@@ -1,4 +1,4 @@
-[Back](/cherri/language/)
+[Back](/cherri/compiler/)
 
 # Actions
 
