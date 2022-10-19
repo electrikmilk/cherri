@@ -1,3 +1,5 @@
+[Back](/cherri/language/)
+
 # Menus
 
 You can create menus in 3 ways.

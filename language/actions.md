@@ -1,3 +1,5 @@
+[Back](/cherri/language/)
+
 # Actions
 
 These are the standard Shortcuts actions currently built-in. More are being added all the time. Non-standard actions are

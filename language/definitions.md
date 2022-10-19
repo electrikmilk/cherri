@@ -8,6 +8,8 @@
 }
 </style>
 
+[Back](/cherri/language/)
+
 # Definitions
 
 Define aspects of your Shortcut, such as the color and glyph of the icon, how it should respond

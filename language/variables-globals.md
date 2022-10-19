@@ -1,3 +1,5 @@
+[Back](/cherri/language/)
+
 # Variables & Globals
 
 Variables are initialized using the following syntax:
