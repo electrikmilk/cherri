@@ -13,16 +13,21 @@ a {
 }
 
 html,body,p {
-  line-height: 1.7;
-  font-size: 18px
+  line-height: 1.7 !important;
+  font-size: 18px !important
 }
 
 h1,h2,h3,h4 {
-  line-height: 1.2;
-  border-color: #555
+  line-height: 1.2 !important;
+  border-color: #555 !important
 }
 
-pre {
-  background: #555;
-  color: burlywood
+pre,code {
+  background-color: #555 !important;
+  color: burlywood !important;
+  border-radius: 10px !important
+}
+
+.highlight {
+  background: none !important
 }
