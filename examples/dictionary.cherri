@@ -1,0 +1,28 @@
+/*
+You can enter a standard JSON object
+as the value of a dictionary
+*/
+
+@dictVar = {
+    "key1": "value",
+    "key2": 5,
+    "key3": true,
+    "key4": [
+        "item 1",
+        5,
+        ["item 3",5,false],
+        {"key":"value"}
+    ],
+    "key5":{
+        "key":"value"
+    }
+}
+
+// Get values, keys, and values for keys...
+
+@value = getValue(dictVar, "key1")
+alert(value,"Value of key1",false)
+
+@keys = getKeys(dictVar)
+
+@values = getValues(dictVar)

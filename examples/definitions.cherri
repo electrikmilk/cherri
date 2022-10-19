@@ -1,0 +1,7 @@
+#define color red
+#define glyph apple
+#define inputs image, text
+#define outputs app, file
+#define from menubar, sleepmode, onscreen
+#define noinput getclipboard
+#define name Test

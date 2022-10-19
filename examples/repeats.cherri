@@ -1,0 +1,15 @@
+@intVar = 3
+@intVar2 = 7
+@testVar = "test"
+
+repeat 6 {
+    @intVar2 = 5
+    if intVar == intVar2 {
+        @testVar = "test2"
+    }
+}
+
+@listVar = list("item 1","item 2","item 3")
+foreach listVar {
+    alert(RepeatIndex,RepeatItem, false)
+}

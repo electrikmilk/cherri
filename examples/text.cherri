@@ -1,0 +1,19 @@
+/*
+Easily edit text...
+*/
+
+@textVar = "test"
+
+@textVar = correctSpelling(textVar)
+@textVar = replaceText("S","A",textVar)
+@textVar = iReplaceText("s","a",textVar)
+@textVar = regReplaceText("[0-9a-zA-Z]","a",textVar)
+@textVar = iRegReplaceText("[0-9a-z]","a",textVar)
+@textVar = splitText(textVar,",")
+@textVar = combineText(textVar,",")
+@textVar = uppercase(textVar)
+@textVar = lowercase(textVar)
+@textVar = titleCase(textVar)
+@textVar = capitalize(textVar)
+@textVar = capitalizeAll(textVar)
+@textVar = alternateCase(textVar)

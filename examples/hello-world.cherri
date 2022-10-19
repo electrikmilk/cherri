@@ -1,0 +1,9 @@
+/* Hello, World! */
+
+#define color yellow
+#define glyph smiley
+#define name Hello, Cherri!
+
+@message = "Hello, Cherri!"
+@title = "Alert"
+alert(message, "{title}", false)

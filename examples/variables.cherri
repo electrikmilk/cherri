@@ -1,0 +1,27 @@
+/* Types of variables */
+
+@intVar = 42
+@intVar2 = 52
+@stringVar = "text {intVar}"
+@arrayVar = ["item 1 {intVar}","item 2","item 3",5,{"key1":"value","key2":5,"key3":true}]
+@boolVarTrue = true
+@boolVarFalse = false
+@urlVar = url("https://apple.com","https://google.com")
+@dictVar = {
+    "key1": "value",
+    "key2": 5,
+    "key3": true,
+    "key4": [
+        "item1",
+        "item 2",
+        "item3"
+    ]
+}
+@expVar = 54 * 4 + (6 * 7)
+@listVar = list("Item 1","Item 2","Item 3")
+
+// empty variable
+@emptyVar
+
+// add to variable
+@stringVar += "test"

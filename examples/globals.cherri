@@ -1,0 +1,14 @@
+/*
+All globals are implemented
+Globals are case-sensitive
+*/
+
+@input = ShortcutInput
+@date = CurrentDate
+@clipboard = Clipboard
+@device = Device
+
+alert(Ask, "", false)
+
+// But you can also just inline a global in a string like other variables
+@shortcutInput = "{ShortcutInput}"

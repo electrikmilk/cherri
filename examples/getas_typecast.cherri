@@ -1,0 +1,13 @@
+// Get as...
+@deviceOS = Device[OS]
+@versionNumber = Device[System Version]
+
+// Inline get as...
+@osVersion = "{Device[OS]} {Device[System Version]}"
+
+// Type coercion...
+@number = 5
+@text = number.text
+
+// Inline type coercion...
+@numberText = "Number: {number(text)}"

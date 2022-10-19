@@ -1,0 +1,27 @@
+// VCard menu
+
+@menuPrefix = "Menu"
+@items
+repeat 3 {
+    @items += makeVCard("{menuPrefix} Title {RepeatIndex}","{menuPrefix} Subtitle","assets/cherri_icon.png")
+}
+@menuItems = "{items}"
+@vcf = setName(menuItems,"menu.vcf",false)
+@contact = vcf.contact
+@chosenItem = chooseFromList(contact,"Prompt")
+alert(chosenItem,"You chose:",false)
+
+// Choose from menu
+
+menu "Prompt" {
+    case "Item 1":
+        nothing()
+    case "Item 2":
+        nothing()
+}
+
+// Choose from list
+
+@listVar = list("Item 1","Item 2","Item 3")
+@chosenItem = chooseFromList(listVar,"Choose a item")
+alert(chosenItem,"You chose:",false)
