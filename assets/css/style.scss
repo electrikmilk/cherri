@@ -1,0 +1,28 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+html,body{
+  background: #222;
+  color: #fafafa
+}
+
+a {
+  color: #ff5e5d
+}
+
+html,body,p {
+  line-height: 1.7;
+  font-size: 18px
+}
+
+h1,h2,h3,h4 {
+  line-height: 1.2;
+  border-color: #555
+}
+
+pre {
+  background: #555;
+  color: burlywood
+}
