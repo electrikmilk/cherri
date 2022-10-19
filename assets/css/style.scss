@@ -22,10 +22,14 @@ h1,h2,h3,h4 {
   border-color: #555 !important
 }
 
-pre,code {
+pre {
   background-color: #555 !important;
   color: burlywood !important;
   border-radius: 10px !important
+}
+
+code {
+  color: burlywood !important;
 }
 
 .highlight {
