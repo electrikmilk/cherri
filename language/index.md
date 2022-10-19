@@ -10,6 +10,7 @@ things work, bugs or inaccurate documentation are very likely.
 - [Supported Actions](actions.md)
 - [Variables & Globals](variables-globals.md)
 - [Definitions](definitions.md)
+- [Glyphs](glyphs.md)
 - [Menus](menus.md)
 - [Statements](statements.md)
 - [Content Item Types](content-item-types.md)
