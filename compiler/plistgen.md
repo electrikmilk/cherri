@@ -1,4 +1,4 @@
-[Back](/cherri/language/)
+[Back](/cherri/compiler/)
 
 # Property List (.plist) Generation
 
