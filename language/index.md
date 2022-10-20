@@ -13,6 +13,7 @@ things work, bugs or inaccurate documentation are very likely.
 - [Statements](statements.md)
 - [VCard Menus](vcards.md)
 - [Menus](menus.md)
+- [Includes](includes.md)
 - [Definitions](definitions.md)
 - [Glyphs](glyphs.md)
 - [Content Item Types](content-item-types.md)
