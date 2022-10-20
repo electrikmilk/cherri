@@ -17,4 +17,6 @@ The path of your file will be added to the beginning of every include path unles
 
 You can include other Cherri files at any point in your Cherri file.
 
+You can include Cherri files in files that you include creating an include chain, but a single file can only be included once ever.
+
 Be careful of conflicts between the included code and the current file.
