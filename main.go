@@ -123,7 +123,9 @@ func parseIncludes() {
 		if includePath == "" {
 			parserError("No path inside of include")
 		}
-		includePath = relativePath + includePath
+		if !strings.Contains(includePath, "..") {
+			includePath = relativePath + includePath
+		}
 		if contains(included, includePath) {
 			parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
 		}
