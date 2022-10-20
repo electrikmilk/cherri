@@ -27,12 +27,12 @@ say if you need to move forward 2 characters, for example.
 This is meant to be used in an if/else or switch case statement. For example:
 
 ```go
-if tokenAhead(VAR) {
+if tokenAhead(Var) {
     // ...
 }
 ```
 
-If the token `VAR` is in the upcoming characters, this function will return true and advance past those characters plus
+If the token `Var` is in the upcoming characters, this function will return true and advance past those characters plus
 one to account for spaces so that this function can be chained.
 
 A helpful alias for this function is `tokensAhead(v ...tokenType) bool`. This allows for checking if one of the tokens
