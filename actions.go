@@ -19,6 +19,7 @@ Rename the function to standardActions() and rename the file to actions_standard
 
 func makeActions() {
 	actions = make(map[string]actionDefinition)
+	calendarActions()
 	documentActions()
 	locationActions()
 	mediaActions()
@@ -28,7 +29,304 @@ func makeActions() {
 }
 
 func calendarActions() {
-
+	actions["addCalendar"] = actionDefinition{
+		ident: "addnewcalendar",
+		args: []argumentDefinition{
+			{
+				field:     "name",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("CalendarName", args, 0),
+			}
+		},
+	}
+	actions["addSeconds"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Add", "sec", args)
+		},
+	}
+	actions["addMinutes"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Add", "min", args)
+		},
+	}
+	actions["addHours"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Add", "hr", args)
+		},
+	}
+	actions["addDays"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Add", "days", args)
+		},
+	}
+	actions["addWeeks"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Add", "weeks", args)
+		},
+	}
+	actions["addMonths"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Add", "months", args)
+		},
+	}
+	actions["addYears"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Add", "yr", args)
+		},
+	}
+	actions["subtractSeconds"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Subtract", "sec", args)
+		},
+	}
+	actions["subtractMinutes"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Subtract", "min", args)
+		},
+	}
+	actions["subtractHours"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Subtract", "hr", args)
+		},
+	}
+	actions["subtractDays"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Subtract", "days", args)
+		},
+	}
+	actions["subtractWeeks"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Subtract", "weeks", args)
+		},
+	}
+	actions["subtractMonths"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Subtract", "months", args)
+		},
+	}
+	actions["subtractYears"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "magnitude",
+				validType: Integer,
+			},
+			{
+				field:     "date",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Subtract", "yr", args)
+		},
+	}
+	actions["getStartMinute"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Get Start of Minute", "", args)
+		},
+	}
+	actions["getStartHour"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Get Start of Hour", "", args)
+		},
+	}
+	actions["getStartWeek"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Get Start of Week", "", args)
+		},
+	}
+	actions["getStartMonth"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Get Start of Month", "", args)
+		},
+	}
+	actions["getStartYear"] = actionDefinition{
+		ident: "adjustdate",
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return adjustDate("Get Start of Year", "", args)
+		},
+	}
 }
 
 func contactActions() {

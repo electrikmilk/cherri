@@ -166,6 +166,43 @@ func checkIdentify(params *[]plistData, outputName plistData, actionUUID plistDa
 	}
 }
 
+func adjustDate(operation string, unit string, args []actionArgument) []plistData {
+	var adjustDateParams = []plistData{
+		{
+			key:      "WFAdjustOperation",
+			dataType: Text,
+			value:    operation,
+		},
+		argumentValue("WFDate", args, 0),
+	}
+	if unit != "" {
+		adjustDateParams = append(adjustDateParams, plistData{
+			key:      "WFDuration",
+			dataType: Dictionary,
+			value: []plistData{
+				{
+					key:      "Value",
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "Unit",
+							dataType: Text,
+							value:    unit,
+						},
+						argumentValue("Magnitude", args, 1),
+					},
+				},
+				{
+					key:      "WFSerializationType",
+					dataType: Text,
+					value:    "WFQuantityFieldValue",
+				},
+			},
+		})
+	}
+	return adjustDateParams
+}
+
 func changeCase(textCase string, args []actionArgument) []plistData {
 	return []plistData{
 		{
