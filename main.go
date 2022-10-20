@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -42,19 +43,16 @@ func main() {
 		fmt.Printf("\033[31mFile '%s' does not exist!", filePath)
 		os.Exit(1)
 	}
-	var file, statErr = os.Stat(filePath)
-	handle(statErr)
-	var nameParts = strings.Split(file.Name(), ".")
-	var ext = nameParts[len(nameParts)-1]
-	if ext != fileExtension {
-		fmt.Printf("\033[31mFile '%s' is not a .%s file!", filePath, fileExtension)
-		os.Exit(1)
-	}
-	filename = file.Name()
+	checkFile(filePath)
+	var pathParts = strings.Split(filePath, "/")
+	filename = pathParts[len(pathParts)-1]
+	var nameParts = strings.Split(filename, ".")
 	basename = nameParts[0]
 	var bytes, readErr = os.ReadFile(filePath)
 	handle(readErr)
 	contents = string(bytes)
+
+	parseIncludes()
 
 	if arg("debug") {
 		fmt.Printf("Parsing %s... ", filename)
@@ -104,6 +102,42 @@ func main() {
 	if !arg("bypass") {
 		removeErr := os.Remove(basename + "_unsigned.shortcut")
 		handle(removeErr)
+	}
+}
+
+func parseIncludes() {
+	lines = strings.Split(contents, "\n")
+	for l, line := range lines {
+		lineIdx = l
+		if !strings.Contains(line, "#include") {
+			continue
+		}
+		r := regexp.MustCompile("\"(.*?)\"")
+		var includePath = strings.Trim(r.FindString(line), "\"")
+		if includePath == "" {
+			parserError("No path inside of include")
+		}
+		checkFile(includePath)
+		bytes, readErr := os.ReadFile(includePath)
+		handle(readErr)
+		lines[l] = string(bytes)
+	}
+	contents = strings.Join(lines, "\n")
+	lineIdx = 0
+}
+
+func checkFile(filePath string) {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		fmt.Printf("\033[31mFile '%s' does not exist!\033[0m\n", filePath)
+		os.Exit(1)
+	}
+	var file, statErr = os.Stat(filePath)
+	handle(statErr)
+	var nameParts = strings.Split(file.Name(), ".")
+	var ext = nameParts[len(nameParts)-1]
+	if ext != fileExtension {
+		fmt.Printf("\033[31mFile '%s' is not a .%s file!\033[0m\n", filePath, fileExtension)
+		os.Exit(1)
 	}
 }
 

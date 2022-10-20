@@ -1,0 +1,3 @@
+#include "examples/include.cherri"
+
+alert(textVar,"Alert",false)
