@@ -36,6 +36,7 @@ Go compiler.
 - This compiler is meant to be one static distributed binary. Do not make it depend on external resources.
 - Use the format `var variable = ...` rather than `variable := ...` unless a function returns more than one variable, or
   in a for loop or if statement, and specify types unless they can be inferred.
+- Capitalized case for tokens (e.g. `LeftBrace`).
 - Only put comments in code to explain _why_ something does something, not what it is doing. Your code should be
   readable enough that it is obvious to anyone reading it.
 - No moving code around for no reason. Only organize code when absolutely necessary.
@@ -53,6 +54,8 @@ Go compiler.
 - Commits and changes should be one-to-one, as in, every commit should correlate to a major change in your submission.
   However, don't make commits for every little thing. Most minor pull requests can contain only one commit.
 - Wrap commit messages at 72 characters.
+- No periods at the end of commit message titles.
+- Only capitalize the first word of a commit message title.
 - Add your copyright to the top of files you have changed or added in the same style as the rest of the project if you
   would like.
 
