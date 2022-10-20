@@ -60,5 +60,13 @@ code {
 }
 
 .markdown-body hr {
-    background: #555;
+    background: #555 !important;
+}
+
+.border-top {
+    border-color: #555 !important;
+}
+
+.text-gray {
+    color: #ababab !important;
 }
