@@ -48,6 +48,15 @@ alert(Ask, "", false)
 @shortcutInput = "{ShortcutInput}"
 ```
 
+### Text
+
+```cherri
+@text = "text"
+@multi = "multi
+line
+text"
+```
+
 ### Numbers
 
 ```cherri
