@@ -2,7 +2,9 @@
 
 Before making any contributions, familiarize yourself with how the Cherri programming language generally works for
 issues, and how the compiler works on a deeper level for
-PRs. [Read documentation](https://electrikmilk.github.io/cherri/compiler/)
+PRs.
+
+[Read documentation](https://electrikmilk.github.io/cherri/)
 
 ## Issue policy
 
