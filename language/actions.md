@@ -4,7 +4,7 @@
 
 These are the standard Shortcuts actions currently built-in and more are being added all the time.
 
-[Learn about contributing actions here](/cherri/compiler/actions.md).
+[Learn about contributing actions here](../compiler/actions.md).
 
 Actions in Cherri are intended to be easier to use, as in some cases, single actions have been split up into multiple
 actions to reduce the number of arguments.
