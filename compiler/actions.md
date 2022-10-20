@@ -37,7 +37,7 @@ actions["getType"] = actionDefinition{
         return []plistData{
             argumentValue("WFInput", args, 0),
         }
-	},
+    },
 }
 ```
 
