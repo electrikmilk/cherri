@@ -15,6 +15,9 @@ if intVar > 6 {
 }
 ```
 
+If statements are not required to contain the else statement, but do require the ending curly brace as in other
+languages.
+
 The first operand of the if statement must be a variable. The second can optionally be a variable.
 
 ### Conditional Operators
@@ -77,7 +80,7 @@ foreach list {
 }
 ```
 
-`list` should be an iterable variable.
+`list` must be an iterable variable.
 
 ### Repeat Globals
 
@@ -87,4 +90,4 @@ In `foreach` (repeat with each), `RepeatIndex` and `RepeatItem` are available.
 
 ## Nesting
 
-`if/else`, `repeat`, `foreach`, and `menu` can all be nested inside of each other and vice versa.
+`if/else`, `repeat`, `foreach`, and `menu` can all be nested inside each other and vice versa.

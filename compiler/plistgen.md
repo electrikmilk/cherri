@@ -4,8 +4,9 @@
 
 Property list generation is done using various functions and custom data types.
 
-The file [`plistgen.go`]() generates the file, while [`plist.go`]() contains definitions of the data types and helper
-functions used in generating the plist.
+The file [`plistgen.go`](https://github.com/electrikmilk/cherri/blob/main/plistgen.go) generates the file,
+while [`plist.go`](https://github.com/electrikmilk/cherri/blob/main/plist.go) contains definitions of the data types and
+helper functions used in generating the plist.
 
 A `plistData` value consists of a key, type and value. This will almost directly translate to an XML string.
 

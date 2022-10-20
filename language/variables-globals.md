@@ -82,9 +82,15 @@ You can declare a dictionary using a valid JSON object.
 
 ### Booleans
 
+Booleans translate to a number value of 1 for true, and 0 for false. Boolean variables can be used in conditionals.
+
 ```cherri
 @boolVarTrue = true
 @boolVarFalse = false
+
+if boolVarTrue == true {
+    // ...
+}
 ```
 
 ### Misc

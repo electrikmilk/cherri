@@ -51,7 +51,7 @@ This does not advance characters, but pseudo collects characters until it reache
 This can be used to see if a character exists ahead without moving there.
 
 This function is an alias for `lookAheadUntil(until rune)`, this allows you to specify the character that it
-should stop looking ahead at.
+must stop looking ahead at.
 
 ### `collectUntil(until rune)`
 
@@ -61,10 +61,10 @@ collected. Any spaces will be stripped from the value it collects.
 ### `collectValue(valueType *tokenType, value *any, until rune)`
 
 This takes pointers to a type and a value, and a character to collect until. This will collect the value ahead and
-return it's type and value.
+return its type and value.
 
-It uses these functions to collect the detected value, actions, variables and globals are collected on the spot by this
-function however.
+It uses these functions to collect the detected value. Actions, variables and globals are collected on the spot by this
+function, however.
 
 - `collectString()`
 - `collectInteger()`

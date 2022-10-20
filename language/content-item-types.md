@@ -6,7 +6,7 @@ There is a concept of data types in Shortcuts known as a "content item".
 
 These are defined in Shortcuts for example as `WFAppStoreAppContentItem`.
 
-In Cherri, we shorten these into singular names.
+In Cherri, they are shortened into singular names.
 
 - `app` - WFAppStoreAppContentItem
 - `article` - WFArticleContentItem

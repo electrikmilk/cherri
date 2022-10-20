@@ -1,8 +1,8 @@
 [Back](/cherri/language/)
 
-# Currently Supported Glyphs
+# Glyphs
 
-Here is a list of the currently supported glyphs.
+Here is a list of the currently supported glyphs. Please contribute and add any missing glyphs!
 
 Syntax example:
 
