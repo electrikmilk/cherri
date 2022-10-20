@@ -1,7 +1,8 @@
 # Contributing
 
 Before making any contributions, familiarize yourself with how the Cherri programming language generally works for
-issues, and how the compiler works on a deeper level for PRs. [Read documentation](https://electrikmilk.github.io/cherri/compiler/)
+issues, and how the compiler works on a deeper level for
+PRs. [Read documentation](https://electrikmilk.github.io/cherri/compiler/)
 
 ## Issue policy
 
@@ -26,11 +27,12 @@ reproduce it, what environment it may be isolated to are clearly communicated.
 
 ### Programming language policy
 
-Submit code written in the latest version of the Go programming language that successfully complies using the official
-Go compiler.
+- Submit code written in the latest version of the Go programming language that successfully complies using the official
+  Go compiler.
 
-### Code submission policy
+### Code style policy
 
+- Use camelCase as is standard for Go code for variable, function, type, etc. names.
 - Only add dependencies which add features that exceed the complexity of the compiler, otherwise, you could probably
   write that code yourself.
 - This compiler is meant to be one static distributed binary. Do not make it depend on external resources.
@@ -41,7 +43,9 @@ Go compiler.
   readable enough that it is obvious to anyone reading it.
 - No moving code around for no reason. Only organize code when absolutely necessary.
 - Test your code to the best of your ability, do not submit code that does not compile.
-- Use camelCase as is standard for Go code for variable, function, type, etc. names.
+
+### Code submission policy
+
 - Squash commits when doing fixups, so that if you remove something, you don't have a commit where you created it
   and then another commit where you remove it, squash them together so that whatever ended up not being needed is also
   removed from the commit history.
