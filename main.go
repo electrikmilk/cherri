@@ -19,6 +19,9 @@ var filePath string
 var filename string
 var basename string
 var contents string
+var relativePath string
+
+var included []string
 
 var fileExtension = "cherri"
 
@@ -46,13 +49,16 @@ func main() {
 	checkFile(filePath)
 	var pathParts = strings.Split(filePath, "/")
 	filename = pathParts[len(pathParts)-1]
+	relativePath = strings.Replace(filePath, filename, "", 1)
 	var nameParts = strings.Split(filename, ".")
 	basename = nameParts[0]
 	var bytes, readErr = os.ReadFile(filePath)
 	handle(readErr)
 	contents = string(bytes)
 
-	parseIncludes()
+	if strings.Contains(contents, "#include") {
+		parseIncludes()
+	}
 
 	if arg("debug") {
 		fmt.Printf("Parsing %s... ", filename)
@@ -117,13 +123,21 @@ func parseIncludes() {
 		if includePath == "" {
 			parserError("No path inside of include")
 		}
+		includePath = relativePath + includePath
+		if contains(included, includePath) {
+			parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
+		}
 		checkFile(includePath)
 		bytes, readErr := os.ReadFile(includePath)
 		handle(readErr)
 		lines[l] = string(bytes)
+		included = append(included, includePath)
 	}
 	contents = strings.Join(lines, "\n")
 	lineIdx = 0
+	if strings.Contains(contents, "#include") {
+		parseIncludes()
+	}
 }
 
 func checkFile(filePath string) {

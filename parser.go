@@ -733,6 +733,9 @@ func seek(mov *int, reverse bool) (requestedChar rune) {
 }
 
 func getChar(atIndex int) (returnChar rune) {
+	if atIndex == -1 {
+		return []rune(chars[0])[0]
+	}
 	if len(chars) > atIndex {
 		returnChar = []rune(chars[atIndex])[0]
 	} else {
