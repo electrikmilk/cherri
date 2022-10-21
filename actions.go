@@ -812,6 +812,90 @@ func locationActions() {
 }
 
 func mediaActions() {
+	actions["takePhoto"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "showPreview",
+				validType: Bool,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFCameraCaptureShowPreview", args, 0),
+			}
+		},
+	}
+	actions["takePhotos"] = actionDefinition{
+		ident: "takephoto",
+		args: []argumentDefinition{
+			{
+				field:     "count",
+				validType: Integer,
+			},
+			{
+				field:     "showPreview",
+				validType: Bool,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+			},
+		},
+		check: func(args []actionArgument) {
+			var count = args[0].value.(int)
+			if count == 0 {
+				parserError("Number of photos to take must be greater than zero.")
+			}
+			if count < 2 {
+				parserError("Use action takePhoto() to take only one photo.")
+			}
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFPhotoCount", args, 0),
+				argumentValue("WFCameraCaptureShowPreview", args, 1),
+			}
+		},
+	}
+	actions["takeVideo"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "camera",
+				validType: String,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "Front",
+				},
+			},
+			{
+				field:     "quality",
+				validType: String,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "Medium",
+				},
+			},
+			{
+				field:     "startImmediately",
+				validType: Bool,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFCameraCaptureDevice", args, 0),
+				argumentValue("WFCameraCaptureQuality", args, 1),
+				argumentValue("WFRecordingStart", args, 2),
+			}
+		},
+	}
 	actions["setVolume"] = actionDefinition{
 		args: []argumentDefinition{
 			{
