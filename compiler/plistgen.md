@@ -18,6 +18,16 @@ type plistData struct {
 }
 ```
 
+### `plistDataType`
+
+Here are the constants for `plistDataType`:
+
+- `Text`
+- `Number`
+- `Dictionary`
+- `Array`
+- `Boolean`
+
 It is made easier by the fact that you can have a slice of `plistData` as the `value` if the `dataType` is `Dictionary`.
 This is because the function that generates the plist syntax for dictionaries will recurse. This allows you to in some
 cases almost completely forget about the resulting plist and mainly construct it via abstraction.
