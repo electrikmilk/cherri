@@ -31,6 +31,24 @@ func makeActions() {
 }
 
 func calendarActions() {
+	actions["date"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "date",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFDateActionMode",
+					dataType: Text,
+					value:    "Specified Date",
+				},
+				argumentValue("WFDateActionDate", args, 0),
+			}
+		},
+	}
 	actions["addCalendar"] = actionDefinition{
 		ident: "addnewcalendar",
 		args: []argumentDefinition{
