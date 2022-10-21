@@ -846,19 +846,19 @@ func mediaActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			var count = args[0].value.(int)
-			if count == 0 {
+			var photos = args[0].value.(int)
+			if photos == 0 {
 				parserError("Number of photos to take must be greater than zero.")
 			}
-			if count < 2 {
+			if photos < 2 {
 				parserError("Use action takePhoto() to take only one photo.")
 			}
 		},
 		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFPhotoCount", args, 0),
-				argumentValue("WFCameraCaptureShowPreview", args, 1),
-			}
+			return argumentValues(&args, []paramMap{
+				{key: "WFPhotoCount", idx: 0},
+				{key: "WFCameraCaptureShowPreview", idx: 1},
+			})
 		},
 	}
 	actions["takeVideo"] = actionDefinition{
@@ -889,11 +889,11 @@ func mediaActions() {
 			},
 		},
 		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFCameraCaptureDevice", args, 0),
-				argumentValue("WFCameraCaptureQuality", args, 1),
-				argumentValue("WFRecordingStart", args, 2),
-			}
+			return argumentValues(&args, []paramMap{
+				{key: "WFCameraCaptureDevice", idx: 0},
+				{key: "WFCameraCaptureQuality", idx: 1},
+				{key: "WFRecordingStart", idx: 2},
+			})
 		},
 	}
 	actions["setVolume"] = actionDefinition{
