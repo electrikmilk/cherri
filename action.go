@@ -88,7 +88,11 @@ func realVariableValue(varName string) (varValue variableValue) {
 
 func checkTypes(arguments []actionArgument, checks []argumentDefinition) {
 	for i, check := range checks {
-		typeCheck(check.field, check.validType, arguments[i])
+		if len(arguments) > i {
+			typeCheck(check.field, check.validType, arguments[i])
+		} else if check.defaultValue.value == nil {
+			parserError(fmt.Sprintf("Missing required argument '%s' to call action '%s'", check.field, currentAction))
+		}
 	}
 }
 
@@ -149,7 +153,7 @@ func getArgValue(variable actionArgument) any {
 func enoughArgs(arguments *[]actionArgument) {
 	var actionArgs = actions[currentAction].args
 	for a, arg := range *arguments {
-		if actionArgs[a].noMax == true {
+		if actionArgs[a].noMax {
 			break
 		}
 		if actionArgs[a].defaultValue.value == nil {
