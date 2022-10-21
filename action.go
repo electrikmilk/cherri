@@ -153,6 +153,9 @@ func getArgValue(variable actionArgument) any {
 func enoughArgs(arguments *[]actionArgument) {
 	var actionArgs = actions[currentAction].args
 	for a, arg := range *arguments {
+		if (len(actionArgs) - 1) < a {
+			break
+		}
 		if actionArgs[a].noMax {
 			break
 		}
@@ -175,14 +178,23 @@ func checkIdentify(params *[]plistData, outputName plistData, actionUUID plistDa
 	}
 }
 
+var contactValues []string
+
 func contactValue(class string, contentkit string, args []actionArgument) []plistData {
-	var contactValues []string
+	contactValues = []string{}
+	var entryType int
+	switch contentkit {
+	case "emailaddress":
+		entryType = 2
+	case "phonenumber":
+		entryType = 1
+	}
 	for _, item := range args {
 		contactValues = append(contactValues, plistDict("", []plistData{
 			{
 				key:      "EntryType",
 				dataType: Number,
-				value:    2,
+				value:    entryType,
 			},
 			{
 				key:      "SerializedEntry",
@@ -191,7 +203,7 @@ func contactValue(class string, contentkit string, args []actionArgument) []plis
 					{
 						key:      "link.contentkit." + contentkit,
 						dataType: Text,
-						value:    item,
+						value:    item.value,
 					},
 				},
 			},

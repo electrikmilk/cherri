@@ -351,6 +351,7 @@ func calendarActions() {
 
 func contactActions() {
 	actions["emailAddress"] = actionDefinition{
+		ident: "email",
 		args: []argumentDefinition{
 			{
 				field:     "email",
@@ -1107,6 +1108,7 @@ func scriptingActions() {
 		ident: "getmyworkflows",
 	}
 	actions["urls"] = actionDefinition{
+		ident: "url",
 		args: []argumentDefinition{
 			{
 				field:     "url",
