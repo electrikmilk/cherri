@@ -2214,75 +2214,45 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["wifiOn"] = actionDefinition{
+	actions["setWifi"] = actionDefinition{
 		ident: "wifi.set",
+		args: []argumentDefinition{
+			{
+				field:     "status",
+				validType: Bool,
+			},
+		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				{
-					key:      "OnValue",
-					dataType: Boolean,
-					value:    true,
-				},
+				argumentValue("OnValue", args, 0),
 			}
 		},
 	}
-	actions["wifiOff"] = actionDefinition{
-		ident: "wifi.set",
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "OnValue",
-					dataType: Boolean,
-					value:    false,
-				},
-			}
-		},
-	}
-	actions["cellularDataOn"] = actionDefinition{
+	actions["setCellularData"] = actionDefinition{
 		ident: "cellulardata.set",
+		args: []argumentDefinition{
+			{
+				field:     "status",
+				validType: Bool,
+			},
+		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				{
-					key:      "OnValue",
-					dataType: Boolean,
-					value:    true,
-				},
+				argumentValue("OnValue", args, 0),
 			}
 		},
 	}
-	actions["cellularDataOff"] = actionDefinition{
-		ident: "cellulardata.set",
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "OnValue",
-					dataType: Boolean,
-					value:    false,
-				},
-			}
-		},
-	}
-	actions["cellularVoiceOn"] = actionDefinition{
+	actions["setCellularVoice"] = actionDefinition{
 		ident: "cellular.rat.set",
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "OnValue",
-					dataType: Boolean,
-					value:    true,
-				},
-			}
+		args: []argumentDefinition{
+			{
+				field:     "status",
+				validType: Bool,
+			},
 		},
-	}
-	actions["cellularVoiceOff"] = actionDefinition{
-		ident: "cellular.rat.set",
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				{
-					key:      "OnValue",
-					dataType: Boolean,
-					value:    false,
-				},
+				argumentValue("OnValue", args, 0),
 			}
 		},
 	}
