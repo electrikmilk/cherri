@@ -398,6 +398,7 @@ func contactActions() {
 }
 
 func documentActions() {
+	actions["getSelectedFiles"] = actionDefinition{ident: "finder.getselectedfiles"}
 	actions["extractArchive"] = actionDefinition{
 		ident: "unzip",
 		args: []argumentDefinition{
@@ -786,10 +787,6 @@ func documentActions() {
 	}
 }
 
-func homeActions() {
-
-}
-
 func locationActions() {
 	actions["getCurrentLocation"] = actionDefinition{
 		ident: "location",
@@ -812,6 +809,9 @@ func locationActions() {
 }
 
 func mediaActions() {
+	actions["clearUpNext"] = actionDefinition{}
+	actions["getCurrentSong"] = actionDefinition{}
+	actions["latestPhotoImport"] = actionDefinition{ident: "getlatestphotoimport"}
 	actions["takePhoto"] = actionDefinition{
 		args: []argumentDefinition{
 			{
@@ -859,6 +859,19 @@ func mediaActions() {
 				{key: "WFPhotoCount", idx: 0},
 				{key: "WFCameraCaptureShowPreview", idx: 1},
 			})
+		},
+	}
+	actions["trimVideo"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "video",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFInputMedia", args, 0),
+			}
 		},
 	}
 	actions["takeVideo"] = actionDefinition{
