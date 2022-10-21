@@ -3,6 +3,9 @@
 @intVar = 42
 @intVar2 = 52
 @stringVar = "text {intVar}"
+@multiString = "Multiline
+string
+var"
 @arrayVar = ["item 1 {intVar}","item 2","item 3",5,{"key1":"value","key2":5,"key3":true}]
 @boolVarTrue = true
 @boolVarFalse = false
