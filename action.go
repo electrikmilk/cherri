@@ -166,6 +166,106 @@ func checkIdentify(params *[]plistData, outputName plistData, actionUUID plistDa
 	}
 }
 
+func contactValue(class string, contentkit string, args []actionArgument) []plistData {
+	var contactValues []string
+	for _, item := range args {
+		contactValues = append(contactValues, plistDict("", []plistData{
+			{
+				key:      "EntryType",
+				dataType: Number,
+				value:    2,
+			},
+			{
+				key:      "SerializedEntry",
+				dataType: Dictionary,
+				value: []plistData{
+					{
+						key:      "link.contentkit." + contentkit,
+						dataType: Text,
+						value:    item,
+					},
+				},
+			},
+		}))
+	}
+	return []plistData{
+		{
+			key:      class,
+			dataType: Dictionary,
+			value: []plistData{
+				{
+					key:      "Value",
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "WFContactFieldValues",
+							dataType: Array,
+							value:    contactValues,
+						},
+					},
+				},
+				{
+					key:      "WFSerializationType",
+					dataType: Text,
+					value:    "WFContactFieldValue",
+				},
+			},
+		},
+	}
+}
+
+func roundingValue(mode string, args []actionArgument) []plistData {
+	switch args[2].value {
+	case "1":
+		args[2].value = "Ones Place"
+	case "10":
+		args[2].value = "Tens Place"
+	case "100":
+		args[2].value = "Hundreds Place"
+	case "1000":
+		args[2].value = "Thousands"
+	case "10000":
+		args[2].value = "Ten Thousands"
+	case "100000":
+		args[2].value = "Hundred Thousands"
+	case "1000000":
+		args[2].value = "Millions"
+	}
+	return []plistData{
+		{
+			key:      "WFRoundMode",
+			dataType: Text,
+			value:    mode,
+		},
+		argumentValue("WFInput", args, 0),
+		{
+			key:      "WFRoundTo",
+			dataType: Text,
+			value:    args[2].value,
+		},
+	}
+}
+
+func calculateStatistics(operation string, args []actionArgument) []plistData {
+	return []plistData{
+		{
+			key:      "WFStatisticsOperation",
+			dataType: Text,
+			value:    operation,
+		},
+		inputValue("WFInput", args[0].value.(string), ""),
+	}
+}
+
+var ipTypes = []string{"IPv4", "IPv6"}
+
+func checkIPType(args []actionArgument) {
+	var ipType = strings.ToUpper(getArgValue(args[0]).(string))
+	if !contains(ipTypes, ipType) {
+		parserError(fmt.Sprintf("Invalid IP address type of '%s'. Available IP types: %v", ipType, ipTypes))
+	}
+}
+
 func adjustDate(operation string, unit string, args []actionArgument) []plistData {
 	var adjustDateParams = []plistData{
 		{
