@@ -8,7 +8,7 @@
 }
 </style>
 
-[Back](../index.md)
+[Back](index.md)
 
 # Definitions
 
