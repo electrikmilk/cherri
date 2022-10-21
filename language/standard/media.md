@@ -22,7 +22,7 @@ Gets the latest photo import.
 
 ### `takePhoto(showPreview)`
 
-Takes a photo. `showPreview` is a optional `boolean`.
+Takes a photo. `showPreview` is a optional `boolean` that defaults to `true`.
 
 ---
 
