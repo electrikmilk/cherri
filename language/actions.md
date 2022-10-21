@@ -7,9 +7,9 @@ These are the standard Shortcuts actions currently built-in and more are being a
 [Learn about contributing actions here](../compiler/actions.md).
 
 Actions in Cherri are intended to be easier to use, as in some cases, single actions have been split up into multiple
-actions to reduce the number of arguments.
+actions to reduce the number of arguments and complexity.
 
-All arguments are currently required. `""` is accepted as an empty string value.
+Some arguments are optional and some are required. `""` is accepted as an empty string value.
 
 ## Scripting
 
