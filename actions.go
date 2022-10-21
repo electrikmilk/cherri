@@ -2274,7 +2274,7 @@ func scriptingActions() {
 			return roundingValue("Always Round Down", args)
 		},
 	}
-	actions["scriptToStdIn"] = actionDefinition{
+	actions["runShellScript"] = actionDefinition{
 		args: []argumentDefinition{
 			{
 				field:     "script",
@@ -2287,18 +2287,26 @@ func scriptingActions() {
 			{
 				field:     "shell",
 				validType: String,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "/bin/zsh",
+				},
+			},
+			{
+				field:     "inputMode",
+				validType: String,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "to stdin",
+				},
 			},
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				{
-					key:      "InputMode",
-					dataType: Text,
-					value:    "to stdin",
-				},
-				argumentValue("Script", args, 1),
-				inputValue("Input", args[0].value.(string), ""),
+				argumentValue("Script", args, 0),
+				inputValue("Input", args[1].value.(string), ""),
 				argumentValue("Shell", args, 2),
+				argumentValue("InputMode", args, 3),
 			}
 		},
 	}
