@@ -63,7 +63,9 @@ func makeAction(ident string, paramsDict []plistData) (action string) {
 }
 
 func plistKeyValue(key string, dataType plistDataType, value any) (pair string) {
-	pair = "<key>" + key + "</key>\n"
+	if key != "" {
+		pair = "<key>" + key + "</key>\n"
+	}
 	switch dataType {
 	case Boolean:
 		if value == true {
@@ -78,7 +80,7 @@ func plistKeyValue(key string, dataType plistDataType, value any) (pair string) 
 }
 
 func plistValue(dataType plistDataType, value any) string {
-	return fmt.Sprintf("<%s>%v</%s>\n", dataType, value, dataType)
+	return plistKeyValue("", dataType, value)
 }
 
 func plistArray(key string, values []string) (pair string) {
