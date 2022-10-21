@@ -38,8 +38,9 @@ reproduce it, what environment it may be isolated to are clearly communicated.
 - Only add dependencies which add features that exceed the complexity of the compiler, otherwise, you could probably
   write that code yourself.
 - This compiler is meant to be one static distributed binary. Do not make it depend on external resources.
-- Use the format `var variable = ...` rather than `variable := ...` unless a function returns more than one variable, or
-  in a for loop or if statement, and specify types unless they can be inferred.
+- Use the format `var variable = ...`, unless a function returns more than one variable, or
+  in a for loop or if statement.
+- Omit types when they can be inferred.
 - Capitalized case for tokens (e.g. `LeftBrace`).
 - Only put comments in code to explain _why_ something does something, not what it is doing. Your code should be
   readable enough that it is obvious to anyone reading it.
