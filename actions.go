@@ -20,10 +20,12 @@ Rename the function to standardActions() and rename the file to actions_standard
 func makeActions() {
 	actions = make(map[string]actionDefinition)
 	calendarActions()
+	contactActions()
 	documentActions()
 	locationActions()
 	mediaActions()
 	scriptingActions()
+	sharingActions()
 	webActions()
 	customActions()
 }
@@ -330,7 +332,67 @@ func calendarActions() {
 }
 
 func contactActions() {
-
+	actions["emailAddress"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "email",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return contactValue("WFEmailAddress", "emailaddress", args)
+		},
+	}
+	actions["phoneNumber"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "number",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return contactValue("WFPhoneNumber", "phonenumber", args)
+		},
+	}
+	actions["selectContact"] = actionDefinition{
+		ident: "selectcontacts",
+		args: []argumentDefinition{
+			{
+				field:     "multiple",
+				validType: Bool,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFSelectMultiple", args, 0),
+			}
+		},
+	}
+	actions["selectEmailAddress"] = actionDefinition{
+		ident: "selectemail",
+	}
+	actions["selectPhoneNumber"] = actionDefinition{
+		ident: "selectphone",
+	}
+	actions["getFromContact"] = actionDefinition{
+		ident: "properties.contacts",
+		args: []argumentDefinition{
+			{
+				field:     "contact",
+				validType: String,
+			},
+			{
+				field:     "property",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+				argumentValue("WFContentItemPropertyName", args, 1),
+			}
+		},
+	}
 }
 
 func documentActions() {
@@ -386,6 +448,82 @@ func documentActions() {
 			}
 		},
 	}
+	actions["fileSize"] = actionDefinition{
+		ident: "format.filesize",
+		args: []argumentDefinition{
+			{
+				field:     "file",
+				validType: Variable,
+			},
+			{
+				field:     "format",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFFileSizeIncludeUnits",
+					dataType: Boolean,
+					value:    false,
+				},
+				argumentValue("WFFileSize", args, 0),
+				argumentValue("WFFileSizeFormat", args, 1),
+			}
+		},
+	}
+	actions["getDeviceDetails"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "detail",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFDeviceDetail", args, 0),
+			}
+		},
+	}
+	actions["getFileFrom"] = actionDefinition{
+		ident: "gettypeaction",
+		args: []argumentDefinition{
+			{
+				field:     "file",
+				validType: String,
+			},
+			{
+				field:     "from",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFFileType", args, 0),
+				inputValue("WFInput", args[1].value.(string), ""),
+			}
+		},
+	}
+	actions["getObjectOfClass"] = actionDefinition{
+		ident: "getclassaction",
+		args: []argumentDefinition{
+			{
+				field:     "class",
+				validType: String,
+			},
+			{
+				field:     "from",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("Class", args, 0),
+				inputValue("Input", args[1].value.(string), ""),
+			}
+		},
+	}
+	actions["getOnScreenContent"] = actionDefinition{}
 	actions["translateFrom"] = actionDefinition{
 		ident: "translate",
 		args: []argumentDefinition{
@@ -950,7 +1088,7 @@ func scriptingActions() {
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
-					key:      "WFEncodeMode",
+					key:      "input",
 					dataType: Text,
 					value:    "Encode",
 				},
@@ -962,7 +1100,45 @@ func scriptingActions() {
 		ident: "base64encode",
 		args: []argumentDefinition{
 			{
-				field:     "decodeInput",
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFEncodeMode",
+					dataType: Text,
+					value:    "Decode",
+				},
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["urlEncode"] = actionDefinition{
+		ident: "urlencode",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFEncodeMode",
+					dataType: Text,
+					value:    "Encode",
+				},
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["urlDecode"] = actionDefinition{
+		ident: "urlencode",
+		args: []argumentDefinition{
+			{
+				field:     "input",
 				validType: Variable,
 			},
 		},
@@ -1292,6 +1468,833 @@ func scriptingActions() {
 					dataType: Array,
 					value:    listItems,
 				},
+			}
+		},
+	}
+	actions["calcAverage"] = actionDefinition{
+		ident: "statistics",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return calculateStatistics("Average", args)
+		},
+	}
+	actions["calcMin"] = actionDefinition{
+		ident: "statistics",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return calculateStatistics("Minimum", args)
+		},
+	}
+	actions["calcMax"] = actionDefinition{
+		ident: "statistics",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return calculateStatistics("Maximum", args)
+		},
+	}
+	actions["calcSum"] = actionDefinition{
+		ident: "statistics",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return calculateStatistics("Sum", args)
+		},
+	}
+	actions["calcMedian"] = actionDefinition{
+		ident: "statistics",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return calculateStatistics("Median", args)
+		},
+	}
+	actions["calcMode"] = actionDefinition{
+		ident: "statistics",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return calculateStatistics("Mode", args)
+		},
+	}
+	actions["calcRange"] = actionDefinition{
+		ident: "statistics",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return calculateStatistics("Range", args)
+		},
+	}
+	actions["calcStdDevi"] = actionDefinition{
+		ident: "statistics",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return calculateStatistics("Standard Deviation", args)
+		},
+	}
+	actions["dismissSiri"] = actionDefinition{}
+	actions["getLocalIP"] = actionDefinition{
+		ident: "getipaddress",
+		args: []argumentDefinition{
+			{
+				field:     "type",
+				validType: String,
+			},
+		},
+		check: checkIPType,
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFIPAddressTypeOption", args, 0),
+				{
+					key:      "WFIPAddressSourceOption",
+					dataType: Text,
+					value:    "Local",
+				},
+			}
+		},
+	}
+	actions["getExternalIP"] = actionDefinition{
+		ident: "getipaddress",
+		args: []argumentDefinition{
+			{
+				field:     "type",
+				validType: String,
+			},
+		},
+		check: checkIPType,
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFIPAddressTypeOption", args, 0),
+				{
+					key:      "WFIPAddressSourceOption",
+					dataType: Text,
+					value:    "External",
+				},
+			}
+		},
+	}
+	actions["firstListItem"] = actionDefinition{
+		ident: "getitemfromlist",
+		args: []argumentDefinition{
+			{
+				field:     "list",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+				{
+					key:      "WFItemSpecifier",
+					dataType: Text,
+					value:    "First Item",
+				},
+			}
+		},
+	}
+	actions["lastListItem"] = actionDefinition{
+		ident: "getitemfromlist",
+		args: []argumentDefinition{
+			{
+				field:     "list",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+				{
+					key:      "WFItemSpecifier",
+					dataType: Text,
+					value:    "Last Item",
+				},
+			}
+		},
+	}
+	actions["randomListItem"] = actionDefinition{
+		ident: "getitemfromlist",
+		args: []argumentDefinition{
+			{
+				field:     "list",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+				{
+					key:      "WFItemSpecifier",
+					dataType: Text,
+					value:    "Random Item",
+				},
+			}
+		},
+	}
+	actions["getListItem"] = actionDefinition{
+		ident: "getitemfromlist",
+		args: []argumentDefinition{
+			{
+				field:     "list",
+				validType: Variable,
+			},
+			{
+				field:     "index",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+				argumentValue("WFItemIndex", args, 1),
+				{
+					key:      "WFItemSpecifier",
+					dataType: Text,
+					value:    "Item at Index",
+				},
+			}
+		},
+	}
+	actions["getListItems"] = actionDefinition{
+		ident: "getitemfromlist",
+		args: []argumentDefinition{
+			{
+				field:     "list",
+				validType: Variable,
+			},
+			{
+				field:     "start",
+				validType: Integer,
+			},
+			{
+				field:     "end",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+				argumentValue("WFItemRangeStart", args, 1),
+				argumentValue("WFItemRangeEnd", args, 2),
+				{
+					key:      "WFItemSpecifier",
+					dataType: Text,
+					value:    "Items in Range",
+				},
+			}
+		},
+	}
+	actions["getNumbers"] = actionDefinition{
+		ident: "detect.number",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["getDictionary"] = actionDefinition{
+		ident: "detect.dictionary",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["getText"] = actionDefinition{
+		ident: "detect.text",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["getNumber"] = actionDefinition{
+		ident: "detect.number",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["getAddresses"] = actionDefinition{
+		ident: "detect.address",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["getContacts"] = actionDefinition{
+		ident: "detect.contacts",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["getDates"] = actionDefinition{
+		ident: "detect.date",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["getEmails"] = actionDefinition{
+		ident: "detect.emailaddress",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["getImages"] = actionDefinition{
+		ident: "detect.images",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["getPhoneNumbers"] = actionDefinition{
+		ident: "detect.phonenumber",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["getURLs"] = actionDefinition{
+		ident: "detect.link",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["setWallpaper"] = actionDefinition{
+		ident: "wallpaper.set",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["startScreensaver"] = actionDefinition{}
+	actions["contentGraph"] = actionDefinition{
+		ident: "viewresult",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["openXCallbackURL"] = actionDefinition{
+		ident: "openxcallbackurl",
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFXCallbackURL", args, 0),
+			}
+		},
+	}
+	actions["openXCustomCallbackURL"] = actionDefinition{
+		ident: "openxcallbackurl",
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+			},
+			{
+				field:     "successKey",
+				validType: String,
+			},
+			{
+				field:     "cancelKey",
+				validType: String,
+			},
+			{
+				field:     "errorKey",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFXCallbackCustomCallbackEnabled",
+					dataType: Boolean,
+					value:    true,
+				},
+				argumentValue("WFXCallbackURL", args, 0),
+				argumentValue("WFXCallbackCustomSuccessKey", args, 1),
+				argumentValue("WFXCallbackCustomCancelKey", args, 2),
+				argumentValue("WFXCallbackCustomErrorKey", args, 3),
+			}
+		},
+	}
+	actions["openXCallbackCustomSuccessURL"] = actionDefinition{
+		ident: "openxcallbackurl",
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+			},
+			{
+				field:     "successURL",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFXCallbackCustomSuccessURLEnabled",
+					dataType: Boolean,
+					value:    true,
+				},
+				argumentValue("WFXCallbackURL", args, 0),
+				argumentValue("WFXCallbackCustomSuccessURL", args, 1),
+			}
+		},
+	}
+	actions["openXCallbackURL"] = actionDefinition{
+		ident: "openxcallbackurl",
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFXCallbackURL", args, 0),
+			}
+		},
+	}
+	actions["openCustomXCallbackURL"] = actionDefinition{
+		ident: "openxcallbackurl",
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+			},
+			{
+				field:     "successKey",
+				validType: String,
+			},
+			{
+				field:     "cancelKey",
+				validType: String,
+			},
+			{
+				field:     "errorKey",
+				validType: String,
+			},
+			{
+				field:     "successURL",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			var xCallbackParams = []plistData{
+				argumentValue("WFXCallbackURL", args, 0),
+				argumentValue("WFXCallbackCustomSuccessKey", args, 1),
+				argumentValue("WFXCallbackCustomCancelKey", args, 2),
+				argumentValue("WFXCallbackCustomErrorKey", args, 3),
+				argumentValue("WFXCallbackCustomSuccessURL", args, 4),
+			}
+			if args[1].value.(string) != "" || args[2].value.(string) != "" || args[3].value.(string) != "" {
+				xCallbackParams = append(xCallbackParams, plistData{
+					key:      "WFXCallbackCustomCallbackEnabled",
+					dataType: Boolean,
+					value:    true,
+				})
+			}
+			if args[4].value.(string) != "" {
+				xCallbackParams = append(xCallbackParams, plistData{
+					key:      "WFXCallbackCustomSuccessURLEnabled",
+					dataType: Boolean,
+					value:    true,
+				})
+			}
+			return xCallbackParams
+		},
+	}
+	actions["output"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFOutput", args, 0),
+				{
+					key:      "WFNoOutputSurfaceBehavior",
+					dataType: Text,
+					value:    "Do Nothing",
+				},
+			}
+		},
+	}
+	actions["mustOutput"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+			{
+				field:     "response",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFOutput", args, 0),
+				{
+					key:      "WFNoOutputSurfaceBehavior",
+					dataType: Text,
+					value:    "Respond",
+				},
+			}
+		},
+	}
+	actions["outputOrClipboard"] = actionDefinition{
+		ident: "output",
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFOutput", args, 0),
+				{
+					key:      "WFNoOutputSurfaceBehavior",
+					dataType: Text,
+					value:    "Copy to Clipboard",
+				},
+			}
+		},
+	}
+	actions["wifiOn"] = actionDefinition{
+		ident: "wifi.set",
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "OnValue",
+					dataType: Boolean,
+					value:    true,
+				},
+			}
+		},
+	}
+	actions["wifiOff"] = actionDefinition{
+		ident: "wifi.set",
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "OnValue",
+					dataType: Boolean,
+					value:    false,
+				},
+			}
+		},
+	}
+	actions["cellularDataOn"] = actionDefinition{
+		ident: "cellulardata.set",
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "OnValue",
+					dataType: Boolean,
+					value:    true,
+				},
+			}
+		},
+	}
+	actions["cellularDataOff"] = actionDefinition{
+		ident: "cellulardata.set",
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "OnValue",
+					dataType: Boolean,
+					value:    false,
+				},
+			}
+		},
+	}
+	actions["cellularVoiceOn"] = actionDefinition{
+		ident: "cellular.rat.set",
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "OnValue",
+					dataType: Boolean,
+					value:    true,
+				},
+			}
+		},
+	}
+	actions["cellularVoiceOff"] = actionDefinition{
+		ident: "cellular.rat.set",
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "OnValue",
+					dataType: Boolean,
+					value:    false,
+				},
+			}
+		},
+	}
+	actions["toggleBluetooth"] = actionDefinition{
+		ident: "bluetooth.set",
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "OnValue",
+					dataType: Boolean,
+					value:    false,
+				},
+				{
+					key:      "operation",
+					dataType: Text,
+					value:    "toggle",
+				},
+			}
+		},
+	}
+	actions["bluetoothOn"] = actionDefinition{
+		ident: "bluetooth.set",
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "OnValue",
+					dataType: Boolean,
+					value:    true,
+				},
+				{
+					key:      "operation",
+					dataType: Text,
+					value:    "set",
+				},
+			}
+		},
+	}
+	actions["bluetoothOff"] = actionDefinition{
+		ident: "bluetooth.set",
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "OnValue",
+					dataType: Boolean,
+					value:    false,
+				},
+				{
+					key:      "operation",
+					dataType: Text,
+					value:    "set",
+				},
+			}
+		},
+	}
+	actions["playSound"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				inputValue("WFInput", args[0].value.(string), ""),
+			}
+		},
+	}
+	actions["round"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "number",
+				validType: Integer,
+			},
+			{
+				field:     "roundTo",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return roundingValue("Normal", args)
+		},
+	}
+	actions["roundUp"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "number",
+				validType: Integer,
+			},
+			{
+				field:     "roundTo",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return roundingValue("Always Round Up", args)
+		},
+	}
+	actions["roundDown"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "number",
+				validType: Integer,
+			},
+			{
+				field:     "roundTo",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return roundingValue("Always Round Down", args)
+		},
+	}
+	actions["scriptToStdIn"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "script",
+				validType: String,
+			},
+			{
+				field:     "input",
+				validType: Variable,
+			},
+			{
+				field:     "shell",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "InputMode",
+					dataType: Text,
+					value:    "to stdin",
+				},
+				argumentValue("Script", args, 1),
+				inputValue("Input", args[0].value.(string), ""),
+				argumentValue("Shell", args, 2),
 			}
 		},
 	}
