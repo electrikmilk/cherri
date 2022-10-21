@@ -53,7 +53,7 @@ Wait for the user to return to the Shortcut.
 
 Get the current battery level of device.
 
-### `getDeviceDetails(detail)`
+### `getDeviceDetail(detail)`
 
 Get `detail` of current device.
 
@@ -129,13 +129,13 @@ Get keys of `dictionary`.
 
 ---
 
-### `getValue(dictionary,key)`
+### `getValue(key,dictionary)`
 
 Get the value of `key` in `dictionary`.
 
 ---
 
-### `setValue(dictionary,key,value)`
+### `setValue(key,value,dictionary)`
 
 Set the value of `key` to `value` in `dictionary`.
 
@@ -157,6 +157,13 @@ Base 64 decode `input`.
 
 Generate a hash of `type` using `input`.
 
+#### Hash Types
+
+- MD5
+- SHA1
+- SHA256
+- SHA512
+
 ## Items
 
 ### `countItems(input)`
@@ -173,7 +180,7 @@ Returns the number of characters in `input`.
 
 ### `countWords(input)`
 
-Returns the words of characters in `input`.
+Returns the number of words in `input`.
 
 ---
 
@@ -239,7 +246,7 @@ Get a random item from `list`.
 
 ### `getListItem(list,index)`
 
-Get item at `index` from list. Counting in Shortcuts starts at `1`.
+Get item at `index` from `list`. Counting in Shortcuts starts at `1`.
 
 ---
 
@@ -251,7 +258,7 @@ Get items in range of `start` to `end`.
 
 ### `list(...item)`
 
-Store a list in a variable.
+Store a list of `item` in a variable. No limit on `item` arguments.
 
 ## Math
 
@@ -343,7 +350,16 @@ Do nothing and output nothing.
 
 ### `askForInput(type,prompt,default)`
 
-Ask for input of `type` with `prompt`. Optionally specify `default` or just `""`
+Ask for input of `type` with `prompt`. `default` is optional.
+
+#### Input Types
+
+- Text
+- Number
+- URL
+- Date
+- Time
+- Date and Time
 
 ---
 
@@ -355,13 +371,13 @@ Play sound `input`.
 
 ### `alert(alert,title,cancelButton)`
 
-Show an alert with `title` as the title and `alert` as the body. `cancelButton` is a boolean.
+Show an alert with `title` as the title and `alert` as the body. `cancelButton` is a boolean, default is `true`.
 
 ---
 
 ### `notification(body,title,playSound)`
 
-Trigger a custom notification.
+Trigger a custom notification. `playSound` is a boolean, default is `true`.
 
 ## Numbers
 
@@ -416,7 +432,7 @@ Open Shortcut with name `name`.
 
 ### `run(name,input,isSelf)`
 
-Run Shortcut with name `name` giving `input`. `isSelf` is a boolean.
+Run Shortcut with name `name` giving `input`. `isSelf` is a boolean, default is false.
 
 ## System
 
