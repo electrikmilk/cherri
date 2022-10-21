@@ -11,11 +11,13 @@ import (
 	"strings"
 )
 
-/*
-TODO: Finish standard actions, then combine them all into the makeActions() function.
-Move the making of the actions map somewhere else.
-Rename the function to standardActions() and rename the file to actions_standard.go.
-*/
+// TODO: Finish standard actions, then combine them all into the makeActions() function.
+//  Move the making of the actions map somewhere else.
+//  Rename the function to standardActions() and rename the file to actions_standard.go.
+
+// FIXME: Most of these actions that have enumerable values (a set list values),
+//  do not check if the value matches and list out the valid values if it doesn't.
+//  Use "hash" as an example.
 
 func makeActions() {
 	actions = make(map[string]actionDefinition)
@@ -494,7 +496,7 @@ func documentActions() {
 			}
 		},
 	}
-	actions["getDeviceDetails"] = actionDefinition{
+	actions["getDeviceDetail"] = actionDefinition{
 		args: []argumentDefinition{
 			{
 				field:     "detail",
@@ -1299,8 +1301,12 @@ func scriptingActions() {
 				validType: String,
 			},
 			{
-				field:     "sound",
+				field:     "playSound",
 				validType: Bool,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
 			},
 		},
 		call: func(args []actionArgument) []plistData {
@@ -1342,6 +1348,10 @@ func scriptingActions() {
 			{
 				field:     "cancelButton",
 				validType: Bool,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
 			},
 		},
 		call: func(args []actionArgument) []plistData {
@@ -1366,6 +1376,10 @@ func scriptingActions() {
 			{
 				field:     "defaultValue",
 				validType: String,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "",
+				},
 			},
 		},
 		call: func(args []actionArgument) []plistData {
@@ -1475,12 +1489,12 @@ func scriptingActions() {
 		ident: "getvalueforkey",
 		args: []argumentDefinition{
 			{
-				field:     "dictionary",
-				validType: Dict,
-			},
-			{
 				field:     "key",
 				validType: String,
+			},
+			{
+				field:     "dictionary",
+				validType: Dict,
 			},
 		},
 		call: func(args []actionArgument) []plistData {
@@ -1499,16 +1513,16 @@ func scriptingActions() {
 		ident: "setvalueforkey",
 		args: []argumentDefinition{
 			{
-				field:     "dictionary",
-				validType: Dict,
-			},
-			{
 				field:     "key",
 				validType: String,
 			},
 			{
 				field:     "value",
 				validType: Variable,
+			},
+			{
+				field:     "dictionary",
+				validType: Dict,
 			},
 		},
 		call: func(args []actionArgument) []plistData {
@@ -1563,6 +1577,10 @@ func scriptingActions() {
 			{
 				field:     "isSelf",
 				validType: Bool,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
 			},
 		},
 		call: func(args []actionArgument) []plistData {
