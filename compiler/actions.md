@@ -78,11 +78,20 @@ This field takes an `actionCall` which is a function that accepts a slice of `ac
 of `plistData`. These usually contain the `argumentValue(key,args,argsIndex)` function which handles the argument value
 based on its definition.
 
-Otherwise, you might use a `inputValue(key,name,uuid)` function if the argument only accepts variables.
+For a variable only argument, use the `inputValue(key,name,uuid)` function.
 
-You can also obviously directly add a `plistData` value to this slice.
+If the action has mutliple arguments without a variable only argument, it's best to return the output of `argumentValues()`
+instead. This function takes a reference to the `args` and a `[]paramsMap` slice.
 
-This slice will be used as the value of `WFWorkflowActionParameters` dictionary for the action.
+```go
+type paramMap struct {
+	idx int
+	key string
+}
+```
+
+You can also obviously directly add a `plistData` value to this slice. This slice will be used as the value of
+`WFWorkflowActionParameters` dictionary for the action.
 
 ---
 
