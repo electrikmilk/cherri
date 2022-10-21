@@ -8,7 +8,7 @@
 }
 </style>
 
-[Back](/cherri/language/)
+[Back](../index.md)
 
 # Definitions
 

@@ -1,4 +1,4 @@
-[Back](/cherri/language/)
+[Back](../index.md)
 
 # Content Item Types
 
