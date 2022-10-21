@@ -1383,6 +1383,30 @@ func scriptingActions() {
 			}
 		},
 	}
+	actions["setValue"] = actionDefinition{
+		ident: "setvalueforkey",
+		args: []argumentDefinition{
+			{
+				field:     "dictionary",
+				validType: Dict,
+			},
+			{
+				field:     "key",
+				validType: String,
+			},
+			{
+				field:     "value",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFDictionary", args, 0),
+				argumentValue("WFDictionaryKey", args, 1),
+				argumentValue("WFDictionaryValue", args, 2),
+			}
+		},
+	}
 	actions["open"] = actionDefinition{
 		ident: "openworkflow",
 		args: []argumentDefinition{
