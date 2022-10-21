@@ -12,8 +12,10 @@ import (
 var currentAction string
 
 type argumentDefinition struct {
-	field     string
-	validType tokenType
+	field        string
+	validType    tokenType
+	defaultValue actionArgument
+	noMax        bool
 }
 
 type actionArgument struct {
@@ -57,7 +59,7 @@ func callAction(arguments []actionArgument, outputName plistData, actionUUID pli
 
 func checkAction(arguments []actionArgument) {
 	if len(actions[currentAction].args) > 0 {
-		enoughArgs(arguments, len(actions[currentAction].args))
+		enoughArgs(&arguments)
 		checkTypes(arguments, actions[currentAction].args)
 	}
 	if actions[currentAction].check != nil {
@@ -144,16 +146,19 @@ func getArgValue(variable actionArgument) any {
 	return variable.value
 }
 
-// FIXME: default values for arguments instead of requiring all of them?
-func enoughArgs(arguments []actionArgument, min int) {
-	if len(arguments) < min {
-		lineIdx--
-		parserError(fmt.Sprintf(
-			"Not enough arguments to call '%s()'. Minimum is %d arg(s), but provided %d arg(s)",
-			currentAction,
-			min,
-			len(arguments),
-		))
+func enoughArgs(arguments *[]actionArgument) {
+	var actionArgs = actions[currentAction].args
+	for a, arg := range *arguments {
+		if actionArgs[a].noMax == true {
+			break
+		}
+		if actionArgs[a].defaultValue.value == nil {
+			if arg.value == nil {
+				parserError(fmt.Sprintf("Missing required argument '%s' to call action '%s'", actionArgs[a].field, currentAction))
+			}
+		} else if arg.value == nil {
+			arg = actionArgs[a].defaultValue
+		}
 	}
 }
 

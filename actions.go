@@ -337,6 +337,7 @@ func contactActions() {
 			{
 				field:     "email",
 				validType: String,
+				noMax:     true,
 			},
 		},
 		call: func(args []actionArgument) []plistData {
@@ -348,6 +349,7 @@ func contactActions() {
 			{
 				field:     "number",
 				validType: String,
+				noMax:     true,
 			},
 		},
 		call: func(args []actionArgument) []plistData {
@@ -1455,6 +1457,7 @@ func scriptingActions() {
 			{
 				field:     "listItem",
 				validType: String,
+				noMax:     true,
 			},
 		},
 		call: func(args []actionArgument) []plistData {
@@ -1907,6 +1910,7 @@ func scriptingActions() {
 			{
 				field:     "url",
 				validType: String,
+				noMax:     true,
 			},
 		},
 		call: func(args []actionArgument) []plistData {
