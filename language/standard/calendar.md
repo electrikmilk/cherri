@@ -10,7 +10,7 @@ Create a calendar with `name`.
 
 ### `date(date)`
 
-Create `date` value.
+Create date value from `date`.
 
 ## Add Time
 

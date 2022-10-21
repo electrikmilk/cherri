@@ -27,5 +27,4 @@ may be inaccurate. Not all standard actions in each category are implemented yet
 - [Media](standard/media.md)
 - [Scripting](standard/scripting.md)
 - [Sharing](standard/sharing.md)
-- [Text](standard/text.md)
 - [Web](standard/web.md)

@@ -18,6 +18,6 @@ Get urls from `input`.
 
 ---
 
-### `urls(...url)`
+### `url(...url)`
 
 Create url value of `url`. No limit on `url` arguments.
