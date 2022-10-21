@@ -242,10 +242,14 @@ func makeVariableValue(token *token, varUUID *string) {
 	}
 }
 
-func inputValue(key string, name string, varUUID string) plistData {
-	if varUUID == "" {
-		varUUID = uuids[name]
+func variableInput(key string, name string) plistData {
+	if _, found := uuids[name]; found {
+		return inputValue(key, name, uuids[name])
 	}
+	return inputValue(key, name, "")
+}
+
+func inputValue(key string, name string, varUUID string) plistData {
 	return plistData{
 		key:      key,
 		dataType: Dictionary,

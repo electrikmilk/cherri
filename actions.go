@@ -390,7 +390,7 @@ func contactActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 				argumentValue("WFContentItemPropertyName", args, 1),
 			}
 		},
@@ -408,7 +408,7 @@ func documentActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFArchive", args[0].value.(string), ""),
+				variableInput("WFArchive", args[0].value.(string)),
 			}
 		},
 	}
@@ -432,7 +432,7 @@ func documentActions() {
 			return []plistData{
 				argumentValue("WFZIPName", args, 0),
 				argumentValue("WFArchiveFormat", args, 1),
-				inputValue("WFInput", args[2].value.(string), ""),
+				variableInput("WFInput", args[2].value.(string)),
 			}
 		},
 	}
@@ -446,7 +446,7 @@ func documentActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -502,7 +502,7 @@ func documentActions() {
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
 				argumentValue("WFFileType", args, 0),
-				inputValue("WFInput", args[1].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -521,7 +521,7 @@ func documentActions() {
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
 				argumentValue("Class", args, 0),
-				inputValue("Input", args[1].value.(string), ""),
+				variableInput("Input", args[1].value.(string)),
 			}
 		},
 	}
@@ -544,7 +544,7 @@ func documentActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInputText", args[0].value.(string), ""),
+				variableInput("WFInputText", args[0].value.(string)),
 				argumentValue("WFSelectedFromLanguage", args, 0),
 				argumentValue("WFSelectedLanguage", args, 0),
 			}
@@ -563,7 +563,7 @@ func documentActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInputText", args[0].value.(string), ""),
+				variableInput("WFInputText", args[0].value.(string)),
 				{
 					key:      "WFSelectedFromLanguage",
 					dataType: Text,
@@ -582,7 +582,7 @@ func documentActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -853,7 +853,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -875,7 +875,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 				argumentValue("WFName", args, 1),
 				argumentValue("WFDontIncludeFileExtension", args, 2),
 			}
@@ -1037,7 +1037,7 @@ func scriptingActions() {
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
 				argumentValue("WFHashType", args, 0),
-				inputValue("WFInput", args[1].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1094,7 +1094,7 @@ func scriptingActions() {
 					dataType: Text,
 					value:    "Encode",
 				},
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1113,7 +1113,7 @@ func scriptingActions() {
 					dataType: Text,
 					value:    "Decode",
 				},
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1132,7 +1132,7 @@ func scriptingActions() {
 					dataType: Text,
 					value:    "Encode",
 				},
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1151,7 +1151,7 @@ func scriptingActions() {
 					dataType: Text,
 					value:    "Decode",
 				},
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1472,7 +1472,7 @@ func scriptingActions() {
 						argumentValue("workflowName", args, 0),
 					},
 				},
-				inputValue("WFInput", args[1].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1645,7 +1645,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 				{
 					key:      "WFItemSpecifier",
 					dataType: Text,
@@ -1664,7 +1664,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 				{
 					key:      "WFItemSpecifier",
 					dataType: Text,
@@ -1683,7 +1683,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 				{
 					key:      "WFItemSpecifier",
 					dataType: Text,
@@ -1706,7 +1706,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 				argumentValue("WFItemIndex", args, 1),
 				{
 					key:      "WFItemSpecifier",
@@ -1734,7 +1734,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 				argumentValue("WFItemRangeStart", args, 1),
 				argumentValue("WFItemRangeEnd", args, 2),
 				{
@@ -1755,7 +1755,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1769,7 +1769,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1783,7 +1783,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1797,7 +1797,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1811,7 +1811,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1825,7 +1825,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1839,7 +1839,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1853,7 +1853,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1867,7 +1867,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1881,7 +1881,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1895,7 +1895,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1909,7 +1909,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -1924,7 +1924,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -2249,7 +2249,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -2328,7 +2328,7 @@ func scriptingActions() {
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
 				argumentValue("Script", args, 0),
-				inputValue("Input", args[1].value.(string), ""),
+				variableInput("Input", args[1].value.(string)),
 				argumentValue("Shell", args, 2),
 				argumentValue("InputMode", args, 3),
 			}
@@ -2347,7 +2347,7 @@ func sharingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
@@ -2406,7 +2406,7 @@ func webActions() {
 					dataType: Boolean,
 					value:    true,
 				},
-				inputValue("WFInput", args[0].value.(string), ""),
+				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}

@@ -262,7 +262,7 @@ func calculateStatistics(operation string, args []actionArgument) []plistData {
 			dataType: Text,
 			value:    operation,
 		},
-		inputValue("WFInput", args[0].value.(string), ""),
+		variableInput("WFInput", args[1].value.(string)),
 	}
 }
 
@@ -370,6 +370,6 @@ func count(countType string, args []actionArgument) []plistData {
 			dataType: Text,
 			value:    countType,
 		},
-		inputValue("Input", args[0].value.(string), ""),
+		variableInput("Input", args[0].value.(string)),
 	}
 }
