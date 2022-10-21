@@ -25,20 +25,29 @@ in [`action.go`](https://github.com/electrikmilk/cherri/blob/main/action.go).
 Here is an example of a simple action definition:
 
 ```go
-actions["getType"] = actionDefinition{
-    ident: "getitemtype",
-    args: []argumentDefinition{
-        {
-            field:     "input",
-            validType: STRING,
-        },
-    },
-    call: func (args []actionArgument) []plistData {
-        return []plistData{
-            argumentValue("WFInput", args, 0),
-        }
-    },
+actions["takePhoto"] = actionDefinition{
+     args: []argumentDefinition{
+		{
+			field:     "showPreview",
+			validType: Bool,
+			defaultValue: actionArgument{
+				valueType: Bool,
+				value:     true,
+			},
+		},
+	},
+	call: func(args []actionArgument) []plistData {
+		return []plistData{
+			argumentValue("WFCameraCaptureShowPreview", args, 0),
+		}
+	},
 }
+```
+
+All of these options are optional, as long as the key matches the identifier you could have an action definition as simple as:
+
+```go
+actions["identifier"] = actionDefinition{}
 ```
 
 ### `ident`
@@ -54,6 +63,10 @@ Arguments are defined using a `argumentDefinition` for each argument. It has two
 name, this will be used in error messages. The other defines the valid type for the input, this is compared against the
 value type of the argument received in parsing. This is also used to know the minimum number of arguments. Both of these
 checks happen during parsing right after parsing the arguments for the action.
+
+The `defaultValue` takes an `actionArgument`, you must give a value type and value. This defines a default value if no value
+is specified, to require a value, simply don't define this field. Default values should only be given after any required values
+otherwise they are pointless.
 
 ### `check`
 
