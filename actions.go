@@ -1088,7 +1088,7 @@ func scriptingActions() {
 	actions["getShortcuts"] = actionDefinition{
 		ident: "getmyworkflows",
 	}
-	actions["url"] = actionDefinition{
+	actions["urls"] = actionDefinition{
 		args: []argumentDefinition{
 			{
 				field:     "url",
@@ -2032,78 +2032,6 @@ func scriptingActions() {
 				field:     "url",
 				validType: String,
 				noMax:     true,
-			},
-		},
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFXCallbackURL", args, 0),
-			}
-		},
-	}
-	actions["openXCustomCallbackURL"] = actionDefinition{
-		ident: "openxcallbackurl",
-		args: []argumentDefinition{
-			{
-				field:     "url",
-				validType: String,
-			},
-			{
-				field:     "successKey",
-				validType: String,
-			},
-			{
-				field:     "cancelKey",
-				validType: String,
-			},
-			{
-				field:     "errorKey",
-				validType: String,
-			},
-		},
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFXCallbackCustomCallbackEnabled",
-					dataType: Boolean,
-					value:    true,
-				},
-				argumentValue("WFXCallbackURL", args, 0),
-				argumentValue("WFXCallbackCustomSuccessKey", args, 1),
-				argumentValue("WFXCallbackCustomCancelKey", args, 2),
-				argumentValue("WFXCallbackCustomErrorKey", args, 3),
-			}
-		},
-	}
-	actions["openXCallbackCustomSuccessURL"] = actionDefinition{
-		ident: "openxcallbackurl",
-		args: []argumentDefinition{
-			{
-				field:     "url",
-				validType: String,
-			},
-			{
-				field:     "successURL",
-				validType: String,
-			},
-		},
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFXCallbackCustomSuccessURLEnabled",
-					dataType: Boolean,
-					value:    true,
-				},
-				argumentValue("WFXCallbackURL", args, 0),
-				argumentValue("WFXCallbackCustomSuccessURL", args, 1),
-			}
-		},
-	}
-	actions["openXCallbackURL"] = actionDefinition{
-		ident: "openxcallbackurl",
-		args: []argumentDefinition{
-			{
-				field:     "url",
-				validType: String,
 			},
 		},
 		call: func(args []actionArgument) []plistData {
