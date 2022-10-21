@@ -2303,32 +2303,17 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["bluetoothOn"] = actionDefinition{
+	actions["setBluetooth"] = actionDefinition{
 		ident: "bluetooth.set",
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "OnValue",
-					dataType: Boolean,
-					value:    true,
-				},
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "set",
-				},
-			}
+		args: []argumentDefinition{
+			{
+				field:     "status",
+				validType: Bool,
+			},
 		},
-	}
-	actions["bluetoothOff"] = actionDefinition{
-		ident: "bluetooth.set",
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				{
-					key:      "OnValue",
-					dataType: Boolean,
-					value:    false,
-				},
+				argumentValue("OnValue", args, 0),
 				{
 					key:      "operation",
 					dataType: Text,
