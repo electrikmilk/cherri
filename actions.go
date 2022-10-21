@@ -855,14 +855,6 @@ func mediaActions() {
 				field:     "count",
 				validType: Integer,
 			},
-			{
-				field:     "showPreview",
-				validType: Bool,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
-			},
 		},
 		check: func(args []actionArgument) {
 			var photos = args[0].value.(int)
@@ -874,10 +866,14 @@ func mediaActions() {
 			}
 		},
 		call: func(args []actionArgument) []plistData {
-			return argumentValues(&args, []paramMap{
-				{key: "WFPhotoCount", idx: 0},
-				{key: "WFCameraCaptureShowPreview", idx: 1},
-			})
+			return []plistData{
+				argumentValue("WFPhotoCount", args, 0),
+				{
+					key:      "WFCameraCaptureShowPreview",
+					dataType: Boolean,
+					value:    true,
+				},
+			}
 		},
 	}
 	actions["trimVideo"] = actionDefinition{
