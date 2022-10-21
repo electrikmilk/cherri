@@ -1103,8 +1103,7 @@ func scriptingActions() {
 	actions["getShortcuts"] = actionDefinition{
 		ident: "getmyworkflows",
 	}
-	actions["urls"] = actionDefinition{
-		ident: "url",
+	actions["url"] = actionDefinition{
 		args: []argumentDefinition{
 			{
 				field:     "url",
