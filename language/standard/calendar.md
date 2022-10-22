@@ -75,20 +75,20 @@ Create date value from `date`.
 
 ## Get Starting Time
 
-### `getStartMinute(date,magnitude)`
+### `getStartMinute(date)`
 
 ---
 
-### `getStartHour(date,magnitude)`
+### `getStartHour(date)`
 
 ---
 
-### `getStartWeek(date,magnitude)`
+### `getStartWeek(date)`
 
 ---
 
-### `getStartMonth(date,magnitude)`
+### `getStartMonth(date)`
 
 ---
 
-### `getStartYear(date,magnitude)`
+### `getStartYear(date)`
