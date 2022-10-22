@@ -69,6 +69,9 @@ text"
 ```cherri
 @urls = url("https://apple.com","https://google.com")
 @list = list("Item 1","Item 2","Item 3")
+@email = emailAddress("test@test.org")
+@phone = phoneNumber("(555) 555-5555")
+@date = date("October 5, 2022")
 @location = getCurrentLocation()
 ```
 
