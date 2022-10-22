@@ -10,7 +10,7 @@ var"
 @boolVarTrue = true
 @boolVarFalse = false
 @urlVar = url("https://apple.com","https://google.com")
-@dateVar = date("June 29, 2007")
+@dateVar = date("October 5, 2022")
 @email = emailAddress("test@test.com")
 @phone = phoneNumber("(555) 555-5555")
 @dictVar = {
