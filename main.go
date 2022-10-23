@@ -26,7 +26,6 @@ var included []string
 var fileExtension = "cherri"
 
 func main() {
-	customUsage = "[FILE] [options]"
 	registerArg("share", "s", "Signing mode. [anyone, contacts] [default=contacts]")
 	registerArg("bypass", "b", "Bypass macOS check and signing. Resulting shortcut will NOT run on iOS or macOS.")
 	registerArg("debug", "d", "Save generated plist. Print debug messages and stack traces.")

@@ -47,7 +47,7 @@ func init() {
 
 // Prints a usage message based on the arguments and usage you have registered.
 func usage() {
-	fmt.Printf("USAGE: %s %s", os.Args[0], customUsage)
+	fmt.Print("USAGE: cherri [FILE] [options]")
 	fmt.Printf("\nOptions:\n")
 	for _, arg := range registered {
 		fmt.Printf("\t-%s --%s\t%s\n", arg.short, arg.name, arg.description)
