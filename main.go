@@ -103,11 +103,6 @@ func main() {
 	if !arg("bypass") {
 		sign()
 	}
-
-	if !arg("bypass") {
-		removeErr := os.Remove(basename + "_unsigned.shortcut")
-		handle(removeErr)
-	}
 }
 
 func parseIncludes() {
@@ -186,6 +181,8 @@ func sign() {
 	if arg("debug") {
 		fmt.Printf("\033[32mdone!\033[0m\n")
 	}
+	removeErr := os.Remove(basename + "_unsigned.shortcut")
+	handle(removeErr)
 }
 
 func handle(err error) {
