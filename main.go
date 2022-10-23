@@ -29,6 +29,7 @@ func main() {
 	registerArg("share", "s", "Signing mode. [anyone, contacts] [default=contacts]")
 	registerArg("bypass", "b", "Bypass macOS check and signing. Resulting shortcut will NOT run on iOS or macOS.")
 	registerArg("debug", "d", "Save generated plist. Print debug messages and stack traces.")
+	registerArg("output", "o", "Path to save the shortcut. (e.g. path/to/)")
 	if !arg("bypass") {
 		if runtime.GOOS != "darwin" {
 			fmt.Println("\033[31m\033[1mNot on macOS!\u001B[0m")
@@ -161,11 +162,15 @@ func sign() {
 	if arg("debug") {
 		fmt.Printf("Signing %s.shortcut... ", basename)
 	}
+	var outputPath = basename + ".shortcut"
+	if arg("output") {
+		outputPath = argValue("output") + outputPath
+	}
 	var signBytes, signErr = exec.Command(
 		"shortcuts",
 		"sign",
 		"-i", basename+"_unsigned.shortcut",
-		"-o", basename+".shortcut",
+		"-o", outputPath,
 		"-m", signingMode,
 	).Output()
 	if signErr != nil {
