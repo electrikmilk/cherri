@@ -91,6 +91,13 @@ func argValue(name string) (value string) {
 		if val, ok := args[name]; ok {
 			value = val
 		}
+		for _, r := range registered {
+			if r.name == name {
+				if val, ok := args[r.short]; ok {
+					value = val
+				}
+			}
+		}
 	} else {
 		value = ""
 	}
