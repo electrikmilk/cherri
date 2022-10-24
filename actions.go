@@ -468,7 +468,7 @@ func documentActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -1208,7 +1208,7 @@ func scriptingActions() {
 					dataType: Text,
 					value:    "Encode",
 				},
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -1227,7 +1227,7 @@ func scriptingActions() {
 					dataType: Text,
 					value:    "Decode",
 				},
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -1246,7 +1246,7 @@ func scriptingActions() {
 					dataType: Text,
 					value:    "Encode",
 				},
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -1265,7 +1265,7 @@ func scriptingActions() {
 					dataType: Text,
 					value:    "Decode",
 				},
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
