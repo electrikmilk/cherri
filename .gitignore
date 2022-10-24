@@ -12,6 +12,9 @@ src/aml
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+# Tests
+*.cherri
+
 # Development
 .DS_Store
 /.idea/
