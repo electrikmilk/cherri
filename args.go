@@ -19,8 +19,6 @@ type argument struct {
 var args map[string]string
 var registered []argument
 
-var customUsage string
-
 func init() {
 	args = make(map[string]string)
 	if len(os.Args) < 1 {
