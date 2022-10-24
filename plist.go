@@ -229,7 +229,7 @@ func makeVariableValue(token *token, varUUID *string) {
 							{
 								key:      "WFDictionaryFieldValueItems",
 								dataType: Array,
-								value:    makeDict(token.value),
+								value:    makeDictionary(token.value),
 							},
 						},
 					},
@@ -674,240 +674,122 @@ const (
 	boolType   string = "bool"
 )
 
-func makeDict(value interface{}) (dictItems []string) {
+func makeDictionary(value interface{}) (dictItems []string) {
 	for key, item := range value.(map[string]interface{}) {
-		var itemType dictDataType
-		var serializedType string
-		var WFValue = plistData{
-			key:      "Value",
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "string",
-					dataType: Text,
-					value:    item,
-				},
-			},
-		}
-		switch reflect.TypeOf(item).String() {
-		case stringType:
-			itemType = itemTypeText
-			serializedType = "WFTextTokenString"
-		case intType:
-			itemType = itemTypeNumber
-			serializedType = "WFTextTokenString"
-		case arrayType:
-			itemType = itemTypeArray
-			serializedType = "WFArrayParameterState"
-			WFValue = plistData{
-				key:      "Value",
-				dataType: Array,
-				value:    dictArray(item),
-			}
-		case dictType:
-			itemType = itemTypeDict
-			serializedType = "WFDictionaryFieldValue"
-			WFValue = plistData{
-				key:      "Value",
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "Value",
-						dataType: Dictionary,
-						value: []plistData{
-							{
-								key:      "WFDictionaryFieldValueItems",
-								dataType: Array,
-								value:    makeDict(item),
-							},
-						},
-					},
-					{
-						key:      "WFSerializationType",
-						dataType: Text,
-						value:    "WFDictionaryFieldValue",
-					},
-				},
-			}
-		case boolType:
-			itemType = itemTypeBool
-			serializedType = "WFNumberSubstitutableState"
-			WFValue = plistData{
-				key:      "Value",
-				dataType: Boolean,
-				value:    item,
-			}
-		}
-		dictItems = append(dictItems, plistDict("", []plistData{
-			{
-				key:      "WFKey",
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "Value",
-						dataType: Dictionary,
-						value: []plistData{
-							{
-								key:      "string",
-								dataType: Text,
-								value:    key,
-							},
-						},
-					},
-					{
-						key:      "WFSerializationType",
-						dataType: Text,
-						value:    "WFTextTokenString",
-					},
-				},
-			},
-			{
-				key:      "WFItemType",
-				dataType: Number,
-				value:    string(itemType),
-			},
-			{
-				key:      "WFValue",
-				dataType: Dictionary,
-				value: []plistData{
-					WFValue,
-					{
-						key:      "WFSerializationType",
-						dataType: Text,
-						value:    serializedType,
-					},
-				},
-			},
-		}))
+		dictItems = append(dictItems, dictionaryValue(key, item))
 	}
 	return
 }
 
-func dictArray(value interface{}) (array []string) {
-	for _, item := range value.([]interface{}) {
-		switch reflect.TypeOf(item).String() {
-		case stringType:
-			array = append(array, plistValue(Text, item))
-		case intType:
-			array = append(array, plistDict("", []plistData{
+func dictionaryValue(key string, value any) string {
+	var itemType dictDataType
+	var serializedType string
+	var WFValue = plistData{
+		key:      "Value",
+		dataType: Dictionary,
+		value: []plistData{
+			{
+				key:      "string",
+				dataType: Text,
+				value:    value,
+			},
+		},
+	}
+	switch reflect.TypeOf(value).String() {
+	case stringType:
+		itemType = itemTypeText
+		serializedType = "WFTextTokenString"
+	case intType:
+		itemType = itemTypeNumber
+		serializedType = "WFTextTokenString"
+	case arrayType:
+		itemType = itemTypeArray
+		serializedType = "WFArrayParameterState"
+		var arrayValue []string
+		for _, item := range value.([]interface{}) {
+			arrayValue = append(arrayValue, dictionaryValue("", item))
+		}
+		WFValue = plistData{
+			key:      "Value",
+			dataType: Array,
+			value:    arrayValue,
+		}
+	case dictType:
+		itemType = itemTypeDict
+		serializedType = "WFDictionaryFieldValue"
+		WFValue = plistData{
+			key:      "Value",
+			dataType: Dictionary,
+			value: []plistData{
 				{
-					key:      "WFItemType",
-					dataType: Number,
-					value:    itemTypeNumber,
-				},
-				{
-					key:      "WFValue",
+					key:      "Value",
 					dataType: Dictionary,
 					value: []plistData{
 						{
-							key:      "Value",
-							dataType: Dictionary,
-							value: []plistData{
-								{
-									key:      "string",
-									dataType: Text,
-									value:    item,
-								},
-							},
-						},
-						{
-							key:      "WFSerializationType",
-							dataType: Text,
-							value:    "WFTextTokenString",
-						},
-					},
-				},
-			}))
-		case boolType:
-			array = append(array, plistDict("", []plistData{
-				{
-					key:      "WFItemType",
-					dataType: Number,
-					value:    itemTypeBool,
-				},
-				{
-					key:      "WFValue",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "Value",
-							dataType: Boolean,
-							value:    item,
-						},
-						{
-							key:      "WFSerializationType",
-							dataType: Text,
-							value:    "WFNumberSubstitutableState",
-						},
-					},
-				},
-			}))
-		case arrayType:
-			array = append(array, plistDict("", []plistData{
-				{
-					key:      "WFItemType",
-					dataType: Number,
-					value:    itemTypeArray,
-				},
-				{
-					key:      "WFValue",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "Value",
+							key:      "WFDictionaryFieldValueItems",
 							dataType: Array,
-							value:    dictArray(item),
-						},
-						{
-							key:      "WFSerializationType",
-							dataType: Text,
-							value:    "WFArrayParameterState",
+							value:    makeDictionary(value),
 						},
 					},
 				},
-			}))
-		case dictType:
-			array = append(array, plistDict("", []plistData{
 				{
-					key:      "WFItemType",
-					dataType: Number,
-					value:    itemTypeDict,
+					key:      "WFSerializationType",
+					dataType: Text,
+					value:    "WFDictionaryFieldValue",
 				},
-				{
-					key:      "WFValue",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "Value",
-							dataType: Dictionary,
-							value: []plistData{
-								{
-									key:      "Value",
-									dataType: Dictionary,
-									value: []plistData{
-										{
-											key:      "WFDictionaryFieldValueItems",
-											dataType: Array,
-											value:    makeDict(item),
-										},
-									},
-								},
-								{
-									key:      "WFSerializationType",
-									dataType: Text,
-									value:    "WFDictionaryFieldValue",
-								},
-							},
-						},
-						{
-							key:      "WFSerializationType",
-							dataType: Text,
-							value:    "WFDictionaryFieldValue",
-						},
-					},
-				},
-			}))
+			},
+		}
+	case boolType:
+		itemType = itemTypeBool
+		serializedType = "WFNumberSubstitutableState"
+		WFValue = plistData{
+			key:      "Value",
+			dataType: Boolean,
+			value:    value,
 		}
 	}
-	return
+	var valueData = []plistData{
+		{
+			key:      "WFItemType",
+			dataType: Number,
+			value:    string(itemType),
+		},
+		{
+			key:      "WFValue",
+			dataType: Dictionary,
+			value: []plistData{
+				WFValue,
+				{
+					key:      "WFSerializationType",
+					dataType: Text,
+					value:    serializedType,
+				},
+			},
+		},
+	}
+	if key != "" {
+		valueData = append(valueData, plistData{
+			key:      "WFKey",
+			dataType: Dictionary,
+			value: []plistData{
+				{
+					key:      "Value",
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "string",
+							dataType: Text,
+							value:    key,
+						},
+					},
+				},
+				{
+					key:      "WFSerializationType",
+					dataType: Text,
+					value:    "WFTextTokenString",
+				},
+			},
+		})
+	}
+	return plistDict("", valueData)
 }
