@@ -39,9 +39,9 @@ little more that will turn out valid Shortcuts.
 ### Development on other platforms
 
 As it stands, I don't want someone to get confused and think Shortcuts compiled using Cherri on other platforms will run
-on their Mac or iOS device. However, you can use the `--bypass` (or `-b` for short) to bypass the macOS check and
-Shortcut signing, but the compiled Shortcut will not run on iOS or macOS, obviously. The compiler currently only
-supports Unix-like systems.
+on their Mac or iOS device. However, you can build the compiler for your platform and use the `--unsigned` (or `-u` for
+short) to skip signing the compiled Shortcut, but the compiled Shortcut will not run on iOS or macOS, obviously. The
+compiler currently only supports Unix-like systems.
 
 [Read my full thoughts on this](https://github.com/electrikmilk/cherri/wiki/Why-macOS-only%3F)
 

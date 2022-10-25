@@ -57,7 +57,7 @@ reproduce it, what environment it may be isolated to are clearly communicated.
   your feature until you are ready to submit it, so that you are able to sync your fork beforehand. If this ends up
   happening just sync your main branch with upstream and rebase your feature branch from your main branch.
 - Test your feature or bug fix by writing a Cherri file and checking that it compiles to a valid Shortcut. If you are on
-  a non-macOS platform using the `--bypass` argument, the Shortcut will compile, but may be invalid. Use an XML linter
+  a non-macOS platform using the `--unsigned` argument, the Shortcut will compile, but may be invalid. Use an XML linter
   or validator on the compiled Shortcut file.
 - Commits and changes should be one-to-one, as in, every commit should correlate to a major change in your submission.
   However, don't make commits for every little thing. Most minor pull requests can contain only one commit.

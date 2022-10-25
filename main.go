@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"runtime"
 	"strings"
 
 	"github.com/google/uuid"
@@ -27,16 +26,9 @@ var fileExtension = "cherri"
 
 func main() {
 	registerArg("share", "s", "Signing mode. [anyone, contacts] [default=contacts]")
-	registerArg("bypass", "b", "Bypass macOS check and signing. Resulting shortcut will NOT run on iOS or macOS.")
+	registerArg("unsigned", "u", "Don't sign compiled Shortcut. Will NOT run on iOS or macOS.")
 	registerArg("debug", "d", "Save generated plist. Print debug messages and stack traces.")
 	registerArg("output", "o", "Path to save the shortcut. (e.g. path/to/)")
-	if !arg("bypass") {
-		if runtime.GOOS != "darwin" {
-			fmt.Println("\033[31m\033[1mNot on macOS!\u001B[0m")
-			fmt.Println("\u001B[31mShortcuts can only be signed on macOS!\033[0m")
-			os.Exit(1)
-		}
-	}
 	if len(os.Args) < 2 {
 		usage()
 		os.Exit(0)
@@ -101,7 +93,7 @@ func main() {
 		fmt.Print("\033[32mdone!\033[0m\n")
 	}
 
-	if !arg("bypass") {
+	if !arg("unsigned") {
 		sign()
 	}
 }
