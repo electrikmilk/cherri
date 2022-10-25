@@ -7,6 +7,8 @@ actions to reduce the number of arguments and complexity.
 
 Some arguments are optional and some are required.
 
+Some actions may not be implemented due to difficulty implementing them practically into the language.
+
 ## Standard Actions
 
 These are the standard Shortcuts actions currently supported. Currently, more are being added all the time so this list
