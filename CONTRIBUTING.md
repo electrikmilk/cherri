@@ -46,7 +46,8 @@ reproduce it, what environment it may be isolated to are clearly communicated.
   readable enough that it is obvious to anyone reading it.
 - No moving code around for no reason. Only organize code when absolutely necessary.
 - Test your code to the best of your ability, do not submit code that does not compile.
-- Keep any additions to Cherri syntax consistent with the existing style (e.g. camelCase, scripting-language-like, only capitalize globals, no parenthesis). 
+- Keep any additions to Cherri syntax consistent with the existing style (e.g. camelCase, scripting-language-like, only
+  capitalize globals, no parenthesis).
 
 ### Code submission policy
 

@@ -20,7 +20,8 @@ programming language, that compiles directly to a valid runnable Shortcut.
 alert(message, "Alert", false)
 ```
 
-This project is in the early stages of development, but it does have an [_idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap).
+This project is in the early stages of development, but it does have an [_
+idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap).
 
 ### Usage
 
@@ -60,7 +61,8 @@ compiler currently only supports Unix-like systems.
 
 ### Reference
 
-- [zachary7829](https://github.com/zachary7829)'s [Shortcut File Format Reference](https://zachary7829.github.io/blog/shortcuts/fileformat)
+- [zachary7829](https://github.com/zachary7829)'
+  s [Shortcut File Format Reference](https://zachary7829.github.io/blog/shortcuts/fileformat)
 - [sebj](https://github.com/sebj)'s [Shortcut File Format Reference](https://github.com/sebj/iOS-Shortcuts-Reference)
 
 ### Inspiration
