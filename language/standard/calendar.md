@@ -12,7 +12,9 @@ Create a calendar with `name`.
 
 Create date value from `date`.
 
-## Add Time
+### Adjust Date
+
+#### Add Time
 
 ### `addSeconds(date,magnitude)`
 
@@ -43,7 +45,7 @@ Create date value from `date`.
 ---
 
 
-## Subtract Time
+#### Subtract Time
 
 ### `addSeconds(date,magnitude)`
 
@@ -73,7 +75,7 @@ Create date value from `date`.
 
 ---
 
-## Get Starting Time
+#### Get Starting Time
 
 ### `getStartMinute(date)`
 
