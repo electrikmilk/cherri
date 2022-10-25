@@ -442,7 +442,7 @@ Open Shortcut with name `name`.
 
 ### `run(name,input,isSelf)`
 
-Run Shortcut with name `name` giving `input`. `isSelf` is a boolean, default is false.
+Run Shortcut with name `name` giving `input`. `isSelf` is a boolean, default is `false`.
 
 ## System
 
