@@ -66,14 +66,13 @@ func plistKeyValue(key string, dataType plistDataType, value any) (pair string) 
 	if key != "" {
 		pair = "<key>" + key + "</key>\n"
 	}
-	switch dataType {
-	case Boolean:
+	if dataType == Boolean {
 		if value == true {
 			pair += "<true/>\n"
 		} else {
 			pair += "<false/>\n"
 		}
-	default:
+	} else {
 		pair += fmt.Sprintf("<%s>%v</%s>\n", dataType, value, dataType)
 	}
 	return
@@ -90,14 +89,13 @@ func plistArray(key string, values []string) (pair string) {
 	if len(values) == 0 {
 		pair += "<array/>\n"
 		return
-	} else {
-		pair += "<array>\n"
-		for _, val := range values {
-			pair += val
-		}
-		pair += "</array>\n"
-		return
 	}
+	pair += "<array>\n"
+	for _, val := range values {
+		pair += val
+	}
+	pair += "</array>\n"
+	return
 }
 
 func plistDict(key string, values []plistData) (pair string) {
@@ -168,8 +166,8 @@ func makeVariableValue(token *token, varUUID *string) {
 		dataType: Text,
 		value:    token.ident,
 	}
-	switch {
-	case token.valueType == Integer:
+	switch token.valueType {
+	case Integer:
 		shortcutActions = append(shortcutActions, makeAction("number", []plistData{
 			UUID,
 			outputName,
@@ -179,7 +177,7 @@ func makeVariableValue(token *token, varUUID *string) {
 				value:    token.value,
 			},
 		}))
-	case token.valueType == Bool:
+	case Bool:
 		var boolValue string
 		if token.value == true {
 			boolValue = "1"
@@ -195,13 +193,13 @@ func makeVariableValue(token *token, varUUID *string) {
 				value:    boolValue,
 			},
 		}))
-	case token.valueType == String:
+	case String:
 		shortcutActions = append(shortcutActions, makeAction("gettext", []plistData{
 			UUID,
 			outputName,
 			attachmentValues("WFTextActionText", token.value.(string), "", Text),
 		}))
-	case token.valueType == Expression:
+	case Expression:
 		shortcutActions = append(shortcutActions, makeAction("calculateexpression", []plistData{
 			UUID,
 			outputName,
@@ -211,10 +209,10 @@ func makeVariableValue(token *token, varUUID *string) {
 				value:    token.value,
 			},
 		}))
-	case token.valueType == Action:
+	case Action:
 		currentAction = token.value.(action).ident
 		callAction(token.value.(action).args, outputName, UUID)
-	case token.valueType == Dict:
+	case Dict:
 		shortcutActions = append(shortcutActions, makeAction("dictionary", []plistData{
 			outputName,
 			UUID,
@@ -446,7 +444,7 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 					if coerce != "" {
 						varName = currentVariable + "(" + coerce + ")"
 					}
-					// Replace with OBJECT REPLACEMENT CHARACTER
+					// Replace with OBJECT REPLACEMENT character
 					noVarString = strings.Replace(
 						noVarString,
 						"{"+varName+"}",

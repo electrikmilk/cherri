@@ -786,6 +786,7 @@ func makeKeyList(title string, list map[string]string) (formattedList string) {
 	return
 }
 
+/*
 func printCurrentChar() {
 	var currentChar string
 	switch char {
@@ -802,3 +803,4 @@ func printCurrentChar() {
 	}
 	fmt.Println(currentChar, fmt.Sprintf("%d:%d", lineIdx+1, idx))
 }
+*/

@@ -146,7 +146,6 @@ type condition struct {
 	variableThreeValue any
 }
 
-var conditionals map[string]string
 var conditions map[tokenType]string
 
 var groupingUUID string

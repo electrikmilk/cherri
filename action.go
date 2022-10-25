@@ -180,10 +180,10 @@ func checkIdentify(params *[]plistData, outputName plistData, actionUUID plistDa
 
 var contactValues []string
 
-func contactValue(class string, contentkit string, args []actionArgument) []plistData {
+func contactValue(class string, contentKit string, args []actionArgument) []plistData {
 	contactValues = []string{}
 	var entryType int
-	switch contentkit {
+	switch contentKit {
 	case "emailaddress":
 		entryType = 2
 	case "phonenumber":
@@ -201,7 +201,7 @@ func contactValue(class string, contentkit string, args []actionArgument) []plis
 				dataType: Dictionary,
 				value: []plistData{
 					{
-						key:      "link.contentkit." + contentkit,
+						key:      "link.contentKit." + contentKit,
 						dataType: Text,
 						value:    item.value,
 					},
