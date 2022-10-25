@@ -47,6 +47,12 @@ Wait `number` of seconds.
 
 Wait for the user to return to the Shortcut.
 
+### Content
+
+### `getOnScreenContent()`
+
+Get content on device screen.
+
 ## Device
 
 ### `getBatteryLevel()`
