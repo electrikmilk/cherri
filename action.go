@@ -180,7 +180,7 @@ func checkIdentify(params *[]plistData, outputName plistData, actionUUID plistDa
 
 var contactValues []string
 
-func contactValue(class string, contentKit string, args []actionArgument) []plistData {
+func contactValue(key string, contentKit string, args []actionArgument) []plistData {
 	contactValues = []string{}
 	var entryType int
 	switch contentKit {
@@ -201,7 +201,7 @@ func contactValue(class string, contentKit string, args []actionArgument) []plis
 				dataType: Dictionary,
 				value: []plistData{
 					{
-						key:      "link.contentKit." + contentKit,
+						key:      "link.contentkit." + contentKit,
 						dataType: Text,
 						value:    item.value,
 					},
@@ -211,7 +211,7 @@ func contactValue(class string, contentKit string, args []actionArgument) []plis
 	}
 	return []plistData{
 		{
-			key:      class,
+			key:      key,
 			dataType: Dictionary,
 			value: []plistData{
 				{
