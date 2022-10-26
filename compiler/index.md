@@ -9,7 +9,7 @@ things work, bugs or inaccurate documentation are very likely.
 
 **NOTE:** Keep in mind that this compiler is in the early stages of development. There is much refactoring to be done, the compiler has not yet reached the desired level of maturity and simplicity. 
 
-- [Actions](actions.md)
+- [Defining Actions](actions.md)
 - [Metadata](metadata.md)
 - [Property List Generation](plistgen.md)
 - [Parsing](parsing.md)
