@@ -10,7 +10,7 @@ things work, bugs or inaccurate documentation are very likely.
 
 ## Usage
 
-[Download the latest release](https://github.com/electrikmilk/cherri/releases) (macOS only)
+[Download the latest release](https://github.com/electrikmilk/cherri/releases) ([macOS only](https://github.com/electrikmilk/cherri/wiki/Why-macOS-only%3F))
 
 _Or_
 
