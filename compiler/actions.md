@@ -66,6 +66,15 @@ actions["takePhoto"] = actionDefinition{
 }
 ```
 
+`ident` exists so that you can do this:
+
+```go
+actions["takeMorePhotos"] = actionDefinition{
+     ident: "takephoto",
+     // ...
+}
+```
+
 ### `args`
 
 Arguments are defined using a `argumentDefinition` for each argument. It has two main fields, one that defines the field
