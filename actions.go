@@ -1475,12 +1475,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["waitToReturn"] = actionDefinition{
-		ident: "waittoreturn",
-		call: func(args []actionArgument) []plistData {
-			return []plistData{}
-		},
-	}
+	actions["waitToReturn"] = actionDefinition{}
 	actions["notification"] = actionDefinition{
 		ident: "notification",
 		args: []argumentDefinition{
