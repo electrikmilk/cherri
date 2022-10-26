@@ -827,6 +827,193 @@ func locationActions() {
 			}
 		},
 	}
+	actions["getAddresses"] = actionDefinition{
+		ident: "detect.address",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				variableInput("WFInput", args[1].value.(string)),
+			}
+		},
+	}
+	actions["getCurrentWeather"] = actionDefinition{
+		ident: "currentconditions",
+	}
+	actions["getCurrentWeatherAt"] = actionDefinition{
+		ident: "currentconditions",
+		args: []argumentDefinition{
+			{
+				field:     "location",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFWeatherCustomLocation", args, 0),
+			}
+		},
+	}
+	actions["openInMaps"] = actionDefinition{
+		ident: "searchmaps",
+		args: []argumentDefinition{
+			{
+				field:     "location",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFInput", args, 0),
+			}
+		},
+	}
+	actions["streetAddress"] = actionDefinition{
+		ident: "address",
+		args: []argumentDefinition{
+			{
+				field:     "addressLine2",
+				validType: String,
+			},
+			{
+				field:     "addressLine2",
+				validType: String,
+			},
+			{
+				field:     "city",
+				validType: String,
+			},
+			{
+				field:     "state",
+				validType: String,
+			},
+			{
+				field:     "country",
+				validType: String,
+			},
+			{
+				field:     "zipCode",
+				validType: Integer,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFAddressLine1", args, 0),
+				argumentValue("WFAddressLine2", args, 1),
+				argumentValue("WFCity", args, 2),
+				argumentValue("WFState", args, 3),
+				argumentValue("WFCountry", args, 4),
+				argumentValue("WFPostalCode", args, 5),
+			}
+		},
+	}
+	actions["getWeatherDetail"] = actionDefinition{
+		ident: "properties.weather.conditions",
+		args: []argumentDefinition{
+			{
+				field:     "weather",
+				validType: Variable,
+			},
+			{
+				field:     "property",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFInput", args, 0),
+				argumentValue("WFContentItemPropertyName", args, 1),
+			}
+		},
+	}
+	actions["getWeatherForcast"] = actionDefinition{
+		ident: "weather.forecast",
+		args: []argumentDefinition{
+			{
+				field:     "type",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFWeatherForecastType", args, 0),
+			}
+		},
+	}
+	actions["getWeatherForcastAt"] = actionDefinition{
+		ident: "weather.forecast",
+		args: []argumentDefinition{
+			{
+				field:     "type",
+				validType: String,
+			},
+			{
+				field:     "location",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFWeatherForecastType", args, 0),
+				argumentValue("WFInput", args, 1),
+			}
+		},
+	}
+	actions["getLocationDetail"] = actionDefinition{
+		ident: "properties.locations",
+		args: []argumentDefinition{
+			{
+				field:     "location",
+				validType: Variable,
+			},
+			{
+				field:     "property",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFInput", args, 0),
+				argumentValue("WFContentItemPropertyName", args, 1),
+			}
+		},
+	}
+	actions["getMapsLink"] = actionDefinition{
+		ident: "",
+		args: []argumentDefinition{
+			{
+				field:     "location",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFInput", args, 0),
+			}
+		},
+	}
+	actions["getHalfwayPoint"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "firstLocation",
+				validType: Variable,
+			},
+			{
+				field:     "secondLocation",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFGetHalfwayPointFirstLocation", args, 0),
+				argumentValue("WFGetHalfwayPointSecondLocation", args, 1),
+			}
+		},
+	}
 }
 
 func mediaActions() {
