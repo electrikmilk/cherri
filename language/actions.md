@@ -17,7 +17,7 @@ may be inaccurate. Not all standard actions in each category are implemented yet
 - [ ] (3/23) [Calendar](standard/calendar.md)
 - [ ] (6/15) [Contacts](standard/contacts.md)
 - [ ] (13/64) [Documents](standard/documents.md)
-- [ ] (1/17) [Location](standard/location.md)
+- [ ] (9/17) [Location](standard/location.md)
 - [ ] (7/68) [Media](standard/media.md)
 - [ ] (54/74) [Scripting](standard/scripting.md)
 - [ ] (4/10) [Sharing](standard/sharing.md)
