@@ -168,7 +168,7 @@ func enoughArgs(arguments *[]actionArgument) {
 		if actionArgs[a].noMax {
 			break
 		}
-		if actionArgs[a].defaultValue.value == nil {
+		if actionArgs[a].defaultValue.value == nil && actionArgs[a].optional != true {
 			if arg.value == nil {
 				parserError(fmt.Sprintf("Missing required argument '%s' to call action '%s'", actionArgs[a].field, currentAction))
 			}
