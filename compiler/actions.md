@@ -64,9 +64,21 @@ name, this will be used in error messages. The other defines the valid type for 
 value type of the argument received in parsing. This is also used to know the minimum number of arguments. Both of these
 checks happen during parsing right after parsing the arguments for the action.
 
+```go
+type argumentDefinition struct {
+	field        string
+	validType    tokenType
+	key          string
+	defaultValue actionArgument
+	noMax        bool
+}
+```
+
 The `defaultValue` takes an `actionArgument`, you must give a value type and value. This defines a default value if no value
 is specified, to require a value, simply don't define this field. Default values should only be given after any required values
 otherwise they are pointless.
+
+The `key` is used if there is no need to process arguments when the action is called. If you use `key` to specify the key of this action parameter, do not add a call to the action definition, otherwise this is pointless and will be ignored.
 
 ### `check`
 
