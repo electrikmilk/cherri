@@ -1676,12 +1676,12 @@ func scriptingActions() {
 		ident: "getvalueforkey",
 		args: []argumentDefinition{
 			{
-				field:     "key",
-				validType: String,
-			},
-			{
 				field:     "dictionary",
 				validType: Dict,
+			},
+			{
+				field:     "key",
+				validType: String,
 			},
 		},
 		call: func(args []actionArgument) []plistData {
