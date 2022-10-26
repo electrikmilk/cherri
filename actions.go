@@ -16,7 +16,7 @@ import (
 //  Rename the function to standardActions() and rename the file to actions_standard.go.
 
 // FIXME: Most of these actions that have enumerable values (a set list values),
-//  do not check if the value matches and list out the valid values if it doesn't.
+//  check if the value matches and list out the valid values if it doesn't.
 //  Use "hash" as an example.
 
 func makeActions() {
