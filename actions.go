@@ -1318,6 +1318,7 @@ func scriptingActions() {
 			}
 		},
 	}
+	var hashTypes = []string{"MD5", "SHA1", "SHA256", "SHA512"}
 	actions["hash"] = actionDefinition{
 		args: []argumentDefinition{
 			{

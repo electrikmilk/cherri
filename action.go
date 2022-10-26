@@ -41,8 +41,6 @@ type actionDefinition struct {
 
 var actions map[string]actionDefinition
 
-var hashTypes = []string{"MD5", "SHA1", "SHA256", "SHA512"}
-
 func callAction(arguments []actionArgument, outputName plistData, actionUUID plistData) {
 	var ident string
 	if actions[currentAction].ident != "" {
