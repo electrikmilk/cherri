@@ -1180,7 +1180,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 				argumentValue("WFName", args, 1),
 				argumentValue("WFDontIncludeFileExtension", args, 2),
 			}
