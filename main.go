@@ -34,10 +34,6 @@ func main() {
 		os.Exit(0)
 	}
 	filePath = os.Args[1]
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		fmt.Printf("\033[31mFile '%s' does not exist!", filePath)
-		os.Exit(1)
-	}
 	checkFile(filePath)
 	var pathParts = strings.Split(filePath, "/")
 	filename = pathParts[len(pathParts)-1]
@@ -131,7 +127,7 @@ func parseIncludes() {
 
 func checkFile(filePath string) {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		fmt.Printf("\033[31mFile '%s' does not exist!\033[0m\n", filePath)
+		fmt.Printf("\n\033[31mFile at path '%s' does not exist!\033[0m\n", filePath)
 		os.Exit(1)
 	}
 	var file, statErr = os.Stat(filePath)
