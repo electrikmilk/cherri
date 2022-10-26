@@ -103,14 +103,17 @@ func plistDict(key string, values []plistData) (pair string) {
 		pair = "<key>" + key + "</key>\n"
 	}
 	pair += "<dict>\n"
+	var empty = plistData{}
 	for _, data := range values {
-		switch data.dataType {
-		case Dictionary:
-			pair += plistDict(data.key, data.value.([]plistData))
-		case Array:
-			pair += plistArray(data.key, data.value.([]string))
-		default:
-			pair += plistKeyValue(data.key, data.dataType, data.value)
+		if data != empty {
+			switch data.dataType {
+			case Dictionary:
+				pair += plistDict(data.key, data.value.([]plistData))
+			case Array:
+				pair += plistArray(data.key, data.value.([]string))
+			default:
+				pair += plistKeyValue(data.key, data.dataType, data.value)
+			}
 		}
 	}
 	pair += "</dict>\n"
