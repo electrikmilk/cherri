@@ -78,7 +78,10 @@ This field takes an `actionCall` which is a function that accepts a slice of `ac
 of `plistData`. These usually contain the `argumentValue(key,args,argsIndex)` function which handles the argument value
 based on its definition.
 
-For a variable only argument, use the `inputValue(key,name,uuid)` function.
+For a variable only argument, use the `variableInput(key,value)` function.
+
+You can also obviously directly add a `plistData` value to this slice. This slice will be used as the value of
+`WFWorkflowActionParameters` dictionary for the action.
 
 If the action has mutliple arguments without a variable only argument, it's best to return the output of `argumentValues()`
 instead. This function takes a reference to the `args` and a `[]paramsMap` slice.
@@ -90,8 +93,25 @@ type paramMap struct {
 }
 ```
 
-You can also obviously directly add a `plistData` value to this slice. This slice will be used as the value of
-`WFWorkflowActionParameters` dictionary for the action.
+If it is not necessary to process arguments before they are used as values, simply add the key of the argument to the argument definition like this:
+
+```go
+actions["takePhoto"] = actionDefinition{
+     args: []argumentDefinition{
+		{
+			field:     "showPreview",
+			validType: Bool,
+			key: "WFCameraCaptureShowPreview"
+			defaultValue: actionArgument{
+				valueType: Bool,
+				value:     true,
+			},
+		},
+	},
+}
+```
+
+If you do this, the argument value for that argument will be done for you, just make sure to not add the call property and add the key property to each of your argument definitions. This is done to help make defining actions simpler and faster.
 
 ---
 
