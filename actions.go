@@ -2023,7 +2023,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 				argumentValue("WFItemIndex", args, 1),
 				{
 					key:      "WFItemSpecifier",
@@ -2051,7 +2051,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 				argumentValue("WFItemRangeStart", args, 1),
 				argumentValue("WFItemRangeEnd", args, 2),
 				{
@@ -2072,7 +2072,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -2086,7 +2086,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -2100,35 +2100,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
-			}
-		},
-	}
-	actions["getNumber"] = actionDefinition{
-		ident: "detect.number",
-		args: []argumentDefinition{
-			{
-				field:     "input",
-				validType: Variable,
-			},
-		},
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
-			}
-		},
-	}
-	actions["getAddresses"] = actionDefinition{
-		ident: "detect.address",
-		args: []argumentDefinition{
-			{
-				field:     "input",
-				validType: Variable,
-			},
-		},
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -2142,7 +2114,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -2156,7 +2128,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -2165,12 +2137,12 @@ func scriptingActions() {
 		args: []argumentDefinition{
 			{
 				field:     "input",
-				validType: Variable,
+				validType: String,
 			},
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -2184,7 +2156,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -2198,7 +2170,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -2212,7 +2184,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -2226,7 +2198,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
@@ -2241,7 +2213,7 @@ func scriptingActions() {
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
