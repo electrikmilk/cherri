@@ -135,7 +135,7 @@ func checkFile(filePath string) {
 	var nameParts = strings.Split(file.Name(), ".")
 	var ext = nameParts[len(nameParts)-1]
 	if ext != fileExtension {
-		fmt.Printf("\033[31mFile '%s' is not a .%s file!\033[0m\n", filePath, fileExtension)
+		fmt.Printf("\n\033[31mFile '%s' is not a .%s file!\033[0m\n", filePath, fileExtension)
 		os.Exit(1)
 	}
 }
