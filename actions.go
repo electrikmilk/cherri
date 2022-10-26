@@ -2587,6 +2587,96 @@ func webActions() {
 			}
 		},
 	}
+	actions["runJavaScriptOnWebpage"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "javascript",
+				validType: String,
+				key:       "WFJavaScript",
+			},
+		},
+	}
+	var engines = []string{"amazon", "bing", "duckduckgo", "ebay", "google", "reddit", "twitter", "yahoo!", "youTube"}
+	actions["searchWeb"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "engine",
+				validType: String,
+				key:       "WFSearchWebDestination",
+			},
+			{
+				field:     "query",
+				validType: String,
+				key:       "WFInputText",
+			},
+		},
+		check: func(args []actionArgument) {
+			var engine = strings.ToLower(getArgValue(args[0]).(string))
+			if !contains(engines, engine) {
+				parserError(fmt.Sprintf("Invalid search engine '%s'. Available search engines: %v", engine, engines))
+			}
+		},
+	}
+	actions["getWebpageContents"] = actionDefinition{
+		ident: "getwebpagecontents",
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+				key:       "WFInput",
+			},
+		},
+	}
+	actions["expandURL"] = actionDefinition{
+		ident: "url.expand",
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+				key:       "URL",
+			},
+		},
+	}
+	var urlComponents = []string{"Scheme", "User", "Password", "Host", "Port", "Path", "Query", "Fragment"}
+	actions["getURLComponent"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+				key:       "WFURL",
+			},
+			{
+				field:     "component",
+				validType: String,
+				key:       "WFURLComponent",
+			},
+		},
+		check: func(args []actionArgument) {
+			var component = strings.ToTitle(getArgValue(args[0]).(string))
+			if !contains(urlComponents, component) {
+				parserError(fmt.Sprintf("Invalid URL component '%s'. Available URL components: %v", component, urlComponents))
+			}
+		},
+	}
+	// FIXME: Complete this action...this action is very complex and needs to be split up probably
+	actions["downloadURL"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+				key:       "WFURL",
+			},
+			{
+				field:     "method",
+				validType: String,
+				key:       "WFHTTPMethod",
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "POST",
+				},
+			},
+		},
+	}
 }
 
 func customActions() {
