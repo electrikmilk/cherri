@@ -97,8 +97,11 @@ func checkTypes(arguments []actionArgument, checks []argumentDefinition) {
 	for i, check := range checks {
 		if len(arguments) > i {
 			typeCheck(check.field, check.validType, arguments[i])
+			if check.defaultValue.value == arguments[i].value {
+				parserWarning(fmt.Sprintf("Value for argument %d '%s' for action '%s()' of '%v', is the same as the default value.", i+1, check.field, currentAction, arguments[i].value))
+			}
 		} else if check.defaultValue.value == nil {
-			parserError(fmt.Sprintf("Missing required argument '%s' to call action '%s'", check.field, currentAction))
+			parserError(fmt.Sprintf("Missing required argument %d '%s' to call action '%s()'", i+1, check.field, currentAction))
 		}
 	}
 }
