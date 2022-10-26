@@ -59,7 +59,7 @@ is specified, not only is the key used instead, but its case will be changed to 
 
 ### `args`
 
-Arguments are defined using a `argumentDefinition` for each argument. It has two fields, one that defines the field
+Arguments are defined using a `argumentDefinition` for each argument. It has two main fields, one that defines the field
 name, this will be used in error messages. The other defines the valid type for the input, this is compared against the
 value type of the argument received in parsing. This is also used to know the minimum number of arguments. Both of these
 checks happen during parsing right after parsing the arguments for the action.
