@@ -8,6 +8,16 @@ compiler, [click here](https://electrikmilk.github.io/cherri/compiler/).
 Contributing to this open-source documentation is recommended as this language is in the early stages and while most
 things work, bugs or inaccurate documentation are very likely.
 
+## Usage
+
+[Download the latest release](https://github.com/electrikmilk/cherri/releases) (macOS only)
+
+_Or_
+
+[Build from source](https://github.com/electrikmilk/cherri)
+
+## Language
+
 - [Supported Actions](actions.md)
 - [Variables & Globals](variables-globals.md)
 - [Statements](statements.md)
