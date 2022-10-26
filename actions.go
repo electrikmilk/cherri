@@ -1338,6 +1338,25 @@ func scriptingActions() {
 			}
 		},
 	}
+	actions["addToReadingList"] = actionDefinition{
+		ident: "readinglist",
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "Show-WFURL",
+					dataType: Boolean,
+					value:    true,
+				},
+				argumentValue("WFURL", args, 0),
+			}
+		},
+	}
 	var hashTypes = []string{"MD5", "SHA1", "SHA256", "SHA512"}
 	actions["hash"] = actionDefinition{
 		args: []argumentDefinition{
@@ -2579,6 +2598,16 @@ func sharingActions() {
 }
 
 func webActions() {
+	actions["getURLHeaders"] = actionDefinition{
+		ident: "url.getheaders",
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+				key:       "WFInput",
+			},
+		},
+	}
 	actions["openURL"] = actionDefinition{
 		args: []argumentDefinition{
 			{
@@ -2627,6 +2656,86 @@ func webActions() {
 			}
 		},
 	}
+	actions["showWebpage"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+				key:       "WFURL",
+			},
+			{
+				field:     "useReader",
+				validType: Bool,
+				key:       "WFEnterSafariReader",
+				optional:  true,
+			},
+		},
+	}
+	actions["getRSSFeeds"] = actionDefinition{
+		ident: "rss.extract",
+		args: []argumentDefinition{
+			{
+				field:     "urls",
+				validType: String,
+				key:       "WFURLs",
+			},
+		},
+	}
+	actions["getRSS"] = actionDefinition{
+		ident: "rss",
+		args: []argumentDefinition{
+			{
+				field:     "items",
+				validType: Integer,
+				key:       "WFRSSItemQuantity",
+			},
+			{
+				field:     "url",
+				validType: String,
+				key:       "WFRSSFeedURL",
+			},
+		},
+	}
+	var webpageDetails = []string{"page contents", "page selection", "page url", "name"}
+	actions["getWebPageDetail"] = actionDefinition{
+		ident: "properties.safariwebpage",
+		args: []argumentDefinition{
+			{
+				field:     "webpage",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				field:     "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+			},
+		},
+		check: func(args []actionArgument) {
+			var detail = strings.ToLower(getArgValue(args[1]).(string))
+			if !contains(webpageDetails, detail) {
+				parserError(fmt.Sprintf("Invalid webpage detail '%s'. Available webpage details: %v", detail, webpageDetails))
+			}
+		},
+	}
+	actions["getArticleDetail"] = actionDefinition{
+		ident: "properties.articles",
+		args: []argumentDefinition{
+			{
+				field:     "article",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				field:     "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+			},
+		},
+	}
+	actions["getCurrentURL"] = actionDefinition{
+		ident: "safari.geturl",
+	}
 	actions["getWebpageContents"] = actionDefinition{
 		ident: "getwebpagecontents",
 		args: []argumentDefinition{
@@ -2634,6 +2743,55 @@ func webActions() {
 				field:     "url",
 				validType: String,
 				key:       "WFInput",
+			},
+		},
+	}
+	actions["searchGiphy"] = actionDefinition{
+		ident: "giphy",
+		args: []argumentDefinition{
+			{
+				field:     "query",
+				validType: String,
+				key:       "WFGiphyQuery",
+			},
+		},
+	}
+	actions["getGifs"] = actionDefinition{
+		ident: "giphy",
+		args: []argumentDefinition{
+			{
+				field:     "query",
+				validType: String,
+			},
+			{
+				field:     "gifs",
+				validType: Integer,
+				defaultValue: actionArgument{
+					value:     1,
+					valueType: Integer,
+				},
+				optional: true,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFGiphyShowPicker",
+					dataType: Boolean,
+					value:    false,
+				},
+				argumentValue("WFGiphyQuery", args, 0),
+				argumentValue("WFGiphyLimit", args, 1),
+			}
+		},
+	}
+	actions["getArticle"] = actionDefinition{
+		ident: "getarticle",
+		args: []argumentDefinition{
+			{
+				field:     "webpage",
+				validType: String,
+				key:       "WFWebPage",
 			},
 		},
 	}
