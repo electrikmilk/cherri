@@ -1486,6 +1486,7 @@ func scriptingActions() {
 			{
 				field:     "title",
 				validType: String,
+				optional:  true,
 			},
 			{
 				field:     "playSound",
@@ -1531,6 +1532,7 @@ func scriptingActions() {
 			{
 				field:     "title",
 				validType: String,
+				optional:  true,
 			},
 			{
 				field:     "cancelButton",
