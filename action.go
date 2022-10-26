@@ -16,6 +16,7 @@ type argumentDefinition struct {
 	validType    tokenType
 	key          string
 	defaultValue actionArgument
+	optional     bool
 	noMax        bool
 }
 
@@ -98,7 +99,7 @@ func checkTypes(arguments []actionArgument, checks []argumentDefinition) {
 			if check.defaultValue.value == arguments[i].value {
 				parserWarning(fmt.Sprintf("Value for argument %d '%s' for action '%s()' of '%v', is the same as the default value.", i+1, check.field, currentAction, arguments[i].value))
 			}
-		} else if check.defaultValue.value == nil {
+		} else if check.defaultValue.value == nil && check.optional != true {
 			parserError(fmt.Sprintf("Missing required argument %d '%s' to call action '%s()'", i+1, check.field, currentAction))
 		}
 	}

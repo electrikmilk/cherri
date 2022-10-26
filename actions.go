@@ -1568,10 +1568,7 @@ func scriptingActions() {
 			{
 				field:     "defaultValue",
 				validType: String,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "",
-				},
+				optional:  true,
 			},
 		},
 		call: func(args []actionArgument) []plistData {
