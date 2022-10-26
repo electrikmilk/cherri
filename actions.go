@@ -419,6 +419,22 @@ func contactActions() {
 }
 
 func documentActions() {
+	actions["saveFile"] = actionDefinition{
+		ident: "documentpicker.save",
+		args: []argumentDefinition{
+			{
+				field:     "file",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				field:     "overwrite",
+				validType: Bool,
+				key:       "WFSaveFileOverwrite",
+				optional:  true,
+			},
+		},
+	}
 	actions["getSelectedFiles"] = actionDefinition{ident: "finder.getselectedfiles"}
 	actions["extractArchive"] = actionDefinition{
 		ident: "unzip",
