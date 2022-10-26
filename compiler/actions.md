@@ -79,7 +79,7 @@ The `defaultValue` takes an `actionArgument`, you must give a value type and val
 is specified, to require a value, simply don't define this field. Default values should only be given after any required values
 otherwise they are pointless.
 
-`optional` tells Cherri that this parameter is completely optional for this action. It will not write a key value pair for this parameter if it is optional and has no value.
+`optional` tells Cherri that this parameter is completely optional for this action. It will not write a key value pair for this parameter if it is optional and has no value. The Shortcuts app does this with many parameters that it has a default value for, if an actions parameter is not specified, it fills in the gap and goes with the default value for that parameter for that action. This should be done when possible as it makes for a much smaller Shortcut file on average.
 
 Do not use `optional` and `defaultValue` in tandem, it's pointless.
 
