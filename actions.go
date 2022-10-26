@@ -383,12 +383,12 @@ func contactActions() {
 			{
 				field:     "multiple",
 				validType: Bool,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
+				key: "WFSelectMultiple",
 			},
-		},
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFSelectMultiple", args, 0),
-			}
 		},
 	}
 	actions["selectEmailAddress"] = actionDefinition{
