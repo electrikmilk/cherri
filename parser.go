@@ -748,6 +748,10 @@ func parserErr(err error) {
 	parserError(fmt.Sprintf("%s", err))
 }
 
+func parserWarning(message string) {
+	fmt.Printf("\n\033[33mWarning: %s (%d:%d)\033[0m\n", message, lineIdx+1, lineCharIdx+1)
+}
+
 func parserError(message string) {
 	if char == '\n' || prev(1) == '\n' {
 		lineIdx--
