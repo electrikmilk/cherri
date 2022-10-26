@@ -1172,6 +1172,10 @@ func scriptingActions() {
 			{
 				field:     "includeFileExtension",
 				validType: Bool,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
 			},
 		},
 		call: func(args []actionArgument) []plistData {
