@@ -9,7 +9,7 @@ things work, bugs or inaccurate documentation are very likely.
 
 ## Warning
 
-Keep in mind that this compiler is in the early stages of development and is under going heavy development. There is much refactoring to be done, the compiler has not yet reached the desired level of maturity and simplicity, and things are always subject to change.
+Keep in mind that this compiler is in the early stages and is under going heavy development. There is much refactoring to be done, the compiler has not yet reached the desired level of maturity and simplicity, and things are always subject to change.
 
 ## Shortcut File Format Reference
 
