@@ -70,6 +70,7 @@ type argumentDefinition struct {
 	validType    tokenType
 	key          string
 	defaultValue actionArgument
+	optional     bool
 	noMax        bool
 }
 ```
@@ -77,6 +78,10 @@ type argumentDefinition struct {
 The `defaultValue` takes an `actionArgument`, you must give a value type and value. This defines a default value if no value
 is specified, to require a value, simply don't define this field. Default values should only be given after any required values
 otherwise they are pointless.
+
+Optional tells Cherri that this parameter is completely optional for this action. It will not write a key value pair for this parameter if it is optional and has no value or default value.
+
+Do not use `optional` and `defaultValue` in tandem, it's pointless.
 
 The `key` is used if there is no need to process arguments when the action is called. If you use `key` to specify the key of this action parameter, do not add a call to the action definition, otherwise this is pointless and will be ignored.
 
