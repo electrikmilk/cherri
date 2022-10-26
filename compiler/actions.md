@@ -1,6 +1,6 @@
 [Back](/cherri/compiler/)
 
-# Actions
+# Defining Actions
 
 Defining actions is easy but might be a little complicated to understand at first. Actions are defined in one
 place, [`actions.go`](https://github.com/electrikmilk/cherri/blob/main/actions.go).
