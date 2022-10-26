@@ -14,6 +14,7 @@ var currentAction string
 type argumentDefinition struct {
 	field        string
 	validType    tokenType
+	key          string
 	defaultValue actionArgument
 	noMax        bool
 }
@@ -52,6 +53,10 @@ func callAction(arguments []actionArgument, outputName plistData, actionUUID pli
 	var params []plistData
 	if actions[currentAction].call != nil {
 		params = actions[currentAction].call(arguments)
+	} else if actions[currentAction].args != nil {
+		for i, a := range actions[currentAction].args {
+			params = append(params, argumentValue(a.key, arguments, i))
+		}
 	}
 	checkIdentify(&params, outputName, actionUUID)
 	shortcutActions = append(shortcutActions, makeAction(ident, params))
