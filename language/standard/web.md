@@ -2,7 +2,68 @@
 
 # Web Actions
 
+## Articles
+
+### `getArticle(webpage)`
+
+Get article from `webpage` in article.
+
+---
+
+### `getArticleDetail(article,detail)`
+
+Get `detail` from `article`.
+
+## Giphy
+
+### `searchGiphy(query)`
+
+Search Giphy for `query`.
+
+---
+
+### `getGifs(query,gifs)`
+
+Get `gifs` number of gifs from Giphy for `query`.
+
+## RSS
+
+### `getRSS(items,url)`
+
+Get `items` number of items from RSS feed at `url`.
+
+---
+
+### `getRSSFeeds(urls)`
+
+Get RSS feeds from urls.
+
 ## Safari
+
+### `addToReadingList(url)`
+
+Add `url` to the users reading list.
+
+---
+
+### `getCurrentURL()`
+
+Get current web page url.
+
+---
+
+### `getWebPageDetail(webpage,detail)`
+
+Get `detail` of `webpage`.
+
+#### Details
+
+- Page Contents
+- Page Selection
+- Page URL
+- Name
+
+---
 
 ### `openURLs(urls)`
 
@@ -32,6 +93,12 @@ Search the web for `query` using `engine`.
 - Yahoo!
 - YouTube
 
+---
+
+### `showWebpage(url,useReader)`
+
+Show `url`. `urlReader` is a boolean, the default is `true`. 
+
 ## URLs
 
 ### `expandURL(url)`
@@ -54,6 +121,8 @@ Get `component` from `url`.
 - Path
 - Query
 - Fragment
+
+---
 
 ### `getURLs(input)`
 
@@ -78,3 +147,9 @@ _This action is currently incomplete due to it's complexity_
 ### `getWebpageContents(url)`
 
 Get contents of webpage at `url`.
+
+---
+
+### `getURLHeaders(url)`
+
+Get headers for `url`.
