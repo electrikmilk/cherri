@@ -287,10 +287,10 @@ func calculateStatistics(operation string, args []actionArgument) []plistData {
 	}
 }
 
-var ipTypes = []string{"IPv4", "IPv6"}
+var ipTypes = []string{"ipv4", "ipv6"}
 
 func checkIPType(args []actionArgument) {
-	var ipType = strings.ToUpper(getArgValue(args[0]).(string))
+	var ipType = strings.ToLower(getArgValue(args[0]).(string))
 	if !contains(ipTypes, ipType) {
 		parserError(fmt.Sprintf("Invalid IP address type of '%s'. Available IP types: %v", ipType, ipTypes))
 	}

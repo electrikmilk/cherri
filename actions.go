@@ -1949,12 +1949,34 @@ func scriptingActions() {
 		},
 	}
 	actions["dismissSiri"] = actionDefinition{}
+	actions["isOnline"] = actionDefinition{
+		ident: "getipaddress",
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFIPAddressSourceOption",
+					dataType: Text,
+					value:    "External",
+				},
+				{
+					key:      "WFIPAddressTypeOption",
+					dataType: Text,
+					value:    "IPv4",
+				},
+			}
+		},
+	}
 	actions["getLocalIP"] = actionDefinition{
 		ident: "getipaddress",
 		args: []argumentDefinition{
 			{
 				field:     "type",
 				validType: String,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "IPv4",
+				},
+				optional: true,
 			},
 		},
 		check: checkIPType,
@@ -1975,6 +1997,11 @@ func scriptingActions() {
 			{
 				field:     "type",
 				validType: String,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "IPv4",
+				},
+				optional: true,
 			},
 		},
 		check: checkIPType,
