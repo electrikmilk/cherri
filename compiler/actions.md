@@ -7,15 +7,16 @@ place, [`actions.go`](https://github.com/electrikmilk/cherri/blob/main/actions.g
 
 Actions are added to a map that accepts a key of type `string` and a value of type `actionDefinition`.
 
-An action definition consists of the identifier, the argument definitions, an optional `check` function of custom
-type `actionCheck` that is called when the action is checked at parsing, and a call of the custom type `actionCall`.
+An action definition consists of the identifier, the parameter definitions, an optional `check` function of custom
+type `paramCheck` that is called when the action is checked at parsing, and `make` of the custom type `makeParams`
+that returns the parameters for the action.
 
 ```go
 type actionDefinition struct {
-    ident string
-    args  []argumentDefinition
-    check actionCheck
-    call  actionCall
+	identifier string
+	parameters []parameterDefinition
+	check      paramCheck
+	make       makeParams
 }
 ```
 
@@ -26,7 +27,7 @@ Here is an example of a simple action definition:
 
 ```go
 actions["takePhoto"] = actionDefinition{
-     args: []argumentDefinition{
+     parameters: []parameterDefinition{
 		{
 			field:     "showPreview",
 			validType: Bool,
@@ -36,7 +37,7 @@ actions["takePhoto"] = actionDefinition{
 			},
 		},
 	},
-	call: func(args []actionArgument) []plistData {
+	make: func(args []actionArgument) []plistData {
 		return []plistData{
 			argumentValue("WFCameraCaptureShowPreview", args, 0),
 		}
@@ -50,7 +51,7 @@ All of these options are optional, as long as the key matches the identifier you
 actions["identifier"] = actionDefinition{}
 ```
 
-### `ident`
+### `identifier`
 
 The identifier is the identifier at the end of `is.workflows.actions.**identifier**`.
 
@@ -61,7 +62,7 @@ So there is no need to do the below example, remove the ident property and the k
 
 ```go
 actions["takePhoto"] = actionDefinition{
-     ident: "takephoto",
+     identifier: "takephoto",
      // ...
 }
 ```
@@ -70,21 +71,21 @@ actions["takePhoto"] = actionDefinition{
 
 ```go
 actions["takeMorePhotos"] = actionDefinition{
-     ident: "takephoto",
+     identifier: "takephoto",
      // ...
 }
 ```
 
-### `args`
+### `parameters`
 
-Arguments are defined using a `argumentDefinition` for each argument. It has two main fields, one that defines the field
-name, this will be used in error messages. The other defines the valid type for the input, this is compared against the
-value type of the argument received in parsing. This is also used to know the minimum number of arguments. Both of these
-checks happen during parsing right after parsing the arguments for the action.
+Arguments are defined using a `argumentDefinition` for each argument. It has two main fields, one that defines the argument
+`name`, this will be used in error messages. The other defines the valid type for the argument, this is compared against the
+value type of the argument received in parsing. This is also used to know the minimum number of arguments for the action. Both of these
+checks happen during parsing, right after parsing the arguments for the action.
 
 ```go
-type argumentDefinition struct {
-	field        string
+type parameterDefinition struct {
+	name         string
 	validType    tokenType
 	key          string
 	defaultValue actionArgument
@@ -103,11 +104,11 @@ The `key` is used if there is no need to process arguments. If you use `key` to 
 
 ### `check`
 
-This field takes an `actionCheck` which is a function that accepts a slice of `actionArguments`.
+This field takes an `paramCheck` which is a function that accepts a slice of `actionArguments`.
 
-### `call`
+### `make`
 
-This field takes an `actionCall` which is a function that accepts a slice of `actionArguments` and must return a slice
+This field takes an `makeParams` which is a function that accepts a slice of `actionArguments` and must return a slice
 of `plistData`. These usually contain the `argumentValue(key,args,argsIndex)` function which handles the argument value
 based on its definition.
 
@@ -117,22 +118,15 @@ You can also obviously directly add a `plistData` value to this slice. This slic
 `WFWorkflowActionParameters` dictionary for the action.
 
 If the action has mutliple arguments without a variable only argument, it's best to return the output of `argumentValues()`
-instead. This function takes a reference to the `args` and a `[]paramsMap` slice.
-
-```go
-type paramMap struct {
-	idx int
-	key string
-}
-```
+instead. This function takes a reference to the `args` and an unlimited strings argument of the keys for each parameter.
 
 If it is not necessary to process arguments before they are used as values, simply add the key of the argument to the argument definition like this:
 
 ```go
 actions["takePhoto"] = actionDefinition{
-     args: []argumentDefinition{
+     parameters: []parameterDefinition{
 		{
-			field:     "showPreview",
+			name:     "showPreview",
 			validType: Bool,
 			key: "WFCameraCaptureShowPreview"
 			defaultValue: actionArgument{
