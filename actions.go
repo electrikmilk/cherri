@@ -1357,24 +1357,31 @@ func scriptingActions() {
 	actions["hash"] = actionDefinition{
 		args: []argumentDefinition{
 			{
-				field:     "type",
-				validType: String,
-			},
-			{
 				field:     "input",
 				validType: Variable,
 			},
+			{
+				field:     "type",
+				validType: String,
+				defaultValue: actionArgument{
+					valueType: "MD5",
+					value:     String,
+				},
+				optional: true,
+			},
 		},
 		check: func(args []actionArgument) {
-			var hashType = strings.ToUpper(getArgValue(args[0]).(string))
-			if !contains(hashTypes, hashType) {
-				parserError(fmt.Sprintf("Invalid hash type of '%s'. Available hash types: %v", hashType, hashTypes))
+			if args[1].value != nil {
+				var hashType = strings.ToUpper(getArgValue(args[1]).(string))
+				if !contains(hashTypes, hashType) {
+					parserError(fmt.Sprintf("Invalid hash type of '%s'. Available hash types: %v", hashType, hashTypes))
+				}
 			}
 		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
-				argumentValue("WFHashType", args, 0),
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
+				argumentValue("WFHashType", args, 1),
 			}
 		},
 	}
