@@ -479,7 +479,7 @@ func documentActions() {
 			}
 		},
 	}
-	actions["getFileFrom"] = actionDefinition{
+	actions["getFileFromFolder"] = actionDefinition{
 		ident: "documentpicker.open",
 		args: []argumentDefinition{
 			{
