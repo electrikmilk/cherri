@@ -253,6 +253,47 @@ func variableInput(key string, name string) plistData {
 }
 
 func inputValue(key string, name string, varUUID string) plistData {
+	var value []plistData
+	if varUUID != "" {
+		value = []plistData{
+			{
+				key:      "OutputName",
+				dataType: Text,
+				value:    name,
+			},
+			{
+				key:      "OutputUUID",
+				dataType: Text,
+				value:    varUUID,
+			},
+			{
+				key:      "Type",
+				dataType: Text,
+				value:    "ActionOutput",
+			},
+		}
+	} else if _, found := globals[name]; found {
+		value = []plistData{
+			{
+				key:      "Type",
+				dataType: Text,
+				value:    globals[name].variableType,
+			},
+		}
+	} else {
+		value = []plistData{
+			{
+				key:      "OutputName",
+				dataType: Text,
+				value:    name,
+			},
+			{
+				key:      "Type",
+				dataType: Text,
+				value:    "ActionOutput",
+			},
+		}
+	}
 	return plistData{
 		key:      key,
 		dataType: Dictionary,
@@ -260,23 +301,7 @@ func inputValue(key string, name string, varUUID string) plistData {
 			{
 				key:      "Value",
 				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "OutputName",
-						dataType: Text,
-						value:    name,
-					},
-					{
-						key:      "OutputUUID",
-						dataType: Text,
-						value:    varUUID,
-					},
-					{
-						key:      "Type",
-						dataType: Text,
-						value:    "ActionOutput",
-					},
-				},
+				value:    value,
 			},
 			{
 				key:      "WFSerializationType",
