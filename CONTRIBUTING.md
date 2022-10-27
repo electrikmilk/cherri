@@ -76,7 +76,8 @@ It is not encouraged to make major contributions to this project if you do not h
 troubleshooting why your contribution does not work will be cumbersome. If you prefer to develop on another platform,
 that's fine, but it is preferred that you have access to a Mac. For Shortcut debugging, you must use a Mac to
 validate that Shortcuts still successfully sign with your changes applied. This is mainly because even though the
-generated plist may be valid XML, it may not be in the valid to the Shortcut file format.
+generated plist may be valid XML, it may not be a valid Shortcut file, which the `shortcuts` binary on Mac validates
+when it signs the Shortcut.
 
 If you do not have access to a Mac, you must still make sure that a Cherri file that demonstrates your
 feature or bug fix successfully compiles to a valid plist. Use an XML linter or validator to check this and a member of
