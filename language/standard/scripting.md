@@ -302,9 +302,15 @@ Shorthands for `roundTo` value:
 
 ## Network
 
+### `isOnline()`
+
+This is an alias of the standard **Get IP Address** action.
+
 ### `getLocalIP(type)`
 
 Get the local IP of the user of `type`.
+
+`type` is optional.
 
 ### Types
 
@@ -316,6 +322,13 @@ Get the local IP of the user of `type`.
 ### `getExternalIP(type)`
 
 Get the external IP of the user of `type`.
+
+`type` is optional.
+
+### Types
+
+- IPv4
+- IPv6
 
 ---
 
