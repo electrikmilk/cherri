@@ -84,7 +84,7 @@ fix successfully compiles to a valid plist. Use an XML linter or validator to ch
 upon reviewing your PR will check if the Shortcut signs successfully. But fair warning that making a major contribution
 without access to a Mac may be frustrating.
 
-Please throughly debug the issues with your contribution, no repeatly asking the reviewer to check if a Shortcut signs
+Please throughly debug the issues with your contribution, no repeatedly asking the reviewer to check if a Shortcut signs
 with your change.
 
 **Your issues or PRs will be addressed as time allows for members of this project.**
