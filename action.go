@@ -77,6 +77,17 @@ func checkAction(arguments []actionArgument) {
 	}
 }
 
+func checkEnum(name string, arg actionArgument, enum []string) {
+	var value = strings.ToLower(getArgValue(arg).(string))
+	if !contains(enum, value) {
+		var enumList string
+		for _, e := range enum {
+			enumList += "- " + e + "\n"
+		}
+		parserError(fmt.Sprintf("Invalid %s of '%s'.\n\nAvailable %ss:\n%s", name, value, name, enumList))
+	}
+}
+
 func realVariableValue(varName string) (varValue variableValue) {
 	if _, global := globals[varName]; global {
 		varValue = globals[varName]
@@ -288,15 +299,6 @@ func calculateStatistics(operation string, args []actionArgument) []plistData {
 			value:    operation,
 		},
 		variableInput("WFInput", args[1].value.(string)),
-	}
-}
-
-var ipTypes = []string{"ipv4", "ipv6"}
-
-func checkIPType(args []actionArgument) {
-	var ipType = strings.ToLower(getArgValue(args[0]).(string))
-	if !contains(ipTypes, ipType) {
-		parserError(fmt.Sprintf("Invalid IP address type of '%s'. Available IP types: %v", ipType, ipTypes))
 	}
 }
 

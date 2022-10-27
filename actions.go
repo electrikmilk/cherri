@@ -566,10 +566,7 @@ func documentActions() {
 		},
 		check: func(args []actionArgument) {
 			if args[0].value != nil {
-				var correctionLevel = strings.ToUpper(getArgValue(args[0]).(string))
-				if !contains(errorCorrectionLevels, correctionLevel) {
-					parserError(fmt.Sprintf("Invalid error correction level of '%s'. Available error correction levels: %v", correctionLevel, errorCorrectionLevels))
-				}
+				checkEnum("error correction level", args[0], errorCorrectionLevels)
 			}
 		},
 	}
@@ -1708,7 +1705,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	var hashTypes = []string{"MD5", "SHA1", "SHA256", "SHA512"}
+	var hashTypes = []string{"md5", "sha1", "sha256", "sha512"}
 	actions["hash"] = actionDefinition{
 		args: []argumentDefinition{
 			{
@@ -1727,10 +1724,8 @@ func scriptingActions() {
 		},
 		check: func(args []actionArgument) {
 			if args[1].value != nil {
-				var hashType = strings.ToUpper(getArgValue(args[1]).(string))
-				if !contains(hashTypes, hashType) {
-					parserError(fmt.Sprintf("Invalid hash type of '%s'. Available hash types: %v", hashType, hashTypes))
-				}
+				checkEnum("hash type", args[1], hashTypes)
+				args[1].value = strings.ToUpper(args[1].value.(string))
 			}
 		},
 		call: func(args []actionArgument) []plistData {
@@ -2321,6 +2316,7 @@ func scriptingActions() {
 			}
 		},
 	}
+	var ipTypes = []string{"ipv4", "ipv6"}
 	actions["getLocalIP"] = actionDefinition{
 		ident: "getipaddress",
 		args: []argumentDefinition{
@@ -2334,7 +2330,9 @@ func scriptingActions() {
 				optional: true,
 			},
 		},
-		check: checkIPType,
+		check: func(args []actionArgument) {
+			checkEnum("IP address type", args[0], ipTypes)
+		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
 				argumentValue("WFIPAddressTypeOption", args, 0),
@@ -2359,7 +2357,9 @@ func scriptingActions() {
 				optional: true,
 			},
 		},
-		check: checkIPType,
+		check: func(args []actionArgument) {
+			checkEnum("IP address type", args[0], ipTypes)
+		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
 				argumentValue("WFIPAddressTypeOption", args, 0),
@@ -3043,10 +3043,7 @@ func webActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			var engine = strings.ToLower(getArgValue(args[0]).(string))
-			if !contains(engines, engine) {
-				parserError(fmt.Sprintf("Invalid search engine '%s'. Available search engines: %v", engine, engines))
-			}
+			checkEnum("search engine", args[0], engines)
 		},
 	}
 	actions["showWebpage"] = actionDefinition{
@@ -3105,10 +3102,7 @@ func webActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			var detail = strings.ToLower(getArgValue(args[1]).(string))
-			if !contains(webpageDetails, detail) {
-				parserError(fmt.Sprintf("Invalid webpage detail '%s'. Available webpage details: %v", detail, webpageDetails))
-			}
+			checkEnum("webpage detail", args[1], webpageDetails)
 		},
 	}
 	actions["getArticleDetail"] = actionDefinition{
@@ -3213,10 +3207,7 @@ func webActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			var component = strings.ToLower(getArgValue(args[0]).(string))
-			if !contains(urlComponents, component) {
-				parserError(fmt.Sprintf("Invalid URL component '%s'. Available URL components: %v", component, urlComponents))
-			}
+			checkEnum("URL component", args[0], urlComponents)
 		},
 	}
 	actions["downloadURL"] = actionDefinition{
@@ -3246,6 +3237,7 @@ func webActions() {
 		},
 	}
 	var bodyTypes = []string{"json", "form", "file"}
+	var httpMethods = []string{"get", "post", "put", "patch", "delete"}
 	actions["httpRequest"] = actionDefinition{
 		args: []argumentDefinition{
 			{
@@ -3273,11 +3265,11 @@ func webActions() {
 			},
 		},
 		check: func(args []actionArgument) {
+			if args[1].value != nil {
+				checkEnum("HTTP method", args[1], httpMethods)
+			}
 			if args[3].value != nil {
-				var bodyType = strings.ToLower(getArgValue(args[3]).(string))
-				if !contains(bodyTypes, bodyType) {
-					parserError(fmt.Sprintf("Invalid HTTP body type '%s'. Available HTTP body types: %v", bodyType, bodyTypes))
-				}
+				checkEnum("HTTP body type", args[3], bodyTypes)
 			}
 		},
 		call: func(args []actionArgument) []plistData {
