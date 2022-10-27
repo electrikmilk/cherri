@@ -453,6 +453,139 @@ func documentActions() {
 			}
 		},
 	}
+	actions["getGroupAtIndex"] = actionDefinition{
+		ident: "text.match.getgroup",
+		args: []argumentDefinition{
+			{
+				field:     "matches",
+				validType: Variable,
+				key:       "matches",
+			},
+			{
+				field:     "index",
+				validType: Integer,
+				key:       "WFGroupIndex",
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				variableInput("matches", args[0].value.(string)),
+				argumentValue("WFGroupIndex", args, 1),
+				{
+					key:      "WFGetGroupType",
+					dataType: Text,
+					value:    "Group At Index",
+				},
+			}
+		},
+	}
+	actions["getFileFrom"] = actionDefinition{
+		ident: "documentpicker.open",
+		args: []argumentDefinition{
+			{
+				field:     "file",
+				validType: Variable,
+				key:       "WFFile",
+			},
+			{
+				field:     "path",
+				validType: String,
+				key:       "WFGetFilePath",
+			},
+			{
+				field:     "errorIfNotFound",
+				validType: Bool,
+				key:       "WFFileErrorIfNotFound",
+			},
+		},
+	}
+	actions["markup"] = actionDefinition{
+		ident: "avairyeditphoto",
+		args: []argumentDefinition{
+			{
+				field:     "document",
+				validType: Variable,
+				key:       "WFDocument",
+			},
+		},
+	}
+	actions["rename"] = actionDefinition{
+		ident: "file.rename",
+		args: []argumentDefinition{
+			{
+				field:     "file",
+				validType: Variable,
+				key:       "WFFile",
+			},
+			{
+				field:     "newName",
+				validType: String,
+				key:       "WFNewFilename",
+			},
+		},
+	}
+	actions["reveal"] = actionDefinition{
+		ident: "file.reveal",
+		args: []argumentDefinition{
+			{
+				field:     "file",
+				validType: Variable,
+				key:       "WFFile",
+			},
+		},
+	}
+	actions["define"] = actionDefinition{
+		ident: "showdefinition",
+		args: []argumentDefinition{
+			{
+				field:     "word",
+				validType: String,
+				key:       "Word",
+			},
+		},
+	}
+	var errorCorrectionLevels = []string{"low", "medium", "quartile", "high"}
+	actions["makeQRcode"] = actionDefinition{
+		ident: "generatebarcode",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: String,
+				key:       "WFText",
+			},
+			{
+				field:     "errorCorrection",
+				validType: String,
+				key:       "WFQRErrorCorrectionLevel",
+			},
+		},
+		check: func(args []actionArgument) {
+			if args[0].value != nil {
+				var correctionLevel = strings.ToUpper(getArgValue(args[0]).(string))
+				if !contains(errorCorrectionLevels, correctionLevel) {
+					parserError(fmt.Sprintf("Invalid error correction level of '%s'. Available error correction levels: %v", correctionLevel, errorCorrectionLevels))
+				}
+			}
+		},
+	}
+	actions["showNote"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "note",
+				validType: Variable,
+				key:       "WFInput",
+			},
+		},
+	}
+	actions["splitPDF"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "pdf",
+				validType: Variable,
+				key:       "WFInput",
+			},
+		},
+	}
 	actions["makeHTML"] = actionDefinition{
 		ident: "gethtmlfromrichtext",
 		args: []argumentDefinition{
