@@ -51,10 +51,8 @@ compiler currently only supports Unix-like systems.
 1. Because it's fun :)
 2. Some languages have been abandoned, don't work very well, or no longer work.
 3. I don't want Shortcuts languages to die. There should be more, not less.
-4. I am hoping to make a language that is as direct as possible, where you can predict what the actual Shortcut will
-   look like, but not without its own set of tricks and conveniences.
-5. Some stability that comes with the project being on macOS over iOS.
-6. I am not aware of any project [other than one](https://github.com/zachary7829/Buttermilk) that compiles a
+4. Some stability that comes with the project being on macOS and not iOS.
+5. I am not aware of any project [other than one](https://github.com/zachary7829/Buttermilk) that compiles a
    Shortcut in a way that is meant for a desktop OS.
 
 ## Credits
