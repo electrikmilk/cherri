@@ -68,21 +68,26 @@ reproduce it, what environment it may be isolated to are clearly communicated.
 - Add your copyright to the top of files you have changed or added in the same style as the rest of the project if you
   would like.
 
-Your issues or PRs will be addressed as time allows for members of this project.
-
 ## Cross-platform development policy
 
-It is not encouraged to make major contributions to this project if you do not have access to a Mac, simply because
-troubleshooting why your contribution does not work will be cumbersome. If you prefer to develop on another platform,
-that's fine, but it is preferred that you have access to a Mac. For Shortcut debugging, you must use a Mac to
-validate that Shortcuts still successfully sign with your changes applied. This is mainly because even though the
-generated plist may be valid XML, it may not be a valid Shortcut file, which the `shortcuts` binary on Mac validates
-when it signs the Shortcut.
+**It is not encouraged to make major contributions to this project if you do not have access to a Mac.**
 
-If you do not have access to a Mac, you must still make sure that a Cherri file that demonstrates your
-feature or bug fix successfully compiles to a valid plist. Use an XML linter or validator to check this and a member of
-the project upon reviewing your PR will check if the Shortcut signs successfully. But fair warning that making a major
-contribution without access to a Mac may be frustrating.
+Troubleshooting why your contribution does not work will be cumbersome. If you prefer to develop on another platform,
+that's fine, but it is preferred that you have access to a Mac. For Shortcut debugging, you must use a Mac to validate
+that Shortcuts still successfully sign with your changes applied.
+
+This is mainly because although the generated plist may be valid XML, it may not be a valid Shortcut file, which the
+`shortcuts` binary on Mac validates when it signs the Shortcut.
+
+If you do not have access to a Mac, you must still make sure that a Cherri file that demonstrates your feature or bug
+fix successfully compiles to a valid plist. Use an XML linter or validator to check this and a member of the project
+upon reviewing your PR will check if the Shortcut signs successfully. But fair warning that making a major contribution
+without access to a Mac may be frustrating.
+
+Please throughly debug the issues with your contribution, no repeatly asking the reviewer to check if a Shortcut signs
+with your change.
+
+**Your issues or PRs will be addressed as time allows for members of this project.**
 
 ## Human language policy
 
