@@ -15,21 +15,21 @@ Some of these actions are abstracted into statements:
 
 ---
 
-### `output(input)`
+### `output(output)`
 
-Stop and output `input`. Do nothing if there is nowhere to output.
-
----
-
-### `mustOutput(input,response)`
-
-Stop and output `input`. Respond with `response` if there is nowhere to output.
+Stop and output `output`. Do nothing if there is nowhere to output.
 
 ---
 
-### `outputOrClipboard(input)`
+### `mustOutput(output,response)`
 
-Stop and output `input`. Copy to the clipboard if there is nowhere to output.
+Stop and output `output`. Respond with `response` if there is nowhere to output.
+
+---
+
+### `outputOrClipboard(output)`
+
+Stop and output `output`. Copy to the clipboard if there is nowhere to output.
 
 ---
 
