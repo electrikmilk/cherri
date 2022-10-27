@@ -139,7 +139,7 @@ Get keys of `dictionary`.
 
 ---
 
-### `getValue(key,dictionary)`
+### `getValue(dictionary,key)`
 
 Get the value of `key` in `dictionary`.
 
