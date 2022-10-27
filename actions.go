@@ -2364,6 +2364,7 @@ func scriptingActions() {
 		},
 	}
 	actions["mustOutput"] = actionDefinition{
+		ident: "output",
 		args: []argumentDefinition{
 			{
 				field:     "input",
