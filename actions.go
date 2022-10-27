@@ -862,44 +862,6 @@ func documentActions() {
 			}
 		},
 	}
-	actions["getFileFrom"] = actionDefinition{
-		ident: "gettypeaction",
-		args: []argumentDefinition{
-			{
-				field:     "file",
-				validType: String,
-			},
-			{
-				field:     "from",
-				validType: Variable,
-			},
-		},
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFFileType", args, 0),
-				variableInput("WFInput", args[1].value.(string)),
-			}
-		},
-	}
-	actions["getObjectOfClass"] = actionDefinition{
-		ident: "getclassaction",
-		args: []argumentDefinition{
-			{
-				field:     "class",
-				validType: String,
-			},
-			{
-				field:     "from",
-				validType: Variable,
-			},
-		},
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("Class", args, 0),
-				variableInput("Input", args[1].value.(string)),
-			}
-		},
-	}
 	actions["translateFrom"] = actionDefinition{
 		ident: "translate",
 		args: []argumentDefinition{
@@ -1478,6 +1440,25 @@ func mediaActions() {
 }
 
 func scriptingActions() {
+	actions["getObjectOfClass"] = actionDefinition{
+		ident: "getclassaction",
+		args: []argumentDefinition{
+			{
+				field:     "class",
+				validType: String,
+			},
+			{
+				field:     "from",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("Class", args, 0),
+				variableInput("Input", args[1].value.(string)),
+			}
+		},
+	}
 	actions["getOnScreenContent"] = actionDefinition{}
 	actions["fileSize"] = actionDefinition{
 		ident: "format.filesize",
