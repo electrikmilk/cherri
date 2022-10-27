@@ -114,6 +114,12 @@ Connect to server at `url`.
 
 Append `input` to `note`.
 
+---
+
+### `showNote(note)`
+
+Show `note`.
+
 ## Previewing
 
 ### `quicklook(input)`
