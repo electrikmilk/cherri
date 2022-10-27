@@ -107,11 +107,11 @@ Expand `url`. This is generally used for short urls.
 
 ---
 
-### `getURLComponent(url,component)`
+### `getURLDetail(url,detail)`
 
-Get `component` from `url`.
+Get `detail` from `url`.
 
-#### Components
+#### Details
 
 - Scheme
 - User
