@@ -245,21 +245,21 @@ func contactValue(key string, contentKit string, args []actionArgument) []plistD
 }
 
 func roundingValue(mode string, args []actionArgument) []plistData {
-	switch args[2].value {
+	switch args[1].value {
 	case "1":
-		args[2].value = "Ones Place"
+		args[1].value = "Ones Place"
 	case "10":
-		args[2].value = "Tens Place"
+		args[1].value = "Tens Place"
 	case "100":
-		args[2].value = "Hundreds Place"
+		args[1].value = "Hundreds Place"
 	case "1000":
-		args[2].value = "Thousands"
+		args[1].value = "Thousands"
 	case "10000":
-		args[2].value = "Ten Thousands"
+		args[1].value = "Ten Thousands"
 	case "100000":
-		args[2].value = "Hundred Thousands"
+		args[1].value = "Hundred Thousands"
 	case "1000000":
-		args[2].value = "Millions"
+		args[1].value = "Millions"
 	}
 	return []plistData{
 		{
@@ -271,7 +271,7 @@ func roundingValue(mode string, args []actionArgument) []plistData {
 		{
 			key:      "WFRoundTo",
 			dataType: Text,
-			value:    args[2].value,
+			value:    args[1].value,
 		},
 	}
 }
