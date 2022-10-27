@@ -453,7 +453,7 @@ func documentActions() {
 			}
 		},
 	}
-	actions["getGroupAtIndex"] = actionDefinition{
+	actions["matchedTextGroupIndex"] = actionDefinition{
 		ident: "text.match.getgroup",
 		args: []argumentDefinition{
 			{
@@ -483,7 +483,7 @@ func documentActions() {
 		ident: "documentpicker.open",
 		args: []argumentDefinition{
 			{
-				field:     "file",
+				field:     "folder",
 				validType: Variable,
 				key:       "WFFile",
 			},
@@ -496,6 +496,11 @@ func documentActions() {
 				field:     "errorIfNotFound",
 				validType: Bool,
 				key:       "WFFileErrorIfNotFound",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+				optional: true,
 			},
 		},
 	}
@@ -528,7 +533,7 @@ func documentActions() {
 		ident: "file.reveal",
 		args: []argumentDefinition{
 			{
-				field:     "file",
+				field:     "files",
 				validType: Variable,
 				key:       "WFFile",
 			},
@@ -600,7 +605,7 @@ func documentActions() {
 				key:       "WFMakeFullDocument",
 				defaultValue: actionArgument{
 					valueType: Bool,
-					value:     true,
+					value:     false,
 				},
 				optional: true,
 			},
@@ -796,7 +801,11 @@ func documentActions() {
 				field:     "overwrite",
 				validType: Bool,
 				key:       "WFSaveFileOverwrite",
-				optional:  true,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
+				optional: true,
 			},
 		},
 	}
