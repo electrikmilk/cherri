@@ -67,7 +67,7 @@ actions["takePhoto"] = actionDefinition{
 }
 ```
 
-`ident` exists so that you can do this:
+`identifier` exists so that you can do this:
 
 ```go
 actions["takeMorePhotos"] = actionDefinition{
@@ -78,10 +78,12 @@ actions["takeMorePhotos"] = actionDefinition{
 
 ### `parameters`
 
-Arguments are defined using a `argumentDefinition` for each argument. It has two main fields, one that defines the argument
-`name`, this will be used in error messages. The other defines the valid type for the argument, this is compared against the
+Parameters are defined using a `parameterDefinition` for each parameter. It has two main fields, one that defines the argument
+`name` for the action, this will be used in error messages. The other defines the valid type for the argument, this is compared against the
 value type of the argument received in parsing. This is also used to know the minimum number of arguments for the action. Both of these
 checks happen during parsing, right after parsing the arguments for the action.
+
+Parameters correlate almost directly to arguments.
 
 ```go
 type parameterDefinition struct {
