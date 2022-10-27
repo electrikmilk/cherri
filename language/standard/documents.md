@@ -58,10 +58,6 @@ Get a link to `file`.
 
 ---
 
-### `selectFile(multiple)`
-
----
-
 ### `getSelectedFiles()`
 
 Get selected files in Finder.
