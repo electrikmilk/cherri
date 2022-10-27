@@ -2368,7 +2368,7 @@ func scriptingActions() {
 		args: []argumentDefinition{
 			{
 				field:     "output",
-				validType: Variable,
+				validType: String,
 			},
 			{
 				field:     "response",
