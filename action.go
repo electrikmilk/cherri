@@ -55,7 +55,11 @@ func callAction(arguments []actionArgument, outputName plistData, actionUUID pli
 	} else if actions[currentAction].args != nil {
 		for i, a := range actions[currentAction].args {
 			if len(arguments) > i {
-				params = append(params, argumentValue(a.key, arguments, i))
+				if a.validType == Variable {
+					params = append(params, variableInput(a.key, arguments[i].value.(string)))
+				} else {
+					params = append(params, argumentValue(a.key, arguments, i))
+				}
 			}
 		}
 	}
