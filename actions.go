@@ -2348,7 +2348,7 @@ func scriptingActions() {
 	actions["output"] = actionDefinition{
 		args: []argumentDefinition{
 			{
-				field:     "input",
+				field:     "output",
 				validType: Variable,
 			},
 		},
@@ -2367,7 +2367,7 @@ func scriptingActions() {
 		ident: "output",
 		args: []argumentDefinition{
 			{
-				field:     "input",
+				field:     "output",
 				validType: Variable,
 			},
 			{
@@ -2378,6 +2378,7 @@ func scriptingActions() {
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
 				argumentValue("WFOutput", args, 0),
+				argumentValue("WFResponse", args, 1),
 				{
 					key:      "WFNoOutputSurfaceBehavior",
 					dataType: Text,
@@ -2388,6 +2389,12 @@ func scriptingActions() {
 	}
 	actions["outputOrClipboard"] = actionDefinition{
 		ident: "output",
+		args: []argumentDefinition{
+			{
+				field:     "output",
+				validType: Variable,
+			},
+		},
 		call: func(args []actionArgument) []plistData {
 			return []plistData{
 				argumentValue("WFOutput", args, 0),
