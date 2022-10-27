@@ -4,15 +4,117 @@
 
 ## Archives
 
+### `extractArchive(file)`
+
+Extract files from archive `file`.
+
+---
+
 ### `makeArchive(name,format,files)`
 
 Create an archive of `files` named `name` in `format`.
 
+## Books
+
+### `addToBooks(input)`
+
+## Editing
+
+### `markup(input)`
+
+Opens `input` in a markup editor.
+
+## File Storage
+
+### `createShortcutsFolder(path)`
+
+Create a folder at `path` in the users Shortcuts folder in their iCloud Drive.
+
 ---
 
-### `extractArchive(file)`
+### `deleteFiles(files,immediately)`
 
-Extract files from archive `file`.
+Delete `files`. `immediately` is a boolean, default is `false`.
+
+---
+
+### `getFolderContents(folder,recursive)`
+
+Get contents of `folder`. `recursive` is a boolean, default is `true`.
+
+---
+
+### `getFileFromFolder(folder,path,errorIfNotFound)`
+
+Get `path` in `folder`. `errorIfNotFound` is a boolean, default is `true`.
+
+---
+
+### `getFileLink(file)`
+
+Get a link to `file`.
+
+---
+
+### `selectFile(multiple)`
+
+---
+
+### `getSelectedFiles()`
+
+Get selected files in Finder.
+
+---
+
+### `rename(file,newName)`
+
+Rename `file` to `newName`.
+
+---
+
+### `reveal(files)`
+
+Reveal `files` in Finder.
+
+---
+
+### `saveFile(file,overwrite)`
+
+_Incomplete_
+
+Prompt to save `file`. `overwrite` is a boolean, default is `false`.
+
+---
+
+### `selectFile(multiple)`
+
+Prompt to select a file.
+
+`multiple` is a boolean, default is `false`.
+
+## Files
+
+### `getFileDetail(file,detail)`
+
+Get `detail` of `file`.
+
+---
+
+### `getParentDirectory(input)`
+
+Get parent directory of `input`.
+
+## Network
+
+### `connectToServer(url)`
+
+Connect to server at `url`.
+
+## Notes
+
+### `appendNote(note,input)`
+
+Append `input` to `note`.
 
 ## Previewing
 
@@ -26,11 +128,87 @@ Preview `input`.
 
 Show `input` in a dialog.
 
+## Printing
+
+### `print(input)`
+
+Print `input`.
+
+---
+
+### `splitPDF(pdf)`
+
+Split `pdf` into pages.
+
+
+## QR Codes
+
+### `makeQRCode(input,errorCorrection)`
+
+Generate a QR code using `input` with error correction level `errorCorrection`.
+
+#### Error Correction Levels
+
+- Low
+- Medium
+- Quartile
+- High
+
+## Rich Text
+
+### `makeHTML(input,makeFullDocument)`
+
+Convert `richText` into HTML.
+
+`makeFullDocument` is a boolean, default is `false`.
+
+---
+
+### `makeMarkdown(richText)`
+
+Convert `richText` into Markdown.
+
+---
+
+### `getRichTextFromHTML(html)`
+
+Get rich text from `html`.
+
+---
+
+### `getRichTextFromMarkdown(markdown)`
+
+Get rich text from `markdown`.
+
 ## Text
+
+### `getTextFromImage(image)`
+
+Get text from `image`.
+
+---
+
+### `getEmojiName(emoji)`
+
+Get the emoji name of `emoji`.
+
+---
 
 ### `getText(input)`
 
 Get text from `input`.
+
+---
+
+### `define(word)`
+
+Show the definition of `word`.
+
+---
+
+### `matchedTextGroupIndex(matches,index)`
+
+Get group at `index` in `matches`.
 
 ## Text Editing
 
