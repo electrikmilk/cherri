@@ -645,7 +645,7 @@ func argumentValues(args *[]actionArgument, params ...string) (data []plistData)
 }
 
 func argumentValue(key string, args []actionArgument, idx int) plistData {
-	var actionArg = actions[currentAction].args[idx]
+	var actionArg = actions[currentAction].parameters[idx]
 	var arg actionArgument
 	if len(args) <= idx {
 		if actionArg.optional == true {

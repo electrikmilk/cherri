@@ -11,8 +11,8 @@ import (
 
 var currentAction string
 
-type argumentDefinition struct {
-	field        string
+type parameterDefinition struct {
+	name         string
 	validType    tokenType
 	key          string
 	defaultValue actionArgument
@@ -30,30 +30,30 @@ type action struct {
 	args  []actionArgument
 }
 
-type actionCall func(args []actionArgument) []plistData
-type actionCheck func(args []actionArgument)
+type makeParams func(args []actionArgument) []plistData
+type paramCheck func(args []actionArgument)
 
 type actionDefinition struct {
-	ident string
-	args  []argumentDefinition
-	check actionCheck
-	call  actionCall
+	identifier string
+	parameters []parameterDefinition
+	check      paramCheck
+	make       makeParams
 }
 
 var actions map[string]actionDefinition
 
 func callAction(arguments []actionArgument, outputName plistData, actionUUID plistData) {
 	var ident string
-	if actions[currentAction].ident != "" {
-		ident = actions[currentAction].ident
+	if actions[currentAction].identifier != "" {
+		ident = actions[currentAction].identifier
 	} else {
 		ident = strings.ToLower(currentAction)
 	}
 	var params []plistData
-	if actions[currentAction].call != nil {
-		params = actions[currentAction].call(arguments)
-	} else if actions[currentAction].args != nil {
-		for i, a := range actions[currentAction].args {
+	if actions[currentAction].make != nil {
+		params = actions[currentAction].make(arguments)
+	} else if actions[currentAction].parameters != nil {
+		for i, a := range actions[currentAction].parameters {
 			if len(arguments) > i {
 				if a.validType == Variable {
 					params = append(params, variableInput(a.key, arguments[i].value.(string)))
@@ -68,9 +68,9 @@ func callAction(arguments []actionArgument, outputName plistData, actionUUID pli
 }
 
 func checkAction(arguments []actionArgument) {
-	if len(actions[currentAction].args) > 0 {
+	if len(actions[currentAction].parameters) > 0 {
 		enoughArgs(&arguments)
-		checkTypes(arguments, actions[currentAction].args)
+		checkTypes(arguments, actions[currentAction].parameters)
 	}
 	if actions[currentAction].check != nil {
 		actions[currentAction].check(arguments)
@@ -107,15 +107,15 @@ func realVariableValue(varName string) (varValue variableValue) {
 	return
 }
 
-func checkTypes(arguments []actionArgument, checks []argumentDefinition) {
+func checkTypes(arguments []actionArgument, checks []parameterDefinition) {
 	for i, check := range checks {
 		if len(arguments) > i {
-			typeCheck(check.field, check.validType, arguments[i])
+			typeCheck(check.name, check.validType, arguments[i])
 			if check.defaultValue.value == arguments[i].value {
-				parserWarning(fmt.Sprintf("Value for argument %d '%s' for action '%s()' of '%v', is the same as the default value.", i+1, check.field, currentAction, arguments[i].value))
+				parserWarning(fmt.Sprintf("Value for argument %d '%s' for action '%s()' of '%v', is the same as the default value.", i+1, check.name, currentAction, arguments[i].value))
 			}
 		} else if check.defaultValue.value == nil && check.optional != true {
-			parserError(fmt.Sprintf("Missing required argument %d '%s' to call action '%s()'", i+1, check.field, currentAction))
+			parserError(fmt.Sprintf("Missing required argument %d '%s' to call action '%s()'", i+1, check.name, currentAction))
 		}
 	}
 }
@@ -175,7 +175,7 @@ func getArgValue(variable actionArgument) any {
 }
 
 func enoughArgs(arguments *[]actionArgument) {
-	var actionArgs = actions[currentAction].args
+	var actionArgs = actions[currentAction].parameters
 	for a, arg := range *arguments {
 		if (len(actionArgs) - 1) < a {
 			break
@@ -185,7 +185,7 @@ func enoughArgs(arguments *[]actionArgument) {
 		}
 		if actionArgs[a].defaultValue.value == nil && actionArgs[a].optional != true {
 			if arg.value == nil {
-				parserError(fmt.Sprintf("Missing required argument '%s' to call action '%s'", actionArgs[a].field, currentAction))
+				parserError(fmt.Sprintf("Missing required argument '%s' to call action '%s'", actionArgs[a].name, currentAction))
 			}
 		} else if arg.value == nil {
 			arg = actionArgs[a].defaultValue
