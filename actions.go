@@ -2829,7 +2829,6 @@ func webActions() {
 			}
 		},
 	}
-	// FIXME: Complete this action...this action is very complex and needs to be split up probably
 	actions["downloadURL"] = actionDefinition{
 		args: []argumentDefinition{
 			{
@@ -2838,14 +2837,61 @@ func webActions() {
 				key:       "WFURL",
 			},
 			{
+				field:     "headers",
+				validType: Dict,
+				key:       "WFHTTPHeaders",
+				optional:  true,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFHTTPMethod",
+					dataType: Text,
+					value:    "GET",
+				},
+				argumentValue("WFURL", args, 0),
+				argumentValue("WFHTTPHeaders", args, 1),
+			}
+		},
+	}
+	var bodyTypes = []string{"json", "form", "file"}
+	actions["httpRequest"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+			},
+			{
 				field:     "method",
 				validType: String,
-				key:       "WFHTTPMethod",
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "POST",
-				},
 			},
+			{
+				field:     "body",
+				validType: Dict,
+				optional:  true,
+			},
+			{
+				field:     "bodyType",
+				validType: String,
+				optional:  true,
+			},
+			{
+				field:     "headers",
+				validType: Dict,
+				optional:  true,
+			},
+		},
+		check: func(args []actionArgument) {
+			if args[3].value != nil {
+				var bodyType = strings.ToLower(getArgValue(args[3]).(string))
+				if !contains(bodyTypes, bodyType) {
+					parserError(fmt.Sprintf("Invalid HTTP body type '%s'. Available HTTP body types: %v", bodyType, bodyTypes))
+				}
+			}
+		},
+		call: func(args []actionArgument) []plistData {
+			return argumentValues(&args, "WFURL", "WFHTTPMethod", "WFFormValues", "WFHTTPBodyType", "WFHTTPHeaders")
 		},
 	}
 }
