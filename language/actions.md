@@ -21,7 +21,7 @@ may be inaccurate. Not all standard actions in each category are implemented yet
 - [ ] (7/68) [Media](standard/media.md)
 - [ ] (54/74) [Scripting](standard/scripting.md)
 - [ ] (4/10) [Sharing](standard/sharing.md)
-- [ ] (9/26) [Web](standard/web.md)
+- [ ] (19/26) [Web](standard/web.md)
 
 [Please report incomplete or non-working actions](https://github.com/electrikmilk/cherri/issues)
 
