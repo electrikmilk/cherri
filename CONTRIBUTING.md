@@ -45,21 +45,21 @@ reproduce it, what environment it may be isolated to are clearly communicated.
 - Only put comments in code to explain _why_ something does something, not what it is doing. Your code should be
   readable enough that it is obvious to anyone reading it.
 - No moving code around for no reason. Only organize code when absolutely necessary.
-- Test your code to the best of your ability, do not submit code that does not compile.
 - Keep any additions to Cherri syntax consistent with the existing style (e.g. camelCase, scripting-language-like, only
   capitalize globals, no parenthesis).
 
 ### Code submission policy
 
+- Test your code to the best of your ability, do not submit code that does not compile.
+- Test your feature or bug fix by writing a Cherri file and checking that it compiles to a valid Shortcut. If you are on
+  a non-macOS platform using the `--unsigned` argument, the Shortcut will compile, but may be invalid. Use an XML linter
+  or validator on the compiled Shortcut file.
 - Squash commits when doing fixups, so that if you remove something, you don't have a commit where you created it
   and then another commit where you remove it, squash them together so that whatever ended up not being needed is also
   removed from the commit history.
 - Make sure your fork is up-to-date everytime you are about to submit a contribution. It's best to not make a branch for
   your feature until you are ready to submit it, so that you are able to sync your fork beforehand. If this ends up
   happening just sync your main branch with upstream and rebase your feature branch from your main branch.
-- Test your feature or bug fix by writing a Cherri file and checking that it compiles to a valid Shortcut. If you are on
-  a non-macOS platform using the `--unsigned` argument, the Shortcut will compile, but may be invalid. Use an XML linter
-  or validator on the compiled Shortcut file.
 - Commits and changes should be one-to-one, as in, every commit should correlate to a major change in your submission.
   However, don't make commits for every little thing. Most minor pull requests can contain only one commit.
 - Wrap commit messages at 72 characters.
