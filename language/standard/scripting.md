@@ -163,13 +163,13 @@ Base 64 decode `input`.
 
 ---
 
-### `hash(type,input)`
+### `hash(input,type)`
 
 Generate a hash of `type` using `input`.
 
 #### Hash Types
 
-- MD5
+- MD5 (default)
 - SHA1
 - SHA256
 - SHA512
