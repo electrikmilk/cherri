@@ -862,43 +862,6 @@ func documentActions() {
 			}
 		},
 	}
-	actions["fileSize"] = actionDefinition{
-		ident: "format.filesize",
-		args: []argumentDefinition{
-			{
-				field:     "file",
-				validType: Variable,
-			},
-			{
-				field:     "format",
-				validType: String,
-			},
-		},
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFFileSizeIncludeUnits",
-					dataType: Boolean,
-					value:    false,
-				},
-				argumentValue("WFFileSize", args, 0),
-				argumentValue("WFFileSizeFormat", args, 1),
-			}
-		},
-	}
-	actions["getDeviceDetail"] = actionDefinition{
-		args: []argumentDefinition{
-			{
-				field:     "detail",
-				validType: String,
-			},
-		},
-		call: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFDeviceDetail", args, 0),
-			}
-		},
-	}
 	actions["getFileFrom"] = actionDefinition{
 		ident: "gettypeaction",
 		args: []argumentDefinition{
@@ -937,7 +900,6 @@ func documentActions() {
 			}
 		},
 	}
-	actions["getOnScreenContent"] = actionDefinition{}
 	actions["translateFrom"] = actionDefinition{
 		ident: "translate",
 		args: []argumentDefinition{
@@ -1516,6 +1478,44 @@ func mediaActions() {
 }
 
 func scriptingActions() {
+	actions["getOnScreenContent"] = actionDefinition{}
+	actions["fileSize"] = actionDefinition{
+		ident: "format.filesize",
+		args: []argumentDefinition{
+			{
+				field:     "file",
+				validType: Variable,
+			},
+			{
+				field:     "format",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFFileSizeIncludeUnits",
+					dataType: Boolean,
+					value:    false,
+				},
+				argumentValue("WFFileSize", args, 0),
+				argumentValue("WFFileSizeFormat", args, 1),
+			}
+		},
+	}
+	actions["getDeviceDetail"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "detail",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFDeviceDetail", args, 0),
+			}
+		},
+	}
 	actions["setBrightness"] = actionDefinition{
 		args: []argumentDefinition{
 			{
