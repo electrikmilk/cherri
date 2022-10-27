@@ -122,7 +122,7 @@ You can also obviously directly add a `plistData` value to this slice. This slic
 If the action has mutliple arguments without a variable only argument, it's best to return the output of `argumentValues()`
 instead. This function takes a reference to the `args` and an unlimited strings argument of the keys for each parameter.
 
-If it is not necessary to process arguments before they are used as values, simply add the key of the argument to the argument definition like this:
+If it is not necessary to process arguments before they are used as parameter values, simply add the key of the argument to the parameter definition like this:
 
 ```go
 actions["takePhoto"] = actionDefinition{
@@ -140,7 +140,7 @@ actions["takePhoto"] = actionDefinition{
 }
 ```
 
-If you do this, the argument value for that argument will be done for you, just make sure to not add the call property and add the key property to each of your argument definitions. This is done to help make defining actions simpler and faster.
+If you do this, the parameter value for that argument will be done for you, just make sure to not add the `make` property and add the `key` property to each of your parameter definitions. This is done to help make defining actions simpler and faster.
 
 ---
 
