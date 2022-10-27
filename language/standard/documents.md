@@ -18,6 +18,8 @@ Create an archive of `files` named `name` in `format`.
 
 ### `addToBooks(input)`
 
+Add `input` to books. `input` is expected to be a PDF.
+
 ## Editing
 
 ### `markup(input)`
