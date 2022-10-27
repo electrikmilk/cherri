@@ -419,6 +419,238 @@ func contactActions() {
 }
 
 func documentActions() {
+	// FIXME: Writing to locations other than the Shortcuts folder
+	actions["createShortcutsFolder"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "path",
+				validType: String,
+				key:       "WFFilePath",
+			},
+		},
+	}
+	actions["getFolderContents"] = actionDefinition{
+		ident: "file.getfoldercontents",
+		args: []argumentDefinition{
+			{
+				field:     "folder",
+				validType: Variable,
+			},
+			{
+				field:     "recursive",
+				validType: Bool,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+				optional: true,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				variableInput("WFFolder", args[0].value.(string)),
+				argumentValue("Recursive", args, 1),
+			}
+		},
+	}
+	actions["makeHTML"] = actionDefinition{
+		ident: "gethtmlfromrichtext",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				field:     "makeFullDocument",
+				validType: Bool,
+				key:       "WFMakeFullDocument",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+				optional: true,
+			},
+		},
+	}
+	actions["makeMarkdown"] = actionDefinition{
+		ident: "getmarkdownfromrichtext",
+		args: []argumentDefinition{
+			{
+				field:     "richText",
+				validType: Variable,
+				key:       "WFInput",
+			},
+		},
+	}
+	actions["getRichTextFromHTML"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "html",
+				validType: Variable,
+				key:       "WFHTML",
+			},
+		},
+	}
+	actions["getRichTextFromMarkdown"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "markdown",
+				validType: Variable,
+				key:       "WFInput",
+			},
+		},
+	}
+	actions["print"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+				key:       "WFInput",
+			},
+		},
+	}
+	actions["selectFile"] = actionDefinition{
+		ident: "file.select",
+		args: []argumentDefinition{
+			{
+				field:     "multiple",
+				validType: Bool,
+				key:       "SelectMultiple",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
+				optional: true,
+			},
+		},
+	}
+	actions["getFileLink"] = actionDefinition{
+		ident: "file.getlink",
+		args: []argumentDefinition{
+			{
+				field:     "file",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				variableInput("WFFile", args[0].value.(string)),
+			}
+		},
+	}
+	actions["getParentDirectory"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				variableInput("WFInput", args[0].value.(string)),
+			}
+		},
+	}
+	actions["getEmojiName"] = actionDefinition{
+		ident: "getnameofemoji",
+		args: []argumentDefinition{
+			{
+				field:     "emoji",
+				validType: String,
+				key:       "WFInput",
+			},
+		},
+	}
+	actions["getFileDetail"] = actionDefinition{
+		ident: "properties.files",
+		args: []argumentDefinition{
+			{
+				field:     "file",
+				validType: Variable,
+			},
+			{
+				field:     "detail",
+				validType: String,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				variableInput("WFFolder", args[0].value.(string)),
+				argumentValue("WFContentItemPropertyName", args, 1),
+			}
+		},
+	}
+	actions["deleteFiles"] = actionDefinition{
+		ident: "file.delete",
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+			{
+				field:     "immediately",
+				validType: Bool,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
+				optional: true,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				variableInput("WFInput", args[0].value.(string)),
+				argumentValue("WFDeleteImmediatelyDelete", args, 1),
+			}
+		},
+	}
+	actions["getTextFromImage"] = actionDefinition{
+		ident: "extracttextfromimage",
+		args: []argumentDefinition{
+			{
+				field:     "image",
+				validType: Variable,
+				key:       "WFImage",
+			},
+		},
+	}
+	actions["connectToServer"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "url",
+				validType: String,
+				key:       "WFInput",
+			},
+		},
+	}
+	actions["appendNote"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "note",
+				validType: String,
+				key:       "WFNote",
+			},
+			{
+				field:     "input",
+				validType: String,
+				key:       "WFInput",
+			},
+		},
+	}
+	actions["addToBooks"] = actionDefinition{
+		args: []argumentDefinition{
+			{
+				field:     "input",
+				validType: Variable,
+			},
+		},
+		call: func(args []actionArgument) []plistData {
+			return []plistData{
+				variableInput("BooksInput", args[0].value.(string)),
+			}
+		},
+	}
 	actions["saveFile"] = actionDefinition{
 		ident: "documentpicker.save",
 		args: []argumentDefinition{
