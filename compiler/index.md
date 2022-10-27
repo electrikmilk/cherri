@@ -17,7 +17,7 @@ Keep in mind that this compiler is in the early stages and is under going heavy 
   s [Shortcut File Format Reference](https://zachary7829.github.io/blog/shortcuts/fileformat)
 - [sebj](https://github.com/sebj)'s [Shortcut File Format Reference](https://github.com/sebj/iOS-Shortcuts-Reference)
 
-To download property list (.plist) versions of Shortcuts, [here is a helpful Shortcut](https://routinehub.co/shortcut/13252/) (written in Cherri!)
+To download property list (.plist) versions of Shortcuts for further reference, [here is a helpful Shortcut](https://routinehub.co/shortcut/13252/) (written in Cherri!)
 
 ## Compiler
 
