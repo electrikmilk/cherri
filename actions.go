@@ -2808,8 +2808,8 @@ func webActions() {
 			},
 		},
 	}
-	var urlComponents = []string{"Scheme", "User", "Password", "Host", "Port", "Path", "Query", "Fragment"}
-	actions["getURLComponent"] = actionDefinition{
+	var urlComponents = []string{"scheme", "user", "password", "host", "port", "path", "query", "fragment"}
+	actions["getURLDetail"] = actionDefinition{
 		args: []argumentDefinition{
 			{
 				field:     "url",
@@ -2817,13 +2817,13 @@ func webActions() {
 				key:       "WFURL",
 			},
 			{
-				field:     "component",
+				field:     "detail",
 				validType: String,
 				key:       "WFURLComponent",
 			},
 		},
 		check: func(args []actionArgument) {
-			var component = strings.ToTitle(getArgValue(args[0]).(string))
+			var component = strings.ToLower(getArgValue(args[0]).(string))
 			if !contains(urlComponents, component) {
 				parserError(fmt.Sprintf("Invalid URL component '%s'. Available URL components: %v", component, urlComponents))
 			}
