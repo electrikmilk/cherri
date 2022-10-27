@@ -132,7 +132,7 @@ func typeCheck(field string, validType tokenType, argument actionArgument) {
 			))
 		}
 	} else if argument.valueType != validType {
-		lineIdx -= 2
+		lineIdx--
 		parserError(fmt.Sprintf("Invalid value '%v' of type '%s' for argument '%s' of type '%s' in '%s()'",
 			argVal,
 			typeName(argValueType),
