@@ -55,8 +55,8 @@ actions["identifier"] = actionDefinition{}
 
 The identifier is the identifier at the end of `is.workflows.actions.**identifier**`.
 
-The identifier is optional if the key of the action matches the action identifier, even in camelCase, as if no `ident`
-is specified, not only is the key used instead, but its case will be changed to lowercase.
+The identifier is optional if the key of the action matches the action identifier, even in camelCase, as if no `identifier`
+is defined, not only is the key used instead, but its case will be changed to lowercase.
 
 So there is no need to do the below example, remove the ident property and the key will be used instead.
 
