@@ -136,11 +136,23 @@ Create url value of `url`. No limit on `url` arguments.
 
 ## Web Requests
 
-### `downloadURL(url,method)`
+### `downloadURL(url)`
+
+Download contents of `url`.
+
+---
+
+### `httpRequest(url,method,body,bodyType,headers)`
 
 Download `url` using HTTP method `method`.
 
-_This action is currently incomplete due to it's complexity_
+`body`, `bodyType` and `headers` are optional.
+
+#### Body Types
+
+- Form (default)
+- JSON
+- File
 
 ---
 
