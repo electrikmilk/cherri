@@ -1122,11 +1122,7 @@ func mediaActions() {
 			},
 		},
 		call: func(args []actionArgument) []plistData {
-			return argumentValues(&args, []paramMap{
-				{key: "WFCameraCaptureDevice", idx: 0},
-				{key: "WFCameraCaptureQuality", idx: 1},
-				{key: "WFRecordingStart", idx: 2},
-			})
+			return argumentValues(&args, "WFCameraCaptureDevice", "WFCameraCaptureQuality", "WFRecordingStart")
 		},
 	}
 	actions["setVolume"] = actionDefinition{

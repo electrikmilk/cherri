@@ -612,14 +612,9 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 	}
 }
 
-type paramMap struct {
-	idx int
-	key string
-}
-
-func argumentValues(args *[]actionArgument, params []paramMap) (data []plistData) {
-	for _, param := range params {
-		data = append(data, argumentValue(param.key, *args, param.idx))
+func argumentValues(args *[]actionArgument, params ...string) (data []plistData) {
+	for i, param := range params {
+		data = append(data, argumentValue(param, *args, i))
 	}
 	return
 }
