@@ -27,7 +27,7 @@ may be inaccurate. Not all standard actions in each category are implemented yet
 
 ## Non-standard actions
 
-Once standard actions are finished being implemented, or a non-standard action is contributed, it is planned to have these actions use an `import` syntax so that they do not take up memory and compile time if they don't have to.
+Once standard actions are finished being implemented, or a non-standard action is contributed, it is planned to implement an `import` syntax to use a library of non-standard actions so that they do not take up memory and compile time if they don't have to.
 
 ## Can I contribute actions, even non-standard actions?
 
