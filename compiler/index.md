@@ -22,6 +22,7 @@ To download property list (.plist) versions of Shortcuts for further reference, 
 ## Compiler
 
 - [Defining Actions](actions.md)
+- [Defining Non-Standard Actions](non-std-actions.md)
 - [Metadata](metadata.md)
 - [Property List Generation](plistgen.md)
 - [Parsing](parsing.md)
