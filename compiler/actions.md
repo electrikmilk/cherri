@@ -2,8 +2,10 @@
 
 # Defining Actions
 
-Defining actions is easy but might be a little complicated to understand at first. Actions are defined in one
-place, [`actions.go`](https://github.com/electrikmilk/cherri/blob/main/actions.go).
+Defining actions is easy but might be a little complicated to understand at first. Standard actions are defined in one
+place, [`actions_standard.go`](https://github.com/electrikmilk/cherri/blob/main/actions_standard.go).
+
+Non-standard actions should be added to a new or existing file for those actions.
 
 Actions are added to a map that accepts a key of type `string` and a value of type `actionDefinition`.
 
