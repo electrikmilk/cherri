@@ -1,9 +1,10 @@
 // VCard menu
 
 @menuPrefix = "Menu"
+@subtitle = "{menuPrefix} Subtitle"
 @items
 repeat 3 {
-    @items += makeVCard("{menuPrefix} Title {RepeatIndex}","{menuPrefix} Subtitle","assets/cherri_icon.png")
+    @items += makeVCard("{menuPrefix} Title {RepeatIndex}",subtitle,"assets/cherri_icon.png")
 }
 @menuItems = "{items}"
 @vcf = setName(menuItems,"menu.vcf",false)
