@@ -34,20 +34,25 @@ type makeParams func(args []actionArgument) []plistData
 type paramCheck func(args []actionArgument)
 
 type actionDefinition struct {
-	identifier string
-	parameters []parameterDefinition
-	check      paramCheck
-	make       makeParams
+	stdIdentifier string
+	identifier    string
+	parameters    []parameterDefinition
+	check         paramCheck
+	make          makeParams
 }
 
 var actions map[string]actionDefinition
 
 func callAction(arguments []actionArgument, outputName plistData, actionUUID plistData) {
 	var ident string
-	if actions[currentAction].identifier != "" {
+	if actions[currentAction].stdIdentifier != "" {
+		ident = actions[currentAction].stdIdentifier
+		ident = "is.workflow.actions." + ident
+	} else if actions[currentAction].identifier != "" {
 		ident = actions[currentAction].identifier
 	} else {
 		ident = strings.ToLower(currentAction)
+		ident = "is.workflow.actions." + ident
 	}
 	var params []plistData
 	if actions[currentAction].make != nil {
@@ -65,6 +70,27 @@ func callAction(arguments []actionArgument, outputName plistData, actionUUID pli
 	}
 	checkIdentify(&params, outputName, actionUUID)
 	shortcutActions = append(shortcutActions, makeAction(ident, params))
+}
+
+func makeAction(ident string, params []plistData) (action string) {
+	action = plistDict("", []plistData{
+		{
+			key:      "WFWorkflowActionIdentifier",
+			dataType: Text,
+			value:    ident,
+		},
+		{
+			key:      "WFWorkflowActionParameters",
+			dataType: Dictionary,
+			value:    params,
+		},
+	})
+	return
+}
+
+func standardAction(ident string, params []plistData) string {
+	ident = "is.workflow.actions." + ident
+	return makeAction(ident, params)
 }
 
 func checkAction(arguments []actionArgument) {

@@ -46,22 +46,6 @@ type noInputParams struct {
 
 var noInput noInputParams
 
-func makeAction(ident string, paramsDict []plistData) (action string) {
-	action = plistDict("", []plistData{
-		{
-			key:      "WFWorkflowActionIdentifier",
-			dataType: Text,
-			value:    "is.workflow.actions." + ident,
-		},
-		{
-			key:      "WFWorkflowActionParameters",
-			dataType: Dictionary,
-			value:    paramsDict,
-		},
-	})
-	return
-}
-
 func plistKeyValue(key string, dataType plistDataType, value any) (pair string) {
 	if key != "" {
 		pair = "<key>" + key + "</key>\n"
@@ -171,7 +155,7 @@ func makeVariableValue(token *token, varUUID *string) {
 	}
 	switch token.valueType {
 	case Integer:
-		shortcutActions = append(shortcutActions, makeAction("number", []plistData{
+		shortcutActions = append(shortcutActions, standardAction("number", []plistData{
 			UUID,
 			outputName,
 			{
@@ -187,7 +171,7 @@ func makeVariableValue(token *token, varUUID *string) {
 		} else {
 			boolValue = "0"
 		}
-		shortcutActions = append(shortcutActions, makeAction("number", []plistData{
+		shortcutActions = append(shortcutActions, standardAction("number", []plistData{
 			UUID,
 			outputName,
 			{
@@ -197,13 +181,13 @@ func makeVariableValue(token *token, varUUID *string) {
 			},
 		}))
 	case String:
-		shortcutActions = append(shortcutActions, makeAction("gettext", []plistData{
+		shortcutActions = append(shortcutActions, standardAction("gettext", []plistData{
 			UUID,
 			outputName,
 			attachmentValues("WFTextActionText", token.value.(string), "", Text),
 		}))
 	case Expression:
-		shortcutActions = append(shortcutActions, makeAction("calculateexpression", []plistData{
+		shortcutActions = append(shortcutActions, standardAction("calculateexpression", []plistData{
 			UUID,
 			outputName,
 			{
@@ -216,7 +200,7 @@ func makeVariableValue(token *token, varUUID *string) {
 		currentAction = token.value.(action).ident
 		callAction(token.value.(action).args, outputName, UUID)
 	case Dict:
-		shortcutActions = append(shortcutActions, makeAction("dictionary", []plistData{
+		shortcutActions = append(shortcutActions, standardAction("dictionary", []plistData{
 			outputName,
 			UUID,
 			{

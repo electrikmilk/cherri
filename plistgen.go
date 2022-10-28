@@ -60,9 +60,9 @@ func makePlist() (plist string) {
 				}
 			}
 			if tok.typeof == Var {
-				shortcutActions = append(shortcutActions, makeAction("setvariable", setVariableParams))
+				shortcutActions = append(shortcutActions, standardAction("setvariable", setVariableParams))
 			} else if tok.typeof == AddTo {
-				shortcutActions = append(shortcutActions, makeAction("appendvariable", setVariableParams))
+				shortcutActions = append(shortcutActions, standardAction("appendvariable", setVariableParams))
 			}
 			if tok.valueType == Arr {
 				for _, value := range tok.value.([]interface{}) {
@@ -94,11 +94,11 @@ func makePlist() (plist string) {
 						dataType: Text,
 						value:    tok.ident,
 					})
-					shortcutActions = append(shortcutActions, makeAction("appendvariable", addToVariableParams))
+					shortcutActions = append(shortcutActions, standardAction("appendvariable", addToVariableParams))
 				}
 			}
 		case Comment:
-			shortcutActions = append(shortcutActions, makeAction("comment", []plistData{
+			shortcutActions = append(shortcutActions, standardAction("comment", []plistData{
 				{
 					key:      "WFCommentActionText",
 					dataType: Text,
@@ -110,7 +110,7 @@ func makePlist() (plist string) {
 			callAction(tok.value.(action).args, plistData{}, plistData{})
 		case Repeat:
 			if tok.valueType == EndIf {
-				shortcutActions = append(shortcutActions, makeAction("repeat.count", []plistData{
+				shortcutActions = append(shortcutActions, standardAction("repeat.count", []plistData{
 					{
 						key:      "WFControlFlowMode",
 						dataType: Number,
@@ -128,7 +128,7 @@ func makePlist() (plist string) {
 					},
 				}))
 			} else {
-				shortcutActions = append(shortcutActions, makeAction("repeat.count", []plistData{
+				shortcutActions = append(shortcutActions, standardAction("repeat.count", []plistData{
 					{
 						key:      "WFControlFlowMode",
 						dataType: Number,
@@ -147,7 +147,7 @@ func makePlist() (plist string) {
 			}
 		case RepeatWithEach:
 			if tok.valueType == EndIf {
-				shortcutActions = append(shortcutActions, makeAction("repeat.each", []plistData{
+				shortcutActions = append(shortcutActions, standardAction("repeat.each", []plistData{
 					{
 						key:      "WFControlFlowMode",
 						dataType: Number,
@@ -165,7 +165,7 @@ func makePlist() (plist string) {
 					},
 				}))
 			} else {
-				shortcutActions = append(shortcutActions, makeAction("repeat.each", []plistData{
+				shortcutActions = append(shortcutActions, standardAction("repeat.each", []plistData{
 					{
 						key:      "WFControlFlowMode",
 						dataType: Number,
@@ -237,9 +237,9 @@ func makePlist() (plist string) {
 					value:    menuItems,
 				})
 			}
-			shortcutActions = append(shortcutActions, makeAction("choosefrommenu", menuParams))
+			shortcutActions = append(shortcutActions, standardAction("choosefrommenu", menuParams))
 		case Case:
-			shortcutActions = append(shortcutActions, makeAction("choosefrommenu", []plistData{
+			shortcutActions = append(shortcutActions, standardAction("choosefrommenu", []plistData{
 				{
 					key:      "GroupingIdentifier",
 					dataType: Text,
@@ -306,7 +306,7 @@ func makePlist() (plist string) {
 				dataType: Number,
 				value:    controlFlowMode,
 			})
-			shortcutActions = append(shortcutActions, makeAction("conditional", conditionalParams))
+			shortcutActions = append(shortcutActions, standardAction("conditional", conditionalParams))
 		}
 	}
 	plist += plistArray("WFWorkflowActions", shortcutActions)
