@@ -25,6 +25,10 @@ may be inaccurate. Not all standard actions in each category are implemented yet
 
 [Please report incomplete or non-working actions](https://github.com/electrikmilk/cherri/issues)
 
+## Non-standard actions
+
+Once standard actions are finished being implemented, or a non-standard action is contributed, it is planned to have these actions use an `import` syntax so that they do not take up memory and compile time if they don't have to.
+
 ## Can I contribute actions, even non-standard actions?
 
 Yes.
