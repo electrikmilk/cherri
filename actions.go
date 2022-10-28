@@ -15,9 +15,9 @@ import (
 //  Move the making of the actions map somewhere else.
 //  Rename the function to standardActions() and rename the file to actions_standard.go.
 
-// FIXME: Most of these actions that have enumerable values (a set list values),
-//  check if the value matches and list out the valid values if it doesn't.
-//  Use "hash" as an example.
+// FIXME: Some of these actions have enumerable arguments (a set list values),
+//  but the argument value is not being checked against it's possible values.
+//  Use the "hash" action as an example.
 
 func makeActions() {
 	actions = make(map[string]actionDefinition)
