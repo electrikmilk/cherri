@@ -21,7 +21,7 @@ var registered []argument
 
 func init() {
 	args = make(map[string]string)
-	if len(os.Args) < 1 {
+	if len(os.Args) <= 1 {
 		return
 	}
 	for i, a := range os.Args {
@@ -34,12 +34,10 @@ func init() {
 			var keyValue = strings.Split(a, "=")
 			if len(keyValue) > 1 {
 				args[keyValue[0]] = keyValue[1]
-			} else {
-				args[a] = ""
+				continue
 			}
-		} else {
-			args[a] = ""
 		}
+		args[a] = ""
 	}
 }
 
@@ -56,7 +54,7 @@ func usage() {
 func registerArg(name string, shorthand string, description string) {
 	for _, r := range registered {
 		if r.name == name {
-			panic(fmt.Sprintf("Argument %s is already registered!", name))
+			return
 		}
 	}
 	registered = append(registered, argument{

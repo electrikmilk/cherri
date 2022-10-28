@@ -753,6 +753,7 @@ func parserWarning(message string) {
 }
 
 func parserError(message string) {
+	lines = strings.Split(contents, "\n")
 	if char == '\n' || prev(1) == '\n' {
 		lineIdx--
 	}

@@ -22,14 +22,14 @@ var relativePath string
 
 var included []string
 
-var fileExtension = "cherri"
+const fileExtension = "cherri"
 
 func main() {
 	registerArg("share", "s", "Signing mode. [anyone, contacts] [default=contacts]")
 	registerArg("unsigned", "u", "Don't sign compiled Shortcut. Will NOT run on iOS or macOS.")
 	registerArg("debug", "d", "Save generated plist. Print debug messages and stack traces.")
 	registerArg("output", "o", "Optional output file path. (e.g. /path/to/file.shortcut).")
-	if len(os.Args) < 2 {
+	if len(os.Args) <= 1 {
 		usage()
 		os.Exit(0)
 	}
