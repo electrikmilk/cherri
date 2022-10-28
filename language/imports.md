@@ -5,7 +5,7 @@
 To import a library of non-standard actions use the following sytax:
 
 ```cherri
-import library
+#import library
 ```
 
 Where `library` is the name of the library. This will make the actions in that library available to you.
