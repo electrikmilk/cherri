@@ -149,15 +149,17 @@ If you do this, the parameter value for that argument will be done for you, just
 
 ### Define a library
 
-Defining a library:
+Libraries are defined in the `makeLibraries()` function in [`action.go`](https://github.com/electrikmilk/cherri/blob/main/action.go).
 
-```
+```go
+// func makeLibraries() {
 libraries["standard"] = libraryDefinition{
 	identifier: "com.company.app",
 	make: func(identifier string) {
 		appActions(identifier)
 	},
 }
+// ...
 ```
 
 ### Add to an Existing Library
@@ -166,7 +168,7 @@ An existing library will have it's own file and a library definition in `makeLib
 
 Go to the file for the library (e.g. `actions_APP.go`) and define actions in the same way as explained on this page, but use the `appIdentifier` field instead of the `identifier` field. Unlike standard actions, you must specify a `appIdentifier` field even if it matches the key.
 
-Use the identifier provided to the make actions function.
+Use the `identifier` provided to the make actions function.
 
 ```go
 actions["doThing"] = actionDefinition{
@@ -174,6 +176,8 @@ actions["doThing"] = actionDefinition{
      // ...
 }
 ```
+
+Libraries are made available using the `import {library name}` syntax.
 
 ---
 
