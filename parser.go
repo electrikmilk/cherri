@@ -25,12 +25,13 @@ var closureTypes map[int]tokenType
 var closureIdx int
 
 func parse() {
-	makeGlobals()
-	makeActions()
+	variables = make(map[string]variableValue)
+	actions = make(map[string]actionDefinition)
 	menus = make(map[string][]variableValue)
 	closureUUIDs = make(map[int]string)
 	closureTypes = make(map[int]tokenType)
-	variables = make(map[string]variableValue)
+	makeGlobals()
+	standardActions()
 	chars = strings.Split(contents, "")
 	idx = -1
 	advance()

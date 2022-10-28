@@ -11,16 +11,11 @@ import (
 	"strings"
 )
 
-// TODO: Finish standard actions, then combine them all into the makeActions() function.
-//  Move the making of the actions map somewhere else.
-//  Rename the function to standardActions() and rename the file to actions_standard.go.
-
 // FIXME: Some of these actions have enumerable arguments (a set list values),
 //  but the argument value is not being checked against it's possible values.
 //  Use the "hash" action as an example.
 
-func makeActions() {
-	actions = make(map[string]actionDefinition)
+func standardActions() {
 	calendarActions()
 	contactActions()
 	documentActions()
