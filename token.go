@@ -28,7 +28,7 @@ const (
 	Menu           tokenType = "menu"
 	Case           tokenType = "case"
 	Definition     tokenType = "#define"
-	Import         tokenType = "import"
+	Import         tokenType = "#import"
 )
 
 /* Definitions */
