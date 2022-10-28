@@ -15,10 +15,11 @@ that returns the parameters for the action.
 
 ```go
 type actionDefinition struct {
-	identifier string
-	parameters []parameterDefinition
-	check      paramCheck
-	make       makeParams
+	identifier    string
+	appIdentifier string
+	parameters    []parameterDefinition
+	check         paramCheck
+	make          makeParams
 }
 ```
 
@@ -143,6 +144,36 @@ actions["takePhoto"] = actionDefinition{
 ```
 
 If you do this, the parameter value for that argument will be done for you, just make sure to not add the `make` property and add the `key` property to each of your parameter definitions. This is done to help make defining actions simpler and faster.
+
+## Defining Non-Standard Actions
+
+### Define a library
+
+Defining a library:
+
+```
+libraries["standard"] = libraryDefinition{
+	identifier: "com.company.app",
+	make: func(identifier string) {
+		appActions(identifier)
+	},
+}
+```
+
+### Add to an Existing Library
+
+An existing library will have it's own file and a library definition in `makeLibraries()` in [`action.go`](https://github.com/electrikmilk/cherri/blob/main/action.go).
+
+Go to the file for the library (e.g. `actions_APP.go`) and define actions in the same way as explained on this page, but use the `appIdentifier` field instead of the `identifier` field. Unlike standard actions, you must specify a `appIdentifier` field even if it matches the key.
+
+Use the identifier provided to the make actions function.
+
+```go
+actions["doThing"] = actionDefinition{
+     appIdentifier: identifier + "dothing",
+     // ...
+}
+```
 
 ---
 
