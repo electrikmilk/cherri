@@ -31,7 +31,6 @@ func parse() {
 	closureUUIDs = make(map[int]string)
 	closureTypes = make(map[int]tokenType)
 	makeGlobals()
-	standardActions()
 	chars = strings.Split(contents, "")
 	idx = -1
 	advance()
@@ -396,6 +395,9 @@ func parse() {
 				closureIdx--
 			}
 		case strings.Contains(lookAhead(), "("):
+			if len(actions) == 0 {
+				standardActions()
+			}
 			var identifier = collectUntil('(')
 			if _, found := actions[identifier]; found {
 				var arguments = collectArguments()
