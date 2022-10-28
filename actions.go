@@ -3296,9 +3296,17 @@ func customActions() {
 			},
 		},
 		make: func(args []actionArgument) []plistData {
+			var title = args[0].value.(string)
+			var subtitle = args[1].value.(string)
+			if _, found := variables[title]; found {
+				title = "{" + title + "}"
+			}
+			if _, found := variables[subtitle]; found {
+				subtitle = "{" + subtitle + "}"
+			}
 			var vcard = "BEGIN:VCARD\nVERSION:3.0\n"
-			vcard += "N;CHARSET=utf-8:" + args[0].value.(string) + "\n"
-			vcard += "ORG:" + args[1].value.(string) + "\nPHOTO;ENCODING=b:"
+			vcard += "N;CHARSET=utf-8:" + title + "\n"
+			vcard += "ORG:" + subtitle + "\nPHOTO;ENCODING=b:"
 			bytes, readErr := os.ReadFile(getArgValue(args[2]).(string))
 			handle(readErr)
 			vcard += base64.StdEncoding.EncodeToString(bytes) + "\nEND:VCARD"
