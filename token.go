@@ -14,12 +14,7 @@ type token struct {
 	value     any
 }
 
-type tokenSet struct {
-	line   int
-	tokens []token
-}
-
-var tokenSets []tokenSet
+var tokens []token
 
 /* Keywords */
 

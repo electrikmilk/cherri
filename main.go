@@ -57,7 +57,7 @@ func main() {
 	}
 
 	if arg("debug") {
-		fmt.Println(tokenSets)
+		fmt.Println(tokens)
 		fmt.Print("\n")
 		fmt.Println(variables)
 		fmt.Print("\n")

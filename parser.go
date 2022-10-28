@@ -31,9 +31,7 @@ func parse() {
 	closureUUIDs = make(map[int]string)
 	closureTypes = make(map[int]tokenType)
 	variables = make(map[string]variableValue)
-	lines = strings.Split(contents, "\n")
 	chars = strings.Split(contents, "")
-	var lineTokens []token
 	idx = -1
 	advance()
 	for char != -1 {
@@ -212,7 +210,7 @@ func parse() {
 					}
 				}
 			}
-			lineTokens = append(lineTokens, token{
+			tokens = append(tokens, token{
 				col:       idx,
 				typeof:    varType,
 				ident:     identifier,
@@ -230,7 +228,7 @@ func parse() {
 			}
 		case isToken(ForwardSlash):
 			if isToken(ForwardSlash) {
-				lineTokens = append(lineTokens, token{
+				tokens = append(tokens, token{
 					col:       idx,
 					typeof:    Comment,
 					ident:     "",
@@ -238,7 +236,7 @@ func parse() {
 					value:     collectComment(singleLine),
 				})
 			} else {
-				lineTokens = append(lineTokens, token{
+				tokens = append(tokens, token{
 					col:       idx,
 					typeof:    Comment,
 					ident:     "",
@@ -255,7 +253,7 @@ func parse() {
 			var timesValue any
 			collectValue(&timesType, &timesValue, '{')
 			advance()
-			lineTokens = append(lineTokens, token{
+			tokens = append(tokens, token{
 				col:       idx,
 				typeof:    Repeat,
 				ident:     groupingUUID,
@@ -271,7 +269,7 @@ func parse() {
 			var iterableValue any
 			collectValue(&iterableType, &iterableValue, '{')
 			advance()
-			lineTokens = append(lineTokens, token{
+			tokens = append(tokens, token{
 				col:       idx,
 				typeof:    RepeatWithEach,
 				ident:     groupingUUID,
@@ -289,7 +287,7 @@ func parse() {
 			collectUntil('{')
 			advance()
 			menus[groupingUUID] = []variableValue{}
-			lineTokens = append(lineTokens, token{
+			tokens = append(tokens, token{
 				col:       idx,
 				typeof:    Menu,
 				ident:     groupingUUID,
@@ -309,7 +307,7 @@ func parse() {
 				valueType: itemType,
 				value:     itemValue,
 			})
-			lineTokens = append(lineTokens, token{
+			tokens = append(tokens, token{
 				col:       idx,
 				typeof:    Case,
 				ident:     groupingUUID,
@@ -355,7 +353,7 @@ func parse() {
 				}
 			}
 			advance()
-			lineTokens = append(lineTokens, token{
+			tokens = append(tokens, token{
 				col:       idx,
 				typeof:    Conditional,
 				ident:     groupingUUID,
@@ -375,7 +373,7 @@ func parse() {
 				if groupingUUID == "" {
 					parserError("Else has no starting if statement.")
 				}
-				lineTokens = append(lineTokens, token{
+				tokens = append(tokens, token{
 					col:       idx,
 					typeof:    Conditional,
 					ident:     closureUUIDs[closureIdx],
@@ -387,7 +385,7 @@ func parse() {
 				if groupingUUID == "" {
 					parserError("Ending } has no starting statement.")
 				}
-				lineTokens = append(lineTokens, token{
+				tokens = append(tokens, token{
 					col:       idx,
 					typeof:    closureTypes[closureIdx],
 					ident:     closureUUIDs[closureIdx],
@@ -402,7 +400,7 @@ func parse() {
 				var arguments = collectArguments()
 				currentAction = identifier
 				checkAction(arguments)
-				lineTokens = append(lineTokens, token{
+				tokens = append(tokens, token{
 					col:       idx,
 					typeof:    Action,
 					ident:     identifier,
@@ -418,9 +416,6 @@ func parse() {
 		default:
 			parserError(fmt.Sprintf("Illegal character '%s'", string(char)))
 		}
-	}
-	if len(lineTokens) > 0 {
-		tokenSets = append(tokenSets, tokenSet{line: lineIdx, tokens: lineTokens})
 	}
 }
 
