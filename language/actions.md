@@ -14,6 +14,8 @@ Some actions may not be implemented due to difficulty implementing them practica
 These are the standard Shortcuts actions currently supported. Currently, more are being added all the time so this list
 may be inaccurate. Not all standard actions in each category are implemented yet, Scripting is the most complete.
 
+Standard actions are always available and do not need to be imported.
+
 - [ ] (3/23) [Calendar](standard/calendar.md)
 - [ ] (6/15) [Contacts](standard/contacts.md)
 - [ ] (40/64) [Documents](standard/documents.md)
