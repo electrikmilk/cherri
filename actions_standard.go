@@ -47,7 +47,7 @@ func calendarActions() {
 		},
 	}
 	actions["addCalendar"] = actionDefinition{
-		stdIdentifier: "addnewcalendar",
+		identifier: "addnewcalendar",
 		parameters: []parameterDefinition{
 			{
 				name:      "name",
@@ -61,7 +61,7 @@ func calendarActions() {
 		},
 	}
 	actions["addSeconds"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -77,7 +77,7 @@ func calendarActions() {
 		},
 	}
 	actions["addMinutes"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -93,7 +93,7 @@ func calendarActions() {
 		},
 	}
 	actions["addHours"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -109,7 +109,7 @@ func calendarActions() {
 		},
 	}
 	actions["addDays"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -125,7 +125,7 @@ func calendarActions() {
 		},
 	}
 	actions["addWeeks"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -141,7 +141,7 @@ func calendarActions() {
 		},
 	}
 	actions["addMonths"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -157,7 +157,7 @@ func calendarActions() {
 		},
 	}
 	actions["addYears"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -173,7 +173,7 @@ func calendarActions() {
 		},
 	}
 	actions["subtractSeconds"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -189,7 +189,7 @@ func calendarActions() {
 		},
 	}
 	actions["subtractMinutes"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -205,7 +205,7 @@ func calendarActions() {
 		},
 	}
 	actions["subtractHours"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -221,7 +221,7 @@ func calendarActions() {
 		},
 	}
 	actions["subtractDays"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -237,7 +237,7 @@ func calendarActions() {
 		},
 	}
 	actions["subtractWeeks"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -253,7 +253,7 @@ func calendarActions() {
 		},
 	}
 	actions["subtractMonths"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -269,7 +269,7 @@ func calendarActions() {
 		},
 	}
 	actions["subtractYears"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "magnitude",
@@ -285,7 +285,7 @@ func calendarActions() {
 		},
 	}
 	actions["getStartMinute"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -297,7 +297,7 @@ func calendarActions() {
 		},
 	}
 	actions["getStartHour"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -309,7 +309,7 @@ func calendarActions() {
 		},
 	}
 	actions["getStartWeek"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -321,7 +321,7 @@ func calendarActions() {
 		},
 	}
 	actions["getStartMonth"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -333,7 +333,7 @@ func calendarActions() {
 		},
 	}
 	actions["getStartYear"] = actionDefinition{
-		stdIdentifier: "adjustdate",
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -348,7 +348,7 @@ func calendarActions() {
 
 func contactActions() {
 	actions["emailAddress"] = actionDefinition{
-		stdIdentifier: "email",
+		identifier: "email",
 		parameters: []parameterDefinition{
 			{
 				name:      "email",
@@ -373,7 +373,7 @@ func contactActions() {
 		},
 	}
 	actions["selectContact"] = actionDefinition{
-		stdIdentifier: "selectcontacts",
+		identifier: "selectcontacts",
 		parameters: []parameterDefinition{
 			{
 				name:      "multiple",
@@ -387,13 +387,13 @@ func contactActions() {
 		},
 	}
 	actions["selectEmailAddress"] = actionDefinition{
-		stdIdentifier: "selectemail",
+		identifier: "selectemail",
 	}
 	actions["selectPhoneNumber"] = actionDefinition{
-		stdIdentifier: "selectphone",
+		identifier: "selectphone",
 	}
 	actions["getFromContact"] = actionDefinition{
-		stdIdentifier: "properties.contacts",
+		identifier: "properties.contacts",
 		parameters: []parameterDefinition{
 			{
 				name:      "contact",
@@ -425,7 +425,7 @@ func documentActions() {
 		},
 	}
 	actions["getFolderContents"] = actionDefinition{
-		stdIdentifier: "file.getfoldercontents",
+		identifier: "file.getfoldercontents",
 		parameters: []parameterDefinition{
 			{
 				name:      "folder",
@@ -449,7 +449,7 @@ func documentActions() {
 		},
 	}
 	actions["matchedTextGroupIndex"] = actionDefinition{
-		stdIdentifier: "text.match.getgroup",
+		identifier: "text.match.getgroup",
 		parameters: []parameterDefinition{
 			{
 				name:      "matches",
@@ -475,7 +475,7 @@ func documentActions() {
 		},
 	}
 	actions["getFileFromFolder"] = actionDefinition{
-		stdIdentifier: "documentpicker.open",
+		identifier: "documentpicker.open",
 		parameters: []parameterDefinition{
 			{
 				name:      "folder",
@@ -500,7 +500,7 @@ func documentActions() {
 		},
 	}
 	actions["markup"] = actionDefinition{
-		stdIdentifier: "avairyeditphoto",
+		identifier: "avairyeditphoto",
 		parameters: []parameterDefinition{
 			{
 				name:      "document",
@@ -510,7 +510,7 @@ func documentActions() {
 		},
 	}
 	actions["rename"] = actionDefinition{
-		stdIdentifier: "file.rename",
+		identifier: "file.rename",
 		parameters: []parameterDefinition{
 			{
 				name:      "file",
@@ -525,7 +525,7 @@ func documentActions() {
 		},
 	}
 	actions["reveal"] = actionDefinition{
-		stdIdentifier: "file.reveal",
+		identifier: "file.reveal",
 		parameters: []parameterDefinition{
 			{
 				name:      "files",
@@ -535,7 +535,7 @@ func documentActions() {
 		},
 	}
 	actions["define"] = actionDefinition{
-		stdIdentifier: "showdefinition",
+		identifier: "showdefinition",
 		parameters: []parameterDefinition{
 			{
 				name:      "word",
@@ -546,7 +546,7 @@ func documentActions() {
 	}
 	var errorCorrectionLevels = []string{"low", "medium", "quartile", "high"}
 	actions["makeQRcode"] = actionDefinition{
-		stdIdentifier: "generatebarcode",
+		identifier: "generatebarcode",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -584,7 +584,7 @@ func documentActions() {
 		},
 	}
 	actions["makeHTML"] = actionDefinition{
-		stdIdentifier: "gethtmlfromrichtext",
+		identifier: "gethtmlfromrichtext",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -604,7 +604,7 @@ func documentActions() {
 		},
 	}
 	actions["makeMarkdown"] = actionDefinition{
-		stdIdentifier: "getmarkdownfromrichtext",
+		identifier: "getmarkdownfromrichtext",
 		parameters: []parameterDefinition{
 			{
 				name:      "richText",
@@ -641,7 +641,7 @@ func documentActions() {
 		},
 	}
 	actions["selectFile"] = actionDefinition{
-		stdIdentifier: "file.select",
+		identifier: "file.select",
 		parameters: []parameterDefinition{
 			{
 				name:      "multiple",
@@ -656,7 +656,7 @@ func documentActions() {
 		},
 	}
 	actions["getFileLink"] = actionDefinition{
-		stdIdentifier: "file.getlink",
+		identifier: "file.getlink",
 		parameters: []parameterDefinition{
 			{
 				name:      "file",
@@ -683,7 +683,7 @@ func documentActions() {
 		},
 	}
 	actions["getEmojiName"] = actionDefinition{
-		stdIdentifier: "getnameofemoji",
+		identifier: "getnameofemoji",
 		parameters: []parameterDefinition{
 			{
 				name:      "emoji",
@@ -693,7 +693,7 @@ func documentActions() {
 		},
 	}
 	actions["getFileDetail"] = actionDefinition{
-		stdIdentifier: "properties.files",
+		identifier: "properties.files",
 		parameters: []parameterDefinition{
 			{
 				name:      "file",
@@ -712,7 +712,7 @@ func documentActions() {
 		},
 	}
 	actions["deleteFiles"] = actionDefinition{
-		stdIdentifier: "file.delete",
+		identifier: "file.delete",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -736,7 +736,7 @@ func documentActions() {
 		},
 	}
 	actions["getTextFromImage"] = actionDefinition{
-		stdIdentifier: "extracttextfromimage",
+		identifier: "extracttextfromimage",
 		parameters: []parameterDefinition{
 			{
 				name:      "image",
@@ -782,7 +782,7 @@ func documentActions() {
 		},
 	}
 	actions["saveFile"] = actionDefinition{
-		stdIdentifier: "documentpicker.save",
+		identifier: "documentpicker.save",
 		parameters: []parameterDefinition{
 			{
 				name:      "file",
@@ -801,9 +801,9 @@ func documentActions() {
 			},
 		},
 	}
-	actions["getSelectedFiles"] = actionDefinition{stdIdentifier: "finder.getselectedfiles"}
+	actions["getSelectedFiles"] = actionDefinition{identifier: "finder.getselectedfiles"}
 	actions["extractArchive"] = actionDefinition{
-		stdIdentifier: "unzip",
+		identifier: "unzip",
 		parameters: []parameterDefinition{
 			{
 				name:      "file",
@@ -817,7 +817,7 @@ func documentActions() {
 		},
 	}
 	actions["makeArchive"] = actionDefinition{
-		stdIdentifier: "makezip",
+		identifier: "makezip",
 		parameters: []parameterDefinition{
 			{
 				name:      "name",
@@ -841,7 +841,7 @@ func documentActions() {
 		},
 	}
 	actions["quicklook"] = actionDefinition{
-		stdIdentifier: "previewdocument",
+		identifier: "previewdocument",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -855,7 +855,7 @@ func documentActions() {
 		},
 	}
 	actions["translateFrom"] = actionDefinition{
-		stdIdentifier: "translate",
+		identifier: "translate",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -915,7 +915,7 @@ func documentActions() {
 		},
 	}
 	actions["replaceText"] = actionDefinition{
-		stdIdentifier: "text.replace",
+		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
 				name:      "find",
@@ -935,7 +935,7 @@ func documentActions() {
 		},
 	}
 	actions["iReplaceText"] = actionDefinition{
-		stdIdentifier: "text.replace",
+		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
 				name:      "find",
@@ -955,7 +955,7 @@ func documentActions() {
 		},
 	}
 	actions["regReplaceText"] = actionDefinition{
-		stdIdentifier: "text.replace",
+		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
 				name:      "expression",
@@ -975,7 +975,7 @@ func documentActions() {
 		},
 	}
 	actions["iRegReplaceText"] = actionDefinition{
-		stdIdentifier: "text.replace",
+		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
 				name:      "expression",
@@ -995,7 +995,7 @@ func documentActions() {
 		},
 	}
 	actions["uppercase"] = actionDefinition{
-		stdIdentifier: "text.changecase",
+		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -1007,7 +1007,7 @@ func documentActions() {
 		},
 	}
 	actions["lowercase"] = actionDefinition{
-		stdIdentifier: "text.changecase",
+		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -1019,7 +1019,7 @@ func documentActions() {
 		},
 	}
 	actions["titleCase"] = actionDefinition{
-		stdIdentifier: "text.changecase",
+		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -1031,7 +1031,7 @@ func documentActions() {
 		},
 	}
 	actions["capitalize"] = actionDefinition{
-		stdIdentifier: "text.changecase",
+		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -1043,7 +1043,7 @@ func documentActions() {
 		},
 	}
 	actions["capitalizeAll"] = actionDefinition{
-		stdIdentifier: "text.changecase",
+		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -1055,7 +1055,7 @@ func documentActions() {
 		},
 	}
 	actions["alternateCase"] = actionDefinition{
-		stdIdentifier: "text.changecase",
+		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -1085,7 +1085,7 @@ func documentActions() {
 		},
 	}
 	actions["splitText"] = actionDefinition{
-		stdIdentifier: "text.split",
+		identifier: "text.split",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -1099,7 +1099,7 @@ func documentActions() {
 		make: textParts,
 	}
 	actions["combineText"] = actionDefinition{
-		stdIdentifier: "text.combine",
+		identifier: "text.combine",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -1116,7 +1116,7 @@ func documentActions() {
 
 func locationActions() {
 	actions["getCurrentLocation"] = actionDefinition{
-		stdIdentifier: "location",
+		identifier: "location",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -1134,7 +1134,7 @@ func locationActions() {
 		},
 	}
 	actions["getAddresses"] = actionDefinition{
-		stdIdentifier: "detect.address",
+		identifier: "detect.address",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1148,10 +1148,10 @@ func locationActions() {
 		},
 	}
 	actions["getCurrentWeather"] = actionDefinition{
-		stdIdentifier: "currentconditions",
+		identifier: "currentconditions",
 	}
 	actions["getCurrentWeatherAt"] = actionDefinition{
-		stdIdentifier: "currentconditions",
+		identifier: "currentconditions",
 		parameters: []parameterDefinition{
 			{
 				name:      "location",
@@ -1165,7 +1165,7 @@ func locationActions() {
 		},
 	}
 	actions["openInMaps"] = actionDefinition{
-		stdIdentifier: "searchmaps",
+		identifier: "searchmaps",
 		parameters: []parameterDefinition{
 			{
 				name:      "location",
@@ -1179,7 +1179,7 @@ func locationActions() {
 		},
 	}
 	actions["streetAddress"] = actionDefinition{
-		stdIdentifier: "address",
+		identifier: "address",
 		parameters: []parameterDefinition{
 			{
 				name:      "addressLine2",
@@ -1218,7 +1218,7 @@ func locationActions() {
 		},
 	}
 	actions["getWeatherDetail"] = actionDefinition{
-		stdIdentifier: "properties.weather.conditions",
+		identifier: "properties.weather.conditions",
 		parameters: []parameterDefinition{
 			{
 				name:      "weather",
@@ -1237,7 +1237,7 @@ func locationActions() {
 		},
 	}
 	actions["getWeatherForcast"] = actionDefinition{
-		stdIdentifier: "weather.forecast",
+		identifier: "weather.forecast",
 		parameters: []parameterDefinition{
 			{
 				name:      "type",
@@ -1251,7 +1251,7 @@ func locationActions() {
 		},
 	}
 	actions["getWeatherForcastAt"] = actionDefinition{
-		stdIdentifier: "weather.forecast",
+		identifier: "weather.forecast",
 		parameters: []parameterDefinition{
 			{
 				name:      "type",
@@ -1270,7 +1270,7 @@ func locationActions() {
 		},
 	}
 	actions["getLocationDetail"] = actionDefinition{
-		stdIdentifier: "properties.locations",
+		identifier: "properties.locations",
 		parameters: []parameterDefinition{
 			{
 				name:      "location",
@@ -1289,7 +1289,7 @@ func locationActions() {
 		},
 	}
 	actions["getMapsLink"] = actionDefinition{
-		stdIdentifier: "",
+		identifier: "",
 		parameters: []parameterDefinition{
 			{
 				name:      "location",
@@ -1325,7 +1325,7 @@ func locationActions() {
 func mediaActions() {
 	actions["clearUpNext"] = actionDefinition{}
 	actions["getCurrentSong"] = actionDefinition{}
-	actions["latestPhotoImport"] = actionDefinition{stdIdentifier: "getlatestphotoimport"}
+	actions["latestPhotoImport"] = actionDefinition{identifier: "getlatestphotoimport"}
 	actions["takePhoto"] = actionDefinition{
 		parameters: []parameterDefinition{
 			{
@@ -1344,7 +1344,7 @@ func mediaActions() {
 		},
 	}
 	actions["takePhotos"] = actionDefinition{
-		stdIdentifier: "takephoto",
+		identifier: "takephoto",
 		parameters: []parameterDefinition{
 			{
 				name:      "count",
@@ -1433,7 +1433,7 @@ func mediaActions() {
 
 func scriptingActions() {
 	actions["getObjectOfClass"] = actionDefinition{
-		stdIdentifier: "getclassaction",
+		identifier: "getclassaction",
 		parameters: []parameterDefinition{
 			{
 				name:      "class",
@@ -1453,7 +1453,7 @@ func scriptingActions() {
 	}
 	actions["getOnScreenContent"] = actionDefinition{}
 	actions["fileSize"] = actionDefinition{
-		stdIdentifier: "format.filesize",
+		identifier: "format.filesize",
 		parameters: []parameterDefinition{
 			{
 				name:      "file",
@@ -1504,7 +1504,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getName"] = actionDefinition{
-		stdIdentifier: "getitemname",
+		identifier: "getitemname",
 		parameters: []parameterDefinition{
 			{
 				name:      "item",
@@ -1518,7 +1518,7 @@ func scriptingActions() {
 		},
 	}
 	actions["setName"] = actionDefinition{
-		stdIdentifier: "setitemname",
+		identifier: "setitemname",
 		parameters: []parameterDefinition{
 			{
 				name:      "item",
@@ -1546,7 +1546,7 @@ func scriptingActions() {
 		},
 	}
 	actions["countItems"] = actionDefinition{
-		stdIdentifier: "count",
+		identifier: "count",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1558,7 +1558,7 @@ func scriptingActions() {
 		},
 	}
 	actions["countChars"] = actionDefinition{
-		stdIdentifier: "count",
+		identifier: "count",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1570,7 +1570,7 @@ func scriptingActions() {
 		},
 	}
 	actions["countWords"] = actionDefinition{
-		stdIdentifier: "count",
+		identifier: "count",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1582,7 +1582,7 @@ func scriptingActions() {
 		},
 	}
 	actions["countSentences"] = actionDefinition{
-		stdIdentifier: "count",
+		identifier: "count",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1594,7 +1594,7 @@ func scriptingActions() {
 		},
 	}
 	actions["countLines"] = actionDefinition{
-		stdIdentifier: "count",
+		identifier: "count",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1606,7 +1606,7 @@ func scriptingActions() {
 		},
 	}
 	actions["toggleAppearance"] = actionDefinition{
-		stdIdentifier: "appearance",
+		identifier: "appearance",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -1618,7 +1618,7 @@ func scriptingActions() {
 		},
 	}
 	actions["lightMode"] = actionDefinition{
-		stdIdentifier: "appearance",
+		identifier: "appearance",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -1635,7 +1635,7 @@ func scriptingActions() {
 		},
 	}
 	actions["darkMode"] = actionDefinition{
-		stdIdentifier: "appearance",
+		identifier: "appearance",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -1653,7 +1653,7 @@ func scriptingActions() {
 	}
 	actions["getBatteryLevel"] = actionDefinition{}
 	actions["getShortcuts"] = actionDefinition{
-		stdIdentifier: "getmyworkflows",
+		identifier: "getmyworkflows",
 	}
 	actions["url"] = actionDefinition{
 		parameters: []parameterDefinition{
@@ -1682,7 +1682,7 @@ func scriptingActions() {
 		},
 	}
 	actions["addToReadingList"] = actionDefinition{
-		stdIdentifier: "readinglist",
+		identifier: "readinglist",
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -1731,7 +1731,7 @@ func scriptingActions() {
 		},
 	}
 	actions["formatNumber"] = actionDefinition{
-		stdIdentifier: "format.number",
+		identifier: "format.number",
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
@@ -1750,7 +1750,7 @@ func scriptingActions() {
 		},
 	}
 	actions["randomNumber"] = actionDefinition{
-		stdIdentifier: "number.random",
+		identifier: "number.random",
 		parameters: []parameterDefinition{
 			{
 				name:      "min",
@@ -1769,7 +1769,7 @@ func scriptingActions() {
 		},
 	}
 	actions["base64Encode"] = actionDefinition{
-		stdIdentifier: "base64encode",
+		identifier: "base64encode",
 		parameters: []parameterDefinition{
 			{
 				name:      "encodeInput",
@@ -1788,7 +1788,7 @@ func scriptingActions() {
 		},
 	}
 	actions["base64Decode"] = actionDefinition{
-		stdIdentifier: "base64encode",
+		identifier: "base64encode",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1807,7 +1807,7 @@ func scriptingActions() {
 		},
 	}
 	actions["urlEncode"] = actionDefinition{
-		stdIdentifier: "urlencode",
+		identifier: "urlencode",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1826,7 +1826,7 @@ func scriptingActions() {
 		},
 	}
 	actions["urlDecode"] = actionDefinition{
-		stdIdentifier: "urlencode",
+		identifier: "urlencode",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1845,7 +1845,7 @@ func scriptingActions() {
 		},
 	}
 	actions["show"] = actionDefinition{
-		stdIdentifier: "showresult",
+		identifier: "showresult",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1860,7 +1860,7 @@ func scriptingActions() {
 	}
 	actions["waitToReturn"] = actionDefinition{}
 	actions["notification"] = actionDefinition{
-		stdIdentifier: "notification",
+		identifier: "notification",
 		parameters: []parameterDefinition{
 			{
 				name:      "body",
@@ -1889,11 +1889,11 @@ func scriptingActions() {
 		},
 	}
 	actions["stop"] = actionDefinition{
-		stdIdentifier: "exit",
+		identifier: "exit",
 	}
 	actions["nothing"] = actionDefinition{}
 	actions["wait"] = actionDefinition{
-		stdIdentifier: "delay",
+		identifier: "delay",
 		parameters: []parameterDefinition{
 			{
 				name:      "seconds",
@@ -1935,7 +1935,7 @@ func scriptingActions() {
 		},
 	}
 	actions["askForInput"] = actionDefinition{
-		stdIdentifier: "ask",
+		identifier: "ask",
 		parameters: []parameterDefinition{
 			{
 				name:      "inputType",
@@ -1978,7 +1978,7 @@ func scriptingActions() {
 		},
 	}
 	actions["chooseMultipleFromList"] = actionDefinition{
-		stdIdentifier: "choosefromlist",
+		identifier: "choosefromlist",
 		parameters: []parameterDefinition{
 			{
 				name:      "dictionary",
@@ -2003,7 +2003,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getType"] = actionDefinition{
-		stdIdentifier: "getitemtype",
+		identifier: "getitemtype",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2017,7 +2017,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getKeys"] = actionDefinition{
-		stdIdentifier: "getvalueforkey",
+		identifier: "getvalueforkey",
 		parameters: []parameterDefinition{
 			{
 				name:      "dictionary",
@@ -2036,7 +2036,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getValues"] = actionDefinition{
-		stdIdentifier: "getvalueforkey",
+		identifier: "getvalueforkey",
 		parameters: []parameterDefinition{
 			{
 				name:      "dictionary",
@@ -2055,7 +2055,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getValue"] = actionDefinition{
-		stdIdentifier: "getvalueforkey",
+		identifier: "getvalueforkey",
 		parameters: []parameterDefinition{
 			{
 				name:      "dictionary",
@@ -2079,7 +2079,7 @@ func scriptingActions() {
 		},
 	}
 	actions["setValue"] = actionDefinition{
-		stdIdentifier: "setvalueforkey",
+		identifier: "setvalueforkey",
 		parameters: []parameterDefinition{
 			{
 				name:      "key",
@@ -2103,7 +2103,7 @@ func scriptingActions() {
 		},
 	}
 	actions["open"] = actionDefinition{
-		stdIdentifier: "openworkflow",
+		identifier: "openworkflow",
 		parameters: []parameterDefinition{
 			{
 				name:      "shortcutName",
@@ -2133,7 +2133,7 @@ func scriptingActions() {
 		},
 	}
 	actions["run"] = actionDefinition{
-		stdIdentifier: "runworkflow",
+		identifier: "runworkflow",
 		parameters: []parameterDefinition{
 			{
 				name:      "shortcutName",
@@ -2198,7 +2198,7 @@ func scriptingActions() {
 		},
 	}
 	actions["calcAverage"] = actionDefinition{
-		stdIdentifier: "statistics",
+		identifier: "statistics",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2210,7 +2210,7 @@ func scriptingActions() {
 		},
 	}
 	actions["calcMin"] = actionDefinition{
-		stdIdentifier: "statistics",
+		identifier: "statistics",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2222,7 +2222,7 @@ func scriptingActions() {
 		},
 	}
 	actions["calcMax"] = actionDefinition{
-		stdIdentifier: "statistics",
+		identifier: "statistics",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2234,7 +2234,7 @@ func scriptingActions() {
 		},
 	}
 	actions["calcSum"] = actionDefinition{
-		stdIdentifier: "statistics",
+		identifier: "statistics",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2246,7 +2246,7 @@ func scriptingActions() {
 		},
 	}
 	actions["calcMedian"] = actionDefinition{
-		stdIdentifier: "statistics",
+		identifier: "statistics",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2258,7 +2258,7 @@ func scriptingActions() {
 		},
 	}
 	actions["calcMode"] = actionDefinition{
-		stdIdentifier: "statistics",
+		identifier: "statistics",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2270,7 +2270,7 @@ func scriptingActions() {
 		},
 	}
 	actions["calcRange"] = actionDefinition{
-		stdIdentifier: "statistics",
+		identifier: "statistics",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2282,7 +2282,7 @@ func scriptingActions() {
 		},
 	}
 	actions["calcStdDevi"] = actionDefinition{
-		stdIdentifier: "statistics",
+		identifier: "statistics",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2295,7 +2295,7 @@ func scriptingActions() {
 	}
 	actions["dismissSiri"] = actionDefinition{}
 	actions["isOnline"] = actionDefinition{
-		stdIdentifier: "getipaddress",
+		identifier: "getipaddress",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -2313,7 +2313,7 @@ func scriptingActions() {
 	}
 	var ipTypes = []string{"ipv4", "ipv6"}
 	actions["getLocalIP"] = actionDefinition{
-		stdIdentifier: "getipaddress",
+		identifier: "getipaddress",
 		parameters: []parameterDefinition{
 			{
 				name:      "type",
@@ -2340,7 +2340,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getExternalIP"] = actionDefinition{
-		stdIdentifier: "getipaddress",
+		identifier: "getipaddress",
 		parameters: []parameterDefinition{
 			{
 				name:      "type",
@@ -2367,7 +2367,7 @@ func scriptingActions() {
 		},
 	}
 	actions["firstListItem"] = actionDefinition{
-		stdIdentifier: "getitemfromlist",
+		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
 				name:      "list",
@@ -2386,7 +2386,7 @@ func scriptingActions() {
 		},
 	}
 	actions["lastListItem"] = actionDefinition{
-		stdIdentifier: "getitemfromlist",
+		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
 				name:      "list",
@@ -2405,7 +2405,7 @@ func scriptingActions() {
 		},
 	}
 	actions["randomListItem"] = actionDefinition{
-		stdIdentifier: "getitemfromlist",
+		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
 				name:      "list",
@@ -2424,7 +2424,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getListItem"] = actionDefinition{
-		stdIdentifier: "getitemfromlist",
+		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
 				name:      "list",
@@ -2448,7 +2448,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getListItems"] = actionDefinition{
-		stdIdentifier: "getitemfromlist",
+		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
 				name:      "list",
@@ -2477,7 +2477,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getNumbers"] = actionDefinition{
-		stdIdentifier: "detect.number",
+		identifier: "detect.number",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2491,7 +2491,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getDictionary"] = actionDefinition{
-		stdIdentifier: "detect.dictionary",
+		identifier: "detect.dictionary",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2505,7 +2505,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getText"] = actionDefinition{
-		stdIdentifier: "detect.text",
+		identifier: "detect.text",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2519,7 +2519,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getContacts"] = actionDefinition{
-		stdIdentifier: "detect.contacts",
+		identifier: "detect.contacts",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2533,7 +2533,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getDates"] = actionDefinition{
-		stdIdentifier: "detect.date",
+		identifier: "detect.date",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2547,7 +2547,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getEmails"] = actionDefinition{
-		stdIdentifier: "detect.emailaddress",
+		identifier: "detect.emailaddress",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2561,7 +2561,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getImages"] = actionDefinition{
-		stdIdentifier: "detect.images",
+		identifier: "detect.images",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2575,7 +2575,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getPhoneNumbers"] = actionDefinition{
-		stdIdentifier: "detect.phonenumber",
+		identifier: "detect.phonenumber",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2589,7 +2589,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getURLs"] = actionDefinition{
-		stdIdentifier: "detect.link",
+		identifier: "detect.link",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2603,7 +2603,7 @@ func scriptingActions() {
 		},
 	}
 	actions["setWallpaper"] = actionDefinition{
-		stdIdentifier: "wallpaper.set",
+		identifier: "wallpaper.set",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2618,7 +2618,7 @@ func scriptingActions() {
 	}
 	actions["startScreensaver"] = actionDefinition{}
 	actions["contentGraph"] = actionDefinition{
-		stdIdentifier: "viewresult",
+		identifier: "viewresult",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2632,7 +2632,7 @@ func scriptingActions() {
 		},
 	}
 	actions["openXCallbackURL"] = actionDefinition{
-		stdIdentifier: "openxcallbackurl",
+		identifier: "openxcallbackurl",
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -2647,7 +2647,7 @@ func scriptingActions() {
 		},
 	}
 	actions["openCustomXCallbackURL"] = actionDefinition{
-		stdIdentifier: "openxcallbackurl",
+		identifier: "openxcallbackurl",
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -2714,7 +2714,7 @@ func scriptingActions() {
 		},
 	}
 	actions["mustOutput"] = actionDefinition{
-		stdIdentifier: "output",
+		identifier: "output",
 		parameters: []parameterDefinition{
 			{
 				name:      "output",
@@ -2738,7 +2738,7 @@ func scriptingActions() {
 		},
 	}
 	actions["outputOrClipboard"] = actionDefinition{
-		stdIdentifier: "output",
+		identifier: "output",
 		parameters: []parameterDefinition{
 			{
 				name:      "output",
@@ -2757,7 +2757,7 @@ func scriptingActions() {
 		},
 	}
 	actions["setWifi"] = actionDefinition{
-		stdIdentifier: "wifi.set",
+		identifier: "wifi.set",
 		parameters: []parameterDefinition{
 			{
 				name:      "status",
@@ -2771,7 +2771,7 @@ func scriptingActions() {
 		},
 	}
 	actions["setCellularData"] = actionDefinition{
-		stdIdentifier: "cellulardata.set",
+		identifier: "cellulardata.set",
 		parameters: []parameterDefinition{
 			{
 				name:      "status",
@@ -2785,7 +2785,7 @@ func scriptingActions() {
 		},
 	}
 	actions["setCellularVoice"] = actionDefinition{
-		stdIdentifier: "cellular.rat.set",
+		identifier: "cellular.rat.set",
 		parameters: []parameterDefinition{
 			{
 				name:      "status",
@@ -2799,7 +2799,7 @@ func scriptingActions() {
 		},
 	}
 	actions["toggleBluetooth"] = actionDefinition{
-		stdIdentifier: "bluetooth.set",
+		identifier: "bluetooth.set",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -2816,7 +2816,7 @@ func scriptingActions() {
 		},
 	}
 	actions["setBluetooth"] = actionDefinition{
-		stdIdentifier: "bluetooth.set",
+		identifier: "bluetooth.set",
 		parameters: []parameterDefinition{
 			{
 				name:      "status",
@@ -2932,7 +2932,7 @@ func scriptingActions() {
 
 func sharingActions() {
 	actions["airdrop"] = actionDefinition{
-		stdIdentifier: "airdropdocument",
+		identifier: "airdropdocument",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2959,7 +2959,7 @@ func sharingActions() {
 		},
 	}
 	actions["copyToClipboard"] = actionDefinition{
-		stdIdentifier: "setclipboard",
+		identifier: "setclipboard",
 		parameters: []parameterDefinition{
 			{
 				name:      "value",
@@ -2987,7 +2987,7 @@ func sharingActions() {
 
 func webActions() {
 	actions["getURLHeaders"] = actionDefinition{
-		stdIdentifier: "url.getheaders",
+		identifier: "url.getheaders",
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -3057,7 +3057,7 @@ func webActions() {
 		},
 	}
 	actions["getRSSFeeds"] = actionDefinition{
-		stdIdentifier: "rss.extract",
+		identifier: "rss.extract",
 		parameters: []parameterDefinition{
 			{
 				name:      "urls",
@@ -3067,7 +3067,7 @@ func webActions() {
 		},
 	}
 	actions["getRSS"] = actionDefinition{
-		stdIdentifier: "rss",
+		identifier: "rss",
 		parameters: []parameterDefinition{
 			{
 				name:      "items",
@@ -3083,7 +3083,7 @@ func webActions() {
 	}
 	var webpageDetails = []string{"page contents", "page selection", "page url", "name"}
 	actions["getWebPageDetail"] = actionDefinition{
-		stdIdentifier: "properties.safariwebpage",
+		identifier: "properties.safariwebpage",
 		parameters: []parameterDefinition{
 			{
 				name:      "webpage",
@@ -3101,7 +3101,7 @@ func webActions() {
 		},
 	}
 	actions["getArticleDetail"] = actionDefinition{
-		stdIdentifier: "properties.articles",
+		identifier: "properties.articles",
 		parameters: []parameterDefinition{
 			{
 				name:      "article",
@@ -3116,10 +3116,10 @@ func webActions() {
 		},
 	}
 	actions["getCurrentURL"] = actionDefinition{
-		stdIdentifier: "safari.geturl",
+		identifier: "safari.geturl",
 	}
 	actions["getWebpageContents"] = actionDefinition{
-		stdIdentifier: "getwebpagecontents",
+		identifier: "getwebpagecontents",
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -3129,7 +3129,7 @@ func webActions() {
 		},
 	}
 	actions["searchGiphy"] = actionDefinition{
-		stdIdentifier: "giphy",
+		identifier: "giphy",
 		parameters: []parameterDefinition{
 			{
 				name:      "query",
@@ -3139,7 +3139,7 @@ func webActions() {
 		},
 	}
 	actions["getGifs"] = actionDefinition{
-		stdIdentifier: "giphy",
+		identifier: "giphy",
 		parameters: []parameterDefinition{
 			{
 				name:      "query",
@@ -3168,7 +3168,7 @@ func webActions() {
 		},
 	}
 	actions["getArticle"] = actionDefinition{
-		stdIdentifier: "getarticle",
+		identifier: "getarticle",
 		parameters: []parameterDefinition{
 			{
 				name:      "webpage",
@@ -3178,7 +3178,7 @@ func webActions() {
 		},
 	}
 	actions["expandURL"] = actionDefinition{
-		stdIdentifier: "url.expand",
+		identifier: "url.expand",
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -3275,7 +3275,7 @@ func webActions() {
 
 func customActions() {
 	actions["makeVCard"] = actionDefinition{
-		stdIdentifier: "gettext",
+		identifier: "gettext",
 		parameters: []parameterDefinition{
 			{
 				name:      "title",

@@ -155,7 +155,7 @@ func makeVariableValue(token *token, varUUID *string) {
 	}
 	switch token.valueType {
 	case Integer:
-		shortcutActions = append(shortcutActions, standardAction("number", []plistData{
+		shortcutActions = append(shortcutActions, makeStdAction("number", []plistData{
 			UUID,
 			outputName,
 			{
@@ -171,7 +171,7 @@ func makeVariableValue(token *token, varUUID *string) {
 		} else {
 			boolValue = "0"
 		}
-		shortcutActions = append(shortcutActions, standardAction("number", []plistData{
+		shortcutActions = append(shortcutActions, makeStdAction("number", []plistData{
 			UUID,
 			outputName,
 			{
@@ -181,13 +181,13 @@ func makeVariableValue(token *token, varUUID *string) {
 			},
 		}))
 	case String:
-		shortcutActions = append(shortcutActions, standardAction("gettext", []plistData{
+		shortcutActions = append(shortcutActions, makeStdAction("gettext", []plistData{
 			UUID,
 			outputName,
 			attachmentValues("WFTextActionText", token.value.(string), "", Text),
 		}))
 	case Expression:
-		shortcutActions = append(shortcutActions, standardAction("calculateexpression", []plistData{
+		shortcutActions = append(shortcutActions, makeStdAction("calculateexpression", []plistData{
 			UUID,
 			outputName,
 			{
@@ -200,7 +200,7 @@ func makeVariableValue(token *token, varUUID *string) {
 		currentAction = token.value.(action).ident
 		callAction(token.value.(action).args, outputName, UUID)
 	case Dict:
-		shortcutActions = append(shortcutActions, standardAction("dictionary", []plistData{
+		shortcutActions = append(shortcutActions, makeStdAction("dictionary", []plistData{
 			outputName,
 			UUID,
 			{

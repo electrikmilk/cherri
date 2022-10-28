@@ -167,9 +167,11 @@ func parse() {
 			}
 		case tokenAhead(Import):
 			makeLibraries()
-			var collectedLibrary = collectUntil('\n')
+			var collectedLibrary = strings.ToLower(collectUntil('\n'))
 			if _, found := libraries[collectedLibrary]; found {
-				libraries[collectedLibrary].make()
+				libraries[collectedLibrary].make(libraries[collectedLibrary].identifier)
+			} else {
+				parserError(fmt.Sprintf("Import library '%s' does not exist!", collectedLibrary))
 			}
 		case tokenAhead(Var):
 			idx -= 2

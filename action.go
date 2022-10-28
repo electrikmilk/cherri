@@ -34,8 +34,8 @@ type makeParams func(args []actionArgument) []plistData
 type paramCheck func(args []actionArgument)
 
 type actionDefinition struct {
-	stdIdentifier string
 	identifier    string
+	appIdentifier string
 	parameters    []parameterDefinition
 	check         paramCheck
 	make          makeParams
@@ -44,20 +44,22 @@ type actionDefinition struct {
 var actions map[string]actionDefinition
 
 type libraryDefinition struct {
-	make func()
+	identifier string
+	make       func(identifier string)
 }
 
 var libraries map[string]libraryDefinition
 
 func callAction(arguments []actionArgument, outputName plistData, actionUUID plistData) {
 	var ident string
-	if actions[currentAction].stdIdentifier != "" {
-		ident = actions[currentAction].stdIdentifier
-		ident = "is.workflow.actions." + ident
-	} else if actions[currentAction].identifier != "" {
-		ident = actions[currentAction].identifier
+	if actions[currentAction].appIdentifier != "" {
+		ident = actions[currentAction].appIdentifier
 	} else {
-		ident = strings.ToLower(currentAction)
+		if actions[currentAction].identifier != "" {
+			ident = actions[currentAction].identifier
+		} else {
+			ident = strings.ToLower(currentAction)
+		}
 		ident = "is.workflow.actions." + ident
 	}
 	var params []plistData
@@ -94,7 +96,7 @@ func makeAction(ident string, params []plistData) (action string) {
 	return
 }
 
-func standardAction(ident string, params []plistData) string {
+func makeStdAction(ident string, params []plistData) string {
 	ident = "is.workflow.actions." + ident
 	return makeAction(ident, params)
 }
