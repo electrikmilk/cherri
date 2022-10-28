@@ -24,6 +24,7 @@ _Or_
 - [VCard Menus](vcards.md)
 - [Menus](menus.md)
 - [Includes](includes.md)
+- [Imports](imports.md)
 - [Definitions](definitions.md)
 - [Glyphs](glyphs.md)
 - [Content Item Types](content-item-types.md)
