@@ -43,7 +43,7 @@ actions["doThing"] = actionDefinition{
 }
 ```
 
-Libraries are made available using the `import {library name}` syntax.
+Libraries are made available using the `#import {library name}` syntax.
 
 ---
 
