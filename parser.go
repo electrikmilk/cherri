@@ -499,6 +499,9 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*valueType = Bool
 		*value = false
 	case strings.Contains(lookAheadUntil('\n'), "("):
+		if len(actions) == 0 {
+			standardActions()
+		}
 		var identifier = collectUntil('(')
 		if _, found := actions[identifier]; found {
 			var arguments = collectArguments()
