@@ -17,6 +17,17 @@ libraries["app"] = libraryDefinition{
 // ...
 ```
 
+Create a file called `actions_APP.go`, replace `APP` with a unique name for the app, etc. that you are adding actions for.
+
+Create a function in that file:
+
+```go
+func appActions(identifier string) {
+// ...
+```
+
+Again, replace `app` with the unique name you gave the file or a variant of it.
+
 ## Add to an Existing Library
 
 An existing library will have it's own file and a library definition in `makeLibraries()` in [`action.go`](https://github.com/electrikmilk/cherri/blob/main/action.go).
