@@ -151,9 +151,11 @@ If you do this, the parameter value for that argument will be done for you, just
 
 Libraries are defined in the `makeLibraries()` function in [`action.go`](https://github.com/electrikmilk/cherri/blob/main/action.go).
 
+Your library name must be lowercase or camelCase.
+
 ```go
 // func makeLibraries() {
-libraries["standard"] = libraryDefinition{
+libraries["app"] = libraryDefinition{
 	identifier: "com.company.app",
 	make: func(identifier string) {
 		appActions(identifier)
