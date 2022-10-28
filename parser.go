@@ -165,6 +165,12 @@ func parse() {
 					parserError(fmt.Sprintf("Invalid minimum version '%s'", collectVersion))
 				}
 			}
+		case tokenAhead(Import):
+			makeLibraries()
+			var collectedLibrary = collectUntil('\n')
+			if _, found := libraries[collectedLibrary]; found {
+				libraries[collectedLibrary].make()
+			}
 		case tokenAhead(Var):
 			idx -= 2
 			advance()

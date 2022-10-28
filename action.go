@@ -43,6 +43,12 @@ type actionDefinition struct {
 
 var actions map[string]actionDefinition
 
+type libraryDefinition struct {
+	make func()
+}
+
+var libraries map[string]libraryDefinition
+
 func callAction(arguments []actionArgument, outputName plistData, actionUUID plistData) {
 	var ident string
 	if actions[currentAction].stdIdentifier != "" {
@@ -425,4 +431,8 @@ func count(countType string, args []actionArgument) []plistData {
 		},
 		variableInput("Input", args[0].value.(string)),
 	}
+}
+
+func makeLibraries() {
+	libraries = make(map[string]libraryDefinition)
 }
