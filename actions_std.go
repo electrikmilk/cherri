@@ -499,6 +499,26 @@ func documentActions() {
 			},
 		},
 	}
+	actions["getFileFromShortcutsFolder"] = actionDefinition{
+		identifier: "documentpicker.open",
+		parameters: []parameterDefinition{
+			{
+				name:      "path",
+				validType: String,
+				key:       "WFGetFilePath",
+			},
+			{
+				name:      "errorIfNotFound",
+				validType: Bool,
+				key:       "WFFileErrorIfNotFound",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+				optional: true,
+			},
+		},
+	}
 	actions["markup"] = actionDefinition{
 		identifier: "avairyeditphoto",
 		parameters: []parameterDefinition{
