@@ -916,22 +916,18 @@ func documentActions() {
 			{
 				name:      "text",
 				validType: String,
+				key:       "WFInputText",
 			},
 			{
 				name:      "from",
 				validType: String,
+				key:       "WFSelectedFromLanguage",
 			},
 			{
 				name:      "to",
 				validType: String,
+				key:       "WFSelectedLanguage",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInputText", args[0].value.(string)),
-				argumentValue("WFSelectedFromLanguage", args, 0),
-				argumentValue("WFSelectedLanguage", args, 0),
-			}
 		},
 	}
 	actions["translate"] = actionDefinition{
@@ -962,12 +958,8 @@ func documentActions() {
 			{
 				name:      "input",
 				validType: String,
+				key:       "WFInput",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["replaceText"] = actionDefinition{
