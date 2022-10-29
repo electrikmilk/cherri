@@ -36,7 +36,7 @@ func main() {
 	filePath = os.Args[1]
 	checkFile(filePath)
 	var pathParts = strings.Split(filePath, "/")
-	filename = pathParts[len(pathParts)-1]
+	filename = end(pathParts)
 	relativePath = strings.Replace(filePath, filename, "", 1)
 	var nameParts = strings.Split(filename, ".")
 	basename = nameParts[0]
@@ -133,7 +133,7 @@ func checkFile(filePath string) {
 	var file, statErr = os.Stat(filePath)
 	handle(statErr)
 	var nameParts = strings.Split(file.Name(), ".")
-	var ext = nameParts[len(nameParts)-1]
+	var ext = end(nameParts)
 	if ext != fileExtension {
 		fmt.Printf("\n\033[31mFile '%s' is not a .%s file!\033[0m\n", filePath, fileExtension)
 		os.Exit(1)
@@ -176,6 +176,10 @@ func sign() {
 	}
 	removeErr := os.Remove(basename + "_unsigned.shortcut")
 	handle(removeErr)
+}
+
+func end(slice []string) string {
+	return slice[len(slice)-1]
 }
 
 func handle(err error) {
