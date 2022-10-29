@@ -76,9 +76,13 @@ Reveal `files` in Finder.
 
 ---
 
-### `saveFile(file,overwrite)`
+### `saveFile(file,path,overwrite)`
 
-_Incomplete_
+Save `file` to `path`. `overwrite` is a boolean, default is `false`.
+
+---
+
+### `saveFilePrompt(file,overwrite)`
 
 Prompt to save `file`. `overwrite` is a boolean, default is `false`.
 
