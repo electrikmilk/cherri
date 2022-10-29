@@ -966,7 +966,7 @@ func documentActions() {
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	}
