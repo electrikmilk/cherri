@@ -808,6 +808,41 @@ func documentActions() {
 			{
 				name:      "file",
 				validType: Variable,
+			},
+			{
+				name:      "path",
+				validType: String,
+			},
+			{
+				name:      "overwrite",
+				validType: Bool,
+				key:       "WFSaveFileOverwrite",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
+				optional: true,
+			},
+		},
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				variableInput("WFInput", args[0].value.(string)),
+				argumentValue("WFFileDestinationPath", args, 1),
+				argumentValue("WFSaveFileOverwrite", args, 2),
+				{
+					key:      "WFAskWhereToSave",
+					dataType: Boolean,
+					value:    false,
+				},
+			}
+		},
+	}
+	actions["saveFilePrompt"] = actionDefinition{
+		identifier: "documentpicker.save",
+		parameters: []parameterDefinition{
+			{
+				name:      "file",
+				validType: Variable,
 				key:       "WFInput",
 			},
 			{
