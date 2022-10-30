@@ -502,9 +502,6 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		if len(actions) == 0 {
 			standardActions()
 		}
-		printCurrentChar()
-		fmt.Println(string(next(1)))
-		fmt.Println(string(next(2)))
 		var identifier = collectUntil('(')
 		fmt.Println("identifier", identifier)
 		if _, found := actions[identifier]; found {
