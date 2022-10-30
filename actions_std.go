@@ -415,7 +415,7 @@ func contactActions() {
 
 func documentActions() {
 	// FIXME: Writing to locations other than the Shortcuts folder
-	actions["createShortcutsFolder"] = actionDefinition{
+	actions["createFolder"] = actionDefinition{
 		identifier: "file.createfolder",
 		parameters: []parameterDefinition{
 			{
@@ -500,7 +500,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["getFileFromShortcutsFolder"] = actionDefinition{
+	actions["getFile"] = actionDefinition{
 		identifier: "documentpicker.open",
 		parameters: []parameterDefinition{
 			{
