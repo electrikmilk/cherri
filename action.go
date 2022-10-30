@@ -424,6 +424,13 @@ func replaceText(caseSensitive bool, regExp bool, args []actionArgument) []plist
 	}
 }
 
+func languageCode(language string) string {
+	if _, found := languages[language]; found {
+		return languages[language]
+	}
+	return language
+}
+
 func count(countType string, args []actionArgument) []plistData {
 	return []plistData{
 		{

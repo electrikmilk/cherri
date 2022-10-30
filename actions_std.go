@@ -910,8 +910,9 @@ func documentActions() {
 			}
 		},
 	}
+	makeLanguages()
 	actions["translateFrom"] = actionDefinition{
-		identifier: "translate",
+		identifier: "text.translate",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -929,8 +930,13 @@ func documentActions() {
 				key:       "WFSelectedLanguage",
 			},
 		},
+		check: func(args []actionArgument) {
+			args[1].value = languageCode(args[1].value.(string))
+			args[2].value = languageCode(args[2].value.(string))
+		},
 	}
 	actions["translate"] = actionDefinition{
+		identifier: "text.translate",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -941,15 +947,18 @@ func documentActions() {
 				validType: String,
 			},
 		},
+		check: func(args []actionArgument) {
+			args[1].value = languageCode(args[1].value.(string))
+		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInputText", args[0].value.(string)),
+				argumentValue("WFInputText", args, 0),
+				argumentValue("WFSelectedLanguage", args, 1),
 				{
 					key:      "WFSelectedFromLanguage",
 					dataType: Text,
 					value:    "Detect Language",
 				},
-				argumentValue("WFSelectedLanguage", args, 0),
 			}
 		},
 	}

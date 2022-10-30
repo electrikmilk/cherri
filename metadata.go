@@ -90,6 +90,33 @@ func makeVersions() {
 	versions["12"] = "500"
 }
 
+/* Languages */
+
+var languages map[string]string
+
+func makeLanguages() {
+	languages = make(map[string]string)
+	languages["Arabic"] = "ar_AE"
+	languages["Mandarin Chinese (Mainland)"] = "zh_CN"
+	languages["Mandarin Chinese (Taiwan)"] = "zh_TW"
+	languages["Dutch"] = "nl_NL"
+	languages["English (UK)"] = "en_GB"
+	languages["English (US)"] = "en_US"
+	languages["French"] = "fr_FR"
+	languages["German"] = "de_DE"
+	languages["Indonesian"] = "id_ID"
+	languages["Italian"] = "it_IT"
+	languages["Japanese"] = "jp_JP"
+	languages["Korean"] = "ko_KR"
+	languages["Polish"] = "pl_PL"
+	languages["Portuguese (Brazil)"] = "pt_BR"
+	languages["Russian"] = "ru_RU"
+	languages["Spanish (Spain)"] = "es_ES"
+	languages["Thai"] = "th_TH"
+	languages["Turkish"] = "tr_TR"
+	languages["Vietnamese"] = "vn_VN"
+}
+
 /* Globals */
 
 var globals map[string]variableValue
