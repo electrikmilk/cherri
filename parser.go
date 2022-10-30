@@ -503,7 +503,6 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 			standardActions()
 		}
 		var identifier = collectUntil('(')
-		fmt.Println("identifier", identifier)
 		if _, found := actions[identifier]; found {
 			var arguments = collectArguments()
 			currentAction = identifier
