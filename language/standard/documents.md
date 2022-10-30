@@ -28,7 +28,7 @@ Opens `input` in a markup editor.
 
 ## File Storage
 
-### `createShortcutsFolder(path)`
+### `createFolder(path)`
 
 Create a folder at `path` in the users Shortcuts folder in their iCloud Drive.
 
@@ -43,6 +43,12 @@ Delete `files`. `immediately` is a boolean, default is `false`.
 ### `getFolderContents(folder,recursive)`
 
 Get contents of `folder`. `recursive` is a boolean, default is `true`.
+
+---
+
+### `getFile(path,errorIfNotFound)`
+
+Get `path` in the users Shortcuts folder. `errorIfNotFound` is a boolean, default is `true`.
 
 ---
 
