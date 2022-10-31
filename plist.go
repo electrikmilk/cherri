@@ -137,7 +137,7 @@ func condParam(key string, conditionalParams *[]plistData, typeOf *tokenType, va
 			}, Integer, Text))
 		}
 	case Variable:
-		var realVar = realVariableValue(value.(string))
+		var realVar = realVariableValue(value.(string), String)
 		condParam(key, conditionalParams, &realVar.valueType, realVar.value)
 	}
 }

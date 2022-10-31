@@ -122,7 +122,7 @@ func checkEnum(name string, arg actionArgument, enum []string) {
 	}
 }
 
-func realVariableValue(varName string) (varValue variableValue) {
+func realVariableValue(varName string, lastValueType tokenType) (varValue variableValue) {
 	if _, global := globals[varName]; global {
 		varValue = globals[varName]
 		hasInputVariables(varName)
@@ -131,7 +131,10 @@ func realVariableValue(varName string) (varValue variableValue) {
 		var argValueType = variables[varName].valueType
 		var value = variables[varName].value
 		if argValueType == Variable {
-			varValue = realVariableValue(value.(string))
+			if lastValueType == Variable && argValueType == Variable {
+				parserError("Passed variable value that evaluates to variable")
+			}
+			varValue = realVariableValue(value.(string), argValueType)
 		} else {
 			varValue = variables[varName]
 		}
@@ -163,7 +166,7 @@ func typeCheck(field string, validType tokenType, argument actionArgument) {
 	}
 	if argValueType == Variable {
 		var varName = argVal.(string)
-		var getVar = realVariableValue(varName)
+		var getVar = realVariableValue(varName, String)
 		argValueType = getVar.valueType
 		argVal = getVar.value
 		if argValueType == Action {

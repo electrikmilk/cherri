@@ -766,23 +766,30 @@ func parserError(message string) {
 	if char == '\n' || prev(1) == '\n' {
 		lineIdx--
 	}
-	fmt.Print("\n\n")
-	fmt.Printf("\033[31m\033[1m%s\033[0m\n", message)
-	fmt.Printf("\n\033[2m--- \033[0m%s:%d:%d\n", filePath, lineIdx+1, lineCharIdx+1)
+	fmt.Printf("\n\033[31m\033[1m%s\033[0m\n", message)
+	fmt.Printf("\n\033[2m----- \033[0m%s:%d:%d\n", filePath, lineIdx+1, lineCharIdx+1)
 	if lineIdx != -1 {
 		if len(lines) > (lineIdx - 1) {
-			fmt.Println("\033[2m" + fmt.Sprintf("%d | ", lineIdx) + lines[lineIdx-1] + "\u001B[0m")
+			fmt.Printf("\033[2m%d | %s\033[0m\n", lineIdx, lines[lineIdx-1])
 		}
 		if len(lines) > lineIdx {
-			fmt.Println("\033[31m\033[1m" + fmt.Sprintf("%d | ", lineIdx+1) + lines[lineIdx] + "\u001B[0m")
+			fmt.Printf("\033[31m\033[1m%d | ", lineIdx+1)
+			for c, chr := range strings.Split(lines[lineIdx], "") {
+				if c == idx {
+					fmt.Printf("\033[4m%s\033[0m", chr)
+				} else {
+					fmt.Print(chr)
+				}
+			}
+			fmt.Print("\033[0m\n")
 		}
 		var spaces string
-		for i := 0; i < (lineCharIdx + 3); i++ {
+		for i := 0; i < (lineCharIdx + 5); i++ {
 			spaces += " "
 		}
-		fmt.Println("\033[31m" + spaces + "^\u001B[0m")
+		fmt.Println("\033[31m" + spaces + "^\033[0m")
 		if len(lines) > (lineIdx + 1) {
-			fmt.Println("\033[2m" + fmt.Sprintf("%d | ", lineIdx+2) + lines[lineIdx+1] + "\u001B[0m")
+			fmt.Printf("\033[2m%d | %s\n-----\033[0m\n\n", lineIdx+2, lines[lineIdx+1])
 		}
 	}
 	if arg("debug") {
