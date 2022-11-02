@@ -174,9 +174,7 @@ func parse() {
 			} else {
 				parserError(fmt.Sprintf("Import library '%s' does not exist!", collectedLibrary))
 			}
-		case tokenAhead(Var):
-			idx -= 2
-			advance()
+		case isToken(At):
 			var identifier string
 			if strings.Contains(lookAheadUntil('\n'), "=") {
 				identifier = collectUntil(' ')
@@ -389,14 +387,14 @@ func parse() {
 				})
 				tokenAhead(LeftBrace)
 			} else {
-				if groupingUUID == "" {
-					parserError("Ending } has no starting statement.")
+				if currentGroupingUUID == "" {
+					parserError("Ending closure has no starting statement.")
 				}
 				tokens = append(tokens, token{
 					col:       idx,
 					typeof:    closureTypes[closureIdx],
 					ident:     closureUUIDs[closureIdx],
-					valueType: EndIf,
+					valueType: EndClosure,
 					value:     nil,
 				})
 				closureIdx--

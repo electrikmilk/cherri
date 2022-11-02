@@ -109,7 +109,7 @@ func makePlist() (plist string) {
 			currentAction = tok.value.(action).ident
 			callAction(tok.value.(action).args, plistData{}, plistData{})
 		case Repeat:
-			if tok.valueType == EndIf {
+			if tok.valueType == EndClosure {
 				shortcutActions = append(shortcutActions, makeStdAction("repeat.count", []plistData{
 					{
 						key:      "WFControlFlowMode",
@@ -141,12 +141,12 @@ func makePlist() (plist string) {
 					{
 						key:      "GroupingIdentifier",
 						dataType: Text,
-						value:    groupingUUID,
+						value:    currentGroupingUUID,
 					},
 				}))
 			}
 		case RepeatWithEach:
-			if tok.valueType == EndIf {
+			if tok.valueType == EndClosure {
 				shortcutActions = append(shortcutActions, makeStdAction("repeat.each", []plistData{
 					{
 						key:      "WFControlFlowMode",
@@ -178,13 +178,13 @@ func makePlist() (plist string) {
 					{
 						key:      "GroupingIdentifier",
 						dataType: Text,
-						value:    groupingUUID,
+						value:    currentGroupingUUID,
 					},
 				}))
 			}
 		case Menu:
 			var controlFlow = 0
-			if tok.valueType == EndIf {
+			if tok.valueType == EndClosure {
 				controlFlow = 2
 			}
 			var menuParams = []plistData{
@@ -199,7 +199,7 @@ func makePlist() (plist string) {
 					value:    controlFlow,
 				},
 			}
-			if tok.valueType != EndIf {
+			if tok.valueType != EndClosure {
 				if tok.valueType == Variable {
 					menuParams = append(menuParams, paramValue("WFMenuPrompt", actionArgument{
 						valueType: tok.valueType,
@@ -298,7 +298,7 @@ func makePlist() (plist string) {
 				controlFlowMode = 0
 			case Else:
 				controlFlowMode = 1
-			case EndIf:
+			case EndClosure:
 				controlFlowMode = 2
 			}
 			conditionalParams = append(conditionalParams, plistData{

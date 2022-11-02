@@ -19,10 +19,10 @@ var tokens []token
 /* Keywords */
 
 const (
-	Var            tokenType = "@"
+	Var            tokenType = "variable"
 	If             tokenType = "if"
 	Else           tokenType = "else"
-	EndIf          tokenType = "endif"
+	EndClosure     tokenType = "endif"
 	Repeat         tokenType = "repeat"
 	RepeatWithEach tokenType = "foreach"
 	Menu           tokenType = "menu"
@@ -88,9 +88,10 @@ func typeName(typeOf tokenType) string {
 /* Operators */
 
 const (
+	At             tokenType = "@"
 	Set            tokenType = "="
 	AddTo          tokenType = "+="
-	Is             tokenType = "=="         // is <- use these?
+	Is             tokenType = "=="         // is
 	Not            tokenType = "!="         // is not
 	Any            tokenType = "value"      // has any value
 	Empty          tokenType = "!value"     // does not have any value
