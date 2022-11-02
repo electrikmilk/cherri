@@ -23,6 +23,7 @@ var lineCharIdx int
 var closureUUIDs map[int]string
 var closureTypes map[int]tokenType
 var closureIdx int
+var currentGroupingUUID string
 
 func parse() {
 	variables = make(map[string]variableValue)
@@ -253,9 +254,9 @@ func parse() {
 				})
 			}
 		case tokenAhead(Repeat):
-			groupingUUID = shortcutsUUID()
+			currentGroupingUUID = shortcutsUUID()
 			closureIdx++
-			closureUUIDs[closureIdx] = groupingUUID
+			closureUUIDs[closureIdx] = currentGroupingUUID
 			closureTypes[closureIdx] = Repeat
 			var timesType tokenType
 			var timesValue any
@@ -264,14 +265,14 @@ func parse() {
 			tokens = append(tokens, token{
 				col:       idx,
 				typeof:    Repeat,
-				ident:     groupingUUID,
+				ident:     currentGroupingUUID,
 				valueType: timesType,
 				value:     timesValue,
 			})
 		case tokenAhead(RepeatWithEach):
-			groupingUUID = shortcutsUUID()
+			currentGroupingUUID = shortcutsUUID()
 			closureIdx++
-			closureUUIDs[closureIdx] = groupingUUID
+			closureUUIDs[closureIdx] = currentGroupingUUID
 			closureTypes[closureIdx] = RepeatWithEach
 			var iterableType tokenType
 			var iterableValue any
@@ -280,30 +281,30 @@ func parse() {
 			tokens = append(tokens, token{
 				col:       idx,
 				typeof:    RepeatWithEach,
-				ident:     groupingUUID,
+				ident:     currentGroupingUUID,
 				valueType: iterableType,
 				value:     iterableValue,
 			})
 		case tokenAhead(Menu):
-			groupingUUID = shortcutsUUID()
+			currentGroupingUUID = shortcutsUUID()
 			closureIdx++
-			closureUUIDs[closureIdx] = groupingUUID
+			closureUUIDs[closureIdx] = currentGroupingUUID
 			closureTypes[closureIdx] = Menu
 			var promptType tokenType
 			var promptValue any
 			collectValue(&promptType, &promptValue, '{')
 			collectUntil('{')
 			advance()
-			menus[groupingUUID] = []variableValue{}
+			menus[currentGroupingUUID] = []variableValue{}
 			tokens = append(tokens, token{
 				col:       idx,
 				typeof:    Menu,
-				ident:     groupingUUID,
+				ident:     currentGroupingUUID,
 				valueType: promptType,
 				value:     promptValue,
 			})
 		case tokenAhead(Case):
-			if groupingUUID == "" {
+			if currentGroupingUUID == "" {
 				parserError("Case has no starting menu statement.")
 			}
 			var itemType tokenType
@@ -311,14 +312,14 @@ func parse() {
 			collectValue(&itemType, &itemValue, ':')
 			collectUntil(':')
 			advance()
-			menus[groupingUUID] = append(menus[groupingUUID], variableValue{
+			menus[currentGroupingUUID] = append(menus[currentGroupingUUID], variableValue{
 				valueType: itemType,
 				value:     itemValue,
 			})
 			tokens = append(tokens, token{
 				col:       idx,
 				typeof:    Case,
-				ident:     groupingUUID,
+				ident:     currentGroupingUUID,
 				valueType: itemType,
 				value:     itemValue,
 			})
@@ -326,9 +327,9 @@ func parse() {
 			if len(conditions) == 0 {
 				makeConditions()
 			}
-			groupingUUID = shortcutsUUID()
+			currentGroupingUUID = shortcutsUUID()
 			closureIdx++
-			closureUUIDs[closureIdx] = groupingUUID
+			closureUUIDs[closureIdx] = currentGroupingUUID
 			closureTypes[closureIdx] = Conditional
 			var cond string
 			if isToken(Exclamation) {
@@ -362,7 +363,7 @@ func parse() {
 			tokens = append(tokens, token{
 				col:       idx,
 				typeof:    Conditional,
-				ident:     groupingUUID,
+				ident:     currentGroupingUUID,
 				valueType: If,
 				value: condition{
 					variableOneType:    variableOneType,
@@ -376,7 +377,7 @@ func parse() {
 			})
 		case tokenAhead(RightBrace):
 			if tokenAhead(Else) {
-				if groupingUUID == "" {
+				if currentGroupingUUID == "" {
 					parserError("Else has no starting if statement.")
 				}
 				tokens = append(tokens, token{

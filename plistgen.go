@@ -119,7 +119,7 @@ func makePlist() (plist string) {
 					{
 						key:      "GroupingIdentifier",
 						dataType: Text,
-						value:    groupingUUID,
+						value:    currentGroupingUUID,
 					},
 					{
 						key:      "UUID",
@@ -156,7 +156,7 @@ func makePlist() (plist string) {
 					{
 						key:      "GroupingIdentifier",
 						dataType: Text,
-						value:    groupingUUID,
+						value:    currentGroupingUUID,
 					},
 					{
 						key:      "UUID",
