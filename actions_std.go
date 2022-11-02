@@ -2160,6 +2160,26 @@ func scriptingActions() {
 			}
 		},
 	}
+	actions["openApp"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "bundleID",
+				validType: String,
+			},
+		},
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFAppIdentifier", args, 0),
+				{
+					key:      "WFSelectedApp",
+					dataType: Dictionary,
+					value: []plistData{
+						argumentValue("BundleIdentifier", args, 0),
+					},
+				},
+			}
+		},
+	}
 	actions["open"] = actionDefinition{
 		identifier: "openworkflow",
 		parameters: []parameterDefinition{
