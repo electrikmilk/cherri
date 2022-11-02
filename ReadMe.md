@@ -4,6 +4,8 @@
 
 # Cherri
 
+[![Build](https://github.com/electrikmilk/cherri/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/electrikmilk/cherri/actions/workflows/go.yml) [![Releases](https://img.shields.io/github/v/release/electrikmilk/cherri?include_prereleases)](https://github.com/electrikmilk/cherri/releases) [![Go](https://img.shields.io/github/go-mod/go-version/electrikmilk/cherri)](https://github.com/electrikmilk/cherri/blob/main/go.mod) [![License](https://img.shields.io/github/license/electrikmilk/cherri)](https://github.com/electrikmilk/cherri/blob/main/LICENSE)
+
 **Cherri** (pronounced cherry) is a [iOS Siri Shortcuts](https://apps.apple.com/us/app/shortcuts/id915249334)
 programming language, that compiles directly to a valid runnable Shortcut.
 
