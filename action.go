@@ -39,6 +39,7 @@ type actionDefinition struct {
 	parameters    []parameterDefinition
 	check         paramCheck
 	make          makeParams
+	outputType    tokenType
 }
 
 var actions map[string]actionDefinition
@@ -155,10 +156,37 @@ func checkTypes(arguments []actionArgument, checks []parameterDefinition) {
 		if len(arguments) > i {
 			typeCheck(check.name, check.validType, arguments[i])
 			if check.defaultValue.value == arguments[i].value {
-				parserWarning(fmt.Sprintf("Value for argument %d '%s' for action '%s()' of '%v', is the same as the default value.", i+1, check.name, currentAction, arguments[i].value))
+				parserWarning(
+					fmt.Sprintf(
+						"Value for argument %d '%s' for action '%s()' of '%v', is the same as the default value.",
+						i+1, check.name, currentAction, arguments[i].value,
+					),
+				)
 			}
-		} else if check.defaultValue.value == nil && check.optional != true {
-			parserError(fmt.Sprintf("Missing required argument %d '%s' to call action '%s()'", i+1, check.name, currentAction))
+		} else if check.defaultValue.value == nil && !check.optional {
+			parserError(
+				fmt.Sprintf("Missing required argument %d '%s' to call action '%s()'", i+1, check.name, currentAction),
+			)
+		}
+	}
+}
+
+func validActionOutput(field string, validType tokenType, value any) {
+	var actionIdent = value.(action).ident
+	if _, found := actions[actionIdent]; found {
+		var actionOutputType = actions[actionIdent].outputType
+		if actionOutputType != "" {
+			if actionOutputType != validType {
+				parserError(
+					fmt.Sprintf("Invalid variable value of action '%v' that outputs type '%s' for argument '%s' of type '%s' in '%s()'",
+						actionIdent+"()",
+						typeName(actionOutputType),
+						field,
+						typeName(validType),
+						currentAction,
+					),
+				)
+			}
 		}
 	}
 }
@@ -166,17 +194,17 @@ func checkTypes(arguments []actionArgument, checks []parameterDefinition) {
 func typeCheck(field string, validType tokenType, argument actionArgument) {
 	var argValueType = argument.valueType
 	var argVal = argument.value
-	if argValueType == Action {
-		// FIXME: Identify the output type of action
+	switch {
+	case argValueType == Action:
+		validActionOutput(field, validType, argVal)
 		return
-	}
-	if argValueType == Variable {
+	case argValueType == Variable:
 		var varName = argVal.(string)
 		var getVar = realVariableValue(varName, String)
 		argValueType = getVar.valueType
 		argVal = getVar.value
 		if argValueType == Action {
-			// FIXME: Identify the output type of action
+			validActionOutput(field, validType, argVal)
 			return
 		}
 		if argValueType != validType && validType != Variable {
@@ -189,7 +217,7 @@ func typeCheck(field string, validType tokenType, argument actionArgument) {
 				currentAction,
 			))
 		}
-	} else if argument.valueType != validType {
+	case argument.valueType != validType:
 		lineIdx--
 		parserError(fmt.Sprintf("Invalid value '%v' of type '%s' for argument '%s' of type '%s' in '%s()'",
 			argVal,
