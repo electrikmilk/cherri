@@ -11,6 +11,9 @@ import (
 	"strings"
 )
 
+var shortcutActions []string
+var uuids map[string]string
+
 type plistDataType string
 
 const Text plistDataType = "string"
@@ -18,6 +21,12 @@ const Number plistDataType = "integer"
 const Dictionary plistDataType = "dictionary"
 const Array plistDataType = "array"
 const Boolean plistDataType = "boolean"
+
+type plistData struct {
+	key      string
+	dataType plistDataType
+	value    any
+}
 
 type dictDataType string
 
@@ -27,24 +36,14 @@ const itemTypeArray dictDataType = "2"
 const itemTypeDict dictDataType = "1"
 const itemTypeBool dictDataType = "4"
 
-type plistData struct {
-	key      string
-	dataType plistDataType
-	value    any
-}
-
-var shortcutActions []string
-
-var uuids map[string]string
-
-var hasShortcutInputVariables = false
-
 type noInputParams struct {
 	name   string
 	params []plistData
 }
 
 var noInput noInputParams
+
+var hasShortcutInputVariables = false
 
 func plistKeyValue(key string, dataType plistDataType, value any) (pair string) {
 	if key != "" {

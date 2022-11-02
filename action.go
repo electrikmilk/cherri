@@ -220,12 +220,10 @@ func enoughArgs(arguments *[]actionArgument) {
 		if actionArgs[a].noMax {
 			break
 		}
-		if actionArgs[a].defaultValue.value == nil && actionArgs[a].optional != true {
+		if !actionArgs[a].optional {
 			if arg.value == nil {
 				parserError(fmt.Sprintf("Missing required argument '%s' to call action '%s'", actionArgs[a].name, currentAction))
 			}
-		} else if arg.value == nil {
-			arg = actionArgs[a].defaultValue
 		}
 	}
 }

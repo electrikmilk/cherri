@@ -31,7 +31,7 @@ func main() {
 	registerArg("output", "o", "Optional output file path. (e.g. /path/to/file.shortcut).")
 	if len(os.Args) <= 1 {
 		usage()
-		os.Exit(0)
+		os.Exit(1)
 	}
 	filePath = os.Args[1]
 	checkFile(filePath)

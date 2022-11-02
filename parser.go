@@ -454,7 +454,7 @@ func lookAheadUntil(until rune) (ahead string) {
 			break
 		}
 	}
-	ahead = strings.Trim(strings.Trim(strings.ToLower(ahead), " "), "\n")
+	ahead = strings.Trim(strings.ToLower(ahead), " \t\n")
 	return
 }
 
@@ -588,8 +588,7 @@ func collectComment(collect commentType) (comment string) {
 			advance()
 		}
 		comment = strings.Trim(comment, "\n")
-		advanceTimes(2)
-		advance()
+		advanceTimes(3)
 	}
 	comment = strings.Trim(comment, " ")
 	return
@@ -677,20 +676,18 @@ func advance() {
 }
 
 func advanceTimes(times int) {
-	var i int
-	for i = 0; i < times; i++ {
+	for i := 0; i < times; i++ {
 		advance()
 	}
 }
 
 func isToken(token tokenType) bool {
-	if strings.ToLower(string(char)) == string(token) {
-		var tokenLength = len(string(token))
-		advanceTimes(tokenLength)
-		return true
-	} else {
+	if strings.ToLower(string(char)) != string(token) {
 		return false
 	}
+	var tokenLength = len(string(token))
+	advanceTimes(tokenLength)
+	return true
 }
 
 func tokenAhead(token tokenType) (isAhead bool) {
@@ -752,16 +749,14 @@ func seek(mov *int, reverse bool) (requestedChar rune) {
 	return
 }
 
-func getChar(atIndex int) (returnChar rune) {
+func getChar(atIndex int) rune {
 	if atIndex == -1 {
 		return []rune(chars[0])[0]
 	}
-	if len(chars) > atIndex {
-		returnChar = []rune(chars[atIndex])[0]
-	} else {
-		returnChar = -1
+	if len(chars) < atIndex {
+		return -1
 	}
-	return
+	return []rune(chars[atIndex])[0]
 }
 
 func parserErr(err error) {
@@ -833,6 +828,6 @@ func printCurrentChar() {
 	default:
 		currentChar = string(char)
 	}
-	fmt.Println(currentChar, fmt.Sprintf("%d:%d", lineIdx+1, idx))
+	fmt.Printf("%s %d:%d", currentChar, lineIdx+1, lineCharIdx)
 }
 */

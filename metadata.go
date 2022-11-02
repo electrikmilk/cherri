@@ -117,6 +117,18 @@ func makeLanguages() {
 	languages["Vietnamese"] = "vn_VN"
 }
 
+/* Variables */
+
+var variables map[string]variableValue
+
+type variableValue struct {
+	variableType string
+	valueType    tokenType
+	value        any
+	getAs        string
+	coerce       string
+}
+
 /* Globals */
 
 var globals map[string]variableValue
@@ -159,3 +171,38 @@ func makeGlobals() {
 		value:        "Repeat Index",
 	}
 }
+
+/* Conditionals */
+
+type condition struct {
+	variableOneType    tokenType
+	variableOneValue   any
+	condition          string
+	variableTwoType    tokenType
+	variableTwoValue   any
+	variableThreeType  tokenType
+	variableThreeValue any
+}
+
+var conditions map[tokenType]string
+
+func makeConditions() {
+	conditions = make(map[tokenType]string)
+	conditions[Is] = "4"
+	conditions[Not] = "5"
+	conditions[Any] = "100"
+	conditions[Empty] = "101"
+	conditions[Contains] = "99"
+	conditions[DoesNotContain] = "999"
+	conditions[BeginsWith] = "8"
+	conditions[EndsWith] = "9"
+	conditions[GreaterThan] = "2"
+	conditions[GreaterOrEqual] = "3"
+	conditions[LessThan] = "0"
+	conditions[LessOrEqual] = "1"
+	conditions[Between] = "1003"
+}
+
+/* Menus */
+
+var menus map[string][]variableValue

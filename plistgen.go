@@ -9,7 +9,7 @@ import (
 	"reflect"
 )
 
-const header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n"
+const header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"https://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n"
 const footer = "</dict>\n</plist>"
 
 func makePlist() (plist string) {
@@ -371,8 +371,8 @@ func makePlist() (plist string) {
 			wfWorkflowTypes = append(wfWorkflowTypes, plistValue(Text, wtype))
 		}
 	}
-
 	plist += plistArray("WFWorkflowTypes", wfWorkflowTypes)
+
 	plist += footer
 
 	if arg("debug") {

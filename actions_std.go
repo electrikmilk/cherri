@@ -53,12 +53,8 @@ func calendarActions() {
 			{
 				name:      "name",
 				validType: String,
+				key:       "CalendarName",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("CalendarName", args, 0),
-			}
 		},
 	}
 	actions["addSeconds"] = actionDefinition{
