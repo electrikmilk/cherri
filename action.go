@@ -131,20 +131,21 @@ func realVariableValue(varName string, lastValueType tokenType) (varValue variab
 	if _, global := globals[varName]; global {
 		varValue = globals[varName]
 		hasInputVariables(varName)
-	} else if _, found := variables[strings.ToLower(varName)]; found {
-		varName = strings.ToLower(varName)
-		var argValueType = variables[varName].valueType
-		var value = variables[varName].value
-		if argValueType == Variable {
-			if lastValueType == Variable && argValueType == Variable {
-				parserError("Passed variable value that evaluates to variable")
-			}
-			varValue = realVariableValue(value.(string), argValueType)
-		} else {
-			varValue = variables[varName]
-		}
-	} else {
+		return
+	}
+	if _, found := variables[strings.ToLower(varName)]; !found {
 		parserError(fmt.Sprintf("Variable or Global '%s' does not exist", varName))
+	}
+	varName = strings.ToLower(varName)
+	var argValueType = variables[varName].valueType
+	var value = variables[varName].value
+	if argValueType == Variable {
+		if lastValueType == Variable && argValueType == Variable {
+			parserError("Passed variable value that evaluates to variable")
+		}
+		varValue = realVariableValue(value.(string), argValueType)
+	} else {
+		varValue = variables[varName]
 	}
 	return
 }
