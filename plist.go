@@ -429,19 +429,20 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 	var coerce string
 	for _, chr := range variableChars {
 		if collectingVariable {
-			if collectingGetAs {
+			switch {
+			case collectingGetAs:
 				if chr == "]" {
 					collectingGetAs = false
 					continue
 				}
 				getAs += chr
-			} else if collectingCoerce {
+			case collectingCoerce:
 				if chr == ")" {
 					collectingCoerce = false
 					continue
 				}
 				coerce += chr
-			} else {
+			default:
 				if chr == "}" {
 					varIndex[varNum] = attachmentVariable{
 						varName: currentVariable,
@@ -631,7 +632,7 @@ func argumentValue(key string, args []actionArgument, idx int) plistData {
 	var actionArg = actions[currentAction].parameters[idx]
 	var arg actionArgument
 	if len(args) <= idx {
-		if actionArg.optional == true {
+		if actionArg.optional {
 			return plistData{}
 		}
 		if actionArg.defaultValue.value != nil {

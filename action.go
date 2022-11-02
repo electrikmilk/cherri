@@ -178,7 +178,8 @@ func validActionOutput(field string, validType tokenType, value any) {
 		if actionOutputType != "" {
 			if actionOutputType != validType {
 				parserError(
-					fmt.Sprintf("Invalid variable value of action '%v' that outputs type '%s' for argument '%s' of type '%s' in '%s()'",
+					fmt.Sprintf(
+						"Invalid variable value of action '%v' that outputs type '%s' for argument '%s' of type '%s' in '%s()'",
 						actionIdent+"()",
 						typeName(actionOutputType),
 						field,
