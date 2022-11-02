@@ -76,7 +76,12 @@ func callAction(arguments []actionArgument, outputName plistData, actionUUID pli
 			}
 		}
 	}
-	checkIdentify(&params, outputName, actionUUID)
+	if outputName.value != nil {
+		params = append(params, outputName)
+	}
+	if actionUUID.value != nil {
+		params = append(params, actionUUID)
+	}
 	shortcutActions = append(shortcutActions, makeAction(ident, params))
 }
 
@@ -225,15 +230,6 @@ func enoughArgs(arguments *[]actionArgument) {
 				parserError(fmt.Sprintf("Missing required argument '%s' to call action '%s'", actionArgs[a].name, currentAction))
 			}
 		}
-	}
-}
-
-func checkIdentify(params *[]plistData, outputName plistData, actionUUID plistData) {
-	if outputName.value != nil {
-		*params = append(*params, outputName)
-	}
-	if actionUUID.value != nil {
-		*params = append(*params, actionUUID)
 	}
 }
 
