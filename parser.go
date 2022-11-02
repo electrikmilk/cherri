@@ -607,7 +607,20 @@ func collectInteger() (integer string) {
 }
 
 func collectString() (str string) {
-	return collectUntil('"')
+	for char != -1 {
+		if char == '"' && prev(1) != '\\' {
+			break
+		}
+		if char == '\\' && next(1) == '"' {
+			advance()
+			continue
+		}
+		str += string(char)
+		advance()
+	}
+	advance()
+	str = strings.Trim(str, " ")
+	return
 }
 
 func collectArray(until rune) (array interface{}) {
