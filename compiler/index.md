@@ -2,6 +2,8 @@
 
 Welcome to the Cherri programming language compiler documentation!
 
+Before contributing, please make sure you have read the [contributing guidelines](https://github.com/electrikmilk/cherri/blob/main/CONTRIBUTING.md).
+
 If you are looking for documentation on usage of the Cherri programming language, [click here](https://electrikmilk.github.io/cherri/language/).
 
 Contributing to this open-source documentation is recommended as this language is in the early stages and while most
