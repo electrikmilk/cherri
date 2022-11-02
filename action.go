@@ -108,7 +108,7 @@ func makeStdAction(ident string, params []plistData) string {
 
 func checkAction(arguments []actionArgument) {
 	if len(actions[currentAction].parameters) > 0 {
-		enoughArgs(&arguments)
+		checkArgs(&arguments)
 		checkTypes(arguments, actions[currentAction].parameters)
 	}
 	if actions[currentAction].check != nil {
@@ -216,7 +216,7 @@ func getArgValue(variable actionArgument) any {
 	return variable.value
 }
 
-func enoughArgs(arguments *[]actionArgument) {
+func checkArgs(arguments *[]actionArgument) {
 	var actionArgs = actions[currentAction].parameters
 	for a, arg := range *arguments {
 		if (len(actionArgs) - 1) < a {
