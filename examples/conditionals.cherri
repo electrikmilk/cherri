@@ -15,8 +15,10 @@ if intVar > 5 {}
 if intVar < 5 {}
 if intVar >= 5 {}
 if intVar <= 5 {}
-if intVar beginsWith 5 {}
-if intVar endsWith 5 {}
+if textVar contains "string" {}
+if textVar !contains "2" {}
+if textVar beginsWith "string" {}
+if textVar2 endsWith "2" {}
 if intVar <> 5 6 {} // between
 
 // nesting...
