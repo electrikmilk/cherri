@@ -3344,6 +3344,12 @@ func customActions() {
 				validType: String,
 			},
 		},
+		check: func(args []actionArgument) {
+			var image = getArgValue(args[2])
+			if reflect.TypeOf(image).String() != stringType {
+				parserError("Image path for VCard must be a string literal")
+			}
+		},
 		make: func(args []actionArgument) []plistData {
 			var title = args[0].value.(string)
 			var subtitle = args[1].value.(string)
@@ -3356,12 +3362,7 @@ func customActions() {
 			var vcard = "BEGIN:VCARD\nVERSION:3.0\n"
 			vcard += "N;CHARSET=utf-8:" + title + "\n"
 			vcard += "ORG:" + subtitle + "\nPHOTO;ENCODING=b:"
-			var image = getArgValue(args[2])
-			if reflect.TypeOf(image).String() != "string" {
-				fmt.Println("\n\033[31mImage path for VCard must be a string literal\033[0m")
-				os.Exit(1)
-			}
-			bytes, readErr := os.ReadFile(image.(string))
+			bytes, readErr := os.ReadFile(getArgValue(args[2]).(string))
 			handle(readErr)
 			vcard += base64.StdEncoding.EncodeToString(bytes) + "\nEND:VCARD"
 			args[0] = actionArgument{
