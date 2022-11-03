@@ -23,6 +23,7 @@ func TestCherri(t *testing.T) {
 			currentTest = "examples/" + file.Name()
 			fmt.Printf("\nCompiling \033[1m%s\033[0m...\n", currentTest)
 			os.Args[1] = currentTest
+			args["unsigned"] = ""
 			resetParser()
 			main()
 			fmt.Println("\033[32mPASSED\033[0m")
