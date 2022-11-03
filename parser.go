@@ -351,6 +351,7 @@ func parse() {
 					collectValue(&variableThreeType, &variableThreeValue, '{')
 				}
 			}
+			isToken(LeftBrace)
 			tokens = append(tokens, token{
 				typeof:    Conditional,
 				ident:     currentGroupingUUID,
