@@ -218,7 +218,6 @@ func parse() {
 				}
 			}
 			tokens = append(tokens, token{
-				col:       idx,
 				typeof:    varType,
 				ident:     identifier,
 				valueType: valueType,
@@ -236,7 +235,6 @@ func parse() {
 		case isToken(ForwardSlash):
 			if isToken(ForwardSlash) {
 				tokens = append(tokens, token{
-					col:       idx,
 					typeof:    Comment,
 					ident:     "",
 					valueType: String,
@@ -244,7 +242,6 @@ func parse() {
 				})
 			} else {
 				tokens = append(tokens, token{
-					col:       idx,
 					typeof:    Comment,
 					ident:     "",
 					valueType: String,
@@ -261,7 +258,6 @@ func parse() {
 			collectValue(&timesType, &timesValue, '{')
 			advance()
 			tokens = append(tokens, token{
-				col:       idx,
 				typeof:    Repeat,
 				ident:     currentGroupingUUID,
 				valueType: timesType,
@@ -277,7 +273,6 @@ func parse() {
 			collectValue(&iterableType, &iterableValue, '{')
 			advance()
 			tokens = append(tokens, token{
-				col:       idx,
 				typeof:    RepeatWithEach,
 				ident:     currentGroupingUUID,
 				valueType: iterableType,
@@ -295,7 +290,6 @@ func parse() {
 			advance()
 			menus[currentGroupingUUID] = []variableValue{}
 			tokens = append(tokens, token{
-				col:       idx,
 				typeof:    Menu,
 				ident:     currentGroupingUUID,
 				valueType: promptType,
@@ -315,7 +309,6 @@ func parse() {
 				value:     itemValue,
 			})
 			tokens = append(tokens, token{
-				col:       idx,
 				typeof:    Case,
 				ident:     currentGroupingUUID,
 				valueType: itemType,
@@ -359,7 +352,6 @@ func parse() {
 				}
 			}
 			tokens = append(tokens, token{
-				col:       idx,
 				typeof:    Conditional,
 				ident:     currentGroupingUUID,
 				valueType: If,
@@ -379,7 +371,6 @@ func parse() {
 					parserError("Else has no starting if statement.")
 				}
 				tokens = append(tokens, token{
-					col:       idx,
 					typeof:    Conditional,
 					ident:     closureUUIDs[closureIdx],
 					valueType: Else,
@@ -391,7 +382,6 @@ func parse() {
 					parserError("Ending closure has no starting statement.")
 				}
 				tokens = append(tokens, token{
-					col:       idx,
 					typeof:    closureTypes[closureIdx],
 					ident:     closureUUIDs[closureIdx],
 					valueType: EndClosure,
@@ -409,7 +399,6 @@ func parse() {
 				currentAction = identifier
 				checkAction(arguments)
 				tokens = append(tokens, token{
-					col:       idx,
 					typeof:    Action,
 					ident:     identifier,
 					valueType: Action,

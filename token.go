@@ -7,7 +7,6 @@ package main
 type tokenType string
 
 type token struct {
-	col       int
 	typeof    tokenType
 	ident     string
 	valueType tokenType

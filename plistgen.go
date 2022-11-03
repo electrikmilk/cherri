@@ -82,7 +82,6 @@ func makePlist() (plist string) {
 						itemIdent = "Dictionary"
 					}
 					makeVariableValue(&token{
-						col:       tok.col,
 						typeof:    valueType,
 						ident:     itemIdent,
 						valueType: valueType,
