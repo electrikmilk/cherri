@@ -742,10 +742,10 @@ func getChar(atIndex int) rune {
 	if atIndex == -1 {
 		return []rune(chars[0])[0]
 	}
-	if len(chars) < atIndex {
-		return -1
+	if len(chars) > atIndex {
+		return []rune(chars[atIndex])[0]
 	}
-	return []rune(chars[atIndex])[0]
+	return -1
 }
 
 func parserErr(err error) {
