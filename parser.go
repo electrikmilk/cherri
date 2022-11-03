@@ -818,6 +818,6 @@ func printCurrentChar() {
 	default:
 		currentChar = string(char)
 	}
-	fmt.Printf("%s %d:%d", currentChar, lineIdx+1, lineCharIdx)
+	fmt.Printf("%s %d:%d\n", currentChar, lineIdx+1, lineCharIdx)
 }
 */
