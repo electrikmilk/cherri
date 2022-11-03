@@ -11,19 +11,9 @@ programming language, that compiles directly to a valid runnable Shortcut.
 
 [Documentation](https://electrikmilk.github.io/cherri/)
 
-[`hello-world.cherri`](examples/hello-world.cherri)
+[![Hello World Example](assets/example.png)](examples/hello-world.cherri)
 
-```
-#define color yellow
-#define glyph smiley
-#define name Hello, Cherri!
-
-@message = "Hello, Cherri!"
-alert(message, "Alert", false)
-```
-
-This project is in the early stages of development, but it does have an [_
-idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap).
+This project is in the early stages of development, but it does have an [_idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap).
 
 ### Usage
 
