@@ -17,6 +17,9 @@ import (
 //  Use the "hash" action as an example.
 
 func standardActions() {
+	if len(actions) != 0 {
+		return
+	}
 	calendarActions()
 	contactActions()
 	documentActions()

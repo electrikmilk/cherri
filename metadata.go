@@ -12,6 +12,9 @@ var colors map[string]string
 var iconColor = "-1263359489"
 
 func makeColors() {
+	if len(colors) != 0 {
+		return
+	}
 	colors = make(map[string]string)
 	colors["red"] = "4282601983"
 	colors["darkorange"] = "4251333119"
@@ -37,6 +40,9 @@ var inputs []string
 var outputs []string
 
 func makeContentItems() {
+	if len(contentItems) != 0 {
+		return
+	}
 	contentItems = make(map[string]string)
 	contentItems["app"] = "WFAppStoreAppContentItem"
 	contentItems["article"] = "WFArticleContentItem"
@@ -65,6 +71,9 @@ var workflowTypes map[string]string
 var types []string
 
 func makeWorkflowTypes() {
+	if len(workflowTypes) != 0 {
+		return
+	}
 	workflowTypes = make(map[string]string)
 	workflowTypes["menubar"] = "MenuBar"
 	workflowTypes["quickactions"] = "QuickActions"
@@ -82,6 +91,9 @@ var versions map[string]string
 var minimumVersion = "900"
 
 func makeVersions() {
+	if len(versions) != 0 {
+		return
+	}
 	versions = make(map[string]string)
 	versions["16"] = "900"
 	versions["15"] = "800"
@@ -95,6 +107,9 @@ func makeVersions() {
 var languages map[string]string
 
 func makeLanguages() {
+	if len(languages) != 0 {
+		return
+	}
 	languages = make(map[string]string)
 	languages["Arabic"] = "ar_AE"
 	languages["Mandarin Chinese (Mainland)"] = "zh_CN"
@@ -134,6 +149,9 @@ type variableValue struct {
 var globals map[string]variableValue
 
 func makeGlobals() {
+	if len(globals) != 0 {
+		return
+	}
 	globals = make(map[string]variableValue)
 	globals["ShortcutInput"] = variableValue{
 		variableType: "ExtensionInput",
@@ -187,6 +205,9 @@ type condition struct {
 var conditions map[tokenType]string
 
 func makeConditions() {
+	if len(conditions) != 0 {
+		return
+	}
 	conditions = make(map[tokenType]string)
 	conditions[Is] = "4"
 	conditions[Not] = "5"

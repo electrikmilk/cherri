@@ -69,9 +69,7 @@ func parse() {
 					parserError(fmt.Sprintf("Invalid icon glyph '%s'\n\n%s\n", collectGlyph, list))
 				}
 			case tokenAhead(Inputs):
-				if len(contentItems) == 0 {
-					makeContentItems()
-				}
+				makeContentItems()
 				var collectInputs = collectUntil('\n')
 				if collectInputs != "" {
 					var definedInputs = strings.Split(collectInputs, ",")
@@ -86,9 +84,7 @@ func parse() {
 					}
 				}
 			case tokenAhead(Outputs):
-				if len(contentItems) == 0 {
-					makeContentItems()
-				}
+				makeContentItems()
 				var collectOutputs = collectUntil('\n')
 				if collectOutputs != "" {
 					var definedOutputs = strings.Split(collectOutputs, ",")
@@ -315,9 +311,7 @@ func parse() {
 				value:     itemValue,
 			})
 		case tokenAhead(If):
-			if len(conditions) == 0 {
-				makeConditions()
-			}
+			makeConditions()
 			currentGroupingUUID = shortcutsUUID()
 			closureIdx++
 			closureUUIDs[closureIdx] = currentGroupingUUID
@@ -391,9 +385,7 @@ func parse() {
 				closureIdx--
 			}
 		case strings.Contains(lookAhead(), "("):
-			if len(actions) == 0 {
-				standardActions()
-			}
+			standardActions()
 			var identifier = collectUntil('(')
 			if _, found := actions[identifier]; found {
 				var arguments = collectArguments()
@@ -486,9 +478,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*valueType = Bool
 		*value = false
 	case strings.Contains(lookAheadUntil(until), "("):
-		if len(actions) == 0 {
-			standardActions()
-		}
+		standardActions()
 		var identifier = collectUntil('(')
 		if _, found := actions[identifier]; found {
 			var arguments = collectArguments()

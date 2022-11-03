@@ -332,9 +332,7 @@ func variablePlistValue(key string, varName string, ident string) plistData {
 			}))
 		}
 		if coerce != "" {
-			if len(contentItems) == 0 {
-				makeContentItems()
-			}
+			makeContentItems()
 			if _, found := contentItems[coerce]; found {
 				aggrandizements = append(aggrandizements, plistDict("", []plistData{
 					{

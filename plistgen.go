@@ -335,9 +335,7 @@ func makePlist() (plist string) {
 
 	var inputContentItems []string
 	if len(inputs) == 0 {
-		if len(contentItems) == 0 {
-			makeContentItems()
-		}
+		makeContentItems()
 		for _, input := range contentItems {
 			inputContentItems = append(inputContentItems, plistValue(Text, input))
 		}
@@ -351,9 +349,7 @@ func makePlist() (plist string) {
 
 	var outputContentItems []string
 	if len(outputs) != 0 {
-		if len(contentItems) == 0 {
-			makeContentItems()
-		}
+		makeContentItems()
 		for _, output := range outputs {
 			outputContentItems = append(outputContentItems, plistValue(Text, output))
 		}

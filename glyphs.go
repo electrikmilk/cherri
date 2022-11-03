@@ -10,6 +10,9 @@ var glyphs map[string]int
 var iconGlyph int64 = 61440
 
 func makeGlyphs() {
+	if len(glyphs) != 0 {
+		return
+	}
 	glyphs = make(map[string]int)
 	glyphs["car"] = 0xe83c
 	glyphs["bus"] = 0xe91e
