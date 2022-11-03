@@ -787,6 +787,7 @@ func parserError(message string) {
 		}
 	}
 	if arg("debug") {
+		fmt.Println(tokens)
 		panic("parser error")
 	} else {
 		os.Exit(1)
