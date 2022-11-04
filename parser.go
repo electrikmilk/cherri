@@ -51,7 +51,7 @@ func parse() {
 					iconColor = colors[collectColor]
 				} else {
 					var list = makeKeyList("Available icon colors:", colors)
-					parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s\n", collectColor, list))
+					parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s", collectColor, list))
 				}
 			case tokenAhead(Glyph):
 				var collectGlyph = collectUntil('\n')
@@ -66,7 +66,7 @@ func parse() {
 					for key := range glyphs {
 						list += "- " + key + "\n"
 					}
-					parserError(fmt.Sprintf("Invalid icon glyph '%s'\n\n%s\n", collectGlyph, list))
+					parserError(fmt.Sprintf("Invalid icon glyph '%s'\n\n%s", collectGlyph, list))
 				}
 			case tokenAhead(Inputs):
 				makeContentItems()
@@ -79,7 +79,7 @@ func parse() {
 							inputs = append(inputs, contentItems[input])
 						} else {
 							var list = makeKeyList("Available content items:", contentItems)
-							parserError(fmt.Sprintf("Invalid input content item '%s'\n\n%s\n", input, list))
+							parserError(fmt.Sprintf("Invalid input content item '%s'\n\n%s", input, list))
 						}
 					}
 				}
@@ -94,7 +94,7 @@ func parse() {
 							outputs = append(outputs, contentItems[output])
 						} else {
 							var list = makeKeyList("Available content items:", contentItems)
-							parserError(fmt.Sprintf("Invalid output content item '%s'\n\n%s\n", output, list))
+							parserError(fmt.Sprintf("Invalid output content item '%s'\n\n%s", output, list))
 						}
 					}
 				}
@@ -109,7 +109,7 @@ func parse() {
 							types = append(types, workflowTypes[wtype])
 						} else {
 							var list = makeKeyList("Available workflow types:", workflowTypes)
-							parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s\n", wtype, list))
+							parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
 						}
 					}
 				}
@@ -145,7 +145,7 @@ func parse() {
 						}
 					} else {
 						var list = makeKeyList("Available workflow types:", workflowTypes)
-						parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s\n", wtype, list))
+						parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
 					}
 				case tokenAhead(GetClipboard):
 					noInput = noInputParams{
