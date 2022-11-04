@@ -9,7 +9,7 @@
 **Cherri** (pronounced cherry) is a [iOS Siri Shortcuts](https://apps.apple.com/us/app/shortcuts/id915249334)
 programming language, that compiles directly to a valid runnable Shortcut.
 
-[Documentation](https://electrikmilk.github.io/cherri/)
+[Documentation](https://electrikmilk.github.io/cherri/) • [Code Tour](https://youtu.be/gU8TsI96uww)
 
 [![Hello World Example](assets/example.png)](examples/hello-world.cherri)
 
