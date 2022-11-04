@@ -28,3 +28,4 @@ To download property list (.plist) versions of Shortcuts for further reference, 
 - [Metadata](metadata.md)
 - [Property List Generation](plistgen.md)
 - [Parsing](parsing.md)
+- [Code Tour Video](https://youtu.be/gU8TsI96uww)
