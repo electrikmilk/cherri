@@ -52,6 +52,8 @@ reproduce it, what environment it may be isolated to are clearly communicated.
 
 - Test your code to the best of your ability, do not submit code that does not compile.
 - Write in the imperative (Fix bug, Add thing, etc.)
+- If you change how a feature works, modify the existing feature or add the new feature to the examples folders. These
+  files are language examples obviously, but are also used as test files in the main workflow.
 - Test your feature or bug fix by writing a Cherri file and checking that it compiles to a valid Shortcut. If you are on
   a non-macOS platform using the `--unsigned` argument, the Shortcut will compile, but may be invalid. Use an XML linter
   or validator on the compiled Shortcut file.
