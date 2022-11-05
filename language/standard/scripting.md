@@ -6,9 +6,9 @@ These actions are the most complete.
 
 ### Apps
 
-### `openApp(appId)`
+### `openApp(bundleId)`
 
-Open app with `appId`. For example `com.apple.AppStore`.
+Open app with `bundleId`. For example `com.apple.AppStore`.
 
 _Contributed by [JosephShenton](https://github.com/JosephShenton)_.
 
