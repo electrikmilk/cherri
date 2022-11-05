@@ -27,6 +27,11 @@ func TestCherri(t *testing.T) {
 			resetParser()
 			main()
 			fmt.Println("\033[32mPASSED\033[0m")
+			var compiledFile = strings.Replace(file.Name(), ".cherri", "_unsigned.shortcut", 1)
+			err := os.Remove(compiledFile)
+			if err != nil {
+				fmt.Printf("Failed to remove test file %s!\n", compiledFile)
+			}
 		}
 	}
 }
