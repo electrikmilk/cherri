@@ -4,6 +4,20 @@
 
 These actions are the most complete.
 
+### Apps
+
+### `openApp(appId)`
+
+Open app with `appId`. For example `com.apple.AppStore`.
+
+_Contributed by [JosephShenton](https://github.com/JosephShenton)_.
+
+### Content
+
+### `getOnScreenContent()`
+
+Get content on device screen.
+
 ## Control Flow
 
 Some of these actions are abstracted into statements:
@@ -48,12 +62,6 @@ Wait `number` of seconds.
 ### `waitToReturn()`
 
 Wait for the user to return to the Shortcut.
-
-### Content
-
-### `getOnScreenContent()`
-
-Get content on device screen.
 
 ## Device
 
