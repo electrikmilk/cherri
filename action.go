@@ -469,6 +469,38 @@ func count(countType string, args []actionArgument) []plistData {
 	}
 }
 
+var appIds map[string]string
+
+func makeAppIds() {
+	if len(appIds) != 0 {
+		return
+	}
+	appIds = make(map[string]string)
+	appIds["appstore"] = "com.apple.AppStore"
+	appIds["files"] = "com.apple.DocumentsApp"
+	appIds["shortcuts"] = "is.workflow.my.app"
+	appIds["safari"] = "com.apple.mobilesafari"
+	appIds["facetime"] = "com.apple.facetime"
+	appIds["notes"] = "com.apple.mobilenotes"
+	appIds["phone"] = "com.apple.mobilephone"
+	appIds["reminders"] = "com.apple.reminders"
+	appIds["mail"] = "com.apple.mobilemail"
+	appIds["music"] = "com.apple.Music"
+	appIds["calendar"] = "com.apple.mobilecal"
+	appIds["maps"] = "com.apple.Maps"
+	appIds["contacts"] = "com.apple.MobileAddressBook"
+	appIds["health"] = "com.apple.Health"
+	appIds["photos"] = "com.apple.mobileslideshow"
+}
+
+func replaceAppId(args []actionArgument) {
+	makeAppIds()
+	var id = getArgValue(args[0]).(string)
+	if _, found := appIds[id]; found {
+		args[0].value = appIds[id]
+	}
+}
+
 func makeLibraries() {
 	libraries = make(map[string]libraryDefinition)
 }

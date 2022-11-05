@@ -2162,10 +2162,11 @@ func scriptingActions() {
 	actions["openApp"] = actionDefinition{
 		parameters: []parameterDefinition{
 			{
-				name:      "bundleID",
+				name:      "appID",
 				validType: String,
 			},
 		},
+		check: replaceAppId,
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				argumentValue("WFAppIdentifier", args, 0),
@@ -2175,6 +2176,74 @@ func scriptingActions() {
 					value: []plistData{
 						argumentValue("BundleIdentifier", args, 0),
 					},
+				},
+			}
+		},
+	}
+	actions["hideApp"] = actionDefinition{
+		identifier: "hide.app",
+		parameters: []parameterDefinition{
+			{
+				name:      "appId",
+				validType: String,
+			},
+		},
+		check: replaceAppId,
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFApp",
+					dataType: Dictionary,
+					value: []plistData{
+						argumentValue("BundleIdentifier", args, 0),
+					},
+				},
+			}
+		},
+	}
+	actions["quitApp"] = actionDefinition{
+		identifier: "quit.app",
+		parameters: []parameterDefinition{
+			{
+				name:      "appId",
+				validType: String,
+			},
+		},
+		check: replaceAppId,
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFApp",
+					dataType: Dictionary,
+					value: []plistData{
+						argumentValue("BundleIdentifier", args, 0),
+					},
+				},
+			}
+		},
+	}
+	actions["killApp"] = actionDefinition{
+		identifier: "quit.app",
+		parameters: []parameterDefinition{
+			{
+				name:      "appId",
+				validType: String,
+			},
+		},
+		check: replaceAppId,
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFApp",
+					dataType: Dictionary,
+					value: []plistData{
+						argumentValue("BundleIdentifier", args, 0),
+					},
+				},
+				{
+					key:      "WFAskToSaveChanges",
+					dataType: Boolean,
+					value:    false,
 				},
 			}
 		},
