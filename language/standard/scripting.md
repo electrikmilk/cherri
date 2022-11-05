@@ -6,11 +6,45 @@ These actions are the most complete.
 
 ### Apps
 
-### `openApp(bundleId)`
+### `openApp(appId)`
 
-Open app with `bundleId`. For example `com.apple.AppStore`.
+Open app with `appId`. For example `com.apple.AppStore`.
 
 _Contributed by [JosephShenton](https://github.com/JosephShenton)_.
+
+#### App ID Shorthands
+
+- `appstore`
+- `files`
+- `shortcuts`
+- `safari`
+- `facetime`
+- `notes`
+- `phone`
+- `reminders`
+- `mail`
+- `music`
+- `calendar`
+- `maps`
+- `contacts`
+- `health`
+- `photos`
+
+### `hideApp(appId)`
+
+Hide app with `appId`. For example `com.apple.AppStore`.
+
+---
+
+### `quitApp(appId)`
+
+Quit app with `appId`. For example `com.apple.DocumentsApp`.
+
+---
+
+### `killApp(appId)`
+
+Quit app with `appId` without asking to save changes. For example `com.apple.facetime`.
 
 ### Content
 
