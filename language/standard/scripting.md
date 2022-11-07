@@ -4,7 +4,7 @@
 
 These actions are the most complete.
 
-### Apps
+## Apps
 
 ### `openApp(appId)`
 
@@ -46,7 +46,7 @@ Quit app with `appId`. For example `com.apple.DocumentsApp`.
 
 Quit app with `appId` without asking to save changes. For example `com.apple.facetime`.
 
-### Content
+## Content
 
 ### `getOnScreenContent()`
 
