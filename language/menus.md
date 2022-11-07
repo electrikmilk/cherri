@@ -4,7 +4,7 @@
 
 ## 1. Choose From Menu
 
-The syntax for Menus is similar to a `switch` statement in other languages. Use the following syntax to create a menu:
+The syntax for menus are similar to a `switch` statement in other languages. Use the following syntax to create a menu:
 
 ```cherri
 menu "Prompt" {
