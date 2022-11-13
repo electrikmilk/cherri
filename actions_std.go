@@ -2141,22 +2141,18 @@ func scriptingActions() {
 			{
 				name:      "key",
 				validType: String,
+				key:       "WFDictionaryKey",
 			},
 			{
 				name:      "value",
-				validType: Variable,
+				validType: String,
+				key:       "WFDictionaryValue",
 			},
 			{
 				name:      "dictionary",
 				validType: Dict,
+				key:       "WFDictionary",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFDictionary", args, 0),
-				argumentValue("WFDictionaryKey", args, 1),
-				argumentValue("WFDictionaryValue", args, 2),
-			}
 		},
 	}
 	actions["openApp"] = actionDefinition{

@@ -26,3 +26,5 @@ alert(value,"Value of key1",false)
 @keys = getKeys(dictVar)
 
 @values = getValues(dictVar)
+
+setValue("key 1", value, dictVar)
