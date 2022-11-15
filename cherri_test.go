@@ -21,12 +21,13 @@ func TestCherri(t *testing.T) {
 	for _, file := range files {
 		if strings.Contains(file.Name(), ".cherri") {
 			currentTest = "examples/" + file.Name()
-			fmt.Printf("\nCompiling \033[1m%s\033[0m...\n", currentTest)
+			fmt.Printf("Compiling \033[1m%s\033[0m...\n", currentTest)
 			os.Args[1] = currentTest
 			args["unsigned"] = ""
 			resetParser()
 			main()
 			fmt.Println("\033[32mPASSED\033[0m")
+			fmt.Print("\n")
 			var compiledFile = strings.Replace(file.Name(), ".cherri", "_unsigned.shortcut", 1)
 			err := os.Remove(compiledFile)
 			if err != nil {
