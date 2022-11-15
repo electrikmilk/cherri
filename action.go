@@ -117,8 +117,14 @@ func checkAction(arguments []actionArgument) {
 	}
 }
 
-func checkEnum(name string, arg actionArgument, enum []string) {
-	var value = strings.ToLower(getArgValue(arg).(string))
+func checkEnum(name string, enum []string, args []actionArgument, idx int) {
+	if len(args) < idx {
+		return
+	}
+	if args[idx].value == nil {
+		return
+	}
+	var value = strings.ToLower(getArgValue(args[idx]).(string))
 	if !contains(enum, value) {
 		var enumList string
 		for _, e := range enum {

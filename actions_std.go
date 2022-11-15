@@ -581,9 +581,7 @@ func documentActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			if args[0].value != nil {
-				checkEnum("error correction level", args[0], errorCorrectionLevels)
-			}
+			checkEnum("error correction level", errorCorrectionLevels, args, 0)
 		},
 	}
 	actions["showNote"] = actionDefinition{
@@ -1775,8 +1773,8 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			if args[1].value != nil {
-				checkEnum("hash type", args[1], hashTypes)
+			checkEnum("hash type", hashTypes, args, 1)
+			if args[1].value != nil && args[1].valueType != Variable {
 				args[1].value = strings.ToUpper(args[1].value.(string))
 			}
 		},
@@ -2468,7 +2466,7 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			checkEnum("IP address type", args[0], ipTypes)
+			checkEnum("IP address type", ipTypes, args, 0)
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -2495,7 +2493,7 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			checkEnum("IP address type", args[0], ipTypes)
+			checkEnum("IP address type", ipTypes, args, 0)
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -3180,7 +3178,7 @@ func webActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			checkEnum("search engine", args[0], engines)
+			checkEnum("search engine", engines, args, 0)
 		},
 	}
 	actions["showWebpage"] = actionDefinition{
@@ -3239,7 +3237,7 @@ func webActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			checkEnum("webpage detail", args[1], webpageDetails)
+			checkEnum("webpage detail", webpageDetails, args, 1)
 		},
 	}
 	actions["getArticleDetail"] = actionDefinition{
@@ -3344,7 +3342,7 @@ func webActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			checkEnum("URL component", args[0], urlComponents)
+			checkEnum("URL component", urlComponents, args, 0)
 		},
 	}
 	actions["downloadURL"] = actionDefinition{
