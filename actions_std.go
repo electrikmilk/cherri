@@ -2139,6 +2139,11 @@ func scriptingActions() {
 		identifier: "setvalueforkey",
 		parameters: []parameterDefinition{
 			{
+				name:      "dictionary",
+				validType: Variable,
+				key:       "WFDictionary",
+			},
+			{
 				name:      "key",
 				validType: String,
 				key:       "WFDictionaryKey",
@@ -2147,11 +2152,6 @@ func scriptingActions() {
 				name:      "value",
 				validType: String,
 				key:       "WFDictionaryValue",
-			},
-			{
-				name:      "dictionary",
-				validType: Dict,
-				key:       "WFDictionary",
 			},
 		},
 	}

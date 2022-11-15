@@ -27,4 +27,4 @@ alert(value,"Value of key1",false)
 
 @values = getValues(dictVar)
 
-setValue("key 1", value, dictVar)
+setValue(dictVar, "key 1", value)
