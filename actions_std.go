@@ -3371,44 +3371,60 @@ func webActions() {
 			}
 		},
 	}
-	var bodyTypes = []string{"json", "form", "file"}
 	var httpMethods = []string{"get", "post", "put", "patch", "delete"}
-	actions["httpRequest"] = actionDefinition{
-		parameters: []parameterDefinition{
-			{
-				name:      "url",
-				validType: String,
-			},
-			{
-				name:      "method",
-				validType: String,
-			},
-			{
-				name:      "body",
-				validType: Dict,
-				optional:  true,
-			},
-			{
-				name:      "bodyType",
-				validType: String,
-				optional:  true,
-			},
-			{
-				name:      "headers",
-				validType: Dict,
-				optional:  true,
+	var httpParams = []parameterDefinition{
+		{
+			name:      "url",
+			validType: String,
+		},
+		{
+			name:      "method",
+			validType: String,
+			optional:  true,
+			defaultValue: actionArgument{
+				valueType: String,
+				value:     "GET",
 			},
 		},
+		{
+			name:      "body",
+			validType: Variable,
+			optional:  true,
+		},
+		{
+			name:      "headers",
+			validType: Dict,
+			optional:  true,
+		},
+	}
+	actions["formRequest"] = actionDefinition{
+		identifier: "downloadurl",
+		parameters: httpParams,
 		check: func(args []actionArgument) {
-			if args[1].value != nil {
-				checkEnum("HTTP method", args[1], httpMethods)
-			}
-			if args[3].value != nil {
-				checkEnum("HTTP body type", args[3], bodyTypes)
-			}
+			checkEnum("HTTP method", httpMethods, args, 1)
 		},
 		make: func(args []actionArgument) []plistData {
-			return argumentValues(&args, "WFURL", "WFHTTPMethod", "WFFormValues", "WFHTTPBodyType", "WFHTTPHeaders")
+			return httpRequest("Form", "WFFormValues", args)
+		},
+	}
+	actions["jsonRequest"] = actionDefinition{
+		identifier: "downloadurl",
+		parameters: httpParams,
+		check: func(args []actionArgument) {
+			checkEnum("HTTP method", httpMethods, args, 1)
+		},
+		make: func(args []actionArgument) []plistData {
+			return httpRequest("JSON", "WFJSONValues", args)
+		},
+	}
+	actions["fileRequest"] = actionDefinition{
+		identifier: "downloadurl",
+		parameters: httpParams,
+		check: func(args []actionArgument) {
+			checkEnum("HTTP method", httpMethods, args, 1)
+		},
+		make: func(args []actionArgument) []plistData {
+			return httpRequest("File", "WFRequestVariable", args)
 		},
 	}
 }
@@ -3697,5 +3713,19 @@ func replaceAppId(args []actionArgument) {
 	var id = getArgValue(args[0]).(string)
 	if _, found := appIds[id]; found {
 		args[0].value = appIds[id]
+	}
+}
+
+func httpRequest(bodyType string, valuesKey string, args []actionArgument) []plistData {
+	return []plistData{
+		{
+			key:      "WFHTTPBodyType",
+			dataType: Text,
+			value:    bodyType,
+		},
+		argumentValue("WFURL", args, 0),
+		argumentValue("WFHTTPMethod", args, 1),
+		argumentValue(valuesKey, args, 2),
+		argumentValue("WFHTTPHeaders", args, 3),
 	}
 }
