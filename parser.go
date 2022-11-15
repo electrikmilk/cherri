@@ -534,7 +534,7 @@ func collectArguments() (arguments []actionArgument) {
 		}
 		var valueType tokenType
 		var value any
-		if strings.Contains(lookAhead(), ",") {
+		if strings.Contains(lookAheadUntil('\n'), ",") {
 			collectValue(&valueType, &value, ',')
 		} else {
 			collectValue(&valueType, &value, ')')
