@@ -142,17 +142,27 @@ Download contents of `url`.
 
 ---
 
-### `httpRequest(url,method,body,bodyType,headers)`
+### `formRequest(url,method,body,headers)`
 
-Download `url` using HTTP method `method`.
+Send a `method` request to `url` with `body`.
 
-`body`, `bodyType` and `headers` are optional.
+`body`and `headers` are optional.
 
-#### Body Types
+---
 
-- Form (default)
-- JSON
-- File
+### `jsonRequest(url,method,body,headers)`
+
+Send a `method` request to `url` with `body`.
+
+`body`and `headers` are optional.
+
+---
+
+### `fileRequest(url,method,body,headers)`
+
+Send a `method` request to `url` with `body`.
+
+`body`and `headers` are optional.
 
 ---
 
