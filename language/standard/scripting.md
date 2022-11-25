@@ -30,6 +30,8 @@ _Contributed by [JosephShenton](https://github.com/JosephShenton)_.
 - `health`
 - `photos`
 
+---
+
 ### `hideApp(appId)`
 
 Hide app with `appId`. For example `com.apple.AppStore`.
