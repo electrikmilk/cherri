@@ -19,6 +19,7 @@ var filename string
 var basename string
 var contents string
 var relativePath string
+var outputPath string
 
 var included []string
 
@@ -44,6 +45,11 @@ func main() {
 	var bytes, readErr = os.ReadFile(filePath)
 	handle(readErr)
 	contents = string(bytes)
+
+	outputPath = basename + ".shortcut"
+	if arg("output") {
+		outputPath = argValue("output")
+	}
 
 	if strings.Contains(contents, "#include") {
 		parseIncludes()
@@ -95,7 +101,7 @@ func main() {
 	}
 
 	if arg("import") && !arg("unsigned") {
-		var _, importErr = exec.Command("open", basename+".shortcut").Output()
+		var _, importErr = exec.Command("open", outputPath).Output()
 		handle(importErr)
 	}
 }
@@ -155,10 +161,6 @@ func sign() {
 	}
 	if arg("debug") {
 		fmt.Printf("Signing %s.shortcut... ", basename)
-	}
-	var outputPath = basename + ".shortcut"
-	if arg("output") {
-		outputPath = argValue("output")
 	}
 	var signBytes, signErr = exec.Command(
 		"shortcuts",
