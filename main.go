@@ -29,6 +29,7 @@ func main() {
 	registerArg("unsigned", "u", "Don't sign compiled Shortcut. Will NOT run on iOS or macOS.")
 	registerArg("debug", "d", "Save generated plist. Print debug messages and stack traces.")
 	registerArg("output", "o", "Optional output file path. (e.g. /path/to/file.shortcut).")
+	registerArg("import", "i", "Opens compiled Shortcut after compilation. Ignored if unsigned.")
 	if len(os.Args) <= 1 {
 		usage()
 		os.Exit(1)
@@ -91,6 +92,11 @@ func main() {
 
 	if !arg("unsigned") {
 		sign()
+	}
+
+	if arg("import") && !arg("unsigned") {
+		var _, importErr = exec.Command("open", basename+".shortcut").Output()
+		handle(importErr)
 	}
 }
 
