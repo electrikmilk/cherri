@@ -15,4 +15,4 @@ be a part of that, keep your interaction with this project focused solely on tha
 6. No soliciting of any kind.
 7. Do your best to stay positive and not bring others down just because you're having a bad day.
 8. Be practical and honest, but not discouraging or pessimistic. It does not help anything or anyone.
-9. No brand wars (trashing companies, other languages, etc.).
+9. No flame or brand wars (off-topic, trashing other languages, etc.).
