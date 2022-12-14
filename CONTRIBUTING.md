@@ -15,9 +15,10 @@ Before submitting an issue please confirm the following:
 - You are using the latest version.
 - You are describing your issue to the absolute best of your ability. Include any and all relevant information.
 - Your issue is one to one. No multiple bug issues.
-- (If using the latest build of the compiler) You are including the version of the Go programming language compiler
+- You are including version info
+  - **If you compiled the compiler:** You are including the version of the Go programming language compiler
   installed on your machine. Use the output of `go version`.
-- You are including the version of macOS installed on your machine and your CPU architecture. Use the output
+  - **If you are using the latest release:** You are including the version of macOS installed on your machine and your CPU architecture. Use the output
   of `uname -a`.
 
 Confirming these things help immensely to prevent duplicates, ensure proper communication and reproducibility.
