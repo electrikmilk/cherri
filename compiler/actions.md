@@ -105,7 +105,7 @@ The `defaultValue` takes an `actionArgument`, you must give a value type and val
 
 The Shortcuts app does this with many parameters that it has a default value for, if an actions parameter is not specified, it fills in the gap and goes with the default value for that parameter for that action as defined in the Shortcuts app itself for that action. This should be done when possible as it makes for a much smaller Shortcut file on average.
 
-The `key` is used if there is no need to process arguments. If you use `key` to specify the key of this action parameter, do not add a call to the action definition, otherwise this is pointless and will be ignored.
+The `key` is used if there is no need to process arguments. If you use `key` to specify the key of this action parameter, do not add a `make` to the action definition, otherwise this is pointless and will be ignored.
 
 ### `check`
 
