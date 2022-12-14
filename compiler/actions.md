@@ -3,7 +3,7 @@
 # Defining Actions
 
 Defining actions is easy but might be a little complicated to understand at first. Standard actions are defined in one
-place, [`actions_standard.go`](https://github.com/electrikmilk/cherri/blob/main/actions_standard.go).
+place, [`actions_std.go`](https://github.com/electrikmilk/cherri/blob/main/actions_std.go).
 
 Non-standard actions should be added to a new or existing file for those actions.
 
