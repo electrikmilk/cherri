@@ -53,8 +53,9 @@ reproduce it, what environment it may be isolated to are clearly communicated.
 
 - Test your code to the best of your ability, do not submit code that does not compile.
 - Write in the imperative (Fix bug, Add thing, etc.)
-- If you change how a feature works, modify the existing feature or add the new feature to the examples folders. These
-  files are language examples obviously, but are also used as test files in the main workflow.
+- Don't over explain but don't be vague, briefly but clearly state your changes in detail.
+- If you change how a feature works, modify the existing feature or add the new feature to the examples folder. These
+  files are language examples obviously, but are also used as test files in the commit checks.
 - Test your feature or bug fix by writing a Cherri file and checking that it compiles to a valid Shortcut. If you are on
   a non-macOS platform using the `--unsigned` argument, the Shortcut will compile, but may be invalid. Use an XML linter
   or validator on the compiled Shortcut file.
@@ -64,13 +65,12 @@ reproduce it, what environment it may be isolated to are clearly communicated.
 - Make sure your fork is up-to-date everytime you are about to submit a contribution. It's best to not make a branch for
   your feature until you are ready to submit it, so that you are able to sync your fork beforehand. If this ends up
   happening just sync your main branch with upstream and rebase your feature branch from your main branch.
-- Commits and changes should be one-to-one, as in, every commit should correlate to a major change in your submission.
+- No merge commits.
+- Commits and changes should be one-to-one, as in, every commit should correlate to a major change in your contribution.
   However, don't make commits for every little thing. Most minor pull requests can contain only one commit.
 - Wrap commit messages at 72 characters.
-- No periods at the end of commit message titles.
-- Only capitalize the first word of a commit message title.
-- Add your copyright to the top of files you have changed or added in the same style as the rest of the project if you
-  would like.
+- No periods at the end of commit message titles. Only capitalize the first word of a commit message title.
+- Optionally, add your copyright to the top of files you have changed or added in the same style as the rest of the project.
 
 ## Cross-platform development policy
 
@@ -89,7 +89,7 @@ upon reviewing your PR will check if the Shortcut signs successfully. But fair w
 without access to a Mac may be frustrating.
 
 Please throughly debug the issues with your contribution, no repeatedly asking the reviewer to check if a Shortcut signs
-with your change.
+with your latest change.
 
 **Your issues or PRs will be addressed as time allows for members of this project.**
 
