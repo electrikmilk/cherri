@@ -46,7 +46,7 @@ reproduce it, what environment it may be isolated to are clearly communicated.
   readable enough that it is obvious to anyone reading it.
 - No moving code around without a good reason. Only organize code when absolutely necessary.
 - Keep any additions to Cherri syntax consistent with the existing style (e.g. camelCase, scripting-language-like, only
-  capitalize globals, no parenthesis).
+  capitalize globals, minimal parenthesis).
 - In action names, detail is preferred over component, and make is preferred over generate or create.
 
 ### Code submission policy
