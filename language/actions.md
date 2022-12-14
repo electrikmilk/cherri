@@ -27,10 +27,6 @@ Standard actions are always available and do not need to be imported.
 
 [Please report incomplete or non-working actions](https://github.com/electrikmilk/cherri/issues)
 
-## Non-standard actions
-
-Once standard actions are finished being implemented, or a non-standard action is contributed, it is planned to implement an `import` syntax to use a library of non-standard actions so that they do not take up memory and compile time if they don't have to.
-
 ## Can I contribute actions, even non-standard actions?
 
 Yes.
