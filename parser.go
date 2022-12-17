@@ -153,13 +153,25 @@ func parse() {
 						params: []plistData{},
 					}
 				}
+			case tokenAhead(Mac):
+				var defValue = collectUntil('\n')
+				switch defValue {
+				case "true":
+					isMac = true
+				case "false":
+					isMac = false
+				default:
+					parserError(fmt.Sprintf("Invalid value of '%s' for boolean definition 'mac'", defValue))
+				}
 			case tokenAhead(Version):
 				var collectVersion = collectUntil('\n')
 				makeVersions()
 				if _, found := versions[collectVersion]; found {
-					minimumVersion = versions[collectVersion]
+					maxVersion = versions[collectVersion]
+					iosVersion, _ = strconv.ParseFloat(collectVersion, 8)
 				} else {
-					parserError(fmt.Sprintf("Invalid minimum version '%s'", collectVersion))
+					var list = makeKeyList("Available versions:", versions)
+					parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
 				}
 			}
 		case tokenAhead(Import):

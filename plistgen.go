@@ -356,8 +356,8 @@ func makePlist() (plist string) {
 	}
 	plist += plistArray("WFWorkflowOutputContentItemClasses", outputContentItems)
 
-	plist += plistKeyValue("WFWorkflowMinimumClientVersion", Number, minimumVersion)
-	plist += plistKeyValue("WFWorkflowMinimumClientVersionString", Text, minimumVersion)
+	plist += plistKeyValue("WFWorkflowMinimumClientVersion", Number, maxVersion)
+	plist += plistKeyValue("WFWorkflowMinimumClientVersionString", Text, maxVersion)
 	plist += plistKeyValue("WFWorkflowHasShortcutInputVariables", Boolean, hasShortcutInputVariables)
 
 	var wfWorkflowTypes []string

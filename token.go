@@ -40,6 +40,7 @@ const (
 	Outputs tokenType = "outputs"
 	From    tokenType = "from"
 	Version tokenType = "version"
+	Mac     tokenType = "mac"
 	NoInput tokenType = "noinput"
 )
 

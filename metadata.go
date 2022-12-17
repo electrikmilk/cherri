@@ -88,14 +88,17 @@ func makeWorkflowTypes() {
 /* Versions */
 
 var versions map[string]string
-var minimumVersion = "900"
+var maxVersion = "900"
+var iosVersion = 16.2
 
 func makeVersions() {
 	if len(versions) != 0 {
 		return
 	}
 	versions = make(map[string]string)
+	versions["16.2"] = "900"
 	versions["16"] = "900"
+	versions["15.7.2"] = "800"
 	versions["15"] = "800"
 	versions["14"] = "700"
 	versions["13"] = "600"

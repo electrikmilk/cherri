@@ -6,10 +6,12 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"strings"
 )
 
 var currentAction string
+var isMac = false
 
 type parameterDefinition struct {
 	name         string
@@ -40,6 +42,8 @@ type actionDefinition struct {
 	check         paramCheck
 	make          makeParams
 	outputType    tokenType
+	mac           bool
+	minVersion    float64
 }
 
 var actions map[string]actionDefinition
@@ -114,6 +118,18 @@ func checkAction(arguments []actionArgument) {
 	}
 	if actions[currentAction].check != nil {
 		actions[currentAction].check(arguments)
+	}
+	if actions[currentAction].minVersion != 0 {
+		if actions[currentAction].minVersion > iosVersion {
+			parserWarning(
+				fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentAction, math.Ceil(iosVersion)),
+			)
+		}
+	}
+	if !isMac && actions[currentAction].mac {
+		parserWarning(
+			fmt.Sprintf("You've set your Shortcut as non-Mac. Action '%s()' is a Mac only action.", currentAction),
+		)
 	}
 }
 
