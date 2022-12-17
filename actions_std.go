@@ -1707,6 +1707,32 @@ func scriptingActions() {
 		},
 	}
 	actions["getBatteryLevel"] = actionDefinition{}
+	actions["isCharging"] = actionDefinition{
+		identifier: "getbatterylevel",
+		minVersion: 16.2,
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "Subject",
+					dataType: Text,
+					value:    "Is Charging",
+				},
+			}
+		},
+	}
+	actions["connectedToCharger"] = actionDefinition{
+		identifier: "getbatterylevel",
+		minVersion: 16.2,
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "Subject",
+					dataType: Text,
+					value:    "Is Connected to Charger",
+				},
+			}
+		},
+	}
 	actions["getShortcuts"] = actionDefinition{
 		identifier: "getmyworkflows",
 	}
@@ -2741,6 +2767,10 @@ func scriptingActions() {
 				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
+	}
+	actions["getWallpaper"] = actionDefinition{
+		identifier: "posters.get",
+		minVersion: 16.2,
 	}
 	actions["setWallpaper"] = actionDefinition{
 		identifier: "wallpaper.set",
