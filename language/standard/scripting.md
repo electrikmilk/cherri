@@ -107,6 +107,22 @@ Get the current battery level of device.
 
 ---
 
+### `isCharging()`
+
+Check if the device is charging.
+
+_**Minimum iOS version:** 16.2_
+
+---
+
+### `connectedToCharger()`
+
+Check if device is connected to charger.
+
+_**Minimum iOS version:** 16.2_
+
+---
+
 ### `getDeviceDetail(detail)`
 
 Get `detail` of current device.
@@ -507,9 +523,20 @@ Run Shortcut with name `name` giving `input`. `isSelf` is a boolean, default is 
 
 Dismiss Siri and continue.
 
+---
+
 ### `setWallpaper(image)`
 
 Set device wallpaper to `image`.
+
+---
+
+
+### `getWallpaper()`
+
+Get device wallpaper.
+
+_**Minimum iOS version:** 16.2_
 
 ## Variables
 
@@ -520,6 +547,8 @@ See [Variables & Globals](../variables-globals.md).
 ### `openXCallbackURL(url)`
 
 Open X-Callback URL `url`.
+
+---
 
 ### `openXCustomCallbackURL(url,successKey,cancelKey,errorKey,successURL)`
 
