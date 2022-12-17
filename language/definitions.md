@@ -114,5 +114,5 @@ This definition is not widely supported. Defines the name of your Shortcut alter
 Defines the maximum version of iOS your Shortcut supports. Warnings will be printed if you use actions that are not supported in the targeted version.
 
 ```cherri
-#define version 16
+#define version 16.2
 ```
