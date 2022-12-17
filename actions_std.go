@@ -353,7 +353,7 @@ func contactActions() {
 			{
 				name:      "email",
 				validType: String,
-				noMax:     true,
+				infinite:  true,
 			},
 		},
 		make: func(args []actionArgument) []plistData {
@@ -365,7 +365,7 @@ func contactActions() {
 			{
 				name:      "number",
 				validType: String,
-				noMax:     true,
+				infinite:  true,
 			},
 		},
 		make: func(args []actionArgument) []plistData {
@@ -2320,7 +2320,7 @@ func scriptingActions() {
 			{
 				name:      "listItem",
 				validType: String,
-				noMax:     true,
+				infinite:  true,
 			},
 		},
 		make: func(args []actionArgument) []plistData {
@@ -2777,7 +2777,7 @@ func scriptingActions() {
 			{
 				name:      "url",
 				validType: String,
-				noMax:     true,
+				infinite:  true,
 			},
 		},
 		make: func(args []actionArgument) []plistData {

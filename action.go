@@ -17,7 +17,7 @@ type parameterDefinition struct {
 	key          string
 	defaultValue actionArgument
 	optional     bool
-	noMax        bool
+	infinite     bool
 }
 
 type actionArgument struct {
@@ -258,7 +258,7 @@ func checkArgs(arguments *[]actionArgument) {
 		if (len(actionArgs) - 1) < a {
 			break
 		}
-		if actionArgs[a].noMax {
+		if actionArgs[a].infinite {
 			break
 		}
 		if !actionArgs[a].optional {
