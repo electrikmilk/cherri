@@ -167,7 +167,7 @@ func parse() {
 				var collectVersion = collectUntil('\n')
 				makeVersions()
 				if _, found := versions[collectVersion]; found {
-					maxVersion = versions[collectVersion]
+					minVersion = versions[collectVersion]
 					iosVersion, _ = strconv.ParseFloat(collectVersion, 8)
 				} else {
 					var list = makeKeyList("Available versions:", versions)
