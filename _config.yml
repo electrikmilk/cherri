@@ -1,3 +1,5 @@
 title: Cherri 🍒
 description: iOS Siri Shortcuts Programming Language
+plugins:
+  - jekyll-default-layout
 theme: just-the-docs
