@@ -2,7 +2,7 @@
 
 
 
-[![Hello World Example](https://github.com/electrikmilk/cherri/raw/main/assets/example.png)](examples/hello-world.cherri)
+[![Hello World Example](https://github.com/electrikmilk/cherri/raw/main/assets/example.png)](https://github.com/electrikmilk/cherri/blob/main/examples/hello-world.cherri)
 
 
 
