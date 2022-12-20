@@ -15,7 +15,3 @@ layout: home
 
 - [Getting started with Cherri](language/index.md)
 - [Learn how to contribute to Cherri](compiler/index.md)
-
----
-
-[![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/electrikmilk/cherri)
