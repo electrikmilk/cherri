@@ -2768,9 +2768,22 @@ func scriptingActions() {
 			}
 		},
 	}
+	actions["getAllWallpapers"] = actionDefinition{
+		identifier: "posters.get",
+		minVersion: 16.2,
+	}
 	actions["getWallpaper"] = actionDefinition{
 		identifier: "posters.get",
 		minVersion: 16.2,
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFPosterType",
+					dataType: Text,
+					value:    "Current",
+				},
+			}
+		},
 	}
 	actions["setWallpaper"] = actionDefinition{
 		identifier: "wallpaper.set",
