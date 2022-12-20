@@ -1,6 +1,4 @@
-<p align="center">
-   <img src="assets/cherri.png" alt="cherri"/>
-</p>
+<img src="https://github.com/electrikmilk/cherri/blob/main/assets/cherri_icon.png?raw=true" alt="cherri"/>
 
 # Cherri
 
@@ -9,9 +7,9 @@
 **Cherri** (pronounced cherry) is a [iOS Siri Shortcuts](https://apps.apple.com/us/app/shortcuts/id915249334)
 programming language, that compiles directly to a valid runnable Shortcut.
 
-[Documentation](https://electrikmilk.github.io/cherri/) • [Code Tour](https://youtu.be/gU8TsI96uww)
+[Documentation](https://cherrilang.org/language/) • [Code Tour](https://youtu.be/gU8TsI96uww)
 
-[![Hello World Example](assets/example.png)](examples/hello-world.cherri)
+[![Hello World Example](https://cherrilang.org/assets/example.png)](examples/hello-world.cherri)
 
 This project is in the early stages of development, but it does have an [_idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap).
 
