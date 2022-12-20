@@ -1,4 +1,21 @@
 title: Cherri 🍒
 description: iOS Siri Shortcuts Programming Language
+
 theme: just-the-docs
 logo: "/assets/cherri.png"
+color_scheme: cherri
+
+aux_links:
+  "GitHub":
+    - "//github.com/electrikmilk/cherri"
+aux_links_new_tab: true
+
+footer_content: "Copyright &copy; Brandon Jordan. Distributed Under <a href=\"https://github.com/electrikmilk/cherri/blob/main/LICENSE\">GPL-2.0 license.</a>"
+last_edit_timestamp: true # last_modified_date
+last_edit_time_format: "%b %e %Y at %I:%M %p"
+
+gh_edit_link: true
+gh_edit_link_text: "This site is open-source. Edit this page on GitHub."
+gh_edit_repository: "https://github.com/electrikmilk/cherri
+gh_edit_branch: "documentation" # the branch that your docs is served from
+gh_edit_view_mode: "edit"
