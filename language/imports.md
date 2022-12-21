@@ -1,3 +1,10 @@
+---
+title: Non-Standard Actions
+layout: default
+parent: Documentation
+nav_order: 4
+---
+
 # Importing Non-Standard Actions
 
 **Note:** No non-standard action libraries exist yet.
