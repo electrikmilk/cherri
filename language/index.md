@@ -13,11 +13,11 @@ Thanks for taking an interest in the Cherri programming language. Don't worry! C
 
 ## Download
 
-Download the latest release build of the Cherri compiler from Github:
+The easiest way to start using Cherri is to the latest release from Github:
 
 [Download the latest release]([http://example.com/](https://github.com/electrikmilk/cherri/releases)){: .btn .btn-red }
 
-The official releases are compiled for the arm64 and x86_64 macOS platform only. [Why?](https://github.com/electrikmilk/cherri/wiki/Why-macOS-only%3F)
+**The official releases are compiled for the arm64 and x86_64 macOS platform only.** [Why?](https://github.com/electrikmilk/cherri/wiki/Why-macOS-only%3F)
 
 ## Build from Source
 
