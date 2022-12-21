@@ -1,5 +1,5 @@
 ---
-title: Home
+title: Cherri | iOS Siri Shortcuts Programming Language
 layout: home
 ---
 
