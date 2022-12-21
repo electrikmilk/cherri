@@ -7,7 +7,7 @@ nav_order: 4
 
 # Menus
 
-## 1. Choose From Menu
+## Choose From Menu
 
 The syntax for menus are similar to a `switch` statement in other languages. Use the following syntax to create a menu:
 
@@ -22,7 +22,7 @@ menu "Prompt" {
 
 The menu prompt can be a variable, so can each case label, they also support inserted variables.
 
-## 2. Choose From List
+## Choose From List
 
 Create a variable with a `list()` action as its value.
 
