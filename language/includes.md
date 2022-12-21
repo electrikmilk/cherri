@@ -9,7 +9,7 @@ nav_order: 6
 
 Use the following syntax to include other Cherri files in a Cherri file.
 
-```cherri
+```c
 #include "path/to/include.cherri"
 ```
 
