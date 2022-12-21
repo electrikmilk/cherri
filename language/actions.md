@@ -37,4 +37,4 @@ Standard actions are always available and do not need to be imported.
 
 Yes.
 
-[Learn more about contributing actions](../compiler/actions.md)
+[Learn more about contributing actions](/compiler/actions.html)
