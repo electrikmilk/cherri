@@ -11,7 +11,7 @@ nav_order: 4
 
 To import a library of non-standard actions use the following sytax:
 
-```cherri
+```c++
 #import library
 ```
 
