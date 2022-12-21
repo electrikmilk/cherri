@@ -14,7 +14,7 @@ These are defined in Shortcuts for example as `WFAppStoreAppContentItem`.
 In Cherri, they are shortened into singular names.
 
 | Type 	| Content Item Type 	|
-|---	|---	|
+|:-------------|:------------------|
 | app 	| WFAppStoreAppContentItem 	|
 | article 	| WFArticleContentItem 	|
 | contact 	| WFContactContentItem 	|
