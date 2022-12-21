@@ -12,6 +12,7 @@ Welcome to the Cherri programming language compiler documentation!
 Before contributing, please make sure you have read the [contributing guidelines](https://github.com/electrikmilk/cherri/blob/main/CONTRIBUTING.md).
 
 {: .warning }
+
 Keep in mind that this compiler is in the early stages and is under going heavy development. There is much refactoring to be done, the compiler has not yet reached the desired level of maturity and simplicity, and things are always subject to change.
 
 ## Shortcut File Format Reference
