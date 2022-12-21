@@ -11,7 +11,7 @@ nav_order: 4
 
 The syntax for menus are similar to a `switch` statement in other languages. Use the following syntax to create a menu:
 
-```cherri
+```go
 menu "Prompt" {
     case "Item 1":
         // do something...
@@ -28,13 +28,13 @@ Create a variable with a `list()` action as its value.
 
 Just like in Shortcuts each item must be a string, but you can still insert variables.
 
-```cherri
+```ruby
 @list = list("Item 1", "Item 2", "Item 3")
 ```
 
 Then simply use the `chooseFromList()` action with the list and a prompt.
 
-```cherri
+```ruby
 @chosenItem = chooseFromList(list,"Choose a item")
 ```
 
