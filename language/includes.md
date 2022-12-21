@@ -1,4 +1,9 @@
-[Back](index.md)
+---
+title: Includes
+layout: default
+parent: Documentation
+nav_order: 6
+---
 
 # Includes
 
