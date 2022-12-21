@@ -19,7 +19,7 @@ Define the look of your Shortcut using one of the supported colors or glyphs.
 #define glyph apple
 ```
 
-Most glyphs are supported, but not all the newest are yet. [Click here for the full list of supported glyphs](glyphs.md)
+Most glyphs are supported, but not all the newest are yet. [Click here for the full list of supported glyphs](/language/glyphs.html)
 .
 
 ### Color
@@ -70,7 +70,7 @@ Get the contents of the clipboard:
 #define noinput getclipboard
 ```
 
-Ask for a [content item type](content-item-types.md):
+Ask for a [content item type](/language/content-item-types.html):
 
 ```cherri
 #define noinput askfor text
