@@ -1,6 +1,7 @@
 ---
 title: Contact
 layout: default
+grand_parent: Documentation
 parent: Actions
 nav_order: 2
 ---
