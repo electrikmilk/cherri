@@ -9,13 +9,13 @@ nav_order: 2
 
 Variables are initialized using the following syntax:
 
-```cherri
+```ruby
 @text = "value"
 ```
 
 Insert variables into a string value:
 
-```cherri
+```ruby
 @inserted = "Value: {text}"
 
 // Get as...
@@ -27,7 +27,7 @@ Insert variables into a string value:
 
 ### Variable as a value
 
-```cherri
+```ruby
 @inserted = variable
 
 // Get as...
@@ -41,7 +41,7 @@ Insert variables into a string value:
 
 All globals are implemented. Globals are case-sensitive.
 
-```cherri
+```ruby
 @input = ShortcutInput
 @date = CurrentDate
 @clipboard = Clipboard
@@ -55,7 +55,7 @@ alert(Ask, "", false)
 
 ### Text
 
-```cherri
+```ruby
 @text = "text"
 @multi = "multi
 line
@@ -64,14 +64,14 @@ text"
 
 ### Numbers
 
-```cherri
+```ruby
 @number = 42
 @expression = 54 * 4 + (6 * 7)
 ```
 
 ### Action Variables
 
-```cherri
+```ruby
 @urls = url("https://apple.com","https://google.com")
 @list = list("Item 1","Item 2","Item 3")
 @email = emailAddress("test@test.org")
@@ -84,7 +84,7 @@ text"
 
 You can declare a dictionary using a valid JSON object.
 
-```cherri
+```ruby
 @dictionary = {
     "key1": "value",
     "key2": 5,
@@ -101,7 +101,7 @@ You can declare a dictionary using a valid JSON object.
 
 Booleans translate to a number value of 1 for true, and 0 for false. Boolean variables can be used in conditionals.
 
-```cherri
+```ruby
 @boolVarTrue = true
 @boolVarFalse = false
 
@@ -114,12 +114,12 @@ if boolVarTrue == true {
 
 You can declare a variable without a value:
 
-```cherri
+```ruby
 @emptyVar
 ```
 
 Add to a variable using the standard `+=` syntax:
 
-```cherri
+```ruby
 @stringVar += "test"
 ```
