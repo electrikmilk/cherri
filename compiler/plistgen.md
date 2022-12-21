@@ -1,4 +1,9 @@
-[Back](/cherri/compiler/)
+---
+title: Property List Generation
+layout: default
+parent: Contributing
+nav_order: 4
+---
 
 # Property List (.plist) Generation
 
