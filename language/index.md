@@ -41,4 +41,10 @@ cd /path/to/cherri
 go build
 ```
 
-You should now have a `cherri` binary in the same directory. Move this to `/usr/local/bin/` on macOS or Linux to run from anywhere.
+You should now have a `cherri` binary in the same directory. Run it using:
+
+```bash
+./cherri
+```
+
+Move this to `/usr/local/bin/` on macOS or Linux to run from anywhere.
