@@ -21,3 +21,8 @@ aux_links:
   "Code Tour":
     - "//youtu.be/gU8TsI96uww"
 aux_links_new_tab: true
+
+nav_external_links:
+  - title: Code Tour
+    url: https://www.youtube.com/watch?v=gU8TsI96uww
+    hide_icon: false
