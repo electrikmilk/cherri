@@ -17,6 +17,7 @@ The easiest way to start using Cherri is to the latest release from Github:
 
 [Download the latest release](https://github.com/electrikmilk/cherri/releases){: .btn .btn-red }
 
+{: .warning }
 **The official releases are compiled for the arm64 and x86_64 macOS platform only.** [Why?](https://github.com/electrikmilk/cherri/wiki/Why-macOS-only%3F)
 
 ## Build from Source
@@ -47,4 +48,5 @@ You should now have a `cherri` binary in the same directory. Run it using:
 ./cherri
 ```
 
-Move this to `/usr/local/bin/` on macOS or Linux to run from anywhere.
+{: .note }
+You can move the binary to `/usr/local/bin/` on macOS or Linux to run it from anywhere.
