@@ -1,4 +1,9 @@
-[Back](../actions.md)
+---
+title: Contact
+layout: default
+parent: Actions
+nav_order: 2
+---
 
 # Contact Actions
 
