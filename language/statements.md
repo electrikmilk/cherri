@@ -61,7 +61,9 @@ if intVar <> 5 7 {
 }
 ```
 
-## Repeat
+## Loops
+
+### Repeat
 
 Use the following syntax:
 
@@ -74,7 +76,7 @@ repeat 6 {
 
 The number after repeat could also be a variable as long as it evaluates to a number value.
 
-## Repeat With Each
+### Repeat With Each
 
 Use the following syntax:
 
