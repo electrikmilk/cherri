@@ -4,6 +4,16 @@ description: iOS Siri Shortcuts Programming Language
 theme: just-the-docs
 logo: "/assets/cherri_light.png"
 color_scheme: cherri
+callouts:
+  warning:
+    title: Warning
+    color: yellow
+  note:
+    title: Note
+    color: purple
+  important:
+    title: Important
+    color: red
 
 aux_links:
   "GitHub":
