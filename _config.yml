@@ -26,3 +26,6 @@ nav_external_links:
     hide_icon: false
 
 footer_content: "Copyright &copy; Brandon Jordan. Distributed under the <a href=\"https://github.com/electrikmilk/cherri/blob/main/LICENSE\">GPL-2.0 License.</a>"
+
+last_edit_timestamp: true
+last_edit_time_format: "%b %e %Y at %I:%M %p"
