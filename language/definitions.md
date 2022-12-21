@@ -1,14 +1,9 @@
-<style>
-.color {
-    display: inline-block;
-    height: 15px;
-    width: 15px;
-    border-radius: 50%;
-    margin-bottom: -3.5px
-}
-</style>
-
-[Back](index.md)
+---
+title: Definitions
+layout: default
+parent: Documentation
+nav_order: 8
+---
 
 # Definitions
 
