@@ -1,4 +1,9 @@
-[Back](index.md)
+---
+title: Variables & Globals
+layout: default
+parent: Documentation
+nav_order: 2
+---
 
 # Variables & Globals
 
