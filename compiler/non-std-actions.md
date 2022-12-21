@@ -1,3 +1,10 @@
+---
+title: Non-Standard Actions
+layout: default
+parent: Contributing
+nav_order: 2
+---
+
 # Defining Non-Standard Actions
 
 ## Define a library
