@@ -418,11 +418,11 @@ Turn cellular voice and data to on or off.
 
 ### Comments
 
-```cherri
+```js
 // Single line comment
 ```
 
-```cherri
+```js
 /*
 Multiline
 comment
