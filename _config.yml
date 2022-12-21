@@ -31,7 +31,7 @@ last_edit_timestamp: true
 last_edit_time_format: "%b %e %Y at %I:%M %p"
 
 gh_edit_link: true
-gh_edit_link_text: "Edit this page on GitHub."
+gh_edit_link_text: "This page is open-source"
 gh_edit_repository: "https://github.com/electrikmilk/cherri"
 gh_edit_branch: "documentation"
-gh_edit_view_mode: "edit"
+gh_edit_view_mode: "tree"
