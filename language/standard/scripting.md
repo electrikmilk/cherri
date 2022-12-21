@@ -1,4 +1,9 @@
-[Back](../actions.md)
+---
+title: Scripting
+layout: default
+parent: Actions
+nav_order: 6
+---
 
 # Scripting Actions
 
