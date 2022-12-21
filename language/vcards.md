@@ -9,7 +9,7 @@ nav_order: 4
 
 You can easily create a VCard menu using the built-in action `makeVCard()`.
 
-```cherri
+```ruby
 @vcard = makeVCard("Title","Subtitle","path/to/image.jpg")
 ```
 
@@ -19,7 +19,7 @@ The only limitation being that the image path must be available at compile time,
 
 In the example above, `vcard` will contain the generated VCard (a text block containing the generated VCard). So, we can then use it to make a VCard menu like so:
 
-```cherri
+```ruby
 // Generate VCard menu
 @items
 repeat 3 {
