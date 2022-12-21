@@ -1,4 +1,9 @@
-[Back](/cherri/compiler/)
+---
+title: Shortcut Metadata
+layout: default
+parent: Contributing
+nav_order: 3
+---
 
 # Metadata
 
