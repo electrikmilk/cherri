@@ -29,7 +29,7 @@ nav_external_links:
 # appears at the bottom of every page's main content
 # Note: The footer_content option is deprecated and will be removed in a future major release. Please use `_includes/footer_custom.html` for more robust
 markup / liquid-based content.
-footer_content: "Copyright &copy; 2017-2020 Brandon Jordan. Distributed by an <a href=\"https://github.com/just-the-docs/just-the-docs/tree/main/LICENSE.txt\">MIT license.</a>"
+footer_content: "Copyright &copy; 2017-2020 Brandon Jordan. Distributed by an <a href=\"https://github.com/electrikmilk/cherri/blob/main/LICENSE\">GPL 2.0 License.</a>"
 
 # Footer last edited timestamp
 last_edit_timestamp: true # show or hide edit time - page must have `last_modified_date` defined in the frontmatter
@@ -41,4 +41,4 @@ gh_edit_link_text: "Edit this page on GitHub."
 gh_edit_repository: "https://github.com/electrikmilk/cherri" # the github URL for your repo
 gh_edit_branch: "documentation" # the branch that your docs is served from
 # gh_edit_source: docs # the source that your files originate from
-gh_edit_view_mode: "tree" # "tree" or "edit" if you want the user to jump into the editor immediately
+gh_edit_view_mode: "edit" # "tree" or "edit" if you want the user to jump into the editor immediately
