@@ -11,7 +11,7 @@ nav_order: 3
 
 Use the following syntax:
 
-```cherri
+```ruby
 @intVar = 5
 if intVar > 6 {
     
@@ -40,7 +40,7 @@ The first operand of the if statement must be a variable. The second can optiona
 
 ### Has Value/Does Not
 
-```cherri
+```go
 // Has Any Value
 if intVar {
     
@@ -55,7 +55,7 @@ if !intVar {
 
 This checks if `intVar` is between `5` and `7`.
 
-```cherri
+```go
 if intVar <> 5 7 {
     // ...
 }
@@ -65,7 +65,7 @@ if intVar <> 5 7 {
 
 Use the following syntax:
 
-```cherri
+```ruby
 @items
 repeat 6 {
     @items += "Item {RepeatIndex}"
@@ -78,7 +78,7 @@ The number after repeat could also be a variable as long as it evaluates to a nu
 
 Use the following syntax:
 
-```cherri
+```ruby
 @items = list("item 1","item 2","item 3")
 foreach list {
     alert(RepeatIndex,RepeatItem, false)
