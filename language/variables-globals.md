@@ -17,11 +17,17 @@ Insert variables into a string value:
 
 ```ruby
 @inserted = "Value: {text}"
+```
 
-// Get as...
+Get as...
+
+```ruby
 @inserted = "Value: {text[Get]}"
+```
 
-// Type coersion...
+Type coersion...
+
+```ruby
 @inserted = "Value: {text(type)}"
 ```
 
@@ -29,11 +35,17 @@ Insert variables into a string value:
 
 ```ruby
 @inserted = variable
+```
 
-// Get as...
+Get as...
+
+```ruby
 @inserted = variable[Get]
+```
 
-// Type coersion...
+Type coersion...
+
+```ruby
 @inserted = variable.type
 ```
 
@@ -48,8 +60,11 @@ All globals are implemented. Globals are case-sensitive.
 @device = Device
 
 alert(Ask, "", false)
+```
 
-// But you can also just inline a global in a string like other variables
+But you can also just inline a global in a string like other variables
+
+```ruby
 @shortcutInput = "{ShortcutInput}"
 ```
 
@@ -106,7 +121,7 @@ Booleans translate to a number value of 1 for true, and 0 for false. Boolean var
 @boolVarFalse = false
 
 if boolVarTrue == true {
-    // ...
+    ...
 }
 ```
 
