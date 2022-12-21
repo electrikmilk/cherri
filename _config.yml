@@ -16,7 +16,7 @@ callouts:
     color: red
 
 aux_links:
-  "GitHub":
+  "View Source on GitHub":
     - "//github.com/electrikmilk/cherri"
 aux_links_new_tab: true
 
