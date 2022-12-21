@@ -22,14 +22,14 @@ may be inaccurate. Not all standard actions in each category are implemented yet
 
 Standard actions are always available and do not need to be imported.
 
-- [ ] (3/23) [Calendar](standard/calendar.md)
-- [ ] (6/15) [Contacts](standard/contacts.md)
-- [ ] (40/64) [Documents](standard/documents.md)
-- [ ] (9/17) [Location](standard/location.md)
-- [ ] (7/68) [Media](standard/media.md)
-- [ ] (58/74) [Scripting](standard/scripting.md)
-- [ ] (4/10) [Sharing](standard/sharing.md)
-- [ ] (19/26) [Web](standard/web.md)
+- [ ] (3/23) [Calendar](standard/calendar.html)
+- [ ] (6/15) [Contacts](standard/contacts.html)
+- [ ] (40/64) [Documents](standard/documents.html)
+- [ ] (9/17) [Location](standard/location.html)
+- [ ] (7/68) [Media](standard/media.html)
+- [ ] (58/74) [Scripting](standard/scripting.html)
+- [ ] (4/10) [Sharing](standard/sharing.html)
+- [ ] (19/26) [Web](standard/web.html)
 
 [Please report incomplete or non-working actions](https://github.com/electrikmilk/cherri/issues)
 
