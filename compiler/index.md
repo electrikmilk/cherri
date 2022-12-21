@@ -1,3 +1,9 @@
+---
+title: Contributing
+layout: default
+nav_order: 2
+---
+
 # Cherri Compiler Documentation
 
 Welcome to the Cherri programming language compiler documentation!
