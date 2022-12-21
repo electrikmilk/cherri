@@ -1,4 +1,9 @@
-[Back](/cherri/compiler/)
+---
+title: Actions
+layout: default
+parent: Contributing
+nav_order: 1
+---
 
 # Defining Actions
 
