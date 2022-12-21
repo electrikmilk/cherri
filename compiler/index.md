@@ -2,6 +2,7 @@
 title: Contributing
 layout: default
 nav_order: 2
+has_children: true
 ---
 
 # Cherri Compiler Documentation
@@ -26,12 +27,3 @@ Keep in mind that this compiler is in the early stages and is under going heavy 
 - [sebj](https://github.com/sebj)'s [Shortcut File Format Reference](https://github.com/sebj/iOS-Shortcuts-Reference)
 
 To download property list (.plist) versions of Shortcuts for further reference, [here is a helpful Shortcut](https://routinehub.co/shortcut/13252/) (written in Cherri!)
-
-## Compiler
-
-- [Defining Actions](actions.md)
-- [Defining Non-Standard Actions](non-std-actions.md)
-- [Metadata](metadata.md)
-- [Property List Generation](plistgen.md)
-- [Parsing](parsing.md)
-- [Code Tour Video](https://youtu.be/gU8TsI96uww)
