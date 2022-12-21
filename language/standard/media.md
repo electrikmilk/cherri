@@ -1,5 +1,9 @@
-[Back](../actions.md)
-
+---
+title: Media
+layout: default
+parent: Actions
+nav_order: 5
+---
 # Media Actions
 
 ### `clearUpNext()`
