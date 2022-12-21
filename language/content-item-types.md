@@ -13,22 +13,22 @@ These are defined in Shortcuts for example as `WFAppStoreAppContentItem`.
 
 In Cherri, they are shortened into singular names.
 
-- `app` - WFAppStoreAppContentItem
-- `article` - WFArticleContentItem
-- `contact` - WFContactContentItem
-- `date` - WFDateContentItem
-- `email` - WFEmailAddressContentItem
-- `folder` - WFFolderContentItem
-- `file` - WFGenericFileContentItem
-- `image` - WFImageContentItem
-- `itunes` - WFiTunesProductContentItem
-- `location` - WFLocationContentItem
-- `maplink` - WFDCMapsLinkContentItem
-- `media` - WFAVAssetContentItem
-- `pdf` - WFPDFContentItem
-- `phonenumber` - WFPhoneNumberContentItem
-- `richtext` - WFRichTextContentItem
-- `webpage` - WFSafariWebPageContentItem
-- `text` - WFStringContentItem
-- `number` - WFNumberContentItem
-- `url` - WFURLContentItem
+| Type 	| Content Item Type 	|
+|---	|---	|
+| app 	| WFAppStoreAppContentItem 	|
+| article 	| WFArticleContentItem 	|
+| contact 	| WFContactContentItem 	|
+| date 	| WFDateContentItem 	|
+| email 	| WFEmailAddressContentItem 	|
+| folder 	| WFFolderContentItem 	|
+| file 	| WFGenericFileContentItem 	|
+| image 	| WFImageContentItem 	|
+| itunes 	| WFiTunesProductContentItem 	|
+| location 	| WFLocationContentItem 	|
+| maplink 	| WFDCMapsLinkContentItem 	|
+| media 	| WFAVAssetContentItem 	|
+| pdf 	| WFPDFContentItem 	|
+| phonenumber 	| WFPhoneNumberContentItem 	|
+| richtext 	| WFRichTextContentItem 	|
+| webpage 	| WFSafariWebPageContentItem 	|
+| text 	| WFStringContentItem 	|
