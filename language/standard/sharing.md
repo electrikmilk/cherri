@@ -1,4 +1,9 @@
-[Back](../actions.md)
+---
+title: Sharing
+layout: default
+parent: Actions
+nav_order: 7
+---
 
 # Sharing Actions
 
