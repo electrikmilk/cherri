@@ -1,31 +1,44 @@
-# Cherri Language Documentation
+---
+title: Getting Started
+layout: default
+nav_order: 1
+has_children: true
+---
+
+# Getting Started
 
 Welcome to the Cherri programming language documentation!
 
-If you are looking for documentation to contribute to the Cherri
-compiler, [click here](https://electrikmilk.github.io/cherri/compiler/).
+Thanks for taking an interest in the Cherri programming language. Don't worry! Cherri is designed to be easy to learn and use, it's likely very similar to a programming language you are already familiar with.
 
-Contributing to this open-source documentation is recommended as this language is in the early stages and while most
-things work, bugs or inaccurate documentation are very likely.
+## Download
 
-## Usage
+Download the latest release build of the Cherri compiler from Github:
 
-[Download the latest release](https://github.com/electrikmilk/cherri/releases) ([macOS only](https://github.com/electrikmilk/cherri/wiki/Why-macOS-only%3F))
+[Download the latest release]([http://example.com/](https://github.com/electrikmilk/cherri/releases)){: .btn .btn-red }
 
-_Or_
+The official releases are compiled for the arm64 and x86_64 macOS platform only. [Why?](https://github.com/electrikmilk/cherri/wiki/Why-macOS-only%3F)
 
-[Build from source](https://github.com/electrikmilk/cherri)
+## Build from Source
 
-## Language
+### 1. Download the source
 
-- [Supported Actions](actions.md)
-- [Variables & Globals](variables-globals.md)
-- [Statements](statements.md)
-- [VCard Menus](vcards.md)
-- [Menus](menus.md)
-- [Includes](includes.md)
-- [Imports](imports.md)
-- [Definitions](definitions.md)
-- [Glyphs](glyphs.md)
-- [Content Item Types](content-item-types.md)
-- [Comments](comments.md)
+Download the source tree from Github: [https://github.com/electrikmilk/cherri](https://github.com/electrikmilk/cherri)
+
+### 2. Install Go
+
+Install Go via the official Go website: [https://go.dev/doc/install](https://go.dev/doc/install)
+
+### 3. Build
+
+Enter the directory of the source your downloaded and build.
+
+```bash
+# Enter directory
+cd /path/to/cherri
+
+# Build
+go build
+```
+
+You should now have a `cherri` binary in the same directory. Move this to `/usr/local/bin/` on macOS or Linux to run from anywhere.
