@@ -1,3 +1,11 @@
 @import "./color_schemes/dark";
 
 $link-color: $red-000;
+
+.color {
+    display: inline-block;
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    margin-bottom: -3.5px
+}
