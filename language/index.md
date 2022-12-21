@@ -15,7 +15,7 @@ Thanks for taking an interest in the Cherri programming language. Don't worry! C
 
 The easiest way to start using Cherri is to the latest release from Github:
 
-[Download the latest release]([http://example.com/](https://github.com/electrikmilk/cherri/releases)){: .btn .btn-red }
+[Download the latest release](https://github.com/electrikmilk/cherri/releases){: .btn .btn-red }
 
 **The official releases are compiled for the arm64 and x86_64 macOS platform only.** [Why?](https://github.com/electrikmilk/cherri/wiki/Why-macOS-only%3F)
 
