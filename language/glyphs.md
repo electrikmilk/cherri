@@ -1,4 +1,9 @@
-[Back](index.md)
+---
+title: Glyphs
+layout: default
+parent: Documentation
+nav_order: 9
+---
 
 # Glyphs
 
