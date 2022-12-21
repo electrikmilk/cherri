@@ -1,4 +1,9 @@
-[Back](index.md)
+---
+title: Content Item Types
+layout: default
+parent: Documentation
+nav_order: 10
+---
 
 # Content Item Types
 
