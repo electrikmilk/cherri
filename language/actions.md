@@ -1,7 +1,8 @@
 ---
 title: Actions
 layout: default
-nav_order: 3
+parent: Documentation
+nav_order: 1
 ---
 
 # Actions
