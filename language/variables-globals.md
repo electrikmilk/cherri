@@ -31,7 +31,7 @@ Type coersion...
 @inserted = "Value: {text(type)}"
 ```
 
-### Variable as a value
+## Variable as a value
 
 ```ruby
 @inserted = variable
@@ -49,7 +49,7 @@ Type coersion...
 @inserted = variable.type
 ```
 
-### Globals
+## Globals
 
 All globals are implemented. Globals are case-sensitive.
 
@@ -67,6 +67,8 @@ But you can also just inline a global in a string like other variables
 ```ruby
 @shortcutInput = "{ShortcutInput}"
 ```
+
+## Types
 
 ### Text
 
@@ -125,7 +127,7 @@ if boolVarTrue == true {
 }
 ```
 
-### Misc
+## Misc
 
 You can declare a variable without a value:
 
