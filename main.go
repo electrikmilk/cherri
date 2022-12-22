@@ -229,7 +229,7 @@ func ansi(message string, typeOf outputType) string {
 }
 
 func exit(message string) {
-	fmt.Println("\n" + ansi(message, red) + "\n")
+	fmt.Println("\nError: " + ansi(message, red) + "\n")
 	if arg("debug") {
 		panic("debug")
 	} else {

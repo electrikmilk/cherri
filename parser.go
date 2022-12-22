@@ -790,7 +790,7 @@ func parserError(message string) {
 			fmt.Printf("\033[2m%d | %s\n-----\033[0m\n\n", lineIdx+2, lines[lineIdx+1])
 		}
 	} else {
-		fmt.Printf("%s (%d:%d)\n", message, lineIdx+1, lineCharIdx+1)
+		fmt.Printf("Error: %s (%d:%d)\n", message, lineIdx+1, lineCharIdx+1)
 	}
 	if arg("debug") {
 		fmt.Println(tokens)
