@@ -91,7 +91,12 @@ func main() {
 	if arg("debug") {
 		fmt.Printf("Creating unsigned %s.shortcut... ", basename)
 	}
-	shortcutWriteErr := os.WriteFile(basename+"_unsigned.shortcut", []byte(plist), 0600)
+
+	var unsignedPath = basename + "_unsigned.shortcut"
+	if arg("unsigned") {
+		unsignedPath = outputPath
+	}
+	shortcutWriteErr := os.WriteFile(unsignedPath, []byte(plist), 0600)
 	handle(shortcutWriteErr)
 	if arg("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
