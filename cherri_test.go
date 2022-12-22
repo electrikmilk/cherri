@@ -24,13 +24,13 @@ func TestCherri(t *testing.T) {
 			fmt.Printf("Compiling %s...\n", ansi(currentTest, bold))
 			os.Args[1] = currentTest
 			args["unsigned"] = ""
+			args["output"] = file.Name() + "_unsigned.shortcut"
 			resetParser()
 			main()
 			fmt.Print(ansi("PASSED", green) + "\n\n")
-			var compiledFile = strings.Replace(file.Name(), ".cherri", "_unsigned.shortcut", 1)
-			err := os.Remove(compiledFile)
+			err := os.Remove(args["output"])
 			if err != nil {
-				fmt.Println(ansi(fmt.Sprintf("Failed to remove test file %s!\n", compiledFile), red))
+				fmt.Println(ansi(fmt.Sprintf("Failed to remove test file %s!\n", args["output"]), red))
 			}
 		}
 	}
