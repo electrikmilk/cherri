@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"strings"
 )
@@ -503,8 +502,7 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 		} else if _, found := variables[strings.ToLower(stringVar.varName)]; found {
 			storedVar = variables[stringVar.varName]
 		} else {
-			fmt.Printf("\n\n\033[31mVariable '%s' does not exist!\033[0m\n", stringVar.varName)
-			os.Exit(1)
+			exit(fmt.Sprintf("Variable '%s' does not exist!", stringVar.varName))
 		}
 		var varValue []plistData
 		var varType = "Variable"

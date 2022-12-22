@@ -755,7 +755,7 @@ func parserErr(err error) {
 }
 
 func parserWarning(message string) {
-	fmt.Printf("\n\033[33mWarning: %s (%d:%d)\033[0m\n", message, lineIdx+1, lineCharIdx+1)
+	fmt.Print(ansi(fmt.Sprintf("\nWarning: %s (%d:%d)\n", message, lineIdx+1, lineCharIdx+1), yellow))
 }
 
 func parserError(message string) {
@@ -763,9 +763,10 @@ func parserError(message string) {
 	if char == '\n' || prev(1) == '\n' {
 		lineIdx--
 	}
-	fmt.Printf("\n\033[31m\033[1m%s\033[0m\n", message)
-	fmt.Printf("\n\033[2m----- \033[0m%s:%d:%d\n", filePath, lineIdx+1, lineCharIdx+1)
-	if lineIdx != -1 {
+	if lineIdx != -1 && !arg("no-ansi") {
+		fmt.Print("\033[31m")
+		fmt.Println("\n" + ansi(message, bold))
+		fmt.Printf("\n\033[2m----- \033[0m%s:%d:%d\n", filePath, lineIdx+1, lineCharIdx+1)
 		if len(lines) > (lineIdx - 1) {
 			fmt.Printf("\033[2m%d | %s\033[0m\n", lineIdx, lines[lineIdx-1])
 		}
@@ -773,7 +774,7 @@ func parserError(message string) {
 			fmt.Printf("\033[31m\033[1m%d | ", lineIdx+1)
 			for c, chr := range strings.Split(lines[lineIdx], "") {
 				if c == idx {
-					fmt.Printf("\033[4m%s\033[0m", chr)
+					fmt.Print(ansi(chr, underline))
 				} else {
 					fmt.Print(chr)
 				}
@@ -788,10 +789,12 @@ func parserError(message string) {
 		if len(lines) > (lineIdx + 1) {
 			fmt.Printf("\033[2m%d | %s\n-----\033[0m\n\n", lineIdx+2, lines[lineIdx+1])
 		}
+	} else {
+		fmt.Printf("%s (%d:%d)\n", message, lineIdx+1, lineCharIdx+1)
 	}
 	if arg("debug") {
 		fmt.Println(tokens)
-		panic("parser error")
+		panic("debug")
 	} else {
 		os.Exit(1)
 	}

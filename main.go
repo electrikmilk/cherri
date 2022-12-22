@@ -31,6 +31,7 @@ func main() {
 	registerArg("debug", "d", "Save generated plist. Print debug messages and stack traces.")
 	registerArg("output", "o", "Optional output file path. (e.g. /path/to/file.shortcut).")
 	registerArg("import", "i", "Opens compiled Shortcut after compilation. Ignored if unsigned.")
+	registerArg("no-ansi", "a", "Don't output ANSI escape sequences that format and color the output.")
 	if len(os.Args) <= 1 {
 		usage()
 		os.Exit(1)
@@ -60,7 +61,7 @@ func main() {
 	}
 	parse()
 	if arg("debug") {
-		fmt.Print("\033[32mdone!\033[0m\n")
+		fmt.Print(ansi("done!", green) + "\n")
 	}
 
 	if arg("debug") {
@@ -77,14 +78,14 @@ func main() {
 	}
 	var plist = makePlist()
 	if arg("debug") {
-		fmt.Print("\033[32mdone!\033[0m\n")
+		fmt.Print(ansi("done!", green) + "\n")
 	}
 
 	if arg("debug") {
 		fmt.Printf("Creating %s.plist... ", basename)
 		plistWriteErr := os.WriteFile(basename+".plist", []byte(plist), 0600)
 		handle(plistWriteErr)
-		fmt.Print("\033[32mdone!\033[0m\n")
+		fmt.Print(ansi("done!", green) + "\n")
 	}
 
 	if arg("debug") {
@@ -93,7 +94,7 @@ func main() {
 	shortcutWriteErr := os.WriteFile(basename+"_unsigned.shortcut", []byte(plist), 0600)
 	handle(shortcutWriteErr)
 	if arg("debug") {
-		fmt.Print("\033[32mdone!\033[0m\n")
+		fmt.Print(ansi("done!", green) + "\n")
 	}
 
 	if !arg("unsigned") {
@@ -139,16 +140,14 @@ func parseIncludes() {
 
 func checkFile(filePath string) {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		fmt.Printf("\n\033[31mFile at path '%s' does not exist!\033[0m\n", filePath)
-		os.Exit(1)
+		exit(fmt.Sprintf("File at path '%s' does not exist!", filePath))
 	}
 	var file, statErr = os.Stat(filePath)
 	handle(statErr)
 	var nameParts = strings.Split(file.Name(), ".")
 	var ext = end(nameParts)
 	if ext != fileExtension {
-		fmt.Printf("\n\033[31mFile '%s' is not a .%s file!\033[0m\n", filePath, fileExtension)
-		os.Exit(1)
+		exit(fmt.Sprintf("File '%s' is not a .%s file!", filePath, fileExtension))
 	}
 }
 
@@ -171,16 +170,16 @@ func sign() {
 	).Output()
 	if signErr != nil {
 		if arg("debug") {
-			fmt.Print("\033[31mfailed!\033[0m\n")
+			fmt.Print(ansi("failed!", red) + "\n")
 		}
-		fmt.Println("\n\033[31mError: Failed to sign Shortcut, plist may be invalid!\033[0m")
+		fmt.Println("\n" + ansi("Error: Failed to sign Shortcut, plist may be invalid!", red))
 		if len(signBytes) > 0 {
 			fmt.Println("shortcuts:", string(signBytes))
 		}
 		os.Exit(1)
 	}
 	if arg("debug") {
-		fmt.Printf("\033[32mdone!\033[0m\n")
+		fmt.Print(ansi("done!", green) + "\n")
 	}
 	removeErr := os.Remove(basename + "_unsigned.shortcut")
 	handle(removeErr)
@@ -207,4 +206,33 @@ func contains(s []string, e string) bool {
 
 func shortcutsUUID() string {
 	return strings.ToUpper(uuid.New().String())
+}
+
+type outputType int
+
+const (
+	bold      outputType = 1
+	dim       outputType = 2
+	underline outputType = 4
+	red       outputType = 31
+	green     outputType = 32
+	yellow    outputType = 33
+)
+
+const CSI = "\033["
+
+func ansi(message string, typeOf outputType) string {
+	if arg("no-ansi") {
+		return message
+	}
+	return fmt.Sprintf("%s%dm%s", CSI, typeOf, message) + "\033[0m"
+}
+
+func exit(message string) {
+	fmt.Println("\n" + ansi(message, red) + "\n")
+	if arg("debug") {
+		panic("debug")
+	} else {
+		os.Exit(1)
+	}
 }
