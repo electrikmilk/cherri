@@ -20,6 +20,3 @@ nav_order: 1
 alert(message, "{title}", false)
 ```
 [Try it out!](https://playground.cherrilang.org){: .btn }
-
-Contributing to this open-source documentation is recommended as this language is in the early stages and while most
-things work, bugs or inaccurate documentation are very likely.
