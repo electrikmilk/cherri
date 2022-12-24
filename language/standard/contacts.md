@@ -7,6 +7,7 @@ nav_order: 2
 ---
 
 # Contact Actions
+{: .no_toc }
 
 ## Table of contents
 {: .no_toc .text-delta }
