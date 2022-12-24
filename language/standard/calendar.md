@@ -17,17 +17,17 @@ nav_order: 1
 
 ---
 
+## Calendar
+
 ### `addCalendar(name)`
 
 Create a calendar with `name`.
 
----
+## Date
 
 ### `date(date)`
 
 Create date value from `date`.
-
-### Adjust Date
 
 #### Add Time
 
@@ -58,7 +58,6 @@ Create date value from `date`.
 ### `addYears(date,magnitude)`
 
 ---
-
 
 #### Subtract Time
 
