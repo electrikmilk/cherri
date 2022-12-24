@@ -15,17 +15,11 @@ nav_order: 2
 1. TOC
 {:toc}
 
----
+## Contacts
 
-### `emailAddress(...email)`
+### `getFromContact(contact,property)`
 
-Create email address value of `email`. No limit on `email` arguments.
-
----
-
-### `phoneNumber(...number)`
-
-Create phone number value of `number`. No limit on `number` arguments.
+Retrieve `property` from `contact`.
 
 ---
 
@@ -33,11 +27,11 @@ Create phone number value of `number`. No limit on `number` arguments.
 
 Prompt the user to select a contact.
 
----
+## Phone
 
-### `selectEmailAddress()`
+### `phoneNumber(...number)`
 
-Prompt the user to select an email address.
+Create phone number value of `number`. No limit on `number` arguments.
 
 ---
 
@@ -45,8 +39,14 @@ Prompt the user to select an email address.
 
 Prompt the user to select a phone number.
 
+## Email
+
+### `emailAddress(...email)`
+
+Create email address value of `email`. No limit on `email` arguments.
+
 ---
 
-### `getFromContact(contact,property)`
+### `selectEmailAddress()`
 
-Retrieve `property` from `contact`.
+Prompt the user to select an email address.
