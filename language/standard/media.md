@@ -5,7 +5,9 @@ grand_parent: Documentation
 parent: Actions
 nav_order: 5
 ---
+
 # Media Actions
+{: .no_toc }
 
 ## Table of contents
 {: .no_toc .text-delta }
