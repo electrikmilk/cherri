@@ -8,6 +8,14 @@ nav_order: 1
 
 # Calendar Actions
 
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
+
 ### `addCalendar(name)`
 
 Create a calendar with `name`.
