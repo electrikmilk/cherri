@@ -8,6 +8,14 @@ nav_order: 4
 
 # Location Actions
 
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
+
 ### `getCurrentLocation()`
 
 Get the users current location.
