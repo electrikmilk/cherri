@@ -8,6 +8,14 @@ nav_order: 7
 
 # Sharing Actions
 
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
+
 ## Clipboard
 
 ### `getClipboard()`
