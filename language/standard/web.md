@@ -7,6 +7,7 @@ nav_order: 8
 ---
 
 # Web Actions
+{: .no_toc }
 
 ## Table of contents
 {: .no_toc .text-delta }
