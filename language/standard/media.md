@@ -15,25 +15,7 @@ nav_order: 5
 1. TOC
 {:toc}
 
----
-
-### `clearUpNext()`
-
-Clears the up next songs.
-
----
-
-### `getCurrentSong()`
-
-Gets the current song.
-
----
-
-### `latestPhotoImport()`
-
-Gets the latest photo import.
-
----
+## Camera
 
 ### `takePhoto(showPreview)`
 
@@ -53,16 +35,34 @@ Takes a video using `camera` in `quality`.
 
 - `camera` is a string value of `Front` or `Back`.
 - `quality` is a string value of `Low`, `Medium`, `High`. Default is `Medium`.
-- `startImmediately` is an optional boolean value set to `false` by default. 
+- `startImmediately` is an optional boolean value set to `false` by default.
+
+## Music
+
+### `getCurrentSong()`
+
+Gets the current song.
 
 ---
 
-### `trimVideo(video)`
+### `clearUpNext()`
 
-Prompts the user to trim `video`. Returns the trimmed video.
+Clears the up next songs.
 
----
+## Photos
+
+### `latestPhotoImport()`
+
+Gets the latest photo import.
+
+## Playback
 
 ### `setVolume(number)`
 
 Set device volume to `number`.
+
+## Video
+
+### `trimVideo(video)`
+
+Prompts the user to trim `video`. Returns the trimmed video.
