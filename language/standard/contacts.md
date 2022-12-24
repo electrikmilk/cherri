@@ -8,6 +8,14 @@ nav_order: 2
 
 # Contact Actions
 
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
+
 ### `emailAddress(...email)`
 
 Create email address value of `email`. No limit on `email` arguments.
