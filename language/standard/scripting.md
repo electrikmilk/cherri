@@ -8,7 +8,13 @@ nav_order: 6
 
 # Scripting Actions
 
-These actions are the most complete.
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
 
 ## Apps
 
