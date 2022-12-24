@@ -7,6 +7,14 @@ nav_order: 5
 ---
 # Media Actions
 
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
+
 ### `clearUpNext()`
 
 Clears the up next songs.
