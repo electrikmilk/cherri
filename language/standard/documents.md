@@ -7,6 +7,7 @@ nav_order: 3
 ---
 
 # Documents Actions
+{: .no_toc }
 
 ## Table of contents
 {: .no_toc .text-delta }
