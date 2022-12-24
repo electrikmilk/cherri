@@ -8,6 +8,14 @@ nav_order: 3
 
 # Documents Actions
 
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
+
 ## Archives
 
 ### `extractArchive(file)`
