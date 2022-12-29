@@ -2759,13 +2759,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: Variable,
+				validType: String,
+				key:       "WFInput",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["getAllWallpapers"] = actionDefinition{
