@@ -190,7 +190,7 @@ Start screen saver on Mac.
 
 ## Dictionaries
 
-### [Dictionary](../variables-globals.md#dictionaries)
+### [Dictionary](../variables-globals.html#dictionaries)
 
 ---
 
