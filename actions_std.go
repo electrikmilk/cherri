@@ -2021,23 +2021,19 @@ func scriptingActions() {
 			{
 				name:      "inputType",
 				validType: String,
+				key:       "WFInputType",
 			},
 			{
 				name:      "prompt",
 				validType: String,
+				key:       "WFAskActionPrompt",
 			},
 			{
 				name:      "defaultValue",
 				validType: String,
 				optional:  true,
+				key:       "WFAskActionDefaultAnswer",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFInputType", args, 0),
-				argumentValue("WFAskActionPrompt", args, 1),
-				argumentValue("WFAskActionDefaultAnswer", args, 2),
-			}
 		},
 	}
 	actions["chooseFromList"] = actionDefinition{
