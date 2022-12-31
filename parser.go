@@ -10,6 +10,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 var idx int
@@ -763,7 +765,7 @@ func parserError(message string) {
 	if char == '\n' || prev(1) == '\n' {
 		lineIdx--
 	}
-	if lineIdx != -1 && !arg("no-ansi") {
+	if lineIdx != -1 && !args.Using("no-ansi") {
 		fmt.Print("\033[31m")
 		fmt.Println("\n" + ansi(message, bold))
 		fmt.Printf("\n\033[2m----- \033[0m%s:%d:%d\n", filePath, lineIdx+1, lineCharIdx+1)
@@ -792,7 +794,7 @@ func parserError(message string) {
 	} else {
 		fmt.Printf("Error: %s (%d:%d)\n", message, lineIdx+1, lineCharIdx+1)
 	}
-	if arg("debug") {
+	if args.Using("debug") {
 		fmt.Println(tokens)
 		panic("debug")
 	} else {

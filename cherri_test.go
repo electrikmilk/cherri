@@ -9,6 +9,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 var currentTest string
@@ -23,14 +25,14 @@ func TestCherri(t *testing.T) {
 			currentTest = "examples/" + file.Name()
 			fmt.Printf("Compiling %s...\n", ansi(currentTest, bold))
 			os.Args[1] = currentTest
-			args["unsigned"] = ""
-			args["output"] = file.Name() + "_unsigned.shortcut"
+			args.Args["unsigned"] = ""
+			args.Args["output"] = file.Name() + "_unsigned.shortcut"
 			resetParser()
 			main()
 			fmt.Print(ansi("PASSED", green) + "\n\n")
-			err := os.Remove(args["output"])
+			err := os.Remove(args.Args["output"])
 			if err != nil {
-				fmt.Println(ansi(fmt.Sprintf("Failed to remove test file %s!\n", args["output"]), red))
+				fmt.Println(ansi(fmt.Sprintf("Failed to remove test file %s!\n", args.Args["output"]), red))
 			}
 		}
 	}

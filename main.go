@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/electrikmilk/args-parser"
 	"github.com/google/uuid"
 )
 
@@ -26,15 +27,15 @@ var included []string
 const fileExtension = "cherri"
 
 func main() {
-	registerArg("share", "s", "Signing mode. [anyone, contacts] [default=contacts]")
-	registerArg("unsigned", "u", "Don't sign compiled Shortcut. Will NOT run on iOS or macOS.")
-	registerArg("debug", "d", "Save generated plist. Print debug messages and stack traces.")
-	registerArg("output", "o", "Optional output file path. (e.g. /path/to/file.shortcut).")
-	registerArg("import", "i", "Opens compiled Shortcut after compilation. Ignored if unsigned.")
-	registerArg("no-ansi", "a", "Don't output ANSI escape sequences that format and color the output.")
+	args.Register("share", "s", "Signing mode. [anyone, contacts] [default=contacts]")
+	args.Register("unsigned", "u", "Don't sign compiled Shortcut. Will NOT run on iOS or macOS.")
+	args.Register("debug", "d", "Save generated plist. Print debug messages and stack traces.")
+	args.Register("output", "o", "Optional output file path. (e.g. /path/to/file.shortcut).")
+	args.Register("import", "i", "Opens compiled Shortcut after compilation. Ignored if unsigned.")
+	args.Register("no-ansi", "a", "Don't output ANSI escape sequences that format and color the output.")
+	args.CustomUsage = "[FILE]"
 	if len(os.Args) <= 1 {
-		usage()
-		os.Exit(1)
+		args.PrintUsage()
 	}
 	filePath = os.Args[1]
 	checkFile(filePath)
@@ -48,23 +49,23 @@ func main() {
 	contents = string(bytes)
 
 	outputPath = basename + ".shortcut"
-	if arg("output") {
-		outputPath = argValue("output")
+	if args.Using("output") {
+		outputPath = args.Value("output")
 	}
 
 	if strings.Contains(contents, "#include") {
 		parseIncludes()
 	}
 
-	if arg("debug") {
+	if args.Using("debug") {
 		fmt.Printf("Parsing %s... ", filename)
 	}
 	parse()
-	if arg("debug") {
+	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
 	}
 
-	if arg("debug") {
+	if args.Using("debug") {
 		fmt.Println(tokens)
 		fmt.Print("\n")
 		fmt.Println(variables)
@@ -73,40 +74,40 @@ func main() {
 		fmt.Print("\n")
 	}
 
-	if arg("debug") {
+	if args.Using("debug") {
 		fmt.Printf("Generating plist... ")
 	}
 	var plist = makePlist()
-	if arg("debug") {
+	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
 	}
 
-	if arg("debug") {
+	if args.Using("debug") {
 		fmt.Printf("Creating %s.plist... ", basename)
 		plistWriteErr := os.WriteFile(basename+".plist", []byte(plist), 0600)
 		handle(plistWriteErr)
 		fmt.Print(ansi("done!", green) + "\n")
 	}
 
-	if arg("debug") {
+	if args.Using("debug") {
 		fmt.Printf("Creating unsigned %s.shortcut... ", basename)
 	}
 
 	var unsignedPath = basename + "_unsigned.shortcut"
-	if arg("unsigned") {
+	if args.Using("unsigned") {
 		unsignedPath = outputPath
 	}
 	shortcutWriteErr := os.WriteFile(unsignedPath, []byte(plist), 0600)
 	handle(shortcutWriteErr)
-	if arg("debug") {
+	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
 	}
 
-	if !arg("unsigned") {
+	if !args.Using("unsigned") {
 		sign()
 	}
 
-	if arg("import") && !arg("unsigned") {
+	if args.Using("import") && !args.Using("unsigned") {
 		var _, importErr = exec.Command("open", outputPath).Output()
 		handle(importErr)
 	}
@@ -158,12 +159,12 @@ func checkFile(filePath string) {
 
 func sign() {
 	var signingMode = "people-who-know-me"
-	if arg("share") {
-		if argValue("share") == "anyone" {
+	if args.Using("share") {
+		if args.Value("share") == "anyone" {
 			signingMode = "anyone"
 		}
 	}
-	if arg("debug") {
+	if args.Using("debug") {
 		fmt.Printf("Signing %s.shortcut... ", basename)
 	}
 	var signBytes, signErr = exec.Command(
@@ -174,7 +175,7 @@ func sign() {
 		"-m", signingMode,
 	).Output()
 	if signErr != nil {
-		if arg("debug") {
+		if args.Using("debug") {
 			fmt.Print(ansi("failed!", red) + "\n")
 		}
 		fmt.Println("\n" + ansi("Error: Failed to sign Shortcut, plist may be invalid!", red))
@@ -183,7 +184,7 @@ func sign() {
 		}
 		os.Exit(1)
 	}
-	if arg("debug") {
+	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
 	}
 	removeErr := os.Remove(basename + "_unsigned.shortcut")
@@ -227,7 +228,7 @@ const (
 const CSI = "\033["
 
 func ansi(message string, typeOf outputType) string {
-	if arg("no-ansi") {
+	if args.Using("no-ansi") {
 		return message
 	}
 	return fmt.Sprintf("%s%dm%s", CSI, typeOf, message) + "\033[0m"
@@ -235,7 +236,7 @@ func ansi(message string, typeOf outputType) string {
 
 func exit(message string) {
 	fmt.Println("\nError: " + ansi(message, red) + "\n")
-	if arg("debug") {
+	if args.Using("debug") {
 		panic("debug")
 	} else {
 		os.Exit(1)
