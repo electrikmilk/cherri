@@ -4,7 +4,7 @@ Before making any contributions, familiarize yourself with how the Cherri progra
 issues, and how the compiler works on a deeper level for
 PRs.
 
-[Read documentation](https://electrikmilk.github.io/cherri/)
+[Read documentation](https://cherrilang.org/compiler/)
 
 ## Issue policy
 
@@ -74,7 +74,7 @@ reproduce it, what environment it may be isolated to are clearly communicated.
 
 ## Cross-platform development policy
 
-**It is not encouraged to make major contributions to this project if you do not have access to a Mac.**
+#### It is not encouraged to make major contributions to this project if you do not have access to a Mac.
 
 Troubleshooting why your contribution does not work will be cumbersome. If you prefer to develop on another platform,
 that's fine, but it is preferred that you have access to a Mac. For Shortcut debugging, you must use a Mac to validate
@@ -85,13 +85,20 @@ This is mainly because although the generated plist may be valid XML, it may not
 
 If you do not have access to a Mac, you must still make sure that a Cherri file that demonstrates your feature or bug
 fix successfully compiles to a valid plist. Use an XML linter or validator to check this and a member of the project
-upon reviewing your PR will check if the Shortcut signs successfully. But fair warning that making a major contribution
-without access to a Mac may be frustrating.
+upon reviewing your PR will check if the Shortcut signs successfully.
 
 Please throughly debug the issues with your contribution, no repeatedly asking the reviewer to check if a Shortcut signs
 with your latest change.
 
-**Your issues or PRs will be addressed as time allows for members of this project.**
+#### Making major contributions without access to a Mac _will_ be frustrating.
+
+---
+
+<p align=center>
+  <b>Your issues or PRs will be addressed as time allows for members of this project</b>
+</p>
+
+---
 
 ## Human language policy
 

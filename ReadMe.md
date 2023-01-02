@@ -20,29 +20,28 @@ cherri file.cherri
 ```
 
 Run `cherri` without any arguments to see all options and usage. For development, use the `--debug` (or `-d`) option for
-stack traces and create a plist file.
+stack traces and output a plist file.
 
 ## Why macOS only?
 
-Generating valid Shortcuts is only possible on macOS. I am planning to make a web editor once the compiler matures a
-little more that will turn out valid Shortcuts.
+Generating valid Shortcuts is only possible on macOS. However, I am hoping to add a signing server to the [web editor](https://playground.cherrilang.org) that will turn out valid Shortcuts on any platform with a web browser.
 
 ### Development on other platforms
 
 As it stands, I don't want someone to get confused and think Shortcuts compiled using Cherri on other platforms will run
 on their Mac or iOS device. However, you can build the compiler for your platform and use the `--unsigned` (or `-u` for
-short) to skip signing the compiled Shortcut, but the compiled Shortcut will not run on iOS or macOS, obviously. The
-compiler currently only supports Unix-like systems.
+short) to skip signing the compiled Shortcut, but the compiled Shortcut will not run on iOS or macOS, obviously. Also,
+the compiler is primarily developed and tested on Unix-like systems.
 
 [Read my full thoughts on this](https://github.com/electrikmilk/cherri/wiki/Why-macOS-only%3F)
 
 ## Why another Shortcuts language?
 
-1. Because it's fun :)
-2. Some languages have been abandoned, don't work very well, or no longer work.
-3. I don't want Shortcuts languages to die. There should be more, not less.
-4. Some stability that comes with the project being on macOS and not iOS.
-5. I am not aware of any project [other than one](https://github.com/zachary7829/Buttermilk) that compiles a
+Because it's fun :)
+
+Some languages have been abandoned, don't work very well, or no longer work. I don't want Shortcuts languages to die. There should be more, not less.
+
+Some stability that comes with the project being on macOS and not iOS. I am not aware of any project [other than one](https://github.com/zachary7829/Buttermilk) that compiles a
    Shortcut in a way that is meant for a desktop OS.
 
 ## Credits
