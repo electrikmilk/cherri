@@ -13,10 +13,9 @@ nav_order: 1
 
 #define color yellow
 #define glyph smiley
-#define name Hello, Cherri!
 
-@message = "Hello, Cherri!"
-@title = "Alert"
-alert(message, "{title}", false)
+@title = "Cherri"
+@message = "Alert"
+alert(message, "Hello, {title}!", false)
 ```
 [Try it out!](https://playground.cherrilang.org){: .btn }
