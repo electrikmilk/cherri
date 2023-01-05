@@ -4,7 +4,7 @@ Before making any contributions, familiarize yourself with how the Cherri progra
 issues, and how the compiler works on a deeper level for
 PRs.
 
-[Read documentation](https://electrikmilk.github.io/cherri/)
+[Read documentation](https://cherrilang.org/compiler/)
 
 ## Issue policy
 
