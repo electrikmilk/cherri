@@ -71,10 +71,10 @@ Get content on device screen.
 
 Some of these actions are abstracted into statements:
 
-- [Choose From Menu](../menus.md#1-choose-from-menu)
-- [If](../statements.md#ifelse)
-- [Repeat](../statements.md#repeat)
-- [Repeat With Each](../statements.md#repeat-with-each)
+- [Choose From Menu](../menus.html#1-choose-from-menu)
+- [If](../statements.html#ifelse)
+- [Repeat](../statements.html#repeat)
+- [Repeat With Each](../statements.html#repeat-with-each)
 
 ---
 
