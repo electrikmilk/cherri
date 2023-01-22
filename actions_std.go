@@ -373,7 +373,7 @@ func contactActions() {
 		identifier: "filter.contacts",
 		parameters: []parameterDefinition{
 			{
-				name:      "input",
+				name:      "contacts",
 				validType: Variable,
 				key:       "WFContentItemInputParameter",
 				optional:  false,
