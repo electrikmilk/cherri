@@ -1347,6 +1347,26 @@ func documentActions() {
 		mac:        true,
 		minVersion: 15,
 	}
+	actions["openFile"] = actionDefinition{
+		identifier: "openin",
+		parameters: []parameterDefinition{
+			{
+				name:      "file",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "prompt",
+				validType: Bool,
+				key:       "WFOpenInAskWhenRun",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
+				optional: true,
+			},
+		},
+	}
 }
 
 func locationActions() {
