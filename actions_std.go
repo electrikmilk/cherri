@@ -460,7 +460,7 @@ func contactActions() {
 				key:       "WFInput",
 			},
 			{
-				name:      "detail",
+				name:      "property",
 				validType: String,
 				key:       "WFContentItemPropertyName",
 			},
