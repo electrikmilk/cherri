@@ -1225,6 +1225,128 @@ func documentActions() {
 		},
 		make: textParts,
 	}
+	actions["makeDiskImage"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "name",
+				validType: String,
+			},
+			{
+				name:      "contents",
+				validType: Variable,
+			},
+			{
+				name:      "encrypt",
+				validType: Bool,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
+				optional: true,
+			},
+		},
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("VolumeName", args, 0),
+				variableInput("WFInput", args[1].value.(string)),
+				argumentValue("EncryptImage", args, 1),
+				{
+					key:      "SizeToFit",
+					dataType: Boolean,
+					value:    true,
+				},
+			}
+		},
+		mac:        true,
+		minVersion: 15,
+	}
+	var storageUnits = []string{
+		"bytes",
+		"KB",
+		"MB",
+		"GB",
+		"TB",
+		"PB",
+		"EB",
+		"ZB",
+		"YB",
+	}
+	actions["makeSizedDiskImage"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "name",
+				validType: String,
+			},
+			{
+				name:      "contents",
+				validType: Variable,
+			},
+			{
+				name:      "size",
+				validType: String,
+			},
+			{
+				name:      "encrypt",
+				validType: Bool,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
+				optional: true,
+			},
+		},
+		check: func(args []actionArgument) {
+			var copyArgs = args
+			var size = strings.Split(getArgValue(args[2]).(string), " ")
+			copyArgs[2] = actionArgument{
+				valueType: String,
+				value:     size[1],
+			}
+			checkEnum("disk size", storageUnits, copyArgs, 2)
+		},
+		make: func(args []actionArgument) []plistData {
+			var size = strings.Split(getArgValue(args[2]).(string), " ")
+			return []plistData{
+				argumentValue("VolumeName", args, 0),
+				variableInput("WFInput", args[1].value.(string)),
+				{
+					key:      "ImageSize",
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "Value",
+							dataType: Dictionary,
+							value: []plistData{
+								{
+									key:      "Unit",
+									dataType: Text,
+									value:    size[0],
+								},
+								{
+									key:      "Magnitude",
+									dataType: Text,
+									value:    size[1],
+								},
+							},
+						},
+						{
+							key:      "WFSerializationType",
+							dataType: Text,
+							value:    "WFQuantityFieldValue",
+						},
+					},
+				},
+				argumentValue("EncryptImage", args, 3),
+				{
+					key:      "SizeToFit",
+					dataType: Boolean,
+					value:    false,
+				},
+			}
+		},
+		mac:        true,
+		minVersion: 15,
+	}
 }
 
 func locationActions() {
