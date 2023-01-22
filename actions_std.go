@@ -347,6 +347,65 @@ func calendarActions() {
 }
 
 func contactActions() {
+	var contactProperties = []string{
+		"First Name",
+		"Middle Name",
+		"Last Name",
+		"Birthday",
+		"Prefix",
+		"Suffix",
+		"Nickname",
+		"Phonetic First Name",
+		"Phonetic Last Name",
+		"Phonetic Middle Name",
+		"Company",
+		"Job Title",
+		"Department",
+		"File Extension",
+		"Creation Date",
+		"File Path",
+		"Last Modified Date",
+		"Name",
+		"Random",
+	}
+	var abcSortOrders = []string{"A to Z", "Z to A"}
+	actions["filterContacts"] = actionDefinition{
+		identifier: "filter.contacts",
+		parameters: []parameterDefinition{
+			{
+				name:      "input",
+				validType: Variable,
+				key:       "WFContentItemInputParameter",
+				optional:  false,
+			},
+			{
+				name:      "property",
+				validType: String,
+				key:       "WFContentItemSortProperty",
+				optional:  false,
+			},
+			{
+				name:      "sortOrder",
+				validType: String,
+				key:       "WFContentItemSortOrder",
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "A to Z",
+				},
+				optional: true,
+			},
+			{
+				name:      "limit",
+				validType: Integer,
+				key:       "WFContentItemLimitNumber",
+				optional:  true,
+			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("contact property", contactProperties, args, 1)
+			checkEnum("sort order", abcSortOrders, args, 2)
+		},
+	}
 	actions["emailAddress"] = actionDefinition{
 		identifier: "email",
 		parameters: []parameterDefinition{
