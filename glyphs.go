@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Brandon Jordan
+ * Copyright (c) 2023 Brandon Jordan
  */
 
 /* Glyphs sourced from https://github.com/pfgithub/scpl under MIT license */
