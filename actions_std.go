@@ -451,23 +451,22 @@ func contactActions() {
 	actions["selectPhoneNumber"] = actionDefinition{
 		identifier: "selectphone",
 	}
-	actions["getFromContact"] = actionDefinition{
+	actions["getContactDetail"] = actionDefinition{
 		identifier: "properties.contacts",
 		parameters: []parameterDefinition{
 			{
 				name:      "contact",
-				validType: String,
+				validType: Variable,
+				key:       "WFInput",
 			},
 			{
-				name:      "property",
+				name:      "detail",
 				validType: String,
+				key:       "WFContentItemPropertyName",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
-				argumentValue("WFContentItemPropertyName", args, 1),
-			}
+		check: func(args []actionArgument) {
+			checkEnum("contact property", contactProperties, args, 1)
 		},
 	}
 }
