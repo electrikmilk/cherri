@@ -115,7 +115,7 @@ func makePlist() (plist string) {
 					{
 						key:      "WFControlFlowMode",
 						dataType: Number,
-						value:    2,
+						value:    endStatement,
 					},
 					{
 						key:      "GroupingIdentifier",
@@ -133,7 +133,7 @@ func makePlist() (plist string) {
 					{
 						key:      "WFControlFlowMode",
 						dataType: Number,
-						value:    0,
+						value:    startStatement,
 					},
 					paramValue("WFRepeatCount", actionArgument{
 						valueType: tok.valueType,
@@ -152,7 +152,7 @@ func makePlist() (plist string) {
 					{
 						key:      "WFControlFlowMode",
 						dataType: Number,
-						value:    2,
+						value:    endStatement,
 					},
 					{
 						key:      "GroupingIdentifier",
@@ -170,7 +170,7 @@ func makePlist() (plist string) {
 					{
 						key:      "WFControlFlowMode",
 						dataType: Number,
-						value:    0,
+						value:    startStatement,
 					},
 					paramValue("WFInput", actionArgument{
 						valueType: tok.valueType,
@@ -184,9 +184,9 @@ func makePlist() (plist string) {
 				}))
 			}
 		case Menu:
-			var controlFlow = 0
+			var controlFlow = startStatement
 			if tok.valueType == EndClosure {
-				controlFlow = 2
+				controlFlow = endStatement
 			}
 			var menuParams = []plistData{
 				{
@@ -249,7 +249,7 @@ func makePlist() (plist string) {
 				{
 					key:      "WFControlFlowMode",
 					dataType: Number,
-					value:    1,
+					value:    statementPart,
 				},
 				paramValue("WFMenuItemTitle", actionArgument{
 					valueType: tok.valueType,
@@ -296,11 +296,11 @@ func makePlist() (plist string) {
 					dataType: Number,
 					value:    cond.condition,
 				})
-				controlFlowMode = 0
+				controlFlowMode = startStatement
 			case Else:
-				controlFlowMode = 1
+				controlFlowMode = statementPart
 			case EndClosure:
-				controlFlowMode = 2
+				controlFlowMode = endStatement
 			}
 			conditionalParams = append(conditionalParams, plistData{
 				key:      "WFControlFlowMode",
