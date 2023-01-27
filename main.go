@@ -72,10 +72,15 @@ func main() {
 	}
 
 	if args.Using("debug") {
+		fmt.Println(ansi("### TOKENS ###", bold))
 		fmt.Println(tokens)
 		fmt.Print("\n")
+
+		fmt.Println(ansi("### VARIABLES ###", bold))
 		fmt.Println(variables)
 		fmt.Print("\n")
+
+		fmt.Println(ansi("### MENUS ###", bold))
 		fmt.Println(menus)
 		fmt.Print("\n")
 	}
