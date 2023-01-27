@@ -373,7 +373,9 @@ func makePlist() (plist string) {
 	plist += footer
 
 	if args.Using("debug") {
+		fmt.Println(ansi("### UUIDS ###", bold))
 		fmt.Println(uuids)
+		fmt.Print("\n")
 	}
 
 	return
