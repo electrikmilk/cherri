@@ -34,16 +34,22 @@ func main() {
 	args.Register("import", "i", "Opens compiled Shortcut after compilation. Ignored if unsigned.")
 	args.Register("no-ansi", "a", "Don't output ANSI escape sequences that format and color the output.")
 	args.CustomUsage = "[FILE]"
+
 	if len(os.Args) <= 1 {
 		args.PrintUsage()
 	}
+
 	filePath = os.Args[1]
 	checkFile(filePath)
-	var pathParts = strings.Split(filePath, "/")
-	filename = end(pathParts)
+
+	var stat, statErr = os.Stat(filePath)
+	handle(statErr)
+	filename = stat.Name()
+
 	relativePath = strings.Replace(filePath, filename, "", 1)
 	var nameParts = strings.Split(filename, ".")
 	basename = nameParts[0]
+
 	var bytes, readErr = os.ReadFile(filePath)
 	handle(readErr)
 	contents = string(bytes)
