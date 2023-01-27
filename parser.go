@@ -42,10 +42,13 @@ func parse() {
 		case char == ' ' || char == '\t' || char == '\n':
 			advance()
 		case tokenAhead(Definition):
+			advance()
 			switch {
 			case tokenAhead(Name):
+				advance()
 				workflowName = collectUntil('\n')
 			case tokenAhead(Color):
+				advance()
 				var collectColor = collectUntil('\n')
 				makeColors()
 				collectColor = strings.ToLower(collectColor)
@@ -56,6 +59,7 @@ func parse() {
 					parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s", collectColor, list))
 				}
 			case tokenAhead(Glyph):
+				advance()
 				var collectGlyph = collectUntil('\n')
 				makeGlyphs()
 				collectGlyph = strings.ToLower(collectGlyph)
@@ -71,6 +75,7 @@ func parse() {
 					parserError(fmt.Sprintf("Invalid icon glyph '%s'\n\n%s", collectGlyph, list))
 				}
 			case tokenAhead(Inputs):
+				advance()
 				makeContentItems()
 				var collectInputs = collectUntil('\n')
 				if collectInputs != "" {
@@ -86,6 +91,7 @@ func parse() {
 					}
 				}
 			case tokenAhead(Outputs):
+				advance()
 				makeContentItems()
 				var collectOutputs = collectUntil('\n')
 				if collectOutputs != "" {
@@ -101,6 +107,7 @@ func parse() {
 					}
 				}
 			case tokenAhead(From):
+				advance()
 				makeWorkflowTypes()
 				var collectWorkflowTypes = collectUntil('\n')
 				if collectWorkflowTypes != "" {
@@ -116,9 +123,9 @@ func parse() {
 					}
 				}
 			case tokenAhead(NoInput):
+				advance()
 				switch {
 				case tokenAhead(StopWith):
-					lineCharIdx -= 2
 					advance()
 					var stopWithError = collectString()
 					noInput = noInputParams{
@@ -132,6 +139,7 @@ func parse() {
 						},
 					}
 				case tokenAhead(AskFor):
+					advance()
 					makeContentItems()
 					var wtype = collectUntil('\n')
 					if _, found := contentItems[wtype]; found {
@@ -177,6 +185,7 @@ func parse() {
 				}
 			}
 		case tokenAhead(Import):
+			advance()
 			makeLibraries()
 			var collectedLibrary = strings.ToLower(collectUntil('\n'))
 			if _, found := libraries[collectedLibrary]; found {
@@ -188,9 +197,9 @@ func parse() {
 			var identifier string
 			if strings.Contains(lookAheadUntil('\n'), "=") {
 				identifier = collectUntil(' ')
+				advance()
 			} else {
 				identifier = collectUntil('\n')
-				idx -= 2
 				advance()
 			}
 			var valueType tokenType
@@ -207,6 +216,7 @@ func parse() {
 				} else {
 					tokensAhead(Set)
 				}
+				advance()
 				collectValue(&valueType, &value, '\n')
 				if valueType == Variable {
 					var stringValue = value.(string)
@@ -259,6 +269,7 @@ func parse() {
 				})
 			}
 		case tokenAhead(Repeat):
+			advance()
 			currentGroupingUUID = shortcutsUUID()
 			closureIdx++
 			closureUUIDs[closureIdx] = currentGroupingUUID
@@ -266,7 +277,7 @@ func parse() {
 			var timesType tokenType
 			var timesValue any
 			collectValue(&timesType, &timesValue, '{')
-			advance()
+			advanceTimes(2)
 			tokens = append(tokens, token{
 				typeof:    Repeat,
 				ident:     currentGroupingUUID,
@@ -274,6 +285,7 @@ func parse() {
 				value:     timesValue,
 			})
 		case tokenAhead(RepeatWithEach):
+			advance()
 			currentGroupingUUID = shortcutsUUID()
 			closureIdx++
 			closureUUIDs[closureIdx] = currentGroupingUUID
@@ -289,6 +301,7 @@ func parse() {
 				value:     iterableValue,
 			})
 		case tokenAhead(Menu):
+			advance()
 			currentGroupingUUID = shortcutsUUID()
 			closureIdx++
 			closureUUIDs[closureIdx] = currentGroupingUUID
@@ -306,6 +319,7 @@ func parse() {
 				value:     promptValue,
 			})
 		case tokenAhead(Case):
+			advance()
 			if currentGroupingUUID == "" {
 				parserError("Case has no starting menu statement.")
 			}
@@ -325,6 +339,7 @@ func parse() {
 				value:     itemValue,
 			})
 		case tokenAhead(If):
+			advance()
 			makeConditions()
 			currentGroupingUUID = shortcutsUUID()
 			closureIdx++
@@ -351,12 +366,14 @@ func parse() {
 				} else {
 					parserError(fmt.Sprintf("Invalid conditional '%s'", collectConditional))
 				}
+				advance()
 				collectValue(&variableTwoType, &variableTwoValue, ' ')
 				if char == ' ' {
 					advance()
 				}
 				if !isToken(LeftBrace) {
 					collectValue(&variableThreeType, &variableThreeValue, '{')
+					advance()
 				}
 			}
 			isToken(LeftBrace)
@@ -375,7 +392,9 @@ func parse() {
 				},
 			})
 		case tokenAhead(RightBrace):
+			advance()
 			if tokenAhead(Else) {
+				advance()
 				if currentGroupingUUID == "" {
 					parserError("Else has no starting if statement.")
 				}
@@ -401,6 +420,7 @@ func parse() {
 		case strings.Contains(lookAhead(), "("):
 			standardActions()
 			var identifier = collectUntil('(')
+			advance()
 			if _, found := actions[identifier]; found {
 				var arguments = collectArguments()
 				currentAction = identifier
@@ -417,6 +437,9 @@ func parse() {
 			} else {
 				parserError(fmt.Sprintf("Unknown action '%s()'", identifier))
 			}
+			if char == ')' {
+				advance()
+			}
 		default:
 			parserError(fmt.Sprintf("Illegal character '%s'", string(char)))
 		}
@@ -428,7 +451,6 @@ func collectUntil(ch rune) (collected string) {
 		collected += string(char)
 		advance()
 	}
-	advance()
 	collected = strings.Trim(collected, " ")
 	return
 }
@@ -462,10 +484,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		var integer = collectInteger()
 		*valueType = Integer
 		*value = integer
-		if char == '\n' {
-			idx -= 1
-			advance()
-		} else {
+		if char != '\n' {
 			advance()
 		}
 		if tokensAhead(Plus, Minus, Multiply, Divide, Modulus) {
@@ -494,6 +513,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	case strings.Contains(lookAheadUntil(until), "("):
 		standardActions()
 		var identifier = collectUntil('(')
+		advance()
 		if _, found := actions[identifier]; found {
 			var arguments = collectArguments()
 			currentAction = identifier
@@ -504,7 +524,10 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 				args:  arguments,
 			}
 		} else {
-			parserError(fmt.Sprintf("Unknown action '%s()'", identifier))
+			parserError(fmt.Sprintf("Unknown action as value '%s()'", identifier))
+		}
+		if char == ')' {
+			advance()
 		}
 	default:
 		if lookAheadUntil(until) == "" {
@@ -515,13 +538,18 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		switch {
 		case strings.Contains(lookAheadUntil(until), "["):
 			identifier = collectUntil('[')
+			advance()
 			fullIdentifier = identifier + "[" + collectUntil(until)
+			advance()
 		case strings.Contains(lookAheadUntil(until), "."):
 			identifier = collectUntil('.')
+			advance()
 			fullIdentifier = identifier + "." + collectUntil(until)
+			advance()
 		default:
 			identifier = collectUntil(until)
 			fullIdentifier = identifier
+			advance()
 		}
 		var lowerIdentifier = strings.ToLower(identifier)
 		if _, global := globals[identifier]; global {
@@ -532,7 +560,6 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 			*valueType = Variable
 			*value = fullIdentifier
 		} else {
-			lineIdx--
 			if fullIdentifier == "" {
 				parserError("Value expected")
 			}
@@ -563,9 +590,6 @@ func collectArguments() (arguments []actionArgument) {
 			valueType: valueType,
 			value:     value,
 		})
-	}
-	if char == ')' {
-		advance()
 	}
 	return
 }
@@ -707,7 +731,7 @@ func tokenAhead(token tokenType) (isAhead bool) {
 		}
 	}
 	if isAhead {
-		advanceTimes(len(tokenChars) + 1)
+		advanceTimes(len(tokenChars))
 	}
 	return
 }
