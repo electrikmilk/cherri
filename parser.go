@@ -504,7 +504,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 				args:  arguments,
 			}
 		} else {
-			parserError(fmt.Sprintf("Invalid action '%s()'", identifier))
+			parserError(fmt.Sprintf("Unknown action '%s()'", identifier))
 		}
 	default:
 		var identifier string
