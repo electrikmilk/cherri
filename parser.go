@@ -507,6 +507,9 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 			parserError(fmt.Sprintf("Unknown action '%s()'", identifier))
 		}
 	default:
+		if lookAheadUntil(until) == "" {
+			parserError("Value expected")
+		}
 		var identifier string
 		var fullIdentifier string
 		switch {
@@ -530,6 +533,9 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 			*value = fullIdentifier
 		} else {
 			lineIdx--
+			if fullIdentifier == "" {
+				parserError("Value expected")
+			}
 			parserError(fmt.Sprintf("Unknown value type: '%s'", fullIdentifier))
 		}
 	}
