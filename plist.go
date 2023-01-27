@@ -135,8 +135,16 @@ func condParam(key string, conditionalParams *[]plistData, typeOf *tokenType, va
 			}, Integer, Text))
 		}
 	case Variable:
-		var realVar = realVariableValue(value.(string), String)
-		condParam(key, conditionalParams, &realVar.valueType, realVar.value)
+		var variable = variables[strings.ToLower(value.(string))]
+		switch variable.valueType {
+		case Integer:
+			*conditionalParams = append(*conditionalParams, variablePlistValue("WFNumberValue", value.(string), uuids[value.(string)]))
+		case String:
+			*conditionalParams = append(*conditionalParams, attachmentValues("WFConditionalActionString", fmt.Sprintf("{%s}", value.(string)), uuids[value.(string)], Text))
+		default:
+			var realVar = realVariableValue(value.(string), String)
+			condParam(key, conditionalParams, &realVar.valueType, realVar.value)
+		}
 	}
 }
 
