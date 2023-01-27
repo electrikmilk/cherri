@@ -121,13 +121,13 @@ func checkAction(arguments []actionArgument) {
 	}
 	if actions[currentAction].minVersion != 0 {
 		if actions[currentAction].minVersion > iosVersion {
-			parserWarning(
+			parserError(
 				fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentAction, math.Ceil(iosVersion)),
 			)
 		}
 	}
 	if !isMac && actions[currentAction].mac {
-		parserWarning(
+		parserError(
 			fmt.Sprintf("You've set your Shortcut as non-Mac. Action '%s()' is a Mac only action.", currentAction),
 		)
 	}
