@@ -790,7 +790,7 @@ func parserError(message string) {
 			fmt.Print("\033[0m\n")
 		}
 		var spaces string
-		for i := 0; i < (lineCharIdx + 5); i++ {
+		for i := 0; i < (lineCharIdx + 4); i++ {
 			spaces += " "
 		}
 		fmt.Println("\033[31m" + spaces + "^\033[0m")
