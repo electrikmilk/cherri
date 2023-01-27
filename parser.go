@@ -330,11 +330,11 @@ func parse() {
 			closureIdx++
 			closureUUIDs[closureIdx] = currentGroupingUUID
 			closureTypes[closureIdx] = Conditional
-			var cond string
+			var conditionType string
 			if isToken(Exclamation) {
-				cond = conditions[Empty]
+				conditionType = conditions[Empty]
 			} else {
-				cond = conditions[Any]
+				conditionType = conditions[Any]
 			}
 			var variableOneType tokenType
 			var variableOneValue any
@@ -347,7 +347,7 @@ func parse() {
 				var collectConditional = collectUntil(' ')
 				var collectConditionalToken = tokenType(collectConditional)
 				if _, found := conditions[collectConditionalToken]; found {
-					cond = conditions[collectConditionalToken]
+					conditionType = conditions[collectConditionalToken]
 				} else {
 					parserError(fmt.Sprintf("Invalid conditional '%s'", collectConditional))
 				}
@@ -367,7 +367,7 @@ func parse() {
 				value: condition{
 					variableOneType:    variableOneType,
 					variableOneValue:   variableOneValue,
-					condition:          cond,
+					condition:          conditionType,
 					variableTwoType:    variableTwoType,
 					variableTwoValue:   variableTwoValue,
 					variableThreeType:  variableThreeType,
