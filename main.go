@@ -116,7 +116,10 @@ func main() {
 func parseIncludes() {
 	lines = strings.Split(contents, "\n")
 	for l, line := range lines {
+		chars = strings.Split(line, "")
 		lineIdx = l
+		idx = 9
+		lineCharIdx = idx
 		if !strings.Contains(line, "#include") {
 			continue
 		}
