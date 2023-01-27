@@ -209,10 +209,6 @@ func end(slice []string) string {
 	return slice[len(slice)-1]
 }
 
-func end(slice []string) string {
-	return slice[len(slice)-1]
-}
-
 func handle(err error) {
 	if err != nil {
 		panic(err)
