@@ -162,10 +162,8 @@ func checkFile(filePath string) {
 
 func sign() {
 	var signingMode = "people-who-know-me"
-	if args.Using("share") {
-		if args.Value("share") == "anyone" {
-			signingMode = "anyone"
-		}
+	if args.Using("share") && args.Value("share") == "anyone" {
+		signingMode = "anyone"
 	}
 	if args.Using("debug") {
 		fmt.Printf("Signing %s.shortcut... ", basename)
