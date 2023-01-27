@@ -775,7 +775,7 @@ func parserError(message string) {
 		fmt.Print("\033[31m")
 		fmt.Println("\n" + ansi(message, bold))
 		fmt.Printf("\n\033[2m----- \033[0m%s:%d:%d\n", filePath, lineIdx+1, lineCharIdx+1)
-		if len(lines) > (lineIdx - 1) {
+		if len(lines) > (lineIdx-1) && lineIdx != 0 {
 			fmt.Printf("\033[2m%d | %s\033[0m\n", lineIdx, lines[lineIdx-1])
 		}
 		if len(lines) > lineIdx {
