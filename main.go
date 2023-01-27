@@ -224,7 +224,6 @@ type outputType int
 
 const (
 	bold      outputType = 1
-	dim       outputType = 2
 	underline outputType = 4
 	red       outputType = 31
 	green     outputType = 32
