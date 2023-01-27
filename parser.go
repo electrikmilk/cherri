@@ -763,7 +763,7 @@ func parserErr(err error) {
 }
 
 func parserWarning(message string) {
-	fmt.Print(ansi(fmt.Sprintf("\nWarning: %s (%d:%d)\n", message, lineIdx+1, lineCharIdx+1), yellow))
+	fmt.Print(ansi(fmt.Sprintf("\nWarning: %s %s:%d:%d\n", message, filePath, lineIdx+1, lineCharIdx+1), yellow))
 }
 
 func parserError(message string) {
