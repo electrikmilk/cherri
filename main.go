@@ -168,21 +168,22 @@ func sign() {
 	if args.Using("debug") {
 		fmt.Printf("Signing %s.shortcut... ", basename)
 	}
-	var signBytes, signErr = exec.Command(
+	var sign = exec.Command(
 		"shortcuts",
 		"sign",
 		"-i", basename+"_unsigned.shortcut",
 		"-o", outputPath,
 		"-m", signingMode,
-	).Output()
+	)
+	var stdErr bytes.Buffer
+	sign.Stderr = &stdErr
+	var signErr = sign.Run()
 	if signErr != nil {
 		if args.Using("debug") {
 			fmt.Print(ansi("failed!", red) + "\n")
 		}
 		fmt.Println("\n" + ansi("Error: Failed to sign Shortcut, plist may be invalid!", red))
-		if len(signBytes) > 0 {
-			fmt.Println("shortcuts:", string(signBytes))
-		}
+		fmt.Println("shortcuts:", stdErr.String())
 		os.Exit(1)
 	}
 	if args.Using("debug") {
@@ -190,6 +191,10 @@ func sign() {
 	}
 	removeErr := os.Remove(basename + "_unsigned.shortcut")
 	handle(removeErr)
+}
+
+func end(slice []string) string {
+	return slice[len(slice)-1]
 }
 
 func end(slice []string) string {
