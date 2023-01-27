@@ -679,6 +679,12 @@ func hasInputVariables(varName string) {
 }
 
 const (
+	startStatement = 0
+	statementPart  = 1
+	endStatement   = 2
+)
+
+const (
 	stringType string = "string"
 	intType    string = "float64"
 	arrayType  string = "[]interface {}"
