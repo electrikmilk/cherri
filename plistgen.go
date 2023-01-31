@@ -63,7 +63,7 @@ func makePlist() (plist string) {
 			}
 			if tok.typeof == Var {
 				shortcutActions = append(shortcutActions, makeStdAction("setvariable", setVariableParams))
-			} else if tok.typeof == AddTo {
+			} else if tok.typeof == AddTo && tok.valueType != Arr {
 				shortcutActions = append(shortcutActions, makeStdAction("appendvariable", setVariableParams))
 			}
 			if tok.valueType == Arr {
