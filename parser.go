@@ -79,14 +79,14 @@ func parse() {
 				makeContentItems()
 				var collectInputs = collectUntil('\n')
 				if collectInputs != "" {
-					var definedInputs = strings.Split(collectInputs, ",")
-					for _, input := range definedInputs {
+					var inputTypes = strings.Split(collectInputs, ",")
+					for _, input := range inputTypes {
 						input = strings.Trim(input, " ")
 						if _, found := contentItems[input]; found {
 							inputs = append(inputs, contentItems[input])
 						} else {
-							var list = makeKeyList("Available content items:", contentItems)
-							parserError(fmt.Sprintf("Invalid input content item '%s'\n\n%s", input, list))
+							var list = makeKeyList("Available content item types:", contentItems)
+							parserError(fmt.Sprintf("Invalid input type '%s'\n\n%s", input, list))
 						}
 					}
 				}
@@ -95,14 +95,14 @@ func parse() {
 				makeContentItems()
 				var collectOutputs = collectUntil('\n')
 				if collectOutputs != "" {
-					var definedOutputs = strings.Split(collectOutputs, ",")
-					for _, output := range definedOutputs {
+					var outputTypes = strings.Split(collectOutputs, ",")
+					for _, output := range outputTypes {
 						output = strings.Trim(output, " ")
 						if _, found := contentItems[output]; found {
 							outputs = append(outputs, contentItems[output])
 						} else {
-							var list = makeKeyList("Available content items:", contentItems)
-							parserError(fmt.Sprintf("Invalid output content item '%s'\n\n%s", output, list))
+							var list = makeKeyList("Available content item types:", contentItems)
+							parserError(fmt.Sprintf("Invalid output type '%s'\n\n%s", output, list))
 						}
 					}
 				}
