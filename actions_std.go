@@ -489,8 +489,10 @@ func documentActions() {
 			{
 				name:      "folder",
 				validType: Variable,
+				key:       "WFFolder",
 			},
 			{
+				key:       "Recursive",
 				name:      "recursive",
 				validType: Bool,
 				defaultValue: actionArgument{
@@ -499,12 +501,6 @@ func documentActions() {
 				},
 				optional: true,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFFolder", args[0].value.(string)),
-				argumentValue("Recursive", args, 1),
-			}
 		},
 	}
 	actions["matchedTextGroupIndex"] = actionDefinition{
@@ -738,12 +734,8 @@ func documentActions() {
 			{
 				name:      "file",
 				validType: Variable,
+				key:       "WFFile",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFFile", args[0].value.(string)),
-			}
 		},
 	}
 	actions["getParentDirectory"] = actionDefinition{
@@ -751,12 +743,8 @@ func documentActions() {
 			{
 				name:      "input",
 				validType: Variable,
+				key:       "WFInput",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["getEmojiName"] = actionDefinition{
@@ -775,17 +763,13 @@ func documentActions() {
 			{
 				name:      "file",
 				validType: Variable,
+				key:       "WFFolder",
 			},
 			{
 				name:      "detail",
 				validType: String,
+				key:       "WFContentItemPropertyName",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFFolder", args[0].value.(string)),
-				argumentValue("WFContentItemPropertyName", args, 1),
-			}
 		},
 	}
 	actions["deleteFiles"] = actionDefinition{
@@ -793,10 +777,12 @@ func documentActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
 			{
 				name:      "immediately",
+				key:       "WFDeleteImmediatelyDelete",
 				validType: Bool,
 				defaultValue: actionArgument{
 					valueType: Bool,
@@ -804,12 +790,6 @@ func documentActions() {
 				},
 				optional: true,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-				argumentValue("WFDeleteImmediatelyDelete", args, 1),
-			}
 		},
 	}
 	actions["getTextFromImage"] = actionDefinition{
@@ -850,12 +830,8 @@ func documentActions() {
 			{
 				name:      "input",
 				validType: Variable,
+				key:       "BooksInput",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("BooksInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["saveFile"] = actionDefinition{
@@ -920,12 +896,8 @@ func documentActions() {
 			{
 				name:      "file",
 				validType: Variable,
+				key:       "WFArchive",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFArchive", args[0].value.(string)),
-			}
 		},
 	}
 	actions["makeArchive"] = actionDefinition{
@@ -934,22 +906,18 @@ func documentActions() {
 			{
 				name:      "name",
 				validType: String,
+				key:       "WFZIPName",
 			},
 			{
 				name:      "format",
 				validType: String,
+				key:       "WFArchiveFormat",
 			},
 			{
 				name:      "files",
 				validType: Variable,
+				key:       "WFInput",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFZIPName", args, 0),
-				argumentValue("WFArchiveFormat", args, 1),
-				variableInput("WFInput", args[2].value.(string)),
-			}
 		},
 	}
 	actions["quicklook"] = actionDefinition{
@@ -957,16 +925,11 @@ func documentActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: String,
+				validType: Variable,
+				key:       "WFInput",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
-		},
 	}
-	makeLanguages()
 	actions["translateFrom"] = actionDefinition{
 		identifier: "text.translate",
 		parameters: []parameterDefinition{
@@ -1394,12 +1357,8 @@ func locationActions() {
 			{
 				name:      "input",
 				validType: Variable,
+				key:       "WFInput",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
-			}
 		},
 	}
 	actions["getCurrentWeather"] = actionDefinition{
@@ -1411,12 +1370,8 @@ func locationActions() {
 			{
 				name:      "location",
 				validType: Variable,
+				key:       "WFWeatherCustomLocation",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFWeatherCustomLocation", args, 0),
-			}
 		},
 	}
 	actions["openInMaps"] = actionDefinition{
@@ -1425,12 +1380,8 @@ func locationActions() {
 			{
 				name:      "location",
 				validType: Variable,
+				key:       "WFInput",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFInput", args, 0),
-			}
 		},
 	}
 	actions["streetAddress"] = actionDefinition{
@@ -1439,38 +1390,58 @@ func locationActions() {
 			{
 				name:      "addressLine2",
 				validType: String,
+				key:       "WFAddressLine1",
 			},
 			{
 				name:      "addressLine2",
 				validType: String,
+				key:       "WFAddressLine2",
 			},
 			{
 				name:      "city",
 				validType: String,
+				key:       "WFCity",
 			},
 			{
 				name:      "state",
 				validType: String,
+				key:       "WFState",
 			},
 			{
 				name:      "country",
 				validType: String,
+				key:       "WFCountry",
 			},
 			{
 				name:      "zipCode",
 				validType: Integer,
+				key:       "WFPostalCode",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFAddressLine1", args, 0),
-				argumentValue("WFAddressLine2", args, 1),
-				argumentValue("WFCity", args, 2),
-				argumentValue("WFState", args, 3),
-				argumentValue("WFCountry", args, 4),
-				argumentValue("WFPostalCode", args, 5),
-			}
-		},
+	}
+	var weatherDetails = []string{
+		"Name",
+		"Air Pollutants",
+		"Air Quality Category",
+		"Air Quality Index",
+		"Sunset Time",
+		"Sunrise Time",
+		"UV Index",
+		"Wind Direction",
+		"Wind Speed",
+		"Precipitation Chance",
+		"Precipitation Amount",
+		"Pressure",
+		"Humidity",
+		"Dewpoint",
+		"Visibility",
+		"Condition",
+		"Feels Like",
+		"Low",
+		"High",
+		"Temperature",
+		"Location",
+		"Date",
 	}
 	actions["getWeatherDetail"] = actionDefinition{
 		identifier: "properties.weather.conditions",
@@ -1478,51 +1449,66 @@ func locationActions() {
 			{
 				name:      "weather",
 				validType: Variable,
+				key:       "WFInput",
 			},
 			{
-				name:      "property",
+				name:      "detail",
 				validType: String,
+				key:       "WFContentItemPropertyName",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFInput", args, 0),
-				argumentValue("WFContentItemPropertyName", args, 1),
-			}
+		check: func(args []actionArgument) {
+			checkEnum("weather detail", weatherDetails, args, 1)
 		},
 	}
-	actions["getWeatherForcast"] = actionDefinition{
+	var weatherForecastTypes = []string{
+		"Daily",
+		"Hourly",
+	}
+	actions["getWeatherForecast"] = actionDefinition{
 		identifier: "weather.forecast",
 		parameters: []parameterDefinition{
 			{
 				name:      "type",
 				validType: String,
+				key:       "WFWeatherForecastType",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFWeatherForecastType", args, 0),
-			}
+		check: func(args []actionArgument) {
+			checkEnum("weather forecast type", weatherForecastTypes, args, 0)
 		},
 	}
-	actions["getWeatherForcastAt"] = actionDefinition{
+	actions["getWeatherForecastAt"] = actionDefinition{
 		identifier: "weather.forecast",
 		parameters: []parameterDefinition{
 			{
 				name:      "type",
 				validType: String,
+				key:       "WFWeatherForecastType",
 			},
 			{
 				name:      "location",
 				validType: Variable,
+				key:       "WFInput",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFWeatherForecastType", args, 0),
-				argumentValue("WFInput", args, 1),
-			}
+		check: func(args []actionArgument) {
+			checkEnum("weather forecast type", weatherForecastTypes, args, 0)
 		},
+	}
+	var locationDetails = []string{
+		"Name",
+		"URL",
+		"Label",
+		"Phone Number",
+		"Region",
+		"ZIP Code",
+		"State",
+		"City",
+		"Street",
+		"Altitude",
+		"Longitude",
+		"Latitude",
 	}
 	actions["getLocationDetail"] = actionDefinition{
 		identifier: "properties.locations",
@@ -1530,17 +1516,16 @@ func locationActions() {
 			{
 				name:      "location",
 				validType: Variable,
+				key:       "WFInput",
 			},
 			{
-				name:      "property",
+				name:      "detail",
 				validType: String,
+				key:       "WFContentItemPropertyName",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFInput", args, 0),
-				argumentValue("WFContentItemPropertyName", args, 1),
-			}
+		check: func(args []actionArgument) {
+			checkEnum("location detail", locationDetails, args, 1)
 		},
 	}
 	actions["getMapsLink"] = actionDefinition{
@@ -1549,12 +1534,8 @@ func locationActions() {
 			{
 				name:      "location",
 				validType: Variable,
+				key:       "WFInput",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFInput", args, 0),
-			}
 		},
 	}
 	actions["getHalfwayPoint"] = actionDefinition{
@@ -1562,17 +1543,13 @@ func locationActions() {
 			{
 				name:      "firstLocation",
 				validType: Variable,
+				key:       "WFGetHalfwayPointFirstLocation",
 			},
 			{
 				name:      "secondLocation",
 				validType: Variable,
+				key:       "WFGetHalfwayPointSecondLocation",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFGetHalfwayPointFirstLocation", args, 0),
-				argumentValue("WFGetHalfwayPointSecondLocation", args, 1),
-			}
 		},
 	}
 }
@@ -1586,16 +1563,12 @@ func mediaActions() {
 			{
 				name:      "showPreview",
 				validType: Bool,
+				key:       "WFCameraCaptureShowPreview",
 				defaultValue: actionArgument{
 					valueType: Bool,
 					value:     true,
 				},
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFCameraCaptureShowPreview", args, 0),
-			}
 		},
 	}
 	actions["takePhotos"] = actionDefinition{
@@ -1631,12 +1604,8 @@ func mediaActions() {
 			{
 				name:      "video",
 				validType: Variable,
+				key:       "WFInputMedia",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFInputMedia", args, 0),
-			}
 		},
 	}
 	actions["takeVideo"] = actionDefinition{
@@ -1644,6 +1613,7 @@ func mediaActions() {
 			{
 				name:      "camera",
 				validType: String,
+				key:       "WFCameraCaptureDevice",
 				defaultValue: actionArgument{
 					valueType: String,
 					value:     "Front",
@@ -1652,6 +1622,7 @@ func mediaActions() {
 			{
 				name:      "quality",
 				validType: String,
+				key:       "WFCameraCaptureQuality",
 				defaultValue: actionArgument{
 					valueType: String,
 					value:     "Medium",
@@ -1660,14 +1631,12 @@ func mediaActions() {
 			{
 				name:      "startImmediately",
 				validType: Bool,
+				key:       "WFRecordingStart",
 				defaultValue: actionArgument{
 					valueType: Bool,
 					value:     false,
 				},
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return argumentValues(&args, "WFCameraCaptureDevice", "WFCameraCaptureQuality", "WFRecordingStart")
 		},
 	}
 	actions["setVolume"] = actionDefinition{
@@ -1692,18 +1661,14 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "class",
+				key:       "Class",
 				validType: String,
 			},
 			{
 				name:      "from",
+				key:       "Input",
 				validType: Variable,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("Class", args, 0),
-				variableInput("Input", args[1].value.(string)),
-			}
 		},
 	}
 	actions["getOnScreenContent"] = actionDefinition{}
@@ -1735,13 +1700,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "detail",
+				key:       "WFDeviceDetail",
 				validType: String,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFDeviceDetail", args, 0),
-			}
 		},
 	}
 	actions["setBrightness"] = actionDefinition{
@@ -1764,12 +1725,8 @@ func scriptingActions() {
 			{
 				name:      "item",
 				validType: Variable,
+				key:       "WFInput",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
-			}
 		},
 	}
 	actions["setName"] = actionDefinition{
@@ -1777,27 +1734,23 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "item",
+				key:       "WFInput",
 				validType: Variable,
 			},
 			{
 				name:      "name",
+				key:       "WFName",
 				validType: String,
 			},
 			{
 				name:      "includeFileExtension",
+				key:       "WFDontIncludeFileExtension",
 				validType: Bool,
 				defaultValue: actionArgument{
 					valueType: Bool,
 					value:     false,
 				},
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-				argumentValue("WFName", args, 1),
-				argumentValue("WFDontIncludeFileExtension", args, 2),
-			}
 		},
 	}
 	actions["countItems"] = actionDefinition{
@@ -1987,9 +1940,11 @@ func scriptingActions() {
 			{
 				name:      "input",
 				validType: Variable,
+				key:       "WFInput",
 			},
 			{
 				name:      "type",
+				key:       "WFHashType",
 				validType: String,
 				defaultValue: actionArgument{
 					valueType: "MD5",
@@ -2004,30 +1959,20 @@ func scriptingActions() {
 				args[1].value = strings.ToUpper(args[1].value.(string))
 			}
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-				argumentValue("WFHashType", args, 1),
-			}
-		},
 	}
 	actions["formatNumber"] = actionDefinition{
 		identifier: "format.number",
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
+				key:       "WFNumber",
 				validType: Integer,
 			},
 			{
 				name:      "decimalPlaces",
+				key:       "WFNumberFormatDecimalPlaces",
 				validType: Integer,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFNumber", args, 0),
-				argumentValue("WFNumberFormatDecimalPlaces", args, 1),
-			}
 		},
 	}
 	actions["randomNumber"] = actionDefinition{
@@ -2035,18 +1980,14 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "min",
+				key:       "WFRandomNumberMinimum",
 				validType: Integer,
 			},
 			{
 				name:      "max",
+				key:       "WFRandomNumberMaximum",
 				validType: Integer,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFRandomNumberMinimum", args, 0),
-				argumentValue("WFRandomNumberMaximum", args, 1),
-			}
 		},
 	}
 	actions["base64Encode"] = actionDefinition{
@@ -2130,13 +2071,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: String,
+				key:       "Text",
+				validType: Variable,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("Text", args, 0),
-			}
 		},
 	}
 	actions["waitToReturn"] = actionDefinition{}
@@ -2146,27 +2083,23 @@ func scriptingActions() {
 			{
 				name:      "body",
 				validType: String,
+				key:       "WFNotificationActionBody",
 			},
 			{
 				name:      "title",
+				key:       "WFNotificationActionTitle",
 				validType: String,
 				optional:  true,
 			},
 			{
 				name:      "playSound",
+				key:       "WFNotificationActionSound",
 				validType: Bool,
 				defaultValue: actionArgument{
 					valueType: Bool,
 					value:     true,
 				},
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFNotificationActionBody", args, 0),
-				argumentValue("WFNotificationActionTitle", args, 1),
-				argumentValue("WFNotificationActionSound", args, 2),
-			}
 		},
 	}
 	actions["stop"] = actionDefinition{
@@ -2178,41 +2111,33 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "seconds",
+				key:       "WFDelayTime",
 				validType: Integer,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFDelayTime", args, 0),
-			}
 		},
 	}
 	actions["alert"] = actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "alert",
+				key:       "WFAlertActionMessage",
 				validType: String,
 			},
 			{
 				name:      "title",
+				key:       "WFAlertActionTitle",
 				validType: String,
 				optional:  true,
 			},
 			{
 				name:      "cancelButton",
+				key:       "WFAlertActionCancelButtonShown",
 				validType: Bool,
 				defaultValue: actionArgument{
 					valueType: Bool,
 					value:     true,
 				},
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFAlertActionMessage", args, 0),
-				argumentValue("WFAlertActionTitle", args, 1),
-				argumentValue("WFAlertActionCancelButtonShown", args, 2),
-			}
 		},
 	}
 	actions["askForInput"] = actionDefinition{
@@ -2240,18 +2165,14 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "dictionary",
+				key:       "WFInput",
 				validType: Dict,
 			},
 			{
 				name:      "prompt",
+				key:       "WFChooseFromListActionPrompt",
 				validType: String,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFInput", args, 0),
-				argumentValue("WFChooseFromListActionPrompt", args, 1),
-			}
 		},
 	}
 	actions["chooseMultipleFromList"] = actionDefinition{
@@ -2285,12 +2206,8 @@ func scriptingActions() {
 			{
 				name:      "input",
 				validType: Variable,
+				key:       "WFInput",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFInput", args, 0),
-			}
 		},
 	}
 	actions["getKeys"] = actionDefinition{
@@ -2843,13 +2760,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["getDictionary"] = actionDefinition{
@@ -2857,13 +2770,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["getText"] = actionDefinition{
@@ -2871,13 +2780,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["getContacts"] = actionDefinition{
@@ -2885,13 +2790,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["getDates"] = actionDefinition{
@@ -2899,13 +2800,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["getEmails"] = actionDefinition{
@@ -2913,13 +2810,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: String,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["getImages"] = actionDefinition{
@@ -2927,13 +2820,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["getPhoneNumbers"] = actionDefinition{
@@ -2941,13 +2830,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["getURLs"] = actionDefinition{
@@ -2982,13 +2867,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["startScreensaver"] = actionDefinition{}
@@ -2997,13 +2878,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-			}
 		},
 	}
 	actions["openXCallbackURL"] = actionDefinition{
@@ -3011,14 +2888,10 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
+				key:       "WFXCallbackURL",
 				validType: String,
 				infinite:  true,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFXCallbackURL", args, 0),
-			}
 		},
 	}
 	actions["openCustomXCallbackURL"] = actionDefinition{
@@ -3136,13 +3009,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "status",
+				key:       "OnValue",
 				validType: Bool,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("OnValue", args, 0),
-			}
 		},
 	}
 	actions["setCellularData"] = actionDefinition{
@@ -3150,13 +3019,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "status",
+				key:       "OnValue",
 				validType: Bool,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("OnValue", args, 0),
-			}
 		},
 	}
 	actions["setCellularVoice"] = actionDefinition{
@@ -3164,13 +3029,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "status",
+				key:       "OnValue",
 				validType: Bool,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("OnValue", args, 0),
-			}
 		},
 	}
 	actions["toggleBluetooth"] = actionDefinition{
@@ -3213,13 +3074,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
-			}
 		},
 	}
 	actions["round"] = actionDefinition{
@@ -3271,14 +3128,17 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "script",
+				key:       "Script",
 				validType: String,
 			},
 			{
 				name:      "input",
+				key:       "Input",
 				validType: Variable,
 			},
 			{
 				name:      "shell",
+				key:       "Shell",
 				validType: String,
 				defaultValue: actionArgument{
 					valueType: String,
@@ -3287,20 +3147,13 @@ func scriptingActions() {
 			},
 			{
 				name:      "inputMode",
+				key:       "InputMode",
 				validType: String,
 				defaultValue: actionArgument{
 					valueType: String,
 					value:     "to stdin",
 				},
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("Script", args, 0),
-				variableInput("Input", args[1].value.(string)),
-				argumentValue("Shell", args, 2),
-				argumentValue("InputMode", args, 3),
-			}
 		},
 	}
 }
@@ -3311,26 +3164,18 @@ func sharingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
-			}
 		},
 	}
 	actions["share"] = actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: String,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFInput", args, 0),
-			}
 		},
 	}
 	actions["copyToClipboard"] = actionDefinition{
@@ -3338,23 +3183,19 @@ func sharingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "value",
+				key:       "WFInput",
 				validType: Variable,
 			},
 			{
 				name:      "local",
+				key:       "WFLocalOnly",
 				validType: Bool,
 			},
 			{
 				name:      "expire",
+				key:       "WFExpirationDate",
 				validType: String,
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFInput", args, 0),
-				argumentValue("WFLocalOnly", args, 1),
-				argumentValue("WFExpirationDate", args, 2),
-			}
 		},
 	}
 	actions["getClipboard"] = actionDefinition{}
@@ -3902,6 +3743,7 @@ func replaceText(caseSensitive bool, regExp bool, args []actionArgument) []plist
 }
 
 func languageCode(language string) string {
+	makeLanguages()
 	if _, found := languages[language]; found {
 		return languages[language]
 	}
