@@ -73,13 +73,13 @@ func makePlist() (plist string) {
 					var addToVariableParams []plistData
 					var itemIdent string
 					switch reflect.TypeOf(value).String() {
-					case "string":
+					case stringType:
 						valueType = String
 						itemIdent = "Text"
-					case "float64":
+					case intType:
 						valueType = Integer
 						itemIdent = "Number"
-					case "map[string]interface {}":
+					case dictType:
 						valueType = Dict
 						itemIdent = "Dictionary"
 					}
