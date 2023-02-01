@@ -783,7 +783,9 @@ func getChar(atIndex int) rune {
 }
 
 func parserErr(err error) {
-	parserError(fmt.Sprintf("%s", err))
+	if err != nil {
+		parserError(fmt.Sprintf("%s", err))
+	}
 }
 
 func parserWarning(message string) {
