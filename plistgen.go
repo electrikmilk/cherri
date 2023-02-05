@@ -333,7 +333,41 @@ func makePlist() (plist string) {
 		},
 	})
 
-	plist += plistArray("WFWorkflowImportQuestions", []string{})
+	if len(questions) > 0 {
+		var importQuestions []string
+		for _, q := range questions {
+			importQuestions = append(importQuestions, plistDict("", []plistData{
+				{
+					key:      "ParameterKey",
+					dataType: Text,
+					value:    q.parameter,
+				},
+				{
+					key:      "Category",
+					dataType: Text,
+					value:    "Parameter",
+				},
+				{
+					key:      "ActionIndex",
+					dataType: Number,
+					value:    q.actionIndex,
+				},
+				{
+					key:      "Text",
+					dataType: Text,
+					value:    q.text,
+				},
+				{
+					key:      "DefaultValue",
+					dataType: Text,
+					value:    q.defaultValue,
+				},
+			}))
+		}
+		plist += plistArray("WFWorkflowImportQuestions", importQuestions)
+	} else {
+		plist += plistArray("WFWorkflowImportQuestions", []string{})
+	}
 
 	var inputContentItems []string
 	if len(inputs) == 0 {

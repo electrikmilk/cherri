@@ -29,6 +29,7 @@ var currentGroupingUUID string
 
 func parse() {
 	variables = make(map[string]variableValue)
+	questions = make(map[string]question)
 	actions = make(map[string]actionDefinition)
 	menus = make(map[string][]variableValue)
 	closureUUIDs = make(map[int]string)
@@ -41,6 +42,24 @@ func parse() {
 		switch {
 		case char == ' ' || char == '\t' || char == '\n':
 			advance()
+		case tokenAhead(Question):
+			advance()
+			var identifier = collectUntil(' ')
+			identifier = strings.ToLower(identifier)
+			advance()
+			if !isToken("\"") {
+				parserError("Expected string")
+			}
+			var text = collectString()
+			advance()
+			if !isToken("\"") {
+				parserError("Expected string")
+			}
+			var defaultValue = collectString()
+			questions[identifier] = question{
+				text:         text,
+				defaultValue: defaultValue,
+			}
 		case tokenAhead(Definition):
 			advance()
 			switch {
@@ -558,6 +577,9 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 			hasInputVariables(identifier)
 		} else if _, found := variables[lowerIdentifier]; found {
 			*valueType = Variable
+			*value = fullIdentifier
+		} else if _, found := questions[lowerIdentifier]; found {
+			*valueType = Question
 			*value = fullIdentifier
 		} else {
 			if fullIdentifier == "" {

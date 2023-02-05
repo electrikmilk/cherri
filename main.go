@@ -84,6 +84,10 @@ func main() {
 		fmt.Println(ansi("### MENUS ###", bold))
 		fmt.Println(menus)
 		fmt.Print("\n")
+
+		fmt.Println(ansi("### IMPORT QUESTIONS ###", bold))
+		fmt.Println(questions)
+		fmt.Print("\n")
 	}
 
 	if args.Using("debug") {

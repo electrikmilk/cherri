@@ -56,6 +56,22 @@ type libraryDefinition struct {
 var libraries map[string]libraryDefinition
 
 func callAction(arguments []actionArgument, outputName plistData, actionUUID plistData) {
+	for i, a := range arguments {
+		if a.valueType == Question {
+			var lowerIdentifier = strings.ToLower(a.value.(string))
+			if _, found := questions[lowerIdentifier]; found {
+				var q = questions[lowerIdentifier]
+				var parameter = actions[currentAction].parameters[i]
+				questions[lowerIdentifier] = question{
+					parameter:    parameter.key,
+					actionIndex:  len(shortcutActions),
+					text:         q.text,
+					defaultValue: q.defaultValue,
+				}
+				arguments[i].value = ""
+			}
+		}
+	}
 	var ident string
 	if actions[currentAction].appIdentifier != "" {
 		ident = actions[currentAction].appIdentifier
@@ -240,6 +256,7 @@ func typeCheck(field string, validType tokenType, argument actionArgument) {
 				currentAction,
 			))
 		}
+	case argValueType == Question:
 	case argument.valueType != validType:
 		lineIdx--
 		parserError(fmt.Sprintf("Invalid value '%v' of type '%s' for argument '%s' of type '%s' in '%s()'",

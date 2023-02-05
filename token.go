@@ -28,6 +28,7 @@ const (
 	Case           tokenType = "case"
 	Definition     tokenType = "#define"
 	Import         tokenType = "#import"
+	Question       tokenType = "#question"
 )
 
 /* Definitions */
