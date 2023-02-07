@@ -215,7 +215,13 @@ func end(slice []string) string {
 
 func handle(err error) {
 	if err != nil {
-		panic(err)
+		var message = fmt.Sprintf("%s", err)
+		fmt.Println("\nError: " + ansi(message, red) + "\n")
+		if args.Using("debug") {
+			panic(err)
+		} else {
+			os.Exit(1)
+		}
 	}
 }
 
