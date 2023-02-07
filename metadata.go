@@ -96,6 +96,7 @@ func makeVersions() {
 		return
 	}
 	versions = make(map[string]string)
+	versions["16.3"] = "900"
 	versions["16.2"] = "900"
 	versions["16"] = "900"
 	versions["15.7.2"] = "800"
