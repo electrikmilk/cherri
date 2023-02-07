@@ -1,4 +1,4 @@
-module cherri
+module github.com/electrikmilk/cherri
 
 go 1.19
 
