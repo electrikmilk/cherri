@@ -2072,7 +2072,7 @@ func scriptingActions() {
 			{
 				name:      "input",
 				key:       "Text",
-				validType: Variable,
+				validType: String,
 			},
 		},
 	}
