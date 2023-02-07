@@ -1955,9 +1955,6 @@ func scriptingActions() {
 		},
 		check: func(args []actionArgument) {
 			checkEnum("hash type", hashTypes, args, 1)
-			if args[1].value != nil && args[1].valueType != Variable {
-				args[1].value = strings.ToUpper(args[1].value.(string))
-			}
 		},
 	}
 	actions["formatNumber"] = actionDefinition{
