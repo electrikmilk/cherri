@@ -162,7 +162,7 @@ func checkEnum(name string, enum []string, args []actionArgument, idx int) {
 		for _, e := range enum {
 			enumList += "- " + e + "\n"
 		}
-		parserError(fmt.Sprintf("Invalid %s of '%s'.\n\nAvailable %ss:\n%s", name, value, name, enumList))
+		parserError(fmt.Sprintf("Invalid %s of '%s'.\n\nAvailable %ss:\n%s\nValues must be in the exact case listed to work properly.", name, value, name, enumList))
 	}
 }
 
