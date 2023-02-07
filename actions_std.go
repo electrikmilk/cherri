@@ -2140,6 +2140,7 @@ func scriptingActions() {
 			},
 		},
 	}
+	var inputTypes = []string{"text", "number", "url", "date", "time", "date and time"}
 	actions["askForInput"] = actionDefinition{
 		identifier: "ask",
 		parameters: []parameterDefinition{
@@ -2159,6 +2160,9 @@ func scriptingActions() {
 				optional:  true,
 				key:       "WFAskActionDefaultAnswer",
 			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("input type", inputTypes, args, 0)
 		},
 	}
 	actions["chooseFromList"] = actionDefinition{
