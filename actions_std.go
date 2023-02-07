@@ -2174,31 +2174,15 @@ func scriptingActions() {
 				key:       "WFChooseFromListActionPrompt",
 				validType: String,
 			},
-		},
-	}
-	actions["chooseMultipleFromList"] = actionDefinition{
-		identifier: "choosefromlist",
-		parameters: []parameterDefinition{
 			{
-				name:      "dictionary",
-				validType: Dict,
-			},
-			{
-				name:      "prompt",
-				validType: String,
-			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFChooseFromListActionSelectMultiple",
-					dataType: Boolean,
-					value:    true,
+				name:     "selectMultiple",
+				key:      "WFChooseFromListActionSelectMultiple",
+				optional: true,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
 				},
-				argumentValue("WFInput", args, 0),
-				argumentValue("WFChooseFromListActionPrompt", args, 1),
-				argumentValue("WFChooseFromListActionSelectAll", args, 2),
-			}
+			},
 		},
 	}
 	actions["getType"] = actionDefinition{
