@@ -10,6 +10,6 @@ repeat 6 {
 }
 
 @listVar = list("item 1","item 2","item 3")
-foreach listVar {
+for listVar {
     alert(RepeatIndex,RepeatItem, false)
 }
