@@ -619,7 +619,7 @@ func documentActions() {
 			},
 		},
 	}
-	var errorCorrectionLevels = []string{"low", "medium", "quartile", "high"}
+	var errorCorrectionLevels = []string{"Low", "Medium", "Quartile", "High"}
 	actions["makeQRcode"] = actionDefinition{
 		identifier: "generatebarcode",
 		parameters: []parameterDefinition{
@@ -1934,7 +1934,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	var hashTypes = []string{"md5", "sha1", "sha256", "sha512"}
+	var hashTypes = []string{"MD5", "SHA1", "SHA256", "SHA512"}
 	actions["hash"] = actionDefinition{
 		parameters: []parameterDefinition{
 			{
@@ -2140,7 +2140,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	var inputTypes = []string{"text", "number", "url", "date", "time", "date and time"}
+	var inputTypes = []string{"Text", "Number", "URL", "Date", "Time", "Date and Time"}
 	actions["askForInput"] = actionDefinition{
 		identifier: "ask",
 		parameters: []parameterDefinition{
@@ -2594,7 +2594,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	var ipTypes = []string{"ipv4", "ipv6"}
+	var ipTypes = []string{"IPv4", "IPv6"}
 	actions["getLocalIP"] = actionDefinition{
 		identifier: "getipaddress",
 		parameters: []parameterDefinition{
@@ -3243,7 +3243,7 @@ func webActions() {
 			},
 		},
 	}
-	var engines = []string{"amazon", "bing", "duckduckgo", "ebay", "google", "reddit", "twitter", "yahoo!", "youTube"}
+	var engines = []string{"Amazon", "Bing", "DuckDuckGo", "eBay", "Google", "Reddit", "Twitter", "Yahoo!", "YouTube"}
 	actions["searchWeb"] = actionDefinition{
 		parameters: []parameterDefinition{
 			{
@@ -3301,7 +3301,7 @@ func webActions() {
 			},
 		},
 	}
-	var webpageDetails = []string{"page contents", "page selection", "page url", "name"}
+	var webpageDetails = []string{"Page Contents", "Page Selection", "Page URL", "Name"}
 	actions["getWebPageDetail"] = actionDefinition{
 		identifier: "properties.safariwebpage",
 		parameters: []parameterDefinition{
@@ -3407,7 +3407,7 @@ func webActions() {
 			},
 		},
 	}
-	var urlComponents = []string{"scheme", "user", "password", "host", "port", "path", "query", "fragment"}
+	var urlComponents = []string{"Scheme", "User", "Password", "Host", "Port", "Path", "Query", "Fragment"}
 	actions["getURLDetail"] = actionDefinition{
 		parameters: []parameterDefinition{
 			{
@@ -3451,7 +3451,7 @@ func webActions() {
 			}
 		},
 	}
-	var httpMethods = []string{"get", "post", "put", "patch", "delete"}
+	var httpMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE"}
 	var httpParams = []parameterDefinition{
 		{
 			name:      "url",
