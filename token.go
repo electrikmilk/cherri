@@ -23,7 +23,7 @@ const (
 	Else           tokenType = "else"
 	EndClosure     tokenType = "endif"
 	Repeat         tokenType = "repeat"
-	RepeatWithEach tokenType = "foreach"
+	RepeatWithEach tokenType = "for"
 	Menu           tokenType = "menu"
 	Case           tokenType = "case"
 	Definition     tokenType = "#define"
