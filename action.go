@@ -156,7 +156,7 @@ func checkEnum(name string, enum []string, args []actionArgument, idx int) {
 	if args[idx].value == nil {
 		return
 	}
-	var value = strings.ToLower(getArgValue(args[idx]).(string))
+	var value = getArgValue(args[idx]).(string)
 	if !contains(enum, value) {
 		var enumList string
 		for _, e := range enum {
