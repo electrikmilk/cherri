@@ -195,12 +195,12 @@ func makeGlobals() {
 	}
 	globals["RepeatItem"] = variableValue{
 		variableType: "Variable",
-		valueType:    Variable,
+		valueType:    String,
 		value:        "Repeat Item",
 	}
 	globals["RepeatIndex"] = variableValue{
 		variableType: "Variable",
-		valueType:    Variable,
+		valueType:    String,
 		value:        "Repeat Index",
 	}
 }
