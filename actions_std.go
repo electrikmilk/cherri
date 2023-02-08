@@ -2887,7 +2887,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["startScreensaver"] = actionDefinition{}
+	actions["startScreensaver"] = actionDefinition{mac: true}
 	actions["contentGraph"] = actionDefinition{
 		identifier: "viewresult",
 		parameters: []parameterDefinition{
