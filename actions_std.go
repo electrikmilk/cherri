@@ -1672,6 +1672,18 @@ func scriptingActions() {
 		},
 	}
 	actions["getOnScreenContent"] = actionDefinition{}
+	var fileSizeUnits = []string{
+		"Closest Unit",
+		"Bytes",
+		"Kilobytes",
+		"Megabytes",
+		"Gigabytes",
+		"Terabytes",
+		"Petabytes",
+		"Exabytes",
+		"Zettabytes",
+		"Yottabytes",
+	}
 	actions["fileSize"] = actionDefinition{
 		identifier: "format.filesize",
 		parameters: []parameterDefinition{
@@ -1683,6 +1695,9 @@ func scriptingActions() {
 				name:      "format",
 				validType: String,
 			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("file format size unit", fileSizeUnits, args, 1)
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -1696,6 +1711,18 @@ func scriptingActions() {
 			}
 		},
 	}
+	var deviceDetails = []string{
+		"Device Name",
+		"Device Hostname",
+		"Device Model",
+		"Device Is Watch",
+		"System Version",
+		"Screen Width",
+		"Screen Height",
+		"Current Volume",
+		"Current Brightness",
+		"Current Appearance",
+	}
 	actions["getDeviceDetail"] = actionDefinition{
 		parameters: []parameterDefinition{
 			{
@@ -1703,6 +1730,9 @@ func scriptingActions() {
 				key:       "WFDeviceDetail",
 				validType: String,
 			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("device detail", deviceDetails, args, 0)
 		},
 	}
 	actions["setBrightness"] = actionDefinition{
