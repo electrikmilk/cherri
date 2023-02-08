@@ -25,8 +25,6 @@ var outputPath string
 
 var included []string
 
-const fileExtension = "cherri"
-
 func main() {
 	args.Register("share", "s", "Signing mode. [anyone, contacts] [default=contacts]")
 	args.Register("unsigned", "u", "Don't sign compiled Shortcut. Will NOT run on iOS or macOS.")
@@ -165,14 +163,14 @@ func parseIncludes() {
 
 func checkFile(filePath string) {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		exit(fmt.Sprintf("File at path '%s' does not exist!", filePath))
+		exit(fmt.Sprintf("File '%s' does not exist!", filePath))
 	}
 	var file, statErr = os.Stat(filePath)
 	handle(statErr)
 	var nameParts = strings.Split(file.Name(), ".")
 	var ext = end(nameParts)
-	if ext != fileExtension {
-		exit(fmt.Sprintf("File '%s' is not a .%s file!", filePath, fileExtension))
+	if ext != "cherri" {
+		exit(fmt.Sprintf("File '%s' is not a .cherri file!", filePath))
 	}
 }
 
