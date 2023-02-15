@@ -625,13 +625,6 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 	}
 }
 
-func argumentValues(args *[]actionArgument, params ...string) (data []plistData) {
-	for i, param := range params {
-		data = append(data, argumentValue(param, *args, i))
-	}
-	return
-}
-
 func argumentValue(key string, args []actionArgument, idx int) plistData {
 	var actionArg = actions[currentAction].parameters[idx]
 	var arg actionArgument
