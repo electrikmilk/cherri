@@ -2635,100 +2635,88 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["calcAverage"] = actionDefinition{
-		identifier: "statistics",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return calculateStatistics("Average", args)
-		},
+	var calculationOpersations = []string{
+		"x^2",
+		"х^3",
+		"x^у",
+		"e^x",
+		"10^x",
+		"In(x)",
+		"log(x)",
+		"√x",
+		"∛x",
+		"x!",
+		"sin(x)",
+		"cos(X)",
+		"tan(x)",
+		"abs(x)",
 	}
-	actions["calcMin"] = actionDefinition{
-		identifier: "statistics",
+	actions["calculate"] = actionDefinition{
+		identifier: "math",
 		parameters: []parameterDefinition{
 			{
-				name:      "input",
-				validType: Variable,
+				name:      "operation",
+				validType: String,
+			},
+			{
+				name:      "operandOne",
+				validType: Integer,
+			},
+			{
+				name:      "operandTwo",
+				validType: Integer,
+				defaultValue: actionArgument{
+					valueType: Integer,
+					value:     nil,
+				},
+				optional: true,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return calculateStatistics("Minimum", args)
+		check: func(args []actionArgument) {
+			checkEnum("calculation operation", calculationOpersations, args, 0)
 		},
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFMathOperation",
+					dataType: Text,
+					value:    "...",
+				},
+				argumentValue("WFScientificMathOperation", args, 0),
+				argumentValue("WFInput", args, 1),
+				argumentValue("WFMathOperand", args, 2),
+			}
+		},
+		outputType: "",
+		mac:        false,
+		minVersion: 0,
 	}
-	actions["calcMax"] = actionDefinition{
-		identifier: "statistics",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return calculateStatistics("Maximum", args)
-		},
+	var statisticsOperations = []string{
+		"Average",
+		"Minimum",
+		"Maximum",
+		"Sum",
+		"Median",
+		"Mode",
+		"Range",
+		"Standard Deviation",
 	}
-	actions["calcSum"] = actionDefinition{
+	actions["statistic"] = actionDefinition{
 		identifier: "statistics",
 		parameters: []parameterDefinition{
 			{
-				name:      "input",
-				validType: Variable,
+				name:      "operation",
+				validType: String,
+				key:       "WFStatisticsOperation",
 			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return calculateStatistics("Sum", args)
-		},
-	}
-	actions["calcMedian"] = actionDefinition{
-		identifier: "statistics",
-		parameters: []parameterDefinition{
 			{
 				name:      "input",
 				validType: Variable,
+				key:       "WFInput",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return calculateStatistics("Median", args)
-		},
-	}
-	actions["calcMode"] = actionDefinition{
-		identifier: "statistics",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return calculateStatistics("Mode", args)
-		},
-	}
-	actions["calcRange"] = actionDefinition{
-		identifier: "statistics",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return calculateStatistics("Range", args)
-		},
-	}
-	actions["calcStdDevi"] = actionDefinition{
-		identifier: "statistics",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return calculateStatistics("Standard Deviation", args)
+		check: func(args []actionArgument) {
+			checkEnum("statistics operation", statisticsOperations, args, 0)
 		},
 	}
 	actions["dismissSiri"] = actionDefinition{}
