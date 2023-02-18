@@ -2314,7 +2314,9 @@ func scriptingActions() {
 				validType: String,
 			},
 		},
-		check: replaceAppId,
+		check: func(args []actionArgument) {
+			replaceAppId(args, 0)
+		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				argumentValue("WFAppIdentifier", args, 0),
@@ -2336,7 +2338,9 @@ func scriptingActions() {
 				validType: String,
 			},
 		},
-		check: replaceAppId,
+		check: func(args []actionArgument) {
+			replaceAppId(args, 0)
+		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -2383,7 +2387,9 @@ func scriptingActions() {
 				validType: String,
 			},
 		},
-		check: replaceAppId,
+		check: func(args []actionArgument) {
+			replaceAppId(args, 0)
+		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -2430,7 +2436,9 @@ func scriptingActions() {
 				validType: String,
 			},
 		},
-		check: replaceAppId,
+		check: func(args []actionArgument) {
+			replaceAppId(args, 0)
+		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -3884,23 +3892,20 @@ func makeAppIds() {
 }
 
 func apps(args []actionArgument) (apps []plistData) {
-	if len(appIds) == 0 {
-		makeAppIds()
-	}
 	for a := range args {
 		apps = append(apps, argumentValue("BundleIdentifier", args, a))
 	}
 	return
 }
 
-func replaceAppId(args []actionArgument) {
+func replaceAppId(args []actionArgument, idx int) {
 	if len(appIds) == 0 {
 		makeAppIds()
 	}
 	if len(args) >= 1 {
-		var id = getArgValue(args[0]).(string)
+		var id = getArgValue(args[idx]).(string)
 		if _, found := appIds[id]; found {
-			args[0].value = appIds[id]
+			args[idx].value = appIds[id]
 		}
 	}
 }
