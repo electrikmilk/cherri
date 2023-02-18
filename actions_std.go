@@ -3650,6 +3650,109 @@ func webActions() {
 			return httpRequest("File", "WFRequestVariable", args)
 		},
 	}
+	actions["runAppleScript"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "input",
+				validType: Variable,
+				key:       "Input",
+			},
+			{
+				name:      "script",
+				validType: String,
+				key:       "Script",
+			},
+		},
+		mac: true,
+	}
+	actions["runJSAutomation"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "input",
+				validType: Variable,
+				key:       "Input",
+			},
+			{
+				name:      "script",
+				validType: String,
+				key:       "Script",
+			},
+		},
+		mac: true,
+	}
+	var windowPositions = []string{
+		"Top Left",
+		"Top Center",
+		"Top Right",
+		"Middle Left",
+		"Center",
+		"Middle Right",
+		"Bottom Left",
+		"Bottom Center",
+		"Bottom Right",
+		"Coordinates",
+	}
+	actions["moveWindow"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "window",
+				validType: Variable,
+				key:       "WFWindow",
+			},
+			{
+				name:      "position",
+				validType: String,
+				key:       "WFPosition",
+			},
+			{
+				name:      "bringToFront",
+				validType: Bool,
+				key:       "WFBringToFront",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+				optional: true,
+			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("window position", windowPositions, args, 1)
+		},
+		mac: true,
+	}
+	var windowConfigurations = []string{
+		"Fit Screen",
+		"Top Half",
+		"Bottom Half",
+		"Left Half",
+		"Right Half",
+		"Top Left Quarter",
+		"Top Right Quarter",
+		"Bottom Left Quarter",
+		"Bottom Right Quarter",
+		"Dimensions",
+	}
+	actions["resizeWindow"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "window",
+				validType: Variable,
+				key:       "WFWindow",
+			},
+			{
+				name:         "configuration",
+				validType:    String,
+				key:          "WFConfiguration",
+				defaultValue: actionArgument{},
+				optional:     false,
+				infinite:     false,
+			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("window configuration", windowConfigurations, args, 1)
+		},
+		mac: true,
+	}
 }
 
 func customActions() {
