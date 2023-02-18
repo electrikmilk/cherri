@@ -2349,6 +2349,32 @@ func scriptingActions() {
 			}
 		},
 	}
+	actions["hideAllApps"] = actionDefinition{
+		identifier: "hide.app",
+		parameters: []parameterDefinition{
+			{
+				name:      "except",
+				validType: String,
+				optional:  true,
+				infinite:  true,
+			},
+		},
+		check: replaceAppIds,
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFHideAppMode",
+					dataType: Text,
+					value:    "All Apps",
+				},
+				{
+					key:      "WFAppsExcept",
+					dataType: Array,
+					value:    []string{plistDict("", apps(args))},
+				},
+			}
+		},
+	}
 	actions["quitApp"] = actionDefinition{
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
@@ -2370,6 +2396,32 @@ func scriptingActions() {
 			}
 		},
 	}
+	actions["quitAllApps"] = actionDefinition{
+		identifier: "quit.app",
+		parameters: []parameterDefinition{
+			{
+				name:      "except",
+				validType: String,
+				optional:  true,
+				infinite:  true,
+			},
+		},
+		check: replaceAppIds,
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFQuitAppMode",
+					dataType: Text,
+					value:    "All Apps",
+				},
+				{
+					key:      "WFAppsExcept",
+					dataType: Array,
+					value:    []string{plistDict("", apps(args))},
+				},
+			}
+		},
+	}
 	actions["killApp"] = actionDefinition{
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
@@ -2387,6 +2439,37 @@ func scriptingActions() {
 					value: []plistData{
 						argumentValue("BundleIdentifier", args, 0),
 					},
+				},
+				{
+					key:      "WFAskToSaveChanges",
+					dataType: Boolean,
+					value:    false,
+				},
+			}
+		},
+	}
+	actions["killAllApps"] = actionDefinition{
+		identifier: "quit.app",
+		parameters: []parameterDefinition{
+			{
+				name:      "except",
+				validType: String,
+				optional:  true,
+				infinite:  true,
+			},
+		},
+		check: replaceAppIds,
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFQuitAppMode",
+					dataType: Text,
+					value:    "All Apps",
+				},
+				{
+					key:      "WFAppsExcept",
+					dataType: Array,
+					value:    []string{plistDict("", apps(args))},
 				},
 				{
 					key:      "WFAskToSaveChanges",
@@ -3800,11 +3883,39 @@ func makeAppIds() {
 	appIds["photos"] = "com.apple.mobileslideshow"
 }
 
+func apps(args []actionArgument) (apps []plistData) {
+	if len(appIds) == 0 {
+		makeAppIds()
+	}
+	for a := range args {
+		apps = append(apps, argumentValue("BundleIdentifier", args, a))
+	}
+	return
+}
+
 func replaceAppId(args []actionArgument) {
-	makeAppIds()
-	var id = getArgValue(args[0]).(string)
-	if _, found := appIds[id]; found {
-		args[0].value = appIds[id]
+	if len(appIds) == 0 {
+		makeAppIds()
+	}
+	if len(args) >= 1 {
+		var id = getArgValue(args[0]).(string)
+		if _, found := appIds[id]; found {
+			args[0].value = appIds[id]
+		}
+	}
+}
+
+func replaceAppIds(args []actionArgument) {
+	if len(appIds) == 0 {
+		makeAppIds()
+	}
+	if len(args) >= 1 {
+		for a := range args {
+			var id = getArgValue(args[a]).(string)
+			if _, found := appIds[id]; found {
+				args[a].value = appIds[id]
+			}
+		}
 	}
 }
 
