@@ -2215,7 +2215,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["getType"] = actionDefinition{
+	actions["typeOf"] = actionDefinition{
 		identifier: "getitemtype",
 		parameters: []parameterDefinition{
 			{
