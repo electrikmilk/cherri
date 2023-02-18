@@ -41,6 +41,7 @@ type actionDefinition struct {
 	parameters    []parameterDefinition
 	check         paramCheck
 	make          makeParams
+	addParams     []plistData
 	outputType    tokenType
 	mac           bool
 	minVersion    float64
@@ -95,6 +96,11 @@ func callAction(arguments []actionArgument, outputName plistData, actionUUID pli
 					params = append(params, argumentValue(a.key, arguments, i))
 				}
 			}
+		}
+	}
+	if actions[currentAction].addParams != nil {
+		for _, param := range actions[currentAction].addParams {
+			params = append(params, param)
 		}
 	}
 	if outputName.value != nil {
