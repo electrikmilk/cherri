@@ -2487,6 +2487,59 @@ func scriptingActions() {
 			}
 		},
 	}
+	actions["splitApps"] = actionDefinition{
+		identifier: "splitscreen",
+		parameters: []parameterDefinition{
+			{
+				name:      "firstAppID",
+				validType: String,
+			},
+			{
+				name:      "secondAppID",
+				validType: String,
+			},
+			{
+				name:      "ratio",
+				validType: String,
+				optional:  true,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "half",
+				},
+			},
+		},
+		check: func(args []actionArgument) {
+			replaceAppId(args, 0)
+			replaceAppId(args, 1)
+			if len(args) > 2 {
+				switch args[2].value {
+				case "half":
+					args[2].value = "½ + ½"
+				case "thirdByTwo":
+					args[2].value = "⅓ + ⅔"
+				}
+			}
+		},
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFPrimaryAppIdentifier",
+					dataType: Dictionary,
+					value: []plistData{
+						argumentValue("BundleIdentifier", args, 0),
+					},
+				},
+				{
+					key:      "WFSecondaryAppIdentifier",
+					dataType: Dictionary,
+					value: []plistData{
+						argumentValue("BundleIdentifier", args, 1),
+					},
+				},
+				argumentValue("WFAppRatio", args, 2),
+			}
+		},
+	}
 	actions["open"] = actionDefinition{
 		identifier: "openworkflow",
 		parameters: []parameterDefinition{
