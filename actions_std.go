@@ -3680,6 +3680,102 @@ func webActions() {
 		},
 		mac: true,
 	}
+	var sortOrders = []string{
+		"asc",
+		"desc",
+	}
+	var windowSortings = []string{
+		"Title",
+		"App Name",
+		"Width",
+		"Height",
+		"X Position",
+		"V Y Position",
+		"Window Index",
+		"Name",
+		"Random",
+	}
+	actions["getWindows"] = actionDefinition{
+		identifier: "filter.windows",
+		parameters: []parameterDefinition{
+			{
+				name:      "sortBy",
+				validType: String,
+				key:       "WFContentItemSortProperty",
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     nil,
+				},
+				optional: true,
+			},
+			{
+				name:         "orderBy",
+				validType:    String,
+				key:          "WFContentItemSortOrder",
+				defaultValue: actionArgument{},
+				optional:     true,
+			},
+			{
+				name:      "limit",
+				validType: Integer,
+				key:       "WFContentItemLimitNumber",
+				defaultValue: actionArgument{
+					valueType: Integer,
+					value:     nil,
+				},
+				optional: true,
+			},
+		},
+		addParams: func(args []actionArgument) (params []plistData) {
+			if args[2].value != nil {
+				params = append(params, plistData{
+					key:      "WFContentItemLimitEnabled",
+					dataType: Boolean,
+					value:    true,
+				})
+			}
+			return
+		},
+		check: func(args []actionArgument) {
+			checkEnum("sort by", windowSortings, args, 0)
+			checkEnum("sort order", sortOrders, args, 1)
+			if args[1].value != nil {
+				var alphabetic = []string{
+					"Title",
+					"App Name",
+					"Name",
+					"Random",
+				}
+				var numeric = []string{
+					"Width",
+					"Height",
+					"X Position",
+					"Y Postiion",
+					"Window Index",
+				}
+				var sortBy = getArgValue(args[0]).(string)
+				var orderBy = getArgValue(args[1]).(string)
+				if sortBy != "Random" {
+					if contains(alphabetic, sortBy) {
+						switch orderBy {
+						case "asc":
+							args[1].value = "A to Z"
+						case "desc":
+							args[1].value = "Z to A"
+						}
+					} else if contains(numeric, sortBy) {
+						switch orderBy {
+						case "asc":
+							args[1].value = "Biggest First"
+						case "desc":
+							args[1].value = "Smallest First"
+						}
+					}
+				}
+			}
+		},
+		mac: true,
+	}
 	var windowPositions = []string{
 		"Top Left",
 		"Top Center",
