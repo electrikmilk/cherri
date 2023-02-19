@@ -347,27 +347,7 @@ func calendarActions() {
 }
 
 func contactActions() {
-	var contactProperties = []string{
-		"First Name",
-		"Middle Name",
-		"Last Name",
-		"Birthday",
-		"Prefix",
-		"Suffix",
-		"Nickname",
-		"Phonetic First Name",
-		"Phonetic Last Name",
-		"Phonetic Middle Name",
-		"Company",
-		"Job Title",
-		"Department",
-		"File Extension",
-		"Creation Date",
-		"File Path",
-		"Last Modified Date",
-		"Name",
-		"Random",
-	}
+	var contactProperties = []string{"First Name", "Middle Name", "Last Name", "Birthday", "Prefix", "Suffix", "Nickname", "Phonetic First Name", "Phonetic Last Name", "Phonetic Middle Name", "Company", "Job Title", "Department", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
 	var abcSortOrders = []string{"A to Z", "Z to A"}
 	actions["filterContacts"] = actionDefinition{
 		identifier: "filter.contacts",
@@ -1419,30 +1399,7 @@ func locationActions() {
 			},
 		},
 	}
-	var weatherDetails = []string{
-		"Name",
-		"Air Pollutants",
-		"Air Quality Category",
-		"Air Quality Index",
-		"Sunset Time",
-		"Sunrise Time",
-		"UV Index",
-		"Wind Direction",
-		"Wind Speed",
-		"Precipitation Chance",
-		"Precipitation Amount",
-		"Pressure",
-		"Humidity",
-		"Dewpoint",
-		"Visibility",
-		"Condition",
-		"Feels Like",
-		"Low",
-		"High",
-		"Temperature",
-		"Location",
-		"Date",
-	}
+	var weatherDetails = []string{"Name", "Air Pollutants", "Air Quality Category", "Air Quality Index", "Sunset Time", "Sunrise Time", "UV Index", "Wind Direction", "Wind Speed", "Precipitation Chance", "Precipitation Amount", "Pressure", "Humidity", "Dewpoint", "Visibility", "Condition", "Feels Like", "Low", "High", "Temperature", "Location", "Date"}
 	actions["getWeatherDetail"] = actionDefinition{
 		identifier: "properties.weather.conditions",
 		parameters: []parameterDefinition{
@@ -1496,20 +1453,7 @@ func locationActions() {
 			checkEnum("weather forecast type", weatherForecastTypes, args, 0)
 		},
 	}
-	var locationDetails = []string{
-		"Name",
-		"URL",
-		"Label",
-		"Phone Number",
-		"Region",
-		"ZIP Code",
-		"State",
-		"City",
-		"Street",
-		"Altitude",
-		"Longitude",
-		"Latitude",
-	}
+	var locationDetails = []string{"Name", "URL", "Label", "Phone Number", "Region", "ZIP Code", "State", "City", "Street", "Altitude", "Longitude", "Latitude"}
 	actions["getLocationDetail"] = actionDefinition{
 		identifier: "properties.locations",
 		parameters: []parameterDefinition{
@@ -1672,18 +1616,7 @@ func scriptingActions() {
 		},
 	}
 	actions["getOnScreenContent"] = actionDefinition{}
-	var fileSizeUnits = []string{
-		"Closest Unit",
-		"Bytes",
-		"Kilobytes",
-		"Megabytes",
-		"Gigabytes",
-		"Terabytes",
-		"Petabytes",
-		"Exabytes",
-		"Zettabytes",
-		"Yottabytes",
-	}
+	var fileSizeUnits = []string{"Closest Unit", "Bytes", "Kilobytes", "Megabytes", "Gigabytes", "Terabytes", "Petabytes", "Exabytes", "Zettabytes", "Yottabytes"}
 	actions["fileSize"] = actionDefinition{
 		identifier: "format.filesize",
 		parameters: []parameterDefinition{
@@ -2635,22 +2568,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	var calculationOpersations = []string{
-		"x^2",
-		"х^3",
-		"x^у",
-		"e^x",
-		"10^x",
-		"In(x)",
-		"log(x)",
-		"√x",
-		"∛x",
-		"x!",
-		"sin(x)",
-		"cos(X)",
-		"tan(x)",
-		"abs(x)",
-	}
+	var calculationOpersations = []string{"x^2", "х^3", "x^у", "e^x", "10^x", "In(x)", "log(x)", "√x", "∛x", "x!", "sin(x)", "cos(X)", "tan(x)", "abs(x)"}
 	actions["calculate"] = actionDefinition{
 		identifier: "math",
 		parameters: []parameterDefinition{
@@ -3680,21 +3598,8 @@ func webActions() {
 		},
 		mac: true,
 	}
-	var sortOrders = []string{
-		"asc",
-		"desc",
-	}
-	var windowSortings = []string{
-		"Title",
-		"App Name",
-		"Width",
-		"Height",
-		"X Position",
-		"V Y Position",
-		"Window Index",
-		"Name",
-		"Random",
-	}
+	var sortOrders = []string{"asc", "desc"}
+	var windowSortings = []string{"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"}
 	actions["getWindows"] = actionDefinition{
 		identifier: "filter.windows",
 		parameters: []parameterDefinition{
@@ -3740,19 +3645,8 @@ func webActions() {
 			checkEnum("sort by", windowSortings, args, 0)
 			checkEnum("sort order", sortOrders, args, 1)
 			if args[1].value != nil {
-				var alphabetic = []string{
-					"Title",
-					"App Name",
-					"Name",
-					"Random",
-				}
-				var numeric = []string{
-					"Width",
-					"Height",
-					"X Position",
-					"Y Postiion",
-					"Window Index",
-				}
+				var alphabetic = []string{"Title", "App Name", "Name", "Random"}
+				var numeric = []string{"Width", "Height", "X Position", "Y Position", "Window Index"}
 				var sortBy = getArgValue(args[0]).(string)
 				var orderBy = getArgValue(args[1]).(string)
 				if sortBy != "Random" {
@@ -3776,18 +3670,7 @@ func webActions() {
 		},
 		mac: true,
 	}
-	var windowPositions = []string{
-		"Top Left",
-		"Top Center",
-		"Top Right",
-		"Middle Left",
-		"Center",
-		"Middle Right",
-		"Bottom Left",
-		"Bottom Center",
-		"Bottom Right",
-		"Coordinates",
-	}
+	var windowPositions = []string{"Top Left", "Top Center", "Top Right", "Middle Left", "Center", "Middle Right", "Bottom Left", "Bottom Center", "Bottom Right", "Coordinates"}
 	actions["moveWindow"] = actionDefinition{
 		parameters: []parameterDefinition{
 			{
@@ -3816,18 +3699,7 @@ func webActions() {
 		},
 		mac: true,
 	}
-	var windowConfigurations = []string{
-		"Fit Screen",
-		"Top Half",
-		"Bottom Half",
-		"Left Half",
-		"Right Half",
-		"Top Left Quarter",
-		"Top Right Quarter",
-		"Bottom Left Quarter",
-		"Bottom Right Quarter",
-		"Dimensions",
-	}
+	var windowConfigurations = []string{"Fit Screen", "Top Half", "Bottom Half", "Left Half", "Right Half", "Top Left Quarter", "Top Right Quarter", "Bottom Left Quarter", "Bottom Right Quarter", "Dimensions"}
 	actions["resizeWindow"] = actionDefinition{
 		parameters: []parameterDefinition{
 			{
