@@ -16,6 +16,11 @@ import (
 //  but the argument value is not being checked against it's possible values.
 //  Use the "hash" action as an example.
 
+var storageUnits = []string{"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"}
+
+var measurementUnitTypes = []string{"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"}
+var units map[string][]string
+
 func standardActions() {
 	if len(actions) != 0 {
 		return
@@ -1202,17 +1207,6 @@ func documentActions() {
 		},
 		mac:        true,
 		minVersion: 15,
-	}
-	var storageUnits = []string{
-		"bytes",
-		"KB",
-		"MB",
-		"GB",
-		"TB",
-		"PB",
-		"EB",
-		"ZB",
-		"YB",
 	}
 	actions["makeSizedDiskImage"] = actionDefinition{
 		parameters: []parameterDefinition{
@@ -3720,6 +3714,111 @@ func webActions() {
 			checkEnum("window configuration", windowConfigurations, args, 1)
 		},
 		mac: true,
+	}
+	units = make(map[string][]string)
+	units["Acceleration"] = []string{"m/s²", "g-force"}
+	units["Angle"] = []string{"degrees", "arcminutes", "arcseconds", "radians", "grad", "revolutions"}
+	units["Area"] = []string{"Mm²", "square kilometers", "square meters", "square centimeters", "mm²", "um²", "nm²", "square inches", "square feet", "square yards", "square miles", "acres", "a", "hectares"}
+	units["Concentration Mass"] = []string{"g/L", "mg/dL", "µg/m³"}
+	units["Dispersion"] = []string{"ppm"}
+	units["Duration"] = []string{"milliseconds", "microseconds", "nanoseconds", "ps", "seconds", "minutes", "hours"}
+	units["Electric Charge"] = []string{"C", "MAh", "kAh", "Ah", "mAh", "µAh"}
+	units["Electric Current"] = []string{"MA", "kA", "amp", "mA", "µA"}
+	units["Electric Potential Difference"] = []string{"MV", "kV", "volt", "mV", "µV"}
+	units["Electric Resistance"] = []string{"MΩ", "kΩ", "ohm", "mΩ", "µΩ"}
+	units["Energy"] = []string{"kJ", "joule", "kcal", "cal", "kWh"}
+	units["Frequency"] = []string{"tHz", "GHz", "MHz", "kHz", "Hz", "mHz", "µHz", "nHz", "fps"}
+	units["Fuel Efficiency"] = []string{"L/100km", "mpg"}
+	units["Illuminance"] = []string{"lux"}
+	units["Information Storage"] = []string{"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"}
+	units["Length"] = []string{"Mm", "km", "hm", "dam", "meter", "dm", "cm", "mm", "µm", "nm", "pm", "in", "ft", "yd", "mi", "smi", "ly", "nmi", "fathom", "furlong", "au", "parsec"}
+	units["Mass"] = []string{"kg", "gram", "dg", "cg", "mg", "µg", "ng", "pg", "oz", "lb", "stone", "t", "ton", "carat", "oz t", "slug"}
+	units["Power"] = []string{"TW", "GW", "MW", "kW", "watt", "mW", "µW", "nW", "pw", "fw", "hp"}
+	units["Pressure"] = []string{"N/m²", "GPa", "MPa", "kPa", "hPa", "\" Hg", "bar", "mbar", "mm Hg", "psi"}
+	units["Speed"] = []string{"m/s", "km/hr", "mi/hr", "kn"}
+	units["Temperature"] = []string{"K", "ºC", "ºF"}
+	units["Volume"] = []string{"ML", "kL", "liter", "dL", "cL", "mL", "km³", "m³", "dm³", "cm³", "mm³", "in³", "ft³", "yd³", "mi³", "acre ft", "bushel", "tsp", "tbsp", "fl oz", "pt", "qt", "Imp gal", "mcup"}
+	actions["convertMeasurement"] = actionDefinition{
+		identifier: "measurement.convert",
+		parameters: []parameterDefinition{
+			{
+				name:      "measurement",
+				validType: Variable,
+			},
+			{
+				name:      "unitType",
+				validType: String,
+			},
+			{
+				name:      "unit",
+				validType: String,
+			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("measurement unit type", measurementUnitTypes, args, 1)
+			var unitType = getArgValue(args[1]).(string)
+			checkEnum("measurement unit", units[unitType], args, 2)
+		},
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				argumentValue("WFInput", args, 0),
+				{
+					key:      "WFMeasurementUnit",
+					dataType: Dictionary,
+					value: []plistData{
+						argumentValue("WFNSUnitSymbol", args, 2),
+						argumentValue("WFNSUnitType", args, 1),
+					},
+				},
+				argumentValue("WFMeasurementUnitType", args, 1),
+			}
+		},
+	}
+	actions["measurement"] = actionDefinition{
+		identifier: "measurement.create",
+		parameters: []parameterDefinition{
+			{
+				name:      "magnitude",
+				validType: String,
+			},
+			{
+				name:      "unitType",
+				validType: String,
+			},
+			{
+				name:      "unit",
+				validType: String,
+			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("unit type", measurementUnitTypes, args, 1)
+			var unitType = getArgValue(args[1]).(string)
+			checkEnum("unit", units[unitType], args, 2)
+		},
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFMeasurementUnit",
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "Value",
+							dataType: Dictionary,
+							value: []plistData{
+								argumentValue("Magnitude", args, 0),
+								argumentValue("Unit", args, 2),
+							},
+						},
+						{
+							key:      "WFSerializationType",
+							dataType: Text,
+							value:    "WFQuantityFieldValue",
+						},
+					},
+				},
+				argumentValue("WFMeasurementUnitType", args, 1),
+			}
+		},
 	}
 }
 
