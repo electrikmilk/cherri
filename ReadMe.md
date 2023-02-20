@@ -9,11 +9,11 @@
 **Cherri** (pronounced cherry) is a [iOS Siri Shortcuts](https://apps.apple.com/us/app/shortcuts/id915249334)
 programming language, that compiles directly to a valid runnable Shortcut.
 
-[Playground](https://playground.cherrilang.org/) • [Documentation](https://cherrilang.org/language/) • [Code Tour](https://youtu.be/gU8TsI96uww) • [_idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap)
-
-[![Hello World Example](https://cherrilang.org/assets/example.png)](examples/hello-world.cherri)
+[Playground](https://playground.cherrilang.org/) • [Documentation](https://cherrilang.org/language/) • [Code Tour](https://youtu.be/gU8TsI96uww) • [_Idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap)
 
 **WARNING:** This project has not yet reached a stable version. It is under heavy development, and backwards incompatible changes may be made.
+
+[![Hello World Example](https://cherrilang.org/assets/example.png)](examples/hello-world.cherri)
 
 ### Usage
 
