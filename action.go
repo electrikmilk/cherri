@@ -13,6 +13,7 @@ import (
 var currentAction string
 var isMac = false
 
+// parameterDefinition is used to define an actions parameters and to check against collected argument values.
 type parameterDefinition struct {
 	name         string
 	validType    tokenType
@@ -22,41 +23,55 @@ type parameterDefinition struct {
 	infinite     bool
 }
 
+// actionArgument is a variableValue value used to define collected argument values by the parser.
 type actionArgument struct {
 	valueType tokenType
 	value     any
 }
 
+// action is a variableValue value that represents a collected action and arguments.
 type action struct {
+	// ident is the identifier of the action collected (e.g. identifier(...)).
 	ident string
-	args  []actionArgument
+	// args are each of the arguments collected between the actions' parenthesis.
+	args []actionArgument
 }
 
-type makeParams func(args []actionArgument) []plistData
-type paramCheck func(args []actionArgument)
-type additionalParams func(args []actionArgument) []plistData
+// argsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument.
+type argsFunc func(args []actionArgument)
 
+// argsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument that must return a slice of plistData as a result.
+type paramsFunc func(args []actionArgument) []plistData
+
+// actionDefinition defines an action, what it expects and has functions for checking the arguments and creating the parameters.
 type actionDefinition struct {
 	identifier    string
 	appIdentifier string
 	parameters    []parameterDefinition
-	check         paramCheck
-	make          makeParams
-	addParams     additionalParams
+	check         argsFunc
+	make          paramsFunc
+	addParams     paramsFunc
 	outputType    tokenType
 	mac           bool
 	minVersion    float64
 }
 
+// actions is the data structure that determines every action the compiler knows about.
+// The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions map[string]actionDefinition
 
+// libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
 type libraryDefinition struct {
 	identifier string
-	make       func(identifier string)
+	// make is the function to call to add the actions in this library to the actions map.
+	make func(identifier string)
 }
 
+// libraries is a map of the 3rd party libraries defined in the compiler.
+// The key determines the identifier of the identifier name that must be used in the syntax, it's value defines its behavior, etc. using an libraryDefinition.
 var libraries map[string]libraryDefinition
 
+// callAction builds an action based on its actionDefinition and adds it to the shortcutActions map which makePlist will use to build the actions section of the Shortcut file format.
 func callAction(arguments []actionArgument, outputName plistData, actionUUID plistData) {
 	for i, a := range arguments {
 		if a.valueType == Question {
