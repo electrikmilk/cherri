@@ -3063,6 +3063,48 @@ func scriptingActions() {
 			}
 		},
 	}
+	var focusModes = plistData{
+		key:      "FocusModes",
+		dataType: Dictionary,
+		value: []plistData{
+			{
+				key:      "Identifier",
+				dataType: Text,
+				value:    "com.apple.donotdisturb.mode.default",
+			},
+			{
+				key:      "DisplayString",
+				dataType: Text,
+				value:    "Do Not Disturb",
+			},
+		},
+	}
+	actions["DNDOn"] = actionDefinition{
+		identifier: "dnd.set",
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				focusModes,
+				{
+					key:      "Enabled",
+					dataType: Number,
+					value:    1,
+				},
+			}
+		},
+	}
+	actions["DNDOff"] = actionDefinition{
+		identifier: "dnd.set",
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				focusModes,
+				{
+					key:      "Enabled",
+					dataType: Number,
+					value:    0,
+				},
+			}
+		},
+	}
 	actions["setWifi"] = actionDefinition{
 		identifier: "wifi.set",
 		parameters: []parameterDefinition{
