@@ -22,7 +22,7 @@ cherri file.cherri
 ```
 
 Run `cherri` without any arguments to see all options and usage. For development, use the `--debug` (or `-d`) option for
-stack traces and output a plist file.
+stack traces and to output a .plist file.
 
 ## Why macOS only?
 
