@@ -270,7 +270,6 @@ func typeCheck(field string, validType tokenType, argument actionArgument) {
 			return
 		}
 		if argValueType != validType && validType != Variable {
-			lineIdx--
 			parserError(fmt.Sprintf("Invalid variable value '%v' of type '%s' for argument '%s' of type '%s' in '%s()'",
 				argVal,
 				typeName(argValueType),
@@ -281,8 +280,7 @@ func typeCheck(field string, validType tokenType, argument actionArgument) {
 		}
 	case argValueType == Question:
 	case argument.valueType != validType:
-		lineIdx--
-		parserError(fmt.Sprintf("Invalid value '%v' of type '%s' for argument '%s' of type '%s' in '%s()'",
+		parserError(fmt.Sprintf("Invalid argument value '%v' of type '%s' for argument '%s' of type '%s' in '%s()'",
 			argVal,
 			typeName(argValueType),
 			field,
