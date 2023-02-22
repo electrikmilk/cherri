@@ -10,7 +10,10 @@ import (
 	"strings"
 )
 
+// currentAction holds the current action identifier between functions.
 var currentAction string
+
+// isMac is set based on if the mac definition is set.
 var isMac = false
 
 // parameterDefinition is used to define an actions parameters and to check against collected argument values.
@@ -129,6 +132,7 @@ func callAction(arguments []actionArgument, outputName plistData, actionUUID pli
 	shortcutActions = append(shortcutActions, makeAction(ident, params))
 }
 
+// makeAction constructs the action for the plist using ident and params.
 func makeAction(ident string, params []plistData) (action string) {
 	action = plistDict("", []plistData{
 		{
@@ -145,11 +149,14 @@ func makeAction(ident string, params []plistData) (action string) {
 	return
 }
 
+// makeStdAction is an alias of makeAction that simply prepends the shortcuts bundle identifier to ident.
 func makeStdAction(ident string, params []plistData) string {
 	ident = "is.workflow.actions." + ident
 	return makeAction(ident, params)
 }
 
+// checkAction checks the parsed arguments provided for an action and if it can be used based on definitions set.
+// If an action has a check function defined this will be called and provided the parsed arguments.
 func checkAction(arguments []actionArgument) {
 	if len(actions[currentAction].parameters) > 0 {
 		checkArgs(&arguments)
@@ -172,6 +179,7 @@ func checkAction(arguments []actionArgument) {
 	}
 }
 
+// checkEnum checks an argument value against a string slice
 func checkEnum(name string, enum []string, args []actionArgument, idx int) {
 	if len(args) < idx {
 		return
@@ -189,6 +197,7 @@ func checkEnum(name string, enum []string, args []actionArgument, idx int) {
 	}
 }
 
+// realVariableValue recurses to get the real value of a variable given its name
 func realVariableValue(varName string, lastValueType tokenType) (varValue variableValue) {
 	if _, global := globals[varName]; global {
 		varValue = globals[varName]
@@ -253,6 +262,7 @@ func validActionOutput(field string, validType tokenType, value any) {
 	}
 }
 
+// typeCheck is used to check the types of arguments given for actions
 func typeCheck(field string, validType tokenType, argument actionArgument) {
 	var argValueType = argument.valueType
 	var argVal = argument.value
@@ -292,6 +302,8 @@ func typeCheck(field string, validType tokenType, argument actionArgument) {
 	}
 }
 
+// getArgValue recurses to find the actual value of an argument
+// in the case that the argument is a variable
 func getArgValue(variable actionArgument) any {
 	if variable.valueType == Variable {
 		var varName = variable.value.(string)
