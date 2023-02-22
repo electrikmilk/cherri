@@ -201,7 +201,6 @@ func checkEnum(name string, enum []string, args []actionArgument, idx int) {
 func realVariableValue(varName string, lastValueType tokenType) (varValue variableValue) {
 	if _, global := globals[varName]; global {
 		varValue = globals[varName]
-		hasInputVariables(varName)
 		return
 	}
 	if _, found := variables[strings.ToLower(varName)]; !found {
