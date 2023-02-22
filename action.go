@@ -159,7 +159,7 @@ func makeStdAction(ident string, params []plistData) string {
 // If an action has a check function defined this will be called and provided the parsed arguments.
 func checkAction(arguments []actionArgument) {
 	if len(actions[currentAction].parameters) > 0 {
-		checkArgs(&arguments)
+		checkArgs(arguments)
 		checkTypes(arguments, actions[currentAction].parameters)
 	}
 	if actions[currentAction].check != nil {
@@ -220,26 +220,17 @@ func realVariableValue(varName string, lastValueType tokenType) (varValue variab
 	return
 }
 
+// checkTypes iterates through `arguments` against `checks` to determine if the valid type defined
+// for an action argument is the same as the type of the argument that was parsed.
 func checkTypes(arguments []actionArgument, checks []parameterDefinition) {
 	for i, check := range checks {
 		if len(arguments) > i {
 			typeCheck(check.name, check.validType, arguments[i])
-			if check.defaultValue.value == arguments[i].value {
-				parserWarning(
-					fmt.Sprintf(
-						"Value for argument %d '%s' for action '%s()' of '%v', is the same as the default value.",
-						i+1, check.name, currentAction, arguments[i].value,
-					),
-				)
-			}
-		} else if check.defaultValue.value == nil && !check.optional {
-			parserError(
-				fmt.Sprintf("Missing required argument %d '%s' to call action '%s()'", i+1, check.name, currentAction),
-			)
 		}
 	}
 }
 
+// validActionOutput checks the output of an action in the case that the output has been assigned to a variable
 func validActionOutput(field string, validType tokenType, value any) {
 	var actionIdent = value.(action).ident
 	if _, found := actions[actionIdent]; found {
@@ -319,19 +310,46 @@ func getArgValue(variable actionArgument) any {
 	return variable.value
 }
 
-func checkArgs(arguments *[]actionArgument) {
-	var actionArgs = actions[currentAction].parameters
-	for a, arg := range *arguments {
-		if (len(actionArgs) - 1) < a {
+// checkArgs checks to ensure all the required arguments for an action were entered.
+func checkArgs(arguments []actionArgument) {
+	var actionParams = actions[currentAction].parameters
+	for i, param := range actionParams {
+		if param.infinite {
 			break
 		}
-		if actionArgs[a].infinite {
-			break
-		}
-		if !actionArgs[a].optional {
-			if arg.value == nil {
-				parserError(fmt.Sprintf("Missing required argument '%s' to call action '%s'", actionArgs[a].name, currentAction))
+		if i+1 > len(arguments) && !param.optional {
+			var argIndex = i + 1
+			var suffix = "th"
+			switch argIndex {
+			case 1:
+				suffix = "st"
+			case 2:
+				suffix = "nd"
+			case 3:
+				suffix = "rd"
 			}
+			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'", argIndex, suffix, param.name, currentAction))
+		}
+		var realValue = getArgValue(arguments[i])
+		if param.defaultValue.value == realValue {
+			var argumentPlacement = currentAction + "("
+			for argIndex := 0; argIndex < i+1; argIndex++ {
+				if argIndex == i {
+					argumentPlacement += fmt.Sprintf("%s = %v", param.name, arguments[i].value)
+				} else {
+					argumentPlacement += "..."
+				}
+				if argIndex < len(actionParams)-1 {
+					argumentPlacement += ","
+				}
+			}
+			argumentPlacement += ")"
+			parserWarning(
+				fmt.Sprintf(
+					"Value for action argument is the same as the default value\n%s.",
+					argumentPlacement,
+				),
+			)
 		}
 	}
 }
