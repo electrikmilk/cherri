@@ -328,26 +328,28 @@ func checkArgs(arguments []actionArgument) {
 			}
 			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'", argIndex, suffix, param.name, currentAction))
 		}
-		var realValue = getArgValue(arguments[i])
-		if param.defaultValue.value == realValue {
-			var argumentPlacement = currentAction + "("
-			for argIndex := 0; argIndex < i+1; argIndex++ {
-				if argIndex == i {
-					argumentPlacement += fmt.Sprintf("%s = %v", param.name, arguments[i].value)
-				} else {
-					argumentPlacement += "..."
+		if len(arguments) >= i+1 {
+			var realValue = getArgValue(arguments[i])
+			if param.defaultValue.value == realValue {
+				var argumentPlacement = currentAction + "("
+				for argIndex := 0; argIndex < i+1; argIndex++ {
+					if argIndex == i {
+						argumentPlacement += fmt.Sprintf("%s = %v", param.name, arguments[i].value)
+					} else {
+						argumentPlacement += "..."
+					}
+					if argIndex < len(actionParams)-1 {
+						argumentPlacement += ","
+					}
 				}
-				if argIndex < len(actionParams)-1 {
-					argumentPlacement += ","
-				}
+				argumentPlacement += ")"
+				parserWarning(
+					fmt.Sprintf(
+						"Value for action argument is the same as the default value\n%s.",
+						argumentPlacement,
+					),
+				)
 			}
-			argumentPlacement += ")"
-			parserWarning(
-				fmt.Sprintf(
-					"Value for action argument is the same as the default value\n%s.",
-					argumentPlacement,
-				),
-			)
 		}
 	}
 }
