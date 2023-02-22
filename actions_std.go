@@ -2087,6 +2087,7 @@ func scriptingActions() {
 				name:      "cancelButton",
 				key:       "WFAlertActionCancelButtonShown",
 				validType: Bool,
+				optional:  true,
 				defaultValue: actionArgument{
 					valueType: Bool,
 					value:     true,
@@ -2515,6 +2516,7 @@ func scriptingActions() {
 					valueType: Bool,
 					value:     false,
 				},
+				optional: true,
 			},
 		},
 		make: func(args []actionArgument) []plistData {
