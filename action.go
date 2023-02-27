@@ -193,7 +193,7 @@ func checkAction(arguments []actionArgument) {
 	}
 }
 
-// checkEnum checks an argument value against a string slice
+// checkEnum checks an argument value against a string slice.
 func checkEnum(name string, enum []string, args []actionArgument, idx int) {
 	if len(args) < idx {
 		return
@@ -211,7 +211,7 @@ func checkEnum(name string, enum []string, args []actionArgument, idx int) {
 	}
 }
 
-// realVariableValue recurses to get the real value of a variable given its name
+// realVariableValue recurses to get the real value of a variable given its name.
 func realVariableValue(varName string, lastValueType tokenType) (varValue variableValue) {
 	if _, global := globals[varName]; global {
 		varValue = globals[varName]
@@ -244,7 +244,7 @@ func checkTypes(arguments []actionArgument, checks []parameterDefinition) {
 	}
 }
 
-// validActionOutput checks the output of an action in the case that the output has been assigned to a variable
+// validActionOutput checks the output of an action in the case that the output has been assigned to a variable.
 func validActionOutput(field string, validType tokenType, value any) {
 	var actionIdent = value.(action).ident
 	if _, found := actions[actionIdent]; found {
@@ -266,7 +266,7 @@ func validActionOutput(field string, validType tokenType, value any) {
 	}
 }
 
-// typeCheck is used to check the types of arguments given for actions
+// typeCheck is used to check the types of arguments given for actions.
 func typeCheck(field string, validType tokenType, argument actionArgument) {
 	var argValueType = argument.valueType
 	var argVal = argument.value
@@ -305,7 +305,7 @@ func typeCheck(field string, validType tokenType, argument actionArgument) {
 }
 
 // getArgValue recurses to find the actual value of an argument
-// in the case that the argument is a variable
+// in the case that the argument is a variable.
 func getArgValue(variable actionArgument) any {
 	if variable.valueType == Variable {
 		var varName = variable.value.(string)
