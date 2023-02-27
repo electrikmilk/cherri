@@ -5,10 +5,7 @@
 package main
 
 import (
-	"fmt"
 	"reflect"
-
-	"github.com/electrikmilk/args-parser"
 )
 
 const header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"https://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n"
