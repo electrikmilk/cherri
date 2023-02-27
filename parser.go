@@ -668,13 +668,13 @@ func collectString() (str string) {
 }
 
 func collectArray(until rune) (array interface{}) {
-	var rawJson = "{\"array\":["
+	var rawJSON = "{\"array\":["
 	for char != until && char != -1 {
-		rawJson += string(char)
+		rawJSON += string(char)
 		advance()
 	}
-	rawJson += "]}"
-	if err := json.Unmarshal([]byte(rawJson), &array); err != nil {
+	rawJSON += "]}"
+	if err := json.Unmarshal([]byte(rawJSON), &array); err != nil {
 		lineIdx -= 2
 		parserErr(err)
 	}
@@ -684,10 +684,10 @@ func collectArray(until rune) (array interface{}) {
 }
 
 func collectDictionary() (dictionary interface{}) {
-	var rawJson = "{"
+	var rawJSON = "{"
 	var insideInnerObject = false
 	for {
-		rawJson += string(char)
+		rawJSON += string(char)
 		if char == '{' {
 			insideInnerObject = true
 		} else if char == '}' {
@@ -698,7 +698,7 @@ func collectDictionary() (dictionary interface{}) {
 		}
 		advance()
 	}
-	if err := json.Unmarshal([]byte(rawJson), &dictionary); err != nil {
+	if err := json.Unmarshal([]byte(rawJSON), &dictionary); err != nil {
 		parserErr(err)
 	}
 	advance()
