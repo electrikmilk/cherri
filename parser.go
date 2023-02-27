@@ -849,7 +849,7 @@ func parserError(message string) {
 		fmt.Printf("Error: %s (%d:%d)\n", message, lineIdx+1, lineCharIdx+1)
 	}
 	if args.Using("debug") {
-		fmt.Println(tokens)
+		printDebug()
 		panic("debug")
 	} else {
 		os.Exit(1)

@@ -65,32 +65,17 @@ func main() {
 	if args.Using("debug") {
 		fmt.Printf("Parsing %s... ", filename)
 	}
+
 	parse()
+
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
-	}
 
-	if args.Using("debug") {
-		fmt.Println(ansi("### TOKENS ###", bold))
-		fmt.Println(tokens)
-		fmt.Print("\n")
+		printDebug()
 
-		fmt.Println(ansi("### VARIABLES ###", bold))
-		fmt.Println(variables)
-		fmt.Print("\n")
-
-		fmt.Println(ansi("### MENUS ###", bold))
-		fmt.Println(menus)
-		fmt.Print("\n")
-
-		fmt.Println(ansi("### IMPORT QUESTIONS ###", bold))
-		fmt.Println(questions)
-		fmt.Print("\n")
-	}
-
-	if args.Using("debug") {
 		fmt.Printf("Generating plist... ")
 	}
+
 	var plist = makePlist()
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
@@ -101,9 +86,7 @@ func main() {
 		plistWriteErr := os.WriteFile(basename+".plist", []byte(plist), 0600)
 		handle(plistWriteErr)
 		fmt.Print(ansi("done!", green) + "\n")
-	}
 
-	if args.Using("debug") {
 		fmt.Printf("Creating unsigned %s.shortcut... ", basename)
 	}
 
@@ -196,9 +179,8 @@ func sign() {
 		if args.Using("debug") {
 			fmt.Print(ansi("failed!", red) + "\n")
 		}
-		fmt.Println("\n" + ansi("Error: Failed to sign Shortcut, plist may be invalid!", red))
-		fmt.Println("shortcuts:", stdErr.String())
-		os.Exit(1)
+		fmt.Println("\n" + ansi("Failed to sign Shortcut, plist may be invalid!", red))
+		exit("shortcuts:" + stdErr.String())
 	}
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
@@ -216,6 +198,7 @@ func handle(err error) {
 		var message = fmt.Sprintf("%s", err)
 		fmt.Println("\nError: " + ansi(message, red) + "\n")
 		if args.Using("debug") {
+			printDebug()
 			panic(err)
 		} else {
 			os.Exit(1)
@@ -234,6 +217,32 @@ func contains(s []string, e string) bool {
 
 func shortcutsUUID() string {
 	return strings.ToUpper(uuid.New().String())
+}
+
+func printDebug() {
+	if args.Using("debug") {
+		fmt.Println(ansi("#############\n#   DEBUG   #\n#############\n", red))
+
+		fmt.Println(ansi("### TOKENS ###", bold))
+		fmt.Println(tokens)
+		fmt.Print("\n")
+
+		fmt.Println(ansi("### VARIABLES ###", bold))
+		fmt.Println(variables)
+		fmt.Print("\n")
+
+		fmt.Println(ansi("### MENUS ###", bold))
+		fmt.Println(menus)
+		fmt.Print("\n")
+
+		fmt.Println(ansi("### IMPORT QUESTIONS ###", bold))
+		fmt.Println(questions)
+		fmt.Print("\n")
+
+		fmt.Println(ansi("### UUIDS ###", bold))
+		fmt.Println(uuids)
+		fmt.Print("\n")
+	}
 }
 
 type outputType int
@@ -258,6 +267,7 @@ func ansi(message string, typeOf outputType) string {
 func exit(message string) {
 	fmt.Println("\nError: " + ansi(message, red) + "\n")
 	if args.Using("debug") {
+		printDebug()
 		panic("debug")
 	} else {
 		os.Exit(1)
