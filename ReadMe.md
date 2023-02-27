@@ -2,7 +2,11 @@
 
 # Cherri
 
-[![Build](https://github.com/electrikmilk/cherri/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/electrikmilk/cherri/actions/workflows/go.yml) [![Releases](https://img.shields.io/github/v/release/electrikmilk/cherri?include_prereleases)](https://github.com/electrikmilk/cherri/releases) [![Go](https://img.shields.io/github/go-mod/go-version/electrikmilk/cherri)](https://github.com/electrikmilk/cherri/blob/main/go.mod) [![License](https://img.shields.io/github/license/electrikmilk/cherri)](https://github.com/electrikmilk/cherri/blob/main/LICENSE) ![Platform](https://img.shields.io/badge/platform-macOS-red)
+[![Build](https://github.com/electrikmilk/cherri/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/electrikmilk/cherri/actions/workflows/go.yml)
+[![Releases](https://img.shields.io/github/v/release/electrikmilk/cherri?include_prereleases)](https://github.com/electrikmilk/cherri/releases)
+[![Go](https://img.shields.io/github/go-mod/go-version/electrikmilk/cherri)](https://github.com/electrikmilk/cherri/blob/main/go.mod)
+[![License](https://img.shields.io/github/license/electrikmilk/cherri)](https://github.com/electrikmilk/cherri/blob/main/LICENSE)
+![Platform](https://img.shields.io/badge/platform-macOS-red)
 <a href="https://pkg.go.dev/github.com/electrikmilk/cherri?tab=doc"><img src="https://godoc.org/github.com/golang/gddo?status.svg" alt="GoDoc"></a>
 <a href="https://goreportcard.com/report/github.com/electrikmilk/cherri"><img src="https://goreportcard.com/badge/github.com/electrikmilk/cherri"/></a>
 
