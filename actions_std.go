@@ -1749,12 +1749,6 @@ func mediaActions() {
 				optional:  true,
 			},
 		},
-		check:      nil,
-		make:       nil,
-		addParams:  nil,
-		outputType: "",
-		mac:        false,
-		minVersion: 0,
 	}
 	actions["addToGIF"] = actionDefinition{
 		identifier: "addframetogif",
