@@ -1495,8 +1495,8 @@ func locationActions() {
 func mediaActions() {
 	actions["clearUpNext"] = actionDefinition{}
 	actions["getCurrentSong"] = actionDefinition{}
-	actions["lastPhotoImport"] = actionDefinition{identifier: "getlatestphotoimport"}
-	actions["latestBursts"] = actionDefinition{
+	actions["getLastImport"] = actionDefinition{identifier: "getlatestphotoimport"}
+	actions["getLatestBursts"] = actionDefinition{
 		identifier: "getlatestbursts",
 		parameters: []parameterDefinition{
 			{
@@ -1506,7 +1506,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["latestLivePhotos"] = actionDefinition{
+	actions["getLatestLivePhotos"] = actionDefinition{
 		identifier: "getlatestlivephotos",
 		parameters: []parameterDefinition{
 			{
@@ -1516,7 +1516,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["latestScreenshots"] = actionDefinition{
+	actions["getLatestScreenshots"] = actionDefinition{
 		identifier: "getlastscreenshot",
 		parameters: []parameterDefinition{
 			{
@@ -1526,7 +1526,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["latestVideos"] = actionDefinition{
+	actions["getLatestVideos"] = actionDefinition{
 		identifier: "getlastvideo",
 		parameters: []parameterDefinition{
 			{
