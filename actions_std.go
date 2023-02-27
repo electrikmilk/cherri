@@ -1891,6 +1891,149 @@ func mediaActions() {
 			}
 		},
 	}
+	actions["savePhoto"] = actionDefinition{
+		identifier: "savetocameraroll",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFCameraRollSelectedGroup",
+					dataType: Text,
+					value:    "Recents",
+				},
+			}
+		},
+	}
+	actions["play"] = actionDefinition{
+		identifier: "pausemusic",
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFPlayPauseBehavior",
+					dataType: Text,
+					value:    "Play",
+				},
+			}
+		},
+	}
+	actions["pause"] = actionDefinition{
+		identifier: "pausemusic",
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFPlayPauseBehavior",
+					dataType: Text,
+					value:    "Pause",
+				},
+			}
+		},
+	}
+	actions["togglePlayPause"] = actionDefinition{
+		identifier: "pausemusic",
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFPlayPauseBehavior",
+					dataType: Text,
+					value:    "Play/Pause",
+				},
+			}
+		},
+	}
+	actions["startShazam"] = actionDefinition{
+		identifier: "shazamMedia",
+		parameters: []parameterDefinition{
+			{
+				name:      "show",
+				validType: Bool,
+				key:       "WFShazamMediaActionShowWhenRun",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+				optional: true,
+			},
+			{
+				name:      "showError",
+				validType: Bool,
+				key:       "WFShazamMediaActionErrorIfNotRecognized",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+				optional: true,
+			},
+		},
+	}
+	actions["showIniTunes"] = actionDefinition{
+		identifier: "showinstore",
+		parameters: []parameterDefinition{
+			{
+				name:      "product",
+				validType: Variable,
+				key:       "WFProduct",
+			},
+		},
+	}
+	actions["takeScreenshot"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "mainMonitorOnly",
+				validType: Bool,
+				key:       "WFTakeScreenshotMainMonitorOnly",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
+				optional: true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFTakeScreenshotScreenshotType",
+					dataType: Text,
+					value:    "Full Screen",
+				},
+			}
+		},
+		mac: true,
+	}
+	var selectionTypes = []string{"Window", "Custom"}
+	actions["takeInteractiveScreenshot"] = actionDefinition{
+		identifier: "takescreenshot",
+		parameters: []parameterDefinition{
+			{
+				name:      "selection",
+				validType: String,
+				key:       "WFTakeScreenshotActionInteractiveSelectionType",
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "Window",
+				},
+				optional: true,
+			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("selection type", selectionTypes, args, 0)
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFTakeScreenshotScreenshotType",
+					dataType: Text,
+					value:    "Interactive",
+				},
+			}
+		},
+		mac: true,
+	}
 }
 
 func scriptingActions() {
