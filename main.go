@@ -49,9 +49,9 @@ func main() {
 	var nameParts = strings.Split(filename, ".")
 	basename = nameParts[0]
 
-	var bytes, readErr = os.ReadFile(filePath)
+	var fileBytes, readErr = os.ReadFile(filePath)
 	handle(readErr)
-	contents = string(bytes)
+	contents = string(fileBytes)
 
 	outputPath = basename + ".shortcut"
 	if args.Using("output") {
