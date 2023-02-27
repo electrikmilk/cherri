@@ -1495,7 +1495,77 @@ func locationActions() {
 func mediaActions() {
 	actions["clearUpNext"] = actionDefinition{}
 	actions["getCurrentSong"] = actionDefinition{}
-	actions["latestPhotoImport"] = actionDefinition{identifier: "getlatestphotoimport"}
+	actions["lastPhotoImport"] = actionDefinition{identifier: "getlatestphotoimport"}
+	actions["latestBursts"] = actionDefinition{
+		identifier: "getlatestbursts",
+		parameters: []parameterDefinition{
+			{
+				name:      "count",
+				validType: Integer,
+				key:       "WFGetLatestPhotoCount",
+			},
+		},
+	}
+	actions["latestLivePhotos"] = actionDefinition{
+		identifier: "getlatestlivephotos",
+		parameters: []parameterDefinition{
+			{
+				name:      "count",
+				validType: Integer,
+				key:       "WFGetLatestPhotoCount",
+			},
+		},
+	}
+	actions["latestScreenshots"] = actionDefinition{
+		identifier: "getlastscreenshot",
+		parameters: []parameterDefinition{
+			{
+				name:      "count",
+				validType: Integer,
+				key:       "WFGetLatestPhotoCount",
+			},
+		},
+	}
+	actions["latestVideos"] = actionDefinition{
+		identifier: "getlastvideo",
+		parameters: []parameterDefinition{
+			{
+				name:      "count",
+				validType: Integer,
+				key:       "WFGetLatestPhotoCount",
+			},
+		},
+	}
+	actions["getLatestPhotos"] = actionDefinition{
+		identifier: "getlastphoto",
+		parameters: []parameterDefinition{
+			{
+				name:      "count",
+				validType: Integer,
+				key:       "WFGetLatestPhotoCount",
+			},
+			{
+				name:      "includeScreenshots",
+				validType: Bool,
+				key:       "WFGetLatestPhotosActionIncludeScreenshots",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+				optional: true,
+			},
+		},
+	}
+	actions["getImages"] = actionDefinition{
+		identifier: "detect.images",
+		parameters: []parameterDefinition{
+			{
+				name:      "input",
+				key:       "WFInput",
+				validType: Variable,
+			},
+		},
+	}
 	actions["takePhoto"] = actionDefinition{
 		parameters: []parameterDefinition{
 			{
@@ -1588,6 +1658,242 @@ func mediaActions() {
 		check: func(args []actionArgument) {
 			if args[0].valueType != Variable {
 				args[0].value = fmt.Sprintf("0.%s", args[0].value)
+			}
+		},
+	}
+	actions["addToMusic"] = actionDefinition{
+		identifier: "addtoplaylist",
+		parameters: []parameterDefinition{
+			{
+				name:      "songs",
+				validType: Variable,
+				key:       "WFInput",
+			},
+		},
+	}
+	actions["addToPlaylist"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "playlistName",
+				validType: String,
+				key:       "WFPlaylistName",
+			},
+			{
+				name:      "songs",
+				validType: Variable,
+				key:       "WFInput",
+			},
+		},
+	}
+	actions["playNext"] = actionDefinition{
+		identifier: "addmusictoupnext",
+		parameters: []parameterDefinition{
+			{
+				name:      "music",
+				validType: Variable,
+				key:       "WFMusic",
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFWhenToPlay",
+					dataType: Text,
+					value:    "Next",
+				},
+			}
+		},
+	}
+	actions["playLater"] = actionDefinition{
+		identifier: "addmusictoupnext",
+		parameters: []parameterDefinition{
+			{
+				name:      "music",
+				validType: Variable,
+				key:       "WFMusic",
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFWhenToPlay",
+					dataType: Text,
+					value:    "Later",
+				},
+			}
+		},
+	}
+	actions["createPlaylist"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "title",
+				validType: String,
+				key:       "WFPlaylistName",
+			},
+			{
+				name:      "songs",
+				validType: Variable,
+				key:       "WFPlaylistItems",
+				optional:  true,
+			},
+			{
+				name:      "description",
+				validType: String,
+				key:       "WFPlaylistDescription",
+				optional:  true,
+			},
+			{
+				name:      "author",
+				validType: String,
+				key:       "WFPlaylistAuthor",
+				optional:  true,
+			},
+		},
+		check:      nil,
+		make:       nil,
+		addParams:  nil,
+		outputType: "",
+		mac:        false,
+		minVersion: 0,
+	}
+	actions["addToGIF"] = actionDefinition{
+		identifier: "addframetogif",
+		parameters: []parameterDefinition{
+			{
+				name:         "image",
+				validType:    String,
+				key:          "WFImage",
+				defaultValue: actionArgument{},
+				optional:     false,
+				infinite:     false,
+			},
+			{
+				name:         "gif",
+				validType:    String,
+				key:          "WFInputGIF",
+				defaultValue: actionArgument{},
+				optional:     false,
+				infinite:     false,
+			},
+			{
+				name:      "delay",
+				validType: String,
+				key:       "WFGIFDelayTime",
+				optional:  true,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "0.25",
+				},
+			},
+			{
+				name:      "autoSize",
+				validType: Bool,
+				key:       "WFGIFAutoSize",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+				optional: true,
+			},
+			{
+				name:      "width",
+				validType: String,
+				key:       "WFGIFManualSizeWidth",
+				optional:  true,
+			},
+			{
+				name:      "height",
+				validType: String,
+				key:       "WFGIFManualSizeHeight",
+				optional:  true,
+			},
+		},
+	}
+	actions["convertToJPEG"] = actionDefinition{
+		identifier: "image.convert",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "compressionQuality",
+				validType: Integer,
+				key:       "WFImageCompressionQuality",
+				optional:  true,
+			},
+			{
+				name:      "preserveMetadata",
+				validType: Bool,
+				key:       "WFImagePreserveMetadata",
+				optional:  true,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFImageFormat",
+					dataType: Text,
+					value:    "JPEG",
+				},
+			}
+		},
+	}
+	var imageFormats = []string{"TIFF", "GIF", "PNG", "BMP", "PDF", "HEIF"}
+	actions["convertImage"] = actionDefinition{
+		identifier: "image.convert",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "format",
+				validType: String,
+				key:       "WFImageFormat",
+			},
+			{
+				name:      "preserveMetadata",
+				validType: Bool,
+				key:       "WFImagePreserveMetadata",
+				optional:  true,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("image format", imageFormats, args, 1)
+		},
+	}
+	actions["stripMetadata"] = actionDefinition{
+		identifier: "image.convert",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFImagePreserveMetadata",
+					dataType: Boolean,
+					value:    false,
+				},
+				{
+					key:      "WFImageFormat",
+					dataType: Text,
+					value:    "Match Input",
+				},
 			}
 		},
 	}
@@ -2850,16 +3156,6 @@ func scriptingActions() {
 				name:      "input",
 				key:       "WFInput",
 				validType: String,
-			},
-		},
-	}
-	actions["getImages"] = actionDefinition{
-		identifier: "detect.images",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
 			},
 		},
 	}
