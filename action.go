@@ -76,6 +76,58 @@ var libraries map[string]libraryDefinition
 
 // callAction builds an action based on its actionDefinition and adds it to the shortcutActions map which makePlist will use to build the actions section of the Shortcut file format.
 func callAction(arguments []actionArgument, outputName plistData, actionUUID plistData) {
+	// Check for question arguments
+	questionArgs(arguments)
+	// Determine identifier
+	var ident = actionIdentifier()
+	// Determine parameters
+	var params = actionParameters(arguments)
+	// Additionally add the output name and UUID of this action if provided
+	if outputName.value != nil {
+		params = append(params, outputName)
+	}
+	if actionUUID.value != nil {
+		params = append(params, actionUUID)
+	}
+	shortcutActions = append(shortcutActions, makeAction(ident, params))
+}
+
+func actionIdentifier() (ident string) {
+	if actions[currentAction].appIdentifier != "" {
+		ident = actions[currentAction].appIdentifier
+	} else {
+		if actions[currentAction].identifier != "" {
+			ident = actions[currentAction].identifier
+		} else {
+			ident = strings.ToLower(currentAction)
+		}
+		ident = "is.workflow.actions." + ident
+	}
+	return
+}
+
+func actionParameters(arguments []actionArgument) (params []plistData) {
+	if actions[currentAction].make != nil {
+		params = actions[currentAction].make(arguments)
+	} else if actions[currentAction].parameters != nil {
+		for i, a := range actions[currentAction].parameters {
+			if len(arguments) > i {
+				if a.validType == Variable {
+					params = append(params, variableInput(a.key, arguments[i].value.(string)))
+				} else {
+					params = append(params, argumentValue(a.key, arguments, i))
+				}
+			}
+		}
+	}
+	if actions[currentAction].addParams != nil {
+		var addParams = actions[currentAction].addParams(arguments)
+		params = append(params, addParams...)
+	}
+	return
+}
+
+func questionArgs(arguments []actionArgument) {
 	for i, a := range arguments {
 		if a.valueType == Question {
 			var lowerIdentifier = strings.ToLower(a.value.(string))
@@ -92,44 +144,6 @@ func callAction(arguments []actionArgument, outputName plistData, actionUUID pli
 			}
 		}
 	}
-	var ident string
-	if actions[currentAction].appIdentifier != "" {
-		ident = actions[currentAction].appIdentifier
-	} else {
-		if actions[currentAction].identifier != "" {
-			ident = actions[currentAction].identifier
-		} else {
-			ident = strings.ToLower(currentAction)
-		}
-		ident = "is.workflow.actions." + ident
-	}
-	var params []plistData
-	if actions[currentAction].make != nil {
-		params = actions[currentAction].make(arguments)
-	} else if actions[currentAction].parameters != nil {
-		for i, a := range actions[currentAction].parameters {
-			if len(arguments) > i {
-				if a.validType == Variable {
-					params = append(params, variableInput(a.key, arguments[i].value.(string)))
-				} else {
-					params = append(params, argumentValue(a.key, arguments, i))
-				}
-			}
-		}
-	}
-	if actions[currentAction].addParams != nil {
-		var addParams = actions[currentAction].addParams(arguments)
-		for _, param := range addParams {
-			params = append(params, param)
-		}
-	}
-	if outputName.value != nil {
-		params = append(params, outputName)
-	}
-	if actionUUID.value != nil {
-		params = append(params, actionUUID)
-	}
-	shortcutActions = append(shortcutActions, makeAction(ident, params))
 }
 
 // makeAction constructs the action for the plist using ident and params.
@@ -328,29 +342,34 @@ func checkArgs(arguments []actionArgument) {
 			}
 			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'", argIndex, suffix, param.name, currentAction))
 		}
-		if len(arguments) >= i+1 {
-			var realValue = getArgValue(arguments[i])
-			if param.defaultValue.value == realValue {
-				var argumentPlacement = currentAction + "("
-				for argIndex := 0; argIndex < i+1; argIndex++ {
-					if argIndex == i {
-						argumentPlacement += fmt.Sprintf("%s = %v", param.name, arguments[i].value)
-					} else {
-						argumentPlacement += "..."
-					}
-					if argIndex < len(actionParams)-1 {
-						argumentPlacement += ","
-					}
-				}
-				argumentPlacement += ")"
-				parserWarning(
-					fmt.Sprintf(
-						"Value for action argument is the same as the default value\n%s.",
-						argumentPlacement,
-					),
-				)
+		if len(arguments) < i+1 {
+			return
+		}
+		checkDefaultValue(i, actionParams, param, arguments[i])
+	}
+}
+
+func checkDefaultValue(i int, actionParams []parameterDefinition, param parameterDefinition, argument actionArgument) {
+	var realValue = getArgValue(argument)
+	if param.defaultValue.value == realValue {
+		var argumentPlacement = currentAction + "("
+		for argIndex := 0; argIndex < i+1; argIndex++ {
+			if argIndex == i {
+				argumentPlacement += fmt.Sprintf("%s = %v", param.name, argument.value)
+			} else {
+				argumentPlacement += "..."
+			}
+			if argIndex < len(actionParams)-1 {
+				argumentPlacement += ","
 			}
 		}
+		argumentPlacement += ")"
+		parserWarning(
+			fmt.Sprintf(
+				"Value for action argument is the same as the default value\n%s.",
+				argumentPlacement,
+			),
+		)
 	}
 }
 
