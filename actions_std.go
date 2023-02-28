@@ -1838,6 +1838,218 @@ func mediaActions() {
 			}
 		},
 	}
+	actions["rotateImage"] = actionDefinition{
+		identifier: "image.rotate",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFImage",
+			},
+			{
+				name:      "degrees",
+				validType: String,
+				key:       "WFImageRotateAmount",
+			},
+		},
+	}
+	actions["selectPhotos"] = actionDefinition{
+		identifier: "selectphoto",
+		parameters: []parameterDefinition{
+			{
+				name:      "selectMultiple",
+				validType: Bool,
+				key:       "WFSelectMultiplePhotos",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
+				optional: true,
+			},
+		},
+	}
+	actions["createAlbum"] = actionDefinition{
+		identifier: "photos.createalbum",
+		parameters: []parameterDefinition{
+			{
+				name:      "name",
+				validType: String,
+				key:       "AlbumName",
+			},
+			{
+				name:      "images",
+				validType: Variable,
+				key:       "WFInput",
+				optional:  true,
+			},
+		},
+	}
+	var cropPositions = []string{"Center", "Top Left", "Top Right", "Bottom Left", "Bottom Right", "Custom"}
+	actions["cropImage"] = actionDefinition{
+		identifier: "image.crop",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "position",
+				validType: String,
+				key:       "WFImageCropPosition",
+			},
+			{
+				name:      "width",
+				validType: Variable,
+				key:       "WFImageCropWidth",
+			},
+			{
+				name:      "height",
+				validType: Variable,
+				key:       "WFImageCropHeight",
+			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("crop position", cropPositions, args, 1)
+		},
+	}
+	actions["deletePhotos"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "photos",
+				validType: Variable,
+				key:       "photos",
+			},
+		},
+	}
+	actions["removeFromAlbum"] = actionDefinition{
+		identifier: "removefromalbum",
+		parameters: []parameterDefinition{
+			{
+				name:      "photo",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "album",
+				validType: String,
+				key:       "WFRemoveAlbumSelectedGroup",
+			},
+		},
+	}
+	actions["selectMusic"] = actionDefinition{
+		identifier: "exportsong",
+		parameters: []parameterDefinition{
+			{
+				name:      "selectMultiple",
+				validType: Bool,
+				key:       "WFExportSongActionSelectMultiple",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
+				optional: true,
+			},
+		},
+	}
+	actions["skipBack"] = actionDefinition{
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFSkipBackBehavior",
+					dataType: Text,
+					value:    "Previous Song",
+				},
+			}
+		},
+	}
+	actions["skipFwd"] = actionDefinition{}
+	actions["searchAppStore"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "query",
+				validType: String,
+				key:       "WFSearchTerm",
+			},
+		},
+	}
+	actions["searchPodcasts"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "query",
+				validType: String,
+				key:       "WFSearchTerm",
+			},
+		},
+	}
+	actions["makeVideoFromGIF"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "gif",
+				validType: Variable,
+				key:       "WFInputGIF",
+			},
+			{
+				name:      "loops",
+				validType: Integer,
+				key:       "WFMakeVideoFromGIFActionLoopCount",
+				defaultValue: actionArgument{
+					valueType: Integer,
+					value:     1,
+				},
+				optional: true,
+			},
+		},
+	}
+	var flipDirections = []string{"Horizontal", "Vertical"}
+	actions["flipImage"] = actionDefinition{
+		identifier: "image.flip",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "direction",
+				validType: Variable,
+				key:       "WFImageFlipDirection",
+			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("flip direction", flipDirections, args, 1)
+		},
+	}
+	var recordingQualities = []string{"Normal", "Very High"}
+	var recordingStarts = []string{"On Tap", "Immediately"}
+	actions["record"] = actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "quality",
+				validType: String,
+				key:       "WFRecordingCompression",
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "Normal",
+				},
+				optional: true,
+			},
+			{
+				name:      "start",
+				validType: String,
+				key:       "WFRecordingStart",
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "On Tap",
+				},
+				optional: true,
+			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("recording quality", recordingQualities, args, 0)
+			checkEnum("recording start", recordingStarts, args, 1)
+		},
+	}
 	var imageFormats = []string{"TIFF", "GIF", "PNG", "BMP", "PDF", "HEIF"}
 	actions["convertImage"] = actionDefinition{
 		identifier: "image.convert",
