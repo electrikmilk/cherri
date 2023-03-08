@@ -822,7 +822,20 @@ func parserError(message string) {
 	if lineIdx != -1 && !args.Using("no-ansi") {
 		fmt.Print("\033[31m")
 		fmt.Println("\n" + ansi(message, bold))
-		fmt.Printf("\n\033[2m----- \033[0m%s:%d:%d\n", filePath, lineIdx+1, lineCharIdx+1)
+		var errorFilename = filePath
+		var errorLine = lineIdx + 1
+		var errorCol = lineCharIdx + 1
+		for _, inc := range includes {
+			if lineIdx+1 >= inc.start && lineIdx+1 <= inc.end {
+				errorFilename = inc.file
+				for l, line := range inc.lines {
+					if line == lines[lineIdx] {
+						errorLine = l + 1
+					}
+				}
+			}
+		}
+		fmt.Printf("\n\033[2m----- \033[0m%s:%d:%d\n", errorFilename, errorLine, errorCol)
 		if len(lines) > (lineIdx-1) && lineIdx != 0 {
 			fmt.Printf("\033[2m%d | %s\033[0m\n", lineIdx, lines[lineIdx-1])
 		}

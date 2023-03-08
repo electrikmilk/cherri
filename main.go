@@ -110,31 +110,70 @@ func main() {
 	}
 }
 
+type include struct {
+	file   string
+	start  int
+	end    int
+	lines  []string
+	length int
+}
+
+var includes []include
+
 func parseIncludes() {
 	lines = strings.Split(contents, "\n")
 	for l, line := range lines {
-		chars = strings.Split(line, "")
-		lineIdx = l
-		idx = 9
-		lineCharIdx = idx
 		if !strings.Contains(line, "#include") {
 			continue
 		}
+
+		// Prepare for possible error
+		chars = strings.Split(line, "")
+		lineIdx = l
+		idx = len("#include") + 1
+		lineCharIdx = idx
+
 		r := regexp.MustCompile("\"(.*?)\"")
 		var includePath = strings.Trim(r.FindString(line), "\"")
 		if includePath == "" {
-			parserError("No path inside of include")
+			parserError("Expected file path")
 		}
+
 		if !strings.Contains(includePath, "..") {
 			includePath = relativePath + includePath
 		}
+
 		if contains(included, includePath) {
 			parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
 		}
+
 		checkFile(includePath)
-		bytes, readErr := os.ReadFile(includePath)
+		var includeFileBytes, readErr = os.ReadFile(includePath)
 		handle(readErr)
-		lines[l] = string(bytes)
+
+		var includeContents = string(includeFileBytes)
+		var includeLines = strings.Split(includeContents, "\n")
+		var includeLinesCount = len(includeLines)
+		if strings.Contains(includeContents, "#include") {
+			includeLinesCount--
+		}
+
+		for i, inc := range includes {
+			if inc.start == l {
+				includes[i].start = inc.start + includeLinesCount
+				includes[i].end = (inc.start + includeLinesCount) + inc.length
+			}
+		}
+
+		includes = append(includes, include{
+			file:   includePath,
+			start:  l,
+			end:    l + includeLinesCount,
+			lines:  includeLines,
+			length: includeLinesCount,
+		})
+
+		lines[l] = includeContents
 		included = append(included, includePath)
 	}
 	contents = strings.Join(lines, "\n")
@@ -241,6 +280,10 @@ func printDebug() {
 
 		fmt.Println(ansi("### UUIDS ###", bold))
 		fmt.Println(uuids)
+		fmt.Print("\n")
+
+		fmt.Println(ansi("### INCLUDES ###", bold))
+		fmt.Println(includes)
 		fmt.Print("\n")
 	}
 }
