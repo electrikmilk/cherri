@@ -888,6 +888,14 @@ func parserWarning(message string) {
 	fmt.Print(ansi(fmt.Sprintf("\nWarning: %s %s:%d:%d\n", message, filePath, lineIdx+1, lineCharIdx+1), yellow))
 }
 
+func makeKeyList(title string, list map[string]string) (formattedList string) {
+	formattedList = title + "\n"
+	for key := range list {
+		formattedList += "- " + key + "\n"
+	}
+	return
+}
+
 func parserError(message string) {
 	lines = strings.Split(contents, "\n")
 	if char == '\n' || prev(1) == '\n' {
@@ -941,14 +949,6 @@ func parserError(message string) {
 	} else {
 		os.Exit(1)
 	}
-}
-
-func makeKeyList(title string, list map[string]string) (formattedList string) {
-	formattedList = title + "\n"
-	for key := range list {
-		formattedList += "- " + key + "\n"
-	}
-	return
 }
 
 /*
