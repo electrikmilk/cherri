@@ -25,12 +25,12 @@ var outputPath string
 var included []string
 
 func main() {
-	args.Register("share", "s", "Signing mode. [anyone, contacts] [default=contacts]")
-	args.Register("unsigned", "u", "Don't sign compiled Shortcut. Will NOT run on iOS or macOS.")
-	args.Register("debug", "d", "Save generated plist. Print debug messages and stack traces.")
-	args.Register("output", "o", "Optional output file path. (e.g. /path/to/file.shortcut).")
-	args.Register("import", "i", "Opens compiled Shortcut after compilation. Ignored if unsigned.")
-	args.Register("no-ansi", "a", "Don't output ANSI escape sequences that format and color the output.")
+	args.Register("share", "s", "Signing mode. [anyone, contacts] [default=contacts]", true)
+	args.Register("unsigned", "u", "Don't sign compiled Shortcut. Will NOT run on iOS or macOS.", false)
+	args.Register("debug", "d", "Save generated plist. Print debug messages and stack traces.", false)
+	args.Register("output", "o", "Optional output file path. (e.g. /path/to/file.shortcut).", true)
+	args.Register("import", "i", "Opens compiled Shortcut after compilation. Ignored if unsigned.", false)
+	args.Register("no-ansi", "a", "Don't output ANSI escape sequences that format and color the output.", false)
 	args.CustomUsage = "[FILE]"
 
 	if len(os.Args) <= 1 {
