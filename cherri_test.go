@@ -59,6 +59,7 @@ func resetParser() {
 	globals = map[string]variableValue{}
 	tokens = []token{}
 	included = []string{}
+	includes = []include{}
 	workflowName = ""
 	menus = map[string][]variableValue{}
 	uuids = map[string]string{}
