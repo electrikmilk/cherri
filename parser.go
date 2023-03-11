@@ -884,8 +884,26 @@ func parserErr(err error) {
 	}
 }
 
+func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
+	errorFilename = filePath
+	errorLine = lineIdx + 1
+	errorCol = lineCharIdx + 1
+	for _, inc := range includes {
+		if lineIdx+1 >= inc.start && lineIdx+1 <= inc.end {
+			errorFilename = inc.file
+			for l, line := range inc.lines {
+				if line == lines[lineIdx] {
+					errorLine = l + 1
+				}
+			}
+		}
+	}
+	return
+}
+
 func parserWarning(message string) {
-	fmt.Print(ansi(fmt.Sprintf("\nWarning: %s %s:%d:%d\n", message, filePath, lineIdx+1, lineCharIdx+1), yellow))
+	var errorFilename, errorLine, errorCol = delinquentFile()
+	fmt.Print(ansi(fmt.Sprintf("\nWarning: %s %s:%d:%d\n", message, errorFilename, errorLine, errorCol), yellow))
 }
 
 func makeKeyList(title string, list map[string]string) (formattedList string) {
@@ -904,19 +922,7 @@ func parserError(message string) {
 	if lineIdx != -1 && !args.Using("no-ansi") {
 		fmt.Print("\033[31m")
 		fmt.Println("\n" + ansi(message, bold))
-		var errorFilename = filePath
-		var errorLine = lineIdx + 1
-		var errorCol = lineCharIdx + 1
-		for _, inc := range includes {
-			if lineIdx+1 >= inc.start && lineIdx+1 <= inc.end {
-				errorFilename = inc.file
-				for l, line := range inc.lines {
-					if line == lines[lineIdx] {
-						errorLine = l + 1
-					}
-				}
-			}
-		}
+		var errorFilename, errorLine, errorCol = delinquentFile()
 		fmt.Printf("\n\033[2m----- \033[0m%s:%d:%d\n", errorFilename, errorLine, errorCol)
 		if len(lines) > (lineIdx-1) && lineIdx != 0 {
 			fmt.Printf("\033[2m%d | %s\033[0m\n", lineIdx, lines[lineIdx-1])
