@@ -1,0 +1,5 @@
+@bytes = measurement("2000","Information Storage","B")
+
+@MB = convertMeasurement(bytes,"Information Storage","MB")
+
+alert("2000 bytes in mb is {MB}","Result",false)

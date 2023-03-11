@@ -1,0 +1,12 @@
+menu "Choose App" {
+    case "Notes":
+        openApp("notes")
+    case "Maps":
+        openApp("maps")
+}
+
+alert("","Split Screen?")
+
+splitApps("notes","maps","thirdByTwo")
+
+// go install github.com/electrikmilk/cherri@latest
