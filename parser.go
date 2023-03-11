@@ -892,8 +892,10 @@ func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
 		if lineIdx+1 >= inc.start && lineIdx+1 <= inc.end {
 			errorFilename = inc.file
 			for l, line := range inc.lines {
-				if line == lines[lineIdx] {
-					errorLine = l + 1
+				if lineIdx < len(lines) {
+					if line == lines[lineIdx] {
+						errorLine = l + 1
+					}
 				}
 			}
 		}
