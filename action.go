@@ -349,6 +349,7 @@ func checkArgs(arguments []actionArgument) {
 	}
 }
 
+// checkDefaultValue checks if an argument value is the same as the defined default value for each argument
 func checkDefaultValue(i int, actionParams []parameterDefinition, param parameterDefinition, argument actionArgument) {
 	var realValue = getArgValue(argument)
 	if param.defaultValue.value == realValue {
@@ -373,6 +374,7 @@ func checkDefaultValue(i int, actionParams []parameterDefinition, param paramete
 	}
 }
 
+// makeLibraries makes the library variable, this is where 3rd party action library definitions will start
 func makeLibraries() {
 	libraries = make(map[string]libraryDefinition)
 }
