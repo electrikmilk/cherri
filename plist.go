@@ -565,6 +565,7 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 			}))
 		}
 		if stringVar.coerce != "" {
+			makeContentItems()
 			if _, found := contentItems[stringVar.coerce]; found {
 				aggr = append(aggr, plistDict("", []plistData{
 					{
@@ -579,7 +580,7 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 					},
 				}))
 			} else {
-				var list = makeKeyList("Available content items:", contentItems)
+				var list = makeKeyList("Available content item types:", contentItems)
 				parserError(fmt.Sprintf("Invalid content item for type coerce '%s'\n\n%s\n", stringVar.coerce, list))
 			}
 		}

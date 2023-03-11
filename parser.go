@@ -96,12 +96,12 @@ func parse() {
 				}
 			case tokenAhead(Inputs):
 				advance()
-				makeContentItems()
 				var collectInputs = collectUntil('\n')
 				if collectInputs != "" {
 					var inputTypes = strings.Split(collectInputs, ",")
 					for _, input := range inputTypes {
 						input = strings.Trim(input, " ")
+						makeContentItems()
 						if _, found := contentItems[input]; found {
 							inputs = append(inputs, contentItems[input])
 						} else {
@@ -112,12 +112,12 @@ func parse() {
 				}
 			case tokenAhead(Outputs):
 				advance()
-				makeContentItems()
 				var collectOutputs = collectUntil('\n')
 				if collectOutputs != "" {
 					var outputTypes = strings.Split(collectOutputs, ",")
 					for _, output := range outputTypes {
 						output = strings.Trim(output, " ")
+						makeContentItems()
 						if _, found := contentItems[output]; found {
 							outputs = append(outputs, contentItems[output])
 						} else {
@@ -160,8 +160,8 @@ func parse() {
 					}
 				case tokenAhead(AskFor):
 					advance()
-					makeContentItems()
 					var wtype = collectUntil('\n')
+					makeContentItems()
 					if _, found := contentItems[wtype]; found {
 						noInput = noInputParams{
 							name: "WFWorkflowNoInputBehaviorAskForInput",
