@@ -1,4 +1,4 @@
-<img src="https://github.com/electrikmilk/cherri/blob/main/assets/cherri_icon.png?raw=true" alt="cherri"/>
+![Cherri](https://github.com/electrikmilk/cherri/blob/main/assets/cherri_icon.png?raw=true)
 
 # Cherri
 
@@ -7,15 +7,17 @@
 [![Go](https://img.shields.io/github/go-mod/go-version/electrikmilk/cherri)](https://github.com/electrikmilk/cherri/blob/main/go.mod)
 [![License](https://img.shields.io/github/license/electrikmilk/cherri)](https://github.com/electrikmilk/cherri/blob/main/LICENSE)
 ![Platform](https://img.shields.io/badge/platform-macOS-red)
-<a href="https://pkg.go.dev/github.com/electrikmilk/cherri?tab=doc"><img src="https://godoc.org/github.com/golang/gddo?status.svg" alt="GoDoc"></a>
-<a href="https://goreportcard.com/report/github.com/electrikmilk/cherri"><img src="https://goreportcard.com/badge/github.com/electrikmilk/cherri"/></a>
+[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://pkg.go.dev/github.com/electrikmilk/cherri?tab=doc)
+[![Go Report Card](https://goreportcard.com/badge/github.com/electrikmilk/cherri)](https://goreportcard.com/report/github.com/electrikmilk/cherri)
 
 **Cherri** (pronounced cherry) is a [iOS Siri Shortcuts](https://apps.apple.com/us/app/shortcuts/id915249334)
 programming language, that compiles directly to a valid runnable Shortcut.
 
-[Playground](https://playground.cherrilang.org/) • [Documentation](https://cherrilang.org/language/) • [Code Tour](https://youtu.be/gU8TsI96uww) • [_Idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap)
+[Playground](https://playground.cherrilang.org/) • [Documentation](https://cherrilang.org/language/) • [Code Tour](https://youtu.be/gU8TsI96uww) • [
+_Idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap)
 
-**WARNING:** This project has not yet reached a stable version. It is under heavy development, and backwards incompatible changes may be made.
+**WARNING:** This project has not yet reached a stable version. It is under heavy development, and backwards
+incompatible changes may be made.
 
 [![Hello World Example](https://cherrilang.org/assets/example.png)](examples/hello-world.cherri)
 
@@ -30,7 +32,9 @@ stack traces and to output a .plist file.
 
 ## Why macOS only?
 
-Generating valid Shortcuts is only possible on macOS. However, I am hoping to add a signing server to the [web editor](https://playground.cherrilang.org) that will turn out valid Shortcuts on any platform with a web browser.
+Generating valid Shortcuts is only possible on macOS. However, I am hoping to add a signing server to
+the [web editor](https://playground.cherrilang.org) that will turn out valid Shortcuts on any platform with a web
+browser.
 
 ### Development on other platforms
 
@@ -45,10 +49,12 @@ the compiler is primarily developed and tested on Unix-like systems.
 
 Because it's fun :)
 
-Some languages have been abandoned, don't work very well, or no longer work. I don't want Shortcuts languages to die. There should be more, not less.
+Some languages have been abandoned, don't work very well, or no longer work. I don't want Shortcuts languages to die.
+There should be more, not less.
 
-Some stability that comes with the project being on macOS and not iOS. I am not aware of any project [other than one](https://github.com/zachary7829/Buttermilk) that compiles a
-   Shortcut in a way that is meant for a desktop OS.
+Some stability that comes with the project being on macOS and not iOS. I am not aware of any
+project [other than one](https://github.com/zachary7829/Buttermilk) that compiles a
+Shortcut in a way that is meant for a desktop OS.
 
 ## Credits
 
