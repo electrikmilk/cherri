@@ -8,5 +8,3 @@ menu "Choose App" {
 alert("","Split Screen?")
 
 splitApps("notes","maps","thirdByTwo")
-
-// go install github.com/electrikmilk/cherri@latest
