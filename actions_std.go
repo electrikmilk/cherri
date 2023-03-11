@@ -4504,16 +4504,19 @@ func customActions() {
 			{
 				name:      "url",
 				validType: String,
+				optional:  true,
 			},
 		},
 		check: func(args []actionArgument) {
-			var image = getArgValue(args[2])
-			if reflect.TypeOf(image).String() != stringType {
-				parserError("Image path for VCard must be a string literal")
-			}
-			var iconFile = getArgValue(args[2]).(string)
-			if _, err := os.Stat(iconFile); os.IsNotExist(err) {
-				parserError(fmt.Sprintf("File '%s' does not exist!", iconFile))
+			if len(args) > 2 {
+				var image = getArgValue(args[2])
+				if reflect.TypeOf(image).String() != stringType {
+					parserError("Image path for VCard must be a string literal")
+				}
+				var iconFile = getArgValue(args[2]).(string)
+				if _, err := os.Stat(iconFile); os.IsNotExist(err) {
+					parserError(fmt.Sprintf("File '%s' does not exist!", iconFile))
+				}
 			}
 		},
 		make: func(args []actionArgument) []plistData {
@@ -4528,10 +4531,13 @@ func customActions() {
 			var vcard = "BEGIN:VCARD\nVERSION:3.0\n"
 			vcard += "N;CHARSET=utf-8:" + title + "\n"
 			vcard += "ORG:" + subtitle + "\nPHOTO;ENCODING=b:"
-			var iconFile = getArgValue(args[2]).(string)
-			bytes, readErr := os.ReadFile(iconFile)
-			handle(readErr)
-			vcard += base64.StdEncoding.EncodeToString(bytes) + "\nEND:VCARD"
+			if len(args) > 2 {
+				var iconFile = getArgValue(args[2]).(string)
+				var bytes, readErr = os.ReadFile(iconFile)
+				handle(readErr)
+				vcard += base64.StdEncoding.EncodeToString(bytes)
+			}
+			vcard += "\nEND:VCARD"
 			args[0] = actionArgument{
 				valueType: String,
 				value:     vcard,
