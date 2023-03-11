@@ -3945,16 +3945,16 @@ func webActions() {
 			{
 				name:      "url",
 				validType: String,
+				key:       "WFInput",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "Show-WFInput",
 					dataType: Boolean,
 					value:    true,
 				},
-				variableInput("WFInput", args[1].value.(string)),
 			}
 		},
 	}
