@@ -2347,6 +2347,7 @@ func scriptingActions() {
 				name:      "includeFileExtension",
 				key:       "WFDontIncludeFileExtension",
 				validType: Bool,
+				optional:  true,
 				defaultValue: actionArgument{
 					valueType: Bool,
 					value:     false,
@@ -3943,7 +3944,7 @@ func webActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
-				validType: Variable,
+				validType: String,
 			},
 		},
 		make: func(args []actionArgument) []plistData {
