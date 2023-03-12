@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"html"
 	"reflect"
 	"strings"
 )
@@ -62,7 +63,7 @@ func plistKeyValue(key string, dataType plistDataType, value any) (pair string) 
 		}
 		pair += "<array>\n"
 		for _, val := range value.([]string) {
-			pair += val
+			pair += html.EscapeString(val)
 		}
 		pair += "</array>\n"
 	case Dictionary:
@@ -75,6 +76,9 @@ func plistKeyValue(key string, dataType plistDataType, value any) (pair string) 
 		}
 		pair += "</dict>\n"
 	default:
+		if reflect.TypeOf(value).String() == "string" {
+			value = html.EscapeString(value.(string))
+		}
 		pair += fmt.Sprintf("<%s>%v</%s>\n", dataType, value, dataType)
 	}
 	return
