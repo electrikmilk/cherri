@@ -100,6 +100,10 @@ func main() {
 		sign()
 	}
 
+	if args.Using("debug") {
+		printDebug()
+	}
+
 	if args.Using("import") && !args.Using("unsigned") {
 		var _, importErr = exec.Command("open", outputPath).Output()
 		handle(importErr)
