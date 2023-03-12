@@ -45,7 +45,7 @@ func parse() {
 			advance()
 		case tokenAhead(Question):
 			advance()
-			var identifier = collectUntil(' ')
+			var identifier = collectUntilExpect(' ', 3)
 			identifier = strings.ToLower(identifier)
 			advance()
 			if !isToken("\"") {
@@ -466,12 +466,32 @@ func parse() {
 	}
 }
 
+// collectUntil advances ahead until the current character is `ch`,
+// This should be used in cases where we are unsure how many characters will occur before we reach this character.
+// For instance a string collector would need to use this.
 func collectUntil(ch rune) (collected string) {
 	for char != ch && char != -1 {
 		collected += string(char)
 		advance()
 	}
 	collected = strings.Trim(collected, " ")
+	return
+}
+
+// collectUntilExpect advances ahead until the current character is `ch`.
+// If we advance more times than `maxAdvances` before finding `ch`, we throw
+// an error that we expected `ch` and return the characters collected.
+func collectUntilExpect(ch rune, maxAdvances int) (collected string) {
+	var advances int
+	for char != ch && char != -1 {
+		if advances > maxAdvances {
+			parserError(fmt.Sprintf("Expected %s, got: %s", string(char), collected))
+			break
+		}
+		collected += string(char)
+		advances++
+		advance()
+	}
 	return
 }
 
