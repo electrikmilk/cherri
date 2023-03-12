@@ -63,7 +63,7 @@ func plistKeyValue(key string, dataType plistDataType, value any) (pair string) 
 		}
 		pair += "<array>\n"
 		for _, val := range value.([]string) {
-			pair += html.EscapeString(val)
+			pair += val
 		}
 		pair += "</array>\n"
 	case Dictionary:
