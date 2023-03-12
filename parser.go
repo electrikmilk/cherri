@@ -676,7 +676,11 @@ func collectArray(until rune) (array interface{}) {
 	}
 	rawJSON += "]}"
 	if err := json.Unmarshal([]byte(rawJSON), &array); err != nil {
-		lineIdx -= 2
+		if args.Using("debug") {
+			fmt.Println(ansi("\n### COLLECTED ARRAY ###", bold))
+			fmt.Println(rawJSON)
+			fmt.Print("\n")
+		}
 		parserErr(err)
 	}
 	array = array.(map[string]interface{})["array"]
@@ -700,6 +704,10 @@ func collectDictionary() (dictionary interface{}) {
 		advance()
 	}
 	if err := json.Unmarshal([]byte(rawJSON), &dictionary); err != nil {
+		if args.Using("debug") {
+			fmt.Println(ansi("\n\n### COLLECTED DICTIONARY ###", bold))
+			fmt.Println(rawJSON)
+		}
 		parserErr(err)
 	}
 	advance()
