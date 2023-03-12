@@ -52,13 +52,13 @@ reproduce it, what environment it may be isolated to are clearly communicated.
 ### Code submission policy
 
 - Test your code to the best of your ability, do not submit code that does not compile.
-- Write in the imperative (Fix bug, Add thing, etc.)
-- Don't over explain but don't be vague, briefly but clearly state your changes in detail.
-- If you change how a feature works, modify the existing feature or add the new feature to the examples folder. These
+- Write commit titles in the imperative (Fix bug, Add thing, etc.)
+- Don't over explain but don't be vague, briefly but clearly state your changes.
+- If you change how a feature works, modify the existing feature or add a new feature, add or update a related file in the examples folder. These
   files are language examples obviously, but are also used as test files in the commit checks.
 - Test your feature or bug fix by writing a Cherri file and checking that it compiles to a valid Shortcut. If you are on
-  a non-macOS platform using the `--unsigned` argument, the Shortcut will compile, but may be invalid. Use an XML linter
-  or validator on the compiled Shortcut file.
+  a non-macOS platform using the `--unsigned` argument, the Shortcut will compile, but the XML may be invalid. Use an XML linter
+  or validator on the debug plist file.
 - Squash commits when doing fixups, so that if you remove something, you don't have a commit where you created it
   and then another commit where you remove it, squash them together so that whatever ended up not being needed is also
   removed from the commit history.
@@ -69,7 +69,8 @@ reproduce it, what environment it may be isolated to are clearly communicated.
 - Commits and changes should be one-to-one, as in, every commit should correlate to a major change in your contribution.
   However, don't make commits for every little thing. Most minor pull requests can contain only one commit.
 - Wrap commit messages at 72 characters.
-- No periods at the end of commit message titles. Only capitalize the first word of a commit message title.
+- No periods at the end of commit message titles
+- Only capitalize the first word of a commit message title.
 - Optionally, add your copyright to the top of files you have changed or added in the same style as the rest of the project.
 
 ## Cross-platform development policy
@@ -80,7 +81,7 @@ Troubleshooting why your contribution does not work will be cumbersome. If you p
 that's fine, but it is preferred that you have access to a Mac. For Shortcut debugging, you must use a Mac to validate
 that Shortcuts still successfully sign with your changes applied.
 
-This is mainly because although the generated plist may be valid XML, it may not be a valid Shortcut file, which the
+This is mainly because although the generated plist may be valid XML, it may be invalid Shortcut format, which the
 `shortcuts` binary on Mac validates when it signs the Shortcut.
 
 If you do not have access to a Mac, you must still make sure that a Cherri file that demonstrates your feature or bug
