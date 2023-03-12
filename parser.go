@@ -691,15 +691,27 @@ func collectArray(until rune) (array interface{}) {
 func collectDictionary() (dictionary interface{}) {
 	var rawJSON = "{"
 	var insideInnerObject = false
+	var insideString = false
 	for {
 		rawJSON += string(char)
-		if char == '{' {
-			insideInnerObject = true
-		} else if char == '}' {
-			if !insideInnerObject {
-				break
+		if char == '"' {
+			if insideString {
+				if prev(1) != '\\' {
+					insideString = false
+				}
+			} else {
+				insideString = true
 			}
-			insideInnerObject = false
+		}
+		if !insideString {
+			if char == '{' {
+				insideInnerObject = true
+			} else if char == '}' {
+				if !insideInnerObject {
+					break
+				}
+				insideInnerObject = false
+			}
 		}
 		advance()
 	}
