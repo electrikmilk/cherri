@@ -947,40 +947,44 @@ func makeKeyList(title string, list map[string]string) (formattedList string) {
 func parserError(message string) {
 	lines = strings.Split(contents, "\n")
 	var errorFilename, errorLine, errorCol = delinquentFile()
-	if lineIdx != -1 && !args.Using("no-ansi") {
-		fmt.Print("\033[31m")
-		fmt.Println("\n" + ansi(message, bold))
-		fmt.Printf("\n\033[2m----- \033[0m%s:%d:%d\n", errorFilename, errorLine, errorCol)
-		if len(lines) > (lineIdx-1) && lineIdx != 0 {
-			fmt.Printf("\033[2m%d | %s\033[0m\n", errorLine-1, lines[lineIdx-1])
-		}
-		if len(lines) > lineIdx {
-			fmt.Printf("\033[31m\033[1m%d | ", errorLine)
-			for c, chr := range strings.Split(lines[lineIdx], "") {
-				if c == idx {
-					fmt.Print(ansi(chr, underline))
-				} else {
-					fmt.Print(chr)
-				}
-			}
-			fmt.Print("\033[0m\n")
-		}
-		var spaces string
-		for i := 0; i < (lineCharIdx + 4); i++ {
-			spaces += " "
-		}
-		fmt.Println("\033[31m" + spaces + "^\033[0m")
-		if len(lines) > (lineIdx + 1) {
-			fmt.Printf("\033[2m%d | %s\n-----\033[0m\n\n", errorLine+1, lines[lineIdx+1])
-		}
-	} else {
+	if lineIdx == -1 && args.Using("no-ansi") {
 		fmt.Printf("Error: %s (%d:%d)\n", message, errorLine, errorCol)
+		os.Exit(1)
 	}
+	excerptError(message, errorFilename, errorLine, errorCol)
 	if args.Using("debug") {
 		printDebug()
 		panic("debug")
 	} else {
 		os.Exit(1)
+	}
+}
+
+func excerptError(message string, errorFilename string, errorLine int, errorCol int) {
+	fmt.Print("\033[31m")
+	fmt.Println("\n" + ansi(message, bold))
+	fmt.Printf("\n\033[2m----- \033[0m%s:%d:%d\n", errorFilename, errorLine, errorCol)
+	if len(lines) > (lineIdx-1) && lineIdx != 0 {
+		fmt.Printf("\033[2m%d | %s\033[0m\n", errorLine-1, lines[lineIdx-1])
+	}
+	if len(lines) > lineIdx {
+		fmt.Printf("\033[31m\033[1m%d | ", errorLine)
+		for c, chr := range strings.Split(lines[lineIdx], "") {
+			if c == idx {
+				fmt.Print(ansi(chr, underline))
+			} else {
+				fmt.Print(chr)
+			}
+		}
+		fmt.Print("\033[0m\n")
+	}
+	var spaces string
+	for i := 0; i < (lineCharIdx + 4); i++ {
+		spaces += " "
+	}
+	fmt.Println("\033[31m" + spaces + "^\033[0m")
+	if len(lines) > (lineIdx + 1) {
+		fmt.Printf("\033[2m%d | %s\n-----\033[0m\n\n", errorLine+1, lines[lineIdx+1])
 	}
 }
 
