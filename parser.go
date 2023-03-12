@@ -297,7 +297,8 @@ func parse() {
 			var timesType tokenType
 			var timesValue any
 			collectValue(&timesType, &timesValue, '{')
-			advanceTimes(2)
+			collectUntilExpect('{', 3)
+			advance()
 			tokens = append(tokens, token{
 				typeof:    Repeat,
 				ident:     currentGroupingUUID,
@@ -329,7 +330,7 @@ func parse() {
 			var promptType tokenType
 			var promptValue any
 			collectValue(&promptType, &promptValue, '{')
-			collectUntil('{')
+			collectUntilExpect('{', 3)
 			advance()
 			menus[currentGroupingUUID] = []variableValue{}
 			tokens = append(tokens, token{
@@ -485,8 +486,7 @@ func collectUntilExpect(ch rune, maxAdvances int) (collected string) {
 	var advances int
 	for char != ch && char != -1 {
 		if advances > maxAdvances {
-			parserError(fmt.Sprintf("Expected %s, got: %s", string(char), collected))
-			break
+			parserError(fmt.Sprintf("Expected %s, got: %s", string(ch), collected))
 		}
 		collected += string(char)
 		advances++
