@@ -938,9 +938,6 @@ func makeKeyList(title string, list map[string]string) (formattedList string) {
 
 func parserError(message string) {
 	lines = strings.Split(contents, "\n")
-	if char == '\n' || prev(1) == '\n' {
-		lineIdx--
-	}
 	if lineIdx != -1 && !args.Using("no-ansi") {
 		fmt.Print("\033[31m")
 		fmt.Println("\n" + ansi(message, bold))
