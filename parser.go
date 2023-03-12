@@ -438,28 +438,13 @@ func parse() {
 				closureIdx--
 			}
 		case strings.Contains(lookAhead(), "("):
-			standardActions()
-			var identifier = collectUntil('(')
-			advance()
-			if _, found := actions[identifier]; found {
-				var arguments = collectArguments()
-				currentAction = identifier
-				checkAction(arguments)
-				tokens = append(tokens, token{
-					typeof:    Action,
-					ident:     identifier,
-					valueType: Action,
-					value: action{
-						ident: identifier,
-						args:  arguments,
-					},
-				})
-			} else {
-				parserError(fmt.Sprintf("Unknown action '%s()'", identifier))
-			}
-			if char == ')' {
-				advance()
-			}
+			var identifier, value = collectAction()
+			tokens = append(tokens, token{
+				typeof:    Action,
+				ident:     identifier,
+				valueType: Action,
+				value:     value,
+			})
 		default:
 			parserError(fmt.Sprintf("Illegal character '%s'", string(char)))
 		}
@@ -550,24 +535,8 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*valueType = Bool
 		*value = false
 	case strings.Contains(lookAheadUntil(until), "("):
-		standardActions()
-		var identifier = collectUntil('(')
-		advance()
-		if _, found := actions[identifier]; found {
-			var arguments = collectArguments()
-			currentAction = identifier
-			checkAction(arguments)
-			*valueType = Action
-			*value = action{
-				ident: identifier,
-				args:  arguments,
-			}
-		} else {
-			parserError(fmt.Sprintf("Unknown action as value '%s()'", identifier))
-		}
-		if char == ')' {
-			advance()
-		}
+		*valueType = Action
+		_, *value = collectAction()
 	default:
 		if lookAheadUntil(until) == "" {
 			parserError("Value expected")
@@ -742,6 +711,26 @@ func collectDictionary() (dictionary interface{}) {
 		parserErr(err)
 	}
 	advance()
+	return
+}
+
+func collectAction() (identifier string, value action) {
+	standardActions()
+	identifier = collectUntil('(')
+	advance()
+	if _, found := actions[identifier]; !found {
+		parserError(fmt.Sprintf("Unknown action '%s()'", identifier))
+	}
+	var arguments = collectArguments()
+	currentAction = identifier
+	checkAction(arguments)
+	value = action{
+		ident: identifier,
+		args:  arguments,
+	}
+	if char == ')' {
+		advance()
+	}
 	return
 }
 
