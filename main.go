@@ -69,9 +69,6 @@ func main() {
 
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
-
-		printDebug()
-
 		fmt.Printf("Generating plist... ")
 	}
 
@@ -144,8 +141,7 @@ func sign() {
 		if args.Using("debug") {
 			fmt.Print(ansi("failed!", red) + "\n")
 		}
-		fmt.Println("\n" + ansi("Failed to sign Shortcut, plist may be invalid!", red))
-		exit("shortcuts:" + stdErr.String())
+		exit("Failed to sign Shortcut\n\nshortcuts: " + stdErr.String())
 	}
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
