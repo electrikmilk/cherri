@@ -14,10 +14,10 @@ const footer = "</dict>\n</plist>"
 func makePlist() (plist string) {
 	uuids = make(map[string]string)
 	plist = header
-	plist += plistArray("WFQuickActionSurfaces", []string{})
+	plist += plistKeyValue("WFQuickActionSurfaces", Array, []string{})
 
 	if noInput.name != "" {
-		plist += plistDict("WFWorkflowNoInputBehavior", []plistData{
+		plist += plistKeyValue("WFWorkflowNoInputBehavior", Dictionary, []plistData{
 			{
 				key:      "Name",
 				dataType: Text,
@@ -214,7 +214,7 @@ func makePlist() (plist string) {
 				var menuItems []string
 				for _, item := range menuItemParams {
 					if item.valueType == Variable {
-						menuItems = append(menuItems, plistDict("", []plistData{
+						menuItems = append(menuItems, plistValue(Dictionary, []plistData{
 							{
 								key:      "WFItemType",
 								dataType: Number,
@@ -307,7 +307,7 @@ func makePlist() (plist string) {
 			shortcutActions = append(shortcutActions, makeStdAction("conditional", conditionalParams))
 		}
 	}
-	plist += plistArray("WFWorkflowActions", shortcutActions)
+	plist += plistKeyValue("WFWorkflowActions", Array, shortcutActions)
 	plist += plistKeyValue("WFWorkflowClientVersion", Text, "1146.14")
 
 	if workflowName != "" {
@@ -317,7 +317,7 @@ func makePlist() (plist string) {
 	plist += plistKeyValue("WFWorkflowHasOutputFallback", Boolean, false)
 	plist += plistKeyValue("WFWorkflowHasShortcutInputVariables", Boolean, false)
 
-	plist += plistDict("WFWorkflowIcon", []plistData{
+	plist += plistKeyValue("WFWorkflowIcon", Dictionary, []plistData{
 		{
 			key:      "WFWorkflowIconStartColor",
 			dataType: Number,
@@ -333,7 +333,7 @@ func makePlist() (plist string) {
 	if len(questions) > 0 {
 		var importQuestions []string
 		for _, q := range questions {
-			importQuestions = append(importQuestions, plistDict("", []plistData{
+			importQuestions = append(importQuestions, plistValue(Dictionary, []plistData{
 				{
 					key:      "ParameterKey",
 					dataType: Text,
@@ -361,9 +361,9 @@ func makePlist() (plist string) {
 				},
 			}))
 		}
-		plist += plistArray("WFWorkflowImportQuestions", importQuestions)
+		plist += plistKeyValue("WFWorkflowImportQuestions", Array, importQuestions)
 	} else {
-		plist += plistArray("WFWorkflowImportQuestions", []string{})
+		plist += plistKeyValue("WFWorkflowImportQuestions", Array, []string{})
 	}
 
 	var inputContentItems []string
@@ -378,7 +378,7 @@ func makePlist() (plist string) {
 		}
 	}
 
-	plist += plistArray("WFWorkflowInputContentItemClasses", inputContentItems)
+	plist += plistKeyValue("WFWorkflowInputContentItemClasses", Array, inputContentItems)
 
 	var outputContentItems []string
 	if len(outputs) != 0 {
@@ -387,7 +387,7 @@ func makePlist() (plist string) {
 			outputContentItems = append(outputContentItems, plistValue(Text, output))
 		}
 	}
-	plist += plistArray("WFWorkflowOutputContentItemClasses", outputContentItems)
+	plist += plistKeyValue("WFWorkflowOutputContentItemClasses", Array, outputContentItems)
 
 	plist += plistKeyValue("WFWorkflowMinimumClientVersion", Number, minVersion)
 	plist += plistKeyValue("WFWorkflowMinimumClientVersionString", Text, minVersion)
@@ -399,7 +399,7 @@ func makePlist() (plist string) {
 			wfWorkflowTypes = append(wfWorkflowTypes, plistValue(Text, wtype))
 		}
 	}
-	plist += plistArray("WFWorkflowTypes", wfWorkflowTypes)
+	plist += plistKeyValue("WFWorkflowTypes", Array, wfWorkflowTypes)
 
 	plist += footer
 

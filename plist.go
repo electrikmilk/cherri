@@ -48,13 +48,33 @@ func plistKeyValue(key string, dataType plistDataType, value any) (pair string) 
 	if key != "" {
 		pair = "<key>" + key + "</key>\n"
 	}
-	if dataType == Boolean {
+	switch dataType {
+	case Boolean:
 		if value == true {
 			pair += "<true/>\n"
 		} else {
 			pair += "<false/>\n"
 		}
-	} else {
+	case Array:
+		if len(value.([]string)) == 0 {
+			pair += "<array/>\n"
+			break
+		}
+		pair += "<array>\n"
+		for _, val := range value.([]string) {
+			pair += val
+		}
+		pair += "</array>\n"
+	case Dictionary:
+		pair += "<dict>\n"
+		var empty = plistData{}
+		for _, data := range value.([]plistData) {
+			if data != empty {
+				pair += plistKeyValue(data.key, data.dataType, data.value)
+			}
+		}
+		pair += "</dict>\n"
+	default:
 		pair += fmt.Sprintf("<%s>%v</%s>\n", dataType, value, dataType)
 	}
 	return
@@ -62,44 +82,6 @@ func plistKeyValue(key string, dataType plistDataType, value any) (pair string) 
 
 func plistValue(dataType plistDataType, value any) string {
 	return plistKeyValue("", dataType, value)
-}
-
-func plistArray(key string, values []string) (pair string) {
-	if key != "" {
-		pair = "<key>" + key + "</key>\n"
-	}
-	if len(values) == 0 {
-		pair += "<array/>\n"
-		return
-	}
-	pair += "<array>\n"
-	for _, val := range values {
-		pair += val
-	}
-	pair += "</array>\n"
-	return
-}
-
-func plistDict(key string, values []plistData) (pair string) {
-	if key != "" {
-		pair = "<key>" + key + "</key>\n"
-	}
-	pair += "<dict>\n"
-	var empty = plistData{}
-	for _, data := range values {
-		if data != empty {
-			switch data.dataType {
-			case Dictionary:
-				pair += plistDict(data.key, data.value.([]plistData))
-			case Array:
-				pair += plistArray(data.key, data.value.([]string))
-			default:
-				pair += plistKeyValue(data.key, data.dataType, data.value)
-			}
-		}
-	}
-	pair += "</dict>\n"
-	return
 }
 
 func condParam(key string, conditionalParams *[]plistData, typeOf *tokenType, value any) {
@@ -320,7 +302,7 @@ func variablePlistValue(key string, varName string, ident string) plistData {
 		getAs = variables[lowerIdent].getAs
 		coerce = variables[lowerIdent].coerce
 		if getAs != "" {
-			aggrandizements = append(aggrandizements, plistDict("", []plistData{
+			aggrandizements = append(aggrandizements, plistValue(Dictionary, []plistData{
 				{
 					key:      "PropertyUserInfo",
 					dataType: Number,
@@ -341,7 +323,7 @@ func variablePlistValue(key string, varName string, ident string) plistData {
 		if coerce != "" {
 			makeContentItems()
 			if _, found := contentItems[coerce]; found {
-				aggrandizements = append(aggrandizements, plistDict("", []plistData{
+				aggrandizements = append(aggrandizements, plistValue(Dictionary, []plistData{
 					{
 						key:      "Type",
 						dataType: Text,
@@ -551,7 +533,7 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 			}
 		}
 		if stringVar.getAs != "" {
-			aggr = append(aggr, plistDict("", []plistData{
+			aggr = append(aggr, plistValue(Dictionary, []plistData{
 				{
 					key:      "Type",
 					dataType: Text,
@@ -567,7 +549,7 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 		if stringVar.coerce != "" {
 			makeContentItems()
 			if _, found := contentItems[stringVar.coerce]; found {
-				aggr = append(aggr, plistDict("", []plistData{
+				aggr = append(aggr, plistValue(Dictionary, []plistData{
 					{
 						key:      "Type",
 						dataType: Text,
@@ -811,5 +793,5 @@ func dictionaryValue(key string, value any) string {
 			},
 		})
 	}
-	return plistDict("", valueData)
+	return plistValue(Dictionary, valueData)
 }

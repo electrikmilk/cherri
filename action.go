@@ -148,7 +148,7 @@ func questionArgs(arguments []actionArgument) {
 
 // makeAction constructs the action for the plist using ident and params.
 func makeAction(ident string, params []plistData) (action string) {
-	action = plistDict("", []plistData{
+	action = plistValue(Dictionary, []plistData{
 		{
 			key:      "WFWorkflowActionIdentifier",
 			dataType: Text,

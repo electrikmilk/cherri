@@ -2947,7 +2947,7 @@ func scriptingActions() {
 				{
 					key:      "WFAppsExcept",
 					dataType: Array,
-					value:    []string{plistDict("", apps(args))},
+					value:    []string{plistValue(Dictionary, apps(args))},
 				},
 			}
 		},
@@ -2996,7 +2996,7 @@ func scriptingActions() {
 				{
 					key:      "WFAppsExcept",
 					dataType: Array,
-					value:    []string{plistDict("", apps(args))},
+					value:    []string{plistValue(Dictionary, apps(args))},
 				},
 			}
 		},
@@ -3050,7 +3050,7 @@ func scriptingActions() {
 				{
 					key:      "WFAppsExcept",
 					dataType: Array,
-					value:    []string{plistDict("", apps(args))},
+					value:    []string{plistValue(Dictionary, apps(args))},
 				},
 				{
 					key:      "WFAskToSaveChanges",
@@ -4561,7 +4561,7 @@ func contactValue(key string, contentKit string, args []actionArgument) []plistD
 		entryType = 1
 	}
 	for _, item := range args {
-		contactValues = append(contactValues, plistDict("", []plistData{
+		contactValues = append(contactValues, plistValue(Dictionary, []plistData{
 			{
 				key:      "EntryType",
 				dataType: Number,
