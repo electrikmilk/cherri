@@ -957,16 +957,16 @@ func makeKeyList(title string, list map[string]string) (formattedList string) {
 
 func parserError(message string) {
 	lines = strings.Split(contents, "\n")
+	var errorFilename, errorLine, errorCol = delinquentFile()
 	if lineIdx != -1 && !args.Using("no-ansi") {
 		fmt.Print("\033[31m")
 		fmt.Println("\n" + ansi(message, bold))
-		var errorFilename, errorLine, errorCol = delinquentFile()
 		fmt.Printf("\n\033[2m----- \033[0m%s:%d:%d\n", errorFilename, errorLine, errorCol)
 		if len(lines) > (lineIdx-1) && lineIdx != 0 {
-			fmt.Printf("\033[2m%d | %s\033[0m\n", lineIdx, lines[lineIdx-1])
+			fmt.Printf("\033[2m%d | %s\033[0m\n", errorLine-1, lines[lineIdx-1])
 		}
 		if len(lines) > lineIdx {
-			fmt.Printf("\033[31m\033[1m%d | ", lineIdx+1)
+			fmt.Printf("\033[31m\033[1m%d | ", errorLine)
 			for c, chr := range strings.Split(lines[lineIdx], "") {
 				if c == idx {
 					fmt.Print(ansi(chr, underline))
@@ -982,10 +982,10 @@ func parserError(message string) {
 		}
 		fmt.Println("\033[31m" + spaces + "^\033[0m")
 		if len(lines) > (lineIdx + 1) {
-			fmt.Printf("\033[2m%d | %s\n-----\033[0m\n\n", lineIdx+2, lines[lineIdx+1])
+			fmt.Printf("\033[2m%d | %s\n-----\033[0m\n\n", errorLine+1, lines[lineIdx+1])
 		}
 	} else {
-		fmt.Printf("Error: %s (%d:%d)\n", message, lineIdx+1, lineCharIdx+1)
+		fmt.Printf("Error: %s (%d:%d)\n", message, errorLine, errorCol)
 	}
 	if args.Using("debug") {
 		printDebug()
