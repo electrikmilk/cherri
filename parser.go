@@ -825,9 +825,9 @@ func seek(mov *int, reverse bool) (requestedChar rune) {
 	requestedChar = getChar(nextChar)
 	for requestedChar == ' ' || requestedChar == '\t' || requestedChar == '\n' {
 		if reverse {
-			nextChar -= 1
+			nextChar--
 		} else {
-			nextChar += 1
+			nextChar++
 		}
 		requestedChar = getChar(nextChar)
 	}
