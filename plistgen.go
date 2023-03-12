@@ -283,10 +283,10 @@ func makePlist() (plist string) {
 					},
 				})
 				if cond.variableTwoValue != nil {
-					condParam("", &conditionalParams, &cond.variableTwoType, cond.variableTwoValue)
+					conditionalParameter("", &conditionalParams, &cond.variableTwoType, cond.variableTwoValue)
 				}
 				if cond.variableThreeValue != nil {
-					condParam("WFAnotherNumber", &conditionalParams, &cond.variableThreeType, cond.variableThreeValue)
+					conditionalParameter("WFAnotherNumber", &conditionalParams, &cond.variableThreeType, cond.variableThreeValue)
 				}
 				conditionalParams = append(conditionalParams, plistData{
 					key:      "WFCondition",

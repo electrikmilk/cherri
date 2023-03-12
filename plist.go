@@ -88,7 +88,7 @@ func plistValue(dataType plistDataType, value any) string {
 	return plistKeyValue("", dataType, value)
 }
 
-func condParam(key string, conditionalParams *[]plistData, typeOf *tokenType, value any) {
+func conditionalParameter(key string, conditionalParams *[]plistData, typeOf *tokenType, value any) {
 	if key == "" {
 		switch *typeOf {
 		case String:
@@ -129,7 +129,7 @@ func condParam(key string, conditionalParams *[]plistData, typeOf *tokenType, va
 			*conditionalParams = append(*conditionalParams, attachmentValues("WFConditionalActionString", fmt.Sprintf("{%s}", value.(string)), uuids[value.(string)], Text))
 		default:
 			var realVar = realVariableValue(value.(string), String)
-			condParam(key, conditionalParams, &realVar.valueType, realVar.value)
+			conditionalParameter(key, conditionalParams, &realVar.valueType, realVar.value)
 		}
 	}
 }
