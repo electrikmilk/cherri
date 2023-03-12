@@ -220,7 +220,6 @@ func parse() {
 				advance()
 			} else {
 				identifier = collectUntil('\n')
-				advance()
 			}
 			var valueType tokenType
 			var value any
