@@ -15,9 +15,9 @@ alert(chosenItem,"You chose:",false)
 // Choose from menu
 
 menu "Prompt" {
-    case "Item 1":
+    item "Item 1":
         nothing()
-    case "Item 2":
+    item "Item 2":
         nothing()
 }
 

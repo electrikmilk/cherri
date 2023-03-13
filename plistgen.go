@@ -236,7 +236,7 @@ func makePlist() (plist string) {
 				})
 			}
 			shortcutActions = append(shortcutActions, makeStdAction("choosefrommenu", menuParams))
-		case Case:
+		case Item:
 			shortcutActions = append(shortcutActions, makeStdAction("choosefrommenu", []plistData{
 				{
 					key:      "GroupingIdentifier",

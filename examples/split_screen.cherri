@@ -1,7 +1,7 @@
 menu "Choose App" {
-    case "Notes":
+    item "Notes":
         openApp("notes")
-    case "Maps":
+    item "Maps":
         openApp("maps")
 }
 

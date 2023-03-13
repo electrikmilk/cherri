@@ -25,7 +25,7 @@ const (
 	Repeat         tokenType = "repeat"
 	RepeatWithEach tokenType = "for"
 	Menu           tokenType = "menu"
-	Case           tokenType = "case"
+	Item           tokenType = "item"
 	Definition     tokenType = "#define"
 	Import         tokenType = "#import"
 	Question       tokenType = "#question"

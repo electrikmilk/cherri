@@ -338,7 +338,7 @@ func parse() {
 				valueType: promptType,
 				value:     promptValue,
 			})
-		case tokenAhead(Case):
+		case tokenAhead(Item):
 			advance()
 			if currentGroupingUUID == "" {
 				parserError("Case has no starting menu statement.")
@@ -353,7 +353,7 @@ func parse() {
 				value:     itemValue,
 			})
 			tokens = append(tokens, token{
-				typeof:    Case,
+				typeof:    Item,
 				ident:     currentGroupingUUID,
 				valueType: itemType,
 				value:     itemValue,
