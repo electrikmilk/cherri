@@ -213,21 +213,17 @@ func makePlist() (plist string) {
 				var menuItemParams = menus[tok.ident]
 				var menuItems []string
 				for _, item := range menuItemParams {
-					if item.valueType == Variable {
-						menuItems = append(menuItems, plistValue(Dictionary, []plistData{
-							{
-								key:      "WFItemType",
-								dataType: Number,
-								value:    0,
-							},
-							paramValue("WFValue", actionArgument{
-								valueType: tok.valueType,
-								value:     tok.value,
-							}, String, Text),
-						}))
-					} else {
-						menuItems = append(menuItems, plistValue(Text, item.value.(string)))
-					}
+					menuItems = append(menuItems, plistValue(Dictionary, []plistData{
+						{
+							key:      "WFItemType",
+							dataType: Number,
+							value:    0,
+						},
+						paramValue("WFValue", actionArgument{
+							valueType: item.valueType,
+							value:     item.value,
+						}, String, Text),
+					}))
 				}
 				menuParams = append(menuParams, plistData{
 					key:      "WFMenuItems",
@@ -248,6 +244,10 @@ func makePlist() (plist string) {
 					dataType: Number,
 					value:    statementPart,
 				},
+				paramValue("WFMenuItemAttributedTitle", actionArgument{
+					valueType: tok.valueType,
+					value:     tok.value,
+				}, String, Text),
 				paramValue("WFMenuItemTitle", actionArgument{
 					valueType: tok.valueType,
 					value:     tok.value,
