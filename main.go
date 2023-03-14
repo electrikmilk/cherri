@@ -61,6 +61,10 @@ func main() {
 		parseIncludes()
 	}
 
+	if strings.Contains(contents, "action") {
+		parseCustomActions()
+	}
+
 	if args.Using("debug") {
 		fmt.Printf("Parsing %s... ", filename)
 	}
@@ -213,6 +217,10 @@ func printDebug() {
 
 		fmt.Println(ansi("### IMPORT QUESTIONS ###", bold))
 		fmt.Println(questions)
+		fmt.Print("\n")
+
+		fmt.Println(ansi("### CUSTOM ACTIONS ###", bold))
+		fmt.Println(customActions)
 		fmt.Print("\n")
 
 		fmt.Println(ansi("### UUIDS ###", bold))

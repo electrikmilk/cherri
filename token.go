@@ -29,6 +29,7 @@ const (
 	Definition     tokenType = "#define"
 	Import         tokenType = "#import"
 	Question       tokenType = "#question"
+	CustomAction   tokenType = "action"
 )
 
 /* Definitions */

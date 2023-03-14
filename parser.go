@@ -929,6 +929,65 @@ func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
 	return
 }
 
+// parseCustomActions parses actions defined in the file.
+// It then replaces references to defined actions with the collected action body.
+func parseCustomActions() {
+	customActions = make(map[string]customAction)
+	chars = strings.Split(contents, "")
+	idx = -1
+	advance()
+	for char != -1 {
+		if lineCharIdx != 1 {
+			advance()
+			continue
+		}
+		if tokenAhead(CustomAction) {
+			var startActionLineIdx = lineIdx
+			var identifier = collectUntil('(')
+			collectUntilExpect(')', 1)
+			collectUntilExpect('{', 1)
+			advance()
+			var body = collectUntil('}')
+			var endActionLineIdx = lineIdx
+			advance()
+			customActions[identifier] = customAction{
+				body: body,
+			}
+			lines = strings.Split(contents, "\n")
+			for i := range lines {
+				if i >= startActionLineIdx && i <= endActionLineIdx {
+					lines[i] = ""
+				}
+			}
+			contents = strings.Join(lines, "\n")
+		} else {
+			advance()
+		}
+	}
+	lineIdx = 0
+	lineCharIdx = 0
+	for i, line := range lines {
+		var lineChars = strings.Split(line, "")
+		if len(lineChars) == 0 {
+			continue
+		}
+		if !strings.Contains(line, "()") {
+			continue
+		}
+		r := regexp.MustCompile(`(.*?)\(\)`)
+		var actionIdentifier = r.FindString(line)
+		if actionIdentifier == "" {
+			continue
+		}
+		actionIdentifier = strings.Replace(actionIdentifier, "()", "", 1)
+		if _, found := customActions[actionIdentifier]; found {
+			lines[i] = customActions[actionIdentifier].body
+		}
+	}
+	contents = strings.Join(lines, "\n")
+	lines = strings.Split(contents, "\n")
+}
+
 func parserErr(err error) {
 	if err != nil {
 		parserError(fmt.Sprintf("%s", err))

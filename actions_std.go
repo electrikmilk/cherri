@@ -31,7 +31,7 @@ func standardActions() {
 	scriptingActions()
 	sharingActions()
 	webActions()
-	customActions()
+	builtinActions()
 }
 
 func calendarActions() {
@@ -4489,7 +4489,7 @@ func webActions() {
 	}
 }
 
-func customActions() {
+func builtinActions() {
 	actions["makeVCard"] = actionDefinition{
 		identifier: "gettext",
 		parameters: []parameterDefinition{
