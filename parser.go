@@ -910,12 +910,6 @@ func parseIncludes() {
 	}
 }
 
-func parserErr(err error) {
-	if err != nil {
-		parserError(fmt.Sprintf("%s", err))
-	}
-}
-
 func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
 	errorFilename = filePath
 	errorLine = lineIdx + 1
@@ -933,6 +927,12 @@ func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
 		}
 	}
 	return
+}
+
+func parserErr(err error) {
+	if err != nil {
+		parserError(fmt.Sprintf("%s", err))
+	}
 }
 
 func parserWarning(message string) {
