@@ -929,8 +929,8 @@ func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
 	return
 }
 
-// parseCustomActions parses actions defined in the file.
-// It then replaces references to defined actions with the collected action body.
+// parseCustomActions parses defined actions.
+// It then replaces references to a defined actions with their collected body.
 func parseCustomActions() {
 	customActions = make(map[string]customAction)
 	chars = strings.Split(contents, "")
