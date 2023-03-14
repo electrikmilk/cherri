@@ -846,7 +846,11 @@ var includes []include
 func parseIncludes() {
 	lines = strings.Split(contents, "\n")
 	for l, line := range lines {
-		if !strings.Contains(line, "#include") {
+		var lineChars = strings.Split(line, "")
+		if len(lineChars) == 0 {
+			continue
+		}
+		if !startsWith(line, "#include") {
 			continue
 		}
 

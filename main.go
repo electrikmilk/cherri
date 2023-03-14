@@ -180,6 +180,17 @@ func contains(s []string, e string) bool {
 	return false
 }
 
+func startsWith(s string, substr string) bool {
+	var stringChars = strings.Split(s, "")
+	var subStringChars = strings.Split(substr, "")
+	for i, char := range subStringChars {
+		if char != stringChars[i] {
+			return false
+		}
+	}
+	return true
+}
+
 func shortcutsUUID() string {
 	return strings.ToUpper(uuid.New().String())
 }
