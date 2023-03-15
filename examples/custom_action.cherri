@@ -1,0 +1,8 @@
+@var = "Test"
+
+action myCustomAction() {
+    @message = "Hello"
+    alert(message)
+}
+
+myCustomAction()
