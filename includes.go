@@ -113,3 +113,34 @@ func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
 	}
 	return
 }
+
+// autoInclude looks for files in the same directory and automatically includes them.
+func autoInclude() {
+	var files, readDirErr = os.ReadDir(".")
+	handle(readDirErr)
+	if len(files) == 0 {
+		return
+	}
+	var cherriFiles []string
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		if file.Name() == os.Args[1] {
+			continue
+		}
+		var ext = end(strings.Split(file.Name(), "."))
+		if ext == "cherri" {
+			cherriFiles = append(cherriFiles, file.Name())
+		}
+	}
+	if len(cherriFiles) == 0 {
+		return
+	}
+	lines = strings.Split(contents, "\n")
+	for _, cherriFile := range cherriFiles {
+		var includeLine = fmt.Sprintf("#include \"%s\"", cherriFile)
+		lines = append([]string{includeLine}, lines...)
+	}
+	contents = strings.Join(lines, "\n")
+}
