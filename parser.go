@@ -885,12 +885,7 @@ func parseIncludes() {
 			includeLinesCount--
 		}
 
-		for i, inc := range includes {
-			if inc.start == l {
-				includes[i].start = inc.start + includeLinesCount
-				includes[i].end = (inc.start + includeLinesCount) + inc.length
-			}
-		}
+		updateIncludesMap(l, includeLinesCount)
 
 		includes = append(includes, include{
 			file:   includePath,
@@ -910,6 +905,18 @@ func parseIncludes() {
 	}
 }
 
+// updateIncludesMap checks if an included file starts on `line`.
+// If so, it updates its start and end lines to account for the included file it overlaps with.
+func updateIncludesMap(line int, includeLines int) {
+	for i, inc := range includes {
+		if inc.start == line {
+			includes[i].start = inc.start + includeLines
+			includes[i].end = (inc.start + includeLines) + inc.length
+		}
+	}
+}
+
+// delinquentFile checks if the current parsing error occurs on an included file.
 func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
 	errorFilename = filePath
 	errorLine = lineIdx + 1
