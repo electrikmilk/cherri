@@ -573,6 +573,10 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 			if fullIdentifier == "" {
 				parserError("Value expected")
 			}
+			if args.Using("debug") {
+				fmt.Println("variables", variables)
+				fmt.Println("questions", questions)
+			}
 			parserError(fmt.Sprintf("Unknown value type: '%s'", fullIdentifier))
 		}
 	}
@@ -894,22 +898,3 @@ func excerptError(message string, errorFilename string, errorLine int, errorCol 
 		fmt.Printf("\033[2m%d | %s\n-----\033[0m\n\n", errorLine+1, lines[lineIdx+1])
 	}
 }
-
-/*
-func printCurrentChar() {
-	var currentChar string
-	switch char {
-	case ' ':
-		currentChar = "SPACE"
-	case '\t':
-		currentChar = "TAB"
-	case '\n':
-		currentChar = "LF"
-	case -1:
-		currentChar = "EMPTY"
-	default:
-		currentChar = string(char)
-	}
-	fmt.Printf("%s %d:%d\n", currentChar, lineIdx+1, lineCharIdx)
-}
-*/

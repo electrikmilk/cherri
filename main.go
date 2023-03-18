@@ -208,6 +208,16 @@ func printDebug() {
 	if args.Using("debug") {
 		fmt.Println(ansi("#############\n#   DEBUG   #\n#############\n", red))
 
+		fmt.Println(ansi("### PARSING ###", bold))
+		fmt.Println("Previous Character:")
+		printChar(prev(1))
+		fmt.Println("\nCurrent Character:")
+		printChar(char)
+		fmt.Println("\nNext Character:")
+		printChar(next(1))
+		fmt.Println("\nCurrent Line: \n" + lines[lineIdx])
+		fmt.Print("\n")
+
 		fmt.Println(ansi("### TOKENS ###", bold))
 		fmt.Println(tokens)
 		fmt.Print("\n")
@@ -236,6 +246,23 @@ func printDebug() {
 		fmt.Println(includes)
 		fmt.Print("\n")
 	}
+}
+
+func printChar(ch rune) {
+	var currentChar string
+	switch ch {
+	case ' ':
+		currentChar = "SPACE"
+	case '\t':
+		currentChar = "TAB"
+	case '\n':
+		currentChar = "LF"
+	case -1:
+		currentChar = "EMPTY"
+	default:
+		currentChar = string(ch)
+	}
+	fmt.Printf("%s %d:%d\n", currentChar, lineIdx+1, lineCharIdx)
 }
 
 type outputType int
