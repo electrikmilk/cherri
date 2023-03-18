@@ -77,6 +77,7 @@ func parseIncludes() {
 		included = append(included, includePath)
 	}
 	contents = strings.Join(lines, "\n")
+	lines = strings.Split(contents, "\n")
 	lineIdx = 0
 	if strings.Contains(contents, "#include") {
 		parseIncludes()

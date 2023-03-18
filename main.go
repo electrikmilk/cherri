@@ -212,12 +212,20 @@ func printDebug() {
 		fmt.Println(ansi("#############\n#   DEBUG   #\n#############\n", red))
 
 		fmt.Println(ansi("### PARSING ###", bold))
-		fmt.Println("Previous Character:")
-		printChar(prev(1))
+
+		if idx != 0 {
+			fmt.Println("Previous Character:")
+			printChar(prev(1))
+		}
+
 		fmt.Println("\nCurrent Character:")
 		printChar(char)
-		fmt.Println("\nNext Character:")
-		printChar(next(1))
+
+		if len(contents) < idx {
+			fmt.Println("\nNext Character:")
+			printChar(next(1))
+		}
+
 		fmt.Println("\nCurrent Line: \n" + lines[lineIdx])
 		fmt.Print("\n")
 
