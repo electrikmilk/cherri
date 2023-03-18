@@ -29,7 +29,6 @@ const (
 	Definition     tokenType = "#define"
 	Import         tokenType = "#import"
 	Question       tokenType = "#question"
-	Include        tokenType = "#include "
 	CustomAction   tokenType = "action"
 )
 

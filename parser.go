@@ -28,114 +28,6 @@ var closureTypes map[int]tokenType
 var closureIdx int
 var currentGroupingUUID string
 
-// preParse parses and collects defined actions, removes them and replaces their references with their statement block.
-// It also parses #includes and replaces them with the contents of the specified Cherri file at their filepath.
-// We pre-parse these things so that they can be referenced before or after they are defined.
-func preParse() {
-	customActions = make(map[string]customAction)
-	chars = strings.Split(contents, "")
-	idx = -1
-	advance()
-	for char != -1 {
-		switch {
-		case tokenAhead(CustomAction):
-			if lineCharIdx != 1 {
-				break
-			}
-			var startActionLineIdx = lineIdx
-			var identifier = collectUntil('(')
-			collectUntilExpect(')', 1)
-			collectUntilExpect('{', 1)
-			advance()
-			var body = collectUntil('}')
-			var endActionLineIdx = lineIdx
-			advance()
-			customActions[identifier] = customAction{
-				body: body,
-			}
-			removeActionDefinition(customActions[identifier], startActionLineIdx, endActionLineIdx)
-		case tokenAhead(Include):
-			var includePath = collectString()
-			if includePath == "" {
-				parserError("Expected file path")
-			}
-			advance()
-			if !strings.Contains(includePath, "..") {
-				includePath = relativePath + includePath
-			}
-			if contains(included, includePath) {
-				parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
-			}
-			checkFile(includePath)
-			var includeFileBytes, readErr = os.ReadFile(includePath)
-			handle(readErr)
-
-			var includeContents = string(includeFileBytes)
-			var includeLines = strings.Split(includeContents, "\n")
-			var includeLinesCount = len(includeLines)
-			if strings.Contains(includeContents, "#include") {
-				includeLinesCount--
-			}
-
-			updateIncludesMap(lineIdx, includeLinesCount)
-
-			lines[lineIdx] = includeContents
-			contents = strings.Join(lines, "\n")
-
-			includes = append(includes, include{
-				file:   includePath,
-				start:  lineIdx,
-				end:    lineIdx + includeLinesCount,
-				lines:  includeLines,
-				length: includeLinesCount,
-			})
-			included = append(included, includePath)
-		default:
-			advance()
-		}
-	}
-	if len(customActions) != 0 {
-		findActionRefs()
-	}
-	lineIdx = 0
-	lineCharIdx = 0
-}
-
-// removeActionDefinition removes an action definition from the contents
-func removeActionDefinition(action customAction, start int, end int) {
-	lines = strings.Split(contents, "\n")
-	for i := range lines {
-		if i >= start && i <= end {
-			lines[i] = ""
-		}
-	}
-	contents = strings.Join(lines, "\n")
-}
-
-// findActionRefs replaces references to defined actions with their collected body.
-func findActionRefs() {
-	for i, line := range lines {
-		var lineChars = strings.Split(line, "")
-		if len(lineChars) == 0 {
-			continue
-		}
-		if !strings.Contains(line, "()") {
-			continue
-		}
-		r := regexp.MustCompile(`(.*?)\(\)`)
-		var actionIdentifier = r.FindString(line)
-		if actionIdentifier == "" {
-			continue
-		}
-		actionIdentifier = strings.Replace(actionIdentifier, "()", "", 1)
-		if _, found := customActions[actionIdentifier]; found {
-			lines[i] = customActions[actionIdentifier].body
-		}
-	}
-	contents = strings.Join(lines, "\n")
-	lines = strings.Split(contents, "\n")
-}
-
 func parse() {
 	variables = make(map[string]variableValue)
 	questions = make(map[string]question)
@@ -939,6 +831,69 @@ func getChar(atIndex int) rune {
 		return []rune(chars[atIndex])[0]
 	}
 	return -1
+}
+
+// parseCustomActions parses defined actions and collects them.
+func parseCustomActions() {
+	customActions = make(map[string]customAction)
+	chars = strings.Split(contents, "")
+	idx = -1
+	advance()
+	for char != -1 {
+		if lineCharIdx != 1 {
+			advance()
+			continue
+		}
+		if tokenAhead(CustomAction) {
+			var startActionLineIdx = lineIdx
+			var identifier = collectUntil('(')
+			collectUntilExpect(')', 1)
+			collectUntilExpect('{', 1)
+			advance()
+			var body = collectUntil('}')
+			var endActionLineIdx = lineIdx
+			advance()
+			customActions[identifier] = customAction{
+				body: body,
+			}
+			lines = strings.Split(contents, "\n")
+			for i := range lines {
+				if i >= startActionLineIdx && i <= endActionLineIdx {
+					lines[i] = ""
+				}
+			}
+			contents = strings.Join(lines, "\n")
+		} else {
+			advance()
+		}
+	}
+	lineIdx = 0
+	lineCharIdx = 0
+	findActionRefs()
+}
+
+// findActionRefs replaces references to defined actions with their collected body.
+func findActionRefs() {
+	for i, line := range lines {
+		var lineChars = strings.Split(line, "")
+		if len(lineChars) == 0 {
+			continue
+		}
+		if !strings.Contains(line, "()") {
+			continue
+		}
+		r := regexp.MustCompile(`(.*?)\(\)`)
+		var actionIdentifier = r.FindString(line)
+		if actionIdentifier == "" {
+			continue
+		}
+		actionIdentifier = strings.Replace(actionIdentifier, "()", "", 1)
+		if _, found := customActions[actionIdentifier]; found {
+			lines[i] = customActions[actionIdentifier].body
+		}
+	}
+	contents = strings.Join(lines, "\n")
+	lines = strings.Split(contents, "\n")
 }
 
 func parserErr(err error) {
