@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -831,69 +830,6 @@ func getChar(atIndex int) rune {
 		return []rune(chars[atIndex])[0]
 	}
 	return -1
-}
-
-// parseCustomActions parses defined actions and collects them.
-func parseCustomActions() {
-	customActions = make(map[string]customAction)
-	chars = strings.Split(contents, "")
-	idx = -1
-	advance()
-	for char != -1 {
-		if lineCharIdx != 1 {
-			advance()
-			continue
-		}
-		if tokenAhead(CustomAction) {
-			var startActionLineIdx = lineIdx
-			var identifier = collectUntil('(')
-			collectUntilExpect(')', 1)
-			collectUntilExpect('{', 1)
-			advance()
-			var body = collectUntil('}')
-			var endActionLineIdx = lineIdx
-			advance()
-			customActions[identifier] = customAction{
-				body: body,
-			}
-			lines = strings.Split(contents, "\n")
-			for i := range lines {
-				if i >= startActionLineIdx && i <= endActionLineIdx {
-					lines[i] = ""
-				}
-			}
-			contents = strings.Join(lines, "\n")
-		} else {
-			advance()
-		}
-	}
-	lineIdx = 0
-	lineCharIdx = 0
-	findActionRefs()
-}
-
-// findActionRefs replaces references to defined actions with their collected body.
-func findActionRefs() {
-	for i, line := range lines {
-		var lineChars = strings.Split(line, "")
-		if len(lineChars) == 0 {
-			continue
-		}
-		if !strings.Contains(line, "()") {
-			continue
-		}
-		r := regexp.MustCompile(`(.*?)\(\)`)
-		var actionIdentifier = r.FindString(line)
-		if actionIdentifier == "" {
-			continue
-		}
-		actionIdentifier = strings.Replace(actionIdentifier, "()", "", 1)
-		if _, found := customActions[actionIdentifier]; found {
-			lines[i] = customActions[actionIdentifier].body
-		}
-	}
-	contents = strings.Join(lines, "\n")
-	lines = strings.Split(contents, "\n")
 }
 
 func parserErr(err error) {
