@@ -203,9 +203,9 @@ func parse() {
 				}
 			}
 		case tokenAhead(Import):
-			advance()
 			makeLibraries()
-			var collectedLibrary = strings.ToLower(collectUntil('\n'))
+			advanceTimes(2)
+			var collectedLibrary = collectString()
 			if _, found := libraries[collectedLibrary]; found {
 				libraries[collectedLibrary].make(libraries[collectedLibrary].identifier)
 			} else {
