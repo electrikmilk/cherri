@@ -7,7 +7,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 )
 
@@ -20,68 +19,6 @@ type include struct {
 }
 
 var includes []include
-
-func parseIncludes() {
-	lines = strings.Split(contents, "\n")
-	for l, line := range lines {
-		var lineChars = strings.Split(line, "")
-		if len(lineChars) == 0 {
-			continue
-		}
-		if !startsWith(line, "#include") {
-			continue
-		}
-
-		// Prepare for possible error
-		chars = strings.Split(line, "")
-		lineIdx = l
-		idx = len("#include") + 1
-		lineCharIdx = idx
-
-		r := regexp.MustCompile("\"(.*?)\"")
-		var includePath = strings.Trim(r.FindString(line), "\"")
-		if includePath == "" {
-			parserError("Expected file path")
-		}
-
-		if !strings.Contains(includePath, "..") {
-			includePath = relativePath + includePath
-		}
-
-		if contains(included, includePath) {
-			parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
-		}
-
-		checkFile(includePath)
-		var includeFileBytes, readErr = os.ReadFile(includePath)
-		handle(readErr)
-
-		var includeContents = string(includeFileBytes)
-		var includeLines = strings.Split(includeContents, "\n")
-		var includeLinesCount = len(includeLines)
-		if strings.Contains(includeContents, "#include") {
-			includeLinesCount--
-		}
-
-		updateIncludesMap(l, includeLinesCount)
-
-		includes = append(includes, include{
-			file:   includePath,
-			start:  l,
-			end:    l + includeLinesCount,
-			lines:  includeLines,
-			length: includeLinesCount,
-		})
-
-		lines[l] = includeContents
-		included = append(included, includePath)
-	}
-	contents = strings.Join(lines, "\n")
-	lineIdx = 0
-	if strings.Contains(contents, "#include") {
-		parseIncludes()
-	}
-}
 
 // updateIncludesMap checks if an included file starts on `line`.
 // If so, it updates its start and end lines to account for the included file it overlaps with.

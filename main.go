@@ -62,12 +62,8 @@ func main() {
 		autoInclude()
 	}
 
-	if strings.Contains(contents, "#include") {
-		parseIncludes()
-	}
-
-	if strings.Contains(contents, "action") {
-		parseCustomActions()
+	if strings.Contains(contents, "action") || strings.Contains(contents, "#include \"") {
+		preParse()
 	}
 
 	if args.Using("debug") {
