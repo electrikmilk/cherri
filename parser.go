@@ -30,7 +30,6 @@ var currentGroupingUUID string
 func parse() {
 	variables = make(map[string]variableValue)
 	questions = make(map[string]question)
-	actions = make(map[string]actionDefinition)
 	menus = make(map[string][]variableValue)
 	closureUUIDs = make(map[int]string)
 	closureTypes = make(map[int]tokenType)

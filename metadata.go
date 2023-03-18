@@ -239,15 +239,6 @@ func makeConditions() {
 	conditions[Between] = "1003"
 }
 
-/* Custom Actions */
-
-type customAction struct {
-	// identifier string
-	body string
-}
-
-var customActions map[string]customAction
-
 /* Menus */
 
 var menus map[string][]variableValue

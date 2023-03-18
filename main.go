@@ -66,7 +66,10 @@ func main() {
 		parseIncludes()
 	}
 
+	actions = make(map[string]actionDefinition)
+
 	if strings.Contains(contents, "action") {
+		standardActions()
 		parseCustomActions()
 	}
 
@@ -235,7 +238,12 @@ func printDebug() {
 		fmt.Print("\n")
 
 		fmt.Println(ansi("### CUSTOM ACTIONS ###", bold))
-		fmt.Println(customActions)
+		for identifier, customAction := range customActions {
+			fmt.Println("identifier: " + identifier)
+			fmt.Println("arguments:", customAction.arguments)
+			fmt.Println("body:")
+			fmt.Println(customAction.body)
+		}
 		fmt.Print("\n")
 
 		fmt.Println(ansi("### UUIDS ###", bold))
