@@ -836,6 +836,13 @@ func getChar(atIndex int) rune {
 	return -1
 }
 
+func firstChar() {
+	lineIdx = 0
+	lineCharIdx = 0
+	idx = -1
+	advance()
+}
+
 func parserErr(err error) {
 	if err != nil {
 		parserError(fmt.Sprintf("%s", err))
