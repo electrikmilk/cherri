@@ -618,8 +618,11 @@ func collectComment(collect commentType) (comment string) {
 	if collect == singleLine {
 		comment = collectUntil('\n')
 	} else if collect == multiLine {
-		advance()
-		for char != '*' && next(1) != '/' && char != -1 {
+		advanceTimes(2)
+		for {
+			if char == '*' && next(1) == '/' {
+				break
+			}
 			comment += string(char)
 			advance()
 		}
