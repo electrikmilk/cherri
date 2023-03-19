@@ -99,6 +99,16 @@ func findCustomActionRefs() {
 			continue
 		}
 
+		var returnVariable string
+		if tokenAhead(At) {
+			if !strings.Contains(lookAheadUntil('\n'), "=") {
+				continue
+			}
+			returnVariable = collectUntil(' ')
+			collectUntilExpect('=', 1)
+			advance()
+		}
+
 		var identifier = strings.Trim(collectUntil('('), " \t\n")
 		if _, found := customActions[identifier]; !found {
 			collectUntil('\n')
@@ -141,7 +151,18 @@ func findCustomActionRefs() {
 			}
 		}
 
+		var actionBodyLines = strings.Split(actionBody, "\n")
+		for i, line := range actionBodyLines {
+			if len(line) == 0 {
+				continue
+			}
+			if startsWith(strings.Trim(line, " "), "return") && returnVariable != "" {
+				actionBodyLines[i] = strings.Replace(line, "return ", "@"+returnVariable+" = ", 1)
+			}
+		}
+		actionBody = strings.Join(actionBodyLines, "\n")
 		lines[lineIdx] = actionBody
+
 		contents = strings.Join(lines, "\n")
 		lines = strings.Split(contents, "\n")
 		chars = strings.Split(contents, "")
