@@ -1,0 +1,14 @@
+@params = [
+    {
+        "key": "WFAlertActionMessage",
+        "type": "string",
+        "value": "Hello, world!"
+    },
+    {
+        "key": "WFAlertActionTitle",
+        "type": "string",
+        "value": "Alert"
+    }
+]
+
+rawAction("is.workflow.actions.alert", params)
