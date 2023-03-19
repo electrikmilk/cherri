@@ -115,10 +115,7 @@ func findCustomActionRefs() {
 			continue
 		}
 
-		var arguments []actionArgument
-		if !isToken(RightParen) && next(1) != ')' {
-			arguments = collectArguments()
-		}
+		var arguments = collectArguments()
 		if len(arguments) < len(customActions[identifier].arguments) {
 			parserError(fmt.Sprintf("Not enough arguments to call declared action '%s()'", identifier))
 		}
