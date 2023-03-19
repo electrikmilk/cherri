@@ -138,7 +138,6 @@ func findCustomActionRefs() {
 				} else {
 					actionBody = strings.ReplaceAll(actionBody, argName, replacementValue)
 				}
-				fmt.Println("actionBody: " + actionBody + "\n------\n")
 			}
 		}
 
