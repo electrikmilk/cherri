@@ -61,7 +61,7 @@ type actionDefinition struct {
 
 // actions is the data structure that determines every action the compiler knows about.
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
-var actions map[string]actionDefinition
+var actions map[string]*actionDefinition
 
 // libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
 type libraryDefinition struct {

@@ -51,7 +51,7 @@ func resetParser() {
 	closureIdx = 0
 	currentGroupingUUID = ""
 	variables = map[string]variableValue{}
-	actions = map[string]actionDefinition{}
+	actions = map[string]*actionDefinition{}
 	iconColor = "-1263359489"
 	iconGlyph = 61440
 	inputs = []string{}

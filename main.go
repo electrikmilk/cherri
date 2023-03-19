@@ -66,7 +66,7 @@ func main() {
 		parseIncludes()
 	}
 
-	actions = make(map[string]actionDefinition)
+	actions = make(map[string]*actionDefinition)
 
 	if strings.Contains(contents, "action") {
 		standardActions()

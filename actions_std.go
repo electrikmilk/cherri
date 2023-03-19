@@ -35,7 +35,7 @@ func standardActions() {
 }
 
 func calendarActions() {
-	actions["date"] = actionDefinition{
+	actions["date"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -53,7 +53,7 @@ func calendarActions() {
 			}
 		},
 	}
-	actions["addCalendar"] = actionDefinition{
+	actions["addCalendar"] = &actionDefinition{
 		identifier: "addnewcalendar",
 		parameters: []parameterDefinition{
 			{
@@ -63,7 +63,7 @@ func calendarActions() {
 			},
 		},
 	}
-	actions["addSeconds"] = actionDefinition{
+	actions["addSeconds"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -79,7 +79,7 @@ func calendarActions() {
 			return adjustDate("Add", "sec", args)
 		},
 	}
-	actions["addMinutes"] = actionDefinition{
+	actions["addMinutes"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -95,7 +95,7 @@ func calendarActions() {
 			return adjustDate("Add", "min", args)
 		},
 	}
-	actions["addHours"] = actionDefinition{
+	actions["addHours"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -111,7 +111,7 @@ func calendarActions() {
 			return adjustDate("Add", "hr", args)
 		},
 	}
-	actions["addDays"] = actionDefinition{
+	actions["addDays"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -127,7 +127,7 @@ func calendarActions() {
 			return adjustDate("Add", "days", args)
 		},
 	}
-	actions["addWeeks"] = actionDefinition{
+	actions["addWeeks"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -143,7 +143,7 @@ func calendarActions() {
 			return adjustDate("Add", "weeks", args)
 		},
 	}
-	actions["addMonths"] = actionDefinition{
+	actions["addMonths"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -159,7 +159,7 @@ func calendarActions() {
 			return adjustDate("Add", "months", args)
 		},
 	}
-	actions["addYears"] = actionDefinition{
+	actions["addYears"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -175,7 +175,7 @@ func calendarActions() {
 			return adjustDate("Add", "yr", args)
 		},
 	}
-	actions["subtractSeconds"] = actionDefinition{
+	actions["subtractSeconds"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -191,7 +191,7 @@ func calendarActions() {
 			return adjustDate("Subtract", "sec", args)
 		},
 	}
-	actions["subtractMinutes"] = actionDefinition{
+	actions["subtractMinutes"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -207,7 +207,7 @@ func calendarActions() {
 			return adjustDate("Subtract", "min", args)
 		},
 	}
-	actions["subtractHours"] = actionDefinition{
+	actions["subtractHours"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -223,7 +223,7 @@ func calendarActions() {
 			return adjustDate("Subtract", "hr", args)
 		},
 	}
-	actions["subtractDays"] = actionDefinition{
+	actions["subtractDays"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -239,7 +239,7 @@ func calendarActions() {
 			return adjustDate("Subtract", "days", args)
 		},
 	}
-	actions["subtractWeeks"] = actionDefinition{
+	actions["subtractWeeks"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -255,7 +255,7 @@ func calendarActions() {
 			return adjustDate("Subtract", "weeks", args)
 		},
 	}
-	actions["subtractMonths"] = actionDefinition{
+	actions["subtractMonths"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -271,7 +271,7 @@ func calendarActions() {
 			return adjustDate("Subtract", "months", args)
 		},
 	}
-	actions["subtractYears"] = actionDefinition{
+	actions["subtractYears"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -287,7 +287,7 @@ func calendarActions() {
 			return adjustDate("Subtract", "yr", args)
 		},
 	}
-	actions["getStartMinute"] = actionDefinition{
+	actions["getStartMinute"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -299,7 +299,7 @@ func calendarActions() {
 			return adjustDate("Get Start of Minute", "", args)
 		},
 	}
-	actions["getStartHour"] = actionDefinition{
+	actions["getStartHour"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -311,7 +311,7 @@ func calendarActions() {
 			return adjustDate("Get Start of Hour", "", args)
 		},
 	}
-	actions["getStartWeek"] = actionDefinition{
+	actions["getStartWeek"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -323,7 +323,7 @@ func calendarActions() {
 			return adjustDate("Get Start of Week", "", args)
 		},
 	}
-	actions["getStartMonth"] = actionDefinition{
+	actions["getStartMonth"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -335,7 +335,7 @@ func calendarActions() {
 			return adjustDate("Get Start of Month", "", args)
 		},
 	}
-	actions["getStartYear"] = actionDefinition{
+	actions["getStartYear"] = &actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -352,7 +352,7 @@ func calendarActions() {
 func contactActions() {
 	var contactProperties = []string{"First Name", "Middle Name", "Last Name", "Birthday", "Prefix", "Suffix", "Nickname", "Phonetic First Name", "Phonetic Last Name", "Phonetic Middle Name", "Company", "Job Title", "Department", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
 	var abcSortOrders = []string{"A to Z", "Z to A"}
-	actions["filterContacts"] = actionDefinition{
+	actions["filterContacts"] = &actionDefinition{
 		identifier: "filter.contacts",
 		parameters: []parameterDefinition{
 			{
@@ -389,7 +389,7 @@ func contactActions() {
 			checkEnum("sort order", abcSortOrders, args, 2)
 		},
 	}
-	actions["emailAddress"] = actionDefinition{
+	actions["emailAddress"] = &actionDefinition{
 		identifier: "email",
 		parameters: []parameterDefinition{
 			{
@@ -402,7 +402,7 @@ func contactActions() {
 			return contactValue("WFEmailAddress", "emailaddress", args)
 		},
 	}
-	actions["phoneNumber"] = actionDefinition{
+	actions["phoneNumber"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
@@ -414,7 +414,7 @@ func contactActions() {
 			return contactValue("WFPhoneNumber", "phonenumber", args)
 		},
 	}
-	actions["selectContact"] = actionDefinition{
+	actions["selectContact"] = &actionDefinition{
 		identifier: "selectcontacts",
 		parameters: []parameterDefinition{
 			{
@@ -428,13 +428,13 @@ func contactActions() {
 			},
 		},
 	}
-	actions["selectEmailAddress"] = actionDefinition{
+	actions["selectEmailAddress"] = &actionDefinition{
 		identifier: "selectemail",
 	}
-	actions["selectPhoneNumber"] = actionDefinition{
+	actions["selectPhoneNumber"] = &actionDefinition{
 		identifier: "selectphone",
 	}
-	actions["getContactDetail"] = actionDefinition{
+	actions["getContactDetail"] = &actionDefinition{
 		identifier: "properties.contacts",
 		parameters: []parameterDefinition{
 			{
@@ -456,7 +456,7 @@ func contactActions() {
 
 func documentActions() {
 	// FIXME: Writing to locations other than the Shortcuts folder
-	actions["createFolder"] = actionDefinition{
+	actions["createFolder"] = &actionDefinition{
 		identifier: "file.createfolder",
 		parameters: []parameterDefinition{
 			{
@@ -466,7 +466,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["getFolderContents"] = actionDefinition{
+	actions["getFolderContents"] = &actionDefinition{
 		identifier: "file.getfoldercontents",
 		parameters: []parameterDefinition{
 			{
@@ -486,7 +486,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["matchedTextGroupIndex"] = actionDefinition{
+	actions["matchedTextGroupIndex"] = &actionDefinition{
 		identifier: "text.match.getgroup",
 		parameters: []parameterDefinition{
 			{
@@ -510,7 +510,7 @@ func documentActions() {
 			}
 		},
 	}
-	actions["getFileFromFolder"] = actionDefinition{
+	actions["getFileFromFolder"] = &actionDefinition{
 		identifier: "documentpicker.open",
 		parameters: []parameterDefinition{
 			{
@@ -535,7 +535,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["getFile"] = actionDefinition{
+	actions["getFile"] = &actionDefinition{
 		identifier: "documentpicker.open",
 		parameters: []parameterDefinition{
 			{
@@ -555,7 +555,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["markup"] = actionDefinition{
+	actions["markup"] = &actionDefinition{
 		identifier: "avairyeditphoto",
 		parameters: []parameterDefinition{
 			{
@@ -565,7 +565,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["rename"] = actionDefinition{
+	actions["rename"] = &actionDefinition{
 		identifier: "file.rename",
 		parameters: []parameterDefinition{
 			{
@@ -580,7 +580,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["reveal"] = actionDefinition{
+	actions["reveal"] = &actionDefinition{
 		identifier: "file.reveal",
 		parameters: []parameterDefinition{
 			{
@@ -590,7 +590,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["define"] = actionDefinition{
+	actions["define"] = &actionDefinition{
 		identifier: "showdefinition",
 		parameters: []parameterDefinition{
 			{
@@ -601,7 +601,7 @@ func documentActions() {
 		},
 	}
 	var errorCorrectionLevels = []string{"Low", "Medium", "Quartile", "High"}
-	actions["makeQRcode"] = actionDefinition{
+	actions["makeQRcode"] = &actionDefinition{
 		identifier: "generatebarcode",
 		parameters: []parameterDefinition{
 			{
@@ -619,7 +619,7 @@ func documentActions() {
 			checkEnum("error correction level", errorCorrectionLevels, args, 0)
 		},
 	}
-	actions["showNote"] = actionDefinition{
+	actions["showNote"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "note",
@@ -628,7 +628,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["splitPDF"] = actionDefinition{
+	actions["splitPDF"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "pdf",
@@ -637,7 +637,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["makeHTML"] = actionDefinition{
+	actions["makeHTML"] = &actionDefinition{
 		identifier: "gethtmlfromrichtext",
 		parameters: []parameterDefinition{
 			{
@@ -657,7 +657,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["makeMarkdown"] = actionDefinition{
+	actions["makeMarkdown"] = &actionDefinition{
 		identifier: "getmarkdownfromrichtext",
 		parameters: []parameterDefinition{
 			{
@@ -667,7 +667,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["getRichTextFromHTML"] = actionDefinition{
+	actions["getRichTextFromHTML"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "html",
@@ -676,7 +676,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["getRichTextFromMarkdown"] = actionDefinition{
+	actions["getRichTextFromMarkdown"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "markdown",
@@ -685,7 +685,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["print"] = actionDefinition{
+	actions["print"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -694,7 +694,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["selectFile"] = actionDefinition{
+	actions["selectFile"] = &actionDefinition{
 		identifier: "file.select",
 		parameters: []parameterDefinition{
 			{
@@ -709,7 +709,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["getFileLink"] = actionDefinition{
+	actions["getFileLink"] = &actionDefinition{
 		identifier: "file.getlink",
 		parameters: []parameterDefinition{
 			{
@@ -719,7 +719,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["getParentDirectory"] = actionDefinition{
+	actions["getParentDirectory"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -728,7 +728,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["getEmojiName"] = actionDefinition{
+	actions["getEmojiName"] = &actionDefinition{
 		identifier: "getnameofemoji",
 		parameters: []parameterDefinition{
 			{
@@ -738,7 +738,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["getFileDetail"] = actionDefinition{
+	actions["getFileDetail"] = &actionDefinition{
 		identifier: "properties.files",
 		parameters: []parameterDefinition{
 			{
@@ -753,7 +753,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["deleteFiles"] = actionDefinition{
+	actions["deleteFiles"] = &actionDefinition{
 		identifier: "file.delete",
 		parameters: []parameterDefinition{
 			{
@@ -773,7 +773,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["getTextFromImage"] = actionDefinition{
+	actions["getTextFromImage"] = &actionDefinition{
 		identifier: "extracttextfromimage",
 		parameters: []parameterDefinition{
 			{
@@ -783,7 +783,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["connectToServer"] = actionDefinition{
+	actions["connectToServer"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -792,7 +792,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["appendNote"] = actionDefinition{
+	actions["appendNote"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "note",
@@ -806,7 +806,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["addToBooks"] = actionDefinition{
+	actions["addToBooks"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -815,7 +815,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["saveFile"] = actionDefinition{
+	actions["saveFile"] = &actionDefinition{
 		identifier: "documentpicker.save",
 		parameters: []parameterDefinition{
 			{
@@ -849,7 +849,7 @@ func documentActions() {
 			}
 		},
 	}
-	actions["saveFilePrompt"] = actionDefinition{
+	actions["saveFilePrompt"] = &actionDefinition{
 		identifier: "documentpicker.save",
 		parameters: []parameterDefinition{
 			{
@@ -869,8 +869,8 @@ func documentActions() {
 			},
 		},
 	}
-	actions["getSelectedFiles"] = actionDefinition{identifier: "finder.getselectedfiles"}
-	actions["extractArchive"] = actionDefinition{
+	actions["getSelectedFiles"] = &actionDefinition{identifier: "finder.getselectedfiles"}
+	actions["extractArchive"] = &actionDefinition{
 		identifier: "unzip",
 		parameters: []parameterDefinition{
 			{
@@ -880,7 +880,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["makeArchive"] = actionDefinition{
+	actions["makeArchive"] = &actionDefinition{
 		identifier: "makezip",
 		parameters: []parameterDefinition{
 			{
@@ -900,7 +900,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["quicklook"] = actionDefinition{
+	actions["quicklook"] = &actionDefinition{
 		identifier: "previewdocument",
 		parameters: []parameterDefinition{
 			{
@@ -910,7 +910,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["translateFrom"] = actionDefinition{
+	actions["translateFrom"] = &actionDefinition{
 		identifier: "text.translate",
 		parameters: []parameterDefinition{
 			{
@@ -934,7 +934,7 @@ func documentActions() {
 			args[2].value = languageCode(args[2].value.(string))
 		},
 	}
-	actions["translate"] = actionDefinition{
+	actions["translate"] = &actionDefinition{
 		identifier: "text.translate",
 		parameters: []parameterDefinition{
 			{
@@ -963,7 +963,7 @@ func documentActions() {
 			}
 		},
 	}
-	actions["detectLanguage"] = actionDefinition{
+	actions["detectLanguage"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -972,7 +972,7 @@ func documentActions() {
 			},
 		},
 	}
-	actions["replaceText"] = actionDefinition{
+	actions["replaceText"] = &actionDefinition{
 		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
@@ -992,7 +992,7 @@ func documentActions() {
 			return replaceText(true, false, args)
 		},
 	}
-	actions["iReplaceText"] = actionDefinition{
+	actions["iReplaceText"] = &actionDefinition{
 		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
@@ -1012,7 +1012,7 @@ func documentActions() {
 			return replaceText(false, false, args)
 		},
 	}
-	actions["regReplaceText"] = actionDefinition{
+	actions["regReplaceText"] = &actionDefinition{
 		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
@@ -1032,7 +1032,7 @@ func documentActions() {
 			return replaceText(true, true, args)
 		},
 	}
-	actions["iRegReplaceText"] = actionDefinition{
+	actions["iRegReplaceText"] = &actionDefinition{
 		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
@@ -1052,7 +1052,7 @@ func documentActions() {
 			return replaceText(false, true, args)
 		},
 	}
-	actions["uppercase"] = actionDefinition{
+	actions["uppercase"] = &actionDefinition{
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
@@ -1064,7 +1064,7 @@ func documentActions() {
 			return changeCase("UPPERCASE", args)
 		},
 	}
-	actions["lowercase"] = actionDefinition{
+	actions["lowercase"] = &actionDefinition{
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
@@ -1076,7 +1076,7 @@ func documentActions() {
 			return changeCase("lowercase", args)
 		},
 	}
-	actions["titleCase"] = actionDefinition{
+	actions["titleCase"] = &actionDefinition{
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
@@ -1088,7 +1088,7 @@ func documentActions() {
 			return changeCase("Capitalize with Title Case", args)
 		},
 	}
-	actions["capitalize"] = actionDefinition{
+	actions["capitalize"] = &actionDefinition{
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
@@ -1100,7 +1100,7 @@ func documentActions() {
 			return changeCase("Capitalize with sentence case", args)
 		},
 	}
-	actions["capitalizeAll"] = actionDefinition{
+	actions["capitalizeAll"] = &actionDefinition{
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
@@ -1112,7 +1112,7 @@ func documentActions() {
 			return changeCase("Capitalize Every Word", args)
 		},
 	}
-	actions["alternateCase"] = actionDefinition{
+	actions["alternateCase"] = &actionDefinition{
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
@@ -1124,7 +1124,7 @@ func documentActions() {
 			return changeCase("cApItAlIzE wItH aLtErNaTiNg cAsE", args)
 		},
 	}
-	actions["correctSpelling"] = actionDefinition{
+	actions["correctSpelling"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -1142,7 +1142,7 @@ func documentActions() {
 			}
 		},
 	}
-	actions["splitText"] = actionDefinition{
+	actions["splitText"] = &actionDefinition{
 		identifier: "text.split",
 		parameters: []parameterDefinition{
 			{
@@ -1156,7 +1156,7 @@ func documentActions() {
 		},
 		make: textParts,
 	}
-	actions["combineText"] = actionDefinition{
+	actions["combineText"] = &actionDefinition{
 		identifier: "text.combine",
 		parameters: []parameterDefinition{
 			{
@@ -1170,7 +1170,7 @@ func documentActions() {
 		},
 		make: textParts,
 	}
-	actions["makeDiskImage"] = actionDefinition{
+	actions["makeDiskImage"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "name",
@@ -1206,7 +1206,7 @@ func documentActions() {
 		minVersion: 15,
 	}
 	var storageUnits = []string{"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"}
-	actions["makeSizedDiskImage"] = actionDefinition{
+	actions["makeSizedDiskImage"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "name",
@@ -1284,7 +1284,7 @@ func documentActions() {
 		mac:        true,
 		minVersion: 15,
 	}
-	actions["openFile"] = actionDefinition{
+	actions["openFile"] = &actionDefinition{
 		identifier: "openin",
 		parameters: []parameterDefinition{
 			{
@@ -1307,7 +1307,7 @@ func documentActions() {
 }
 
 func locationActions() {
-	actions["getCurrentLocation"] = actionDefinition{
+	actions["getCurrentLocation"] = &actionDefinition{
 		identifier: "location",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -1325,7 +1325,7 @@ func locationActions() {
 			}
 		},
 	}
-	actions["getAddresses"] = actionDefinition{
+	actions["getAddresses"] = &actionDefinition{
 		identifier: "detect.address",
 		parameters: []parameterDefinition{
 			{
@@ -1335,10 +1335,10 @@ func locationActions() {
 			},
 		},
 	}
-	actions["getCurrentWeather"] = actionDefinition{
+	actions["getCurrentWeather"] = &actionDefinition{
 		identifier: "currentconditions",
 	}
-	actions["getCurrentWeatherAt"] = actionDefinition{
+	actions["getCurrentWeatherAt"] = &actionDefinition{
 		identifier: "currentconditions",
 		parameters: []parameterDefinition{
 			{
@@ -1348,7 +1348,7 @@ func locationActions() {
 			},
 		},
 	}
-	actions["openInMaps"] = actionDefinition{
+	actions["openInMaps"] = &actionDefinition{
 		identifier: "searchmaps",
 		parameters: []parameterDefinition{
 			{
@@ -1358,7 +1358,7 @@ func locationActions() {
 			},
 		},
 	}
-	actions["streetAddress"] = actionDefinition{
+	actions["streetAddress"] = &actionDefinition{
 		identifier: "address",
 		parameters: []parameterDefinition{
 			{
@@ -1394,7 +1394,7 @@ func locationActions() {
 		},
 	}
 	var weatherDetails = []string{"Name", "Air Pollutants", "Air Quality Category", "Air Quality Index", "Sunset Time", "Sunrise Time", "UV Index", "Wind Direction", "Wind Speed", "Precipitation Chance", "Precipitation Amount", "Pressure", "Humidity", "Dewpoint", "Visibility", "Condition", "Feels Like", "Low", "High", "Temperature", "Location", "Date"}
-	actions["getWeatherDetail"] = actionDefinition{
+	actions["getWeatherDetail"] = &actionDefinition{
 		identifier: "properties.weather.conditions",
 		parameters: []parameterDefinition{
 			{
@@ -1416,7 +1416,7 @@ func locationActions() {
 		"Daily",
 		"Hourly",
 	}
-	actions["getWeatherForecast"] = actionDefinition{
+	actions["getWeatherForecast"] = &actionDefinition{
 		identifier: "weather.forecast",
 		parameters: []parameterDefinition{
 			{
@@ -1429,7 +1429,7 @@ func locationActions() {
 			checkEnum("weather forecast type", weatherForecastTypes, args, 0)
 		},
 	}
-	actions["getWeatherForecastAt"] = actionDefinition{
+	actions["getWeatherForecastAt"] = &actionDefinition{
 		identifier: "weather.forecast",
 		parameters: []parameterDefinition{
 			{
@@ -1448,7 +1448,7 @@ func locationActions() {
 		},
 	}
 	var locationDetails = []string{"Name", "URL", "Label", "Phone Number", "Region", "ZIP Code", "State", "City", "Street", "Altitude", "Longitude", "Latitude"}
-	actions["getLocationDetail"] = actionDefinition{
+	actions["getLocationDetail"] = &actionDefinition{
 		identifier: "properties.locations",
 		parameters: []parameterDefinition{
 			{
@@ -1466,7 +1466,7 @@ func locationActions() {
 			checkEnum("location detail", locationDetails, args, 1)
 		},
 	}
-	actions["getMapsLink"] = actionDefinition{
+	actions["getMapsLink"] = &actionDefinition{
 		identifier: "",
 		parameters: []parameterDefinition{
 			{
@@ -1476,7 +1476,7 @@ func locationActions() {
 			},
 		},
 	}
-	actions["getHalfwayPoint"] = actionDefinition{
+	actions["getHalfwayPoint"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "firstLocation",
@@ -1493,10 +1493,10 @@ func locationActions() {
 }
 
 func mediaActions() {
-	actions["clearUpNext"] = actionDefinition{}
-	actions["getCurrentSong"] = actionDefinition{}
-	actions["getLastImport"] = actionDefinition{identifier: "getlatestphotoimport"}
-	actions["getLatestBursts"] = actionDefinition{
+	actions["clearUpNext"] = &actionDefinition{}
+	actions["getCurrentSong"] = &actionDefinition{}
+	actions["getLastImport"] = &actionDefinition{identifier: "getlatestphotoimport"}
+	actions["getLatestBursts"] = &actionDefinition{
 		identifier: "getlatestbursts",
 		parameters: []parameterDefinition{
 			{
@@ -1506,7 +1506,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["getLatestLivePhotos"] = actionDefinition{
+	actions["getLatestLivePhotos"] = &actionDefinition{
 		identifier: "getlatestlivephotos",
 		parameters: []parameterDefinition{
 			{
@@ -1516,7 +1516,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["getLatestScreenshots"] = actionDefinition{
+	actions["getLatestScreenshots"] = &actionDefinition{
 		identifier: "getlastscreenshot",
 		parameters: []parameterDefinition{
 			{
@@ -1526,7 +1526,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["getLatestVideos"] = actionDefinition{
+	actions["getLatestVideos"] = &actionDefinition{
 		identifier: "getlastvideo",
 		parameters: []parameterDefinition{
 			{
@@ -1536,7 +1536,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["getLatestPhotos"] = actionDefinition{
+	actions["getLatestPhotos"] = &actionDefinition{
 		identifier: "getlastphoto",
 		parameters: []parameterDefinition{
 			{
@@ -1556,7 +1556,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["getImages"] = actionDefinition{
+	actions["getImages"] = &actionDefinition{
 		identifier: "detect.images",
 		parameters: []parameterDefinition{
 			{
@@ -1566,7 +1566,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["takePhoto"] = actionDefinition{
+	actions["takePhoto"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "showPreview",
@@ -1579,7 +1579,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["takePhotos"] = actionDefinition{
+	actions["takePhotos"] = &actionDefinition{
 		identifier: "takephoto",
 		parameters: []parameterDefinition{
 			{
@@ -1607,7 +1607,7 @@ func mediaActions() {
 			}
 		},
 	}
-	actions["trimVideo"] = actionDefinition{
+	actions["trimVideo"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "video",
@@ -1616,7 +1616,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["takeVideo"] = actionDefinition{
+	actions["takeVideo"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "camera",
@@ -1647,7 +1647,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["setVolume"] = actionDefinition{
+	actions["setVolume"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "volume",
@@ -1661,7 +1661,7 @@ func mediaActions() {
 			}
 		},
 	}
-	actions["addToMusic"] = actionDefinition{
+	actions["addToMusic"] = &actionDefinition{
 		identifier: "addtoplaylist",
 		parameters: []parameterDefinition{
 			{
@@ -1671,7 +1671,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["addToPlaylist"] = actionDefinition{
+	actions["addToPlaylist"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "playlistName",
@@ -1685,7 +1685,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["playNext"] = actionDefinition{
+	actions["playNext"] = &actionDefinition{
 		identifier: "addmusictoupnext",
 		parameters: []parameterDefinition{
 			{
@@ -1704,7 +1704,7 @@ func mediaActions() {
 			}
 		},
 	}
-	actions["playLater"] = actionDefinition{
+	actions["playLater"] = &actionDefinition{
 		identifier: "addmusictoupnext",
 		parameters: []parameterDefinition{
 			{
@@ -1723,7 +1723,7 @@ func mediaActions() {
 			}
 		},
 	}
-	actions["createPlaylist"] = actionDefinition{
+	actions["createPlaylist"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "title",
@@ -1750,7 +1750,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["addToGIF"] = actionDefinition{
+	actions["addToGIF"] = &actionDefinition{
 		identifier: "addframetogif",
 		parameters: []parameterDefinition{
 			{
@@ -1803,7 +1803,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["convertToJPEG"] = actionDefinition{
+	actions["convertToJPEG"] = &actionDefinition{
 		identifier: "image.convert",
 		parameters: []parameterDefinition{
 			{
@@ -1838,7 +1838,7 @@ func mediaActions() {
 			}
 		},
 	}
-	actions["rotateImage"] = actionDefinition{
+	actions["rotateImage"] = &actionDefinition{
 		identifier: "image.rotate",
 		parameters: []parameterDefinition{
 			{
@@ -1853,7 +1853,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["selectPhotos"] = actionDefinition{
+	actions["selectPhotos"] = &actionDefinition{
 		identifier: "selectphoto",
 		parameters: []parameterDefinition{
 			{
@@ -1868,7 +1868,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["createAlbum"] = actionDefinition{
+	actions["createAlbum"] = &actionDefinition{
 		identifier: "photos.createalbum",
 		parameters: []parameterDefinition{
 			{
@@ -1885,7 +1885,7 @@ func mediaActions() {
 		},
 	}
 	var cropPositions = []string{"Center", "Top Left", "Top Right", "Bottom Left", "Bottom Right", "Custom"}
-	actions["cropImage"] = actionDefinition{
+	actions["cropImage"] = &actionDefinition{
 		identifier: "image.crop",
 		parameters: []parameterDefinition{
 			{
@@ -1913,7 +1913,7 @@ func mediaActions() {
 			checkEnum("crop position", cropPositions, args, 1)
 		},
 	}
-	actions["deletePhotos"] = actionDefinition{
+	actions["deletePhotos"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "photos",
@@ -1922,7 +1922,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["removeFromAlbum"] = actionDefinition{
+	actions["removeFromAlbum"] = &actionDefinition{
 		identifier: "removefromalbum",
 		parameters: []parameterDefinition{
 			{
@@ -1937,7 +1937,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["selectMusic"] = actionDefinition{
+	actions["selectMusic"] = &actionDefinition{
 		identifier: "exportsong",
 		parameters: []parameterDefinition{
 			{
@@ -1952,7 +1952,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["skipBack"] = actionDefinition{
+	actions["skipBack"] = &actionDefinition{
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -1963,8 +1963,8 @@ func mediaActions() {
 			}
 		},
 	}
-	actions["skipFwd"] = actionDefinition{}
-	actions["searchAppStore"] = actionDefinition{
+	actions["skipFwd"] = &actionDefinition{}
+	actions["searchAppStore"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "query",
@@ -1973,7 +1973,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["searchPodcasts"] = actionDefinition{
+	actions["searchPodcasts"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "query",
@@ -1982,7 +1982,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["makeVideoFromGIF"] = actionDefinition{
+	actions["makeVideoFromGIF"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "gif",
@@ -2002,7 +2002,7 @@ func mediaActions() {
 		},
 	}
 	var flipDirections = []string{"Horizontal", "Vertical"}
-	actions["flipImage"] = actionDefinition{
+	actions["flipImage"] = &actionDefinition{
 		identifier: "image.flip",
 		parameters: []parameterDefinition{
 			{
@@ -2022,7 +2022,7 @@ func mediaActions() {
 	}
 	var recordingQualities = []string{"Normal", "Very High"}
 	var recordingStarts = []string{"On Tap", "Immediately"}
-	actions["record"] = actionDefinition{
+	actions["record"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "quality",
@@ -2051,7 +2051,7 @@ func mediaActions() {
 		},
 	}
 	var imageFormats = []string{"TIFF", "GIF", "PNG", "BMP", "PDF", "HEIF"}
-	actions["convertImage"] = actionDefinition{
+	actions["convertImage"] = &actionDefinition{
 		identifier: "image.convert",
 		parameters: []parameterDefinition{
 			{
@@ -2079,7 +2079,7 @@ func mediaActions() {
 			checkEnum("image format", imageFormats, args, 1)
 		},
 	}
-	actions["stripMetadata"] = actionDefinition{
+	actions["stripMetadata"] = &actionDefinition{
 		identifier: "image.convert",
 		parameters: []parameterDefinition{
 			{
@@ -2103,7 +2103,7 @@ func mediaActions() {
 			}
 		},
 	}
-	actions["savePhoto"] = actionDefinition{
+	actions["savePhoto"] = &actionDefinition{
 		identifier: "savetocameraroll",
 		parameters: []parameterDefinition{
 			{
@@ -2122,7 +2122,7 @@ func mediaActions() {
 			}
 		},
 	}
-	actions["play"] = actionDefinition{
+	actions["play"] = &actionDefinition{
 		identifier: "pausemusic",
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -2134,7 +2134,7 @@ func mediaActions() {
 			}
 		},
 	}
-	actions["pause"] = actionDefinition{
+	actions["pause"] = &actionDefinition{
 		identifier: "pausemusic",
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -2146,7 +2146,7 @@ func mediaActions() {
 			}
 		},
 	}
-	actions["togglePlayPause"] = actionDefinition{
+	actions["togglePlayPause"] = &actionDefinition{
 		identifier: "pausemusic",
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -2158,7 +2158,7 @@ func mediaActions() {
 			}
 		},
 	}
-	actions["startShazam"] = actionDefinition{
+	actions["startShazam"] = &actionDefinition{
 		identifier: "shazamMedia",
 		parameters: []parameterDefinition{
 			{
@@ -2183,7 +2183,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["showIniTunes"] = actionDefinition{
+	actions["showIniTunes"] = &actionDefinition{
 		identifier: "showinstore",
 		parameters: []parameterDefinition{
 			{
@@ -2193,7 +2193,7 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["takeScreenshot"] = actionDefinition{
+	actions["takeScreenshot"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "mainMonitorOnly",
@@ -2218,7 +2218,7 @@ func mediaActions() {
 		mac: true,
 	}
 	var selectionTypes = []string{"Window", "Custom"}
-	actions["takeInteractiveScreenshot"] = actionDefinition{
+	actions["takeInteractiveScreenshot"] = &actionDefinition{
 		identifier: "takescreenshot",
 		parameters: []parameterDefinition{
 			{
@@ -2249,7 +2249,7 @@ func mediaActions() {
 }
 
 func scriptingActions() {
-	actions["getObjectOfClass"] = actionDefinition{
+	actions["getObjectOfClass"] = &actionDefinition{
 		identifier: "getclassaction",
 		parameters: []parameterDefinition{
 			{
@@ -2264,9 +2264,9 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["getOnScreenContent"] = actionDefinition{}
+	actions["getOnScreenContent"] = &actionDefinition{}
 	var fileSizeUnits = []string{"Closest Unit", "Bytes", "Kilobytes", "Megabytes", "Gigabytes", "Terabytes", "Petabytes", "Exabytes", "Zettabytes", "Yottabytes"}
-	actions["fileSize"] = actionDefinition{
+	actions["fileSize"] = &actionDefinition{
 		identifier: "format.filesize",
 		parameters: []parameterDefinition{
 			{
@@ -2294,7 +2294,7 @@ func scriptingActions() {
 		},
 	}
 	var deviceDetails = []string{"Device Name", "Device Hostname", "Device Model", "Device Is Watch", "System Version", "Screen Width", "Screen Height", "Current Volume", "Current Brightness", "Current Appearance"}
-	actions["getDeviceDetail"] = actionDefinition{
+	actions["getDeviceDetail"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "detail",
@@ -2306,7 +2306,7 @@ func scriptingActions() {
 			checkEnum("device detail", deviceDetails, args, 0)
 		},
 	}
-	actions["setBrightness"] = actionDefinition{
+	actions["setBrightness"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "brightness",
@@ -2320,7 +2320,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["getName"] = actionDefinition{
+	actions["getName"] = &actionDefinition{
 		identifier: "getitemname",
 		parameters: []parameterDefinition{
 			{
@@ -2330,7 +2330,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["setName"] = actionDefinition{
+	actions["setName"] = &actionDefinition{
 		identifier: "setitemname",
 		parameters: []parameterDefinition{
 			{
@@ -2355,7 +2355,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["countItems"] = actionDefinition{
+	actions["countItems"] = &actionDefinition{
 		identifier: "count",
 		parameters: []parameterDefinition{
 			{
@@ -2367,7 +2367,7 @@ func scriptingActions() {
 			return count("Items", args)
 		},
 	}
-	actions["countChars"] = actionDefinition{
+	actions["countChars"] = &actionDefinition{
 		identifier: "count",
 		parameters: []parameterDefinition{
 			{
@@ -2379,7 +2379,7 @@ func scriptingActions() {
 			return count("Characters", args)
 		},
 	}
-	actions["countWords"] = actionDefinition{
+	actions["countWords"] = &actionDefinition{
 		identifier: "count",
 		parameters: []parameterDefinition{
 			{
@@ -2391,7 +2391,7 @@ func scriptingActions() {
 			return count("Words", args)
 		},
 	}
-	actions["countSentences"] = actionDefinition{
+	actions["countSentences"] = &actionDefinition{
 		identifier: "count",
 		parameters: []parameterDefinition{
 			{
@@ -2403,7 +2403,7 @@ func scriptingActions() {
 			return count("Sentences", args)
 		},
 	}
-	actions["countLines"] = actionDefinition{
+	actions["countLines"] = &actionDefinition{
 		identifier: "count",
 		parameters: []parameterDefinition{
 			{
@@ -2415,7 +2415,7 @@ func scriptingActions() {
 			return count("Lines", args)
 		},
 	}
-	actions["toggleAppearance"] = actionDefinition{
+	actions["toggleAppearance"] = &actionDefinition{
 		identifier: "appearance",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -2427,7 +2427,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["lightMode"] = actionDefinition{
+	actions["lightMode"] = &actionDefinition{
 		identifier: "appearance",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -2444,7 +2444,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["darkMode"] = actionDefinition{
+	actions["darkMode"] = &actionDefinition{
 		identifier: "appearance",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -2461,8 +2461,8 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["getBatteryLevel"] = actionDefinition{}
-	actions["isCharging"] = actionDefinition{
+	actions["getBatteryLevel"] = &actionDefinition{}
+	actions["isCharging"] = &actionDefinition{
 		identifier: "getbatterylevel",
 		minVersion: 16.2,
 		make: func(args []actionArgument) []plistData {
@@ -2475,7 +2475,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["connectedToCharger"] = actionDefinition{
+	actions["connectedToCharger"] = &actionDefinition{
 		identifier: "getbatterylevel",
 		minVersion: 16.2,
 		make: func(args []actionArgument) []plistData {
@@ -2488,10 +2488,10 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["getShortcuts"] = actionDefinition{
+	actions["getShortcuts"] = &actionDefinition{
 		identifier: "getmyworkflows",
 	}
-	actions["url"] = actionDefinition{
+	actions["url"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -2517,7 +2517,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["addToReadingList"] = actionDefinition{
+	actions["addToReadingList"] = &actionDefinition{
 		identifier: "readinglist",
 		parameters: []parameterDefinition{
 			{
@@ -2537,7 +2537,7 @@ func scriptingActions() {
 		},
 	}
 	var hashTypes = []string{"MD5", "SHA1", "SHA256", "SHA512"}
-	actions["hash"] = actionDefinition{
+	actions["hash"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2559,7 +2559,7 @@ func scriptingActions() {
 			checkEnum("hash type", hashTypes, args, 1)
 		},
 	}
-	actions["formatNumber"] = actionDefinition{
+	actions["formatNumber"] = &actionDefinition{
 		identifier: "format.number",
 		parameters: []parameterDefinition{
 			{
@@ -2574,7 +2574,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["randomNumber"] = actionDefinition{
+	actions["randomNumber"] = &actionDefinition{
 		identifier: "number.random",
 		parameters: []parameterDefinition{
 			{
@@ -2589,7 +2589,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["base64Encode"] = actionDefinition{
+	actions["base64Encode"] = &actionDefinition{
 		identifier: "base64encode",
 		parameters: []parameterDefinition{
 			{
@@ -2608,7 +2608,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["base64Decode"] = actionDefinition{
+	actions["base64Decode"] = &actionDefinition{
 		identifier: "base64encode",
 		parameters: []parameterDefinition{
 			{
@@ -2627,7 +2627,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["urlEncode"] = actionDefinition{
+	actions["urlEncode"] = &actionDefinition{
 		identifier: "urlencode",
 		parameters: []parameterDefinition{
 			{
@@ -2646,7 +2646,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["urlDecode"] = actionDefinition{
+	actions["urlDecode"] = &actionDefinition{
 		identifier: "urlencode",
 		parameters: []parameterDefinition{
 			{
@@ -2665,7 +2665,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["show"] = actionDefinition{
+	actions["show"] = &actionDefinition{
 		identifier: "showresult",
 		parameters: []parameterDefinition{
 			{
@@ -2675,8 +2675,8 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["waitToReturn"] = actionDefinition{}
-	actions["notification"] = actionDefinition{
+	actions["waitToReturn"] = &actionDefinition{}
+	actions["notification"] = &actionDefinition{
 		identifier: "notification",
 		parameters: []parameterDefinition{
 			{
@@ -2701,11 +2701,11 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["stop"] = actionDefinition{
+	actions["stop"] = &actionDefinition{
 		identifier: "exit",
 	}
-	actions["nothing"] = actionDefinition{}
-	actions["wait"] = actionDefinition{
+	actions["nothing"] = &actionDefinition{}
+	actions["wait"] = &actionDefinition{
 		identifier: "delay",
 		parameters: []parameterDefinition{
 			{
@@ -2715,7 +2715,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["alert"] = actionDefinition{
+	actions["alert"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "alert",
@@ -2741,7 +2741,7 @@ func scriptingActions() {
 		},
 	}
 	var inputTypes = []string{"Text", "Number", "URL", "Date", "Time", "Date and Time"}
-	actions["askForInput"] = actionDefinition{
+	actions["askForInput"] = &actionDefinition{
 		identifier: "ask",
 		parameters: []parameterDefinition{
 			{
@@ -2765,7 +2765,7 @@ func scriptingActions() {
 			checkEnum("input type", inputTypes, args, 0)
 		},
 	}
-	actions["chooseFromList"] = actionDefinition{
+	actions["chooseFromList"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "dictionary",
@@ -2788,7 +2788,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["typeOf"] = actionDefinition{
+	actions["typeOf"] = &actionDefinition{
 		identifier: "getitemtype",
 		parameters: []parameterDefinition{
 			{
@@ -2798,7 +2798,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["getKeys"] = actionDefinition{
+	actions["getKeys"] = &actionDefinition{
 		identifier: "getvalueforkey",
 		parameters: []parameterDefinition{
 			{
@@ -2817,7 +2817,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["getValues"] = actionDefinition{
+	actions["getValues"] = &actionDefinition{
 		identifier: "getvalueforkey",
 		parameters: []parameterDefinition{
 			{
@@ -2836,7 +2836,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["getValue"] = actionDefinition{
+	actions["getValue"] = &actionDefinition{
 		identifier: "getvalueforkey",
 		parameters: []parameterDefinition{
 			{
@@ -2860,7 +2860,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["setValue"] = actionDefinition{
+	actions["setValue"] = &actionDefinition{
 		identifier: "setvalueforkey",
 		parameters: []parameterDefinition{
 			{
@@ -2880,7 +2880,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["openApp"] = actionDefinition{
+	actions["openApp"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "appID",
@@ -2903,7 +2903,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["hideApp"] = actionDefinition{
+	actions["hideApp"] = &actionDefinition{
 		identifier: "hide.app",
 		parameters: []parameterDefinition{
 			{
@@ -2926,7 +2926,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["hideAllApps"] = actionDefinition{
+	actions["hideAllApps"] = &actionDefinition{
 		identifier: "hide.app",
 		parameters: []parameterDefinition{
 			{
@@ -2952,7 +2952,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["quitApp"] = actionDefinition{
+	actions["quitApp"] = &actionDefinition{
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
 			{
@@ -2975,7 +2975,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["quitAllApps"] = actionDefinition{
+	actions["quitAllApps"] = &actionDefinition{
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
 			{
@@ -3001,7 +3001,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["killApp"] = actionDefinition{
+	actions["killApp"] = &actionDefinition{
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
 			{
@@ -3029,7 +3029,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["killAllApps"] = actionDefinition{
+	actions["killAllApps"] = &actionDefinition{
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
 			{
@@ -3060,7 +3060,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["splitApps"] = actionDefinition{
+	actions["splitApps"] = &actionDefinition{
 		identifier: "splitscreen",
 		parameters: []parameterDefinition{
 			{
@@ -3113,7 +3113,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["open"] = actionDefinition{
+	actions["open"] = &actionDefinition{
 		identifier: "openworkflow",
 		parameters: []parameterDefinition{
 			{
@@ -3143,7 +3143,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["run"] = actionDefinition{
+	actions["run"] = &actionDefinition{
 		identifier: "runworkflow",
 		parameters: []parameterDefinition{
 			{
@@ -3187,7 +3187,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["list"] = actionDefinition{
+	actions["list"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "listItem",
@@ -3210,7 +3210,7 @@ func scriptingActions() {
 		},
 	}
 	var calculationOpersations = []string{"x^2", "х^3", "x^у", "e^x", "10^x", "In(x)", "log(x)", "√x", "∛x", "x!", "sin(x)", "cos(X)", "tan(x)", "abs(x)"}
-	actions["calculate"] = actionDefinition{
+	actions["calculate"] = &actionDefinition{
 		identifier: "math",
 		parameters: []parameterDefinition{
 			{
@@ -3248,7 +3248,7 @@ func scriptingActions() {
 		},
 	}
 	var statisticsOperations = []string{"Average", "Minimum", "Maximum", "Sum", "Median", "Mode", "Range", "Standard Deviation"}
-	actions["statistic"] = actionDefinition{
+	actions["statistic"] = &actionDefinition{
 		identifier: "statistics",
 		parameters: []parameterDefinition{
 			{
@@ -3266,8 +3266,8 @@ func scriptingActions() {
 			checkEnum("statistics operation", statisticsOperations, args, 0)
 		},
 	}
-	actions["dismissSiri"] = actionDefinition{}
-	actions["isOnline"] = actionDefinition{
+	actions["dismissSiri"] = &actionDefinition{}
+	actions["isOnline"] = &actionDefinition{
 		identifier: "getipaddress",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -3285,7 +3285,7 @@ func scriptingActions() {
 		},
 	}
 	var ipTypes = []string{"IPv4", "IPv6"}
-	actions["getLocalIP"] = actionDefinition{
+	actions["getLocalIP"] = &actionDefinition{
 		identifier: "getipaddress",
 		parameters: []parameterDefinition{
 			{
@@ -3312,7 +3312,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["getExternalIP"] = actionDefinition{
+	actions["getExternalIP"] = &actionDefinition{
 		identifier: "getipaddress",
 		parameters: []parameterDefinition{
 			{
@@ -3339,7 +3339,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["firstListItem"] = actionDefinition{
+	actions["firstListItem"] = &actionDefinition{
 		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
@@ -3358,7 +3358,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["lastListItem"] = actionDefinition{
+	actions["lastListItem"] = &actionDefinition{
 		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
@@ -3377,7 +3377,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["randomListItem"] = actionDefinition{
+	actions["randomListItem"] = &actionDefinition{
 		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
@@ -3396,7 +3396,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["getListItem"] = actionDefinition{
+	actions["getListItem"] = &actionDefinition{
 		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
@@ -3420,7 +3420,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["getListItems"] = actionDefinition{
+	actions["getListItems"] = &actionDefinition{
 		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
@@ -3449,7 +3449,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["getNumbers"] = actionDefinition{
+	actions["getNumbers"] = &actionDefinition{
 		identifier: "detect.number",
 		parameters: []parameterDefinition{
 			{
@@ -3459,7 +3459,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["getDictionary"] = actionDefinition{
+	actions["getDictionary"] = &actionDefinition{
 		identifier: "detect.dictionary",
 		parameters: []parameterDefinition{
 			{
@@ -3469,7 +3469,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["getText"] = actionDefinition{
+	actions["getText"] = &actionDefinition{
 		identifier: "detect.text",
 		parameters: []parameterDefinition{
 			{
@@ -3479,7 +3479,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["getContacts"] = actionDefinition{
+	actions["getContacts"] = &actionDefinition{
 		identifier: "detect.contacts",
 		parameters: []parameterDefinition{
 			{
@@ -3489,7 +3489,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["getDates"] = actionDefinition{
+	actions["getDates"] = &actionDefinition{
 		identifier: "detect.date",
 		parameters: []parameterDefinition{
 			{
@@ -3499,7 +3499,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["getEmails"] = actionDefinition{
+	actions["getEmails"] = &actionDefinition{
 		identifier: "detect.emailaddress",
 		parameters: []parameterDefinition{
 			{
@@ -3509,7 +3509,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["getPhoneNumbers"] = actionDefinition{
+	actions["getPhoneNumbers"] = &actionDefinition{
 		identifier: "detect.phonenumber",
 		parameters: []parameterDefinition{
 			{
@@ -3519,7 +3519,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["getURLs"] = actionDefinition{
+	actions["getURLs"] = &actionDefinition{
 		identifier: "detect.link",
 		parameters: []parameterDefinition{
 			{
@@ -3529,11 +3529,11 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["getAllWallpapers"] = actionDefinition{
+	actions["getAllWallpapers"] = &actionDefinition{
 		identifier: "posters.get",
 		minVersion: 16.2,
 	}
-	actions["getWallpaper"] = actionDefinition{
+	actions["getWallpaper"] = &actionDefinition{
 		identifier: "posters.get",
 		minVersion: 16.2,
 		make: func(args []actionArgument) []plistData {
@@ -3546,7 +3546,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["setWallpaper"] = actionDefinition{
+	actions["setWallpaper"] = &actionDefinition{
 		identifier: "wallpaper.set",
 		parameters: []parameterDefinition{
 			{
@@ -3556,8 +3556,8 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["startScreensaver"] = actionDefinition{mac: true}
-	actions["contentGraph"] = actionDefinition{
+	actions["startScreensaver"] = &actionDefinition{mac: true}
+	actions["contentGraph"] = &actionDefinition{
 		identifier: "viewresult",
 		parameters: []parameterDefinition{
 			{
@@ -3567,7 +3567,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["openXCallbackURL"] = actionDefinition{
+	actions["openXCallbackURL"] = &actionDefinition{
 		identifier: "openxcallbackurl",
 		parameters: []parameterDefinition{
 			{
@@ -3578,7 +3578,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["openCustomXCallbackURL"] = actionDefinition{
+	actions["openCustomXCallbackURL"] = &actionDefinition{
 		identifier: "openxcallbackurl",
 		parameters: []parameterDefinition{
 			{
@@ -3629,7 +3629,7 @@ func scriptingActions() {
 			return xCallbackParams
 		},
 	}
-	actions["output"] = actionDefinition{
+	actions["output"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "output",
@@ -3647,7 +3647,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["mustOutput"] = actionDefinition{
+	actions["mustOutput"] = &actionDefinition{
 		identifier: "output",
 		parameters: []parameterDefinition{
 			{
@@ -3671,7 +3671,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["outputOrClipboard"] = actionDefinition{
+	actions["outputOrClipboard"] = &actionDefinition{
 		identifier: "output",
 		parameters: []parameterDefinition{
 			{
@@ -3706,7 +3706,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["DNDOn"] = actionDefinition{
+	actions["DNDOn"] = &actionDefinition{
 		identifier: "dnd.set",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -3719,7 +3719,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["DNDOff"] = actionDefinition{
+	actions["DNDOff"] = &actionDefinition{
 		identifier: "dnd.set",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -3732,7 +3732,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["setWifi"] = actionDefinition{
+	actions["setWifi"] = &actionDefinition{
 		identifier: "wifi.set",
 		parameters: []parameterDefinition{
 			{
@@ -3742,7 +3742,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["setCellularData"] = actionDefinition{
+	actions["setCellularData"] = &actionDefinition{
 		identifier: "cellulardata.set",
 		parameters: []parameterDefinition{
 			{
@@ -3752,7 +3752,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["setCellularVoice"] = actionDefinition{
+	actions["setCellularVoice"] = &actionDefinition{
 		identifier: "cellular.rat.set",
 		parameters: []parameterDefinition{
 			{
@@ -3762,7 +3762,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["toggleBluetooth"] = actionDefinition{
+	actions["toggleBluetooth"] = &actionDefinition{
 		identifier: "bluetooth.set",
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -3779,7 +3779,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["setBluetooth"] = actionDefinition{
+	actions["setBluetooth"] = &actionDefinition{
 		identifier: "bluetooth.set",
 		parameters: []parameterDefinition{
 			{
@@ -3798,7 +3798,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["playSound"] = actionDefinition{
+	actions["playSound"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -3807,7 +3807,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["round"] = actionDefinition{
+	actions["round"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
@@ -3822,7 +3822,7 @@ func scriptingActions() {
 			return roundingValue("Normal", args)
 		},
 	}
-	actions["roundUp"] = actionDefinition{
+	actions["roundUp"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
@@ -3837,7 +3837,7 @@ func scriptingActions() {
 			return roundingValue("Always Round Up", args)
 		},
 	}
-	actions["roundDown"] = actionDefinition{
+	actions["roundDown"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
@@ -3852,7 +3852,7 @@ func scriptingActions() {
 			return roundingValue("Always Round Down", args)
 		},
 	}
-	actions["runShellScript"] = actionDefinition{
+	actions["runShellScript"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "script",
@@ -3887,7 +3887,7 @@ func scriptingActions() {
 }
 
 func sharingActions() {
-	actions["airdrop"] = actionDefinition{
+	actions["airdrop"] = &actionDefinition{
 		identifier: "airdropdocument",
 		parameters: []parameterDefinition{
 			{
@@ -3897,7 +3897,7 @@ func sharingActions() {
 			},
 		},
 	}
-	actions["share"] = actionDefinition{
+	actions["share"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -3906,7 +3906,7 @@ func sharingActions() {
 			},
 		},
 	}
-	actions["copyToClipboard"] = actionDefinition{
+	actions["copyToClipboard"] = &actionDefinition{
 		identifier: "setclipboard",
 		parameters: []parameterDefinition{
 			{
@@ -3926,11 +3926,11 @@ func sharingActions() {
 			},
 		},
 	}
-	actions["getClipboard"] = actionDefinition{}
+	actions["getClipboard"] = &actionDefinition{}
 }
 
 func webActions() {
-	actions["getURLHeaders"] = actionDefinition{
+	actions["getURLHeaders"] = &actionDefinition{
 		identifier: "url.getheaders",
 		parameters: []parameterDefinition{
 			{
@@ -3940,7 +3940,7 @@ func webActions() {
 			},
 		},
 	}
-	actions["openURL"] = actionDefinition{
+	actions["openURL"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -3958,7 +3958,7 @@ func webActions() {
 			}
 		},
 	}
-	actions["runJavaScriptOnWebpage"] = actionDefinition{
+	actions["runJavaScriptOnWebpage"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "javascript",
@@ -3968,7 +3968,7 @@ func webActions() {
 		},
 	}
 	var engines = []string{"Amazon", "Bing", "DuckDuckGo", "eBay", "Google", "Reddit", "Twitter", "Yahoo!", "YouTube"}
-	actions["searchWeb"] = actionDefinition{
+	actions["searchWeb"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "engine",
@@ -3985,7 +3985,7 @@ func webActions() {
 			checkEnum("search engine", engines, args, 0)
 		},
 	}
-	actions["showWebpage"] = actionDefinition{
+	actions["showWebpage"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -4000,7 +4000,7 @@ func webActions() {
 			},
 		},
 	}
-	actions["getRSSFeeds"] = actionDefinition{
+	actions["getRSSFeeds"] = &actionDefinition{
 		identifier: "rss.extract",
 		parameters: []parameterDefinition{
 			{
@@ -4010,7 +4010,7 @@ func webActions() {
 			},
 		},
 	}
-	actions["getRSS"] = actionDefinition{
+	actions["getRSS"] = &actionDefinition{
 		identifier: "rss",
 		parameters: []parameterDefinition{
 			{
@@ -4026,7 +4026,7 @@ func webActions() {
 		},
 	}
 	var webpageDetails = []string{"Page Contents", "Page Selection", "Page URL", "Name"}
-	actions["getWebPageDetail"] = actionDefinition{
+	actions["getWebPageDetail"] = &actionDefinition{
 		identifier: "properties.safariwebpage",
 		parameters: []parameterDefinition{
 			{
@@ -4044,7 +4044,7 @@ func webActions() {
 			checkEnum("webpage detail", webpageDetails, args, 1)
 		},
 	}
-	actions["getArticleDetail"] = actionDefinition{
+	actions["getArticleDetail"] = &actionDefinition{
 		identifier: "properties.articles",
 		parameters: []parameterDefinition{
 			{
@@ -4059,10 +4059,10 @@ func webActions() {
 			},
 		},
 	}
-	actions["getCurrentURL"] = actionDefinition{
+	actions["getCurrentURL"] = &actionDefinition{
 		identifier: "safari.geturl",
 	}
-	actions["getWebpageContents"] = actionDefinition{
+	actions["getWebpageContents"] = &actionDefinition{
 		identifier: "getwebpagecontents",
 		parameters: []parameterDefinition{
 			{
@@ -4072,7 +4072,7 @@ func webActions() {
 			},
 		},
 	}
-	actions["searchGiphy"] = actionDefinition{
+	actions["searchGiphy"] = &actionDefinition{
 		identifier: "giphy",
 		parameters: []parameterDefinition{
 			{
@@ -4082,7 +4082,7 @@ func webActions() {
 			},
 		},
 	}
-	actions["getGifs"] = actionDefinition{
+	actions["getGifs"] = &actionDefinition{
 		identifier: "giphy",
 		parameters: []parameterDefinition{
 			{
@@ -4111,7 +4111,7 @@ func webActions() {
 			}
 		},
 	}
-	actions["getArticle"] = actionDefinition{
+	actions["getArticle"] = &actionDefinition{
 		identifier: "getarticle",
 		parameters: []parameterDefinition{
 			{
@@ -4121,7 +4121,7 @@ func webActions() {
 			},
 		},
 	}
-	actions["expandURL"] = actionDefinition{
+	actions["expandURL"] = &actionDefinition{
 		identifier: "url.expand",
 		parameters: []parameterDefinition{
 			{
@@ -4132,7 +4132,7 @@ func webActions() {
 		},
 	}
 	var urlComponents = []string{"Scheme", "User", "Password", "Host", "Port", "Path", "Query", "Fragment"}
-	actions["getURLDetail"] = actionDefinition{
+	actions["getURLDetail"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -4149,7 +4149,7 @@ func webActions() {
 			checkEnum("URL component", urlComponents, args, 0)
 		},
 	}
-	actions["downloadURL"] = actionDefinition{
+	actions["downloadURL"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -4199,7 +4199,7 @@ func webActions() {
 			optional:  true,
 		},
 	}
-	actions["formRequest"] = actionDefinition{
+	actions["formRequest"] = &actionDefinition{
 		identifier: "downloadurl",
 		parameters: httpParams,
 		check: func(args []actionArgument) {
@@ -4209,7 +4209,7 @@ func webActions() {
 			return httpRequest("Form", "WFFormValues", args)
 		},
 	}
-	actions["jsonRequest"] = actionDefinition{
+	actions["jsonRequest"] = &actionDefinition{
 		identifier: "downloadurl",
 		parameters: httpParams,
 		check: func(args []actionArgument) {
@@ -4219,7 +4219,7 @@ func webActions() {
 			return httpRequest("JSON", "WFJSONValues", args)
 		},
 	}
-	actions["fileRequest"] = actionDefinition{
+	actions["fileRequest"] = &actionDefinition{
 		identifier: "downloadurl",
 		parameters: httpParams,
 		check: func(args []actionArgument) {
@@ -4229,7 +4229,7 @@ func webActions() {
 			return httpRequest("File", "WFRequestVariable", args)
 		},
 	}
-	actions["runAppleScript"] = actionDefinition{
+	actions["runAppleScript"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -4244,7 +4244,7 @@ func webActions() {
 		},
 		mac: true,
 	}
-	actions["runJSAutomation"] = actionDefinition{
+	actions["runJSAutomation"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -4261,7 +4261,7 @@ func webActions() {
 	}
 	var sortOrders = []string{"asc", "desc"}
 	var windowSortings = []string{"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"}
-	actions["getWindows"] = actionDefinition{
+	actions["getWindows"] = &actionDefinition{
 		identifier: "filter.windows",
 		parameters: []parameterDefinition{
 			{
@@ -4332,7 +4332,7 @@ func webActions() {
 		mac: true,
 	}
 	var windowPositions = []string{"Top Left", "Top Center", "Top Right", "Middle Left", "Center", "Middle Right", "Bottom Left", "Bottom Center", "Bottom Right", "Coordinates"}
-	actions["moveWindow"] = actionDefinition{
+	actions["moveWindow"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "window",
@@ -4361,7 +4361,7 @@ func webActions() {
 		mac: true,
 	}
 	var windowConfigurations = []string{"Fit Screen", "Top Half", "Bottom Half", "Left Half", "Right Half", "Top Left Quarter", "Top Right Quarter", "Bottom Left Quarter", "Bottom Right Quarter", "Dimensions"}
-	actions["resizeWindow"] = actionDefinition{
+	actions["resizeWindow"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "window",
@@ -4405,7 +4405,7 @@ func webActions() {
 	units["Speed"] = []string{"m/s", "km/hr", "mi/hr", "kn"}
 	units["Temperature"] = []string{"K", "ºC", "ºF"}
 	units["Volume"] = []string{"ML", "kL", "liter", "dL", "cL", "mL", "km³", "m³", "dm³", "cm³", "mm³", "in³", "ft³", "yd³", "mi³", "acre ft", "bushel", "tsp", "tbsp", "fl oz", "pt", "qt", "Imp gal", "mcup"}
-	actions["convertMeasurement"] = actionDefinition{
+	actions["convertMeasurement"] = &actionDefinition{
 		identifier: "measurement.convert",
 		parameters: []parameterDefinition{
 			{
@@ -4441,7 +4441,7 @@ func webActions() {
 			}
 		},
 	}
-	actions["measurement"] = actionDefinition{
+	actions["measurement"] = &actionDefinition{
 		identifier: "measurement.create",
 		parameters: []parameterDefinition{
 			{
@@ -4489,8 +4489,50 @@ func webActions() {
 	}
 }
 
+func setActionIdent(key string, identifier string) {
+
+}
+
 func builtinActions() {
-	actions["makeVCard"] = actionDefinition{
+	actions["rawAction"] = &actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "identifier",
+				validType: String,
+			},
+			{
+				name:      "parameters",
+				validType: Arr,
+			},
+		},
+		check: func(args []actionArgument) {
+			actions["rawAction"].appIdentifier = getArgValue(args[0]).(string)
+		},
+		make: func(args []actionArgument) (params []plistData) {
+			for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
+				var paramKey string
+				var paramType string
+				var paramValue string
+				for key, value := range parameterDefinitions.(map[string]interface{}) {
+					switch key {
+					case "key":
+						paramKey = value.(string)
+					case "type":
+						paramType = value.(string)
+					case "value":
+						paramValue = value.(string)
+					}
+				}
+				params = append(params, plistData{
+					key:      paramKey,
+					dataType: plistDataType(paramType),
+					value:    paramValue,
+				})
+			}
+			return
+		},
+	}
+	actions["makeVCard"] = &actionDefinition{
 		identifier: "gettext",
 		parameters: []parameterDefinition{
 			{
