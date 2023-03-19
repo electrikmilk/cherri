@@ -33,7 +33,7 @@ func parseCustomActions() {
 			} else {
 				identifier = collectUntil('\n')
 			}
-			// pre-define variables so the type checker doesn't freak out
+			// Pre-define variables so the value checker doesn't freak out
 			variables[identifier] = variableValue{}
 		}
 		if lineCharIdx != 1 || !tokenAhead(CustomAction) {

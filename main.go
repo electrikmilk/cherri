@@ -192,6 +192,7 @@ func contains(s []string, e string) bool {
 	return false
 }
 
+// startsWith determines if the beginning characters of `substr` match `s`.
 func startsWith(s string, substr string) bool {
 	var stringChars = strings.Split(s, "")
 	var subStringChars = strings.Split(substr, "")
