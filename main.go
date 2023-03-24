@@ -227,7 +227,10 @@ func printDebug() {
 			printChar(next(1))
 		}
 
-		fmt.Println("\nCurrent Line: \n" + lines[lineIdx])
+		if len(lines) >= lineIdx {
+			fmt.Println("\nCurrent Line: \n" + lines[lineIdx])
+		}
+
 		fmt.Print("\n")
 
 		fmt.Println(ansi("### TOKENS ###", bold))
