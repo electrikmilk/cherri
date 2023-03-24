@@ -703,6 +703,16 @@ func dictionaryValue(key string, value any) string {
 	}
 	switch reflect.TypeOf(value).String() {
 	case stringType:
+		WFValue = paramValue("Value", actionArgument{
+			valueType: String,
+			value:     value,
+		}, String, Text)
+		if reflect.TypeOf(WFValue.value).String() == "[]main.plistData" {
+			for _, val := range WFValue.value.([]plistData) {
+				WFValue = val
+				break
+			}
+		}
 		itemType = itemTypeText
 		serializedType = "WFTextTokenString"
 	case intType:
