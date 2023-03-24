@@ -1,15 +1,15 @@
 // VCard menu
 
+#include "stdlib"
+
 @menuPrefix = "Menu"
 @subtitle = "{menuPrefix} Subtitle"
 @items
 repeat 3 {
     @items += makeVCard("{menuPrefix} Title {RepeatIndex}",subtitle,"assets/cherri_icon.png")
 }
-@menuItems = "{items}"
-@vcf = setName(menuItems,"menu.vcf",false)
-@contact = vcf.contact
-@chosenItem = chooseFromList(contact,"Prompt")
+
+@chosenItem = showVCard(items, "Prompt")
 alert(chosenItem,"You chose:",false)
 
 // Choose from menu

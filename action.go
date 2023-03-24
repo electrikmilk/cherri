@@ -5,10 +5,14 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"math"
 	"strings"
 )
+
+//go:embed stdlib.cherri
+var stdLib embed.FS
 
 // currentAction holds the current action identifier between functions.
 var currentAction string

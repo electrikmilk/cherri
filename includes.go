@@ -44,17 +44,22 @@ func parseIncludes() {
 			parserError("Expected file path")
 		}
 
-		if !strings.Contains(includePath, "..") {
-			includePath = relativePath + includePath
-		}
-
 		if contains(included, includePath) {
 			parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
 		}
 
-		checkFile(includePath)
-		var includeFileBytes, readErr = os.ReadFile(includePath)
-		handle(readErr)
+		var includeFileBytes []byte
+		var includeReadErr error
+		if includePath == "stdlib" {
+			includeFileBytes, includeReadErr = stdLib.ReadFile("stdlib.cherri")
+		} else {
+			if !strings.Contains(includePath, "..") {
+				includePath = relativePath + includePath
+			}
+			checkFile(includePath)
+			includeFileBytes, includeReadErr = os.ReadFile(includePath)
+		}
+		handle(includeReadErr)
 
 		var includeContents = string(includeFileBytes)
 		var includeLines = strings.Split(includeContents, "\n")
