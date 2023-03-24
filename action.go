@@ -356,7 +356,7 @@ func checkArgs(arguments []actionArgument) {
 // checkDefaultValue checks if an argument value is the same as the defined default value for each argument
 func checkDefaultValue(i int, actionParams []parameterDefinition, param parameterDefinition, argument actionArgument) {
 	var realValue = getArgValue(argument)
-	if param.defaultValue.value == realValue {
+	if param.defaultValue.value != nil && param.defaultValue.value == realValue {
 		var argumentPlacement = currentAction + "("
 		for argIndex := 0; argIndex < i+1; argIndex++ {
 			if argIndex == i {
