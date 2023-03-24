@@ -15,6 +15,7 @@ src/aml
 # Tests
 *.cherri
 !/examples/*.cherri
+!stdlib.cherri
 
 # Development
 .DS_Store

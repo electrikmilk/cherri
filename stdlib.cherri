@@ -1,0 +1,12 @@
+/*
+Cherri Standard Library
+Copyright (c) 2023 Brandon Jordan
+*/
+
+// showVCard sets up a VCard menu using items and prompt
+action showVCard(items, prompt) {
+    @menuItems = "{items}"
+    @vcf = setName(menuItems,"menu.vcf",false)
+    @contact = vcf.contact
+    return chooseFromList(contact,prompt)
+}
