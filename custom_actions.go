@@ -50,7 +50,7 @@ func parseCustomActions() {
 		}
 		advance()
 		var argumentDefinitions []string
-		if !isToken(RightParen) && next(1) != ')' {
+		if char != ')' {
 			argumentDefinitions = collectArgumentDefinitions()
 		}
 		collectUntilExpect('{', 1)
@@ -86,6 +86,7 @@ func parseCustomActions() {
 		contents = strings.Join(lines, "\n")
 	}
 	chars = strings.Split(contents, "")
+	lines = strings.Split(contents, "\n")
 	findCustomActionRefs()
 	firstChar()
 }
@@ -116,7 +117,7 @@ func findCustomActionRefs() {
 		}
 		advance()
 
-		if char == ')' || next(1) == ')' {
+		if char == ')' || (char == ' ' && next(1) == ')') {
 			lines[lineIdx] = customActions[identifier].body
 			contents = strings.Join(lines, "\n")
 			lines = strings.Split(contents, "\n")
@@ -126,6 +127,11 @@ func findCustomActionRefs() {
 		}
 
 		var arguments = collectArguments()
+		if !strings.Contains(lines[lineIdx], identifier) {
+			lineIdx -= 2
+			idx -= 1
+			advance()
+		}
 		if len(arguments) < len(customActions[identifier].arguments) {
 			parserError(fmt.Sprintf("Not enough arguments to call declared action '%s()'", identifier))
 		}
@@ -162,12 +168,11 @@ func findCustomActionRefs() {
 		}
 		actionBody = strings.Join(actionBodyLines, "\n")
 		lines[lineIdx] = actionBody
-
-		contents = strings.Join(lines, "\n")
-		lines = strings.Split(contents, "\n")
-		chars = strings.Split(contents, "")
-		firstChar()
 	}
+	contents = strings.Join(lines, "\n")
+	lines = strings.Split(contents, "\n")
+	chars = strings.Split(contents, "")
+	firstChar()
 }
 
 // collectArgumentDefinitions loosely collects argument names for an action definition into a string slice.
