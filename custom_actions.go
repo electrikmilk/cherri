@@ -172,13 +172,16 @@ func findCustomActionRefs() {
 
 // collectArgumentDefinitions loosely collects argument names for an action definition into a string slice.
 func collectArgumentDefinitions() (arguments []string) {
-	for strings.Contains(lookAheadUntil(')'), ",") {
-		arguments = append(arguments, strings.Trim(collectUntil(','), " \t\n"))
-		advance()
-	}
-	if next(1) != ')' {
-		arguments = append(arguments, strings.Trim(collectUntil(')'), " \t\n"))
-		advance()
+	var collectedDefinitions = strings.Split(collectUntil(')'), ",")
+	if len(collectedDefinitions) > 0 {
+		for _, definition := range collectedDefinitions {
+			definition = strings.Trim(definition, " ")
+			if !contains(arguments, definition) {
+				arguments = append(arguments, definition)
+				continue
+			}
+			parserError(fmt.Sprintf("Argument '%s' already defined", definition))
+		}
 	}
 	return
 }
