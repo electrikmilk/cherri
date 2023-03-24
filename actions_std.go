@@ -819,14 +819,14 @@ func documentActions() {
 		identifier: "documentpicker.save",
 		parameters: []parameterDefinition{
 			{
-				name:      "file",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
 				name:      "path",
 				validType: String,
 				key:       "WFFileDestinationPath",
+			},
+			{
+				name:      "content",
+				validType: Variable,
+				key:       "WFInput",
 			},
 			{
 				name:      "overwrite",
