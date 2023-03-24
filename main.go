@@ -222,7 +222,7 @@ func printDebug() {
 		fmt.Println("\nCurrent Character:")
 		printChar(char)
 
-		if len(contents) < idx {
+		if len(contents) > idx+1 {
 			fmt.Println("\nNext Character:")
 			printChar(next(1))
 		}

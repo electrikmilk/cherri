@@ -573,7 +573,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 				parserError("Value expected")
 			}
 			if args.Using("debug") {
-				fmt.Println("variables", variables)
+				fmt.Println("\nvariables", variables)
 				fmt.Println("questions", questions)
 			}
 			parserError(fmt.Sprintf("Unknown value type: '%s'", fullIdentifier))
@@ -829,8 +829,8 @@ func seek(mov *int, reverse bool) (requestedChar rune) {
 }
 
 func getChar(atIndex int) rune {
-	if atIndex == -1 {
-		return []rune(chars[0])[0]
+	if atIndex < 0 {
+		return -1
 	}
 	if len(chars) > atIndex {
 		return []rune(chars[atIndex])[0]
