@@ -871,7 +871,7 @@ func makeKeyList(title string, list map[string]string) (formattedList string) {
 func parserError(message string) {
 	lines = strings.Split(contents, "\n")
 	var errorFilename, errorLine, errorCol = delinquentFile()
-	if lineIdx == -1 && args.Using("no-ansi") {
+	if args.Using("no-ansi") {
 		fmt.Printf("Error: %s (%d:%d)\n", message, errorLine, errorCol)
 		os.Exit(1)
 	}
