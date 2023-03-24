@@ -4,4 +4,4 @@ open("Add Song to Favorites")
 
 @intVar = 2
 
-run("Add Song to Favorites", intVar, false)
+run("Add Song to Favorites", intVar)
