@@ -63,17 +63,25 @@ func main() {
 	}
 
 	if strings.Contains(contents, "#include") {
+		if args.Using("debug") {
+			fmt.Print("Parsing includes... ")
+		}
 		parseIncludes()
 	}
 
 	actions = make(map[string]*actionDefinition)
 
 	if strings.Contains(contents, "action") {
+		if args.Using("debug") {
+			fmt.Print(ansi("done!", green) + "\n")
+			fmt.Print("Parsing custom actions... ")
+		}
 		standardActions()
 		parseCustomActions()
 	}
 
 	if args.Using("debug") {
+		fmt.Print(ansi("done!", green) + "\n")
 		fmt.Printf("Parsing %s... ", filename)
 	}
 
