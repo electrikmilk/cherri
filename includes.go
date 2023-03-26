@@ -28,7 +28,8 @@ func parseIncludes() {
 		if len(lineChars) == 0 {
 			continue
 		}
-		if !startsWith(line, "#include") {
+		if !startsWith(strings.Trim(line, " "), "#include") {
+			collectUntil('\n')
 			continue
 		}
 
