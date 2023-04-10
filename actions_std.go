@@ -4489,10 +4489,6 @@ func webActions() {
 	}
 }
 
-func setActionIdent(key string, identifier string) {
-
-}
-
 func builtinActions() {
 	actions["rawAction"] = &actionDefinition{
 		parameters: []parameterDefinition{
