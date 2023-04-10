@@ -3884,6 +3884,57 @@ func scriptingActions() {
 			},
 		},
 	}
+	actions["makeShortcut"] = &actionDefinition{
+		appIdentifier: "com.apple.shortcuts.CreateWorkflowAction",
+		parameters: []parameterDefinition{
+			{
+				name:      "name",
+				validType: String,
+				key:       "name",
+			},
+			{
+				name:      "open",
+				validType: Bool,
+				key:       "OpenWhenRun",
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     true,
+				},
+				optional: true,
+			},
+		},
+		minVersion: 16.4,
+	}
+	actions["searchShortcuts"] = &actionDefinition{
+		appIdentifier: "com.apple.shortcuts.SearchShortcutsAction",
+		parameters: []parameterDefinition{
+			{
+				name:      "query",
+				validType: String,
+				key:       "searchPhrase",
+			},
+		},
+		minVersion: 16.4,
+	}
+	var shortcutDetails = []string{"Folder", "Icon", "Action Count", "File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name"}
+	actions["shortcutDetail"] = &actionDefinition{
+		identifier: "properties.workflow",
+		parameters: []parameterDefinition{
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+			},
+			{
+				name:      "shortcut",
+				validType: Variable,
+				key:       "WFInput",
+			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("shortcut detail", shortcutDetails, args, 0)
+		},
+	}
 }
 
 func sharingActions() {
