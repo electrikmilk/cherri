@@ -11,6 +11,7 @@ import (
 	"strings"
 )
 
+// include is a data structure to track include statements.
 type include struct {
 	file   string
 	start  int
@@ -21,6 +22,8 @@ type include struct {
 
 var includes []include
 
+// parseIncludes() searches for include statements within the file and
+// injects the contents of the file at the specified path.
 func parseIncludes() {
 	lines = strings.Split(contents, "\n")
 	for l, line := range lines {

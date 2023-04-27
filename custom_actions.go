@@ -7,6 +7,8 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 // customAction contains the collected declaration of a custom action.
@@ -20,6 +22,10 @@ var customActions map[string]customAction
 
 // parseCustomActions parses defined actions and collects them.
 func parseCustomActions() {
+	if args.Using("debug") {
+		fmt.Print(ansi("done!", green) + "\n")
+		fmt.Print("Parsing custom actions... ")
+	}
 	customActions = make(map[string]customAction)
 	variables = make(map[string]variableValue)
 	chars = strings.Split(contents, "")
@@ -129,7 +135,7 @@ func findCustomActionRefs() {
 		var arguments = collectArguments()
 		if !strings.Contains(lines[lineIdx], identifier) {
 			lineIdx -= 2
-			idx -= 1
+			idx--
 			advance()
 		}
 		if len(arguments) < len(customActions[identifier].arguments) {

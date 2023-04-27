@@ -24,7 +24,7 @@ var outputPath string
 
 var included []string
 
-func main() {
+func init() {
 	args.Register("share", "s", "Signing mode. [anyone, contacts] [default=contacts]", true)
 	args.Register("unsigned", "u", "Don't sign compiled Shortcut. Will NOT run on iOS or macOS.", false)
 	args.Register("debug", "d", "Save generated plist. Print debug messages and stack traces.", false)
@@ -33,17 +33,15 @@ func main() {
 	args.Register("auto-inc", "a", "Automatically include Cherri files in this directory.", false)
 	args.Register("no-ansi", "", "Don't output ANSI escape sequences that format and color the output.", false)
 	args.CustomUsage = "[FILE]"
+}
 
+func main() {
 	if len(os.Args) <= 1 {
 		args.PrintUsage()
 	}
 
 	filePath = os.Args[1]
-	checkFile(filePath)
-
-	var stat, statErr = os.Stat(filePath)
-	handle(statErr)
-	filename = stat.Name()
+	filename = checkFile(filePath)
 
 	relativePath = strings.Replace(filePath, filename, "", 1)
 	var nameParts = strings.Split(filename, ".")
@@ -72,10 +70,6 @@ func main() {
 	actions = make(map[string]*actionDefinition)
 
 	if strings.Contains(contents, "action") {
-		if args.Using("debug") {
-			fmt.Print(ansi("done!", green) + "\n")
-			fmt.Print("Parsing custom actions... ")
-		}
 		standardActions()
 		parseCustomActions()
 	}
@@ -130,17 +124,17 @@ func main() {
 	}
 }
 
-func checkFile(filePath string) {
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+func checkFile(filePath string) (filename string) {
+	var file, statErr = os.Stat(filePath)
+	if os.IsNotExist(statErr) {
 		exit(fmt.Sprintf("File '%s' does not exist!", filePath))
 	}
-	var file, statErr = os.Stat(filePath)
-	handle(statErr)
 	var nameParts = strings.Split(file.Name(), ".")
 	var ext = end(nameParts)
 	if ext != "cherri" {
 		exit(fmt.Sprintf("File '%s' is not a .cherri file!", filePath))
 	}
+	return file.Name()
 }
 
 func sign() {

@@ -2888,7 +2888,7 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			replaceAppId(args, 0)
+			replaceAppID(args, 0)
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -2912,7 +2912,7 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			replaceAppId(args, 0)
+			replaceAppID(args, 0)
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -2936,7 +2936,7 @@ func scriptingActions() {
 				infinite:  true,
 			},
 		},
-		check: replaceAppIds,
+		check: replaceAppIDs,
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -2961,7 +2961,7 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			replaceAppId(args, 0)
+			replaceAppID(args, 0)
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -2985,7 +2985,7 @@ func scriptingActions() {
 				infinite:  true,
 			},
 		},
-		check: replaceAppIds,
+		check: replaceAppIDs,
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -3010,7 +3010,7 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			replaceAppId(args, 0)
+			replaceAppID(args, 0)
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -3039,7 +3039,7 @@ func scriptingActions() {
 				infinite:  true,
 			},
 		},
-		check: replaceAppIds,
+		check: replaceAppIDs,
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -3082,8 +3082,8 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			replaceAppId(args, 0)
-			replaceAppId(args, 1)
+			replaceAppID(args, 0)
+			replaceAppID(args, 1)
 			if len(args) > 2 {
 				switch args[2].value {
 				case "half":
@@ -4865,7 +4865,7 @@ func apps(args []actionArgument) (apps []plistData) {
 	return
 }
 
-func replaceAppId(args []actionArgument, idx int) {
+func replaceAppID(args []actionArgument, idx int) {
 	if len(appIds) == 0 {
 		makeAppIds()
 	}
@@ -4877,7 +4877,7 @@ func replaceAppId(args []actionArgument, idx int) {
 	}
 }
 
-func replaceAppIds(args []actionArgument) {
+func replaceAppIDs(args []actionArgument) {
 	if len(appIds) == 0 {
 		makeAppIds()
 	}

@@ -335,7 +335,7 @@ func checkArgs(arguments []actionArgument) {
 		}
 		if i+1 > len(arguments) && !param.optional {
 			var argIndex = i + 1
-			var suffix = "th"
+			var suffix string
 			switch argIndex {
 			case 1:
 				suffix = "st"
@@ -343,6 +343,8 @@ func checkArgs(arguments []actionArgument) {
 				suffix = "nd"
 			case 3:
 				suffix = "rd"
+			default:
+				suffix = "th"
 			}
 			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'", argIndex, suffix, param.name, currentAction))
 		}
@@ -353,7 +355,7 @@ func checkArgs(arguments []actionArgument) {
 	}
 }
 
-// checkDefaultValue checks if an argument value is the same as the defined default value for each argument
+// checkDefaultValue checks if an argument value is the same as the defined default value for each argument.
 func checkDefaultValue(i int, actionParams []parameterDefinition, param parameterDefinition, argument actionArgument) {
 	var realValue = getArgValue(argument)
 	if param.defaultValue.value != nil && param.defaultValue.value == realValue {
@@ -378,7 +380,7 @@ func checkDefaultValue(i int, actionParams []parameterDefinition, param paramete
 	}
 }
 
-// makeLibraries makes the library variable, this is where 3rd party action library definitions will start
+// makeLibraries makes the library variable, this is where 3rd party action library definitions will start.
 func makeLibraries() {
 	libraries = make(map[string]libraryDefinition)
 }

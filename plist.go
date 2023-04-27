@@ -57,12 +57,13 @@ func plistKeyValue(key string, dataType plistDataType, value any) (pair string) 
 			pair += "<false/>\n"
 		}
 	case Array:
-		if len(value.([]string)) == 0 {
+		var arrayValue = value.([]string)
+		if len(arrayValue) == 0 {
 			pair += "<array/>\n"
 			break
 		}
 		pair += "<array>\n"
-		for _, val := range value.([]string) {
+		for _, val := range arrayValue {
 			pair += val
 		}
 		pair += "</array>\n"
