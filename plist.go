@@ -422,6 +422,9 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 	var getAs string
 	var coerce string
 	for _, chr := range variableChars {
+		if chr == "{" {
+			collectingVariable = true
+		}
 		if collectingVariable {
 			switch {
 			case collectingGetAs:
@@ -473,8 +476,6 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 				}
 				currentVariable += chr
 			}
-		} else if chr == "{" {
-			collectingVariable = true
 		}
 	}
 	var variableIdx int
