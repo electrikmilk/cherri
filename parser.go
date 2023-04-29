@@ -224,35 +224,8 @@ func parse() {
 			var getAs string
 			var coerce string
 			var varType = Var
-			if strings.Contains(
-				lookAheadUntil('\n'),
-				"=",
-			) {
-				if tokenAhead(AddTo) {
-					varType = AddTo
-				} else {
-					tokensAhead(Set)
-				}
-				advance()
-				collectValue(&valueType, &value, '\n')
-				if valueType == Variable {
-					var stringValue = value.(string)
-					if strings.Contains(stringValue, ".") {
-						var dotParts = strings.Split(stringValue, ".")
-						coerce = strings.Trim(dotParts[1], " ")
-						if strings.Contains(stringValue, "[") {
-							var varParts = strings.Split(dotParts[0], "[")
-							value = varParts[0]
-							getAs = strings.Trim(strings.TrimSuffix(varParts[1], "]"), " ")
-						} else {
-							value = dotParts[0]
-						}
-					} else if strings.Contains(stringValue, "[") {
-						var varParts = strings.Split(stringValue, "[")
-						value = varParts[0]
-						getAs = strings.TrimSuffix(varParts[1], "]")
-					}
-				}
+			if strings.Contains(lookAheadUntil('\n'), "=") {
+				collectVariableValue(&valueType, &value, &varType, &coerce, &getAs)
 			}
 			tokens = append(tokens, token{
 				typeof:    varType,
@@ -497,12 +470,39 @@ func lookAheadUntil(until rune) (ahead string) {
 	return
 }
 
+func collectVariableValue(valueType *tokenType, value *any, varType *tokenType, coerce *string, getAs *string) {
+	if tokenAhead(AddTo) {
+		*varType = AddTo
+	} else {
+		tokensAhead(Set)
+	}
+	advance()
+	collectValue(valueType, value, '\n')
+	if *valueType != Variable {
+		return
+	}
+	var stringValue = fmt.Sprintf("%v", *value)
+	if strings.Contains(stringValue, ".") {
+		var dotParts = strings.Split(stringValue, ".")
+		*coerce = strings.Trim(dotParts[1], " ")
+		if strings.Contains(stringValue, "[") {
+			var varParts = strings.Split(dotParts[0], "[")
+			*value = varParts[0]
+			*getAs = strings.Trim(strings.TrimSuffix(varParts[1], "]"), " ")
+		} else {
+			*value = dotParts[0]
+		}
+	} else if strings.Contains(stringValue, "[") {
+		var varParts = strings.Split(stringValue, "[")
+		*value = varParts[0]
+		*getAs = strings.TrimSuffix(varParts[1], "]")
+	}
+	return
+}
+
 func collectValue(valueType *tokenType, value *any, until rune) {
 	switch {
-	case strings.Contains(
-		string(Integer),
-		string(char),
-	):
+	case strings.Contains(string(Integer), string(char)):
 		var integer = collectInteger()
 		*valueType = Integer
 		*value = integer
@@ -536,48 +536,52 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*valueType = Action
 		_, *value = collectAction()
 	default:
-		if lookAheadUntil(until) == "" {
+		collectReference(valueType, value, &until)
+	}
+}
+
+func collectReference(valueType *tokenType, value *any, until *rune) {
+	if lookAheadUntil(*until) == "" {
+		parserError("Value expected")
+	}
+	var identifier string
+	var fullIdentifier string
+	switch {
+	case strings.Contains(lookAheadUntil(*until), "["):
+		identifier = collectUntil('[')
+		advance()
+		fullIdentifier = identifier + "[" + collectUntil(*until)
+		advance()
+	case strings.Contains(lookAheadUntil(*until), "."):
+		identifier = collectUntil('.')
+		advance()
+		fullIdentifier = identifier + "." + collectUntil(*until)
+		advance()
+	default:
+		identifier = collectUntil(*until)
+		fullIdentifier = identifier
+		advance()
+	}
+	var lowerIdentifier = strings.ToLower(identifier)
+	if _, global := globals[identifier]; global {
+		*valueType = Variable
+		*value = fullIdentifier
+		hasInputVariables(identifier)
+	} else if _, found := variables[lowerIdentifier]; found {
+		*valueType = Variable
+		*value = fullIdentifier
+	} else if _, found := questions[lowerIdentifier]; found {
+		*valueType = Question
+		*value = fullIdentifier
+	} else {
+		if fullIdentifier == "" {
 			parserError("Value expected")
 		}
-		var identifier string
-		var fullIdentifier string
-		switch {
-		case strings.Contains(lookAheadUntil(until), "["):
-			identifier = collectUntil('[')
-			advance()
-			fullIdentifier = identifier + "[" + collectUntil(until)
-			advance()
-		case strings.Contains(lookAheadUntil(until), "."):
-			identifier = collectUntil('.')
-			advance()
-			fullIdentifier = identifier + "." + collectUntil(until)
-			advance()
-		default:
-			identifier = collectUntil(until)
-			fullIdentifier = identifier
-			advance()
+		if args.Using("debug") {
+			fmt.Println("\nvariables", variables)
+			fmt.Println("questions", questions)
 		}
-		var lowerIdentifier = strings.ToLower(identifier)
-		if _, global := globals[identifier]; global {
-			*valueType = Variable
-			*value = fullIdentifier
-			hasInputVariables(identifier)
-		} else if _, found := variables[lowerIdentifier]; found {
-			*valueType = Variable
-			*value = fullIdentifier
-		} else if _, found := questions[lowerIdentifier]; found {
-			*valueType = Question
-			*value = fullIdentifier
-		} else {
-			if fullIdentifier == "" {
-				parserError("Value expected")
-			}
-			if args.Using("debug") {
-				fmt.Println("\nvariables", variables)
-				fmt.Println("questions", questions)
-			}
-			parserError(fmt.Sprintf("Unknown value type: '%s'", fullIdentifier))
-		}
+		parserError(fmt.Sprintf("Unknown value type: '%s'", fullIdentifier))
 	}
 }
 

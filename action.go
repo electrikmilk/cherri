@@ -110,10 +110,9 @@ func actionIdentifier() (ident string) {
 	return
 }
 
+// actionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
 func actionParameters(arguments []actionArgument) (params []plistData) {
-	if actions[currentAction].make != nil {
-		params = actions[currentAction].make(arguments)
-	} else if actions[currentAction].parameters != nil {
+	if actions[currentAction].make == nil && actions[currentAction].parameters != nil {
 		for i, a := range actions[currentAction].parameters {
 			if len(arguments) > i {
 				if a.validType == Variable {
@@ -123,6 +122,9 @@ func actionParameters(arguments []actionArgument) (params []plistData) {
 				}
 			}
 		}
+	}
+	if actions[currentAction].make != nil {
+		params = actions[currentAction].make(arguments)
 	}
 	if actions[currentAction].addParams != nil {
 		var addParams = actions[currentAction].addParams(arguments)

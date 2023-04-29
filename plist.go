@@ -45,6 +45,8 @@ var noInput noInputParams
 
 var hasShortcutInputVariables = false
 
+const ObjectReplaceChar = "\uFFFC"
+
 func plistKeyValue(key string, dataType plistDataType, value any) (pair string) {
 	if key != "" {
 		pair = "<key>" + key + "</key>\n"
@@ -452,7 +454,7 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 					noVarString = strings.Replace(
 						noVarString,
 						"{"+varName+"}",
-						"\uFFFC",
+						ObjectReplaceChar,
 						1)
 					currentVariable = ""
 					getAs = ""
@@ -478,7 +480,7 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 	var variableIdx int
 	var noVarChars = strings.Split(noVarString, "")
 	for c, s := range noVarChars {
-		if s == "\uFFFC" {
+		if s == ObjectReplaceChar {
 			stringVars = append(stringVars, stringVar{
 				varName: varIndex[variableIdx].varName,
 				col:     c,
