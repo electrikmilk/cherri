@@ -648,7 +648,6 @@ func paramValue(key string, arg actionArgument, handleAs tokenType, outputType p
 		if handleAs == String {
 			return attachmentValues(key, fmt.Sprintf("{%s}", arg.value), "", Text)
 		}
-
 		return variablePlistValue(key, arg.value.(string), "")
 	case Bool:
 		return plistData{
