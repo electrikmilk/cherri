@@ -45,6 +45,7 @@ var noInput noInputParams
 
 var hasShortcutInputVariables = false
 
+// ObjectReplaceChar is a Shortcuts convention to mark the placement of inline variables in a string.
 const ObjectReplaceChar = "\uFFFC"
 
 func plistKeyValue(key string, dataType plistDataType, value any) (pair string) {
@@ -453,7 +454,6 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 					if coerce != "" {
 						varName = currentVariable + "(" + coerce + ")"
 					}
-					// Replace with OBJECT REPLACEMENT character
 					noVarString = strings.Replace(
 						noVarString,
 						"{"+varName+"}",
