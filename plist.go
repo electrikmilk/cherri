@@ -787,21 +787,34 @@ func dictionaryValue(key string, value any) string {
 		},
 	}
 	if key != "" {
+		var WFKey = plistData{
+			key:      "Value",
+			dataType: Dictionary,
+			value: []plistData{
+				{
+					key:      "string",
+					dataType: Text,
+					value:    key,
+				},
+			},
+		}
+		if strings.ContainsAny(key, "{}") {
+			WFKey = paramValue("Value", actionArgument{
+				valueType: String,
+				value:     key,
+			}, String, Text)
+			if reflect.TypeOf(WFKey.value).String() == "[]main.plistData" {
+				for _, val := range WFKey.value.([]plistData) {
+					WFKey = val
+					break
+				}
+			}
+		}
 		valueData = append(valueData, plistData{
 			key:      "WFKey",
 			dataType: Dictionary,
 			value: []plistData{
-				{
-					key:      "Value",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "string",
-							dataType: Text,
-							value:    key,
-						},
-					},
-				},
+				WFKey,
 				{
 					key:      "WFSerializationType",
 					dataType: Text,
