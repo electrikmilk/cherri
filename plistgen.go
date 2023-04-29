@@ -315,7 +315,6 @@ func makePlist() (plist string) {
 	}
 
 	plist += plistKeyValue("WFWorkflowHasOutputFallback", Boolean, false)
-	plist += plistKeyValue("WFWorkflowHasShortcutInputVariables", Boolean, false)
 
 	plist += plistKeyValue("WFWorkflowIcon", Dictionary, []plistData{
 		{
