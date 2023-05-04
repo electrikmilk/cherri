@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Brandon Jordan
+ * Copyright (c) Brandon Jordan
  */
 
 package main
