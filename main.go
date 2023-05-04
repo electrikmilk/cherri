@@ -229,7 +229,7 @@ func printDebug() {
 			printChar(next(1))
 		}
 
-		if len(lines) >= lineIdx {
+		if len(lines) > lineIdx {
 			fmt.Println("\nCurrent Line: \n" + lines[lineIdx])
 		}
 
