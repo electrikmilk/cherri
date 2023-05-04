@@ -401,6 +401,8 @@ type attachmentVariable struct {
 }
 
 var varPositions []plistData
+var varIndex map[int]attachmentVariable
+var stringVars []stringVar
 
 func attachmentValues(key string, variable string, varUUID string, outputType plistDataType) plistData {
 	if !strings.ContainsAny(variable, "{}") {
@@ -411,88 +413,9 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 		}
 	}
 	varPositions = []plistData{}
-	var stringVars []stringVar
-	var varIndex = make(map[int]attachmentVariable)
-	var variableChars = strings.Split(variable, "")
-	var currentVariable string
-	var collectingVariable bool
-	var collectingGetAs bool
-	var collectingCoerce bool
-	var varNum int
-	var noVarString = variable
-	var getAs string
-	var coerce string
-	for _, chr := range variableChars {
-		if chr == "{" {
-			collectingVariable = true
-			continue
-		}
-		if !collectingVariable {
-			continue
-		}
-		switch {
-		case collectingGetAs:
-			if chr == "]" {
-				collectingGetAs = false
-				continue
-			}
-			getAs += chr
-		case collectingCoerce:
-			if chr == ")" {
-				collectingCoerce = false
-				continue
-			}
-			coerce += chr
-		default:
-			if chr == "}" {
-				varIndex[varNum] = attachmentVariable{
-					varName: currentVariable,
-					getAs:   getAs,
-					coerce:  coerce,
-				}
-				var varName = currentVariable
-				if getAs != "" {
-					varName = currentVariable + "[" + getAs + "]"
-				}
-				if coerce != "" {
-					varName = currentVariable + "(" + coerce + ")"
-				}
-				noVarString = strings.Replace(
-					noVarString,
-					"{"+varName+"}",
-					ObjectReplaceChar,
-					1)
-				currentVariable = ""
-				getAs = ""
-				coerce = ""
-				collectingVariable = false
-				varNum++
-				continue
-			}
-			if chr == "[" {
-				collectingGetAs = true
-				continue
-			}
-			if chr == "(" {
-				collectingCoerce = true
-				continue
-			}
-			currentVariable += chr
-		}
-	}
-	var variableIdx int
-	var noVarChars = strings.Split(noVarString, "")
-	for c, s := range noVarChars {
-		if s == ObjectReplaceChar {
-			stringVars = append(stringVars, stringVar{
-				varName: varIndex[variableIdx].varName,
-				col:     c,
-				getAs:   varIndex[variableIdx].getAs,
-				coerce:  varIndex[variableIdx].coerce,
-			})
-			variableIdx++
-		}
-	}
+	varIndex = make(map[int]attachmentVariable)
+	var noVarString = collectInlineVariables(&variable)
+	createVariableIndex(&noVarString)
 	for _, stringVar := range stringVars {
 		var storedVar variableValue
 		if _, global := globals[stringVar.varName]; global {
@@ -616,6 +539,92 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 			},
 		},
 	}
+}
+
+func createVariableIndex(noVarString *string) {
+	var variableIdx int
+	var noVarChars = strings.Split(*noVarString, "")
+	for c, s := range noVarChars {
+		if s == ObjectReplaceChar {
+			stringVars = append(stringVars, stringVar{
+				varName: varIndex[variableIdx].varName,
+				col:     c,
+				getAs:   varIndex[variableIdx].getAs,
+				coerce:  varIndex[variableIdx].coerce,
+			})
+			variableIdx++
+		}
+	}
+}
+
+func collectInlineVariables(variable *string) (noVarString string) {
+	var variableChars = strings.Split(*variable, "")
+	var currentVariable string
+	var collectingVariable bool
+	var collectingGetAs bool
+	var collectingCoerce bool
+	var varNum int
+	var getAs string
+	var coerce string
+	noVarString = *variable
+	for _, chr := range variableChars {
+		if chr == "{" {
+			collectingVariable = true
+			continue
+		}
+		if !collectingVariable {
+			continue
+		}
+		switch {
+		case collectingGetAs:
+			if chr == "]" {
+				collectingGetAs = false
+				continue
+			}
+			getAs += chr
+		case collectingCoerce:
+			if chr == ")" {
+				collectingCoerce = false
+				continue
+			}
+			coerce += chr
+		default:
+			switch chr {
+			case "}":
+				varIndex[varNum] = attachmentVariable{
+					varName: currentVariable,
+					getAs:   getAs,
+					coerce:  coerce,
+				}
+				var varName = currentVariable
+				if getAs != "" {
+					varName = currentVariable + "[" + getAs + "]"
+				}
+				if coerce != "" {
+					varName = currentVariable + "(" + coerce + ")"
+				}
+				noVarString = strings.Replace(
+					noVarString,
+					"{"+varName+"}",
+					ObjectReplaceChar,
+					1)
+				currentVariable = ""
+				getAs = ""
+				coerce = ""
+				collectingVariable = false
+				varNum++
+				continue
+			case "[":
+				collectingGetAs = true
+				continue
+			case "(":
+				collectingCoerce = true
+				continue
+			}
+			currentVariable += chr
+		}
+	}
+	return
 }
 
 func argumentValue(key string, args []actionArgument, idx int) plistData {
