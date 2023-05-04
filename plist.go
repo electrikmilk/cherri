@@ -71,19 +71,22 @@ func plistKeyValue(key string, dataType plistDataType, value any) (pair string) 
 		}
 		pair += "</array>\n"
 	case Dictionary:
-		pair += "<dict>\n"
-		var empty = plistData{}
-		for _, data := range value.([]plistData) {
-			if data != empty {
-				pair += plistKeyValue(data.key, data.dataType, data.value)
-			}
-		}
-		pair += "</dict>\n"
+		pair += "<dict>\n" + plistDictValue(value) + "</dict>\n"
 	default:
 		if reflect.TypeOf(value).String() == "string" {
 			value = html.EscapeString(value.(string))
 		}
 		pair += fmt.Sprintf("<%s>%v</%s>\n", dataType, value, dataType)
+	}
+	return
+}
+
+func plistDictValue(value any) (pair string) {
+	var empty = plistData{}
+	for _, data := range value.([]plistData) {
+		if data != empty {
+			pair += plistKeyValue(data.key, data.dataType, data.value)
+		}
 	}
 	return
 }
