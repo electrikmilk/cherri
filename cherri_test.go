@@ -15,7 +15,7 @@ import (
 
 var currentTest string
 
-func TestCherri(t *testing.T) {
+func TestCherri(_ *testing.T) {
 	var files, err = os.ReadDir("examples")
 	if err != nil {
 		fmt.Println(ansi("FAILED", red))

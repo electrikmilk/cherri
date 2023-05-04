@@ -401,8 +401,8 @@ type attachmentVariable struct {
 }
 
 var varPositions []plistData
-var varIndex map[int]attachmentVariable
 var stringVars []stringVar
+var varIndex map[int]attachmentVariable
 
 func attachmentValues(key string, variable string, varUUID string, outputType plistDataType) plistData {
 	if !strings.ContainsAny(variable, "{}") {
@@ -413,6 +413,7 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 		}
 	}
 	varPositions = []plistData{}
+	stringVars = []stringVar{}
 	varIndex = make(map[int]attachmentVariable)
 	var noVarString = collectInlineVariables(&variable)
 	createVariableIndex(&noVarString)
