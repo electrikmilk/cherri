@@ -86,7 +86,8 @@ func main() {
 		fmt.Printf("Generating plist... ")
 	}
 
-	var plist = makePlist()
+	makePlist()
+
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
 	}

@@ -4,16 +4,22 @@
 
 package main
 
-import (
-	"reflect"
-)
+import "reflect"
 
 const header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"https://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n"
 const footer = "</dict>\n</plist>"
 
-func makePlist() (plist string) {
+var plist string
+
+func makePlist() {
 	uuids = make(map[string]string)
 	plist = header
+
+	plist += plistKeyValue("WFWorkflowHasOutputFallback", Boolean, false)
+	plist += plistKeyValue("WFWorkflowMinimumClientVersion", Number, minVersion)
+	plist += plistKeyValue("WFWorkflowMinimumClientVersionString", Text, minVersion)
+	plist += plistKeyValue("WFWorkflowHasShortcutInputVariables", Boolean, hasShortcutInputVariables)
+
 	plist += plistKeyValue("WFQuickActionSurfaces", Array, []string{})
 
 	if noInput.name != "" {
@@ -31,6 +37,40 @@ func makePlist() (plist string) {
 		})
 	}
 
+	plistActions()
+
+	plist += plistKeyValue("WFWorkflowClientVersion", Text, "1146.14")
+
+	if workflowName != "" {
+		plist += plistKeyValue("WFWorkflowName", Text, workflowName)
+	}
+
+	plist += plistKeyValue("WFWorkflowIcon", Dictionary, []plistData{
+		{
+			key:      "WFWorkflowIconStartColor",
+			dataType: Number,
+			value:    iconColor,
+		},
+		{
+			key:      "WFWorkflowIconGlyphNumber",
+			dataType: Number,
+			value:    iconGlyph,
+		},
+	})
+
+	if len(questions) > 0 {
+		plistImportQuestions()
+	} else {
+		plist += plistKeyValue("WFWorkflowImportQuestions", Array, []string{})
+	}
+
+	plistContentItems()
+	plistWorkflowTypes()
+
+	plist += footer
+}
+
+func plistActions() {
 	for _, tok := range tokens {
 		switch tok.typeof {
 		case Var, AddTo:
@@ -308,63 +348,54 @@ func makePlist() (plist string) {
 		}
 	}
 	plist += plistKeyValue("WFWorkflowActions", Array, shortcutActions)
-	plist += plistKeyValue("WFWorkflowClientVersion", Text, "1146.14")
+}
 
-	if workflowName != "" {
-		plist += plistKeyValue("WFWorkflowName", Text, workflowName)
+var importQuestions []string
+
+func plistImportQuestions() {
+	for _, q := range questions {
+		importQuestions = append(importQuestions, plistValue(Dictionary, []plistData{
+			{
+				key:      "ParameterKey",
+				dataType: Text,
+				value:    q.parameter,
+			},
+			{
+				key:      "Category",
+				dataType: Text,
+				value:    "Parameter",
+			},
+			{
+				key:      "ActionIndex",
+				dataType: Number,
+				value:    q.actionIndex,
+			},
+			{
+				key:      "Text",
+				dataType: Text,
+				value:    q.text,
+			},
+			{
+				key:      "DefaultValue",
+				dataType: Text,
+				value:    q.defaultValue,
+			},
+		}))
 	}
+	plist += plistKeyValue("WFWorkflowImportQuestions", Array, importQuestions)
+}
 
-	plist += plistKeyValue("WFWorkflowHasOutputFallback", Boolean, false)
-
-	plist += plistKeyValue("WFWorkflowIcon", Dictionary, []plistData{
-		{
-			key:      "WFWorkflowIconStartColor",
-			dataType: Number,
-			value:    iconColor,
-		},
-		{
-			key:      "WFWorkflowIconGlyphNumber",
-			dataType: Number,
-			value:    iconGlyph,
-		},
-	})
-
-	if len(questions) > 0 {
-		var importQuestions []string
-		for _, q := range questions {
-			importQuestions = append(importQuestions, plistValue(Dictionary, []plistData{
-				{
-					key:      "ParameterKey",
-					dataType: Text,
-					value:    q.parameter,
-				},
-				{
-					key:      "Category",
-					dataType: Text,
-					value:    "Parameter",
-				},
-				{
-					key:      "ActionIndex",
-					dataType: Number,
-					value:    q.actionIndex,
-				},
-				{
-					key:      "Text",
-					dataType: Text,
-					value:    q.text,
-				},
-				{
-					key:      "DefaultValue",
-					dataType: Text,
-					value:    q.defaultValue,
-				},
-			}))
+func plistWorkflowTypes() {
+	var wfWorkflowTypes []string
+	if len(types) != 0 {
+		for _, wtype := range types {
+			wfWorkflowTypes = append(wfWorkflowTypes, plistValue(Text, wtype))
 		}
-		plist += plistKeyValue("WFWorkflowImportQuestions", Array, importQuestions)
-	} else {
-		plist += plistKeyValue("WFWorkflowImportQuestions", Array, []string{})
 	}
+	plist += plistKeyValue("WFWorkflowTypes", Array, wfWorkflowTypes)
+}
 
+func plistContentItems() {
 	var inputContentItems []string
 	if len(inputs) == 0 {
 		makeContentItems()
@@ -376,7 +407,6 @@ func makePlist() (plist string) {
 			inputContentItems = append(inputContentItems, plistValue(Text, input))
 		}
 	}
-
 	plist += plistKeyValue("WFWorkflowInputContentItemClasses", Array, inputContentItems)
 
 	var outputContentItems []string
@@ -387,20 +417,4 @@ func makePlist() (plist string) {
 		}
 	}
 	plist += plistKeyValue("WFWorkflowOutputContentItemClasses", Array, outputContentItems)
-
-	plist += plistKeyValue("WFWorkflowMinimumClientVersion", Number, minVersion)
-	plist += plistKeyValue("WFWorkflowMinimumClientVersionString", Text, minVersion)
-	plist += plistKeyValue("WFWorkflowHasShortcutInputVariables", Boolean, hasShortcutInputVariables)
-
-	var wfWorkflowTypes []string
-	if len(types) != 0 {
-		for _, wtype := range types {
-			wfWorkflowTypes = append(wfWorkflowTypes, plistValue(Text, wtype))
-		}
-	}
-	plist += plistKeyValue("WFWorkflowTypes", Array, wfWorkflowTypes)
-
-	plist += footer
-
-	return
 }
