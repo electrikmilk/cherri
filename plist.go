@@ -629,12 +629,19 @@ func collectInlineVariable(chr *string, noVarString *string) {
 				ObjectReplaceChar,
 				1)
 			varNum++
+			currentVariable = ""
+			getAs = ""
+			coerce = ""
+			collectingGetAs = false
+			collectingCoerce = false
+			collectingVariable = false
 		case "[":
 			collectingGetAs = true
 		case "(":
 			collectingCoerce = true
+		default:
+			currentVariable += *chr
 		}
-		currentVariable += *chr
 	}
 }
 
