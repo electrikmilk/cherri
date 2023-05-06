@@ -609,39 +609,43 @@ func collectInlineVariable(chr *string, noVarString *string) {
 		}
 		coerce += *chr
 	default:
-		switch *chr {
-		case "}":
-			varIndex[varNum] = attachmentVariable{
-				varName: currentVariable,
-				getAs:   getAs,
-				coerce:  coerce,
-			}
-			var varName = currentVariable
-			if getAs != "" {
-				varName = currentVariable + "[" + getAs + "]"
-			}
-			if coerce != "" {
-				varName = currentVariable + "(" + coerce + ")"
-			}
-			*noVarString = strings.Replace(
-				*noVarString,
-				"{"+varName+"}",
-				ObjectReplaceChar,
-				1)
-			varNum++
-			currentVariable = ""
-			getAs = ""
-			coerce = ""
-			collectingGetAs = false
-			collectingCoerce = false
-			collectingVariable = false
-		case "[":
-			collectingGetAs = true
-		case "(":
-			collectingCoerce = true
-		default:
-			currentVariable += *chr
+		inlineVariableChar(chr, noVarString)
+	}
+}
+
+func inlineVariableChar(chr *string, noVarString *string) {
+	switch *chr {
+	case "}":
+		varIndex[varNum] = attachmentVariable{
+			varName: currentVariable,
+			getAs:   getAs,
+			coerce:  coerce,
 		}
+		var varName = currentVariable
+		if getAs != "" {
+			varName = currentVariable + "[" + getAs + "]"
+		}
+		if coerce != "" {
+			varName = currentVariable + "(" + coerce + ")"
+		}
+		*noVarString = strings.Replace(
+			*noVarString,
+			"{"+varName+"}",
+			ObjectReplaceChar,
+			1)
+		varNum++
+		currentVariable = ""
+		getAs = ""
+		coerce = ""
+		collectingGetAs = false
+		collectingCoerce = false
+		collectingVariable = false
+	case "[":
+		collectingGetAs = true
+	case "(":
+		collectingCoerce = true
+	default:
+		currentVariable += *chr
 	}
 }
 
