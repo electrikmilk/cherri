@@ -197,7 +197,7 @@ func makeVariableValue(token *token, varUUID *string) {
 		}))
 	case Action:
 		currentAction = token.value.(action).ident
-		callAction(token.value.(action).args, outputName, UUID)
+		plistAction(token.value.(action).args, outputName, UUID)
 	case Dict:
 		shortcutActions = append(shortcutActions, makeStdAction("dictionary", []plistData{
 			outputName,
@@ -561,16 +561,26 @@ func createVariableIndex(noVarString *string) {
 	}
 }
 
+var varNum int
+
+var collectingVariable bool
+var collectingGetAs bool
+var collectingCoerce bool
+
+var currentVariable string
+var getAs string
+var coerce string
+
 func collectInlineVariables(variable *string) (noVarString string) {
 	var variableChars = strings.Split(*variable, "")
-	var currentVariable string
-	var collectingVariable bool
-	var collectingGetAs bool
-	var collectingCoerce bool
-	var varNum int
-	var getAs string
-	var coerce string
 	noVarString = *variable
+	varNum = 0
+	currentVariable = ""
+	getAs = ""
+	coerce = ""
+	collectingGetAs = false
+	collectingCoerce = false
+	collectingVariable = false
 	for _, chr := range variableChars {
 		if chr == "{" {
 			collectingVariable = true
@@ -579,56 +589,53 @@ func collectInlineVariables(variable *string) (noVarString string) {
 		if !collectingVariable {
 			continue
 		}
-		switch {
-		case collectingGetAs:
-			if chr == "]" {
-				collectingGetAs = false
-				continue
-			}
-			getAs += chr
-		case collectingCoerce:
-			if chr == ")" {
-				collectingCoerce = false
-				continue
-			}
-			coerce += chr
-		default:
-			switch chr {
-			case "}":
-				varIndex[varNum] = attachmentVariable{
-					varName: currentVariable,
-					getAs:   getAs,
-					coerce:  coerce,
-				}
-				var varName = currentVariable
-				if getAs != "" {
-					varName = currentVariable + "[" + getAs + "]"
-				}
-				if coerce != "" {
-					varName = currentVariable + "(" + coerce + ")"
-				}
-				noVarString = strings.Replace(
-					noVarString,
-					"{"+varName+"}",
-					ObjectReplaceChar,
-					1)
-				currentVariable = ""
-				getAs = ""
-				coerce = ""
-				collectingVariable = false
-				varNum++
-				continue
-			case "[":
-				collectingGetAs = true
-				continue
-			case "(":
-				collectingCoerce = true
-				continue
-			}
-			currentVariable += chr
-		}
+		collectInlineVariable(&chr, &noVarString)
 	}
 	return
+}
+
+func collectInlineVariable(chr *string, noVarString *string) {
+	switch {
+	case collectingGetAs:
+		if *chr == "]" {
+			collectingGetAs = false
+			break
+		}
+		getAs += *chr
+	case collectingCoerce:
+		if *chr == ")" {
+			collectingCoerce = false
+			break
+		}
+		coerce += *chr
+	default:
+		switch *chr {
+		case "}":
+			varIndex[varNum] = attachmentVariable{
+				varName: currentVariable,
+				getAs:   getAs,
+				coerce:  coerce,
+			}
+			var varName = currentVariable
+			if getAs != "" {
+				varName = currentVariable + "[" + getAs + "]"
+			}
+			if coerce != "" {
+				varName = currentVariable + "(" + coerce + ")"
+			}
+			*noVarString = strings.Replace(
+				*noVarString,
+				"{"+varName+"}",
+				ObjectReplaceChar,
+				1)
+			varNum++
+		case "[":
+			collectingGetAs = true
+		case "(":
+			collectingCoerce = true
+		}
+		currentVariable += *chr
+	}
 }
 
 func argumentValue(key string, args []actionArgument, idx int) plistData {

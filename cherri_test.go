@@ -61,6 +61,7 @@ func resetParser() {
 	included = []string{}
 	includes = []include{}
 	workflowName = ""
+	plist = ""
 	menus = map[string][]variableValue{}
 	uuids = map[string]string{}
 	customActions = map[string]customAction{}

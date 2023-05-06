@@ -71,283 +71,315 @@ func makePlist() {
 }
 
 func plistActions() {
-	for _, tok := range tokens {
-		switch tok.typeof {
+	for _, t := range tokens {
+		switch t.typeof {
 		case Var, AddTo:
-			var setVariableParams = []plistData{
-				{
-					key:      "WFVariableName",
-					dataType: Text,
-					value:    tok.ident,
-				},
-			}
-			if tok.value != nil {
-				var varUUID = shortcutsUUID()
-				makeVariableValue(&tok, &varUUID)
-				uuids[tok.ident] = varUUID
-				if tok.valueType != Arr {
-					if tok.valueType == Variable {
-						setVariableParams = append(setVariableParams, variablePlistValue("WFInput", tok.value.(string), tok.ident))
-					} else {
-						setVariableParams = append(setVariableParams, inputValue("WFInput", tok.ident, varUUID))
-					}
-					setVariableParams = append(setVariableParams, plistData{
-						key:      "WFSerializationType",
-						dataType: Text,
-						value:    "WFTextTokenAttachment",
-					})
-				}
-			}
-			if tok.typeof == Var {
-				shortcutActions = append(shortcutActions, makeStdAction("setvariable", setVariableParams))
-			} else if tok.typeof == AddTo && tok.valueType != Arr {
-				shortcutActions = append(shortcutActions, makeStdAction("appendvariable", setVariableParams))
-			}
-			if tok.valueType == Arr {
-				for _, value := range tok.value.([]interface{}) {
-					var UUID = shortcutsUUID()
-					var valueType tokenType
-					var addToVariableParams []plistData
-					var itemIdent string
-					switch reflect.TypeOf(value).String() {
-					case stringType:
-						valueType = String
-						itemIdent = "Text"
-					case intType:
-						valueType = Integer
-						itemIdent = "Number"
-					case dictType:
-						valueType = Dict
-						itemIdent = "Dictionary"
-					}
-					makeVariableValue(&token{
-						typeof:    valueType,
-						ident:     itemIdent,
-						valueType: valueType,
-						value:     value,
-					}, &UUID)
-					addToVariableParams = append(addToVariableParams, inputValue("WFInput", itemIdent, UUID))
-					addToVariableParams = append(addToVariableParams, plistData{
-						key:      "WFVariableName",
-						dataType: Text,
-						value:    tok.ident,
-					})
-					shortcutActions = append(shortcutActions, makeStdAction("appendvariable", addToVariableParams))
-				}
-			}
+			plistVariable(&t)
 		case Comment:
-			shortcutActions = append(shortcutActions, makeStdAction("comment", []plistData{
-				{
-					key:      "WFCommentActionText",
-					dataType: Text,
-					value:    tok.value,
-				},
-			}))
+			plistComment(&t)
 		case Action:
-			currentAction = tok.value.(action).ident
-			callAction(tok.value.(action).args, plistData{}, plistData{})
+			currentAction = t.value.(action).ident
+			plistAction(t.value.(action).args, plistData{}, plistData{})
 		case Repeat:
-			if tok.valueType == EndClosure {
-				shortcutActions = append(shortcutActions, makeStdAction("repeat.count", []plistData{
-					{
-						key:      "WFControlFlowMode",
-						dataType: Number,
-						value:    endStatement,
-					},
-					{
-						key:      "GroupingIdentifier",
-						dataType: Text,
-						value:    currentGroupingUUID,
-					},
-					{
-						key:      "UUID",
-						dataType: Text,
-						value:    shortcutsUUID(),
-					},
-				}))
-			} else {
-				shortcutActions = append(shortcutActions, makeStdAction("repeat.count", []plistData{
-					{
-						key:      "WFControlFlowMode",
-						dataType: Number,
-						value:    startStatement,
-					},
-					paramValue("WFRepeatCount", actionArgument{
-						valueType: tok.valueType,
-						value:     tok.value,
-					}, Integer, Number),
-					{
-						key:      "GroupingIdentifier",
-						dataType: Text,
-						value:    currentGroupingUUID,
-					},
-				}))
-			}
+			plistRepeat(&t)
 		case RepeatWithEach:
-			if tok.valueType == EndClosure {
-				shortcutActions = append(shortcutActions, makeStdAction("repeat.each", []plistData{
-					{
-						key:      "WFControlFlowMode",
-						dataType: Number,
-						value:    endStatement,
-					},
-					{
-						key:      "GroupingIdentifier",
-						dataType: Text,
-						value:    currentGroupingUUID,
-					},
-					{
-						key:      "UUID",
-						dataType: Text,
-						value:    shortcutsUUID(),
-					},
-				}))
-			} else {
-				shortcutActions = append(shortcutActions, makeStdAction("repeat.each", []plistData{
-					{
-						key:      "WFControlFlowMode",
-						dataType: Number,
-						value:    startStatement,
-					},
-					paramValue("WFInput", actionArgument{
-						valueType: tok.valueType,
-						value:     tok.value,
-					}, Variable, Text),
-					{
-						key:      "GroupingIdentifier",
-						dataType: Text,
-						value:    currentGroupingUUID,
-					},
-				}))
-			}
+			plistRepeatEach(&t)
 		case Menu:
-			var controlFlow = startStatement
-			if tok.valueType == EndClosure {
-				controlFlow = endStatement
-			}
-			var menuParams = []plistData{
-				{
-					key:      "GroupingIdentifier",
-					dataType: Text,
-					value:    tok.ident,
-				},
-				{
-					key:      "WFControlFlowMode",
-					dataType: Number,
-					value:    controlFlow,
-				},
-			}
-			if tok.valueType != EndClosure {
-				if tok.valueType == Variable {
-					menuParams = append(menuParams, paramValue("WFMenuPrompt", actionArgument{
-						valueType: tok.valueType,
-						value:     tok.value,
-					}, String, Text))
-				} else {
-					menuParams = append(menuParams, plistData{
-						key:      "WFMenuPrompt",
-						dataType: Text,
-						value:    tok.value,
-					})
-				}
-				var menuItemParams = menus[tok.ident]
-				var menuItems []string
-				for _, item := range menuItemParams {
-					menuItems = append(menuItems, plistValue(Dictionary, []plistData{
-						{
-							key:      "WFItemType",
-							dataType: Number,
-							value:    0,
-						},
-						paramValue("WFValue", actionArgument{
-							valueType: item.valueType,
-							value:     item.value,
-						}, String, Text),
-					}))
-				}
-				menuParams = append(menuParams, plistData{
-					key:      "WFMenuItems",
-					dataType: Array,
-					value:    menuItems,
-				})
-			}
-			shortcutActions = append(shortcutActions, makeStdAction("choosefrommenu", menuParams))
+			plistMenu(&t)
 		case Item:
-			shortcutActions = append(shortcutActions, makeStdAction("choosefrommenu", []plistData{
-				{
-					key:      "GroupingIdentifier",
-					dataType: Text,
-					value:    tok.ident,
-				},
-				{
-					key:      "WFControlFlowMode",
-					dataType: Number,
-					value:    statementPart,
-				},
-				paramValue("WFMenuItemAttributedTitle", actionArgument{
-					valueType: tok.valueType,
-					value:     tok.value,
-				}, String, Text),
-				paramValue("WFMenuItemTitle", actionArgument{
-					valueType: tok.valueType,
-					value:     tok.value,
-				}, String, Text),
-			}))
+			plistMenuItem(&t)
 		case Conditional:
-			var controlFlowMode int
-			var conditionalParams = []plistData{
-				{
-					key:      "GroupingIdentifier",
-					dataType: Text,
-					value:    tok.ident,
-				},
-				{
-					key:      "UUID",
-					dataType: Text,
-					value:    shortcutsUUID(),
-				},
-			}
-			switch tok.valueType {
-			case If:
-				var cond = tok.value.(condition)
-				conditionalParams = append(conditionalParams, plistData{
-					key:      "WFInput",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "Type",
-							dataType: Text,
-							value:    "Variable",
-						},
-						variablePlistValue("Variable", cond.variableOneValue.(string), tok.ident),
-					},
-				})
-				if cond.variableTwoValue != nil {
-					conditionalParameter("", &conditionalParams, &cond.variableTwoType, cond.variableTwoValue)
-				}
-				if cond.variableThreeValue != nil {
-					conditionalParameter("WFAnotherNumber", &conditionalParams, &cond.variableThreeType, cond.variableThreeValue)
-				}
-				conditionalParams = append(conditionalParams, plistData{
-					key:      "WFCondition",
-					dataType: Number,
-					value:    cond.condition,
-				})
-				controlFlowMode = startStatement
-			case Else:
-				controlFlowMode = statementPart
-			case EndClosure:
-				controlFlowMode = endStatement
-			}
-			conditionalParams = append(conditionalParams, plistData{
-				key:      "WFControlFlowMode",
-				dataType: Number,
-				value:    controlFlowMode,
-			})
-			shortcutActions = append(shortcutActions, makeStdAction("conditional", conditionalParams))
+			plistConditional(&t)
 		}
 	}
 	plist += plistKeyValue("WFWorkflowActions", Array, shortcutActions)
+}
+
+func plistComment(t *token) {
+	shortcutActions = append(shortcutActions, makeStdAction("comment", []plistData{
+		{
+			key:      "WFCommentActionText",
+			dataType: Text,
+			value:    t.value,
+		},
+	}))
+}
+
+func plistVariable(t *token) {
+	var setVariableParams = []plistData{
+		{
+			key:      "WFVariableName",
+			dataType: Text,
+			value:    t.ident,
+		},
+	}
+	if t.value != nil {
+		var varUUID = shortcutsUUID()
+		makeVariableValue(t, &varUUID)
+		uuids[t.ident] = varUUID
+		if t.valueType != Arr {
+			if t.valueType == Variable {
+				setVariableParams = append(setVariableParams, variablePlistValue("WFInput", t.value.(string), t.ident))
+			} else {
+				setVariableParams = append(setVariableParams, inputValue("WFInput", t.ident, varUUID))
+			}
+			setVariableParams = append(setVariableParams, plistData{
+				key:      "WFSerializationType",
+				dataType: Text,
+				value:    "WFTextTokenAttachment",
+			})
+		}
+	}
+	if t.typeof == Var {
+		shortcutActions = append(shortcutActions, makeStdAction("setvariable", setVariableParams))
+	} else if t.typeof == AddTo && t.valueType != Arr {
+		shortcutActions = append(shortcutActions, makeStdAction("appendvariable", setVariableParams))
+	}
+	if t.valueType == Arr {
+		plistArrayVariable(t)
+	}
+}
+
+func plistArrayVariable(t *token) {
+	for _, value := range t.value.([]interface{}) {
+		var UUID = shortcutsUUID()
+		var valueType tokenType
+		var addToVariableParams []plistData
+		var itemIdent string
+		switch reflect.TypeOf(value).String() {
+		case stringType:
+			valueType = String
+			itemIdent = "Text"
+		case intType:
+			valueType = Integer
+			itemIdent = "Number"
+		case dictType:
+			valueType = Dict
+			itemIdent = "Dictionary"
+		}
+		makeVariableValue(&token{
+			typeof:    valueType,
+			ident:     itemIdent,
+			valueType: valueType,
+			value:     value,
+		}, &UUID)
+		addToVariableParams = append(addToVariableParams, inputValue("WFInput", itemIdent, UUID))
+		addToVariableParams = append(addToVariableParams, plistData{
+			key:      "WFVariableName",
+			dataType: Text,
+			value:    t.ident,
+		})
+		shortcutActions = append(shortcutActions, makeStdAction("appendvariable", addToVariableParams))
+	}
+}
+
+func plistConditional(t *token) {
+	var controlFlowMode int
+	var conditionalParams = []plistData{
+		{
+			key:      "GroupingIdentifier",
+			dataType: Text,
+			value:    t.ident,
+		},
+		{
+			key:      "UUID",
+			dataType: Text,
+			value:    shortcutsUUID(),
+		},
+	}
+	switch t.valueType {
+	case If:
+		var cond = t.value.(condition)
+		conditionalParams = append(conditionalParams, plistData{
+			key:      "WFInput",
+			dataType: Dictionary,
+			value: []plistData{
+				{
+					key:      "Type",
+					dataType: Text,
+					value:    "Variable",
+				},
+				variablePlistValue("Variable", cond.variableOneValue.(string), t.ident),
+			},
+		})
+		if cond.variableTwoValue != nil {
+			conditionalParameter("", &conditionalParams, &cond.variableTwoType, cond.variableTwoValue)
+		}
+		if cond.variableThreeValue != nil {
+			conditionalParameter("WFAnotherNumber", &conditionalParams, &cond.variableThreeType, cond.variableThreeValue)
+		}
+		conditionalParams = append(conditionalParams, plistData{
+			key:      "WFCondition",
+			dataType: Number,
+			value:    cond.condition,
+		})
+		controlFlowMode = startStatement
+	case Else:
+		controlFlowMode = statementPart
+	case EndClosure:
+		controlFlowMode = endStatement
+	}
+	conditionalParams = append(conditionalParams, plistData{
+		key:      "WFControlFlowMode",
+		dataType: Number,
+		value:    controlFlowMode,
+	})
+	shortcutActions = append(shortcutActions, makeStdAction("conditional", conditionalParams))
+}
+
+func plistMenu(t *token) {
+	var controlFlow = startStatement
+	if t.valueType == EndClosure {
+		controlFlow = endStatement
+	}
+	var menuParams = []plistData{
+		{
+			key:      "GroupingIdentifier",
+			dataType: Text,
+			value:    t.ident,
+		},
+		{
+			key:      "WFControlFlowMode",
+			dataType: Number,
+			value:    controlFlow,
+		},
+	}
+	if t.valueType != EndClosure {
+		if t.valueType == Variable {
+			menuParams = append(menuParams, paramValue("WFMenuPrompt", actionArgument{
+				valueType: t.valueType,
+				value:     t.value,
+			}, String, Text))
+		} else {
+			menuParams = append(menuParams, plistData{
+				key:      "WFMenuPrompt",
+				dataType: Text,
+				value:    t.value,
+			})
+		}
+		var menuItemParams = menus[t.ident]
+		var menuItems []string
+		for _, item := range menuItemParams {
+			menuItems = append(menuItems, plistValue(Dictionary, []plistData{
+				{
+					key:      "WFItemType",
+					dataType: Number,
+					value:    0,
+				},
+				paramValue("WFValue", actionArgument{
+					valueType: item.valueType,
+					value:     item.value,
+				}, String, Text),
+			}))
+		}
+		menuParams = append(menuParams, plistData{
+			key:      "WFMenuItems",
+			dataType: Array,
+			value:    menuItems,
+		})
+	}
+	shortcutActions = append(shortcutActions, makeStdAction("choosefrommenu", menuParams))
+}
+
+func plistMenuItem(t *token) {
+	shortcutActions = append(shortcutActions, makeStdAction("choosefrommenu", []plistData{
+		{
+			key:      "GroupingIdentifier",
+			dataType: Text,
+			value:    t.ident,
+		},
+		{
+			key:      "WFControlFlowMode",
+			dataType: Number,
+			value:    statementPart,
+		},
+		paramValue("WFMenuItemAttributedTitle", actionArgument{
+			valueType: t.valueType,
+			value:     t.value,
+		}, String, Text),
+		paramValue("WFMenuItemTitle", actionArgument{
+			valueType: t.valueType,
+			value:     t.value,
+		}, String, Text),
+	}))
+}
+
+func plistRepeat(t *token) {
+	if t.valueType == EndClosure {
+		shortcutActions = append(shortcutActions, makeStdAction("repeat.count", []plistData{
+			{
+				key:      "WFControlFlowMode",
+				dataType: Number,
+				value:    endStatement,
+			},
+			{
+				key:      "GroupingIdentifier",
+				dataType: Text,
+				value:    currentGroupingUUID,
+			},
+			{
+				key:      "UUID",
+				dataType: Text,
+				value:    shortcutsUUID(),
+			},
+		}))
+	} else {
+		shortcutActions = append(shortcutActions, makeStdAction("repeat.count", []plistData{
+			{
+				key:      "WFControlFlowMode",
+				dataType: Number,
+				value:    startStatement,
+			},
+			paramValue("WFRepeatCount", actionArgument{
+				valueType: t.valueType,
+				value:     t.value,
+			}, Integer, Number),
+			{
+				key:      "GroupingIdentifier",
+				dataType: Text,
+				value:    currentGroupingUUID,
+			},
+		}))
+	}
+}
+
+func plistRepeatEach(t *token) {
+	if t.valueType == EndClosure {
+		shortcutActions = append(shortcutActions, makeStdAction("repeat.each", []plistData{
+			{
+				key:      "WFControlFlowMode",
+				dataType: Number,
+				value:    endStatement,
+			},
+			{
+				key:      "GroupingIdentifier",
+				dataType: Text,
+				value:    currentGroupingUUID,
+			},
+			{
+				key:      "UUID",
+				dataType: Text,
+				value:    shortcutsUUID(),
+			},
+		}))
+	} else {
+		shortcutActions = append(shortcutActions, makeStdAction("repeat.each", []plistData{
+			{
+				key:      "WFControlFlowMode",
+				dataType: Number,
+				value:    startStatement,
+			},
+			paramValue("WFInput", actionArgument{
+				valueType: t.valueType,
+				value:     t.value,
+			}, Variable, Text),
+			{
+				key:      "GroupingIdentifier",
+				dataType: Text,
+				value:    currentGroupingUUID,
+			},
+		}))
+	}
 }
 
 var importQuestions []string
