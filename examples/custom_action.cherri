@@ -1,7 +1,5 @@
-action add(op1, op2) {
-    return op1 + op2
+action doSomething() {
+    nothing
 }
 
-@result = add(1,2)
-
-show("{result}")
+doSomething()
