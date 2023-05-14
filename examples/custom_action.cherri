@@ -1,5 +1,5 @@
 action doSomething() {
-    nothing
+    nothing()
 }
 
 doSomething()
