@@ -13,8 +13,7 @@ import (
 
 // customAction contains the collected declaration of a custom action.
 type customAction struct {
-	body      string
-	arguments []string
+	body string
 }
 
 // customActions is a map of all the custom actions that have been defined.
@@ -27,21 +26,10 @@ func parseCustomActions() {
 		fmt.Print("Parsing custom actions... ")
 	}
 	customActions = make(map[string]customAction)
-	variables = make(map[string]variableValue)
 	chars = strings.Split(contents, "")
 	idx = -1
 	advance()
 	for char != -1 {
-		if tokenAhead(At) {
-			var identifier string
-			if strings.Contains(lookAheadUntil('\n'), "=") {
-				identifier = collectUntil(' ')
-			} else {
-				identifier = collectUntil('\n')
-			}
-			// Pre-define variables so the value checker doesn't freak out
-			variables[identifier] = variableValue{}
-		}
 		if lineCharIdx != 1 || !tokenAhead(CustomAction) {
 			advance()
 			continue
@@ -55,10 +43,6 @@ func parseCustomActions() {
 			parserError(fmt.Sprintf("Duplication declaration of action '%s()'", identifier))
 		}
 		advance()
-		var argumentDefinitions []string
-		if char != ')' {
-			argumentDefinitions = collectArgumentDefinitions()
-		}
 		collectUntilExpect('{', 1)
 		advance()
 		var body string
@@ -80,8 +64,7 @@ func parseCustomActions() {
 		var endActionLineIdx = lineIdx
 		advance()
 		customActions[identifier] = customAction{
-			body:      body,
-			arguments: argumentDefinitions,
+			body: body,
 		}
 		lines = strings.Split(contents, "\n")
 		for i := range lines {
@@ -106,16 +89,6 @@ func findCustomActionRefs() {
 			continue
 		}
 
-		var returnVariable string
-		if tokenAhead(At) {
-			if !strings.Contains(lookAheadUntil('\n'), "=") {
-				continue
-			}
-			returnVariable = collectUntil(' ')
-			collectUntilExpect('=', 1)
-			advance()
-		}
-
 		var identifier = strings.Trim(collectUntil('('), " \t\n")
 		if _, found := customActions[identifier]; !found {
 			collectUntil('\n')
@@ -125,74 +98,16 @@ func findCustomActionRefs() {
 
 		if char == ')' || (char == ' ' && next(1) == ')') {
 			lines[lineIdx] = customActions[identifier].body
-			contents = strings.Join(lines, "\n")
-			lines = strings.Split(contents, "\n")
-			chars = strings.Split(contents, "")
+			splitContents()
 			firstChar()
 			continue
 		}
 
-		var arguments = collectArguments()
-		if !strings.Contains(lines[lineIdx], identifier) {
-			lineIdx -= 2
-			idx--
-			advance()
-		}
-		if len(arguments) < len(customActions[identifier].arguments) {
-			parserError(fmt.Sprintf("Not enough arguments to call declared action '%s()'", identifier))
-		}
-		if len(arguments) > len(customActions[identifier].arguments) {
-			parserError(fmt.Sprintf("Too many arguments to call declared action '%s()'", identifier))
-		}
+		collectUntilExpect(')', 1)
 
 		var actionBody = customActions[identifier].body
-		var argumentDefinitions = customActions[identifier].arguments
-		for i, argName := range argumentDefinitions {
-			if strings.Contains(actionBody, argName) {
-				var replacementValue = fmt.Sprintf("%v", arguments[i].value)
-				if arguments[i].valueType == String {
-					replacementValue = "\"" + replacementValue + "\""
-				}
-				if strings.Contains(actionBody, "{"+argName+"}") && arguments[i].valueType != Variable {
-					var uniqueVariable = identifier + "-" + argName
-					actionBody = strings.ReplaceAll(actionBody, argName, uniqueVariable)
-					actionBody = "@" + uniqueVariable + " = " + replacementValue + "\n" + actionBody
-				} else {
-					actionBody = strings.ReplaceAll(actionBody, argName, replacementValue)
-				}
-			}
-		}
-
-		var actionBodyLines = strings.Split(actionBody, "\n")
-		for i, line := range actionBodyLines {
-			if len(line) == 0 {
-				continue
-			}
-			if startsWith(strings.Trim(line, " "), "return") && returnVariable != "" {
-				actionBodyLines[i] = strings.Replace(line, "return ", "@"+returnVariable+" = ", 1)
-			}
-		}
-		actionBody = strings.Join(actionBodyLines, "\n")
 		lines[lineIdx] = actionBody
 	}
-	contents = strings.Join(lines, "\n")
-	lines = strings.Split(contents, "\n")
-	chars = strings.Split(contents, "")
+	splitContents()
 	firstChar()
-}
-
-// collectArgumentDefinitions loosely collects argument names for an action definition into a string slice.
-func collectArgumentDefinitions() (arguments []string) {
-	var collectedDefinitions = strings.Split(collectUntil(')'), ",")
-	if len(collectedDefinitions) > 0 {
-		for _, definition := range collectedDefinitions {
-			definition = strings.Trim(definition, " ")
-			if !contains(arguments, definition) {
-				arguments = append(arguments, definition)
-				continue
-			}
-			parserError(fmt.Sprintf("Argument '%s' already defined", definition))
-		}
-	}
-	return
 }

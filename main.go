@@ -255,7 +255,6 @@ func printDebug() {
 		fmt.Println(ansi("### CUSTOM ACTIONS ###", bold))
 		for identifier, customAction := range customActions {
 			fmt.Println("identifier: " + identifier)
-			fmt.Println("arguments:", customAction.arguments)
 			fmt.Println("body:")
 			fmt.Println(customAction.body)
 		}
@@ -269,6 +268,12 @@ func printDebug() {
 		fmt.Println(includes)
 		fmt.Print("\n")
 	}
+}
+
+func splitContents() {
+	contents = strings.Join(lines, "\n")
+	lines = strings.Split(contents, "\n")
+	chars = strings.Split(contents, "")
 }
 
 func printChar(ch rune) {
