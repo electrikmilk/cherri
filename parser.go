@@ -408,7 +408,7 @@ func parse() {
 				})
 				closureIdx--
 			}
-		case strings.Contains(lookAhead(), "("):
+		case strings.Contains(lookAheadUntil(' '), "("):
 			var identifier, value = collectAction()
 			tokens = append(tokens, token{
 				typeof:    Action,
@@ -448,10 +448,6 @@ func collectUntilExpect(ch rune, maxAdvances int) (collected string) {
 		advance()
 	}
 	return
-}
-
-func lookAhead() (ahead string) {
-	return lookAheadUntil(' ')
 }
 
 func lookAheadUntil(until rune) (ahead string) {
@@ -497,7 +493,6 @@ func collectVariableValue(valueType *tokenType, value *any, varType *tokenType, 
 		*value = varParts[0]
 		*getAs = strings.TrimSuffix(varParts[1], "]")
 	}
-	return
 }
 
 func collectValue(valueType *tokenType, value *any, until rune) {
