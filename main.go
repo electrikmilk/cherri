@@ -65,6 +65,7 @@ func main() {
 			fmt.Print("Parsing includes... ")
 		}
 		parseIncludes()
+		fmt.Print(ansi("done!", green) + "\n")
 	}
 
 	actions = make(map[string]*actionDefinition)
@@ -75,7 +76,6 @@ func main() {
 	}
 
 	if args.Using("debug") {
-		fmt.Print(ansi("done!", green) + "\n")
 		fmt.Printf("Parsing %s... ", filename)
 	}
 
