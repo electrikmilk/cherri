@@ -115,7 +115,4 @@ const (
 	Modulus        tokenType = "%"
 	LeftBrace      tokenType = "{"
 	RightBrace     tokenType = "}"
-	LeftParen      tokenType = "("
-	RightParen     tokenType = ")"
-	Comma          tokenType = ","
 )
