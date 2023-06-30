@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"os"
 	"os/exec"
@@ -37,8 +38,12 @@ func init() {
 	args.CustomUsage = "[FILE]"
 }
 
+//go:embed logo.txt
+var logo embed.FS
+
 func main() {
 	if len(os.Args) <= 1 {
+		printLogo()
 		printVersion()
 		fmt.Printf("\n")
 		args.PrintUsage()
@@ -280,6 +285,14 @@ func printDebug() {
 
 func printVersion() {
 	fmt.Printf("Cherri Compiler " + ansi(version, green) + "\n")
+}
+
+func printLogo() {
+	var logoStr string
+	var logoBytes, logoErr = logo.ReadFile("logo.txt")
+	handle(logoErr)
+	logoStr = string(logoBytes)
+	fmt.Println(logoStr)
 }
 
 func splitContents() {
