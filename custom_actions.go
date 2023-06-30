@@ -37,10 +37,10 @@ func parseCustomActions() {
 		var startActionLineIdx = lineIdx
 		var identifier = collectUntil('(')
 		if _, found := customActions[identifier]; found {
-			parserError(fmt.Sprintf("Duplication declaration of action '%s()'", identifier))
+			parserError(fmt.Sprintf("Duplication definition of custom action '%s()'", identifier))
 		}
 		if _, found := actions[identifier]; found {
-			parserError(fmt.Sprintf("Duplication declaration of action '%s()'", identifier))
+			parserError(fmt.Sprintf("Duplication definition of built-in action '%s()'", identifier))
 		}
 		advance()
 		collectUntilExpect('{', 1)
