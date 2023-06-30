@@ -25,6 +25,7 @@ var outputPath string
 var included []string
 
 func init() {
+	args.Register("version", "v", "Print current version information.", false)
 	args.Register("help", "h", "Print this usage information.", false)
 	args.Register("share", "s", "Signing mode. [anyone, contacts] [default=contacts]", true)
 	args.Register("unsigned", "u", "Don't sign compiled Shortcut. Will NOT run on iOS or macOS.", false)
@@ -38,6 +39,8 @@ func init() {
 
 func main() {
 	if len(os.Args) <= 1 {
+		printVersion()
+		fmt.Printf("\n")
 		args.PrintUsage()
 	}
 
@@ -273,6 +276,10 @@ func printDebug() {
 		fmt.Println(includes)
 		fmt.Print("\n")
 	}
+}
+
+func printVersion() {
+	fmt.Printf("Cherri Compiler " + ansi(version, green) + "\n")
 }
 
 func splitContents() {
