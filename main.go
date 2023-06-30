@@ -25,6 +25,7 @@ var outputPath string
 var included []string
 
 func init() {
+	args.Register("help", "h", "Print this usage information.", false)
 	args.Register("share", "s", "Signing mode. [anyone, contacts] [default=contacts]", true)
 	args.Register("unsigned", "u", "Don't sign compiled Shortcut. Will NOT run on iOS or macOS.", false)
 	args.Register("debug", "d", "Save generated plist. Print debug messages and stack traces.", false)
@@ -37,6 +38,10 @@ func init() {
 
 func main() {
 	if len(os.Args) <= 1 {
+		args.PrintUsage()
+	}
+
+	if args.Using("help") {
 		args.PrintUsage()
 	}
 
