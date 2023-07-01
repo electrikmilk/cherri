@@ -283,7 +283,13 @@ func printDebug() {
 }
 
 func printVersion() {
-	fmt.Printf("Cherri Compiler " + ansi(version, green) + "\n")
+	var color outputType
+	if strings.Contains(version, "beta") {
+		color = yellow
+	} else {
+		color = green
+	}
+	fmt.Printf("Cherri Compiler " + ansi(version, color) + "\n")
 }
 
 func printLogo() {
