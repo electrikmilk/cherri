@@ -53,33 +53,9 @@ func main() {
 		args.PrintUsage()
 	}
 
-	filePath = os.Args[1]
-	filename = checkFile(filePath)
+	handleFile()
 
-	relativePath = strings.Replace(filePath, filename, "", 1)
-	var nameParts = strings.Split(filename, ".")
-	basename = nameParts[0]
-
-	var fileBytes, readErr = os.ReadFile(filePath)
-	handle(readErr)
-	contents = string(fileBytes)
-
-	outputPath = basename + ".shortcut"
-	if args.Using("output") {
-		outputPath = args.Value("output")
-	}
-
-	if args.Using("auto-inc") {
-		autoInclude()
-	}
-
-	if strings.Contains(contents, "#include") {
-		if args.Using("debug") {
-			fmt.Print("Parsing includes... ")
-		}
-		parseIncludes()
-		fmt.Print(ansi("done!", green) + "\n")
-	}
+	handleIncludes()
 
 	actions = make(map[string]*actionDefinition)
 
@@ -135,6 +111,24 @@ func main() {
 	if args.Using("import") && !args.Using("unsigned") {
 		var _, importErr = exec.Command("open", outputPath).Output()
 		handle(importErr)
+	}
+}
+
+func handleFile() {
+	filePath = os.Args[1]
+	filename = checkFile(filePath)
+
+	relativePath = strings.Replace(filePath, filename, "", 1)
+	var nameParts = strings.Split(filename, ".")
+	basename = nameParts[0]
+
+	var fileBytes, readErr = os.ReadFile(filePath)
+	handle(readErr)
+	contents = string(fileBytes)
+
+	outputPath = basename + ".shortcut"
+	if args.Using("output") {
+		outputPath = args.Value("output")
 	}
 }
 

@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/electrikmilk/args-parser"
 	"os"
 	"regexp"
 	"strings"
@@ -21,6 +22,20 @@ type include struct {
 }
 
 var includes []include
+
+func handleIncludes() {
+	if args.Using("auto-inc") {
+		autoInclude()
+		return
+	}
+	if strings.Contains(contents, "#include") {
+		if args.Using("debug") {
+			fmt.Print("Parsing includes... ")
+		}
+		parseIncludes()
+		fmt.Print(ansi("done!", green) + "\n")
+	}
+}
 
 // parseIncludes() searches for include statements within the file and
 // injects the contents of the file at the specified path.
