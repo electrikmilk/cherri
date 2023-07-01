@@ -53,6 +53,11 @@ func main() {
 		args.PrintUsage()
 	}
 
+	if args.Using("version") {
+		printVersion()
+		os.Exit(0)
+	}
+
 	handleFile()
 
 	handleIncludes()
