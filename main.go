@@ -38,13 +38,6 @@ func init() {
 }
 
 func main() {
-	if len(os.Args) <= 1 {
-		printLogo()
-		printVersion()
-		fmt.Printf("\n")
-		args.PrintUsage()
-	}
-
 	if args.Using("help") {
 		args.PrintUsage()
 	}
@@ -52,6 +45,20 @@ func main() {
 	if args.Using("version") {
 		printVersion()
 		os.Exit(0)
+	}
+
+	var fileArg = false
+	for _, arg := range os.Args {
+		if strings.Contains(arg, ".cherri") {
+			fileArg = true
+		}
+	}
+
+	if len(os.Args) <= 1 || !fileArg {
+		printLogo()
+		printVersion()
+		fmt.Printf("\n")
+		args.PrintUsage()
 	}
 
 	handleFile()
