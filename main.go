@@ -6,7 +6,6 @@ package main
 
 import (
 	"bytes"
-	"embed"
 	"fmt"
 	"os"
 	"os/exec"
@@ -37,9 +36,6 @@ func init() {
 	args.Register("no-ansi", "", "Don't output ANSI escape sequences that format and color the output.", false)
 	args.CustomUsage = "[FILE]"
 }
-
-//go:embed logo.txt
-var logo embed.FS
 
 func main() {
 	if len(os.Args) <= 1 {
@@ -293,11 +289,15 @@ func printVersion() {
 }
 
 func printLogo() {
-	var logoStr string
-	var logoBytes, logoErr = logo.ReadFile("logo.txt")
-	handle(logoErr)
-	logoStr = string(logoBytes)
-	fmt.Println(logoStr)
+	const green = "\033[38;5;22m"
+	const red = "\033[38;5;88m"
+	const reset = "\033[0m"
+	fmt.Print(green + "\n                       $$$\n                     $$$$$\n                 $$$$$$$$$\n            $$$$$$$$  $$$$\n        $$$$      $$  $$$$\n      $$$     $$$$$$  $ $$\n     $    $$$$$$$$$  $  $$              \n   $$   $$$$$$$$$   $   $$              \n  $$  $$$$$$$$$$   $    $$              \n  $$$$$$$$$$$     $$     $$    " + reset)
+	fmt.Print(red + "$$$$$$   \n" + reset)
+	fmt.Print(green + "$$$$$$$$$       $$       $$ " + reset)
+	fmt.Print(red + "$$$$$$$$$$\n         $$$$$  " + reset)
+	fmt.Print(green + "$$$    $$  $  " + reset)
+	fmt.Print(red + "$$$$$$$$$\n      $$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$\n     $$$$$$$$$$$$  $$$$$  $$$$$$$$$$$$$$\n    $$$  $$$$$$$$$$$$$$$$  $$$$$$$$$  $$\n    $$   $$$$$$$$$$$$$$$$$ $$$$$$$$$  $$\n    $$  $$$$$$$$$$$$$$$$$$ $$$$$$$$$ $$ \n    $$$ $$$$$$$$$$$$$$$$$$ $$$$$$$$$$$  \n    $$$  $$$$$$$$$$$$$$$$ $$$$$$$$$$$   \n     $$$$$$$$$$$$$$$$$$$  $$$$$$$$$     \n     $$$$$$$$$$$$$$$$$$$                \n       $$$$$$$$$$$$$$$                  \n          $$$$$$$$$$                    \n\n" + reset)
 }
 
 func splitContents() {
