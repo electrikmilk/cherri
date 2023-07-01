@@ -51,6 +51,7 @@ func main() {
 	for _, arg := range os.Args {
 		if strings.Contains(arg, ".cherri") {
 			fileArg = true
+			break
 		}
 	}
 
