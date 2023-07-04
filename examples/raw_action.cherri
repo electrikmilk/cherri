@@ -1,4 +1,4 @@
-@params = [
+rawAction("is.workflow.actions.alert", [
     {
         "key": "WFAlertActionMessage",
         "type": "string",
@@ -9,6 +9,4 @@
         "type": "string",
         "value": "Alert"
     }
-]
-
-rawAction("is.workflow.actions.alert", params)
+])
