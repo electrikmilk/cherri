@@ -1,0 +1,9 @@
+@images = selectPhotos(true)
+
+@combined = combineImages(images, "grid")
+
+@image = firstListItem(images)
+
+cropImage(image)
+
+show("{combined}")
