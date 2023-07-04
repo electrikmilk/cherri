@@ -3405,7 +3405,7 @@ func scriptingActions() {
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 				{
 					key:      "WFItemSpecifier",
 					dataType: Text,
@@ -3424,7 +3424,7 @@ func scriptingActions() {
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 				{
 					key:      "WFItemSpecifier",
 					dataType: Text,
@@ -3443,7 +3443,7 @@ func scriptingActions() {
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[1].value.(string)),
+				variableInput("WFInput", args[0].value.(string)),
 				{
 					key:      "WFItemSpecifier",
 					dataType: Text,
