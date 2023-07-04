@@ -1838,6 +1838,45 @@ func mediaActions() {
 			}
 		},
 	}
+	actions["combineImages"] = &actionDefinition{
+		identifier: "image.combine",
+		parameters: []parameterDefinition{
+			{
+				name:      "images",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "mode",
+				validType: String,
+				key:       "WFImageCombineMode",
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "vertically",
+				},
+				optional: true,
+			},
+			{
+				name:      "spacing",
+				validType: Integer,
+				key:       "WFImageCombineSpacing",
+				defaultValue: actionArgument{
+					valueType: Integer,
+					value:     1,
+				},
+				optional: true,
+			},
+		},
+		check: func(args []actionArgument) {
+			if len(args) < 2 {
+				return
+			}
+			var combineMode = fmt.Sprintf("%s", args[1].value)
+			if strings.ToLower(combineMode) == "grid" {
+				args[1].value = "In a Grid"
+			}
+		},
+	}
 	actions["rotateImage"] = &actionDefinition{
 		identifier: "image.rotate",
 		parameters: []parameterDefinition{
