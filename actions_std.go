@@ -1936,20 +1936,37 @@ func mediaActions() {
 				name:      "position",
 				validType: String,
 				key:       "WFImageCropPosition",
+				optional:  true,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "Center",
+				},
 			},
 			{
 				name:      "width",
-				validType: Variable,
+				validType: String,
 				key:       "WFImageCropWidth",
+				optional:  true,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "100",
+				},
 			},
 			{
 				name:      "height",
-				validType: Variable,
+				validType: String,
 				key:       "WFImageCropHeight",
+				optional:  true,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "100",
+				},
 			},
 		},
 		check: func(args []actionArgument) {
-			checkEnum("crop position", cropPositions, args, 1)
+			if len(args) > 1 {
+				checkEnum("crop position", cropPositions, args, 1)
+			}
 		},
 	}
 	actions["deletePhotos"] = &actionDefinition{
