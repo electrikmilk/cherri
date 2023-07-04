@@ -33,7 +33,9 @@ func handleIncludes() {
 			fmt.Print("Parsing includes... ")
 		}
 		parseIncludes()
-		fmt.Print(ansi("done!", green) + "\n")
+		if args.Using("debug") {
+			fmt.Print(ansi("done!", green) + "\n")
+		}
 	}
 }
 
