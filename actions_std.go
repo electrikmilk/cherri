@@ -3682,7 +3682,7 @@ func scriptingActions() {
 					value:    true,
 				})
 			}
-			return xCallbackParams
+			return
 		},
 	}
 	actions["output"] = &actionDefinition{
