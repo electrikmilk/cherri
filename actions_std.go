@@ -3471,7 +3471,7 @@ func scriptingActions() {
 				{
 					key:      "WFItemSpecifier",
 					dataType: Text,
-					value:    "Item at Index",
+					value:    "Item At Index",
 				},
 			}
 		},
