@@ -48,7 +48,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	if len(os.Args) == 1 || !fileArg() {
+	var file = fileArg()
+	if len(os.Args) == 1 || file == "" {
 		printLogo()
 		printVersion()
 		fmt.Printf("\n")
@@ -56,7 +57,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	handleFile()
+	handleFile(file)
 
 	handleIncludes()
 
@@ -117,18 +118,16 @@ func main() {
 	}
 }
 
-func fileArg() bool {
+func fileArg() string {
 	for _, arg := range os.Args {
 		if strings.Contains(arg, ".cherri") {
-			return true
-			break
+			return arg
 		}
 	}
-	return false
+	return ""
 }
 
-func handleFile() {
-	filePath = os.Args[1]
+func handleFile(filePath string) {
 	filename = checkFile(filePath)
 
 	relativePath = strings.Replace(filePath, filename, "", 1)
