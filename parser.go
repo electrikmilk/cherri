@@ -212,6 +212,7 @@ func parse() {
 				parserError(fmt.Sprintf("Import library '%s' does not exist!", collectedLibrary))
 			}
 		case isToken(At):
+			reachable()
 			var identifier string
 			if strings.Contains(lookAheadUntil('\n'), "=") {
 				identifier = collectUntil(' ')
@@ -259,6 +260,7 @@ func parse() {
 				})
 			}
 		case tokenAhead(Repeat):
+			reachable()
 			advance()
 			currentGroupingUUID = shortcutsUUID()
 			closureIdx++
@@ -276,6 +278,7 @@ func parse() {
 				value:     timesValue,
 			})
 		case tokenAhead(RepeatWithEach):
+			reachable()
 			advance()
 			currentGroupingUUID = shortcutsUUID()
 			closureIdx++
@@ -292,6 +295,7 @@ func parse() {
 				value:     iterableValue,
 			})
 		case tokenAhead(Menu):
+			reachable()
 			advance()
 			currentGroupingUUID = shortcutsUUID()
 			closureIdx++
@@ -330,6 +334,7 @@ func parse() {
 				value:     itemValue,
 			})
 		case tokenAhead(If):
+			reachable()
 			advance()
 			makeConditions()
 			currentGroupingUUID = shortcutsUUID()
@@ -400,8 +405,12 @@ func parse() {
 				if currentGroupingUUID == "" {
 					parserError("Ending closure has no starting statement.")
 				}
+				var closureType = closureTypes[closureIdx]
+				if closureType == Repeat || closureType == RepeatWithEach {
+					reachable()
+				}
 				tokens = append(tokens, token{
-					typeof:    closureTypes[closureIdx],
+					typeof:    closureType,
 					ident:     closureUUIDs[closureIdx],
 					valueType: EndClosure,
 					value:     nil,
@@ -409,6 +418,7 @@ func parse() {
 				closureIdx--
 			}
 		case strings.Contains(lookAheadUntil(' '), "("):
+			reachable()
 			var identifier, value = collectAction()
 			tokens = append(tokens, token{
 				typeof:    Action,
@@ -419,6 +429,23 @@ func parse() {
 		default:
 			parserError(fmt.Sprintf("Illegal character '%s'", string(char)))
 		}
+	}
+}
+
+var lastToken token
+
+func reachable() {
+	if len(tokens) == 0 {
+		return
+	}
+	lastToken = tokens[len(tokens)-1]
+	if lastToken.valueType != Action {
+		return
+	}
+	var lastActionIdentifier = lastToken.value.(action).ident
+	var stoppers = []string{"stop", "output", "mustOutput", "outputOrClipboard"}
+	if contains(stoppers, lastActionIdentifier) {
+		parserWarning(fmt.Sprintf("Statement appears to be unreachable or does not loop as %s() was called outside of conditional.", lastActionIdentifier))
 	}
 }
 
