@@ -47,15 +47,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	var fileArg = false
-	for _, arg := range os.Args {
-		if strings.Contains(arg, ".cherri") {
-			fileArg = true
-			break
-		}
-	}
-
-	if len(os.Args) <= 1 || !fileArg {
+	if len(os.Args) <= 1 || !fileArg() {
 		printLogo()
 		printVersion()
 		fmt.Printf("\n")
@@ -121,6 +113,16 @@ func main() {
 		var _, importErr = exec.Command("open", outputPath).Output()
 		handle(importErr)
 	}
+}
+
+func fileArg() bool {
+	for _, arg := range os.Args {
+		if strings.Contains(arg, ".cherri") {
+			return true
+			break
+		}
+	}
+	return false
 }
 
 func handleFile() {
