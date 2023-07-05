@@ -40,6 +40,7 @@ func init() {
 func main() {
 	if args.Using("help") {
 		args.PrintUsage()
+		os.Exit(0)
 	}
 
 	if args.Using("version") {
@@ -47,11 +48,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	if len(os.Args) <= 1 || !fileArg() {
+	if len(os.Args) == 1 || !fileArg() {
 		printLogo()
 		printVersion()
 		fmt.Printf("\n")
 		args.PrintUsage()
+		os.Exit(1)
 	}
 
 	handleFile()
