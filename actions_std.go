@@ -3689,18 +3689,9 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "output",
-				validType: Variable,
+				validType: String,
 				key:       "WFOutput",
 			},
-		},
-		addParams: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFNoOutputSurfaceBehavior",
-					dataType: Text,
-					value:    "Do Nothing",
-				},
-			}
 		},
 	}
 	actions["mustOutput"] = &actionDefinition{
@@ -3732,7 +3723,7 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "output",
-				validType: Variable,
+				validType: String,
 				key:       "WFOutput",
 			},
 		},
