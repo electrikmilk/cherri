@@ -21,10 +21,10 @@ Before submitting an issue please confirm the following:
   - **If you are using the latest release:** You are including the version of macOS installed on your machine and your CPU architecture. Use the output
   of `uname -a`.
 
-Confirming these things help immensely to prevent duplicates, ensure proper communication and reproducibility.
+Confirming these things helps immensely to prevent duplicates, ensure proper communication and reproducibility.
 
 Issues can be frustrating, but an issue is not easily fixed unless a concrete description of what the issue is, how to
-reproduce it, what environment it may be isolated to are clearly communicated.
+reproduce it and what environment it may be isolated to are clearly communicated.
 
 ## Pull request policy
 
