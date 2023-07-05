@@ -78,8 +78,9 @@ func plistActions() {
 		case Comment:
 			plistComment(&t)
 		case Action:
-			currentAction = t.value.(action).ident
-			plistAction(t.value.(action).args, plistData{}, plistData{})
+			var tokenAction = t.value.(action)
+			currentAction = tokenAction.ident
+			plistAction(tokenAction.args, plistData{}, plistData{})
 		case Repeat:
 			plistRepeat(&t)
 		case RepeatWithEach:
