@@ -57,19 +57,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	filename = checkFile(filePath)
-	relativePath = strings.Replace(filePath, filename, "", 1)
-	var nameParts = strings.Split(filename, ".")
-	basename = nameParts[0]
-
-	outputPath = relativePath + basename + ".shortcut"
-	if args.Using("output") {
-		outputPath = args.Value("output")
-	}
-
-	var fileBytes, readErr = os.ReadFile(filePath)
-	handle(readErr)
-	contents = string(fileBytes)
+	handleFile()
 
 	handleIncludes()
 
@@ -118,6 +106,22 @@ func createShortcut() {
 		unsignedPath = outputPath
 	}
 	writeFile(unsignedPath, fmt.Sprintf("Creating unsigned %s.shortcut", basename))
+}
+
+func handleFile() {
+	filename = checkFile(filePath)
+	relativePath = strings.Replace(filePath, filename, "", 1)
+	var nameParts = strings.Split(filename, ".")
+	basename = nameParts[0]
+
+	outputPath = relativePath + basename + ".shortcut"
+	if args.Using("output") {
+		outputPath = args.Value("output")
+	}
+
+	var fileBytes, readErr = os.ReadFile(filePath)
+	handle(readErr)
+	contents = string(fileBytes)
 }
 
 // writeFile writes plist in bytes to filename.
