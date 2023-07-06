@@ -82,6 +82,8 @@ func main() {
 
 	if !args.Using("unsigned") {
 		sign()
+	} else if args.Using("output") {
+		writeFile(outputPath, "Creating output...")
 	}
 
 	if args.Using("debug") {
