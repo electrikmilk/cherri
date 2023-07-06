@@ -903,11 +903,7 @@ func parserErr(err error) {
 
 func parserWarning(message string) {
 	var errorFilename, errorLine, errorCol = delinquentFile()
-	if args.Using("no-ansi") {
-		fmt.Printf("Warning: %s (%d:%d)\n", message, errorLine, errorCol)
-	} else {
-		fmt.Print(ansi(fmt.Sprintf("\nWarning: %s %s:%d:%d\n", message, errorFilename, errorLine, errorCol), yellow))
-	}
+	fmt.Println(ansi("\nWarning: ", yellow, bold) + fmt.Sprintf("%s %s:%d:%d", message, errorFilename, errorLine, errorCol))
 }
 
 func makeKeyList(title string, list map[string]string) (formattedList string) {
