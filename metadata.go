@@ -137,18 +137,6 @@ func makeLanguages() {
 	languages["Vietnamese"] = "vn_VN"
 }
 
-/* Import Questions */
-
-var questions map[string]*question
-
-type question struct {
-	parameter    string
-	actionIndex  int
-	text         string
-	defaultValue string
-	used         bool
-}
-
 /* Variables */
 
 var variables map[string]variableValue

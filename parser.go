@@ -47,166 +47,9 @@ func parse() {
 		case char == ' ' || char == '\t' || char == '\n':
 			advance()
 		case tokenAhead(Question):
-			advance()
-			var identifier = collectUntilExpect(' ', 3)
-			identifier = strings.ToLower(identifier)
-			advance()
-			if !isToken("\"") {
-				parserError("Expected string")
-			}
-			var text = collectString()
-			advance()
-			if !isToken("\"") {
-				parserError("Expected string")
-			}
-			var defaultValue = collectString()
-			questions[identifier] = &question{
-				text:         text,
-				defaultValue: defaultValue,
-			}
+			collectQuestion()
 		case tokenAhead(Definition):
-			advance()
-			switch {
-			case tokenAhead(Name):
-				advance()
-				workflowName = collectUntil('\n')
-			case tokenAhead(Color):
-				advance()
-				var collectColor = collectUntil('\n')
-				makeColors()
-				collectColor = strings.ToLower(collectColor)
-				if _, found := colors[collectColor]; found {
-					iconColor = colors[collectColor]
-				} else {
-					var list = makeKeyList("Available icon colors:", colors)
-					parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s", collectColor, list))
-				}
-			case tokenAhead(Glyph):
-				advance()
-				var collectGlyph = collectUntil('\n')
-				makeGlyphs()
-				collectGlyph = strings.ToLower(collectGlyph)
-				if _, found := glyphs[collectGlyph]; found {
-					glyphInt, hexErr := strconv.ParseInt(fmt.Sprintf("%d", glyphs[collectGlyph]), 10, 64)
-					handle(hexErr)
-					iconGlyph = glyphInt
-				} else {
-					var list = "Available icon glyphs:\n"
-					for key := range glyphs {
-						list += "- " + key + "\n"
-					}
-					parserError(fmt.Sprintf("Invalid icon glyph '%s'\n\n%s", collectGlyph, list))
-				}
-			case tokenAhead(Inputs):
-				advance()
-				var collectInputs = collectUntil('\n')
-				if collectInputs != "" {
-					var inputTypes = strings.Split(collectInputs, ",")
-					for _, input := range inputTypes {
-						input = strings.Trim(input, " ")
-						makeContentItems()
-						if _, found := contentItems[input]; found {
-							inputs = append(inputs, contentItems[input])
-						} else {
-							var list = makeKeyList("Available content item types:", contentItems)
-							parserError(fmt.Sprintf("Invalid input type '%s'\n\n%s", input, list))
-						}
-					}
-				}
-			case tokenAhead(Outputs):
-				advance()
-				var collectOutputs = collectUntil('\n')
-				if collectOutputs != "" {
-					var outputTypes = strings.Split(collectOutputs, ",")
-					for _, output := range outputTypes {
-						output = strings.Trim(output, " ")
-						makeContentItems()
-						if _, found := contentItems[output]; found {
-							outputs = append(outputs, contentItems[output])
-						} else {
-							var list = makeKeyList("Available content item types:", contentItems)
-							parserError(fmt.Sprintf("Invalid output type '%s'\n\n%s", output, list))
-						}
-					}
-				}
-			case tokenAhead(From):
-				advance()
-				makeWorkflowTypes()
-				var collectWorkflowTypes = collectUntil('\n')
-				if collectWorkflowTypes != "" {
-					var definedWorkflowTypes = strings.Split(collectWorkflowTypes, ",")
-					for _, wtype := range definedWorkflowTypes {
-						wtype = strings.Trim(wtype, " ")
-						if _, found := workflowTypes[wtype]; found {
-							types = append(types, workflowTypes[wtype])
-						} else {
-							var list = makeKeyList("Available workflow types:", workflowTypes)
-							parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
-						}
-					}
-				}
-			case tokenAhead(NoInput):
-				advance()
-				switch {
-				case tokenAhead(StopWith):
-					advance()
-					var stopWithError = collectString()
-					noInput = noInputParams{
-						name: "WFWorkflowNoInputBehaviorShowError",
-						params: []plistData{
-							{
-								key:      "Error",
-								dataType: Text,
-								value:    stopWithError,
-							},
-						},
-					}
-				case tokenAhead(AskFor):
-					advance()
-					var wtype = collectUntil('\n')
-					makeContentItems()
-					if _, found := contentItems[wtype]; found {
-						noInput = noInputParams{
-							name: "WFWorkflowNoInputBehaviorAskForInput",
-							params: []plistData{
-								{
-									key:      "ItemClass",
-									dataType: Text,
-									value:    contentItems[wtype],
-								},
-							},
-						}
-					} else {
-						var list = makeKeyList("Available workflow types:", workflowTypes)
-						parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
-					}
-				case tokenAhead(GetClipboard):
-					noInput = noInputParams{
-						name:   "WFWorkflowNoInputBehaviorGetClipboard",
-						params: []plistData{},
-					}
-				}
-			case tokenAhead(Mac):
-				var defValue = collectUntil('\n')
-				switch defValue {
-				case "true":
-					isMac = true
-				case "false":
-					isMac = false
-				default:
-					parserError(fmt.Sprintf("Invalid value of '%s' for boolean definition 'mac'", defValue))
-				}
-			case tokenAhead(Version):
-				var collectVersion = collectUntil('\n')
-				makeVersions()
-				if _, found := versions[collectVersion]; found {
-					minVersion = versions[collectVersion]
-					iosVersion, _ = strconv.ParseFloat(collectVersion, 8)
-				} else {
-					var list = makeKeyList("Available versions:", versions)
-					parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
-				}
-			}
+			collectDefinition()
 		case tokenAhead(Import):
 			makeLibraries()
 			advanceTimes(2)
@@ -217,53 +60,9 @@ func parse() {
 				parserError(fmt.Sprintf("Import library '%s' does not exist!", collectedLibrary))
 			}
 		case isToken(At):
-			reachable()
-			var identifier string
-			if strings.Contains(lookAheadUntil('\n'), "=") {
-				identifier = collectUntil(' ')
-				advance()
-			} else {
-				identifier = collectUntil('\n')
-			}
-			var valueType tokenType
-			var value any
-			var getAs string
-			var coerce string
-			var varType = Var
-			if strings.Contains(lookAheadUntil('\n'), "=") {
-				collectVariableValue(&valueType, &value, &varType, &coerce, &getAs)
-			}
-			tokens = append(tokens, token{
-				typeof:    varType,
-				ident:     identifier,
-				valueType: valueType,
-				value:     value,
-			})
-			if varType == Var {
-				variables[strings.ToLower(identifier)] = variableValue{
-					variableType: "Variable",
-					valueType:    valueType,
-					value:        value,
-					getAs:        getAs,
-					coerce:       coerce,
-				}
-			}
+			collectVariable()
 		case isToken(ForwardSlash):
-			if isToken(ForwardSlash) {
-				tokens = append(tokens, token{
-					typeof:    Comment,
-					ident:     "",
-					valueType: String,
-					value:     collectComment(singleLine),
-				})
-			} else {
-				tokens = append(tokens, token{
-					typeof:    Comment,
-					ident:     "",
-					valueType: String,
-					value:     collectComment(multiLine),
-				})
-			}
+			collectComment()
 		case tokenAhead(Repeat):
 			reachable()
 			advance()
@@ -339,59 +138,7 @@ func parse() {
 				value:     itemValue,
 			})
 		case tokenAhead(If):
-			reachable()
-			advance()
-			makeConditions()
-			currentGroupingUUID = shortcutsUUID()
-			closureIdx++
-			closureUUIDs[closureIdx] = currentGroupingUUID
-			closureTypes[closureIdx] = Conditional
-			var conditionType string
-			if isToken(Exclamation) {
-				conditionType = conditions[Empty]
-			} else {
-				conditionType = conditions[Any]
-			}
-			var variableOneType tokenType
-			var variableOneValue any
-			var variableTwoType tokenType
-			var variableTwoValue any
-			var variableThreeType tokenType
-			var variableThreeValue any
-			collectValue(&variableOneType, &variableOneValue, ' ')
-			if !isToken(LeftBrace) {
-				var collectConditional = collectUntil(' ')
-				var collectConditionalToken = tokenType(collectConditional)
-				if _, found := conditions[collectConditionalToken]; found {
-					conditionType = conditions[collectConditionalToken]
-				} else {
-					parserError(fmt.Sprintf("Invalid conditional '%s'", collectConditional))
-				}
-				advance()
-				collectValue(&variableTwoType, &variableTwoValue, ' ')
-				if char == ' ' {
-					advance()
-				}
-				if !isToken(LeftBrace) {
-					collectValue(&variableThreeType, &variableThreeValue, '{')
-					advance()
-				}
-			}
-			isToken(LeftBrace)
-			tokens = append(tokens, token{
-				typeof:    Conditional,
-				ident:     currentGroupingUUID,
-				valueType: If,
-				value: condition{
-					variableOneType:    variableOneType,
-					variableOneValue:   variableOneValue,
-					condition:          conditionType,
-					variableTwoType:    variableTwoType,
-					variableTwoValue:   variableTwoValue,
-					variableThreeType:  variableThreeType,
-					variableThreeValue: variableThreeValue,
-				},
-			})
+			collectConditional()
 		case tokenAhead(RightBrace):
 			advance()
 			if tokenAhead(Else) {
@@ -644,17 +391,11 @@ func collectArguments() (arguments []actionArgument) {
 	return
 }
 
-type commentType int
-
-const (
-	singleLine commentType = iota
-	multiLine
-)
-
-func collectComment(collect commentType) (comment string) {
-	if collect == singleLine {
+func collectComment() {
+	var comment string
+	if isToken(ForwardSlash) {
 		comment = collectUntil('\n')
-	} else if collect == multiLine {
+	} else {
 		advanceTimes(2)
 		for {
 			if char == '*' && next(1) == '/' {
@@ -667,7 +408,277 @@ func collectComment(collect commentType) (comment string) {
 		advanceTimes(3)
 	}
 	comment = strings.Trim(comment, " ")
-	return
+	tokens = append(tokens, token{
+		typeof:    Comment,
+		ident:     "",
+		valueType: String,
+		value:     comment,
+	})
+}
+
+func collectVariable() {
+	reachable()
+	var identifier string
+	if strings.Contains(lookAheadUntil('\n'), "=") {
+		identifier = collectUntil(' ')
+		advance()
+	} else {
+		identifier = collectUntil('\n')
+	}
+	var valueType tokenType
+	var value any
+	var getAs string
+	var coerce string
+	var varType = Var
+	if strings.Contains(lookAheadUntil('\n'), "=") {
+		collectVariableValue(&valueType, &value, &varType, &coerce, &getAs)
+	}
+	tokens = append(tokens, token{
+		typeof:    varType,
+		ident:     identifier,
+		valueType: valueType,
+		value:     value,
+	})
+	if varType == Var {
+		variables[strings.ToLower(identifier)] = variableValue{
+			variableType: "Variable",
+			valueType:    valueType,
+			value:        value,
+			getAs:        getAs,
+			coerce:       coerce,
+		}
+	}
+}
+
+func collectDefinition() {
+	advance()
+	switch {
+	case tokenAhead(Name):
+		advance()
+		workflowName = collectUntil('\n')
+	case tokenAhead(Color):
+		advance()
+		var collectColor = collectUntil('\n')
+		makeColors()
+		collectColor = strings.ToLower(collectColor)
+		if _, found := colors[collectColor]; found {
+			iconColor = colors[collectColor]
+		} else {
+			var list = makeKeyList("Available icon colors:", colors)
+			parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s", collectColor, list))
+		}
+	case tokenAhead(Glyph):
+		advance()
+		var collectGlyph = collectUntil('\n')
+		makeGlyphs()
+		collectGlyph = strings.ToLower(collectGlyph)
+		if _, found := glyphs[collectGlyph]; found {
+			glyphInt, hexErr := strconv.ParseInt(fmt.Sprintf("%d", glyphs[collectGlyph]), 10, 64)
+			handle(hexErr)
+			iconGlyph = glyphInt
+		} else {
+			var list = "Available icon glyphs:\n"
+			for key := range glyphs {
+				list += "- " + key + "\n"
+			}
+			parserError(fmt.Sprintf("Invalid icon glyph '%s'\n\n%s", collectGlyph, list))
+		}
+	case tokenAhead(Inputs):
+		advance()
+		var collectInputs = collectUntil('\n')
+		if collectInputs != "" {
+			var inputTypes = strings.Split(collectInputs, ",")
+			for _, input := range inputTypes {
+				input = strings.Trim(input, " ")
+				makeContentItems()
+				if _, found := contentItems[input]; found {
+					inputs = append(inputs, contentItems[input])
+				} else {
+					var list = makeKeyList("Available content item types:", contentItems)
+					parserError(fmt.Sprintf("Invalid input type '%s'\n\n%s", input, list))
+				}
+			}
+		}
+	case tokenAhead(Outputs):
+		advance()
+		var collectOutputs = collectUntil('\n')
+		if collectOutputs != "" {
+			var outputTypes = strings.Split(collectOutputs, ",")
+			for _, output := range outputTypes {
+				output = strings.Trim(output, " ")
+				makeContentItems()
+				if _, found := contentItems[output]; found {
+					outputs = append(outputs, contentItems[output])
+				} else {
+					var list = makeKeyList("Available content item types:", contentItems)
+					parserError(fmt.Sprintf("Invalid output type '%s'\n\n%s", output, list))
+				}
+			}
+		}
+	case tokenAhead(From):
+		advance()
+		makeWorkflowTypes()
+		var collectWorkflowTypes = collectUntil('\n')
+		if collectWorkflowTypes != "" {
+			var definedWorkflowTypes = strings.Split(collectWorkflowTypes, ",")
+			for _, wtype := range definedWorkflowTypes {
+				wtype = strings.Trim(wtype, " ")
+				if _, found := workflowTypes[wtype]; found {
+					types = append(types, workflowTypes[wtype])
+				} else {
+					var list = makeKeyList("Available workflow types:", workflowTypes)
+					parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
+				}
+			}
+		}
+	case tokenAhead(NoInput):
+		advance()
+		switch {
+		case tokenAhead(StopWith):
+			advance()
+			var stopWithError = collectString()
+			noInput = noInputParams{
+				name: "WFWorkflowNoInputBehaviorShowError",
+				params: []plistData{
+					{
+						key:      "Error",
+						dataType: Text,
+						value:    stopWithError,
+					},
+				},
+			}
+		case tokenAhead(AskFor):
+			advance()
+			var wtype = collectUntil('\n')
+			makeContentItems()
+			if _, found := contentItems[wtype]; found {
+				noInput = noInputParams{
+					name: "WFWorkflowNoInputBehaviorAskForInput",
+					params: []plistData{
+						{
+							key:      "ItemClass",
+							dataType: Text,
+							value:    contentItems[wtype],
+						},
+					},
+				}
+			} else {
+				var list = makeKeyList("Available workflow types:", workflowTypes)
+				parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
+			}
+		case tokenAhead(GetClipboard):
+			noInput = noInputParams{
+				name:   "WFWorkflowNoInputBehaviorGetClipboard",
+				params: []plistData{},
+			}
+		}
+	case tokenAhead(Mac):
+		var defValue = collectUntil('\n')
+		switch defValue {
+		case "true":
+			isMac = true
+		case "false":
+			isMac = false
+		default:
+			parserError(fmt.Sprintf("Invalid value of '%s' for boolean definition 'mac'", defValue))
+		}
+	case tokenAhead(Version):
+		var collectVersion = collectUntil('\n')
+		makeVersions()
+		if _, found := versions[collectVersion]; found {
+			minVersion = versions[collectVersion]
+			iosVersion, _ = strconv.ParseFloat(collectVersion, 8)
+		} else {
+			var list = makeKeyList("Available versions:", versions)
+			parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
+		}
+	}
+}
+
+var questions map[string]*question
+
+type question struct {
+	parameter    string
+	actionIndex  int
+	text         string
+	defaultValue string
+	used         bool
+}
+
+func collectQuestion() {
+	advance()
+	var identifier = collectUntilExpect(' ', 3)
+	identifier = strings.ToLower(identifier)
+	advance()
+	if !isToken("\"") {
+		parserError("Expected string")
+	}
+	var text = collectString()
+	advance()
+	if !isToken("\"") {
+		parserError("Expected string")
+	}
+	var defaultValue = collectString()
+	questions[identifier] = &question{
+		text:         text,
+		defaultValue: defaultValue,
+	}
+}
+
+func collectConditional() {
+	reachable()
+	advance()
+	makeConditions()
+	currentGroupingUUID = shortcutsUUID()
+	closureIdx++
+	closureUUIDs[closureIdx] = currentGroupingUUID
+	closureTypes[closureIdx] = Conditional
+	var conditionType string
+	if isToken(Exclamation) {
+		conditionType = conditions[Empty]
+	} else {
+		conditionType = conditions[Any]
+	}
+	var variableOneType tokenType
+	var variableOneValue any
+	var variableTwoType tokenType
+	var variableTwoValue any
+	var variableThreeType tokenType
+	var variableThreeValue any
+	collectValue(&variableOneType, &variableOneValue, ' ')
+	if !isToken(LeftBrace) {
+		var collectConditional = collectUntil(' ')
+		var collectConditionalToken = tokenType(collectConditional)
+		if _, found := conditions[collectConditionalToken]; found {
+			conditionType = conditions[collectConditionalToken]
+		} else {
+			parserError(fmt.Sprintf("Invalid conditional '%s'", collectConditional))
+		}
+		advance()
+		collectValue(&variableTwoType, &variableTwoValue, ' ')
+		if char == ' ' {
+			advance()
+		}
+		if !isToken(LeftBrace) {
+			collectValue(&variableThreeType, &variableThreeValue, '{')
+			advance()
+		}
+	}
+	isToken(LeftBrace)
+	tokens = append(tokens, token{
+		typeof:    Conditional,
+		ident:     currentGroupingUUID,
+		valueType: If,
+		value: condition{
+			variableOneType:    variableOneType,
+			variableOneValue:   variableOneValue,
+			condition:          conditionType,
+			variableTwoType:    variableTwoType,
+			variableTwoValue:   variableTwoValue,
+			variableThreeType:  variableThreeType,
+			variableThreeValue: variableThreeValue,
+		},
+	})
 }
 
 func collectInteger() (integer string) {
