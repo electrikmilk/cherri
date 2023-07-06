@@ -48,8 +48,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	var file = fileArg()
-	if len(os.Args) == 1 || file == "" {
+	filePath = fileArg()
+	if len(os.Args) == 1 || filePath == "" {
 		printLogo()
 		printVersion()
 		fmt.Printf("\n")
@@ -57,7 +57,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	handleFile(file)
+	filename = checkFile(filePath)
+	relativePath = strings.Replace(filePath, filename, "", 1)
+	var nameParts = strings.Split(filename, ".")
+	basename = nameParts[0]
+
+	outputPath = relativePath + basename + ".shortcut"
+	if args.Using("output") {
+		outputPath = args.Value("output")
+	}
+
+	var fileBytes, readErr = os.ReadFile(filePath)
+	handle(readErr)
+	contents = string(fileBytes)
 
 	handleIncludes()
 
@@ -99,18 +111,19 @@ func fileArg() string {
 }
 
 func createShortcut() {
-	writeFile(basename+".plist", fmt.Sprintf("Creating %s.plist... ", basename))
+	writeFile(basename+".plist", fmt.Sprintf("Creating %s.plist", basename))
 
-	var unsignedPath = basename + "_unsigned.shortcut"
+	var unsignedPath = relativePath + basename + "_unsigned.shortcut"
 	if args.Using("unsigned") {
 		unsignedPath = outputPath
 	}
-	writeFile(unsignedPath, fmt.Sprintf("Creating unsigned %s.shortcut... ", basename))
+	writeFile(unsignedPath, fmt.Sprintf("Creating unsigned %s.shortcut", basename))
 }
 
+// writeFile writes plist in bytes to filename.
 func writeFile(filename string, debug string) {
 	if args.Using("debug") {
-		fmt.Print(debug)
+		fmt.Print(debug + "... ")
 	}
 	writeErr := os.WriteFile(filename, []byte(plist), 0600)
 	handle(writeErr)
@@ -119,23 +132,7 @@ func writeFile(filename string, debug string) {
 	}
 }
 
-func handleFile(filePath string) {
-	filename = checkFile(filePath)
-
-	relativePath = strings.Replace(filePath, filename, "", 1)
-	var nameParts = strings.Split(filename, ".")
-	basename = nameParts[0]
-
-	var fileBytes, readErr = os.ReadFile(filePath)
-	handle(readErr)
-	contents = string(fileBytes)
-
-	outputPath = basename + ".shortcut"
-	if args.Using("output") {
-		outputPath = args.Value("output")
-	}
-}
-
+// checkFile checks if the file exists and is a .cherri file.
 func checkFile(filePath string) (filename string) {
 	var file, statErr = os.Stat(filePath)
 	if os.IsNotExist(statErr) {
@@ -160,7 +157,7 @@ func sign() {
 	var sign = exec.Command(
 		"shortcuts",
 		"sign",
-		"-i", basename+"_unsigned.shortcut",
+		"-i", relativePath+basename+"_unsigned.shortcut",
 		"-o", outputPath,
 		"-m", signingMode,
 	)
@@ -177,7 +174,7 @@ func sign() {
 		fmt.Print(ansi("done!", green) + "\n")
 	}
 
-	removeErr := os.Remove(basename + "_unsigned.shortcut")
+	removeErr := os.Remove(relativePath + basename + "_unsigned.shortcut")
 	handle(removeErr)
 
 	if args.Using("import") {
