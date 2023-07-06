@@ -186,6 +186,8 @@ func parse() {
 
 var lastToken token
 
+// reachable checks if the last token was a "stopper" and throws a warning if so,
+// should only be run when we are about to parse a new statement.
 func reachable() {
 	if len(tokens) == 0 {
 		return
