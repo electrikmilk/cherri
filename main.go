@@ -99,13 +99,10 @@ func fileArg() string {
 }
 
 func createShortcut() {
-	writeFile(basename+".plist", fmt.Sprintf("Creating %s.plist", basename))
-
-	var unsignedPath = relativePath + basename + "_unsigned.shortcut"
-	if args.Using("unsigned") {
-		unsignedPath = outputPath
+	if args.Using("debug") {
+		writeFile(relativePath+basename+".plist", fmt.Sprintf("Creating %s.plist", basename))
 	}
-	writeFile(unsignedPath, fmt.Sprintf("Creating unsigned %s.shortcut", basename))
+	writeFile(relativePath+basename+"_unsigned.shortcut", fmt.Sprintf("Creating unsigned %s.shortcut", basename))
 }
 
 func handleFile() {
