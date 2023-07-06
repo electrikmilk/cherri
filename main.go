@@ -61,13 +61,6 @@ func main() {
 
 	handleIncludes()
 
-	actions = make(map[string]*actionDefinition)
-
-	if strings.Contains(contents, "action") {
-		standardActions()
-		parseCustomActions()
-	}
-
 	if args.Using("debug") {
 		fmt.Printf("Parsing %s... ", filename)
 	}
@@ -85,24 +78,7 @@ func main() {
 		fmt.Print(ansi("done!", green) + "\n")
 	}
 
-	if args.Using("debug") {
-		fmt.Printf("Creating %s.plist... ", basename)
-		plistWriteErr := os.WriteFile(basename+".plist", []byte(plist), 0600)
-		handle(plistWriteErr)
-		fmt.Print(ansi("done!", green) + "\n")
-
-		fmt.Printf("Creating unsigned %s.shortcut... ", basename)
-	}
-
-	var unsignedPath = basename + "_unsigned.shortcut"
-	if args.Using("unsigned") {
-		unsignedPath = outputPath
-	}
-	shortcutWriteErr := os.WriteFile(unsignedPath, []byte(plist), 0600)
-	handle(shortcutWriteErr)
-	if args.Using("debug") {
-		fmt.Print(ansi("done!", green) + "\n")
-	}
+	createShortcut()
 
 	if !args.Using("unsigned") {
 		sign()
@@ -110,11 +86,6 @@ func main() {
 
 	if args.Using("debug") {
 		printDebug()
-	}
-
-	if args.Using("import") && !args.Using("unsigned") {
-		var _, importErr = exec.Command("open", outputPath).Output()
-		handle(importErr)
 	}
 }
 
@@ -125,6 +96,27 @@ func fileArg() string {
 		}
 	}
 	return ""
+}
+
+func createShortcut() {
+	writeFile(basename+".plist", fmt.Sprintf("Creating %s.plist... ", basename))
+
+	var unsignedPath = basename + "_unsigned.shortcut"
+	if args.Using("unsigned") {
+		unsignedPath = outputPath
+	}
+	writeFile(unsignedPath, fmt.Sprintf("Creating unsigned %s.shortcut... ", basename))
+}
+
+func writeFile(filename string, debug string) {
+	if args.Using("debug") {
+		fmt.Print(debug)
+	}
+	writeErr := os.WriteFile(filename, []byte(plist), 0600)
+	handle(writeErr)
+	if args.Using("debug") {
+		fmt.Print(ansi("done!", green) + "\n")
+	}
 }
 
 func handleFile(filePath string) {
@@ -184,8 +176,14 @@ func sign() {
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
 	}
+
 	removeErr := os.Remove(basename + "_unsigned.shortcut")
 	handle(removeErr)
+
+	if args.Using("import") {
+		var _, importErr = exec.Command("open", outputPath).Output()
+		handle(importErr)
+	}
 }
 
 func end(slice []string) string {

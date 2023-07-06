@@ -28,6 +28,11 @@ var closureIdx int
 var currentGroupingUUID string
 
 func parse() {
+	actions = make(map[string]*actionDefinition)
+	if strings.Contains(contents, "action") {
+		standardActions()
+		parseCustomActions()
+	}
 	variables = make(map[string]variableValue)
 	questions = make(map[string]question)
 	menus = make(map[string][]variableValue)
