@@ -146,7 +146,7 @@ func checkFile(filePath string) (filename string) {
 	return file.Name()
 }
 
-// sign runs the shortcuts sign command on the unsigned shortcut file
+// sign runs the shortcuts sign command on the unsigned shortcut file.
 func sign() {
 	var signingMode = "people-who-know-me"
 	if args.Using("share") && args.Value("share") == "anyone" {

@@ -96,7 +96,7 @@ func plistAction(arguments []actionArgument, outputName plistData, actionUUID pl
 	shortcutActions = append(shortcutActions, makeAction(ident, params))
 }
 
-// actionIdentifier determines the identifier of currentAction
+// actionIdentifier determines the identifier of currentAction.
 func actionIdentifier() (ident string) {
 	if actions[currentAction].appIdentifier != "" {
 		ident = actions[currentAction].appIdentifier
