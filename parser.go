@@ -34,7 +34,7 @@ func parse() {
 		parseCustomActions()
 	}
 	variables = make(map[string]variableValue)
-	questions = make(map[string]question)
+	questions = make(map[string]*question)
 	menus = make(map[string][]variableValue)
 	closureUUIDs = make(map[int]string)
 	closureTypes = make(map[int]tokenType)
@@ -60,7 +60,7 @@ func parse() {
 				parserError("Expected string")
 			}
 			var defaultValue = collectString()
-			questions[identifier] = question{
+			questions[identifier] = &question{
 				text:         text,
 				defaultValue: defaultValue,
 			}
@@ -600,8 +600,12 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		*valueType = Variable
 		*value = fullIdentifier
 	} else if _, found := questions[lowerIdentifier]; found {
+		if questions[lowerIdentifier].used {
+			parserError(fmt.Sprintf("Duplicate usage of '%s', import questions can only be referenced once.", fullIdentifier))
+		}
 		*valueType = Question
 		*value = fullIdentifier
+		questions[lowerIdentifier].used = true
 	} else {
 		if fullIdentifier == "" {
 			parserError("Value expected")

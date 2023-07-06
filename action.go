@@ -143,11 +143,12 @@ func questionArgs(arguments []actionArgument) {
 			if _, found := questions[lowerIdentifier]; found {
 				var q = questions[lowerIdentifier]
 				var parameter = actions[currentAction].parameters[i]
-				questions[lowerIdentifier] = question{
+				questions[lowerIdentifier] = &question{
 					parameter:    parameter.key,
 					actionIndex:  len(shortcutActions),
 					text:         q.text,
 					defaultValue: q.defaultValue,
+					used:         true,
 				}
 				arguments[i].value = ""
 			}

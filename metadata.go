@@ -139,13 +139,14 @@ func makeLanguages() {
 
 /* Import Questions */
 
-var questions map[string]question
+var questions map[string]*question
 
 type question struct {
 	parameter    string
 	actionIndex  int
 	text         string
 	defaultValue string
+	used         bool
 }
 
 /* Variables */
