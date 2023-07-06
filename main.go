@@ -339,11 +339,16 @@ const (
 
 const CSI = "\033["
 
-func ansi(message string, typeOf outputType) string {
+func ansi(message string, typeOf ...outputType) string {
 	if args.Using("no-ansi") {
 		return message
 	}
-	return fmt.Sprintf("%s%dm%s", CSI, typeOf, message) + "\033[0m"
+	var formattedMessage string
+	for _, t := range typeOf {
+		formattedMessage += fmt.Sprintf("%s%dm", CSI, t)
+	}
+	formattedMessage += message + "\033[0m"
+	return formattedMessage
 }
 
 func exit(message string) {
