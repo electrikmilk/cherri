@@ -96,6 +96,7 @@ func plistAction(arguments []actionArgument, outputName plistData, actionUUID pl
 	shortcutActions = append(shortcutActions, makeAction(ident, params))
 }
 
+// actionIdentifier determines the identifier of currentAction
 func actionIdentifier() (ident string) {
 	if actions[currentAction].appIdentifier != "" {
 		ident = actions[currentAction].appIdentifier
@@ -133,6 +134,8 @@ func actionParameters(arguments []actionArgument) (params []plistData) {
 	return
 }
 
+// questionArgs updates questions to target the action parameter
+// that it's identifier matches the arguments value.
 func questionArgs(arguments []actionArgument) {
 	for i, a := range arguments {
 		if a.valueType == Question {
