@@ -138,20 +138,15 @@ func actionParameters(arguments []actionArgument) (params []plistData) {
 // that it's identifier matches the arguments value.
 func questionArgs(arguments []actionArgument) {
 	for i, a := range arguments {
-		if a.valueType == Question {
-			var lowerIdentifier = strings.ToLower(a.value.(string))
-			if _, found := questions[lowerIdentifier]; found {
-				var q = questions[lowerIdentifier]
-				var parameter = actions[currentAction].parameters[i]
-				questions[lowerIdentifier] = &question{
-					parameter:    parameter.key,
-					actionIndex:  len(shortcutActions),
-					text:         q.text,
-					defaultValue: q.defaultValue,
-					used:         true,
-				}
-				arguments[i].value = ""
-			}
+		if a.valueType != Question {
+			continue
+		}
+		var lowerIdentifier = strings.ToLower(a.value.(string))
+		if _, found := questions[lowerIdentifier]; found {
+			var parameter = actions[currentAction].parameters[i]
+			questions[lowerIdentifier].parameter = parameter.key
+			questions[lowerIdentifier].actionIndex = len(shortcutActions)
+			arguments[i].value = ""
 		}
 	}
 }
