@@ -4016,11 +4016,17 @@ func sharingActions() {
 				name:      "local",
 				key:       "WFLocalOnly",
 				validType: Bool,
+				optional:  true,
+				defaultValue: actionArgument{
+					valueType: Bool,
+					value:     false,
+				},
 			},
 			{
 				name:      "expire",
 				key:       "WFExpirationDate",
 				validType: String,
+				optional:  true,
 			},
 		},
 	}
