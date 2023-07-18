@@ -2804,7 +2804,6 @@ func scriptingActions() {
 				name:      "prompt",
 				validType: String,
 				key:       "WFAskActionPrompt",
-				optional:  true,
 			},
 			{
 				name:      "defaultValue",
