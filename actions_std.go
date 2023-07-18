@@ -2823,7 +2823,7 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			checkEnum("input type", inputTypes, args, 0)
+			checkEnum("input type", inputTypes, args, 2)
 		},
 	}
 	actions["chooseFromList"] = &actionDefinition{
