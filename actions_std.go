@@ -2801,16 +2801,6 @@ func scriptingActions() {
 		identifier: "ask",
 		parameters: []parameterDefinition{
 			{
-				name:      "inputType",
-				validType: String,
-				key:       "WFInputType",
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "Text",
-				},
-			},
-			{
 				name:      "prompt",
 				validType: String,
 				key:       "WFAskActionPrompt",
@@ -2821,6 +2811,16 @@ func scriptingActions() {
 				validType: String,
 				optional:  true,
 				key:       "WFAskActionDefaultAnswer",
+			},
+			{
+				name:      "inputType",
+				validType: String,
+				key:       "WFInputType",
+				optional:  true,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "Text",
+				},
 			},
 		},
 		check: func(args []actionArgument) {
