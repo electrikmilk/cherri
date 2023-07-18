@@ -2804,11 +2804,17 @@ func scriptingActions() {
 				name:      "inputType",
 				validType: String,
 				key:       "WFInputType",
+				optional:  true,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "Text",
+				},
 			},
 			{
 				name:      "prompt",
 				validType: String,
 				key:       "WFAskActionPrompt",
+				optional:  true,
 			},
 			{
 				name:      "defaultValue",
