@@ -2824,9 +2824,9 @@ func scriptingActions() {
 	actions["chooseFromList"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
-				name:      "dictionary",
+				name:      "list",
 				key:       "WFInput",
-				validType: Dict,
+				validType: Variable,
 			},
 			{
 				name:      "prompt",
