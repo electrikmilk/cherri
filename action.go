@@ -309,20 +309,21 @@ func typeCheck(field string, validType tokenType, argument actionArgument) {
 
 // getArgValue recurses to find the actual value of an argument
 // in the case that the argument is a variable.
-func getArgValue(variable actionArgument) any {
-	if variable.valueType == Variable {
-		var varName = variable.value.(string)
-		if _, found := variables[varName]; found {
-			if variables[varName].valueType == Variable {
-				return getArgValue(actionArgument{
-					valueType: variables[varName].valueType,
-					value:     variables[varName].value,
-				})
-			}
-			return variables[varName].value
-		}
+func getArgValue(argument actionArgument) any {
+	if argument.valueType != Variable {
+		return argument.value
 	}
-	return variable.value
+	var variable = argument.value.(string)
+	if _, found := variables[variable]; !found {
+		return argument.value
+	}
+	if variables[variable].valueType == Variable {
+		return getArgValue(actionArgument{
+			valueType: variables[variable].valueType,
+			value:     variables[variable].value,
+		})
+	}
+	return variables[variable].value
 }
 
 // checkArgs checks to ensure all the required arguments for an action were entered.
