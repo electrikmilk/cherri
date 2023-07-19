@@ -780,7 +780,7 @@ func collectArray() (array interface{}) {
 }
 
 func collectDictionary() (dictionary interface{}) {
-	var rawJSON = collectJSON()
+	var rawJSON = "{" + collectObject() + "}"
 	if args.Using("debug") {
 		fmt.Println(ansi("\n\n### COLLECTED DICTIONARY ###", bold))
 		fmt.Println(rawJSON)
@@ -792,12 +792,10 @@ func collectDictionary() (dictionary interface{}) {
 	return
 }
 
-func collectJSON() (jsonStr string) {
-	jsonStr = "{"
+func collectObject() (jsonStr string) {
 	var insideInnerObject = false
 	var insideString = false
 	for {
-		jsonStr += string(char)
 		if char == '"' {
 			if insideString {
 				if prev(1) != '\\' {
@@ -817,6 +815,7 @@ func collectJSON() (jsonStr string) {
 				insideInnerObject = false
 			}
 		}
+		jsonStr += string(char)
 		advance()
 	}
 	return

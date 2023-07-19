@@ -29,7 +29,7 @@ func parseCustomActions() {
 	idx = -1
 	advance()
 	for char != -1 {
-		if lineCharIdx != 0 || !tokenAhead(CustomAction) {
+		if lineCharIdx != 1 || !tokenAhead(CustomAction) {
 			advance()
 			continue
 		}
@@ -58,7 +58,7 @@ func parseCustomAction() {
 	collectUntilExpect('{', 1)
 	advance()
 
-	var body = collectUntilIgnoreStrings('}')
+	var body = collectObject()
 	customActions[identifier] = customAction{
 		body: body,
 	}
