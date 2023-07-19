@@ -54,124 +54,23 @@ func parse() {
 		case tokenAhead(Definition):
 			collectDefinition()
 		case tokenAhead(Import):
-			makeLibraries()
-			advanceTimes(2)
-			var collectedLibrary = collectString()
-			if _, found := libraries[collectedLibrary]; found {
-				libraries[collectedLibrary].make(libraries[collectedLibrary].identifier)
-			} else {
-				parserError(fmt.Sprintf("Import library '%s' does not exist!", collectedLibrary))
-			}
+			collectImport()
 		case isToken(At):
 			collectVariable()
 		case isToken(ForwardSlash):
 			collectComment()
 		case tokenAhead(Repeat):
-			reachable()
-			advance()
-			currentGroupingUUID = shortcutsUUID()
-			closureIdx++
-			closureUUIDs[closureIdx] = currentGroupingUUID
-			closureTypes[closureIdx] = Repeat
-			var timesType tokenType
-			var timesValue any
-			collectValue(&timesType, &timesValue, '{')
-			collectUntilExpect('{', 3)
-			advance()
-			tokens = append(tokens, token{
-				typeof:    Repeat,
-				ident:     currentGroupingUUID,
-				valueType: timesType,
-				value:     timesValue,
-			})
+			collectRepeat()
 		case tokenAhead(RepeatWithEach):
-			reachable()
-			advance()
-			currentGroupingUUID = shortcutsUUID()
-			closureIdx++
-			closureUUIDs[closureIdx] = currentGroupingUUID
-			closureTypes[closureIdx] = RepeatWithEach
-			var iterableType tokenType
-			var iterableValue any
-			collectValue(&iterableType, &iterableValue, '{')
-			advance()
-			tokens = append(tokens, token{
-				typeof:    RepeatWithEach,
-				ident:     currentGroupingUUID,
-				valueType: iterableType,
-				value:     iterableValue,
-			})
+			collectRepeatEach()
 		case tokenAhead(Menu):
-			reachable()
-			advance()
-			currentGroupingUUID = shortcutsUUID()
-			closureIdx++
-			closureUUIDs[closureIdx] = currentGroupingUUID
-			closureTypes[closureIdx] = Menu
-			var promptType tokenType
-			var promptValue any
-			collectValue(&promptType, &promptValue, '{')
-			collectUntilExpect('{', 3)
-			advance()
-			menus[currentGroupingUUID] = []variableValue{}
-			tokens = append(tokens, token{
-				typeof:    Menu,
-				ident:     currentGroupingUUID,
-				valueType: promptType,
-				value:     promptValue,
-			})
+			collectMenu()
 		case tokenAhead(Item):
-			advance()
-			if currentGroupingUUID == "" {
-				parserError("Case has no starting menu statement.")
-			}
-			var itemType tokenType
-			var itemValue any
-			collectValue(&itemType, &itemValue, ':')
-			collectUntil(':')
-			advance()
-			menus[currentGroupingUUID] = append(menus[currentGroupingUUID], variableValue{
-				valueType: itemType,
-				value:     itemValue,
-			})
-			tokens = append(tokens, token{
-				typeof:    Item,
-				ident:     currentGroupingUUID,
-				valueType: itemType,
-				value:     itemValue,
-			})
+			collectMenuItem()
 		case tokenAhead(If):
 			collectConditional()
 		case tokenAhead(RightBrace):
-			advance()
-			if tokenAhead(Else) {
-				advance()
-				if currentGroupingUUID == "" {
-					parserError("Else has no starting if statement.")
-				}
-				tokens = append(tokens, token{
-					typeof:    Conditional,
-					ident:     closureUUIDs[closureIdx],
-					valueType: Else,
-					value:     nil,
-				})
-				tokenAhead(LeftBrace)
-			} else {
-				if currentGroupingUUID == "" {
-					parserError("Ending closure has no starting statement.")
-				}
-				var closureType = closureTypes[closureIdx]
-				if closureType == Repeat || closureType == RepeatWithEach {
-					reachable()
-				}
-				tokens = append(tokens, token{
-					typeof:    closureType,
-					ident:     closureUUIDs[closureIdx],
-					valueType: EndClosure,
-					value:     nil,
-				})
-				closureIdx--
-			}
+			collectEndClosure()
 		case strings.Contains(lookAheadUntil(' '), "("):
 			reachable()
 			var identifier, value = collectAction()
@@ -618,6 +517,21 @@ func collectDefinition() {
 	}
 }
 
+// libraries is a map of the 3rd party libraries defined in the compiler.
+// The key determines the identifier of the identifier name that must be used in the syntax, it's value defines its behavior, etc. using an libraryDefinition.
+var libraries map[string]libraryDefinition
+
+func collectImport() {
+	makeLibraries()
+	advanceTimes(2)
+	var collectedLibrary = collectString()
+	if _, found := libraries[collectedLibrary]; found {
+		libraries[collectedLibrary].make(libraries[collectedLibrary].identifier)
+	} else {
+		parserError(fmt.Sprintf("Import library '%s' does not exist!", collectedLibrary))
+	}
+}
+
 var questions map[string]*question
 
 type question struct {
@@ -646,6 +560,45 @@ func collectQuestion() {
 		text:         text,
 		defaultValue: defaultValue,
 	}
+}
+
+func collectRepeat() {
+	reachable()
+	advance()
+	currentGroupingUUID = shortcutsUUID()
+	closureIdx++
+	closureUUIDs[closureIdx] = currentGroupingUUID
+	closureTypes[closureIdx] = Repeat
+	var timesType tokenType
+	var timesValue any
+	collectValue(&timesType, &timesValue, '{')
+	collectUntilExpect('{', 3)
+	advance()
+	tokens = append(tokens, token{
+		typeof:    Repeat,
+		ident:     currentGroupingUUID,
+		valueType: timesType,
+		value:     timesValue,
+	})
+}
+
+func collectRepeatEach() {
+	reachable()
+	advance()
+	currentGroupingUUID = shortcutsUUID()
+	closureIdx++
+	closureUUIDs[closureIdx] = currentGroupingUUID
+	closureTypes[closureIdx] = RepeatWithEach
+	var iterableType tokenType
+	var iterableValue any
+	collectValue(&iterableType, &iterableValue, '{')
+	advance()
+	tokens = append(tokens, token{
+		typeof:    RepeatWithEach,
+		ident:     currentGroupingUUID,
+		valueType: iterableType,
+		value:     iterableValue,
+	})
 }
 
 func collectConditional() {
@@ -702,6 +655,81 @@ func collectConditional() {
 			variableThreeValue: variableThreeValue,
 		},
 	})
+}
+
+func collectMenu() {
+	reachable()
+	advance()
+	currentGroupingUUID = shortcutsUUID()
+	closureIdx++
+	closureUUIDs[closureIdx] = currentGroupingUUID
+	closureTypes[closureIdx] = Menu
+	var promptType tokenType
+	var promptValue any
+	collectValue(&promptType, &promptValue, '{')
+	collectUntilExpect('{', 3)
+	advance()
+	menus[currentGroupingUUID] = []variableValue{}
+	tokens = append(tokens, token{
+		typeof:    Menu,
+		ident:     currentGroupingUUID,
+		valueType: promptType,
+		value:     promptValue,
+	})
+}
+
+func collectMenuItem() {
+	advance()
+	if currentGroupingUUID == "" {
+		parserError("Case has no starting menu statement.")
+	}
+	var itemType tokenType
+	var itemValue any
+	collectValue(&itemType, &itemValue, ':')
+	collectUntil(':')
+	advance()
+	menus[currentGroupingUUID] = append(menus[currentGroupingUUID], variableValue{
+		valueType: itemType,
+		value:     itemValue,
+	})
+	tokens = append(tokens, token{
+		typeof:    Item,
+		ident:     currentGroupingUUID,
+		valueType: itemType,
+		value:     itemValue,
+	})
+}
+
+func collectEndClosure() {
+	advance()
+	if tokenAhead(Else) {
+		advance()
+		if currentGroupingUUID == "" {
+			parserError("Else has no starting if statement.")
+		}
+		tokens = append(tokens, token{
+			typeof:    Conditional,
+			ident:     closureUUIDs[closureIdx],
+			valueType: Else,
+			value:     nil,
+		})
+		tokenAhead(LeftBrace)
+	} else {
+		if currentGroupingUUID == "" {
+			parserError("Ending closure has no starting statement.")
+		}
+		var closureType = closureTypes[closureIdx]
+		if closureType == Repeat || closureType == RepeatWithEach {
+			reachable()
+		}
+		tokens = append(tokens, token{
+			typeof:    closureType,
+			ident:     closureUUIDs[closureIdx],
+			valueType: EndClosure,
+			value:     nil,
+		})
+		closureIdx--
+	}
 }
 
 const intTypeString = string(Integer)

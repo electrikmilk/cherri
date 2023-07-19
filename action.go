@@ -74,10 +74,6 @@ type libraryDefinition struct {
 	make func(identifier string)
 }
 
-// libraries is a map of the 3rd party libraries defined in the compiler.
-// The key determines the identifier of the identifier name that must be used in the syntax, it's value defines its behavior, etc. using an libraryDefinition.
-var libraries map[string]libraryDefinition
-
 // plistAction builds an action based on its actionDefinition and adds it to the shortcutActions map which makePlist will use to build the actions section of the Shortcut file format.
 func plistAction(arguments []actionArgument, outputName plistData, actionUUID plistData) {
 	// Check for question arguments
