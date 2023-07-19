@@ -16,6 +16,8 @@ var stdLib embed.FS
 
 // currentAction holds the current action identifier between functions.
 var currentAction string
+var currentArguments []actionArgument
+var currentArgumentsSize int
 
 // isMac is set based on if the mac definition is set.
 var isMac = false
@@ -172,13 +174,13 @@ func makeStdAction(ident string, params []plistData) string {
 
 // checkAction checks the parsed arguments provided for an action and if it can be used based on definitions set.
 // If an action has a check function defined this will be called and provided the parsed arguments.
-func checkAction(arguments []actionArgument) {
+func checkAction() {
 	if len(actions[currentAction].parameters) > 0 {
-		checkArgs(arguments)
-		checkTypes(arguments, actions[currentAction].parameters)
+		checkArgs()
+		checkTypes(actions[currentAction].parameters)
 	}
 	if actions[currentAction].check != nil {
-		actions[currentAction].check(arguments)
+		actions[currentAction].check(currentArguments)
 	}
 	if actions[currentAction].minVersion != 0 {
 		if actions[currentAction].minVersion > iosVersion {
@@ -237,10 +239,10 @@ func realVariableValue(varName string, lastValueType tokenType) (varValue variab
 
 // checkTypes iterates through `arguments` against `checks` to determine if the valid type defined
 // for an action argument is the same as the type of the argument that was parsed.
-func checkTypes(arguments []actionArgument, checks []parameterDefinition) {
+func checkTypes(checks []parameterDefinition) {
 	for i, check := range checks {
-		if len(arguments) > i {
-			typeCheck(check.name, check.validType, arguments[i])
+		if currentArgumentsSize > i {
+			typeCheck(check.name, check.validType, currentArguments[i])
 		}
 	}
 }
@@ -324,13 +326,13 @@ func getArgValue(variable actionArgument) any {
 }
 
 // checkArgs checks to ensure all the required arguments for an action were entered.
-func checkArgs(arguments []actionArgument) {
+func checkArgs() {
 	var actionParams = actions[currentAction].parameters
 	for i, param := range actionParams {
 		if param.infinite {
 			break
 		}
-		if i+1 > len(arguments) && !param.optional {
+		if i+1 > currentArgumentsSize && !param.optional {
 			var argIndex = i + 1
 			var suffix string
 			switch argIndex {
@@ -345,10 +347,10 @@ func checkArgs(arguments []actionArgument) {
 			}
 			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'", argIndex, suffix, param.name, currentAction))
 		}
-		if len(arguments) < i+1 {
+		if currentArgumentsSize < i+1 {
 			return
 		}
-		checkDefaultValue(i, actionParams, param, arguments[i])
+		checkDefaultValue(i, actionParams, param, currentArguments[i])
 	}
 }
 

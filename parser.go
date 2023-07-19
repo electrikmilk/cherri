@@ -824,18 +824,25 @@ func collectJSON() (jsonStr string) {
 
 func collectAction() (identifier string, value action) {
 	standardActions()
+
 	identifier = collectUntil('(')
 	advance()
 	if _, found := actions[identifier]; !found {
 		parserError(fmt.Sprintf("Unknown action '%s()'", identifier))
 	}
-	var arguments = collectArguments()
 	currentAction = identifier
-	checkAction(arguments)
+
+	var arguments = collectArguments()
+	currentArguments = arguments
+	currentArgumentsSize = len(currentArguments)
+
+	checkAction()
+
 	value = action{
 		ident: identifier,
 		args:  arguments,
 	}
+
 	if char == ')' {
 		advance()
 	}
