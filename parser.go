@@ -297,10 +297,8 @@ func collectVariableValue(valueType *tokenType, value *any, varType *tokenType, 
 }
 
 func collectValue(valueType *tokenType, value *any, until rune) {
-	const intType = string(Integer)
-	var charStr = string(char)
 	switch {
-	case strings.Contains(intType, charStr):
+	case intChar():
 		var integer = collectInteger()
 		*valueType = Integer
 		*value = integer
@@ -703,11 +701,15 @@ func collectConditional() {
 	})
 }
 
+const intTypeString = string(Integer)
+
+func intChar() bool {
+	var charStr = string(char)
+	return strings.Contains(intTypeString, charStr)
+}
+
 func collectInteger() (integer string) {
-	for strings.Contains(
-		string(Integer),
-		string(char),
-	) {
+	for intChar() {
 		integer += string(char)
 		advance()
 	}
