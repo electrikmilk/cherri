@@ -61,10 +61,6 @@ func main() {
 
 	handleIncludes()
 
-	if args.Using("debug") {
-		fmt.Printf("Parsing %s... ", filename)
-	}
-
 	parse()
 
 	if args.Using("debug") {

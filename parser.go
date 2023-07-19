@@ -33,6 +33,9 @@ func parse() {
 		standardActions()
 		parseCustomActions()
 	}
+	if args.Using("debug") {
+		fmt.Printf("Parsing %s... ", filename)
+	}
 	variables = make(map[string]variableValue)
 	questions = make(map[string]*question)
 	menus = make(map[string][]variableValue)

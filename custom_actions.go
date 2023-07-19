@@ -22,7 +22,6 @@ var customActions map[string]customAction
 // parseCustomActions parses defined actions and collects them.
 func parseCustomActions() {
 	if args.Using("debug") {
-		fmt.Print(ansi("done!", green) + "\n")
 		fmt.Print("Parsing custom actions... ")
 	}
 	customActions = make(map[string]customAction)
@@ -38,6 +37,9 @@ func parseCustomActions() {
 	}
 	splitContents()
 	findCustomActionRefs()
+	if args.Using("debug") {
+		fmt.Print(ansi("done!", green) + "\n")
+	}
 }
 
 func parseCustomAction() {
