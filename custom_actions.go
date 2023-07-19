@@ -35,8 +35,10 @@ func parseCustomActions() {
 		}
 		parseCustomAction()
 	}
-	splitContents()
+	lines = strings.Split(contents, "\n")
+	chars = strings.Split(contents, "")
 	findCustomActionRefs()
+	firstChar()
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
 	}
