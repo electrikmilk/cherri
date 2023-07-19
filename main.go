@@ -80,12 +80,6 @@ func main() {
 
 	createShortcut()
 
-	if !args.Using("unsigned") {
-		sign()
-	} else if args.Using("output") {
-		writeFile(outputPath, "Creating output...")
-	}
-
 	if args.Using("debug") {
 		printDebug()
 	}
@@ -105,6 +99,12 @@ func createShortcut() {
 		writeFile(relativePath+basename+".plist", fmt.Sprintf("Creating %s.plist", basename))
 	}
 	writeFile(relativePath+basename+"_unsigned.shortcut", fmt.Sprintf("Creating unsigned %s.shortcut", basename))
+
+	if !args.Using("unsigned") {
+		sign()
+	} else if args.Using("output") {
+		writeFile(outputPath, "Creating output...")
+	}
 }
 
 func handleFile() {
