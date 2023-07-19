@@ -203,6 +203,26 @@ func reachable() {
 	}
 }
 
+func collectUntilIgnoreStrings(ch rune) (collected string) {
+	var insideString = false
+	for char != -1 {
+		if char == ch && !insideString {
+			break
+		}
+		if char == '"' {
+			if insideString && prev(1) != '\\' {
+				insideString = false
+			} else {
+				insideString = true
+			}
+		}
+		collected += string(char)
+		advance()
+	}
+	collected = strings.Trim(collected, " ")
+	return
+}
+
 // collectUntil advances ahead until the current character is `ch`,
 // This should be used in cases where we are unsure how many characters will occur before we reach this character.
 // For instance a string collector would need to use this.

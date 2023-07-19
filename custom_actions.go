@@ -30,54 +30,45 @@ func parseCustomActions() {
 	idx = -1
 	advance()
 	for char != -1 {
-		if lineCharIdx != 1 || !tokenAhead(CustomAction) {
+		if lineCharIdx != 0 || !tokenAhead(CustomAction) {
 			advance()
 			continue
 		}
-		var startActionLineIdx = lineIdx
-		var identifier = collectUntil('(')
-		if _, found := customActions[identifier]; found {
-			parserError(fmt.Sprintf("Duplication definition of custom action '%s()'", identifier))
-		}
-		if _, found := actions[identifier]; found {
-			parserError(fmt.Sprintf("Duplication definition of built-in action '%s()'", identifier))
-		}
-		advance()
-		collectUntilExpect('{', 1)
-		advance()
-		var body string
-		var insideString = false
-		for char != -1 {
-			if char == '}' && !insideString {
-				break
-			}
-			if char == '"' {
-				if insideString {
-					insideString = false
-				} else {
-					insideString = true
-				}
-			}
-			body += string(char)
-			advance()
-		}
-		var endActionLineIdx = lineIdx
-		advance()
-		customActions[identifier] = customAction{
-			body: body,
-		}
-		lines = strings.Split(contents, "\n")
-		for i := range lines {
-			if i >= startActionLineIdx && i <= endActionLineIdx {
-				lines[i] = ""
-			}
-		}
-		contents = strings.Join(lines, "\n")
+		parseCustomAction()
 	}
-	chars = strings.Split(contents, "")
-	lines = strings.Split(contents, "\n")
+	splitContents()
 	findCustomActionRefs()
-	firstChar()
+}
+
+func parseCustomAction() {
+	var startActionLineIdx = lineIdx
+	var identifier = collectUntil('(')
+	if _, found := customActions[identifier]; found {
+		parserError(fmt.Sprintf("Duplication definition of custom action '%s()'", identifier))
+	}
+	if _, found := actions[identifier]; found {
+		parserError(fmt.Sprintf("Duplication definition of built-in action '%s()'", identifier))
+	}
+
+	advance()
+	collectUntilExpect('{', 1)
+	advance()
+
+	var body = collectUntilIgnoreStrings('}')
+	customActions[identifier] = customAction{
+		body: body,
+	}
+
+	var endActionLineIdx = lineIdx
+	advance()
+
+	lines = strings.Split(contents, "\n")
+	for i := range lines {
+		if i >= startActionLineIdx && i <= endActionLineIdx {
+			lines[i] = ""
+		}
+	}
+	contents = strings.Join(lines, "\n")
 }
 
 // findCustomActionRefs replaces references to defined actions with their collected body.
