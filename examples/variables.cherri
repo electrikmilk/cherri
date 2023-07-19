@@ -31,3 +31,5 @@ var"
 
 // add to variable
 @stringVar += "test"
+
+@emptyVar = stringVar
