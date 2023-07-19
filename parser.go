@@ -318,7 +318,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*value = collectString()
 	case isToken(Arr):
 		*valueType = Arr
-		*value = collectArray(']')
+		*value = collectArray()
 	case isToken(Dict):
 		*valueType = Dict
 		*value = collectDictionary()
@@ -733,13 +733,8 @@ func collectString() (str string) {
 	return
 }
 
-func collectArray(until rune) (array interface{}) {
-	var rawJSON = "{\"array\":["
-	for char != until && char != -1 {
-		rawJSON += string(char)
-		advance()
-	}
-	rawJSON += "]}"
+func collectArray() (array interface{}) {
+	var rawJSON = "{\"array\":[" + collectUntilIgnoreStrings(']') + "]}"
 	if err := json.Unmarshal([]byte(rawJSON), &array); err != nil {
 		if args.Using("debug") {
 			fmt.Println(ansi("\n### COLLECTED ARRAY ###", bold))
@@ -754,11 +749,24 @@ func collectArray(until rune) (array interface{}) {
 }
 
 func collectDictionary() (dictionary interface{}) {
-	var rawJSON = "{"
+	var rawJSON = collectJSON()
+	if args.Using("debug") {
+		fmt.Println(ansi("\n\n### COLLECTED DICTIONARY ###", bold))
+		fmt.Println(rawJSON)
+	}
+	if err := json.Unmarshal([]byte(rawJSON), &dictionary); err != nil {
+		parserErr(err)
+	}
+	advance()
+	return
+}
+
+func collectJSON() (jsonStr string) {
+	jsonStr = "{"
 	var insideInnerObject = false
 	var insideString = false
 	for {
-		rawJSON += string(char)
+		jsonStr += string(char)
 		if char == '"' {
 			if insideString {
 				if prev(1) != '\\' {
@@ -780,14 +788,6 @@ func collectDictionary() (dictionary interface{}) {
 		}
 		advance()
 	}
-	if err := json.Unmarshal([]byte(rawJSON), &dictionary); err != nil {
-		if args.Using("debug") {
-			fmt.Println(ansi("\n\n### COLLECTED DICTIONARY ###", bold))
-			fmt.Println(rawJSON)
-		}
-		parserErr(err)
-	}
-	advance()
 	return
 }
 
