@@ -359,13 +359,12 @@ func contactActions() {
 				name:      "contacts",
 				validType: Variable,
 				key:       "WFContentItemInputParameter",
-				optional:  false,
 			},
 			{
-				name:      "property",
+				name:      "sortByProperty",
 				validType: String,
 				key:       "WFContentItemSortProperty",
-				optional:  false,
+				optional:  true,
 			},
 			{
 				name:      "sortOrder",
@@ -880,24 +879,34 @@ func documentActions() {
 			},
 		},
 	}
+	var archiveTypes = []string{".zip", ".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".gz", ".cpio", ".iso"}
 	actions["makeArchive"] = &actionDefinition{
 		identifier: "makezip",
 		parameters: []parameterDefinition{
-			{
-				name:      "name",
-				validType: String,
-				key:       "WFZIPName",
-			},
-			{
-				name:      "format",
-				validType: String,
-				key:       "WFArchiveFormat",
-			},
 			{
 				name:      "files",
 				validType: Variable,
 				key:       "WFInput",
 			},
+			{
+				name:      "format",
+				validType: String,
+				key:       "WFArchiveFormat",
+				optional:  true,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     ".zip",
+				},
+			},
+			{
+				name:      "name",
+				validType: String,
+				key:       "WFZIPName",
+				optional:  true,
+			},
+		},
+		check: func(args []actionArgument) {
+			checkEnum("archive format", archiveTypes, args, 1)
 		},
 	}
 	actions["quicklook"] = &actionDefinition{
@@ -1221,6 +1230,10 @@ func documentActions() {
 			{
 				name:      "size",
 				validType: String,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "1 GB",
+				},
 			},
 			{
 				name:      "encrypt",
