@@ -250,23 +250,29 @@ func printDebug() {
 
 		fmt.Print("\n")
 
-		fmt.Println(ansi("### TOKENS ###", bold))
+		fmt.Println(ansi("### PARSING ###", bold) + "\n")
+
+		fmt.Println(ansi("## TOKENS ##", bold))
 		fmt.Println(tokens)
 		fmt.Print("\n")
 
-		fmt.Println(ansi("### VARIABLES ###", bold))
+		fmt.Println(ansi("## TOKEN CHARS ##", bold))
+		fmt.Println(tokenChars)
+		fmt.Print("\n")
+
+		fmt.Println(ansi("## VARIABLES ##", bold))
 		fmt.Println(variables)
 		fmt.Print("\n")
 
-		fmt.Println(ansi("### MENUS ###", bold))
+		fmt.Println(ansi("## MENUS ##", bold))
 		fmt.Println(menus)
 		fmt.Print("\n")
 
-		fmt.Println(ansi("### IMPORT QUESTIONS ###", bold))
+		fmt.Println(ansi("## IMPORT QUESTIONS ##", bold))
 		fmt.Println(questions)
 		fmt.Print("\n")
 
-		fmt.Println(ansi("### CUSTOM ACTIONS ###", bold))
+		fmt.Println(ansi("## CUSTOM ACTIONS ##", bold))
 		for identifier, customAction := range customActions {
 			fmt.Println("identifier: " + identifier)
 			fmt.Println("body:")
@@ -274,12 +280,12 @@ func printDebug() {
 		}
 		fmt.Print("\n")
 
-		fmt.Println(ansi("### UUIDS ###", bold))
-		fmt.Println(uuids)
+		fmt.Println(ansi("## INCLUDES ##", bold))
+		fmt.Println(includes)
 		fmt.Print("\n")
 
-		fmt.Println(ansi("### INCLUDES ###", bold))
-		fmt.Println(includes)
+		fmt.Println(ansi("## UUIDS ##", bold))
+		fmt.Println(uuids)
 		fmt.Print("\n")
 	}
 }
