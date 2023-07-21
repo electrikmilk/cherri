@@ -1351,14 +1351,12 @@ func locationActions() {
 	}
 	actions["getCurrentWeather"] = &actionDefinition{
 		identifier: "currentconditions",
-	}
-	actions["getCurrentWeatherAt"] = &actionDefinition{
-		identifier: "currentconditions",
 		parameters: []parameterDefinition{
 			{
 				name:      "location",
 				validType: Variable,
 				key:       "WFWeatherCustomLocation",
+				optional:  true,
 			},
 		},
 	}
@@ -1437,24 +1435,17 @@ func locationActions() {
 				name:      "type",
 				validType: String,
 				key:       "WFWeatherForecastType",
-			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("weather forecast type", weatherForecastTypes, args, 0)
-		},
-	}
-	actions["getWeatherForecastAt"] = &actionDefinition{
-		identifier: "weather.forecast",
-		parameters: []parameterDefinition{
-			{
-				name:      "type",
-				validType: String,
-				key:       "WFWeatherForecastType",
+				optional:  true,
+				defaultValue: actionArgument{
+					valueType: String,
+					value:     "Daily",
+				},
 			},
 			{
 				name:      "location",
 				validType: Variable,
 				key:       "WFInput",
+				optional:  true,
 			},
 		},
 		check: func(args []actionArgument) {
