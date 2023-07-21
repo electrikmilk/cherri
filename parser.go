@@ -28,7 +28,7 @@ var closureIdx int
 var currentGroupingUUID string
 
 func parse() {
-	actions = make(map[string]*actionDefinition)
+	tokenChars = make(map[tokenType][]string)
 	if strings.Contains(contents, "action") {
 		standardActions()
 		parseCustomActions()
@@ -878,27 +878,32 @@ func isToken(token tokenType) bool {
 	return true
 }
 
-func tokenAhead(token tokenType) (isAhead bool) {
-	var tokenChars = strings.Split(string(token), "")
-	isAhead = true
-	for i, tchar := range tokenChars {
-		if tchar == " " || tchar == "\t" || tchar == "\n" {
+func tokenAhead(token tokenType) bool {
+	if len(token) == 1 && strings.ToLower(string(char)) == string(token) {
+		advance()
+		return true
+	}
+	var tChars []string
+	if _, found := tokenChars[token]; found {
+		tChars = tokenChars[token]
+	} else {
+		tChars = strings.Split(string(token), "")
+		tokenChars[token] = tChars
+	}
+	for i, tokenChar := range tChars {
+		if tokenChar == " " || tokenChar == "\t" || tokenChar == "\n" {
 			continue
 		}
 		if i == 0 {
-			if strings.ToLower(string(char)) != tchar {
-				isAhead = false
-				break
+			if strings.ToLower(string(char)) != tokenChar {
+				return false
 			}
-		} else if next(i) != []rune(tchar)[0] {
-			isAhead = false
-			break
+		} else if next(i) != []rune(tokenChar)[0] {
+			return false
 		}
 	}
-	if isAhead {
-		advanceTimes(len(tokenChars))
-	}
-	return
+	advanceTimes(len(token))
+	return true
 }
 
 func tokensAhead(v ...tokenType) bool {

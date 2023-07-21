@@ -23,6 +23,7 @@ func standardActions() {
 	if len(actions) != 0 {
 		return
 	}
+	actions = make(map[string]*actionDefinition)
 	calendarActions()
 	contactActions()
 	documentActions()
