@@ -41,6 +41,13 @@ func TestCherri(_ *testing.T) {
 	}
 }
 
+func TestActionList(_ *testing.T) {
+	standardActions()
+	for identifier := range actions {
+		fmt.Println("{label: '" + identifier + "', type: 'function', detail: 'action'},")
+	}
+}
+
 func resetParser() {
 	lines = []string{}
 	chars = []string{}
