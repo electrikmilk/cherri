@@ -656,9 +656,6 @@ func argumentValue(key string, args []actionArgument, idx int) plistData {
 		if actionArg.optional {
 			return plistData{}
 		}
-		if actionArg.defaultValue.value != nil {
-			arg = actionArg.defaultValue
-		}
 	} else {
 		arg = args[idx]
 	}
