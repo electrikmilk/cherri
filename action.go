@@ -178,6 +178,7 @@ func makeStdAction(ident string, params []plistData) string {
 func checkAction() {
 	var action = actions[currentAction]
 	if len(action.parameters) > 0 {
+		checkRequiredArgs(action.parameters)
 		checkTypes(action.parameters)
 	}
 	if action.check != nil {
@@ -194,6 +195,29 @@ func checkAction() {
 		parserError(
 			fmt.Sprintf("You've set your Shortcut as non-Mac. Action '%s()' is a Mac only action.", currentAction),
 		)
+	}
+}
+
+func checkRequiredArgs(params []parameterDefinition) {
+	for i, param := range params {
+		if param.infinite {
+			return
+		}
+		if i+1 > currentArgumentsSize && !param.optional {
+			var argIndex = idx + 1
+			var suffix string
+			switch argIndex {
+			case 1:
+				suffix = "st"
+			case 2:
+				suffix = "nd"
+			case 3:
+				suffix = "rd"
+			default:
+				suffix = "th"
+			}
+			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'", argIndex, suffix, param.name, currentAction))
+		}
 	}
 }
 
@@ -336,21 +360,6 @@ func getArgValue(argument actionArgument) any {
 func checkArg(idx int, param parameterDefinition, argument actionArgument) {
 	if param.infinite {
 		return
-	}
-	if idx > currentArgumentsSize && !param.optional {
-		var argIndex = idx + 1
-		var suffix string
-		switch argIndex {
-		case 1:
-			suffix = "st"
-		case 2:
-			suffix = "nd"
-		case 3:
-			suffix = "rd"
-		default:
-			suffix = "th"
-		}
-		parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'", argIndex, suffix, param.name, currentAction))
 	}
 	if param.enum != nil {
 		checkEnum(param.name, param.enum, argument)
