@@ -2526,6 +2526,7 @@ func scriptingActions() {
 			{
 				name:      "url",
 				validType: String,
+				infinite:  true,
 			},
 		},
 		make: func(args []actionArgument) []plistData {
