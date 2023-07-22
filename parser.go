@@ -584,7 +584,6 @@ func collectRepeat() {
 
 func collectRepeatEach() {
 	reachable()
-	advance()
 	currentGroupingUUID = shortcutsUUID()
 	closureIdx++
 	closureUUIDs[closureIdx] = currentGroupingUUID
@@ -891,7 +890,7 @@ func tokenAhead(token tokenType) bool {
 		tokenChars[token] = tChars
 	}
 	for i, tokenChar := range tChars {
-		if tokenChar == " " || tokenChar == "\t" || tokenChar == "\n" {
+		if tokenChar == "\t" || tokenChar == "\n" {
 			continue
 		}
 		if i == 0 {
@@ -931,7 +930,7 @@ func seek(mov *int, reverse bool) (requestedChar rune) {
 		nextChar += *mov
 	}
 	requestedChar = getChar(nextChar)
-	for requestedChar == ' ' || requestedChar == '\t' || requestedChar == '\n' {
+	for requestedChar == '\t' || requestedChar == '\n' {
 		if reverse {
 			nextChar--
 		} else {
