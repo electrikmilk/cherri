@@ -390,11 +390,6 @@ func checkArg(idx int, param parameterDefinition, argument actionArgument) {
 	}
 }
 
-// checkDefaultValue checks if an argument value is the same as the defined default value for each argument.
-func checkDefaultValue(i int, actionParams []parameterDefinition, param parameterDefinition, argument actionArgument) {
-
-}
-
 // makeLibraries makes the library variable, this is where 3rd party action library definitions will start.
 func makeLibraries() {
 	libraries = make(map[string]libraryDefinition)
