@@ -714,6 +714,7 @@ const (
 	boolType   string = "bool"
 )
 
+// makeDictionary creates a Shortcut dictionary value.
 func makeDictionary(value interface{}) (dictItems []string) {
 	for key, item := range value.(map[string]interface{}) {
 		dictItems = append(dictItems, dictionaryValue(key, item))
@@ -721,10 +722,11 @@ func makeDictionary(value interface{}) (dictItems []string) {
 	return
 }
 
+// dictionaryValue creates an inner dictionary value.
 func dictionaryValue(key string, value any) string {
 	var itemType dictDataType
 	var serializedType string
-	var WFValue = plistData{
+	var wfValue = plistData{
 		key:      "Value",
 		dataType: Dictionary,
 		value: []plistData{
@@ -738,13 +740,13 @@ func dictionaryValue(key string, value any) string {
 	switch reflect.TypeOf(value).String() {
 	case stringType:
 		if strings.ContainsAny(value.(string), "{}") {
-			WFValue = paramValue("Value", actionArgument{
+			wfValue = paramValue("Value", actionArgument{
 				valueType: String,
 				value:     value,
 			}, String, Text)
-			if reflect.TypeOf(WFValue.value).String() == "[]main.plistData" {
-				for _, val := range WFValue.value.([]plistData) {
-					WFValue = val
+			if reflect.TypeOf(wfValue.value).String() == "[]main.plistData" {
+				for _, val := range wfValue.value.([]plistData) {
+					wfValue = val
 					break
 				}
 			}
@@ -761,7 +763,7 @@ func dictionaryValue(key string, value any) string {
 		for _, item := range value.([]interface{}) {
 			arrayValue = append(arrayValue, dictionaryValue("", item))
 		}
-		WFValue = plistData{
+		wfValue = plistData{
 			key:      "Value",
 			dataType: Array,
 			value:    arrayValue,
@@ -769,7 +771,7 @@ func dictionaryValue(key string, value any) string {
 	case dictType:
 		itemType = itemTypeDict
 		serializedType = "WFDictionaryFieldValue"
-		WFValue = plistData{
+		wfValue = plistData{
 			key:      "Value",
 			dataType: Dictionary,
 			value: []plistData{
@@ -794,12 +796,16 @@ func dictionaryValue(key string, value any) string {
 	case boolType:
 		itemType = itemTypeBool
 		serializedType = "WFNumberSubstitutableState"
-		WFValue = plistData{
+		wfValue = plistData{
 			key:      "Value",
 			dataType: Boolean,
 			value:    value,
 		}
 	}
+	return dictionaryPlistValue(key, itemType, serializedType, wfValue)
+}
+
+func dictionaryPlistValue(key string, itemType dictDataType, serializedType string, wfValue plistData) string {
 	var valueData = []plistData{
 		{
 			key:      "WFItemType",
@@ -810,7 +816,7 @@ func dictionaryValue(key string, value any) string {
 			key:      "WFValue",
 			dataType: Dictionary,
 			value: []plistData{
-				WFValue,
+				wfValue,
 				{
 					key:      "WFSerializationType",
 					dataType: Text,
