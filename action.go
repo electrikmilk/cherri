@@ -28,6 +28,7 @@ type parameterDefinition struct {
 	validType    tokenType
 	key          string
 	defaultValue actionArgument
+	enum         []string
 	optional     bool
 	infinite     bool
 }
@@ -177,7 +178,6 @@ func makeStdAction(ident string, params []plistData) string {
 func checkAction() {
 	var action = actions[currentAction]
 	if len(action.parameters) > 0 {
-		checkArgs()
 		checkTypes(action.parameters)
 	}
 	if action.check != nil {
@@ -198,20 +198,22 @@ func checkAction() {
 }
 
 // checkEnum checks an argument value against a string slice.
-func checkEnum(name string, enum []string, args []actionArgument, idx int) {
-	if len(args) < idx {
-		return
-	}
-	if args[idx].value == nil {
-		return
-	}
-	var value = getArgValue(args[idx]).(string)
+func checkEnum(name string, enum []string, argument actionArgument) {
+	var value = getArgValue(argument).(string)
 	if !contains(enum, value) {
 		var enumList string
 		for _, e := range enum {
 			enumList += "- " + e + "\n"
 		}
-		parserError(fmt.Sprintf("Invalid %s of '%s'.\n\nAvailable %ss:\n%s\nValues must be in the exact case listed to work properly.", name, value, name, enumList))
+		parserError(
+			fmt.Sprintf(
+				"Invalid argument '%s' for %s.\n\nAvailable %ss:\n%s\nNote: Values must be in the exact case listed to work properly.",
+				value,
+				name,
+				name,
+				enumList,
+			),
+		)
 	}
 }
 
@@ -330,47 +332,42 @@ func getArgValue(argument actionArgument) any {
 	return variables[variable].value
 }
 
-// checkArgs checks to ensure all the required arguments for an action were entered.
-func checkArgs() {
-	var actionParams = actions[currentAction].parameters
-	for i, param := range actionParams {
-		if param.infinite {
-			break
-		}
-		if i+1 > currentArgumentsSize && !param.optional {
-			var argIndex = i + 1
-			var suffix string
-			switch argIndex {
-			case 1:
-				suffix = "st"
-			case 2:
-				suffix = "nd"
-			case 3:
-				suffix = "rd"
-			default:
-				suffix = "th"
-			}
-			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'", argIndex, suffix, param.name, currentAction))
-		}
-		if currentArgumentsSize < i+1 {
-			return
-		}
-		checkDefaultValue(i, actionParams, param, currentArguments[i])
+// checkArg checks to ensure the collected argument for the current action is valid.
+func checkArg(idx int, param parameterDefinition, argument actionArgument) {
+	if param.infinite {
+		return
 	}
-}
-
-// checkDefaultValue checks if an argument value is the same as the defined default value for each argument.
-func checkDefaultValue(i int, actionParams []parameterDefinition, param parameterDefinition, argument actionArgument) {
+	if idx > currentArgumentsSize && !param.optional {
+		var argIndex = idx + 1
+		var suffix string
+		switch argIndex {
+		case 1:
+			suffix = "st"
+		case 2:
+			suffix = "nd"
+		case 3:
+			suffix = "rd"
+		default:
+			suffix = "th"
+		}
+		parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'", argIndex, suffix, param.name, currentAction))
+	}
+	if param.enum != nil {
+		checkEnum(param.name, param.enum, argument)
+	}
+	if currentArgumentsSize < idx {
+		return
+	}
 	var realValue = getArgValue(argument)
 	if param.defaultValue.value != nil && param.defaultValue.value == realValue {
 		var argumentPlacement = currentAction + "("
-		for argIndex := 0; argIndex < i+1; argIndex++ {
-			if argIndex == i {
+		for argIndex := 0; argIndex < idx+1; argIndex++ {
+			if argIndex == idx {
 				argumentPlacement += fmt.Sprintf("%s = %v", param.name, argument.value)
 			} else {
 				argumentPlacement += "..."
 			}
-			if argIndex < len(actionParams)-1 {
+			if argIndex < len(actions[currentAction].parameters)-1 {
 				argumentPlacement += ","
 			}
 		}
@@ -382,6 +379,11 @@ func checkDefaultValue(i int, actionParams []parameterDefinition, param paramete
 			),
 		)
 	}
+}
+
+// checkDefaultValue checks if an argument value is the same as the defined default value for each argument.
+func checkDefaultValue(i int, actionParams []parameterDefinition, param parameterDefinition, argument actionArgument) {
+
 }
 
 // makeLibraries makes the library variable, this is where 3rd party action library definitions will start.

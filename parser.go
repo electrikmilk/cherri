@@ -288,15 +288,18 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 }
 
 func collectArguments() (arguments []actionArgument) {
-
 	var params = actions[currentAction].parameters
 	var paramsSize = len(params)
 	var argIndex = 0
+	var param parameterDefinition
 	for {
 		if char == ')' || char == '\n' || char == -1 {
 			break
 		}
-		if argIndex == paramsSize {
+		if argIndex < paramsSize {
+			param = params[argIndex]
+		}
+		if argIndex == paramsSize && !param.infinite {
 			parserError(fmt.Sprintf("Too many arguments for action %s() (max: %d)", currentAction, argIndex))
 		}
 		if char == ',' {
@@ -312,10 +315,12 @@ func collectArguments() (arguments []actionArgument) {
 		} else {
 			collectValue(&valueType, &value, ')')
 		}
-		arguments = append(arguments, actionArgument{
+		var argument = actionArgument{
 			valueType: valueType,
 			value:     value,
-		})
+		}
+		checkArg(argIndex, param, argument)
+		arguments = append(arguments, argument)
 		argIndex++
 	}
 	return

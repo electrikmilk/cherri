@@ -365,6 +365,7 @@ func contactActions() {
 				name:      "sortByProperty",
 				validType: String,
 				key:       "WFContentItemSortProperty",
+				enum:      contactProperties,
 				optional:  true,
 			},
 			{
@@ -375,6 +376,7 @@ func contactActions() {
 					valueType: String,
 					value:     "A to Z",
 				},
+				enum:     abcSortOrders,
 				optional: true,
 			},
 			{
@@ -383,10 +385,6 @@ func contactActions() {
 				key:       "WFContentItemLimitNumber",
 				optional:  true,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("contact property", contactProperties, args, 1)
-			checkEnum("sort order", abcSortOrders, args, 2)
 		},
 	}
 	actions["emailAddress"] = &actionDefinition{
@@ -446,10 +444,8 @@ func contactActions() {
 				name:      "property",
 				validType: String,
 				key:       "WFContentItemPropertyName",
+				enum:      contactProperties,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("contact property", contactProperties, args, 1)
 		},
 	}
 }
@@ -613,10 +609,8 @@ func documentActions() {
 				name:      "errorCorrection",
 				validType: String,
 				key:       "WFQRErrorCorrectionLevel",
+				enum:      errorCorrectionLevels,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("error correction level", errorCorrectionLevels, args, 0)
 		},
 	}
 	actions["showNote"] = &actionDefinition{
@@ -893,6 +887,7 @@ func documentActions() {
 				name:      "format",
 				validType: String,
 				key:       "WFArchiveFormat",
+				enum:      archiveTypes,
 				optional:  true,
 				defaultValue: actionArgument{
 					valueType: String,
@@ -905,9 +900,6 @@ func documentActions() {
 				key:       "WFZIPName",
 				optional:  true,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("archive format", archiveTypes, args, 1)
 		},
 	}
 	actions["quicklook"] = &actionDefinition{
@@ -1247,13 +1239,12 @@ func documentActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			var copyArgs = args
 			var size = strings.Split(getArgValue(args[2]).(string), " ")
-			copyArgs[2] = actionArgument{
+			var storageUnitArg = actionArgument{
 				valueType: String,
 				value:     size[1],
 			}
-			checkEnum("disk size", storageUnits, copyArgs, 2)
+			checkEnum("disk size", storageUnits, storageUnitArg)
 		},
 		make: func(args []actionArgument) []plistData {
 			var size = strings.Split(getArgValue(args[2]).(string), " ")
@@ -1418,10 +1409,8 @@ func locationActions() {
 				name:      "detail",
 				validType: String,
 				key:       "WFContentItemPropertyName",
+				enum:      weatherDetails,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("weather detail", weatherDetails, args, 1)
 		},
 	}
 	var weatherForecastTypes = []string{
@@ -1435,6 +1424,7 @@ func locationActions() {
 				name:      "type",
 				validType: String,
 				key:       "WFWeatherForecastType",
+				enum:      weatherForecastTypes,
 				optional:  true,
 				defaultValue: actionArgument{
 					valueType: String,
@@ -1447,9 +1437,6 @@ func locationActions() {
 				key:       "WFInput",
 				optional:  true,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("weather forecast type", weatherForecastTypes, args, 0)
 		},
 	}
 	var locationDetails = []string{"Name", "URL", "Label", "Phone Number", "Region", "ZIP Code", "State", "City", "Street", "Altitude", "Longitude", "Latitude"}
@@ -1465,10 +1452,8 @@ func locationActions() {
 				name:      "detail",
 				validType: String,
 				key:       "WFContentItemPropertyName",
+				enum:      locationDetails,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("location detail", locationDetails, args, 1)
 		},
 	}
 	actions["getMapsLink"] = &actionDefinition{
@@ -1961,17 +1946,13 @@ func mediaActions() {
 				name:      "height",
 				validType: String,
 				key:       "WFImageCropHeight",
+				enum:      cropPositions,
 				optional:  true,
 				defaultValue: actionArgument{
 					valueType: String,
 					value:     "100",
 				},
 			},
-		},
-		check: func(args []actionArgument) {
-			if len(args) > 1 {
-				checkEnum("crop position", cropPositions, args, 1)
-			}
 		},
 	}
 	actions["deletePhotos"] = &actionDefinition{
@@ -2075,10 +2056,8 @@ func mediaActions() {
 				name:      "direction",
 				validType: Variable,
 				key:       "WFImageFlipDirection",
+				enum:      flipDirections,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("flip direction", flipDirections, args, 1)
 		},
 	}
 	var recordingQualities = []string{"Normal", "Very High"}
@@ -2093,6 +2072,7 @@ func mediaActions() {
 					valueType: String,
 					value:     "Normal",
 				},
+				enum:     recordingQualities,
 				optional: true,
 			},
 			{
@@ -2103,12 +2083,9 @@ func mediaActions() {
 					valueType: String,
 					value:     "On Tap",
 				},
+				enum:     recordingStarts,
 				optional: true,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("recording quality", recordingQualities, args, 0)
-			checkEnum("recording start", recordingStarts, args, 1)
 		},
 	}
 	var imageFormats = []string{"TIFF", "GIF", "PNG", "BMP", "PDF", "HEIF"}
@@ -2124,6 +2101,7 @@ func mediaActions() {
 				name:      "format",
 				validType: String,
 				key:       "WFImageFormat",
+				enum:      imageFormats,
 			},
 			{
 				name:      "preserveMetadata",
@@ -2135,9 +2113,6 @@ func mediaActions() {
 					value:     true,
 				},
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("image format", imageFormats, args, 1)
 		},
 	}
 	actions["stripMetadata"] = &actionDefinition{
@@ -2290,11 +2265,9 @@ func mediaActions() {
 					valueType: String,
 					value:     "Window",
 				},
+				enum:     selectionTypes,
 				optional: true,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("selection type", selectionTypes, args, 0)
 		},
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -2339,10 +2312,8 @@ func scriptingActions() {
 				name:      "format",
 				validType: String,
 				key:       "WFFileSizeFormat",
+				enum:      fileSizeUnits,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("file format size unit", fileSizeUnits, args, 1)
 		},
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -2361,10 +2332,8 @@ func scriptingActions() {
 				name:      "detail",
 				key:       "WFDeviceDetail",
 				validType: String,
+				enum:      deviceDetails,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("device detail", deviceDetails, args, 0)
 		},
 	}
 	actions["setBrightness"] = &actionDefinition{
@@ -2608,6 +2577,7 @@ func scriptingActions() {
 			{
 				name:      "type",
 				key:       "WFHashType",
+				enum:      hashTypes,
 				validType: String,
 				defaultValue: actionArgument{
 					valueType: "MD5",
@@ -2615,9 +2585,6 @@ func scriptingActions() {
 				},
 				optional: true,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("hash type", hashTypes, args, 1)
 		},
 	}
 	actions["formatNumber"] = &actionDefinition{
@@ -2632,11 +2599,6 @@ func scriptingActions() {
 				name:      "decimalPlaces",
 				key:       "WFNumberFormatDecimalPlaces",
 				validType: Integer,
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: Integer,
-					value:     2,
-				},
 			},
 		},
 	}
@@ -2825,15 +2787,13 @@ func scriptingActions() {
 				name:      "inputType",
 				validType: String,
 				key:       "WFInputType",
+				enum:      inputTypes,
 				optional:  true,
 				defaultValue: actionArgument{
 					valueType: String,
 					value:     "Text",
 				},
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("input type", inputTypes, args, 2)
 		},
 	}
 	actions["chooseFromList"] = &actionDefinition{
@@ -3287,6 +3247,7 @@ func scriptingActions() {
 			{
 				name:      "operation",
 				validType: String,
+				enum:      calculationOpersations,
 				key:       "WFScientificMathOperation",
 			},
 			{
@@ -3304,9 +3265,6 @@ func scriptingActions() {
 				},
 				optional: true,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("calculation operation", calculationOpersations, args, 0)
 		},
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -3326,15 +3284,13 @@ func scriptingActions() {
 				name:      "operation",
 				validType: String,
 				key:       "WFStatisticsOperation",
+				enum:      statisticsOperations,
 			},
 			{
 				name:      "input",
 				validType: Variable,
 				key:       "WFInput",
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("statistics operation", statisticsOperations, args, 0)
 		},
 	}
 	actions["dismissSiri"] = &actionDefinition{}
@@ -3363,15 +3319,13 @@ func scriptingActions() {
 				name:      "type",
 				validType: String,
 				key:       "WFIPAddressTypeOption",
+				enum:      ipTypes,
 				defaultValue: actionArgument{
 					valueType: String,
 					value:     "IPv4",
 				},
 				optional: true,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("IP address type", ipTypes, args, 0)
 		},
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -3390,15 +3344,13 @@ func scriptingActions() {
 				name:      "type",
 				validType: String,
 				key:       "WFIPAddressTypeOption",
+				enum:      ipTypes,
 				defaultValue: actionArgument{
 					valueType: String,
 					value:     "IPv4",
 				},
 				optional: true,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("IP address type", ipTypes, args, 0)
 		},
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -3986,15 +3938,13 @@ func scriptingActions() {
 				name:      "detail",
 				validType: String,
 				key:       "WFContentItemPropertyName",
+				enum:      shortcutDetails,
 			},
 			{
 				name:      "shortcut",
 				validType: Variable,
 				key:       "WFInput",
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("shortcut detail", shortcutDetails, args, 0)
 		},
 	}
 }
@@ -4093,15 +4043,13 @@ func webActions() {
 				name:      "engine",
 				validType: String,
 				key:       "WFSearchWebDestination",
+				enum:      engines,
 			},
 			{
 				name:      "query",
 				validType: String,
 				key:       "WFInputText",
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("search engine", engines, args, 0)
 		},
 	}
 	actions["showWebpage"] = &actionDefinition{
@@ -4157,10 +4105,8 @@ func webActions() {
 				name:      "detail",
 				validType: String,
 				key:       "WFContentItemPropertyName",
+				enum:      webpageDetails,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("webpage detail", webpageDetails, args, 1)
 		},
 	}
 	actions["getArticleDetail"] = &actionDefinition{
@@ -4262,10 +4208,8 @@ func webActions() {
 				name:      "detail",
 				validType: String,
 				key:       "WFURLComponent",
+				enum:      urlComponents,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("URL component", urlComponents, args, 0)
 		},
 	}
 	actions["downloadURL"] = &actionDefinition{
@@ -4302,6 +4246,7 @@ func webActions() {
 			name:      "method",
 			validType: String,
 			optional:  true,
+			enum:      httpMethods,
 			defaultValue: actionArgument{
 				valueType: String,
 				value:     "GET",
@@ -4321,9 +4266,6 @@ func webActions() {
 	actions["formRequest"] = &actionDefinition{
 		identifier: "downloadurl",
 		parameters: httpParams,
-		check: func(args []actionArgument) {
-			checkEnum("HTTP method", httpMethods, args, 1)
-		},
 		make: func(args []actionArgument) []plistData {
 			return httpRequest("Form", "WFFormValues", args)
 		},
@@ -4331,9 +4273,6 @@ func webActions() {
 	actions["jsonRequest"] = &actionDefinition{
 		identifier: "downloadurl",
 		parameters: httpParams,
-		check: func(args []actionArgument) {
-			checkEnum("HTTP method", httpMethods, args, 1)
-		},
 		make: func(args []actionArgument) []plistData {
 			return httpRequest("JSON", "WFJSONValues", args)
 		},
@@ -4341,9 +4280,6 @@ func webActions() {
 	actions["fileRequest"] = &actionDefinition{
 		identifier: "downloadurl",
 		parameters: httpParams,
-		check: func(args []actionArgument) {
-			checkEnum("HTTP method", httpMethods, args, 1)
-		},
 		make: func(args []actionArgument) []plistData {
 			return httpRequest("File", "WFRequestVariable", args)
 		},
@@ -4387,6 +4323,7 @@ func webActions() {
 				name:      "sortBy",
 				validType: String,
 				key:       "WFContentItemSortProperty",
+				enum:      windowSortings,
 				defaultValue: actionArgument{
 					valueType: String,
 					value:     nil,
@@ -4394,11 +4331,11 @@ func webActions() {
 				optional: true,
 			},
 			{
-				name:         "orderBy",
-				validType:    String,
-				key:          "WFContentItemSortOrder",
-				defaultValue: actionArgument{},
-				optional:     true,
+				name:      "orderBy",
+				validType: String,
+				key:       "WFContentItemSortOrder",
+				enum:      sortOrders,
+				optional:  true,
 			},
 			{
 				name:      "limit",
@@ -4422,8 +4359,6 @@ func webActions() {
 			return
 		},
 		check: func(args []actionArgument) {
-			checkEnum("sort by", windowSortings, args, 0)
-			checkEnum("sort order", sortOrders, args, 1)
 			if args[1].value != nil {
 				var alphabetic = []string{"Title", "App Name", "Name", "Random"}
 				var numeric = []string{"Width", "Height", "X Position", "Y Position", "Window Index"}
@@ -4462,6 +4397,7 @@ func webActions() {
 				name:      "position",
 				validType: String,
 				key:       "WFPosition",
+				enum:      windowPositions,
 			},
 			{
 				name:      "bringToFront",
@@ -4474,9 +4410,6 @@ func webActions() {
 				optional: true,
 			},
 		},
-		check: func(args []actionArgument) {
-			checkEnum("window position", windowPositions, args, 1)
-		},
 		mac: true,
 	}
 	var windowConfigurations = []string{"Fit Screen", "Top Half", "Bottom Half", "Left Half", "Right Half", "Top Left Quarter", "Top Right Quarter", "Bottom Left Quarter", "Bottom Right Quarter", "Dimensions"}
@@ -4488,16 +4421,13 @@ func webActions() {
 				key:       "WFWindow",
 			},
 			{
-				name:         "configuration",
-				validType:    String,
-				key:          "WFConfiguration",
-				defaultValue: actionArgument{},
-				optional:     false,
-				infinite:     false,
+				name:      "configuration",
+				validType: String,
+				key:       "WFConfiguration",
+				enum:      windowConfigurations,
+				optional:  false,
+				infinite:  false,
 			},
-		},
-		check: func(args []actionArgument) {
-			checkEnum("window configuration", windowConfigurations, args, 1)
 		},
 		mac: true,
 	}
@@ -4534,6 +4464,7 @@ func webActions() {
 			{
 				name:      "unitType",
 				validType: String,
+				enum:      measurementUnitTypes,
 			},
 			{
 				name:      "unit",
@@ -4541,9 +4472,8 @@ func webActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			checkEnum("measurement unit type", measurementUnitTypes, args, 1)
 			var unitType = getArgValue(args[1]).(string)
-			checkEnum("measurement unit", units[unitType], args, 2)
+			checkEnum("measurement unit", units[unitType], args[2])
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -4570,6 +4500,7 @@ func webActions() {
 			{
 				name:      "unitType",
 				validType: String,
+				enum:      measurementUnitTypes,
 			},
 			{
 				name:      "unit",
@@ -4577,9 +4508,8 @@ func webActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			checkEnum("unit type", measurementUnitTypes, args, 1)
 			var unitType = getArgValue(args[1]).(string)
-			checkEnum("unit", units[unitType], args, 2)
+			checkEnum("unit", units[unitType], args[2])
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
