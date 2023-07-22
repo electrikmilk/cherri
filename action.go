@@ -297,12 +297,15 @@ func typeCheck(field string, validType tokenType, argument actionArgument) {
 		}
 	case argValueType == Question:
 	case argument.valueType != validType:
-		parserError(fmt.Sprintf("Invalid argument value '%v' of type '%s' for argument '%s' of type '%s' in '%s()'",
+		if argValueType == String {
+			argVal = "\"" + argVal.(string) + "\""
+		}
+		parserError(fmt.Sprintf("%s(): Invalid value '%v' (%s) for argument '%s' (%s).",
+			currentAction,
 			argVal,
 			typeName(argValueType),
 			field,
 			typeName(validType),
-			currentAction,
 		))
 	}
 }
