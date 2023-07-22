@@ -49,7 +49,7 @@ type action struct {
 // argsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument.
 type argsFunc func(args []actionArgument)
 
-// argsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument that must return a slice of plistData as a result.
+// paramsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument that must return a slice of plistData as a result.
 type paramsFunc func(args []actionArgument) []plistData
 
 // actionDefinition defines an action, what it expects and has functions for checking the arguments and creating the parameters.
