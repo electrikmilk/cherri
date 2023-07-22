@@ -832,10 +832,10 @@ func collectAction() (identifier string, value action) {
 	standardActions()
 
 	identifier = collectUntil('(')
-	advance()
 	if _, found := actions[identifier]; !found {
 		parserError(fmt.Sprintf("Unknown action '%s()'", identifier))
 	}
+	advance()
 	currentAction = identifier
 
 	var arguments = collectArguments()

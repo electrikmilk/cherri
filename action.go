@@ -175,21 +175,22 @@ func makeStdAction(ident string, params []plistData) string {
 // checkAction checks the parsed arguments provided for an action and if it can be used based on definitions set.
 // If an action has a check function defined this will be called and provided the parsed arguments.
 func checkAction() {
-	if len(actions[currentAction].parameters) > 0 {
+	var action = actions[currentAction]
+	if len(action.parameters) > 0 {
 		checkArgs()
-		checkTypes(actions[currentAction].parameters)
+		checkTypes(action.parameters)
 	}
-	if actions[currentAction].check != nil {
-		actions[currentAction].check(currentArguments)
+	if action.check != nil {
+		action.check(currentArguments)
 	}
-	if actions[currentAction].minVersion != 0 {
-		if actions[currentAction].minVersion > iosVersion {
+	if action.minVersion != 0 {
+		if action.minVersion > iosVersion {
 			parserError(
 				fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentAction, math.Ceil(iosVersion)),
 			)
 		}
 	}
-	if !isMac && actions[currentAction].mac {
+	if !isMac && action.mac {
 		parserError(
 			fmt.Sprintf("You've set your Shortcut as non-Mac. Action '%s()' is a Mac only action.", currentAction),
 		)
