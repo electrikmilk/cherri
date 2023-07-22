@@ -304,7 +304,7 @@ func variablePlistValue(key string, varName string, ident string) plistData {
 	var lowerIdent = strings.ToLower(ident)
 	if _, global := globals[varName]; global {
 		variable = globals[varName]
-		hasInputVariables(varName)
+		isInputVariable(varName)
 		varName = variable.value.(string)
 	} else if _, found := variables[lowerVarName]; found {
 		variable = variables[lowerVarName]
@@ -424,7 +424,7 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 		var storedVar variableValue
 		if _, global := globals[stringVar.varName]; global {
 			storedVar = globals[stringVar.varName]
-			hasInputVariables(stringVar.varName)
+			isInputVariable(stringVar.varName)
 			stringVar.varName = storedVar.value.(string)
 		} else if _, found := variables[strings.ToLower(stringVar.varName)]; found {
 			storedVar = variables[stringVar.varName]
@@ -693,7 +693,8 @@ func paramValue(key string, arg actionArgument, handleAs tokenType, outputType p
 	}
 }
 
-func hasInputVariables(varName string) {
+// isInputVariable checks if varName is the ShortcutInput global to set the global boolean in the final plist.
+func isInputVariable(varName string) {
 	if varName == "ShortcutInput" {
 		hasShortcutInputVariables = true
 	}

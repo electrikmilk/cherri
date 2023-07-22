@@ -264,7 +264,7 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 	if _, global := globals[identifier]; global {
 		*valueType = Variable
 		*value = fullIdentifier
-		hasInputVariables(identifier)
+		isInputVariable(identifier)
 	} else if _, found := variables[lowerIdentifier]; found {
 		*valueType = Variable
 		*value = fullIdentifier
