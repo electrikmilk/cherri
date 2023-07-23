@@ -217,26 +217,21 @@ func checkRequiredArgs(params []parameterDefinition) {
 			default:
 				suffix = "th"
 			}
-			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'.\n%s", argIndex, suffix, param.name, currentAction, generateActionDefinition(param, false)))
+			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'.\n%s", argIndex, suffix, param.name, currentAction, generateActionDefinition(param, false, true)))
 		}
 	}
 }
 
 // checkEnum checks an argument value against a string slice.
-func checkEnum(name string, enum []string, argument actionArgument) {
+func checkEnum(param parameterDefinition, argument actionArgument) {
 	var value = getArgValue(argument).(string)
-	if !contains(enum, value) {
-		var enumList string
-		for _, e := range enum {
-			enumList += "- " + e + "\n"
-		}
+	if !contains(param.enum, value) {
 		parserError(
 			fmt.Sprintf(
-				"Invalid argument '%s' for %s.\n\nAvailable %ss:\n%s\nNote: Values must be in the exact case listed to work properly.",
+				"Invalid argument '%s' for %s.\n\n%s",
 				value,
-				name,
-				name,
-				enumList,
+				param.name,
+				generateActionDefinition(param, false, true),
 			),
 		)
 	}
@@ -363,7 +358,7 @@ func checkArg(idx int, param parameterDefinition, argument actionArgument) {
 		return
 	}
 	if param.enum != nil {
-		checkEnum(param.name, param.enum, argument)
+		checkEnum(param, argument)
 	}
 	if currentArgumentsSize < idx {
 		return
@@ -375,13 +370,13 @@ func checkArg(idx int, param parameterDefinition, argument actionArgument) {
 			fmt.Sprintf(
 				"Value for action argument '%s' is the same as the default value.\n%s",
 				param.name,
-				generateActionDefinition(param, false),
+				generateActionDefinition(param, false, false),
 			),
 		)
 	}
 }
 
-func generateActionDefinition(focus parameterDefinition, restrictions bool) (definition string) {
+func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) (definition string) {
 	var action = actions[currentAction]
 	definition += currentAction + "("
 	for i, param := range action.parameters {
@@ -399,23 +394,48 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool) (def
 		definition += generateActionParamDefinition(param)
 	}
 	definition += ")"
-	if restrictions && (action.minVersion != 0 || action.mac) {
-		definition += "\nRestrictions: "
-		if action.minVersion != 0 {
-			definition += fmt.Sprintf("iOS %1.f+", action.minVersion)
+	if restrictions {
+		if action.minVersion != 0 || action.mac {
+			definition += "\nRestrictions: "
+			if action.minVersion != 0 {
+				definition += fmt.Sprintf("iOS %1.f+", action.minVersion)
+			}
+			if action.minVersion != 0 && action.mac {
+				definition += ", "
+			}
+			if action.mac {
+				definition += "macOS only"
+			}
 		}
-		if action.minVersion != 0 && action.mac {
-			definition += ", "
+	}
+	if showEnums {
+		var hasEnum = false
+		for _, param := range action.parameters {
+			if param.enum == nil {
+				continue
+			}
+			if focus.name != "" && focus.name != param.name {
+				continue
+			}
+			hasEnum = true
+			definition += "\n\nAvailable " + param.name + "s:\n"
+			for _, e := range param.enum {
+				definition += "- " + e + "\n"
+			}
 		}
-		if action.mac {
-			definition += "macOS only"
+		if hasEnum {
+			definition += "\nNote: Enum values are case-sensitive."
 		}
 	}
 	return definition
 }
 
 func generateActionParamDefinition(param parameterDefinition) (definition string) {
-	definition += typeName(param.validType) + " "
+	if param.enum == nil {
+		definition += typeName(param.validType) + " "
+	} else {
+		definition += "enum "
+	}
 	if param.infinite {
 		definition += "..."
 	}

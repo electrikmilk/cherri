@@ -57,12 +57,12 @@ func main() {
 				exit(fmt.Sprintf("Action %s() does not exist or has not yet been defined.", action))
 			}
 			currentAction = action
-			fmt.Println(generateActionDefinition(parameterDefinition{}, true))
+			fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
 			os.Exit(0)
 		}
 		for action := range actions {
 			currentAction = action
-			fmt.Println(generateActionDefinition(parameterDefinition{}, true) + "\n")
+			fmt.Println(generateActionDefinition(parameterDefinition{}, true, true) + "\n")
 		}
 		os.Exit(0)
 	}

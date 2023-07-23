@@ -1202,7 +1202,10 @@ func documentActions() {
 				valueType: String,
 				value:     size[1],
 			}
-			checkEnum("disk size", storageUnits, storageUnitArg)
+			checkEnum(parameterDefinition{
+				name: "disk size",
+				enum: storageUnits,
+			}, storageUnitArg)
 		},
 		make: func(args []actionArgument) []plistData {
 			var size = strings.Split(getArgValue(args[2]).(string), " ")
@@ -2454,7 +2457,7 @@ func scriptingActions() {
 				key:          "WFHashType",
 				enum:         hashTypes,
 				validType:    String,
-				defaultValue: String,
+				defaultValue: "MD5",
 				optional:     true,
 			},
 		},
@@ -4290,7 +4293,10 @@ func webActions() {
 		},
 		check: func(args []actionArgument) {
 			var unitType = getArgValue(args[1]).(string)
-			checkEnum("measurement unit", units[unitType], args[2])
+			checkEnum(parameterDefinition{
+				name: "measurement unit",
+				enum: units[unitType],
+			}, args[2])
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -4326,7 +4332,10 @@ func webActions() {
 		},
 		check: func(args []actionArgument) {
 			var unitType = getArgValue(args[1]).(string)
-			checkEnum("unit", units[unitType], args[2])
+			checkEnum(parameterDefinition{
+				name: "unit",
+				enum: units[unitType],
+			}, args[2])
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
