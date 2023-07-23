@@ -369,15 +369,12 @@ func contactActions() {
 				optional:  true,
 			},
 			{
-				name:      "sortOrder",
-				validType: String,
-				key:       "WFContentItemSortOrder",
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "A to Z",
-				},
-				enum:     abcSortOrders,
-				optional: true,
+				name:         "sortOrder",
+				validType:    String,
+				key:          "WFContentItemSortOrder",
+				defaultValue: "A to Z",
+				enum:         abcSortOrders,
+				optional:     true,
 			},
 			{
 				name:      "limit",
@@ -416,13 +413,10 @@ func contactActions() {
 		identifier: "selectcontacts",
 		parameters: []parameterDefinition{
 			{
-				name:      "multiple",
-				validType: Bool,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
-				key: "WFSelectMultiple",
+				name:         "multiple",
+				validType:    Bool,
+				defaultValue: false,
+				key:          "WFSelectMultiple",
 			},
 		},
 	}
@@ -471,14 +465,11 @@ func documentActions() {
 				key:       "WFFolder",
 			},
 			{
-				key:       "Recursive",
-				name:      "recursive",
-				validType: Bool,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
-				optional: true,
+				key:          "Recursive",
+				name:         "recursive",
+				validType:    Bool,
+				defaultValue: true,
+				optional:     true,
 			},
 		},
 	}
@@ -520,14 +511,11 @@ func documentActions() {
 				key:       "WFGetFilePath",
 			},
 			{
-				name:      "errorIfNotFound",
-				validType: Bool,
-				key:       "WFFileErrorIfNotFound",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
-				optional: true,
+				name:         "errorIfNotFound",
+				validType:    Bool,
+				key:          "WFFileErrorIfNotFound",
+				defaultValue: true,
+				optional:     true,
 			},
 		},
 	}
@@ -540,14 +528,11 @@ func documentActions() {
 				key:       "WFGetFilePath",
 			},
 			{
-				name:      "errorIfNotFound",
-				validType: Bool,
-				key:       "WFFileErrorIfNotFound",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
-				optional: true,
+				name:         "errorIfNotFound",
+				validType:    Bool,
+				key:          "WFFileErrorIfNotFound",
+				defaultValue: true,
+				optional:     true,
 			},
 		},
 	}
@@ -640,14 +625,11 @@ func documentActions() {
 				key:       "WFInput",
 			},
 			{
-				name:      "makeFullDocument",
-				validType: Bool,
-				key:       "WFMakeFullDocument",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
-				optional: true,
+				name:         "makeFullDocument",
+				validType:    Bool,
+				key:          "WFMakeFullDocument",
+				defaultValue: false,
+				optional:     true,
 			},
 		},
 	}
@@ -692,14 +674,11 @@ func documentActions() {
 		identifier: "file.select",
 		parameters: []parameterDefinition{
 			{
-				name:      "multiple",
-				validType: Bool,
-				key:       "SelectMultiple",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
-				optional: true,
+				name:         "multiple",
+				validType:    Bool,
+				key:          "SelectMultiple",
+				defaultValue: false,
+				optional:     true,
 			},
 		},
 	}
@@ -756,14 +735,11 @@ func documentActions() {
 				validType: Variable,
 			},
 			{
-				name:      "immediately",
-				key:       "WFDeleteImmediatelyDelete",
-				validType: Bool,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
-				optional: true,
+				name:         "immediately",
+				key:          "WFDeleteImmediatelyDelete",
+				validType:    Bool,
+				defaultValue: false,
+				optional:     true,
 			},
 		},
 	}
@@ -823,14 +799,11 @@ func documentActions() {
 				key:       "WFInput",
 			},
 			{
-				name:      "overwrite",
-				validType: Bool,
-				key:       "WFSaveFileOverwrite",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
-				optional: true,
+				name:         "overwrite",
+				validType:    Bool,
+				key:          "WFSaveFileOverwrite",
+				defaultValue: false,
+				optional:     true,
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
@@ -852,14 +825,11 @@ func documentActions() {
 				key:       "WFInput",
 			},
 			{
-				name:      "overwrite",
-				validType: Bool,
-				key:       "WFSaveFileOverwrite",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
-				optional: true,
+				name:         "overwrite",
+				validType:    Bool,
+				key:          "WFSaveFileOverwrite",
+				defaultValue: false,
+				optional:     true,
 			},
 		},
 	}
@@ -884,15 +854,12 @@ func documentActions() {
 				key:       "WFInput",
 			},
 			{
-				name:      "format",
-				validType: String,
-				key:       "WFArchiveFormat",
-				enum:      archiveTypes,
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     ".zip",
-				},
+				name:         "format",
+				validType:    String,
+				key:          "WFArchiveFormat",
+				enum:         archiveTypes,
+				optional:     true,
+				defaultValue: ".zip",
 			},
 			{
 				name:      "name",
@@ -1185,14 +1152,11 @@ func documentActions() {
 				key:       "WFInput",
 			},
 			{
-				name:      "encrypt",
-				validType: Bool,
-				key:       "EncryptImage",
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
+				name:         "encrypt",
+				validType:    Bool,
+				key:          "EncryptImage",
+				optional:     true,
+				defaultValue: false,
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
@@ -1221,21 +1185,15 @@ func documentActions() {
 				key:       "WFInput",
 			},
 			{
-				name:      "size",
-				validType: String,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "1 GB",
-				},
+				name:         "size",
+				validType:    String,
+				defaultValue: "1 GB",
 			},
 			{
-				name:      "encrypt",
-				validType: Bool,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
-				optional: true,
+				name:         "encrypt",
+				validType:    Bool,
+				defaultValue: false,
+				optional:     true,
 			},
 		},
 		check: func(args []actionArgument) {
@@ -1298,14 +1256,11 @@ func documentActions() {
 				key:       "WFInput",
 			},
 			{
-				name:      "prompt",
-				validType: Bool,
-				key:       "WFOpenInAskWhenRun",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
-				optional: true,
+				name:         "prompt",
+				validType:    Bool,
+				key:          "WFOpenInAskWhenRun",
+				defaultValue: false,
+				optional:     true,
 			},
 		},
 	}
@@ -1421,15 +1376,12 @@ func locationActions() {
 		identifier: "weather.forecast",
 		parameters: []parameterDefinition{
 			{
-				name:      "type",
-				validType: String,
-				key:       "WFWeatherForecastType",
-				enum:      weatherForecastTypes,
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "Daily",
-				},
+				name:         "type",
+				validType:    String,
+				key:          "WFWeatherForecastType",
+				enum:         weatherForecastTypes,
+				optional:     true,
+				defaultValue: "Daily",
 			},
 			{
 				name:      "location",
@@ -1535,14 +1487,11 @@ func mediaActions() {
 				key:       "WFGetLatestPhotoCount",
 			},
 			{
-				name:      "includeScreenshots",
-				validType: Bool,
-				key:       "WFGetLatestPhotosActionIncludeScreenshots",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
-				optional: true,
+				name:         "includeScreenshots",
+				validType:    Bool,
+				key:          "WFGetLatestPhotosActionIncludeScreenshots",
+				defaultValue: true,
+				optional:     true,
 			},
 		},
 	}
@@ -1559,13 +1508,10 @@ func mediaActions() {
 	actions["takePhoto"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
-				name:      "showPreview",
-				validType: Bool,
-				key:       "WFCameraCaptureShowPreview",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
+				name:         "showPreview",
+				validType:    Bool,
+				key:          "WFCameraCaptureShowPreview",
+				defaultValue: true,
 			},
 		},
 	}
@@ -1609,31 +1555,22 @@ func mediaActions() {
 	actions["takeVideo"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
-				name:      "camera",
-				validType: String,
-				key:       "WFCameraCaptureDevice",
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "Front",
-				},
+				name:         "camera",
+				validType:    String,
+				key:          "WFCameraCaptureDevice",
+				defaultValue: "Front",
 			},
 			{
-				name:      "quality",
-				validType: String,
-				key:       "WFCameraCaptureQuality",
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "Medium",
-				},
+				name:         "quality",
+				validType:    String,
+				key:          "WFCameraCaptureQuality",
+				defaultValue: "Medium",
 			},
 			{
-				name:      "startImmediately",
-				validType: Bool,
-				key:       "WFRecordingStart",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
+				name:         "startImmediately",
+				validType:    Bool,
+				key:          "WFRecordingStart",
+				defaultValue: false,
 			},
 		},
 	}
@@ -1760,24 +1697,18 @@ func mediaActions() {
 				infinite:     false,
 			},
 			{
-				name:      "delay",
-				validType: String,
-				key:       "WFGIFDelayTime",
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "0.25",
-				},
+				name:         "delay",
+				validType:    String,
+				key:          "WFGIFDelayTime",
+				optional:     true,
+				defaultValue: "0.25",
 			},
 			{
-				name:      "autoSize",
-				validType: Bool,
-				key:       "WFGIFAutoSize",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
-				optional: true,
+				name:         "autoSize",
+				validType:    Bool,
+				key:          "WFGIFAutoSize",
+				defaultValue: true,
+				optional:     true,
 			},
 			{
 				name:      "width",
@@ -1808,14 +1739,11 @@ func mediaActions() {
 				optional:  true,
 			},
 			{
-				name:      "preserveMetadata",
-				validType: Bool,
-				key:       "WFImagePreserveMetadata",
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
+				name:         "preserveMetadata",
+				validType:    Bool,
+				key:          "WFImagePreserveMetadata",
+				optional:     true,
+				defaultValue: true,
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
@@ -1837,24 +1765,18 @@ func mediaActions() {
 				key:       "WFInput",
 			},
 			{
-				name:      "mode",
-				validType: String,
-				key:       "WFImageCombineMode",
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "vertically",
-				},
-				optional: true,
+				name:         "mode",
+				validType:    String,
+				key:          "WFImageCombineMode",
+				defaultValue: "vertically",
+				optional:     true,
 			},
 			{
-				name:      "spacing",
-				validType: Integer,
-				key:       "WFImageCombineSpacing",
-				defaultValue: actionArgument{
-					valueType: Integer,
-					value:     1,
-				},
-				optional: true,
+				name:         "spacing",
+				validType:    Integer,
+				key:          "WFImageCombineSpacing",
+				defaultValue: 1,
+				optional:     true,
 			},
 		},
 		check: func(args []actionArgument) {
@@ -1886,14 +1808,11 @@ func mediaActions() {
 		identifier: "selectphoto",
 		parameters: []parameterDefinition{
 			{
-				name:      "selectMultiple",
-				validType: Bool,
-				key:       "WFSelectMultiplePhotos",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
-				optional: true,
+				name:         "selectMultiple",
+				validType:    Bool,
+				key:          "WFSelectMultiplePhotos",
+				defaultValue: false,
+				optional:     true,
 			},
 		},
 	}
@@ -1923,35 +1842,26 @@ func mediaActions() {
 				key:       "WFInput",
 			},
 			{
-				name:      "position",
-				validType: String,
-				key:       "WFImageCropPosition",
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "Center",
-				},
+				name:         "position",
+				validType:    String,
+				key:          "WFImageCropPosition",
+				optional:     true,
+				defaultValue: "Center",
 			},
 			{
-				name:      "width",
-				validType: String,
-				key:       "WFImageCropWidth",
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "100",
-				},
+				name:         "width",
+				validType:    String,
+				key:          "WFImageCropWidth",
+				optional:     true,
+				defaultValue: "100",
 			},
 			{
-				name:      "height",
-				validType: String,
-				key:       "WFImageCropHeight",
-				enum:      cropPositions,
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "100",
-				},
+				name:         "height",
+				validType:    String,
+				key:          "WFImageCropHeight",
+				enum:         cropPositions,
+				optional:     true,
+				defaultValue: "100",
 			},
 		},
 	}
@@ -1983,14 +1893,11 @@ func mediaActions() {
 		identifier: "exportsong",
 		parameters: []parameterDefinition{
 			{
-				name:      "selectMultiple",
-				validType: Bool,
-				key:       "WFExportSongActionSelectMultiple",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
-				optional: true,
+				name:         "selectMultiple",
+				validType:    Bool,
+				key:          "WFExportSongActionSelectMultiple",
+				defaultValue: false,
+				optional:     true,
 			},
 		},
 	}
@@ -2032,14 +1939,11 @@ func mediaActions() {
 				key:       "WFInputGIF",
 			},
 			{
-				name:      "loops",
-				validType: Integer,
-				key:       "WFMakeVideoFromGIFActionLoopCount",
-				defaultValue: actionArgument{
-					valueType: Integer,
-					value:     1,
-				},
-				optional: true,
+				name:         "loops",
+				validType:    Integer,
+				key:          "WFMakeVideoFromGIFActionLoopCount",
+				defaultValue: 1,
+				optional:     true,
 			},
 		},
 	}
@@ -2065,26 +1969,20 @@ func mediaActions() {
 	actions["record"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
-				name:      "quality",
-				validType: String,
-				key:       "WFRecordingCompression",
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "Normal",
-				},
-				enum:     recordingQualities,
-				optional: true,
+				name:         "quality",
+				validType:    String,
+				key:          "WFRecordingCompression",
+				defaultValue: "Normal",
+				enum:         recordingQualities,
+				optional:     true,
 			},
 			{
-				name:      "start",
-				validType: String,
-				key:       "WFRecordingStart",
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "On Tap",
-				},
-				enum:     recordingStarts,
-				optional: true,
+				name:         "start",
+				validType:    String,
+				key:          "WFRecordingStart",
+				defaultValue: "On Tap",
+				enum:         recordingStarts,
+				optional:     true,
 			},
 		},
 	}
@@ -2104,14 +2002,11 @@ func mediaActions() {
 				enum:      imageFormats,
 			},
 			{
-				name:      "preserveMetadata",
-				validType: Bool,
-				key:       "WFImagePreserveMetadata",
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
+				name:         "preserveMetadata",
+				validType:    Bool,
+				key:          "WFImagePreserveMetadata",
+				optional:     true,
+				defaultValue: true,
 			},
 		},
 	}
@@ -2198,24 +2093,18 @@ func mediaActions() {
 		identifier: "shazamMedia",
 		parameters: []parameterDefinition{
 			{
-				name:      "show",
-				validType: Bool,
-				key:       "WFShazamMediaActionShowWhenRun",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
-				optional: true,
+				name:         "show",
+				validType:    Bool,
+				key:          "WFShazamMediaActionShowWhenRun",
+				defaultValue: true,
+				optional:     true,
 			},
 			{
-				name:      "showError",
-				validType: Bool,
-				key:       "WFShazamMediaActionErrorIfNotRecognized",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
-				optional: true,
+				name:         "showError",
+				validType:    Bool,
+				key:          "WFShazamMediaActionErrorIfNotRecognized",
+				defaultValue: true,
+				optional:     true,
 			},
 		},
 	}
@@ -2232,14 +2121,11 @@ func mediaActions() {
 	actions["takeScreenshot"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
-				name:      "mainMonitorOnly",
-				validType: Bool,
-				key:       "WFTakeScreenshotMainMonitorOnly",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
-				optional: true,
+				name:         "mainMonitorOnly",
+				validType:    Bool,
+				key:          "WFTakeScreenshotMainMonitorOnly",
+				defaultValue: false,
+				optional:     true,
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
@@ -2258,15 +2144,12 @@ func mediaActions() {
 		identifier: "takescreenshot",
 		parameters: []parameterDefinition{
 			{
-				name:      "selection",
-				validType: String,
-				key:       "WFTakeScreenshotActionInteractiveSelectionType",
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "Window",
-				},
-				enum:     selectionTypes,
-				optional: true,
+				name:         "selection",
+				validType:    String,
+				key:          "WFTakeScreenshotActionInteractiveSelectionType",
+				defaultValue: "Window",
+				enum:         selectionTypes,
+				optional:     true,
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
@@ -2374,14 +2257,11 @@ func scriptingActions() {
 				validType: String,
 			},
 			{
-				name:      "includeFileExtension",
-				key:       "WFDontIncludeFileExtension",
-				validType: Bool,
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
+				name:         "includeFileExtension",
+				key:          "WFDontIncludeFileExtension",
+				validType:    Bool,
+				optional:     true,
+				defaultValue: false,
 			},
 		},
 	}
@@ -2576,15 +2456,12 @@ func scriptingActions() {
 				key:       "WFInput",
 			},
 			{
-				name:      "type",
-				key:       "WFHashType",
-				enum:      hashTypes,
-				validType: String,
-				defaultValue: actionArgument{
-					valueType: "MD5",
-					value:     String,
-				},
-				optional: true,
+				name:         "type",
+				key:          "WFHashType",
+				enum:         hashTypes,
+				validType:    String,
+				defaultValue: String,
+				optional:     true,
 			},
 		},
 	}
@@ -2724,13 +2601,10 @@ func scriptingActions() {
 				optional:  true,
 			},
 			{
-				name:      "playSound",
-				key:       "WFNotificationActionSound",
-				validType: Bool,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
+				name:         "playSound",
+				key:          "WFNotificationActionSound",
+				validType:    Bool,
+				defaultValue: true,
 			},
 		},
 	}
@@ -2762,14 +2636,11 @@ func scriptingActions() {
 				optional:  true,
 			},
 			{
-				name:      "cancelButton",
-				key:       "WFAlertActionCancelButtonShown",
-				validType: Bool,
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
+				name:         "cancelButton",
+				key:          "WFAlertActionCancelButtonShown",
+				validType:    Bool,
+				optional:     true,
+				defaultValue: true,
 			},
 		},
 	}
@@ -2789,15 +2660,12 @@ func scriptingActions() {
 				key:       "WFAskActionDefaultAnswer",
 			},
 			{
-				name:      "inputType",
-				validType: String,
-				key:       "WFInputType",
-				enum:      inputTypes,
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "Text",
-				},
+				name:         "inputType",
+				validType:    String,
+				key:          "WFInputType",
+				enum:         inputTypes,
+				optional:     true,
+				defaultValue: "Text",
 			},
 		},
 	}
@@ -2814,13 +2682,10 @@ func scriptingActions() {
 				validType: String,
 			},
 			{
-				name:     "selectMultiple",
-				key:      "WFChooseFromListActionSelectMultiple",
-				optional: true,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
+				name:         "selectMultiple",
+				key:          "WFChooseFromListActionSelectMultiple",
+				optional:     true,
+				defaultValue: false,
 			},
 		},
 	}
@@ -3108,13 +2973,10 @@ func scriptingActions() {
 				validType: String,
 			},
 			{
-				name:      "ratio",
-				validType: String,
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "half",
-				},
+				name:         "ratio",
+				validType:    String,
+				optional:     true,
+				defaultValue: "half",
 			},
 		},
 		check: func(args []actionArgument) {
@@ -3191,13 +3053,10 @@ func scriptingActions() {
 				validType: Variable,
 			},
 			{
-				name:      "isSelf",
-				validType: Bool,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
-				optional: true,
+				name:         "isSelf",
+				validType:    Bool,
+				defaultValue: false,
+				optional:     true,
 			},
 		},
 		make: func(args []actionArgument) []plistData {
@@ -3264,11 +3123,7 @@ func scriptingActions() {
 				name:      "operandTwo",
 				validType: Integer,
 				key:       "WFMathOperand",
-				defaultValue: actionArgument{
-					valueType: Integer,
-					value:     nil,
-				},
-				optional: true,
+				optional:  true,
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
@@ -3321,15 +3176,12 @@ func scriptingActions() {
 		identifier: "getipaddress",
 		parameters: []parameterDefinition{
 			{
-				name:      "type",
-				validType: String,
-				key:       "WFIPAddressTypeOption",
-				enum:      ipTypes,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "IPv4",
-				},
-				optional: true,
+				name:         "type",
+				validType:    String,
+				key:          "WFIPAddressTypeOption",
+				enum:         ipTypes,
+				defaultValue: "IPv4",
+				optional:     true,
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
@@ -3346,15 +3198,12 @@ func scriptingActions() {
 		identifier: "getipaddress",
 		parameters: []parameterDefinition{
 			{
-				name:      "type",
-				validType: String,
-				key:       "WFIPAddressTypeOption",
-				enum:      ipTypes,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "IPv4",
-				},
-				optional: true,
+				name:         "type",
+				validType:    String,
+				key:          "WFIPAddressTypeOption",
+				enum:         ipTypes,
+				defaultValue: "IPv4",
+				optional:     true,
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
@@ -3884,22 +3733,16 @@ func scriptingActions() {
 				validType: Variable,
 			},
 			{
-				name:      "shell",
-				key:       "Shell",
-				validType: String,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "/bin/zsh",
-				},
+				name:         "shell",
+				key:          "Shell",
+				validType:    String,
+				defaultValue: "/bin/zsh",
 			},
 			{
-				name:      "inputMode",
-				key:       "InputMode",
-				validType: String,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     "to stdin",
-				},
+				name:         "inputMode",
+				key:          "InputMode",
+				validType:    String,
+				defaultValue: "to stdin",
 			},
 		},
 	}
@@ -3912,14 +3755,11 @@ func scriptingActions() {
 				key:       "name",
 			},
 			{
-				name:      "open",
-				validType: Bool,
-				key:       "OpenWhenRun",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
-				optional: true,
+				name:         "open",
+				validType:    Bool,
+				key:          "OpenWhenRun",
+				defaultValue: true,
+				optional:     true,
 			},
 		},
 		minVersion: 16.4,
@@ -3983,14 +3823,11 @@ func sharingActions() {
 				validType: Variable,
 			},
 			{
-				name:      "local",
-				key:       "WFLocalOnly",
-				validType: Bool,
-				optional:  true,
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     false,
-				},
+				name:         "local",
+				key:          "WFLocalOnly",
+				validType:    Bool,
+				optional:     true,
+				defaultValue: false,
 			},
 			{
 				name:      "expire",
@@ -4248,14 +4085,11 @@ func webActions() {
 			validType: String,
 		},
 		{
-			name:      "method",
-			validType: String,
-			optional:  true,
-			enum:      httpMethods,
-			defaultValue: actionArgument{
-				valueType: String,
-				value:     "GET",
-			},
+			name:         "method",
+			validType:    String,
+			optional:     true,
+			enum:         httpMethods,
+			defaultValue: "GET",
 		},
 		{
 			name:      "body",
@@ -4329,11 +4163,7 @@ func webActions() {
 				validType: String,
 				key:       "WFContentItemSortProperty",
 				enum:      windowSortings,
-				defaultValue: actionArgument{
-					valueType: String,
-					value:     nil,
-				},
-				optional: true,
+				optional:  true,
 			},
 			{
 				name:      "orderBy",
@@ -4346,11 +4176,7 @@ func webActions() {
 				name:      "limit",
 				validType: Integer,
 				key:       "WFContentItemLimitNumber",
-				defaultValue: actionArgument{
-					valueType: Integer,
-					value:     nil,
-				},
-				optional: true,
+				optional:  true,
 			},
 		},
 		addParams: func(args []actionArgument) (params []plistData) {
@@ -4405,14 +4231,11 @@ func webActions() {
 				enum:      windowPositions,
 			},
 			{
-				name:      "bringToFront",
-				validType: Bool,
-				key:       "WFBringToFront",
-				defaultValue: actionArgument{
-					valueType: Bool,
-					value:     true,
-				},
-				optional: true,
+				name:         "bringToFront",
+				validType:    Bool,
+				key:          "WFBringToFront",
+				defaultValue: true,
+				optional:     true,
 			},
 		},
 		mac: true,
