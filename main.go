@@ -27,6 +27,7 @@ var included []string
 func init() {
 	args.Register("version", "v", "Print current version information.", false)
 	args.Register("help", "h", "Print this usage information.", false)
+	args.Register("action", "", "Print action definition. Leave empty to print all action definitions.", true)
 	args.Register("share", "s", "Signing mode. [anyone, contacts] [default=contacts]", true)
 	args.Register("unsigned", "u", "Don't sign compiled Shortcut. Will NOT run on iOS or macOS.", false)
 	args.Register("debug", "d", "Save generated plist. Print debug messages and stack traces.", false)
@@ -45,6 +46,24 @@ func main() {
 
 	if args.Using("version") {
 		printVersion()
+		os.Exit(0)
+	}
+
+	if args.Using("action") {
+		standardActions()
+		var action = args.Value("action")
+		if action != "" {
+			if _, found := actions[action]; !found {
+				exit(fmt.Sprintf("Action %s() does not exist or has not yet been defined.", action))
+			}
+			currentAction = action
+			fmt.Println(generateActionDefinition(parameterDefinition{}, true))
+			os.Exit(0)
+		}
+		for action := range actions {
+			currentAction = action
+			fmt.Println(generateActionDefinition(parameterDefinition{}, true) + "\n")
+		}
 		os.Exit(0)
 	}
 
