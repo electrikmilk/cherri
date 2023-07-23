@@ -3396,7 +3396,7 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: String,
+				validType: Variable,
 				key:       "WFInput",
 			},
 		},
