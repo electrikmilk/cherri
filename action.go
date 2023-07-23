@@ -204,7 +204,7 @@ func checkRequiredArgs(params []parameterDefinition) {
 			return
 		}
 		if i+1 > currentArgumentsSize && !param.optional {
-			var argIndex = idx + 1
+			var argIndex = i + 1
 			var suffix string
 			switch argIndex {
 			case 1:
