@@ -1304,10 +1304,11 @@ func locationActions() {
 		identifier: "currentconditions",
 		parameters: []parameterDefinition{
 			{
-				name:      "location",
-				validType: Variable,
-				key:       "WFWeatherCustomLocation",
-				optional:  true,
+				name:         "location",
+				validType:    Variable,
+				key:          "WFWeatherCustomLocation",
+				defaultValue: "Current Location",
+				optional:     true,
 			},
 		},
 	}
@@ -1389,10 +1390,11 @@ func locationActions() {
 				defaultValue: "Daily",
 			},
 			{
-				name:      "location",
-				validType: Variable,
-				key:       "WFInput",
-				optional:  true,
+				name:         "location",
+				validType:    Variable,
+				key:          "WFInput",
+				defaultValue: "Current Location",
+				optional:     true,
 			},
 		},
 	}
