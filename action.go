@@ -217,7 +217,7 @@ func checkRequiredArgs(params []parameterDefinition) {
 			default:
 				suffix = "th"
 			}
-			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'.\n%s", argIndex, suffix, param.name, currentAction, generateActionDefinition(param)))
+			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'.\n%s", argIndex, suffix, param.name, currentAction, generateActionDefinition(param, false)))
 		}
 	}
 }
@@ -375,13 +375,13 @@ func checkArg(idx int, param parameterDefinition, argument actionArgument) {
 			fmt.Sprintf(
 				"Value for action argument '%s' is the same as the default value.\n%s",
 				param.name,
-				generateActionDefinition(param),
+				generateActionDefinition(param, false),
 			),
 		)
 	}
 }
 
-func generateActionDefinition(focus parameterDefinition) (definition string) {
+func generateActionDefinition(focus parameterDefinition, restrictions bool) (definition string) {
 	var action = actions[currentAction]
 	definition += currentAction + "("
 	for i, param := range action.parameters {
@@ -399,22 +399,27 @@ func generateActionDefinition(focus parameterDefinition) (definition string) {
 		definition += generateActionParamDefinition(param)
 	}
 	definition += ")"
-	if action.minVersion != 0 || action.mac {
-		definition += "("
+	if restrictions && (action.minVersion != 0 || action.mac) {
+		definition += "\nRestrictions: "
 		if action.minVersion != 0 {
-			definition += fmt.Sprintf("Introduced in iOS %1.f", action.minVersion)
+			definition += fmt.Sprintf("iOS %1.f+", action.minVersion)
+		}
+		if action.minVersion != 0 && action.mac {
+			definition += ", "
 		}
 		if action.mac {
-			definition += ", macOS only"
+			definition += "macOS only"
 		}
-		definition += ")"
 	}
 	return definition
 }
 
 func generateActionParamDefinition(param parameterDefinition) (definition string) {
 	definition += typeName(param.validType) + " "
-	if param.optional {
+	if param.infinite {
+		definition += "..."
+	}
+	if param.optional || param.defaultValue != nil {
 		definition += "?"
 	}
 	definition += param.name
