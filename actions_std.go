@@ -2477,6 +2477,7 @@ func scriptingActions() {
 				name:         "decimalPlaces",
 				key:          "WFNumberFormatDecimalPlaces",
 				validType:    Integer,
+				optional:     true,
 				defaultValue: 2,
 			},
 		},
