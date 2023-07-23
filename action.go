@@ -394,21 +394,20 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 		definition += generateActionParamDefinition(param)
 	}
 	definition += ")"
-	if restrictions {
-		if action.minVersion != 0 || action.mac {
-			definition += "\nRestrictions: "
-			if action.minVersion != 0 {
-				definition += fmt.Sprintf("iOS %1.f+", action.minVersion)
-			}
-			if action.minVersion != 0 && action.mac {
-				definition += ", "
-			}
-			if action.mac {
-				definition += "macOS only"
-			}
+	if restrictions && (action.minVersion != 0 || action.mac) {
+		definition += "\nRestrictions: "
+		if action.minVersion != 0 {
+			definition += fmt.Sprintf("iOS %1.f+", action.minVersion)
+		}
+		if action.minVersion != 0 && action.mac {
+			definition += ", "
+		}
+		if action.mac {
+			definition += "macOS only"
 		}
 	}
 	if showEnums {
+		definition += "\n"
 		var hasEnum = false
 		for _, param := range action.parameters {
 			if param.enum == nil {
@@ -418,7 +417,7 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 				continue
 			}
 			hasEnum = true
-			definition += "\n\nAvailable " + param.name + "s:\n"
+			definition += "\nAvailable " + param.name + "s:\n"
 			for _, e := range param.enum {
 				definition += "- " + e + "\n"
 			}
