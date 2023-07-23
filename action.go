@@ -8,6 +8,7 @@ import (
 	"embed"
 	"fmt"
 	"math"
+	"reflect"
 	"strings"
 )
 
@@ -216,7 +217,7 @@ func checkRequiredArgs(params []parameterDefinition) {
 			default:
 				suffix = "th"
 			}
-			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'", argIndex, suffix, param.name, currentAction))
+			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'.\n%s", argIndex, suffix, param.name, currentAction, generateActionDefinition(param)))
 		}
 	}
 }
@@ -368,26 +369,63 @@ func checkArg(idx int, param parameterDefinition, argument actionArgument) {
 		return
 	}
 	var realValue = getArgValue(argument)
-	if param.defaultValue != nil && param.defaultValue == realValue {
-		var argumentPlacement = currentAction + "("
-		for argIndex := 0; argIndex < idx+1; argIndex++ {
-			if argIndex == idx {
-				argumentPlacement += fmt.Sprintf("%s = %v", param.name, argument.value)
-			} else {
-				argumentPlacement += "..."
-			}
-			if argIndex < len(actions[currentAction].parameters)-1 {
-				argumentPlacement += ","
-			}
-		}
-		argumentPlacement += ")"
+	var stringDefaultValue = fmt.Sprintf("%v", param.defaultValue)
+	if param.defaultValue != nil && stringDefaultValue == realValue {
 		parserWarning(
 			fmt.Sprintf(
-				"Value for action argument is the same as the default value\n%s.",
-				argumentPlacement,
+				"Value for action argument '%s' is the same as the default value.\n%s",
+				param.name,
+				generateActionDefinition(param),
 			),
 		)
 	}
+}
+
+func generateActionDefinition(focus parameterDefinition) (definition string) {
+	var action = actions[currentAction]
+	definition += currentAction + "("
+	for i, param := range action.parameters {
+		if i != 0 && i < len(action.parameters) {
+			definition += ", "
+		}
+		if focus.name != "" {
+			if param.name == focus.name {
+				definition += generateActionParamDefinition(param)
+			} else {
+				definition += "..."
+			}
+			continue
+		}
+		definition += generateActionParamDefinition(param)
+	}
+	definition += ")"
+	if action.minVersion != 0 || action.mac {
+		definition += "("
+		if action.minVersion != 0 {
+			definition += fmt.Sprintf("Introduced in iOS %1.f", action.minVersion)
+		}
+		if action.mac {
+			definition += ", macOS only"
+		}
+		definition += ")"
+	}
+	return definition
+}
+
+func generateActionParamDefinition(param parameterDefinition) (definition string) {
+	definition += typeName(param.validType) + " "
+	if param.optional {
+		definition += "?"
+	}
+	definition += param.name
+	if param.defaultValue != nil {
+		if reflect.TypeOf(param.defaultValue).String() == stringType {
+			definition += fmt.Sprintf(" = \"%v\"", param.defaultValue)
+		} else {
+			definition += fmt.Sprintf(" = %v", param.defaultValue)
+		}
+	}
+	return
 }
 
 // makeLibraries makes the library variable, this is where 3rd party action library definitions will start.
