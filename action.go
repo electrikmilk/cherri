@@ -27,7 +27,7 @@ type parameterDefinition struct {
 	name         string
 	validType    tokenType
 	key          string
-	defaultValue any
+	defaultValue actionArgument
 	enum         []string
 	optional     bool
 	infinite     bool
@@ -368,7 +368,7 @@ func checkArg(idx int, param parameterDefinition, argument actionArgument) {
 		return
 	}
 	var realValue = getArgValue(argument)
-	if param.defaultValue != nil && param.defaultValue == realValue {
+	if param.defaultValue.value != nil && param.defaultValue.value == realValue {
 		var argumentPlacement = currentAction + "("
 		for argIndex := 0; argIndex < idx+1; argIndex++ {
 			if argIndex == idx {
