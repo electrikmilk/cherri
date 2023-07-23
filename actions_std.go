@@ -1681,20 +1681,14 @@ func mediaActions() {
 		identifier: "addframetogif",
 		parameters: []parameterDefinition{
 			{
-				name:         "image",
-				validType:    String,
-				key:          "WFImage",
-				defaultValue: actionArgument{},
-				optional:     false,
-				infinite:     false,
+				name:      "image",
+				validType: String,
+				key:       "WFImage",
 			},
 			{
-				name:         "gif",
-				validType:    String,
-				key:          "WFInputGIF",
-				defaultValue: actionArgument{},
-				optional:     false,
-				infinite:     false,
+				name:      "gif",
+				validType: String,
+				key:       "WFInputGIF",
 			},
 			{
 				name:         "delay",
@@ -3996,14 +3990,11 @@ func webActions() {
 				key:       "WFGiphyQuery",
 			},
 			{
-				name:      "gifs",
-				validType: Integer,
-				key:       "WFGiphyLimit",
-				defaultValue: actionArgument{
-					value:     1,
-					valueType: Integer,
-				},
-				optional: true,
+				name:         "gifs",
+				validType:    Integer,
+				key:          "WFGiphyLimit",
+				defaultValue: 1,
+				optional:     true,
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
