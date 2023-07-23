@@ -582,7 +582,7 @@ func documentActions() {
 		},
 	}
 	var errorCorrectionLevels = []string{"Low", "Medium", "Quartile", "High"}
-	actions["makeQRcode"] = &actionDefinition{
+	actions["makeQRCode"] = &actionDefinition{
 		identifier: "generatebarcode",
 		parameters: []parameterDefinition{
 			{
@@ -591,10 +591,12 @@ func documentActions() {
 				key:       "WFText",
 			},
 			{
-				name:      "errorCorrection",
-				validType: String,
-				key:       "WFQRErrorCorrectionLevel",
-				enum:      errorCorrectionLevels,
+				name:         "errorCorrection",
+				validType:    String,
+				key:          "WFQRErrorCorrectionLevel",
+				enum:         errorCorrectionLevels,
+				optional:     true,
+				defaultValue: "Medium",
 			},
 		},
 	}
