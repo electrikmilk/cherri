@@ -2474,13 +2474,10 @@ func scriptingActions() {
 				validType: Integer,
 			},
 			{
-				name:      "decimalPlaces",
-				key:       "WFNumberFormatDecimalPlaces",
-				validType: Integer,
-				defaultValue: actionArgument{
-					valueType: Integer,
-					value:     2,
-				},
+				name:         "decimalPlaces",
+				key:          "WFNumberFormatDecimalPlaces",
+				validType:    Integer,
+				defaultValue: 2,
 			},
 		},
 	}
