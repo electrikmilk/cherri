@@ -2959,6 +2959,7 @@ func scriptingActions() {
 			}
 		},
 	}
+	var appSplitRatios = []string{"half", "thirdByTwo"}
 	actions["splitApps"] = &actionDefinition{
 		identifier: "splitscreen",
 		parameters: []parameterDefinition{
@@ -2974,6 +2975,7 @@ func scriptingActions() {
 				name:         "ratio",
 				validType:    String,
 				optional:     true,
+				enum:         appSplitRatios,
 				defaultValue: "half",
 			},
 		},
