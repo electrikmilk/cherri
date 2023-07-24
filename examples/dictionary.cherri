@@ -21,7 +21,7 @@ as the value of a dictionary
 // Get values, keys, and values for keys...
 
 @value = getValue(dictVar, "key1")
-alert(value,"Value of key1",false)
+alert(value,"Value of key1")
 
 @keys = getKeys(dictVar)
 

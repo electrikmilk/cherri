@@ -8,7 +8,7 @@ Globals are case-sensitive
 @clipboard = Clipboard
 @device = Device
 
-alert(Ask, "", false)
+alert(Ask)
 
 // But you can also just inline a global in a string like other variables
 @shortcutInput = "{ShortcutInput}"

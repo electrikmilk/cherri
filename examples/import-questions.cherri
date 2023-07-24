@@ -1,6 +1,6 @@
 #question name "What is your name?" "Brandon"
 #question age "What is your age?" "24"
 
-alert(name, "Name", false)
+alert(name, "Name")
 
-alert(age, "Age", false)
+alert(age, "Age")

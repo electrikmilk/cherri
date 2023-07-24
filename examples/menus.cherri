@@ -14,7 +14,7 @@ repeat 3 {
 @contact = vcf.contact
 @chosenItem = chooseFromList(contact,"Prompt")
 
-alert(chosenItem,"You chose:",false)
+alert(chosenItem,"You chose:")
 
 // Choose from menu
 
@@ -29,4 +29,4 @@ menu "Prompt" {
 
 @listVar = list("Item 1","Item 2","Item 3")
 @chosenItem = chooseFromList(listVar,"Choose a item")
-alert(chosenItem,"You chose:",false)
+alert(chosenItem,"You chose:")
