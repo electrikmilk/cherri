@@ -318,7 +318,7 @@ func collectArguments() (arguments []actionArgument) {
 			valueType: valueType,
 			value:     value,
 		}
-		checkArg(argIndex, param, argument)
+		checkArg(param, argument)
 		arguments = append(arguments, argument)
 		argIndex++
 	}

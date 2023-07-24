@@ -181,7 +181,6 @@ func checkAction() {
 	var action = actions[currentAction]
 	if len(action.parameters) > 0 {
 		checkRequiredArgs()
-		checkTypes()
 	}
 	if action.check != nil {
 		action.check(currentArguments)
@@ -260,16 +259,6 @@ func realVariableValue(varName string, lastValueType tokenType) (varValue variab
 		varValue = variables[varName]
 	}
 	return
-}
-
-// checkTypes iterates through `arguments` against `checks` to determine if the valid type defined
-// for an action argument is the same as the type of the argument that was parsed.
-func checkTypes() {
-	for i, param := range actions[currentAction].parameters {
-		if currentArgumentsSize > i {
-			typeCheck(param.name, param.validType, currentArguments[i])
-		}
-	}
 }
 
 // typeCheck is used to check the types of arguments given for actions.
@@ -363,16 +352,14 @@ func incrementValue(value any) string {
 }
 
 // checkArg checks to ensure the collected argument for the current action is valid.
-func checkArg(idx int, param parameterDefinition, argument actionArgument) {
+func checkArg(param parameterDefinition, argument actionArgument) {
 	if param.infinite {
 		return
 	}
 	if param.enum != nil {
 		checkEnum(param, argument)
 	}
-	if currentArgumentsSize < idx {
-		return
-	}
+	typeCheck(param.name, param.validType, argument)
 	var realValue = getArgValue(argument)
 	var stringDefaultValue = fmt.Sprintf("%v", param.defaultValue)
 	if param.defaultValue != nil && stringDefaultValue == realValue {
