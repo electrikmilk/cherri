@@ -23,7 +23,7 @@ var"
         "item3"
     ]
 }
-@expVar = 54 * 4 + (6 * 7)
+@expVar = 54 * {intVar} + (6 * 7)
 @listVar = list("Item 1","Item 2","Item 3")
 
 // empty variable
