@@ -2633,17 +2633,43 @@ func scriptingActions() {
 				validType: String,
 				optional:  true,
 			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFAlertActionCancelButtonShown",
+					dataType: Boolean,
+					value:    false,
+				},
+			}
+		},
+	}
+	actions["confirm"] = &actionDefinition{
+		parameters: []parameterDefinition{
 			{
-				name:         "cancelButton",
-				key:          "WFAlertActionCancelButtonShown",
-				validType:    Bool,
-				optional:     true,
-				defaultValue: true,
+				name:      "alert",
+				key:       "WFAlertActionMessage",
+				validType: String,
 			},
+			{
+				name:      "title",
+				key:       "WFAlertActionTitle",
+				validType: String,
+				optional:  true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFAlertActionCancelButtonShown",
+					dataType: Boolean,
+					value:    true,
+				},
+			}
 		},
 	}
 	var inputTypes = []string{"Text", "Number", "URL", "Date", "Time", "Date and Time"}
-	actions["askForInput"] = &actionDefinition{
+	actions["prompt"] = &actionDefinition{
 		identifier: "ask",
 		parameters: []parameterDefinition{
 			{
