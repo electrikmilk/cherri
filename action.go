@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -350,6 +351,14 @@ func getArgValue(argument actionArgument) any {
 		})
 	}
 	return variables[variable].value
+}
+
+// incrementValue increments a string integer value.
+func incrementValue(value any) string {
+	var intValue, intValueErr = strconv.ParseInt(value.(string), 10, 64)
+	handle(intValueErr)
+	intValue++
+	return fmt.Sprintf("%d", intValue)
 }
 
 // checkArg checks to ensure the collected argument for the current action is valid.

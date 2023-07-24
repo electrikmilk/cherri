@@ -3289,6 +3289,12 @@ func scriptingActions() {
 				key:       "WFItemIndex",
 			},
 		},
+		check: func(args []actionArgument) {
+			args[1] = actionArgument{
+				valueType: Integer,
+				value:     incrementValue(args[1]),
+			}
+		},
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -3317,6 +3323,16 @@ func scriptingActions() {
 				validType: Integer,
 				key:       "WFItemRangeEnd",
 			},
+		},
+		check: func(args []actionArgument) {
+			args[1] = actionArgument{
+				valueType: Integer,
+				value:     incrementValue(args[1].value),
+			}
+			args[2] = actionArgument{
+				valueType: Integer,
+				value:     incrementValue(args[2].value),
+			}
 		},
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
