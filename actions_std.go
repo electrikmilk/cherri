@@ -2678,10 +2678,12 @@ func scriptingActions() {
 				name:      "prompt",
 				key:       "WFChooseFromListActionPrompt",
 				validType: String,
+				optional:  true,
 			},
 			{
 				name:         "selectMultiple",
 				key:          "WFChooseFromListActionSelectMultiple",
+				validType:    Bool,
 				optional:     true,
 				defaultValue: false,
 			},
