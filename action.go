@@ -180,8 +180,8 @@ func makeStdAction(ident string, params []plistData) string {
 func checkAction() {
 	var action = actions[currentAction]
 	if len(action.parameters) > 0 {
-		checkRequiredArgs(action.parameters)
-		checkTypes(action.parameters)
+		checkRequiredArgs()
+		checkTypes()
 	}
 	if action.check != nil {
 		action.check(currentArguments)
@@ -200,8 +200,9 @@ func checkAction() {
 	}
 }
 
-func checkRequiredArgs(params []parameterDefinition) {
-	for i, param := range params {
+// checkRequiredArgs checks if all required arguments for an action have a value.
+func checkRequiredArgs() {
+	for i, param := range actions[currentAction].parameters {
 		if param.infinite {
 			return
 		}
@@ -263,32 +264,10 @@ func realVariableValue(varName string, lastValueType tokenType) (varValue variab
 
 // checkTypes iterates through `arguments` against `checks` to determine if the valid type defined
 // for an action argument is the same as the type of the argument that was parsed.
-func checkTypes(checks []parameterDefinition) {
-	for i, check := range checks {
+func checkTypes() {
+	for i, param := range actions[currentAction].parameters {
 		if currentArgumentsSize > i {
-			typeCheck(check.name, check.validType, currentArguments[i])
-		}
-	}
-}
-
-// validActionOutput checks the output of an action in the case that the output has been assigned to a variable.
-func validActionOutput(field string, validType tokenType, value any) {
-	var actionIdent = value.(action).ident
-	if _, found := actions[actionIdent]; found {
-		var actionOutputType = actions[actionIdent].outputType
-		if actionOutputType != "" {
-			if actionOutputType != validType {
-				parserError(
-					fmt.Sprintf(
-						"Invalid variable value of action '%v' that outputs type '%s' for argument '%s' of type '%s' in '%s()'",
-						actionIdent+"()",
-						typeName(actionOutputType),
-						field,
-						typeName(validType),
-						currentAction,
-					),
-				)
-			}
+			typeCheck(param.name, param.validType, currentArguments[i])
 		}
 	}
 }
@@ -331,6 +310,28 @@ func typeCheck(field string, validType tokenType, argument actionArgument) {
 			field,
 			typeName(validType),
 		))
+	}
+}
+
+// validActionOutput checks the output of an action in the case that the output has been assigned to a variable.
+func validActionOutput(field string, validType tokenType, value any) {
+	var actionIdent = value.(action).ident
+	if _, found := actions[actionIdent]; found {
+		var actionOutputType = actions[actionIdent].outputType
+		if actionOutputType != "" {
+			if actionOutputType != validType {
+				parserError(
+					fmt.Sprintf(
+						"Invalid variable value of action '%v' that outputs type '%s' for argument '%s' of type '%s' in '%s()'",
+						actionIdent+"()",
+						typeName(actionOutputType),
+						field,
+						typeName(validType),
+						currentAction,
+					),
+				)
+			}
+		}
 	}
 }
 
