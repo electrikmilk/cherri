@@ -303,7 +303,7 @@ func typeCheck(field string, validType tokenType, argument actionArgument) {
 		if argValueType == String {
 			argVal = "\"" + argVal.(string) + "\""
 		}
-		parserError(fmt.Sprintf("%s(): Invalid value '%v' (%s) for argument '%s' (%s).",
+		parserError(fmt.Sprintf("%s(): Invalid value %v (%s) for argument '%s' (%s).",
 			currentAction,
 			argVal,
 			typeName(argValueType),
