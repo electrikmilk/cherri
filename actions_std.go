@@ -3692,7 +3692,8 @@ func scriptingActions() {
 			return roundingValue("Normal", args)
 		},
 	}
-	actions["roundUp"] = &actionDefinition{
+	actions["ceil"] = &actionDefinition{
+		identifier: "round",
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
@@ -3707,7 +3708,8 @@ func scriptingActions() {
 			return roundingValue("Always Round Up", args)
 		},
 	}
-	actions["roundDown"] = &actionDefinition{
+	actions["floor"] = &actionDefinition{
+		identifier: "round",
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
