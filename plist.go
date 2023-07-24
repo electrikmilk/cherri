@@ -189,11 +189,7 @@ func makeVariableValue(token *token, varUUID *string) {
 		shortcutActions = append(shortcutActions, makeStdAction("calculateexpression", []plistData{
 			UUID,
 			outputName,
-			{
-				key:      "Input",
-				dataType: Text,
-				value:    token.value,
-			},
+			attachmentValues("Input", token.value.(string), "", Text),
 		}))
 	case Action:
 		currentAction = token.value.(action).ident

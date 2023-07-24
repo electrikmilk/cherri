@@ -204,17 +204,16 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		var integer = collectInteger()
 		*valueType = Integer
 		*value = integer
-		if char != '\n' {
-			advance()
+		advance()
+		if !tokensAhead(Plus, Minus, Multiply, Divide, Modulus) {
+			break
 		}
-		if tokensAhead(Plus, Minus, Multiply, Divide, Modulus) {
-			var expression string
-			idx -= len(integer) + 4
-			advance()
-			*valueType = Expression
-			expression = collectUntil(until)
-			*value = expression
-		}
+		var expression string
+		idx -= len(integer) + 4
+		advance()
+		*valueType = Expression
+		expression = collectUntil(until)
+		*value = expression
 	case isToken(String):
 		*valueType = String
 		*value = collectString()
