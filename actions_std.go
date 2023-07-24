@@ -2266,8 +2266,7 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["countItems"] = &actionDefinition{
-		identifier: "count",
+	actions["count"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2275,7 +2274,7 @@ func scriptingActions() {
 			},
 		},
 		make: func(args []actionArgument) []plistData {
-			return count("Items", args)
+			return countParams("Items", args)
 		},
 	}
 	actions["countChars"] = &actionDefinition{
@@ -2287,7 +2286,7 @@ func scriptingActions() {
 			},
 		},
 		make: func(args []actionArgument) []plistData {
-			return count("Characters", args)
+			return countParams("Characters", args)
 		},
 	}
 	actions["countWords"] = &actionDefinition{
@@ -2299,7 +2298,7 @@ func scriptingActions() {
 			},
 		},
 		make: func(args []actionArgument) []plistData {
-			return count("Words", args)
+			return countParams("Words", args)
 		},
 	}
 	actions["countSentences"] = &actionDefinition{
@@ -2311,7 +2310,7 @@ func scriptingActions() {
 			},
 		},
 		make: func(args []actionArgument) []plistData {
-			return count("Sentences", args)
+			return countParams("Sentences", args)
 		},
 	}
 	actions["countLines"] = &actionDefinition{
@@ -2323,7 +2322,7 @@ func scriptingActions() {
 			},
 		},
 		make: func(args []actionArgument) []plistData {
-			return count("Lines", args)
+			return countParams("Lines", args)
 		},
 	}
 	actions["toggleAppearance"] = &actionDefinition{
@@ -4651,7 +4650,7 @@ func languageCode(language string) string {
 	return language
 }
 
-func count(countType string, args []actionArgument) []plistData {
+func countParams(countType string, args []actionArgument) []plistData {
 	return []plistData{
 		{
 			key:      "WFCountType",
