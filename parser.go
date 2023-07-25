@@ -361,6 +361,12 @@ func collectVariable() {
 	} else {
 		identifier = collectUntil('\n')
 	}
+	if _, found := globals[identifier]; found {
+		parserError(fmt.Sprintf("Cannot redefine global variable '%s'.", identifier))
+	}
+	if _, found := questions[identifier]; found {
+		parserError(fmt.Sprintf("Variable conflicts with defined import question '%s'.", identifier))
+	}
 	var valueType tokenType
 	var value any
 	var getAs string
@@ -559,7 +565,12 @@ type question struct {
 func collectQuestion() {
 	advance()
 	var identifier = collectUntilExpect(' ', 3)
-	identifier = strings.ToLower(identifier)
+	if _, found := questions[identifier]; found {
+		parserError(fmt.Sprintf("Duplicate declaration of import question '%s'.", identifier))
+	}
+	if _, found := variables[identifier]; found {
+		parserError(fmt.Sprintf("Import question conflicts with defined variable '%s'.", identifier))
+	}
 	advance()
 	if !isToken("\"") {
 		parserError("Expected string")
