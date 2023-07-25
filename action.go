@@ -181,6 +181,14 @@ func checkAction() {
 	var action = actions[currentAction]
 	if len(action.parameters) > 0 {
 		checkRequiredArgs()
+
+		for i, param := range actions[currentAction].parameters {
+			if !param.infinite {
+				continue
+			}
+			checkInfiniteArgs(i)
+			break
+		}
 	}
 	if action.check != nil {
 		action.check(currentArguments)
@@ -196,6 +204,15 @@ func checkAction() {
 		parserError(
 			fmt.Sprintf("You've set your Shortcut as non-Mac. Action '%s()' is a Mac only action.", currentAction),
 		)
+	}
+}
+
+func checkInfiniteArgs(startIdx int) {
+	for i, arg := range currentArguments {
+		if i < startIdx {
+			continue
+		}
+		checkArg(actions[currentAction].parameters[startIdx], arg)
 	}
 }
 
@@ -353,9 +370,6 @@ func incrementValue(value any) string {
 
 // checkArg checks to ensure the collected argument for the current action is valid.
 func checkArg(param parameterDefinition, argument actionArgument) {
-	if param.infinite {
-		return
-	}
 	if param.enum != nil {
 		checkEnum(param, argument)
 	}
