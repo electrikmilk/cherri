@@ -458,7 +458,6 @@ func generateActionRestrictions() (definition string) {
 }
 
 func generateActionParamEnums(focus parameterDefinition) (definition string) {
-	definition += "\n"
 	var hasEnum = false
 	for _, param := range actions[currentAction].parameters {
 		if param.enum == nil {
@@ -468,7 +467,7 @@ func generateActionParamEnums(focus parameterDefinition) (definition string) {
 			continue
 		}
 		hasEnum = true
-		definition += "\nAvailable " + param.name + "s:\n"
+		definition += "\n\nAvailable " + param.name + "s:\n"
 		for _, e := range param.enum {
 			definition += "- " + e + "\n"
 		}
