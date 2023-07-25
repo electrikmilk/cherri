@@ -2,6 +2,7 @@
 
 @intVar = 42
 @intVar2 = 52
+const immutable = 5
 @stringVar = "text {intVar}"
 @multiString = "Multiline
 string

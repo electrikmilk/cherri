@@ -147,6 +147,7 @@ type variableValue struct {
 	value        any
 	getAs        string
 	coerce       string
+	constant     bool
 }
 
 /* Globals */

@@ -21,6 +21,7 @@ var tokenChars map[tokenType][]string
 
 const (
 	Var            tokenType = "variable"
+	Constant       tokenType = "const"
 	If             tokenType = "if"
 	Else           tokenType = "else"
 	EndClosure     tokenType = "endif"

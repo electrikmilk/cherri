@@ -56,7 +56,10 @@ func parse() {
 		case tokenAhead(Import):
 			collectImport()
 		case isToken(At):
-			collectVariable()
+			collectVariable(false)
+		case tokenAhead(Constant):
+			advance()
+			collectVariable(true)
 		case isToken(ForwardSlash):
 			collectComment()
 		case tokenAhead(Repeat):
@@ -352,7 +355,7 @@ func collectComment() {
 	})
 }
 
-func collectVariable() {
+func collectVariable(constant bool) {
 	reachable()
 	var identifier string
 	if strings.Contains(lookAheadUntil('\n'), "=") {
@@ -360,6 +363,11 @@ func collectVariable() {
 		advance()
 	} else {
 		identifier = collectUntil('\n')
+	}
+	if _, found := variables[identifier]; found {
+		if variables[identifier].constant {
+			parserError(fmt.Sprintf("Cannot redefine constant '%s'.", identifier))
+		}
 	}
 	if _, found := globals[identifier]; found {
 		parserError(fmt.Sprintf("Cannot redefine global variable '%s'.", identifier))
@@ -388,6 +396,7 @@ func collectVariable() {
 			value:        value,
 			getAs:        getAs,
 			coerce:       coerce,
+			constant:     constant,
 		}
 	}
 }
