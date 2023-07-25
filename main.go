@@ -67,7 +67,7 @@ func main() {
 
 	handleIncludes()
 
-	parse()
+	initParse()
 
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")

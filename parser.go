@@ -27,7 +27,7 @@ var closureTypes map[int]tokenType
 var closureIdx int
 var currentGroupingUUID string
 
-func parse() {
+func initParse() {
 	tokenChars = make(map[tokenType][]string)
 	if strings.Contains(contents, "action") {
 		standardActions()
@@ -45,6 +45,10 @@ func parse() {
 	chars = strings.Split(contents, "")
 	idx = -1
 	advance()
+	parse()
+}
+
+func parse() {
 	for char != -1 {
 		switch {
 		case char == ' ' || char == '\t' || char == '\n':
@@ -75,14 +79,7 @@ func parse() {
 		case tokenAhead(RightBrace):
 			collectEndClosure()
 		case strings.Contains(lookAheadUntil(' '), "("):
-			reachable()
-			var identifier, value = collectAction()
-			tokens = append(tokens, token{
-				typeof:    Action,
-				ident:     identifier,
-				valueType: Action,
-				value:     value,
-			})
+			collectActionCall()
 		default:
 			parserError(fmt.Sprintf("Illegal character '%s'", string(char)))
 		}
@@ -852,6 +849,17 @@ func collectObject() (jsonStr string) {
 		advance()
 	}
 	return
+}
+
+func collectActionCall() {
+	reachable()
+	var identifier, value = collectAction()
+	tokens = append(tokens, token{
+		typeof:    Action,
+		ident:     identifier,
+		valueType: Action,
+		value:     value,
+	})
 }
 
 func collectAction() (identifier string, value action) {
