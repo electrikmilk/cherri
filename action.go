@@ -279,12 +279,12 @@ func realVariableValue(varName string, lastValueType tokenType) (varValue variab
 }
 
 // typeCheck is used to check the types of arguments given for actions.
-func typeCheck(field string, validType tokenType, argument actionArgument) {
+func typeCheck(param parameterDefinition, argument actionArgument) {
 	var argValueType = argument.valueType
 	var argVal = argument.value
 	switch {
 	case argValueType == Action:
-		validActionOutput(field, validType, argVal)
+		validActionOutput(param.name, param.validType, argVal)
 		return
 	case argValueType == Variable:
 		var varName = argVal.(string)
@@ -292,29 +292,29 @@ func typeCheck(field string, validType tokenType, argument actionArgument) {
 		argValueType = getVar.valueType
 		argVal = getVar.value
 		if argValueType == Action {
-			validActionOutput(field, validType, argVal)
+			validActionOutput(param.name, param.validType, argVal)
 			return
 		}
-		if argValueType != validType && validType != Variable {
-			parserError(fmt.Sprintf("Invalid variable value '%v' of type '%s' for argument '%s' of type '%s' in '%s()'",
+		if argValueType != param.validType && param.validType != Variable {
+			parserError(fmt.Sprintf("Invalid variable value %v (%s) for argument '%s' (%s).\n%s",
 				argVal,
 				typeName(argValueType),
-				field,
-				typeName(validType),
-				currentAction,
+				param.name,
+				typeName(param.validType),
+				generateActionDefinition(param, false, false),
 			))
 		}
 	case argValueType == Question:
-	case argument.valueType != validType:
+	case argument.valueType != param.validType:
 		if argValueType == String {
 			argVal = "\"" + argVal.(string) + "\""
 		}
-		parserError(fmt.Sprintf("%s(): Invalid value %v (%s) for argument '%s' (%s).",
-			currentAction,
+		parserError(fmt.Sprintf("Invalid value %v (%s) for argument '%s' (%s).\n%s",
 			argVal,
 			typeName(argValueType),
-			field,
-			typeName(validType),
+			param.name,
+			typeName(param.validType),
+			generateActionDefinition(param, false, false),
 		))
 	}
 }
@@ -373,7 +373,7 @@ func checkArg(param parameterDefinition, argument actionArgument) {
 	if param.enum != nil {
 		checkEnum(param, argument)
 	}
-	typeCheck(param.name, param.validType, argument)
+	typeCheck(param, argument)
 	var realValue = getArgValue(argument)
 	var stringDefaultValue = fmt.Sprintf("%v", param.defaultValue)
 	if param.defaultValue != nil && stringDefaultValue == realValue {
