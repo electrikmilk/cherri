@@ -233,14 +233,14 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*valueType = Action
 		_, *value = collectAction()
 	default:
+		if lookAheadUntil(until) == "" {
+			parserError("Value expected")
+		}
 		collectReference(valueType, value, &until)
 	}
 }
 
 func collectReference(valueType *tokenType, value *any, until *rune) {
-	if lookAheadUntil(*until) == "" {
-		parserError("Value expected")
-	}
 	var identifier string
 	var fullIdentifier string
 	switch {
@@ -260,30 +260,34 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		advance()
 	}
 	var lowerIdentifier = strings.ToLower(identifier)
-	if _, global := globals[identifier]; global {
+	if _, g := globals[identifier]; g {
 		*valueType = Variable
 		*value = fullIdentifier
 		isInputVariable(identifier)
-	} else if _, found := variables[lowerIdentifier]; found {
+		return
+	}
+	if _, v := variables[lowerIdentifier]; v {
 		*valueType = Variable
 		*value = fullIdentifier
-	} else if _, found := questions[lowerIdentifier]; found {
+		return
+	}
+	if _, q := questions[lowerIdentifier]; q {
 		if questions[lowerIdentifier].used {
 			parserError(fmt.Sprintf("Duplicate usage of '%s', import questions can only be referenced once.", fullIdentifier))
 		}
 		*valueType = Question
 		*value = fullIdentifier
 		questions[lowerIdentifier].used = true
-	} else {
-		if fullIdentifier == "" {
-			parserError("Value expected")
-		}
-		if args.Using("debug") {
-			fmt.Println("\nvariables", variables)
-			fmt.Println("questions", questions)
-		}
-		parserError(fmt.Sprintf("Unknown value type: '%s'", fullIdentifier))
+		return
 	}
+	if fullIdentifier == "" {
+		parserError("Value expected")
+	}
+	if args.Using("debug") {
+		fmt.Println("\nvariables", variables)
+		fmt.Println("questions", questions)
+	}
+	parserError(fmt.Sprintf("Unknown value type: '%s'", fullIdentifier))
 }
 
 func collectArguments() (arguments []actionArgument) {
