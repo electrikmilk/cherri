@@ -303,7 +303,12 @@ func collectArguments() (arguments []actionArgument) {
 			param = params[argIndex]
 		}
 		if argIndex == paramsSize && !param.infinite {
-			parserError(fmt.Sprintf("Too many arguments for action %s() (max: %d)", currentAction, argIndex))
+			parserError(
+				fmt.Sprintf("Too many arguments for action %s()\n\n%s",
+					currentAction,
+					generateActionDefinition(parameterDefinition{}, false, false),
+				),
+			)
 		}
 		if char == ',' {
 			advance()
