@@ -435,38 +435,48 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 	}
 	definition += ")"
 	if restrictions && (action.minVersion != 0 || action.mac) {
-		definition += "\nRestrictions: "
-		if action.minVersion != 0 {
-			definition += fmt.Sprintf("iOS %1.f+", action.minVersion)
-		}
-		if action.minVersion != 0 && action.mac {
-			definition += ", "
-		}
-		if action.mac {
-			definition += "macOS only"
-		}
+		definition += generateActionRestrictions()
 	}
 	if showEnums {
-		definition += "\n"
-		var hasEnum = false
-		for _, param := range action.parameters {
-			if param.enum == nil {
-				continue
-			}
-			if focus.name != "" && focus.name != param.name {
-				continue
-			}
-			hasEnum = true
-			definition += "\nAvailable " + param.name + "s:\n"
-			for _, e := range param.enum {
-				definition += "- " + e + "\n"
-			}
-		}
-		if hasEnum {
-			definition += "\nNote: Enum values are case-sensitive."
-		}
+		definition += generateActionParamEnums(focus)
 	}
 	return definition
+}
+
+func generateActionRestrictions() (definition string) {
+	definition += "\nRestrictions: "
+	if actions[currentAction].minVersion != 0 {
+		definition += fmt.Sprintf("iOS %1.f+", actions[currentAction].minVersion)
+	}
+	if actions[currentAction].minVersion != 0 && actions[currentAction].mac {
+		definition += ", "
+	}
+	if actions[currentAction].mac {
+		definition += "macOS only"
+	}
+	return
+}
+
+func generateActionParamEnums(focus parameterDefinition) (definition string) {
+	definition += "\n"
+	var hasEnum = false
+	for _, param := range actions[currentAction].parameters {
+		if param.enum == nil {
+			continue
+		}
+		if focus.name != "" && focus.name != param.name {
+			continue
+		}
+		hasEnum = true
+		definition += "\nAvailable " + param.name + "s:\n"
+		for _, e := range param.enum {
+			definition += "- " + e + "\n"
+		}
+	}
+	if hasEnum {
+		definition += "\nNote: Enum values are case-sensitive."
+	}
+	return
 }
 
 func generateActionParamDefinition(param parameterDefinition) (definition string) {
