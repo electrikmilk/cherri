@@ -188,7 +188,7 @@ func collectVariableValue(valueType *tokenType, value *any, varType *tokenType, 
 		var dotParts = strings.Split(stringValue, ".")
 		*coerce = strings.Trim(dotParts[1], " ")
 		if strings.Contains(stringValue, "[") {
-			var varParts = strings.Split(dotParts[0], "[")
+			var varParts = strings.Split(stringValue, "[")
 			*value = varParts[0]
 			*getAs = strings.Trim(strings.TrimSuffix(varParts[1], "]"), " ")
 		} else {
