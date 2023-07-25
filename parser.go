@@ -573,12 +573,12 @@ func collectQuestion() {
 	}
 	advance()
 	if !isToken("\"") {
-		parserError("Expected string")
+		parserError("Expected question prompt string.")
 	}
 	var text = collectString()
 	advance()
 	if !isToken("\"") {
-		parserError("Expected string")
+		parserError("Expected question default string value.")
 	}
 	var defaultValue = collectString()
 	questions[identifier] = &question{
