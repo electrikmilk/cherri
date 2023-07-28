@@ -2678,18 +2678,18 @@ func scriptingActions() {
 				key:       "WFAskActionPrompt",
 			},
 			{
-				name:      "defaultValue",
-				validType: String,
-				optional:  true,
-				key:       "WFAskActionDefaultAnswer",
-			},
-			{
 				name:         "inputType",
 				validType:    String,
 				key:          "WFInputType",
 				enum:         inputTypes,
 				optional:     true,
 				defaultValue: "Text",
+			},
+			{
+				name:      "defaultValue",
+				validType: String,
+				optional:  true,
+				key:       "WFAskActionDefaultAnswer",
 			},
 		},
 	}
