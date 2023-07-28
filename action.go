@@ -212,7 +212,7 @@ func checkInfiniteArgs(startIdx int) {
 		if i < startIdx {
 			continue
 		}
-		checkArg(actions[currentAction].parameters[startIdx], arg)
+		checkArg(&actions[currentAction].parameters[startIdx], &arg)
 	}
 }
 
@@ -279,7 +279,7 @@ func realVariableValue(varName string, lastValueType tokenType) (varValue variab
 }
 
 // typeCheck is used to check the types of arguments given for actions.
-func typeCheck(param parameterDefinition, argument actionArgument) {
+func typeCheck(param *parameterDefinition, argument *actionArgument) {
 	var argValueType = argument.valueType
 	var argVal = argument.value
 	switch {
@@ -301,7 +301,7 @@ func typeCheck(param parameterDefinition, argument actionArgument) {
 				typeName(argValueType),
 				param.name,
 				typeName(param.validType),
-				generateActionDefinition(param, false, false),
+				generateActionDefinition(*param, false, false),
 			))
 		}
 	case argValueType == Question:
@@ -314,7 +314,7 @@ func typeCheck(param parameterDefinition, argument actionArgument) {
 			typeName(argValueType),
 			param.name,
 			typeName(param.validType),
-			generateActionDefinition(param, false, false),
+			generateActionDefinition(*param, false, false),
 		))
 	}
 }
@@ -369,19 +369,19 @@ func incrementValue(value any) string {
 }
 
 // checkArg checks to ensure the collected argument for the current action is valid.
-func checkArg(param parameterDefinition, argument actionArgument) {
+func checkArg(param *parameterDefinition, argument *actionArgument) {
 	if param.enum != nil {
-		checkEnum(param, argument)
+		checkEnum(*param, *argument)
 	}
 	typeCheck(param, argument)
-	var realValue = getArgValue(argument)
+	var realValue = getArgValue(*argument)
 	var stringDefaultValue = fmt.Sprintf("%v", param.defaultValue)
 	if param.defaultValue != nil && stringDefaultValue == realValue {
 		parserWarning(
 			fmt.Sprintf(
 				"Value for action argument '%s' is the same as the default value.\n%s",
 				param.name,
-				generateActionDefinition(param, false, false),
+				generateActionDefinition(*param, false, false),
 			),
 		)
 	}

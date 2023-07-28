@@ -201,19 +201,7 @@ func collectVariableValue(valueType *tokenType, value *any, varType *tokenType, 
 func collectValue(valueType *tokenType, value *any, until rune) {
 	switch {
 	case intChar():
-		var integer = collectInteger()
-		*valueType = Integer
-		*value = integer
-		advance()
-		if !tokensAhead(Plus, Minus, Multiply, Divide, Modulus) {
-			break
-		}
-		var expression string
-		idx -= len(integer) + 4
-		advance()
-		*valueType = Expression
-		expression = collectUntil(until)
-		*value = expression
+		collectIntegerValue(valueType, value, &until)
 	case isToken(String):
 		*valueType = String
 		*value = collectString()
@@ -238,6 +226,21 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		}
 		collectReference(valueType, value, &until)
 	}
+}
+
+func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
+	var ahead = lookAheadUntil(*until)
+	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
+		var integer = collectInteger()
+		*valueType = Integer
+		*value = integer
+		advance()
+		return
+	}
+	var expression string
+	*valueType = Expression
+	expression = collectUntil(*until)
+	*value = expression
 }
 
 func collectReference(valueType *tokenType, value *any, until *rune) {
@@ -302,36 +305,40 @@ func collectArguments() (arguments []actionArgument) {
 		if argIndex < paramsSize {
 			param = params[argIndex]
 		}
-		if argIndex == paramsSize && !param.infinite {
-			parserError(
-				fmt.Sprintf("Too many arguments for action %s()\n\n%s",
-					currentAction,
-					generateActionDefinition(parameterDefinition{}, false, false),
-				),
-			)
-		}
-		if char == ',' {
-			advance()
-		}
-		if char == ' ' {
-			advance()
-		}
-		var valueType tokenType
-		var value any
-		if strings.Contains(lookAheadUntil('\n'), ",") {
-			collectValue(&valueType, &value, ',')
-		} else {
-			collectValue(&valueType, &value, ')')
-		}
-		var argument = actionArgument{
-			valueType: valueType,
-			value:     value,
-		}
-		if !param.infinite {
-			checkArg(param, argument)
-		}
-		arguments = append(arguments, argument)
+		arguments = append(arguments, collectArgument(&argIndex, &param, &paramsSize))
 		argIndex++
+	}
+	return
+}
+
+func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int) (argument actionArgument) {
+	if *argIndex == *paramsSize && !param.infinite {
+		parserError(
+			fmt.Sprintf("Too many arguments for action %s()\n\n%s",
+				currentAction,
+				generateActionDefinition(parameterDefinition{}, false, false),
+			),
+		)
+	}
+	if char == ',' {
+		advance()
+	}
+	if char == ' ' {
+		advance()
+	}
+	var valueType tokenType
+	var value any
+	if strings.Contains(lookAheadUntil('\n'), ",") {
+		collectValue(&valueType, &value, ',')
+	} else {
+		collectValue(&valueType, &value, ')')
+	}
+	argument = actionArgument{
+		valueType: valueType,
+		value:     value,
+	}
+	if !param.infinite {
+		checkArg(param, &argument)
 	}
 	return
 }
@@ -959,6 +966,15 @@ func tokenAhead(token tokenType) bool {
 func tokensAhead(v ...tokenType) bool {
 	for _, aheadToken := range v {
 		if tokenAhead(aheadToken) {
+			return true
+		}
+	}
+	return false
+}
+
+func containsTokens(str *string, v ...tokenType) bool {
+	for _, aheadToken := range v {
+		if strings.Contains(*str, string(aheadToken)) {
 			return true
 		}
 	}
