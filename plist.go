@@ -238,22 +238,38 @@ func variableInput(key string, name string) plistData {
 func inputValue(key string, name string, varUUID string) plistData {
 	var value []plistData
 	if varUUID != "" {
-		value = []plistData{
-			{
-				key:      "OutputName",
-				dataType: Text,
-				value:    name,
-			},
-			{
-				key:      "OutputUUID",
-				dataType: Text,
-				value:    varUUID,
-			},
-			{
-				key:      "Type",
-				dataType: Text,
-				value:    "ActionOutput",
-			},
+		var variable = variables[name]
+		if variable.valueType != Variable {
+			value = []plistData{
+				{
+					key:      "OutputName",
+					dataType: Text,
+					value:    name,
+				},
+				{
+					key:      "OutputUUID",
+					dataType: Text,
+					value:    varUUID,
+				},
+				{
+					key:      "Type",
+					dataType: Text,
+					value:    "ActionOutput",
+				},
+			}
+		} else {
+			value = []plistData{
+				{
+					key:      "VariableName",
+					dataType: Text,
+					value:    name,
+				},
+				{
+					key:      "Type",
+					dataType: Text,
+					value:    "Variable",
+				},
+			}
 		}
 	} else if _, found := globals[name]; found {
 		value = []plistData{
