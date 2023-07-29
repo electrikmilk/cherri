@@ -232,6 +232,12 @@ func contains(s []string, e string) bool {
 	return false
 }
 
+func capitalize(s string) string {
+	var chars = strings.Split(s, "")
+	chars[0] = strings.ToUpper(chars[0])
+	return strings.Join(chars, "")
+}
+
 // startsWith determines if the beginning characters of `substr` match `s`.
 func startsWith(s string, substr string) bool {
 	var stringChars = strings.Split(s, "")
