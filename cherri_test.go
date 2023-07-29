@@ -31,12 +31,6 @@ func TestCherri(_ *testing.T) {
 
 			main()
 			fmt.Print(ansi("PASSED", green) + "\n\n")
-
-			var removePath = relativePath + basename + "_unsigned.shortcut"
-			removeShortcutErr := os.Remove(removePath)
-			if removeShortcutErr != nil {
-				fmt.Println(ansi(fmt.Sprintf("Failed to remove test file %s!\n", removePath), red))
-			}
 		}
 	}
 }
