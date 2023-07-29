@@ -375,6 +375,9 @@ func collectVariable(constant bool) {
 		identifier = collectUntil(' ')
 		advance()
 	} else {
+		if constant {
+			parserError("Constants must be initialized with a value.")
+		}
 		identifier = collectUntil('\n')
 	}
 	if _, found := variables[identifier]; found {
