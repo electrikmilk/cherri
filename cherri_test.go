@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -26,7 +27,9 @@ func TestCherri(_ *testing.T) {
 			currentTest = "examples/" + file.Name()
 			fmt.Printf("Compiling %s...\n", ansi(currentTest, bold))
 			os.Args[1] = currentTest
-			args.Args["unsigned"] = ""
+			if runtime.GOOS != "darwin" {
+				args.Args["unsigned"] = ""
+			}
 			resetParser()
 
 			main()
