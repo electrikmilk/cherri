@@ -20,9 +20,9 @@ alert(chosenItem,"You chose:")
 
 menu "Prompt" {
     item "Item 1":
-        nothing()
+        alert("Item 1", "You chose:")
     item "Item 2":
-        nothing()
+        alert("Item 2", "You chose:")
 }
 
 // Choose from list
