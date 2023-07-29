@@ -8,12 +8,13 @@ import (
 	"reflect"
 )
 
-const header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"https://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n"
-const footer = "</dict>\n</plist>"
+const header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"https://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n\t<dict>\n"
+const footer = "\t</dict>\n</plist>"
 
 var plist string
 
 func makePlist() {
+	tabLevel = 2
 	uuids = make(map[string]string)
 	plist = header
 
@@ -22,7 +23,7 @@ func makePlist() {
 	plist += plistKeyValue("WFWorkflowMinimumClientVersionString", Text, minVersion)
 	plist += plistKeyValue("WFWorkflowHasShortcutInputVariables", Boolean, hasShortcutInputVariables)
 
-	plist += plistKeyValue("WFQuickActionSurfaces", Array, []string{})
+	plist += plistKeyValue("WFQuickActionSurfaces", Array, []plistData{})
 
 	if noInput.name != "" {
 		plist += plistKeyValue("WFWorkflowNoInputBehavior", Dictionary, []plistData{
@@ -63,7 +64,7 @@ func makePlist() {
 	if len(questions) > 0 {
 		plistImportQuestions()
 	} else {
-		plist += plistKeyValue("WFWorkflowImportQuestions", Array, []string{})
+		plist += plistKeyValue("WFWorkflowImportQuestions", Array, []plistData{})
 	}
 
 	plistContentItems()
@@ -390,70 +391,79 @@ func plistRepeatEach(t *token) {
 	}
 }
 
-var importQuestions []string
+var importQuestions []plistData
 
 func plistImportQuestions() {
 	for _, q := range questions {
-		importQuestions = append(importQuestions, plistValue(Dictionary, []plistData{
-			{
-				key:      "ParameterKey",
-				dataType: Text,
-				value:    q.parameter,
+		importQuestions = append(importQuestions, plistData{
+			dataType: Dictionary,
+			value: []plistData{
+				{
+					key:      "ParameterKey",
+					dataType: Text,
+					value:    q.parameter,
+				},
+				{
+					key:      "Category",
+					dataType: Text,
+					value:    "Parameter",
+				},
+				{
+					key:      "ActionIndex",
+					dataType: Number,
+					value:    q.actionIndex,
+				},
+				{
+					key:      "Text",
+					dataType: Text,
+					value:    q.text,
+				},
+				{
+					key:      "DefaultValue",
+					dataType: Text,
+					value:    q.defaultValue,
+				},
 			},
-			{
-				key:      "Category",
-				dataType: Text,
-				value:    "Parameter",
-			},
-			{
-				key:      "ActionIndex",
-				dataType: Number,
-				value:    q.actionIndex,
-			},
-			{
-				key:      "Text",
-				dataType: Text,
-				value:    q.text,
-			},
-			{
-				key:      "DefaultValue",
-				dataType: Text,
-				value:    q.defaultValue,
-			},
-		}))
+		})
 	}
 	plist += plistKeyValue("WFWorkflowImportQuestions", Array, importQuestions)
 }
 
 func plistWorkflowTypes() {
-	var wfWorkflowTypes []string
+	var wfWorkflowTypes []plistData
 	if len(types) != 0 {
 		for _, wtype := range types {
-			wfWorkflowTypes = append(wfWorkflowTypes, plistValue(Text, wtype))
+			wfWorkflowTypes = append(wfWorkflowTypes, plistData{
+				dataType: Text,
+				value:    wtype,
+			})
 		}
 	}
 	plist += plistKeyValue("WFWorkflowTypes", Array, wfWorkflowTypes)
 }
 
+var inputContentItems []plistData
+var outputContentItems []plistData
+
 func plistContentItems() {
-	var inputContentItems []string
-	if len(inputs) == 0 {
+	if len(inputs) != 0 {
 		makeContentItems()
-		for _, input := range contentItems {
-			inputContentItems = append(inputContentItems, plistValue(Text, input))
-		}
-	} else {
 		for _, input := range inputs {
-			inputContentItems = append(inputContentItems, plistValue(Text, input))
+			inputContentItems = append(inputContentItems, plistData{
+				dataType: Text,
+				value:    input,
+			})
 		}
 	}
 	plist += plistKeyValue("WFWorkflowInputContentItemClasses", Array, inputContentItems)
 
-	var outputContentItems []string
 	if len(outputs) != 0 {
 		makeContentItems()
 		for _, output := range outputs {
-			outputContentItems = append(outputContentItems, plistValue(Text, output))
+			outputContentItems = append(outputContentItems, plistData{
+				dataType: Text,
+				value:    output,
+			})
 		}
 	}
 	plist += plistKeyValue("WFWorkflowOutputContentItemClasses", Array, outputContentItems)

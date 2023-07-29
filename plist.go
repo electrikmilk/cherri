@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-var shortcutActions []string
+var shortcutActions []plistData
 var uuids map[string]string
 
 type plistDataType string
@@ -48,10 +48,13 @@ var hasShortcutInputVariables = false
 // ObjectReplaceChar is a Shortcuts convention to mark the placement of inline variables in a string.
 const ObjectReplaceChar = "\uFFFC"
 
+var tabLevel = 0
+
 func plistKeyValue(key string, dataType plistDataType, value any) (pair string) {
 	if key != "" {
-		pair = "<key>" + key + "</key>\n"
+		pair += strings.Repeat("\t", tabLevel) + "<key>" + key + "</key>\n"
 	}
+	pair += strings.Repeat("\t", tabLevel)
 	switch dataType {
 	case Boolean:
 		if value == true {
@@ -60,18 +63,17 @@ func plistKeyValue(key string, dataType plistDataType, value any) (pair string) 
 			pair += "<false/>\n"
 		}
 	case Array:
-		var arrayValue = value.([]string)
-		if len(arrayValue) == 0 {
+		if len(value.([]plistData)) == 0 {
 			pair += "<array/>\n"
 			break
 		}
 		pair += "<array>\n"
-		for _, val := range arrayValue {
-			pair += val
-		}
-		pair += "</array>\n"
+		pair += plistDictValue(value)
+		pair += strings.Repeat("\t", tabLevel) + "</array>\n"
 	case Dictionary:
-		pair += "<dict>\n" + plistDictValue(value) + "</dict>\n"
+		pair += "<dict>\n"
+		pair += plistDictValue(value)
+		pair += strings.Repeat("\t", tabLevel) + "</dict>\n"
 	default:
 		if reflect.TypeOf(value).String() == "string" {
 			value = html.EscapeString(value.(string))
@@ -82,12 +84,14 @@ func plistKeyValue(key string, dataType plistDataType, value any) (pair string) 
 }
 
 func plistDictValue(value any) (pair string) {
+	tabLevel++
 	var empty = plistData{}
 	for _, data := range value.([]plistData) {
 		if data != empty {
 			pair += plistKeyValue(data.key, data.dataType, data.value)
 		}
 	}
+	tabLevel--
 	return
 }
 
