@@ -449,7 +449,7 @@ func contactActions() {
 }
 
 func documentActions() {
-	// FIXME: Writing to locations other than the Shortcuts folder
+	// TODO: Writing to locations other than the Shortcuts folder.
 	actions["createFolder"] = &actionDefinition{
 		identifier: "file.createfolder",
 		parameters: []parameterDefinition{
