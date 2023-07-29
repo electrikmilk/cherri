@@ -222,7 +222,7 @@ func checkRequiredArgs() {
 		if param.infinite {
 			return
 		}
-		if i+1 > currentArgumentsSize && !param.optional {
+		if i+1 > currentArgumentsSize && !param.optional && param.defaultValue == nil {
 			var argIndex = i + 1
 			var suffix string
 			switch argIndex {
