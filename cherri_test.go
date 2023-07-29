@@ -58,6 +58,7 @@ func resetParser() {
 	currentGroupingUUID = ""
 	variables = map[string]variableValue{}
 	actions = map[string]*actionDefinition{}
+	shortcutActions = []plistData{}
 	iconColor = "-1263359489"
 	iconGlyph = 61440
 	inputs = []string{}
