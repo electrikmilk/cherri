@@ -6,6 +6,7 @@ package main
 
 import (
 	"reflect"
+	"strings"
 )
 
 const header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"https://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n\t<dict>\n"
@@ -135,8 +136,9 @@ func plistVariable(t *token) {
 		}
 	}
 	if t.typeof == Var {
-		if _, found := variables[t.ident]; found {
-			if variables[t.ident].constant {
+		var lowerIdent = strings.ToLower(t.ident)
+		if _, found := variables[lowerIdent]; found {
+			if variables[lowerIdent].constant {
 				return
 			}
 		}
