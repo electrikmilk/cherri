@@ -351,7 +351,7 @@ func calendarActions() {
 }
 
 func contactActions() {
-	var contactProperties = []string{"First Name", "Middle Name", "Last Name", "Birthday", "Prefix", "Suffix", "Nickname", "Phonetic First Name", "Phonetic Last Name", "Phonetic Middle Name", "Company", "Job Title", "Department", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
+	var contactDetails = []string{"First Name", "Middle Name", "Last Name", "Birthday", "Prefix", "Suffix", "Nickname", "Phonetic First Name", "Phonetic Last Name", "Phonetic Middle Name", "Company", "Job Title", "Department", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
 	var abcSortOrders = []string{"A to Z", "Z to A"}
 	actions["filterContacts"] = &actionDefinition{
 		identifier: "filter.contacts",
@@ -365,7 +365,7 @@ func contactActions() {
 				name:      "sortByProperty",
 				validType: String,
 				key:       "WFContentItemSortProperty",
-				enum:      contactProperties,
+				enum:      contactDetails,
 				optional:  true,
 			},
 			{
@@ -438,7 +438,7 @@ func contactActions() {
 				name:      "property",
 				validType: String,
 				key:       "WFContentItemPropertyName",
-				enum:      contactProperties,
+				enum:      contactDetails,
 			},
 		},
 	}
