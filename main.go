@@ -248,6 +248,15 @@ func shortcutsUUID() string {
 	return strings.ToUpper(uuid.New().String())
 }
 
+func printPlistData(data []plistData) {
+	var saveTabLevel = tabLevel
+	tabLevel = 0
+	for _, d := range data {
+		fmt.Println(plistKeyValue(d.key, d.dataType, d.value))
+	}
+	tabLevel = saveTabLevel
+}
+
 func printDebug() {
 	if args.Using("debug") {
 		fmt.Println(ansi("#############\n#   DEBUG   #\n#############\n", red))
