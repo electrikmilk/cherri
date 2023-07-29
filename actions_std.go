@@ -394,7 +394,9 @@ func contactActions() {
 			},
 		},
 		make: func(args []actionArgument) []plistData {
-			return contactValue("WFEmailAddress", "emailaddress", args)
+			return []plistData{
+				contactValue("WFEmailAddress", emailAddress, args),
+			}
 		},
 	}
 	actions["phoneNumber"] = &actionDefinition{
@@ -406,7 +408,9 @@ func contactActions() {
 			},
 		},
 		make: func(args []actionArgument) []plistData {
-			return contactValue("WFPhoneNumber", "phonenumber", args)
+			return []plistData{
+				contactValue("WFPhoneNumber", phoneNumber, args),
+			}
 		},
 	}
 	actions["selectContact"] = &actionDefinition{
@@ -4494,13 +4498,18 @@ func builtinActions() {
 
 var contactValues []string
 
-func contactValue(key string, contentKit string, args []actionArgument) []plistData {
+type contentKit string
+
+var emailAddress contentKit = "emailaddress"
+var phoneNumber contentKit = "phonenumber"
+
+func contactValue(key string, contentKit contentKit, args []actionArgument) plistData {
 	contactValues = []string{}
 	var entryType int
 	switch contentKit {
-	case "emailaddress":
+	case emailAddress:
 		entryType = 2
-	case "phonenumber":
+	case phoneNumber:
 		entryType = 1
 	}
 	for _, item := range args {
@@ -4515,7 +4524,7 @@ func contactValue(key string, contentKit string, args []actionArgument) []plistD
 				dataType: Dictionary,
 				value: []plistData{
 					{
-						key:      "link.contentkit." + contentKit,
+						key:      "link.contentkit." + string(contentKit),
 						dataType: Text,
 						value:    item.value,
 					},
@@ -4523,27 +4532,25 @@ func contactValue(key string, contentKit string, args []actionArgument) []plistD
 			},
 		}))
 	}
-	return []plistData{
-		{
-			key:      key,
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "Value",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "WFContactFieldValues",
-							dataType: Array,
-							value:    contactValues,
-						},
+	return plistData{
+		key:      key,
+		dataType: Dictionary,
+		value: []plistData{
+			{
+				key:      "Value",
+				dataType: Dictionary,
+				value: []plistData{
+					{
+						key:      "WFContactFieldValues",
+						dataType: Array,
+						value:    contactValues,
 					},
 				},
-				{
-					key:      "WFSerializationType",
-					dataType: Text,
-					value:    "WFContactFieldValue",
-				},
+			},
+			{
+				key:      "WFSerializationType",
+				dataType: Text,
+				value:    "WFContactFieldValue",
 			},
 		},
 	}
