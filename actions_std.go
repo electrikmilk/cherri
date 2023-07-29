@@ -2621,9 +2621,12 @@ func scriptingActions() {
 			},
 		},
 		make: func(args []actionArgument) []plistData {
-			var urlItems []string
+			var urlItems []plistData
 			for _, item := range args {
-				urlItems = append(urlItems, plistValue(Text, item.value))
+				urlItems = append(urlItems, plistData{
+					dataType: Text,
+					value:    item.value,
+				})
 			}
 			return []plistData{
 				{
@@ -3085,7 +3088,10 @@ func scriptingActions() {
 				{
 					key:      "WFAppsExcept",
 					dataType: Array,
-					value:    []string{plistValue(Dictionary, apps(args))},
+					value: plistData{
+						dataType: Dictionary,
+						value:    apps(args),
+					},
 				},
 			}
 		},
@@ -3134,7 +3140,10 @@ func scriptingActions() {
 				{
 					key:      "WFAppsExcept",
 					dataType: Array,
-					value:    []string{plistValue(Dictionary, apps(args))},
+					value: plistData{
+						dataType: Dictionary,
+						value:    apps(args),
+					},
 				},
 			}
 		},
@@ -3330,9 +3339,12 @@ func scriptingActions() {
 			},
 		},
 		make: func(args []actionArgument) []plistData {
-			var listItems []string
+			var listItems []plistData
 			for _, item := range args {
-				listItems = append(listItems, plistValue(Text, item.value))
+				listItems = append(listItems, plistData{
+					dataType: Text,
+					value:    item.value,
+				})
 			}
 			return []plistData{
 				{
@@ -4703,7 +4715,7 @@ func builtinActions() {
 	}
 }
 
-var contactValues []string
+var contactValues []plistData
 
 type contentKit string
 
@@ -4711,7 +4723,7 @@ var emailAddress contentKit = "emailaddress"
 var phoneNumber contentKit = "phonenumber"
 
 func contactValue(key string, contentKit contentKit, args []actionArgument) plistData {
-	contactValues = []string{}
+	contactValues = []plistData{}
 	var entryType int
 	switch contentKit {
 	case emailAddress:
@@ -4720,24 +4732,27 @@ func contactValue(key string, contentKit contentKit, args []actionArgument) plis
 		entryType = 1
 	}
 	for _, item := range args {
-		contactValues = append(contactValues, plistValue(Dictionary, []plistData{
-			{
-				key:      "EntryType",
-				dataType: Number,
-				value:    entryType,
-			},
-			{
-				key:      "SerializedEntry",
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "link.contentkit." + string(contentKit),
-						dataType: Text,
-						value:    item.value,
+		contactValues = append(contactValues, plistData{
+			dataType: Dictionary,
+			value: []plistData{
+				{
+					key:      "EntryType",
+					dataType: Number,
+					value:    entryType,
+				},
+				{
+					key:      "SerializedEntry",
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "link.contentkit." + string(contentKit),
+							dataType: Text,
+							value:    item.value,
+						},
 					},
 				},
 			},
-		}))
+		})
 	}
 	return plistData{
 		key:      key,

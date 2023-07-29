@@ -269,19 +269,22 @@ func plistMenu(t *token) {
 			})
 		}
 		var menuItemParams = menus[t.ident]
-		var menuItems []string
+		var menuItems []plistData
 		for _, item := range menuItemParams {
-			menuItems = append(menuItems, plistValue(Dictionary, []plistData{
-				{
-					key:      "WFItemType",
-					dataType: Number,
-					value:    0,
+			menuItems = append(menuItems, plistData{
+				dataType: Dictionary,
+				value: []plistData{
+					{
+						key:      "WFItemType",
+						dataType: Number,
+						value:    0,
+					},
+					paramValue("WFValue", actionArgument{
+						valueType: item.valueType,
+						value:     item.value,
+					}, String, Text),
 				},
-				paramValue("WFValue", actionArgument{
-					valueType: item.valueType,
-					value:     item.value,
-				}, String, Text),
-			}))
+			})
 		}
 		menuParams = append(menuParams, plistData{
 			key:      "WFMenuItems",
