@@ -9,8 +9,8 @@ repeat 3 {
     @items += makeVCard("{menuPrefix} Title {RepeatIndex}",subtitle,"assets/cherri_icon.png")
 }
 
-@menuItems = "{items}"
-@vcf = setName(menuItems,"menu.vcf")
+const menuItems = "{items}"
+const vcf = setName(menuItems,"menu.vcf")
 @contact = vcf.contact
 @chosenItem = chooseFromList(contact,"Prompt")
 

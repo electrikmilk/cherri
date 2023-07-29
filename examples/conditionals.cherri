@@ -2,7 +2,7 @@
 @intVar2 = 42
 @textVar = "string1"
 @textVar2 = "string2"
-@boolVar = true
+const boolVar = true
 
 // types of conditions
 if boolVar == true {}
