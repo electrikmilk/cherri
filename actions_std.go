@@ -456,6 +456,62 @@ func contactActions() {
 			},
 		},
 	}
+	actions["sendEmail"] = &actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "contact",
+				validType: Variable,
+				key:       "WFSendEmailActionToRecipients",
+			},
+			{
+				name:      "from",
+				validType: String,
+				key:       "WFSendEmailActionFrom",
+			},
+			{
+				name:      "subject",
+				validType: String,
+				key:       "WFSendEmailActionSubject",
+			},
+			{
+				name:      "body",
+				validType: String,
+				key:       "WFSendEmailActionInputAttachments",
+			},
+			{
+				name:         "prompt",
+				validType:    Bool,
+				key:          "WFSendEmailActionShowComposeSheet",
+				defaultValue: true,
+			},
+			{
+				name:         "draft",
+				validType:    Bool,
+				key:          "WFSendEmailActionSaveAsDraft",
+				defaultValue: false,
+			},
+		},
+	}
+	actions["sendMessage"] = &actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "contact",
+				validType: Variable,
+				key:       "WFSendMessageActionRecipients",
+			},
+			{
+				name:      "message",
+				validType: String,
+				key:       "WFSendMessageContent",
+			},
+			{
+				name:         "prompt",
+				validType:    Bool,
+				key:          "ShowWhenRun",
+				defaultValue: true,
+			},
+		},
+	}
 	var facetimeCallTypes = []string{"Video", "Audio"}
 	actions["facetimeCall"] = &actionDefinition{
 		appIdentifier: "com.apple.facetime.facetime",
