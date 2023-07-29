@@ -396,6 +396,9 @@ func collectVariable(constant bool) {
 	if strings.Contains(lookAheadUntil('\n'), "=") {
 		collectVariableValue(&valueType, &value, &varType, &coerce, &getAs)
 	}
+	if valueType == Arr && constant {
+		parserError("Array values cannot be constants.")
+	}
 	tokens = append(tokens, token{
 		typeof:    varType,
 		ident:     identifier,
