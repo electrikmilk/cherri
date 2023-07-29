@@ -134,6 +134,11 @@ func plistVariable(t *token) {
 		}
 	}
 	if t.typeof == Var {
+		if _, found := variables[t.ident]; found {
+			if variables[t.ident].constant {
+				return
+			}
+		}
 		shortcutActions = append(shortcutActions, makeStdAction("setvariable", setVariableParams))
 	} else if t.typeof == AddTo && t.valueType != Arr {
 		shortcutActions = append(shortcutActions, makeStdAction("appendvariable", setVariableParams))

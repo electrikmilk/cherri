@@ -133,7 +133,7 @@ func conditionalParameter(key string, conditionalParams *[]plistData, typeOf *to
 		case Integer:
 			*conditionalParams = append(*conditionalParams, variablePlistValue("WFNumberValue", value.(string), uuids[value.(string)]))
 		case String:
-			*conditionalParams = append(*conditionalParams, attachmentValues("WFConditionalActionString", fmt.Sprintf("{%s}", value.(string)), uuids[value.(string)], Text))
+			*conditionalParams = append(*conditionalParams, attachmentValues("WFConditionalActionString", fmt.Sprintf("{%s}", value.(string)), Text))
 		default:
 			var realVar = realVariableValue(value.(string), String)
 			conditionalParameter(key, conditionalParams, &realVar.valueType, realVar.value)
@@ -183,13 +183,13 @@ func makeVariableValue(token *token, varUUID *string) {
 		shortcutActions = append(shortcutActions, makeStdAction("gettext", []plistData{
 			UUID,
 			outputName,
-			attachmentValues("WFTextActionText", token.value.(string), "", Text),
+			attachmentValues("WFTextActionText", token.value.(string), Text),
 		}))
 	case Expression:
 		shortcutActions = append(shortcutActions, makeStdAction("calculateexpression", []plistData{
 			UUID,
 			outputName,
-			attachmentValues("Input", token.value.(string), "", Text),
+			attachmentValues("Input", token.value.(string), Text),
 		}))
 	case Action:
 		currentAction = token.value.(action).ident
@@ -349,17 +349,39 @@ func variablePlistValue(key string, varName string, ident string) plistData {
 	if variable.variableType != "" {
 		varType = variable.variableType
 	}
-	var varValue = []plistData{
-		{
-			key:      "VariableName",
-			dataType: Text,
-			value:    varName,
-		},
-		{
-			key:      "Type",
-			dataType: Text,
-			value:    varType,
-		},
+	var varValue []plistData
+	if variable.constant {
+		var varUUID = uuids[varName]
+		varValue = []plistData{
+			{
+				key:      "OutputName",
+				dataType: Text,
+				value:    varName,
+			},
+			{
+				key:      "OutputUUID",
+				dataType: Text,
+				value:    varUUID,
+			},
+			{
+				key:      "Type",
+				dataType: Text,
+				value:    "ActionOutput",
+			},
+		}
+	} else {
+		varValue = []plistData{
+			{
+				key:      "VariableName",
+				dataType: Text,
+				value:    varName,
+			},
+			{
+				key:      "Type",
+				dataType: Text,
+				value:    varType,
+			},
+		}
 	}
 	if len(aggrandizements) > 0 {
 		varValue = append(varValue, plistData{
@@ -403,7 +425,7 @@ var varPositions []plistData
 var stringVars []stringVar
 var varIndex map[int]attachmentVariable
 
-func attachmentValues(key string, variable string, varUUID string, outputType plistDataType) plistData {
+func attachmentValues(key string, variable string, outputType plistDataType) plistData {
 	if !strings.ContainsAny(variable, "{}") {
 		return plistData{
 			key:      key,
@@ -427,13 +449,15 @@ func attachmentValues(key string, variable string, varUUID string, outputType pl
 		} else {
 			exit(fmt.Sprintf("Variable '%s' does not exist!", stringVar.varName))
 		}
+		var variable = variables[stringVar.varName]
+		var varUUID = uuids[stringVar.varName]
 		var varValue []plistData
 		var varType = "Variable"
 		var aggr []string
 		if storedVar.variableType != "" {
 			varType = storedVar.variableType
 		}
-		if varUUID == "" {
+		if !variable.constant {
 			varValue = []plistData{
 				{
 					key:      "VariableName",
@@ -675,7 +699,7 @@ func paramValue(key string, arg actionArgument, handleAs tokenType, outputType p
 	switch arg.valueType {
 	case Variable:
 		if handleAs == String {
-			return attachmentValues(key, fmt.Sprintf("{%s}", arg.value), "", Text)
+			return attachmentValues(key, fmt.Sprintf("{%s}", arg.value), Text)
 		}
 		return variablePlistValue(key, arg.value.(string), "")
 	case Bool:
@@ -685,7 +709,7 @@ func paramValue(key string, arg actionArgument, handleAs tokenType, outputType p
 			value:    arg.value,
 		}
 	default:
-		return attachmentValues(key, arg.value.(string), "", outputType)
+		return attachmentValues(key, arg.value.(string), outputType)
 	}
 }
 

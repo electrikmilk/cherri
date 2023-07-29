@@ -611,7 +611,6 @@ func collectQuestion() {
 
 func collectRepeat() {
 	reachable()
-	advance()
 	currentGroupingUUID = shortcutsUUID()
 	closureIdx++
 	closureUUIDs[closureIdx] = currentGroupingUUID
@@ -619,7 +618,6 @@ func collectRepeat() {
 	var timesType tokenType
 	var timesValue any
 	collectValue(&timesType, &timesValue, '{')
-	collectUntilExpect('{', 3)
 	advance()
 	tokens = append(tokens, token{
 		typeof:    Repeat,
