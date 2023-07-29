@@ -7,11 +7,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/electrikmilk/args-parser"
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/electrikmilk/args-parser"
 )
 
 var idx int
