@@ -446,6 +446,157 @@ func contactActions() {
 			},
 		},
 	}
+	actions["call"] = &actionDefinition{
+		appIdentifier: "com.apple.mobilephone.call",
+		parameters: []parameterDefinition{
+			{
+				name:      "contact",
+				validType: Variable,
+				key:       "WFCallContact",
+			},
+		},
+	}
+	var facetimeCallTypes = []string{"Video", "Audio"}
+	actions["facetimeCall"] = &actionDefinition{
+		appIdentifier: "com.apple.facetime.facetime",
+		parameters: []parameterDefinition{
+			{
+				name:      "contact",
+				validType: Variable,
+				key:       "WFFaceTimeContact",
+			},
+			{
+				name:         "type",
+				validType:    String,
+				key:          "WFFaceTimeType",
+				defaultValue: "Video",
+				enum:         facetimeCallTypes,
+				optional:     true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFFaceTimeType",
+					dataType: Text,
+					value:    "Video",
+				},
+			}
+		},
+	}
+	actions["newContact"] = &actionDefinition{
+		identifier: "addnewcontact",
+		parameters: []parameterDefinition{
+			{
+				name:      "firstName",
+				validType: String,
+				key:       "WFContactFirstName",
+			},
+			{
+				name:      "lastName",
+				validType: String,
+				key:       "WFContactLastName",
+			},
+			{
+				name:      "phoneNumber",
+				validType: String,
+			},
+			{
+				name:      "emailAddress",
+				validType: String,
+			},
+			{
+				name:      "company",
+				validType: String,
+				key:       "WFContactCompany",
+			},
+			{
+				name:      "notes",
+				validType: String,
+				key:       "WFContactNotes",
+			},
+			{
+				name:         "prompt",
+				validType:    Bool,
+				key:          "ShowWhenRun",
+				defaultValue: false,
+				optional:     true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			if len(args) == 3 {
+				return []plistData{
+					contactValue("WFContactPhoneNumbers", phoneNumber, []actionArgument{args[2]}),
+				}
+			}
+			if len(args) > 3 {
+				return []plistData{
+					contactValue("WFContactPhoneNumbers", phoneNumber, []actionArgument{args[2]}),
+					contactValue("WFContactEmails", emailAddress, []actionArgument{args[3]}),
+				}
+			}
+			return []plistData{}
+		},
+	}
+	actions["updateContact"] = &actionDefinition{
+		identifier: "setters.contacts",
+		parameters: []parameterDefinition{
+			{
+				name:      "contact",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+				enum:      contactDetails,
+			},
+			{
+				name:      "value",
+				validType: String,
+			},
+		},
+		check: func(args []actionArgument) {
+			var contactDetail = args[1].value.(string)
+			var contactDetailKey = strings.ReplaceAll(contactDetail, " ", "")
+			actions[currentAction].parameters[2].key = "WFContactContentItem" + contactDetailKey
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "Mode",
+					dataType: Text,
+					value:    "Set",
+				},
+			}
+		},
+	}
+	actions["removeContactDetail"] = &actionDefinition{
+		identifier: "setters.contacts",
+		parameters: []parameterDefinition{
+			{
+				name:      "contact",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+				enum:      contactDetails,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "Mode",
+					dataType: Text,
+					value:    "Remove",
+				},
+			}
+		},
+	}
 }
 
 func documentActions() {
