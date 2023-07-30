@@ -136,7 +136,7 @@ func handleFile() {
 	basename = nameParts[0]
 	workflowName = basename
 
-	outputPath = relativePath + basename + ".shortcut"
+	outputPath = relativePath + workflowName + ".shortcut"
 	if args.Using("output") {
 		outputPath = args.Value("output")
 	}
@@ -184,7 +184,7 @@ func sign() {
 	var sign = exec.Command(
 		"shortcuts",
 		"sign",
-		"-i", relativePath+basename+"_unsigned.shortcut",
+		"-i", relativePath+workflowName+"_unsigned.shortcut",
 		"-o", outputPath,
 		"-m", signingMode,
 	)
@@ -201,7 +201,7 @@ func sign() {
 		fmt.Print(ansi("done!", green) + "\n")
 	}
 
-	removeErr := os.Remove(relativePath + basename + "_unsigned.shortcut")
+	removeErr := os.Remove(relativePath + workflowName + "_unsigned.shortcut")
 	handle(removeErr)
 
 	if args.Using("import") {

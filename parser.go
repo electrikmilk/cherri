@@ -427,6 +427,7 @@ func collectDefinition() {
 	case tokenAhead(Name):
 		advance()
 		workflowName = collectUntil('\n')
+		outputPath = relativePath + workflowName + ".shortcut"
 	case tokenAhead(Color):
 		advance()
 		var collectColor = collectUntil('\n')
