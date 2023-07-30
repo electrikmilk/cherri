@@ -452,8 +452,15 @@ var outputContentItems []plistData
 
 func plistContentItems() {
 	if len(inputs) != 0 {
-		makeContentItems()
 		for _, input := range inputs {
+			inputContentItems = append(inputContentItems, plistData{
+				dataType: Text,
+				value:    input,
+			})
+		}
+	} else {
+		makeContentItems()
+		for _, input := range contentItems {
 			inputContentItems = append(inputContentItems, plistData{
 				dataType: Text,
 				value:    input,
