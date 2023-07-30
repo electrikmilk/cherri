@@ -115,11 +115,12 @@ func fileArg() string {
 	return ""
 }
 
+// createShortcut writes the Shortcut files to disk and signs them if the unsigned argument is not unused.
 func createShortcut() {
 	if args.Using("debug") {
-		writeFile(relativePath+basename+".plist", fmt.Sprintf("Creating %s.plist", basename))
+		writeFile(relativePath+workflowName+".plist", fmt.Sprintf("Creating %s.plist", workflowName))
 	}
-	writeFile(relativePath+basename+"_unsigned.shortcut", fmt.Sprintf("Creating unsigned %s.shortcut", basename))
+	writeFile(relativePath+workflowName+"_unsigned.shortcut", fmt.Sprintf("Creating unsigned %s.shortcut", workflowName))
 
 	if !args.Using("unsigned") {
 		sign()
@@ -133,6 +134,7 @@ func handleFile() {
 	relativePath = strings.Replace(filePath, filename, "", 1)
 	var nameParts = strings.Split(filename, ".")
 	basename = nameParts[0]
+	workflowName = basename
 
 	outputPath = relativePath + basename + ".shortcut"
 	if args.Using("output") {
