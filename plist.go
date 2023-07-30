@@ -736,7 +736,7 @@ func argumentValue(key string, args []actionArgument, idx int) plistData {
 	var actionArg = actions[currentAction].parameters[idx]
 	var arg actionArgument
 	if len(args) <= idx {
-		if actionArg.optional {
+		if actionArg.optional || actionArg.defaultValue != nil {
 			return plistData{}
 		}
 	} else {

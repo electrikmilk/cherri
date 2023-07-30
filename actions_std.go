@@ -3298,6 +3298,41 @@ func scriptingActions() {
 			}
 		},
 	}
+	actions["runSelf"] = &actionDefinition{
+		identifier: "runworkflow",
+		parameters: []parameterDefinition{
+			{
+				name:      "output",
+				validType: Variable,
+			},
+		},
+		make: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFWorkflow",
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "workflowIdentifier",
+							dataType: Text,
+							value:    shortcutsUUID(),
+						},
+						{
+							key:      "isSelf",
+							dataType: Boolean,
+							value:    true,
+						},
+						{
+							key:      "workflowName",
+							dataType: Text,
+							value:    workflowName,
+						},
+					},
+				},
+				argumentValue("WFInput", args, 0),
+			}
+		},
+	}
 	actions["run"] = &actionDefinition{
 		identifier: "runworkflow",
 		parameters: []parameterDefinition{
@@ -3308,12 +3343,7 @@ func scriptingActions() {
 			{
 				name:      "output",
 				validType: Variable,
-			},
-			{
-				name:         "isSelf",
-				validType:    Bool,
-				defaultValue: false,
-				optional:     true,
+				optional:  true,
 			},
 		},
 		make: func(args []actionArgument) []plistData {
@@ -3335,7 +3365,7 @@ func scriptingActions() {
 						argumentValue("workflowName", args, 0),
 					},
 				},
-				variableInput("WFInput", args[1].value.(string)),
+				argumentValue("WFInput", args, 1),
 			}
 		},
 	}
