@@ -236,7 +236,6 @@ func collectIntegerValue(valueType *tokenType, value *any) {
 	*valueType = Integer
 	*value = integer
 	advance()
-	return
 }
 
 func collectReference(valueType *tokenType, value *any, until *rune) {
