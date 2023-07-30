@@ -506,7 +506,7 @@ func attachmentValues(key string, variable string, outputType plistDataType) pli
 		} else {
 			exit(fmt.Sprintf("Variable '%s' does not exist!", stringVar.varName))
 		}
-		var variable = variables[stringVar.varName]
+		var variable = variables[strings.ToLower(stringVar.varName)]
 		var varUUID = uuids[stringVar.varName]
 		var varValue []plistData
 		var varType = "Variable"
