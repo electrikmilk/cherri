@@ -198,13 +198,9 @@ func collectVariableValue(valueType *tokenType, value *any, varType *tokenType, 
 }
 
 func collectValue(valueType *tokenType, value *any, until rune) {
-	var ahead = lookAheadUntil(until)
 	switch {
-	case containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus):
-		*valueType = Expression
-		*value = collectUntil(until)
 	case intChar():
-		collectIntegerValue(valueType, value)
+		collectIntegerValue(valueType, value, &until)
 	case isToken(String):
 		*valueType = String
 		*value = collectString()
@@ -231,14 +227,13 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	}
 }
 
-func collectIntegerValue(valueType *tokenType, value *any) {
-	var integer = collectInteger()
-	*valueType = Integer
-	*value = integer
-	advance()
-}
-
 func collectReference(valueType *tokenType, value *any, until *rune) {
+	var ahead = lookAheadUntil(*until)
+	if containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
+		*valueType = Expression
+		*value = collectUntil(*until)
+		return
+	}
 	var identifier string
 	var fullIdentifier string
 	switch {
@@ -793,6 +788,19 @@ func collectInteger() (integer string) {
 		advance()
 	}
 	return
+}
+
+func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
+	var ahead = lookAheadUntil(*until)
+	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
+		var integer = collectInteger()
+		*valueType = Integer
+		*value = integer
+		advance()
+		return
+	}
+	*valueType = Expression
+	*value = collectUntil(*until)
 }
 
 func collectString() (str string) {

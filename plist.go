@@ -191,28 +191,21 @@ func makeVariableValue(token *token, varUUID *string) {
 		}))
 	case Expression:
 		var expression = token.value.(string)
+		var expressionParts []string
 		if tokensOccur(&expression, Plus, Minus, Multiply, Divide, Modulus) {
 			var operandOne string
 			var operandTwo string
 			var operation string
-			switch {
-			case strings.Count(expression, string(Plus)) == 1:
-				operation = "+"
-			case strings.Count(expression, string(Minus)) == 1:
-				operation = "-"
-			case strings.Count(expression, string(Multiply)) == 1:
-				operation = "*"
-			case strings.Count(expression, string(Divide)) == 1:
-				operation = "/"
-			case strings.Count(expression, string(Modulus)) == 1:
-				operation = "%"
+			var expressionParts = strings.Split(expression, " ")
+			if len(expressionParts) == 3 {
+				operation = ""
 			}
-			var expressionParts = strings.Split(expression, operation)
-			operandOne = strings.Trim(expressionParts[0], " ")
-			operandTwo = strings.Trim(expressionParts[1], " ")
-			wrapVariableReference(&operandOne)
-			wrapVariableReference(&operandTwo)
 			if operation != "" {
+				expressionParts = strings.Split(expression, operation)
+				operandOne = strings.Trim(expressionParts[0], " ")
+				operandTwo = strings.Trim(expressionParts[1], " ")
+				wrapVariableReference(&operandOne)
+				wrapVariableReference(&operandTwo)
 				shortcutActions = append(shortcutActions, makeStdAction("math", []plistData{
 					UUID,
 					outputName,
@@ -223,10 +216,18 @@ func makeVariableValue(token *token, varUUID *string) {
 				break
 			}
 		}
+		var formattedExpression []string
+		expressionParts = strings.Split(expression, " ")
+		for _, part := range expressionParts {
+			var p = part
+			wrapVariableReference(&p)
+			formattedExpression = append(formattedExpression, p)
+		}
+		expression = strings.Join(formattedExpression, " ")
 		shortcutActions = append(shortcutActions, makeStdAction("calculateexpression", []plistData{
 			UUID,
 			outputName,
-			attachmentValues("Input", token.value.(string), Text),
+			attachmentValues("Input", expression, Text),
 		}))
 	case Action:
 		currentAction = token.value.(action).ident
