@@ -22,18 +22,18 @@ func TestCherri(_ *testing.T) {
 		fmt.Println(ansi("FAILED", red))
 		panic(err)
 	}
+	if runtime.GOOS != "darwin" {
+		args.Args["unsigned"] = ""
+	}
 	for _, file := range files {
 		if strings.Contains(file.Name(), ".cherri") {
 			currentTest = "examples/" + file.Name()
 			fmt.Printf("Compiling %s...\n", ansi(currentTest, bold))
 			os.Args[1] = currentTest
-			if runtime.GOOS != "darwin" {
-				args.Args["unsigned"] = ""
-			}
-			resetParser()
-
 			main()
 			fmt.Print(ansi("PASSED", green) + "\n\n")
+
+			resetParser()
 		}
 	}
 }
