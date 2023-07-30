@@ -210,6 +210,8 @@ func makeVariableValue(token *token, varUUID *string) {
 			var expressionParts = strings.Split(expression, operation)
 			operandOne = strings.Trim(expressionParts[0], " ")
 			operandTwo = strings.Trim(expressionParts[1], " ")
+			wrapVariableReference(&operandOne)
+			wrapVariableReference(&operandTwo)
 			if operation != "" {
 				shortcutActions = append(shortcutActions, makeStdAction("math", []plistData{
 					UUID,
@@ -773,6 +775,19 @@ func paramValue(key string, arg actionArgument, handleAs tokenType, outputType p
 		}
 	default:
 		return attachmentValues(key, arg.value.(string), outputType)
+	}
+}
+
+func wrapVariableReference(s *string) {
+	var reference = strings.ToLower(*s)
+	if _, v := variables[reference]; v {
+		*s = fmt.Sprintf("{%s}", *s)
+	}
+	if _, g := globals[reference]; g {
+		*s = fmt.Sprintf("{%s}", *s)
+	}
+	if _, q := questions[reference]; q {
+		*s = fmt.Sprintf("{%s}", *s)
 	}
 }
 

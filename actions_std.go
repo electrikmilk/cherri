@@ -4727,12 +4727,8 @@ func builtinActions() {
 		make: func(args []actionArgument) []plistData {
 			var title = args[0].value.(string)
 			var subtitle = args[1].value.(string)
-			if _, found := variables[title]; found {
-				title = "{" + title + "}"
-			}
-			if _, found := variables[subtitle]; found {
-				subtitle = "{" + subtitle + "}"
-			}
+			wrapVariableReference(&title)
+			wrapVariableReference(&subtitle)
 			var vcard = "BEGIN:VCARD\nVERSION:3.0\n"
 			vcard += "N;CHARSET=utf-8:" + title + "\n"
 			vcard += "ORG:" + subtitle + "\nPHOTO;ENCODING=b:"
