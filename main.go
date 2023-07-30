@@ -106,7 +106,7 @@ func printActionDefinitions() {
 
 func fileArg() string {
 	for _, arg := range os.Args {
-		if strings.Contains(arg, ".cherri") {
+		if strings.Contains(arg, ".cherri") && !startsWith("-", arg) {
 			return arg
 		}
 	}
