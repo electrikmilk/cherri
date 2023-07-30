@@ -4707,7 +4707,7 @@ func builtinActions() {
 				validType: String,
 			},
 			{
-				name:      "url",
+				name:      "imagePath",
 				validType: String,
 				optional:  true,
 			},
