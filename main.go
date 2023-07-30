@@ -63,6 +63,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	filename = checkFile(filePath)
+
 	handleFile()
 
 	handleIncludes()
@@ -126,8 +128,8 @@ func createShortcut() {
 	}
 }
 
+// handleFile splits the file argument into parts.
 func handleFile() {
-	filename = checkFile(filePath)
 	relativePath = strings.Replace(filePath, filename, "", 1)
 	var nameParts = strings.Split(filename, ".")
 	basename = nameParts[0]
