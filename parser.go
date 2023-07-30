@@ -820,7 +820,7 @@ func collectArray() (array interface{}) {
 			fmt.Println(rawJSON)
 			fmt.Print("\n")
 		}
-		parserErr(err)
+		parserError(fmt.Sprintf("JSON error: %s", err))
 	}
 	array = array.(map[string]interface{})["array"]
 	advance()
@@ -834,7 +834,7 @@ func collectDictionary() (dictionary interface{}) {
 		fmt.Println(rawJSON)
 	}
 	if err := json.Unmarshal([]byte(rawJSON), &dictionary); err != nil {
-		parserErr(err)
+		parserError(fmt.Sprintf("JSON error: %s", err))
 	}
 	advance()
 	return
