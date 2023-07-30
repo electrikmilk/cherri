@@ -200,11 +200,11 @@ func collectVariableValue(valueType *tokenType, value *any, varType *tokenType, 
 func collectValue(valueType *tokenType, value *any, until rune) {
 	var ahead = lookAheadUntil(until)
 	switch {
-	case intChar():
-		collectIntegerValue(valueType, value)
 	case containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus):
 		*valueType = Expression
 		*value = collectUntil(until)
+	case intChar():
+		collectIntegerValue(valueType, value)
 	case isToken(String):
 		*valueType = String
 		*value = collectString()

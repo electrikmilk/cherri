@@ -2378,6 +2378,15 @@ func mediaActions() {
 }
 
 func scriptingActions() {
+	actions["number"] = &actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "number",
+				validType: Integer,
+				key:       "WFNumberActionNumber",
+			},
+		},
+	}
 	actions["getObjectOfClass"] = &actionDefinition{
 		identifier: "getclassaction",
 		parameters: []parameterDefinition{
