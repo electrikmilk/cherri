@@ -3364,14 +3364,14 @@ func scriptingActions() {
 			}
 		},
 	}
-	var calculationOpersations = []string{"x^2", "х^3", "x^у", "e^x", "10^x", "In(x)", "log(x)", "√x", "∛x", "x!", "sin(x)", "cos(X)", "tan(x)", "abs(x)"}
+	var calculationOperations = []string{"x^2", "х^3", "x^у", "e^x", "10^x", "In(x)", "log(x)", "√x", "∛x", "x!", "sin(x)", "cos(X)", "tan(x)", "abs(x)"}
 	actions["calculate"] = &actionDefinition{
 		identifier: "math",
 		parameters: []parameterDefinition{
 			{
 				name:      "operation",
 				validType: String,
-				enum:      calculationOpersations,
+				enum:      calculationOperations,
 				key:       "WFScientificMathOperation",
 			},
 			{
