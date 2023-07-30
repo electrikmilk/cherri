@@ -983,6 +983,15 @@ func containsTokens(str *string, v ...tokenType) bool {
 	return false
 }
 
+func tokensOccur(str *string, v ...tokenType) bool {
+	for _, aheadToken := range v {
+		if strings.Count(*str, string(aheadToken)) != 0 {
+			return true
+		}
+	}
+	return false
+}
+
 func next(mov int) rune {
 	return seek(&mov, false)
 }

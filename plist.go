@@ -190,6 +190,37 @@ func makeVariableValue(token *token, varUUID *string) {
 			attachmentValues("WFTextActionText", token.value.(string), Text),
 		}))
 	case Expression:
+		var expression = token.value.(string)
+		if tokensOccur(&expression, Plus, Minus, Multiply, Divide, Modulus) {
+			var operandOne string
+			var operandTwo string
+			var operation string
+			switch {
+			case strings.Count(expression, string(Plus)) == 1:
+				operation = "+"
+			case strings.Count(expression, string(Minus)) == 1:
+				operation = "-"
+			case strings.Count(expression, string(Multiply)) == 1:
+				operation = "*"
+			case strings.Count(expression, string(Divide)) == 1:
+				operation = "/"
+			case strings.Count(expression, string(Modulus)) == 1:
+				operation = "%"
+			}
+			var expressionParts = strings.Split(expression, operation)
+			operandOne = strings.Trim(expressionParts[0], " ")
+			operandTwo = strings.Trim(expressionParts[1], " ")
+			if operation != "" {
+				shortcutActions = append(shortcutActions, makeStdAction("math", []plistData{
+					UUID,
+					outputName,
+					attachmentValues("WFScientificMathOperation", operation, Text),
+					attachmentValues("WFInput", operandOne, Number),
+					attachmentValues("WFMathOperand", operandTwo, Number),
+				}))
+				break
+			}
+		}
 		shortcutActions = append(shortcutActions, makeStdAction("calculateexpression", []plistData{
 			UUID,
 			outputName,
