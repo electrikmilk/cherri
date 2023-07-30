@@ -271,10 +271,6 @@ func printDebug() {
 	if args.Using("debug") {
 		fmt.Println(ansi("#############\n#   DEBUG   #\n#############\n", red))
 
-		fmt.Println(ansi("### PROPERTY LIST ###", bold))
-
-		printPlistData(shortcutActions)
-
 		fmt.Println(ansi("### PARSING ###", bold))
 
 		if idx != 0 {
