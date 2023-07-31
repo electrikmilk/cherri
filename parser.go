@@ -893,7 +893,8 @@ func collectAction() (identifier string, value action) {
 
 	identifier = collectUntil('(')
 	if _, found := actions[identifier]; !found {
-		parserError(fmt.Sprintf("Unknown action '%s()'", identifier))
+		lineIdx--
+		parserError(fmt.Sprintf("Undefined action '%s()'", identifier))
 	}
 	advance()
 	currentAction = identifier
