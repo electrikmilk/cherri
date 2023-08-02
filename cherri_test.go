@@ -7,11 +7,8 @@ package main
 import (
 	"fmt"
 	"os"
-	"runtime"
 	"strings"
 	"testing"
-
-	"github.com/electrikmilk/args-parser"
 )
 
 var currentTest string
@@ -21,9 +18,6 @@ func TestCherri(_ *testing.T) {
 	if err != nil {
 		fmt.Println(ansi("FAILED", red))
 		panic(err)
-	}
-	if runtime.GOOS != "darwin" {
-		args.Args["unsigned"] = ""
 	}
 	for _, file := range files {
 		if strings.Contains(file.Name(), ".cherri") {

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/electrikmilk/args-parser"
@@ -29,7 +30,6 @@ func init() {
 	args.Register("help", "h", "Print this usage information.", false)
 	args.Register("action", "", "Print action definition. Leave empty to print all action definitions.", true)
 	args.Register("share", "s", "Signing mode. [anyone, contacts] [default=contacts]", true)
-	args.Register("unsigned", "u", "Don't sign compiled Shortcut. Will NOT run on iOS or macOS.", false)
 	args.Register("debug", "d", "Save generated plist. Print debug messages and stack traces.", false)
 	args.Register("output", "o", "Optional output file path. (e.g. /path/to/file.shortcut).", true)
 	args.Register("import", "i", "Opens compiled Shortcut after compilation. Ignored if unsigned.", false)
@@ -122,11 +122,7 @@ func createShortcut() {
 	}
 	writeFile(relativePath+workflowName+"_unsigned.shortcut", fmt.Sprintf("Creating unsigned %s.shortcut", workflowName))
 
-	if !args.Using("unsigned") {
-		sign()
-	} else if args.Using("output") {
-		writeFile(outputPath, "Creating output...")
-	}
+	sign()
 }
 
 // handleFile splits the file argument into parts.
@@ -174,6 +170,10 @@ func checkFile(filePath string) (filename string) {
 
 // sign runs the shortcuts sign command on the unsigned shortcut file.
 func sign() {
+	if runtime.GOOS != "darwin" {
+		fmt.Println(ansi("Warning:", bold, yellow), "macOS is required to sign shortcuts. The compiled Shortcut will not run on iOS 15+ or macOS 12+.")
+		return
+	}
 	var signingMode = "people-who-know-me"
 	if args.Using("share") && args.Value("share") == "anyone" {
 		signingMode = "anyone"
