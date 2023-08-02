@@ -39,9 +39,7 @@ browser.
 ### Development on other platforms
 
 As it stands, I don't want someone to get confused and think Shortcuts compiled using Cherri on other platforms will run
-on their Mac or iOS device. However, you can build the compiler for your platform and use the `--unsigned` (or `-u` for
-short) to skip signing the compiled Shortcut, but the compiled Shortcut will not run on iOS or macOS, obviously. Also,
-the compiler is primarily developed and tested on Unix-like systems.
+on their Mac or iOS device. However, you can build the compiler for your platform, it will just skip signing the compiled Shortcut, so it will not run on iOS 15+ or macOS 12+. Also note that the compiler is primarily developed and tested on Unix-like systems.
 
 [Read my full thoughts on this](https://github.com/electrikmilk/cherri/wiki/Why-macOS-only%3F)
 
