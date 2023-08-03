@@ -34,6 +34,7 @@ func init() {
 	args.Register("output", "o", "Optional output file path. (e.g. /path/to/file.shortcut).", true)
 	args.Register("import", "i", "Opens compiled Shortcut after compilation. Ignored if unsigned.", false)
 	args.Register("auto-inc", "a", "Automatically include Cherri files in this directory.", false)
+	args.Register("comments", "c", "Don't include comments in the compiled Shortcut.", false)
 	args.Register("no-ansi", "", "Don't output ANSI escape sequences that format and color the output.", false)
 	args.CustomUsage = "[FILE]"
 }

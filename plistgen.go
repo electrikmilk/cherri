@@ -5,6 +5,7 @@
 package main
 
 import (
+	"github.com/electrikmilk/args-parser"
 	"reflect"
 	"strings"
 )
@@ -101,6 +102,9 @@ func plistActions() {
 }
 
 func plistComment(comment string) {
+	if args.Using("comments") {
+		return
+	}
 	shortcutActions = append(shortcutActions, makeStdAction("comment", []plistData{
 		{
 			key:      "WFCommentActionText",
