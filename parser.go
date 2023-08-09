@@ -617,7 +617,7 @@ func collectRepeat() {
 	var timesType tokenType
 	var timesValue any
 	collectValue(&timesType, &timesValue, '{')
-	advance()
+	advanceTimes(2)
 	tokens = append(tokens, token{
 		typeof:    Repeat,
 		ident:     currentGroupingUUID,
