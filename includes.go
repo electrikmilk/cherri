@@ -123,7 +123,7 @@ func updateIncludesMap(line int, includeLines int) {
 
 // delinquentFile determines what file the current cursor exists within in relation to any included files.
 func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
-	errorFilename = filePath
+	errorFilename = workflowName + ".cherri"
 	errorLine = lineIdx + 1
 	errorCol = lineCharIdx + 1
 	if len(includes) == 0 {
