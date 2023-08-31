@@ -2868,6 +2868,7 @@ func scriptingActions() {
 		},
 	}
 	actions["confirm"] = &actionDefinition{
+		identifier: "alert",
 		parameters: []parameterDefinition{
 			{
 				name:      "alert",
