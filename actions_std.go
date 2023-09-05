@@ -2278,7 +2278,7 @@ func mediaActions() {
 				name:         "speed",
 				validType:    String,
 				key:          "WFMediaCustomSpeed",
-				defaultValue: "0.5",
+				defaultValue: "Normal",
 				optional:     true,
 				enum:         speeds,
 			},
