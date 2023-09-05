@@ -2632,10 +2632,7 @@ func scriptingActions() {
 		make: func(args []actionArgument) []plistData {
 			var urlItems []plistData
 			for _, item := range args {
-				urlItems = append(urlItems, plistData{
-					dataType: Text,
-					value:    item.value,
-				})
+				urlItems = append(urlItems, attachmentValues("", item.value.(string), Text),)
 			}
 			return []plistData{
 				{
@@ -2644,9 +2641,9 @@ func scriptingActions() {
 					value:    true,
 				},
 				{
-					key:      "WFURLActionURL",
+					key: 	"WFURLActionURL",
 					dataType: Array,
-					value:    urlItems,
+					value: urlItems,
 				},
 			}
 		},
