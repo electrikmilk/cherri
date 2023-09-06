@@ -68,6 +68,7 @@ const (
 	Date        tokenType = "date"
 	True        tokenType = "true"
 	False       tokenType = "false"
+	Nil         tokenType = "nil"
 	Comment     tokenType = "comment"
 	Expression  tokenType = "expression"
 	Variable    tokenType = "variable"

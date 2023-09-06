@@ -762,6 +762,9 @@ func argumentValue(key string, args []actionArgument, idx int) plistData {
 }
 
 func paramValue(key string, arg actionArgument, handleAs tokenType, outputType plistDataType) plistData {
+	if arg.valueType == Nil {
+		return plistData{}
+	}
 	switch arg.valueType {
 	case Variable:
 		if handleAs == String {
