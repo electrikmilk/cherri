@@ -1,8 +1,4 @@
-github.com/electrikmilk/args-parser v1.0.1 h1:UagVnCxItQnDg7xD1Ir5VQYBZZlGvOqJWE42ajapfWQ=
-github.com/electrikmilk/args-parser v1.0.1/go.mod h1:mb/l2JFNNBSA8GVYL0eQCJF6Jd7UtAJTpenLZs6iIJ0=
-github.com/electrikmilk/args-parser v1.0.2 h1:UHjG+R26GnMmu/YKgnzCXypE5XOFzrbdT6ID2+cm9cU=
-github.com/electrikmilk/args-parser v1.0.2/go.mod h1:mb/l2JFNNBSA8GVYL0eQCJF6Jd7UtAJTpenLZs6iIJ0=
-github.com/electrikmilk/args-parser v1.0.3 h1:dVlzHU3BH8dWsypwLgtQalnT/481lG0bIOcNjvJnH7E=
-github.com/electrikmilk/args-parser v1.0.3/go.mod h1:mb/l2JFNNBSA8GVYL0eQCJF6Jd7UtAJTpenLZs6iIJ0=
-github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
-github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/electrikmilk/args-parser v1.0.4 h1:Ve7UQ7Mfbqe3lphRDhkYgBsywxasN7612xeLg9Z08hU=
+github.com/electrikmilk/args-parser v1.0.4/go.mod h1:mb/l2JFNNBSA8GVYL0eQCJF6Jd7UtAJTpenLZs6iIJ0=
+github.com/google/uuid v1.3.1 h1:KjJaJ9iWZ3jOFZIf1Lqf4laDRCasjl0BCmnEGxkdLb4=
+github.com/google/uuid v1.3.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
