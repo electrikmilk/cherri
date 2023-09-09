@@ -5,7 +5,7 @@ be a part of that, keep your interaction with this project focused solely on tha
 
 1. Have fun, but do your best to stay technical.
 2. No discussion unrelated to the Cherri programming language. Related topics include Apple (the tech company), macOS, iOS, iOS Shortcuts app, and
-   the Workflow iOS app.
+   the Workflow iOS app, but please only make mention of them as it relates to Cherri or a change to Shortcuts.
 3. Do your best with contributions and communication.
 4. Please handle conflicts with others in private, do not contact any members of this project to handle situations
    for you. Do your best to stay technical and "be the better person" if someone is behaving in a way that bothers you.
