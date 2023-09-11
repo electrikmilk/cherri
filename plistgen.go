@@ -260,12 +260,14 @@ func plistMenu(t *token) {
 		},
 	}
 	if t.valueType != EndClosure {
-		if t.valueType == Variable {
+		switch t.valueType {
+		case Variable:
 			menuParams = append(menuParams, paramValue("WFMenuPrompt", actionArgument{
 				valueType: t.valueType,
 				value:     t.value,
 			}, String, Text))
-		} else {
+		case Nil:
+		default:
 			menuParams = append(menuParams, plistData{
 				key:      "WFMenuPrompt",
 				dataType: Text,

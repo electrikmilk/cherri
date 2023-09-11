@@ -216,6 +216,9 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	case tokenAhead(False):
 		*valueType = Bool
 		*value = false
+	case tokenAhead(Nil):
+		*valueType = Nil
+		collectUntil(until)
 	case strings.Contains(lookAheadUntil(until), "("):
 		*valueType = Action
 		_, *value = collectAction()

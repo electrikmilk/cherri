@@ -116,12 +116,17 @@ func actionIdentifier() (ident string) {
 func actionParameters(arguments []actionArgument) (params []plistData) {
 	if actions[currentAction].make == nil && actions[currentAction].parameters != nil {
 		for i, a := range actions[currentAction].parameters {
-			if len(arguments) > i {
-				if a.validType == Variable {
-					params = append(params, variableInput(a.key, arguments[i].value.(string)))
-				} else {
-					params = append(params, argumentValue(a.key, arguments, i))
-				}
+			if len(arguments) <= i || len(arguments) == 0 {
+				break
+			}
+			if arguments[i].valueType == Nil {
+				continue
+			}
+
+			if a.validType == Variable {
+				params = append(params, variableInput(a.key, arguments[i].value.(string)))
+			} else {
+				params = append(params, argumentValue(a.key, arguments, i))
 			}
 		}
 	}
@@ -307,6 +312,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 			))
 		}
 	case argValueType == Question:
+	case argValueType == Nil:
 	case argument.valueType != param.validType:
 		if argValueType == String {
 			argVal = "\"" + argVal.(string) + "\""

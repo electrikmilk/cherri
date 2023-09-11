@@ -2222,7 +2222,153 @@ func mediaActions() {
 			},
 		},
 	}
-	actions["stripMetadata"] = &actionDefinition{
+	var audioFormats = []string{"M4A", "AIFF"}
+	var speeds = []string{"0.5X", "Normal", "2X"}
+	var videoSizes = []string{"640×480", "960×540", "1280×720", "1920×1080", "3840×2160", "HEVC 1920×1080", "HEVC 3840x2160", "ProRes 422"}
+	actions["encodeVideo"] = &actionDefinition{
+		identifier: "encodemedia",
+		parameters: []parameterDefinition{
+			{
+				name:      "video",
+				validType: Variable,
+				key:       "WFMedia",
+			},
+			{
+				name:         "size",
+				validType:    String,
+				key:          "WFMediaSize",
+				defaultValue: "Passthrough",
+				enum:         videoSizes,
+				optional:     true,
+			},
+			{
+				name:         "speed",
+				validType:    String,
+				key:          "WFMediaCustomSpeed",
+				defaultValue: "Normal",
+				optional:     true,
+				enum:         speeds,
+			},
+			{
+				name:         "preserveTransparency",
+				validType:    Bool,
+				key:          "WFMediaPreserveTransparency",
+				defaultValue: false,
+				optional:     true,
+			},
+		},
+	}
+	actions["encodeAudio"] = &actionDefinition{
+		identifier: "encodemedia",
+		parameters: []parameterDefinition{
+			{
+				name:      "audio",
+				validType: Variable,
+				key:       "WFMedia",
+			},
+			{
+				name:         "format",
+				validType:    String,
+				key:          "WFMediaAudioFormat",
+				defaultValue: "M4A",
+				enum:         audioFormats,
+				optional:     true,
+			},
+			{
+				name:         "speed",
+				validType:    String,
+				key:          "WFMediaCustomSpeed",
+				defaultValue: "Normal",
+				optional:     true,
+				enum:         speeds,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			var params = []plistData{
+				{
+					key:      "WFMediaAudioOnly",
+					dataType: Boolean,
+					value:    true,
+				},
+			}
+			return params
+		},
+	}
+	actions["setMetadata"] = &actionDefinition{
+		identifier: "encodemedia",
+		parameters: []parameterDefinition{
+			{
+				name:      "media",
+				validType: Variable,
+				key:       "WFMedia",
+			},
+			{
+				name:      "artwork",
+				validType: Variable,
+				key:       "WFMetadataArtwork",
+				optional:  true,
+			},
+			{
+				name:      "title",
+				validType: String,
+				key:       "WFMetadataTitle",
+				optional:  true,
+			},
+			{
+				name:      "artist",
+				validType: String,
+				key:       "WFMetadataArtist",
+				optional:  true,
+			},
+			{
+				name:      "album",
+				validType: String,
+				key:       "WFMetadataAlbum",
+				optional:  true,
+			},
+			{
+				name:      "genre",
+				validType: String,
+				key:       "WFMetadataGenre",
+				optional:  true,
+			},
+			{
+				name:      "year",
+				validType: String,
+				key:       "WFMetadataYear",
+				optional:  true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "Metadata",
+					dataType: Boolean,
+					value:    true,
+				},
+			}
+		},
+	}
+	actions["stripMediaMetadata"] = &actionDefinition{
+		identifier: "encodemedia",
+		parameters: []parameterDefinition{
+			{
+				name:      "media",
+				validType: Variable,
+				key:       "WFMedia",
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "Metadata",
+					dataType: Boolean,
+					value:    true,
+				},
+			}
+		},
+	}
+	actions["stripImageMetadata"] = &actionDefinition{
 		identifier: "image.convert",
 		parameters: []parameterDefinition{
 			{

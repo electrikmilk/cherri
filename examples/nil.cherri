@@ -1,0 +1,21 @@
+@media = getFile(nil)
+setMetadata(media, nil, "Title")
+@media = nil
+
+repeat nil {
+
+}
+
+for nil {
+    nothing()
+}
+
+menu nil {
+    item nil:
+        nothing()
+}
+
+@int = 5
+if int == nil {
+
+}
