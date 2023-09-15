@@ -2787,9 +2787,9 @@ func scriptingActions() {
 					value:    true,
 				},
 				{
-					key: 	"WFURLActionURL",
+					key:      "WFURLActionURL",
 					dataType: Array,
-					value: urlItems,
+					value:    urlItems,
 				},
 			}
 		},
