@@ -283,7 +283,7 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		fmt.Println("\nvariables", variables)
 		fmt.Println("questions", questions)
 	}
-	parserError(fmt.Sprintf("Unknown value type: '%s'", fullIdentifier))
+	parserError(fmt.Sprintf("Undefined reference '%s'", fullIdentifier))
 }
 
 func collectArguments() (arguments []actionArgument) {

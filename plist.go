@@ -507,7 +507,7 @@ func attachmentValues(key string, variable string, outputType plistDataType) pli
 		} else if _, found := variables[strings.ToLower(stringVar.varName)]; found {
 			storedVar = variables[stringVar.varName]
 		} else {
-			exit(fmt.Sprintf("Variable '%s' does not exist!", stringVar.varName))
+			exit(fmt.Sprintf("Undefined reference '%s'", stringVar.varName))
 		}
 		var variable = variables[strings.ToLower(stringVar.varName)]
 		var varUUID = uuids[stringVar.varName]
