@@ -808,12 +808,22 @@ func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 
 func collectString() (str string) {
 	for char != -1 {
+		if char == '\\' {
+			switch next(1) {
+			case '"':
+				str += "\""
+			case 'n':
+				str += "\n"
+			case 't':
+				str += "\t"
+			case 'r':
+				str += "\r"
+			}
+			advanceTimes(2)
+			continue
+		}
 		if char == '"' && prev(1) != '\\' {
 			break
-		}
-		if char == '\\' && next(1) == '"' {
-			advance()
-			continue
 		}
 		str += string(char)
 		advance()
