@@ -713,7 +713,7 @@ func collectMenu() {
 	var promptType tokenType
 	var promptValue any
 	collectValue(&promptType, &promptValue, '{')
-	collectUntilExpect('{', 3)
+	collectUntil('{')
 	advance()
 	menus[currentGroupingUUID] = []variableValue{}
 	tokens = append(tokens, token{
