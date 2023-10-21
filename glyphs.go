@@ -16,6 +16,7 @@ func makeGlyphs() {
 	glyphs = make(map[string]int)
 	glyphs["car"] = 0xe83c
 	glyphs["bus"] = 0xe91e
+	glyphs["robot"] = 61566
 	glyphs["motorbike"] = 0xe987
 	glyphs["ambulance"] = 0xe904
 	glyphs["airplane"] = 0xe900
