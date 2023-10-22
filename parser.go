@@ -840,7 +840,6 @@ func collectString() (str string) {
 		advance()
 	}
 	advance()
-	str = strings.Trim(str, " ")
 	return
 }
 
