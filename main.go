@@ -287,7 +287,7 @@ func printDebug() {
 		fmt.Println(ansi("### PARSING ###", bold) + "\n")
 
 		fmt.Println(ansi("## TOKENS ##", bold))
-		fmt.Println(tokens)
+		printTokens(tokens)
 		fmt.Print("\n")
 
 		fmt.Println(ansi("## TOKEN CHARS ##", bold))

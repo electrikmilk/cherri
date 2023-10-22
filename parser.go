@@ -1068,6 +1068,16 @@ func firstChar() {
 	advance()
 }
 
+func printTokens(tokens []token) {
+	var size = len(tokens)
+	var pad = len(fmt.Sprintf("%d", size))
+	for i, token := range tokens {
+		var idx = i + 1
+		var spaces = pad - len(fmt.Sprintf("%d", idx))
+		fmt.Printf("%s%d | %s\n", strings.Repeat(" ", spaces), idx, token)
+	}
+}
+
 func parserWarning(message string) {
 	var errorFilename, errorLine, errorCol = delinquentFile()
 	fmt.Println(ansi("\nWarning: ", yellow, bold) + fmt.Sprintf("%s %s:%d:%d", message, errorFilename, errorLine, errorCol))
