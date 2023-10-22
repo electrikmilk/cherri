@@ -48,7 +48,7 @@ func main() {
 		if runtime.GOOS != "darwin" {
 			fmt.Println(ansi("\nWarning:", yellow, bold), "Shortcuts compiled on this platform will not run on iOS 15+ or macOS 12+.")
 		}
-		fmt.Printf("\n")
+		fmt.Print("\n")
 		args.PrintUsage()
 		os.Exit(1)
 	}
@@ -98,9 +98,11 @@ func printActionDefinitions() {
 
 func fileArg() string {
 	for _, arg := range os.Args {
-		if strings.Contains(arg, ".cherri") && !startsWith("-", arg) {
-			return arg
+		if !strings.Contains(arg, ".cherri") || startsWith("-", arg) {
+			continue
 		}
+
+		return arg
 	}
 	return ""
 }
