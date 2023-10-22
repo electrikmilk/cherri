@@ -13,15 +13,32 @@
 **Cherri** (pronounced cherry) is a [iOS Siri Shortcuts](https://apps.apple.com/us/app/shortcuts/id915249334)
 programming language, that compiles directly to a valid runnable Shortcut.
 
-[Playground](https://playground.cherrilang.org/) • [Documentation](https://cherrilang.org/language/) • [Code Tour](https://youtu.be/gU8TsI96uww) • [
-_Idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap)
-
-**WARNING:** This project has not yet reached a stable version. It is under heavy development, and backwards
-incompatible changes may be made.
-
 [![Hello World Example](https://cherrilang.org/assets/example.png)](examples/hello-world.cherri)
 
-### Usage
+### Top Features
+
+- 🌟Clear and consistent abstractions that make programming Shortcuts easy.
+- 🪄 No explicit magic variables, they're constants instead.
+- #️⃣ Include files within each other or auto-include.
+- 🔧 Define your own custom actions.
+- 🥩 Raw actions
+- ❓ Import questions
+- 📇 VCard generation
+- 🔢 Typechecker
+
+### Learn more
+
+- 🧸 [Playground](https://playground.cherrilang.org/)
+- 📄 [Documentation](https://cherrilang.org/language/)
+- 🧑‍💻 [Code Tour](https://youtu.be/gU8TsI96uww)
+- 🗺️ [_Idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap)
+
+### **📣 WIP 📣**
+
+This project has not yet reached a stable version. It is under heavy development, and backwards
+incompatible changes may be made.
+
+## Usage
 
 ```bash
 cherri file.cherri
@@ -39,7 +56,9 @@ browser.
 ### Development on other platforms
 
 As it stands, I don't want someone to get confused and think Shortcuts compiled using Cherri on other platforms will run
-on their Mac or iOS device. However, you can build the compiler for your platform, it will just skip signing the compiled Shortcut, so it will not run on iOS 15+ or macOS 12+. Also note that the compiler is primarily developed and tested on Unix-like systems.
+on their Mac or iOS device. However, you can build the compiler for your platform, it will just skip signing the
+compiled Shortcut, so it will not run on iOS 15+ or macOS 12+. Also note that the compiler is primarily developed and
+tested on Unix-like systems.
 
 [Read my full thoughts on this](https://github.com/electrikmilk/cherri/wiki/Why-macOS-only%3F)
 
@@ -53,6 +72,10 @@ There should be more, not less.
 Some stability that comes with the project being on macOS and not iOS. I am not aware of any
 project [other than one](https://github.com/zachary7829/Buttermilk) that compiles a
 Shortcut in a way that is meant for a desktop OS.
+
+## Community
+
+- [VS Code Syntax Highlighting](https://github.com/erenyenigul/cherri-vscode-highlight)
 
 ## Credits
 
