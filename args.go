@@ -20,14 +20,14 @@ func init() {
 	})
 	args.Register(args.Argument{
 		Name:         "action",
-		Description:  "Print action definition. Leave empty to print all action definitions.",
+		Description:  "Print an action's definition. Leave empty to print all action definitions.",
 		DefaultValue: "",
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
 		Name:         "share",
 		Short:        "s",
-		Description:  "Shortcuts signing mode, passed to the `shortcuts` binary.",
+		Description:  "Set the Shortcuts signing mode, passed to the `shortcuts` binary.",
 		Values:       []string{"anyone", "contacts"},
 		DefaultValue: "contacts",
 		ExpectsValue: true,
@@ -35,17 +35,17 @@ func init() {
 	args.Register(args.Argument{
 		Name:        "debug",
 		Short:       "d",
-		Description: "Save generated plist. Print debug messages and stack traces.",
+		Description: "Save the generated plist and print debug messages and stack traces.",
 	})
 	args.Register(args.Argument{
 		Name:        "output",
 		Short:       "o",
-		Description: "Optional output file path. (e.g. /path/to/file.shortcut).",
+		Description: "Optional output file path. (e.g. path/to/file.shortcut).",
 	})
 	args.Register(args.Argument{
 		Name:        "import",
 		Short:       "i",
-		Description: "Opens compiled Shortcut after compilation. Ignored if unsigned.",
+		Description: "Opens compiled Shortcut after compilation (ignored if unsigned).",
 	})
 	args.Register(args.Argument{
 		Name:        "auto-inc",
