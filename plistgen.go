@@ -323,7 +323,7 @@ func plistRepeat(t *token) {
 			{
 				key:      "GroupingIdentifier",
 				dataType: Text,
-				value:    currentGroupingUUID,
+				value:    t.ident,
 			},
 			{
 				key:      "UUID",
@@ -345,7 +345,7 @@ func plistRepeat(t *token) {
 			{
 				key:      "GroupingIdentifier",
 				dataType: Text,
-				value:    currentGroupingUUID,
+				value:    t.ident,
 			},
 		}))
 	}
@@ -362,7 +362,7 @@ func plistRepeatEach(t *token) {
 			{
 				key:      "GroupingIdentifier",
 				dataType: Text,
-				value:    currentGroupingUUID,
+				value:    t.ident,
 			},
 			{
 				key:      "UUID",
@@ -384,7 +384,7 @@ func plistRepeatEach(t *token) {
 			{
 				key:      "GroupingIdentifier",
 				dataType: Text,
-				value:    currentGroupingUUID,
+				value:    t.ident,
 			},
 		}))
 	}

@@ -49,7 +49,6 @@ func resetParser() {
 	closureUUIDs = map[int]string{}
 	closureTypes = map[int]tokenType{}
 	closureIdx = 0
-	currentGroupingUUID = ""
 	variables = map[string]variableValue{}
 	actions = map[string]*actionDefinition{}
 	inputContentItems = []plistData{}

@@ -24,7 +24,6 @@ var lineCharIdx int
 var closureUUIDs map[int]string
 var closureTypes map[int]tokenType
 var closureIdx int
-var currentGroupingUUID string
 
 func initParse() {
 	tokenChars = make(map[tokenType][]string)
@@ -624,9 +623,9 @@ func collectQuestion() {
 
 func collectRepeat() {
 	reachable()
-	currentGroupingUUID = shortcutsUUID()
+	var groupingUUID = shortcutsUUID()
 	closureIdx++
-	closureUUIDs[closureIdx] = currentGroupingUUID
+	closureUUIDs[closureIdx] = groupingUUID
 	closureTypes[closureIdx] = Repeat
 	var timesType tokenType
 	var timesValue any
@@ -634,7 +633,7 @@ func collectRepeat() {
 	advanceTimes(2)
 	tokens = append(tokens, token{
 		typeof:    Repeat,
-		ident:     currentGroupingUUID,
+		ident:     groupingUUID,
 		valueType: timesType,
 		value:     timesValue,
 	})
@@ -642,9 +641,9 @@ func collectRepeat() {
 
 func collectRepeatEach() {
 	reachable()
-	currentGroupingUUID = shortcutsUUID()
+	var groupingUUID = shortcutsUUID()
 	closureIdx++
-	closureUUIDs[closureIdx] = currentGroupingUUID
+	closureUUIDs[closureIdx] = groupingUUID
 	closureTypes[closureIdx] = RepeatWithEach
 	var iterableType tokenType
 	var iterableValue any
@@ -652,7 +651,7 @@ func collectRepeatEach() {
 	advance()
 	tokens = append(tokens, token{
 		typeof:    RepeatWithEach,
-		ident:     currentGroupingUUID,
+		ident:     groupingUUID,
 		valueType: iterableType,
 		value:     iterableValue,
 	})
@@ -662,9 +661,9 @@ func collectConditional() {
 	reachable()
 	advance()
 	makeConditions()
-	currentGroupingUUID = shortcutsUUID()
+	var groupingUUID = shortcutsUUID()
 	closureIdx++
-	closureUUIDs[closureIdx] = currentGroupingUUID
+	closureUUIDs[closureIdx] = groupingUUID
 	closureTypes[closureIdx] = Conditional
 	var conditionType string
 	if isToken(Exclamation) {
@@ -700,7 +699,7 @@ func collectConditional() {
 	isToken(LeftBrace)
 	tokens = append(tokens, token{
 		typeof:    Conditional,
-		ident:     currentGroupingUUID,
+		ident:     groupingUUID,
 		valueType: If,
 		value: condition{
 			variableOneType:    variableOneType,
@@ -717,19 +716,19 @@ func collectConditional() {
 func collectMenu() {
 	reachable()
 	advance()
-	currentGroupingUUID = shortcutsUUID()
+	var groupingUUID = shortcutsUUID()
 	closureIdx++
-	closureUUIDs[closureIdx] = currentGroupingUUID
+	closureUUIDs[closureIdx] = groupingUUID
 	closureTypes[closureIdx] = Menu
 	var promptType tokenType
 	var promptValue any
 	collectValue(&promptType, &promptValue, '{')
 	collectUntil('{')
 	advance()
-	menus[currentGroupingUUID] = []variableValue{}
+	menus[groupingUUID] = []variableValue{}
 	tokens = append(tokens, token{
 		typeof:    Menu,
-		ident:     currentGroupingUUID,
+		ident:     groupingUUID,
 		valueType: promptType,
 		value:     promptValue,
 	})
@@ -737,21 +736,22 @@ func collectMenu() {
 
 func collectMenuItem() {
 	advance()
-	if currentGroupingUUID == "" {
-		parserError("Case has no starting menu statement.")
+	if _, ok := closureUUIDs[closureIdx]; !ok {
+		parserError("Item has no starting menu statement.")
 	}
+	var groupingUUID = closureUUIDs[closureIdx]
 	var itemType tokenType
 	var itemValue any
 	collectValue(&itemType, &itemValue, ':')
 	collectUntil(':')
 	advance()
-	menus[currentGroupingUUID] = append(menus[currentGroupingUUID], variableValue{
+	menus[groupingUUID] = append(menus[groupingUUID], variableValue{
 		valueType: itemType,
 		value:     itemValue,
 	})
 	tokens = append(tokens, token{
 		typeof:    Item,
-		ident:     currentGroupingUUID,
+		ident:     groupingUUID,
 		valueType: itemType,
 		value:     itemValue,
 	})
@@ -761,7 +761,7 @@ func collectEndClosure() {
 	advance()
 	if tokenAhead(Else) {
 		advance()
-		if currentGroupingUUID == "" {
+		if _, ok := closureUUIDs[closureIdx]; !ok {
 			parserError("Else has no starting if statement.")
 		}
 		tokens = append(tokens, token{
@@ -772,7 +772,7 @@ func collectEndClosure() {
 		})
 		tokenAhead(LeftBrace)
 	} else {
-		if currentGroupingUUID == "" {
+		if _, ok := closureUUIDs[closureIdx]; !ok {
 			parserError("Ending closure has no starting statement.")
 		}
 		var closureType = closureTypes[closureIdx]
