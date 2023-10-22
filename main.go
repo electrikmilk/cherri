@@ -25,20 +25,6 @@ var outputPath string
 
 var included []string
 
-func init() {
-	args.Register("version", "v", "Print current version information.", false)
-	args.Register("help", "h", "Print this usage information.", false)
-	args.Register("action", "", "Print action definition. Leave empty to print all action definitions.", true)
-	args.Register("share", "s", "Signing mode. [anyone, contacts] [default=contacts]", true)
-	args.Register("debug", "d", "Save generated plist. Print debug messages and stack traces.", false)
-	args.Register("output", "o", "Optional output file path. (e.g. /path/to/file.shortcut).", true)
-	args.Register("import", "i", "Opens compiled Shortcut after compilation. Ignored if unsigned.", false)
-	args.Register("auto-inc", "a", "Automatically include Cherri files in this directory.", false)
-	args.Register("comments", "c", "Don't include comments in the compiled Shortcut.", false)
-	args.Register("no-ansi", "", "Don't output ANSI escape sequences that format and color the output.", false)
-	args.CustomUsage = "[FILE]"
-}
-
 func main() {
 	if args.Using("help") {
 		args.PrintUsage()
