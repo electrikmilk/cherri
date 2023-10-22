@@ -1338,7 +1338,7 @@ func documentActions() {
 		},
 		make: textParts,
 	}
-	actions["combineText"] = &actionDefinition{
+	actions["joinText"] = &actionDefinition{
 		identifier: "text.combine",
 		parameters: []parameterDefinition{
 			{
