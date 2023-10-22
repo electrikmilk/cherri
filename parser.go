@@ -1068,12 +1068,6 @@ func firstChar() {
 	advance()
 }
 
-func parserErr(err error) {
-	if err != nil {
-		parserError(fmt.Sprintf("%s", err))
-	}
-}
-
 func parserWarning(message string) {
 	var errorFilename, errorLine, errorCol = delinquentFile()
 	fmt.Println(ansi("\nWarning: ", yellow, bold) + fmt.Sprintf("%s %s:%d:%d", message, errorFilename, errorLine, errorCol))
