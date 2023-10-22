@@ -10,7 +10,7 @@ Easily edit text...
 @textVar = regReplaceText("[0-9a-zA-Z]","a",textVar)
 @textVar = iRegReplaceText("[0-9a-z]","a",textVar)
 @textVar = splitText(textVar,",")
-@textVar = combineText(textVar,",")
+@textVar = joinText(textVar,",")
 @textVar = uppercase(textVar)
 @textVar = lowercase(textVar)
 @textVar = titleCase(textVar)
