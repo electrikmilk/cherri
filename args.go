@@ -53,9 +53,9 @@ func init() {
 		Description: "Automatically include Cherri files in this directory.",
 	})
 	args.Register(args.Argument{
-		Name:        "no-comments",
+		Name:        "comments",
 		Short:       "c",
-		Description: "Don't include comments in the compiled Shortcut.",
+		Description: "Include comments in the compiled Shortcut.",
 	})
 	args.Register(args.Argument{
 		Name:        "no-ansi",

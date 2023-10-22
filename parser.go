@@ -337,28 +337,39 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 }
 
 func collectComment() {
+	var collect = args.Using("comments")
 	var comment string
 	if isToken(ForwardSlash) {
-		comment = collectUntil('\n')
+		if collect {
+			comment = collectUntil('\n')
+		} else {
+			collectUntil('\n')
+		}
 	} else {
 		advanceTimes(2)
 		for {
 			if char == '*' && next(1) == '/' {
 				break
 			}
-			comment += string(char)
+			if collect {
+				comment += string(char)
+			}
 			advance()
 		}
-		comment = strings.Trim(comment, "\n")
+		if collect {
+			comment = strings.Trim(comment, "\n")
+		}
 		advanceTimes(3)
 	}
-	comment = strings.Trim(comment, " ")
-	tokens = append(tokens, token{
-		typeof:    Comment,
-		ident:     "",
-		valueType: String,
-		value:     comment,
-	})
+	if collect {
+		comment = strings.Trim(comment, " ")
+		tokens = append(tokens, token{
+			typeof:    Comment,
+			ident:     "",
+			valueType: String,
+			value:     comment,
+		})
+	}
 }
 
 func collectVariable(constant bool) {
