@@ -119,7 +119,7 @@ func actionParameters(arguments []actionArgument) (params []plistData) {
 			if len(arguments) <= i || len(arguments) == 0 {
 				break
 			}
-			if arguments[i].valueType == Nil {
+			if arguments[i].valueType == Nil || a.key == "" {
 				continue
 			}
 
