@@ -3056,8 +3056,20 @@ func scriptingActions() {
 				name:      "defaultValue",
 				validType: String,
 				optional:  true,
-				key:       "WFAskActionDefaultAnswer",
 			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			if len(args) < 3 {
+				return []plistData{}
+			}
+			var defaultAnswer = []plistData{
+				argumentValue("WFAskActionDefaultAnswer", args, 2),
+			}
+			if getArgValue(args[1]) == "Number" {
+				defaultAnswer = append(defaultAnswer, paramValue("WFAskActionDefaultAnswerNumber", args[2], Integer, Number))
+			}
+
+			return defaultAnswer
 		},
 	}
 	actions["chooseFromList"] = &actionDefinition{
