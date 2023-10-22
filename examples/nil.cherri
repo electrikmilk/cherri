@@ -2,11 +2,11 @@
 setMetadata(media, nil, "Title")
 @media = nil
 
-repeat nil {
+repeat n for nil {
 
 }
 
-for nil {
+for null in nil {
     nothing()
 }
 

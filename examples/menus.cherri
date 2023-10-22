@@ -5,8 +5,8 @@
 @menuPrefix = "Menu"
 @subtitle = "{menuPrefix} Subtitle"
 @items
-repeat 3 {
-    @items += makeVCard("{menuPrefix} Title {RepeatIndex}",subtitle,"assets/cherri_icon.png")
+repeat i for 3 {
+    @items += makeVCard("{menuPrefix} Title {i}",subtitle,"assets/cherri_icon.png")
 }
 
 const menuItems = "{items}"

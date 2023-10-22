@@ -2,7 +2,7 @@
 @intVar2 = 7
 @testVar = "test"
 
-repeat 6 {
+repeat i for 6 {
     @intVar2 = 5
     if intVar == intVar2 {
         @testVar = "test2"
@@ -10,6 +10,6 @@ repeat 6 {
 }
 
 @listVar = list("item 1","item 2","item 3")
-for listVar {
-    alert(RepeatIndex,RepeatItem)
+for item in listVar {
+    alert(RepeatIndex,item)
 }
