@@ -74,3 +74,5 @@ Shortcut in a way that is meant for a desktop OS.
 
 _The original Workflow app assigned a code name to each release. Cherri is named after the second to last
 update "Cherries" (also cherry is one of my favorite flavors)._
+
+This project started on Oct 5, 2022.
