@@ -2,4 +2,4 @@
 
 package main
 
-var version = "v0.1.9-beta"
+const version = "v0.1.9-beta"
