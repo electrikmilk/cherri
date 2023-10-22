@@ -57,8 +57,7 @@ reproduce it and what environment it may be isolated to are clearly communicated
 - If you change how a feature works, modify the existing feature or add a new feature, add or update a related file in the examples folder. These
   files are language examples obviously, but are also used as test files in the commit checks.
 - Test your feature or bug fix by writing a Cherri file and checking that it compiles to a valid Shortcut. If you are on
-  a non-macOS platform using the `--unsigned` argument, the Shortcut will compile, but the XML may be invalid. Use an XML linter
-  or validator on the debug plist file.
+  a non-macOS platform, the Shortcut will compile but not try to sign, so the format may be invalid. Use an XML linter or validator on the debug plist file you can generate using `--debug`.
 - Squash commits when doing fixups, so that if you remove something, you don't have a commit where you created it
   and then another commit where you remove it, squash them together so that whatever ended up not being needed is also
   removed from the commit history.
