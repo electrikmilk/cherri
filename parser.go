@@ -384,8 +384,12 @@ func collectVariable(constant bool) {
 		identifier = collectUntil('\n')
 	}
 	if _, found := variables[identifier]; found {
-		if variables[identifier].constant {
+		var variable = variables[identifier]
+		if variable.constant {
 			parserError(fmt.Sprintf("Cannot redefine constant '%s'.", identifier))
+		}
+		if variable.repeatItem {
+			parserError(fmt.Sprintf("Cannot redefine repeat item '%s'.", identifier))
 		}
 	}
 	if _, found := globals[identifier]; found {
@@ -621,40 +625,101 @@ func collectQuestion() {
 	}
 }
 
+var repeatIndexIndex = 1
+var repeatItemIndex = 1
+
 func collectRepeat() {
 	reachable()
+
 	var groupingUUID = shortcutsUUID()
 	closureIdx++
 	closureUUIDs[closureIdx] = groupingUUID
 	closureTypes[closureIdx] = Repeat
+
+	var index string
+	if repeatItemIndex > 1 {
+		index = fmt.Sprintf(" %d", repeatItemIndex)
+	}
+	var repeatIndexIdentifier = collectUntil(' ')
+
+	advance()
+	tokenAhead(RepeatWithEach)
+
 	var timesType tokenType
 	var timesValue any
 	collectValue(&timesType, &timesValue, '{')
 	advanceTimes(2)
-	tokens = append(tokens, token{
-		typeof:    Repeat,
-		ident:     groupingUUID,
-		valueType: timesType,
-		value:     timesValue,
-	})
+
+	tokens = append(tokens,
+		token{
+			typeof:    Repeat,
+			ident:     groupingUUID,
+			valueType: timesType,
+			value:     timesValue,
+		}, token{
+			typeof:    Var,
+			ident:     repeatIndexIdentifier,
+			valueType: Variable,
+			value:     fmt.Sprintf("Repeat Index%s", index),
+		},
+	)
+
+	variables[repeatIndexIdentifier] = variableValue{
+		variableType: "Variable",
+		valueType:    String,
+		value:        repeatIndexIdentifier,
+		repeatItem:   true,
+	}
+
+	repeatIndexIndex++
 }
 
 func collectRepeatEach() {
 	reachable()
+
 	var groupingUUID = shortcutsUUID()
 	closureIdx++
 	closureUUIDs[closureIdx] = groupingUUID
 	closureTypes[closureIdx] = RepeatWithEach
+
+	var index string
+	if repeatItemIndex > 1 {
+		index = fmt.Sprintf(" %d", repeatItemIndex)
+	}
+	var repeatItemIdentifier = collectUntil(' ')
+
+	advance()
+	tokenAhead(In)
+	advance()
+
 	var iterableType tokenType
 	var iterableValue any
 	collectValue(&iterableType, &iterableValue, '{')
+
 	advance()
-	tokens = append(tokens, token{
-		typeof:    RepeatWithEach,
-		ident:     groupingUUID,
-		valueType: iterableType,
-		value:     iterableValue,
-	})
+	tokens = append(tokens,
+		token{
+			typeof:    RepeatWithEach,
+			ident:     groupingUUID,
+			valueType: iterableType,
+			value:     iterableValue,
+		}, token{
+			typeof:    Var,
+			ident:     repeatItemIdentifier,
+			valueType: Variable,
+			value:     fmt.Sprintf("Repeat Item%s", index),
+		},
+	)
+
+	variables[repeatItemIdentifier] = variableValue{
+		variableType: "Variable",
+		valueType:    String,
+		value:        repeatItemIdentifier,
+		repeatItem:   true,
+	}
+
+	repeatItemIndex++
+	repeatIndexIndex++
 }
 
 func collectConditional() {
@@ -778,6 +843,8 @@ func collectEndClosure() {
 		var closureType = closureTypes[closureIdx]
 		if closureType == Repeat || closureType == RepeatWithEach {
 			reachable()
+			repeatItemIndex--
+			repeatIndexIndex--
 		}
 		tokens = append(tokens, token{
 			typeof:    closureType,

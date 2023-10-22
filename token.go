@@ -27,6 +27,7 @@ const (
 	EndClosure     tokenType = "endif"
 	Repeat         tokenType = "repeat "
 	RepeatWithEach tokenType = "for "
+	In             tokenType = "in"
 	Menu           tokenType = "menu"
 	Item           tokenType = "item"
 	Definition     tokenType = "#define"

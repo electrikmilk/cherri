@@ -148,6 +148,7 @@ type variableValue struct {
 	getAs        string
 	coerce       string
 	constant     bool
+	repeatItem   bool
 }
 
 /* Globals */
