@@ -234,8 +234,8 @@ func capitalize(s string) string {
 
 // startsWith determines if the beginning characters of `substr` match `s`.
 func startsWith(s string, substr string) bool {
-	var stringChars = strings.Split(s, "")
-	var subStringChars = strings.Split(substr, "")
+	var stringChars = []rune(s)
+	var subStringChars = []rune(substr)
 	for i, char := range subStringChars {
 		if char != stringChars[i] {
 			return false
