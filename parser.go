@@ -125,7 +125,8 @@ func reachable() {
 	}
 }
 
-func collectUntilIgnoreStrings(ch rune) (collected string) {
+func collectUntilIgnoreStrings(ch rune) string {
+	var collected strings.Builder
 	var insideString = false
 	for char != -1 {
 		if char == ch && !insideString {
@@ -134,42 +135,45 @@ func collectUntilIgnoreStrings(ch rune) (collected string) {
 		if char == '"' {
 			insideString = insideString && prev(1) == '\\'
 		}
-		collected = fmt.Sprintf("%s%c", collected, char)
+		collected.WriteRune(char)
 		advance()
 	}
-	collected = strings.Trim(collected, " ")
-	return
+
+	return strings.Trim(collected.String(), " ")
 }
 
 // collectUntil advances ahead until the current character is `ch`,
 // This should be used in cases where we are unsure how many characters will occur before we reach this character.
 // For instance a string collector would need to use this.
-func collectUntil(ch rune) (collected string) {
+func collectUntil(ch rune) string {
+	var collected strings.Builder
 	for char != ch && char != -1 {
-		collected += string(char)
+		collected.WriteRune(char)
 		advance()
 	}
-	collected = strings.Trim(collected, " ")
-	return
+
+	return strings.Trim(collected.String(), " ")
 }
 
 // collectUntilExpect advances ahead until the current character is `ch`.
 // If we advance more times than `maxAdvances` before finding `ch`, we throw
 // an error that we expected `ch` and return the characters collected.
-func collectUntilExpect(ch rune, maxAdvances int) (collected string) {
+func collectUntilExpect(ch rune, maxAdvances int) string {
+	var collected strings.Builder
 	var advances int
 	for char != ch && char != -1 {
 		if advances > maxAdvances {
-			parserError(fmt.Sprintf("Expected %s, got: %s", string(ch), collected))
+			parserError(fmt.Sprintf("Expected %s, got: %s", string(ch), collected.String()))
 		}
-		collected += string(char)
+		collected.WriteRune(char)
 		advances++
 		advance()
 	}
-	return
+	return collected.String()
 }
 
-func lookAheadUntil(until rune) (ahead string) {
+func lookAheadUntil(until rune) string {
+	var ahead strings.Builder
 	var nextIdx = idx
 	var nextChar rune
 	for nextChar != until {
@@ -178,11 +182,11 @@ func lookAheadUntil(until rune) (ahead string) {
 		}
 
 		nextChar = chars[nextIdx]
-		ahead = fmt.Sprintf("%s%c", ahead, chars[nextIdx])
+		ahead.WriteRune(chars[nextIdx])
 		nextIdx++
 	}
-	ahead = strings.Trim(strings.ToLower(ahead), " \t\n")
-	return
+
+	return strings.Trim(strings.ToLower(ahead.String()), " \t\n")
 }
 
 func collectVariableValue(valueType *tokenType, value *any, varType *tokenType, coerce *string, getAs *string) {
