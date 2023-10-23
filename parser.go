@@ -838,15 +838,7 @@ func collectMenuItem() {
 	advance()
 
 	if len(menus[groupingUUID]) > 0 {
-		// reduces memory usage by not passing anything to the ending block
-		tokens = append(tokens, token{
-			typeof:    Action,
-			ident:     "nothing",
-			valueType: Action,
-			value: action{
-				ident: "nothing",
-			},
-		})
+		addNothing()
 	}
 
 	menus[groupingUUID] = append(menus[groupingUUID], variableValue{
@@ -889,26 +881,19 @@ func collectEndStatement() {
 			repeatIndexIndex--
 		}
 
-		tokens = append(tokens,
-			token{
-				typeof:    Action,
-				ident:     "nothing",
-				valueType: Action,
-				value: action{
-					ident: "nothing",
-				},
-			},
-			token{
-				typeof:    groupType,
-				ident:     groupingUUIDs[groupingIdx],
-				valueType: EndClosure,
-				value:     nil,
-			},
-		)
+		addNothing()
+
+		tokens = append(tokens, token{
+			typeof:    groupType,
+			ident:     groupingUUIDs[groupingIdx],
+			valueType: EndClosure,
+			value:     nil,
+		})
 		groupingIdx--
 	}
 }
 
+// groupStatement creates a grouping UUID for a statement and adds to the statement groupings.
 func groupStatement(groupType tokenType) (groupingUUID string) {
 	groupingUUID = shortcutsUUID()
 	groupingIdx++
@@ -916,6 +901,19 @@ func groupStatement(groupType tokenType) (groupingUUID string) {
 	groupingTypes[groupingIdx] = groupType
 
 	return
+}
+
+// addNothing helps reduce memory usage by not passing anything to the next action.
+func addNothing() {
+	standardActions()
+	tokens = append(tokens, token{
+		typeof:    Action,
+		ident:     "nothing",
+		valueType: Action,
+		value: action{
+			ident: "nothing",
+		},
+	})
 }
 
 const intTypeString = string(Integer)
