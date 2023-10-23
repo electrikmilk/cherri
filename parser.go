@@ -21,9 +21,9 @@ var char rune
 var lineIdx int
 var lineCharIdx int
 
-var closureUUIDs map[int]string
-var closureTypes map[int]tokenType
-var closureIdx int
+var groupingUUIDs map[int]string
+var groupingTypes map[int]tokenType
+var groupingIdx int
 
 func initParse() {
 	tokenChars = make(map[tokenType][]string)
@@ -37,8 +37,8 @@ func initParse() {
 	variables = make(map[string]variableValue)
 	questions = make(map[string]*question)
 	menus = make(map[string][]variableValue)
-	closureUUIDs = make(map[int]string)
-	closureTypes = make(map[int]tokenType)
+	groupingUUIDs = make(map[int]string)
+	groupingTypes = make(map[int]tokenType)
 	makeGlobals()
 	chars = strings.Split(contents, "")
 	idx = -1
@@ -75,7 +75,7 @@ func parse() {
 		case tokenAhead(If):
 			collectConditional()
 		case tokenAhead(RightBrace):
-			collectEndClosure()
+			collectEndStatement()
 		case strings.Contains(lookAheadUntil(' '), "("):
 			collectActionCall()
 		default:
@@ -630,11 +630,7 @@ var repeatItemIndex = 1
 
 func collectRepeat() {
 	reachable()
-
-	var groupingUUID = shortcutsUUID()
-	closureIdx++
-	closureUUIDs[closureIdx] = groupingUUID
-	closureTypes[closureIdx] = Repeat
+	var groupingUUID = groupStatement(Repeat)
 
 	var index string
 	if repeatItemIndex > 1 {
@@ -676,11 +672,7 @@ func collectRepeat() {
 
 func collectRepeatEach() {
 	reachable()
-
-	var groupingUUID = shortcutsUUID()
-	closureIdx++
-	closureUUIDs[closureIdx] = groupingUUID
-	closureTypes[closureIdx] = RepeatWithEach
+	var groupingUUID = groupStatement(RepeatWithEach)
 
 	var index string
 	if repeatItemIndex > 1 {
@@ -726,16 +718,16 @@ func collectConditional() {
 	reachable()
 	advance()
 	makeConditions()
-	var groupingUUID = shortcutsUUID()
-	closureIdx++
-	closureUUIDs[closureIdx] = groupingUUID
-	closureTypes[closureIdx] = Conditional
+
+	var groupingUUID = groupStatement(Conditional)
+
 	var conditionType string
 	if isToken(Exclamation) {
 		conditionType = conditions[Empty]
 	} else {
 		conditionType = conditions[Any]
 	}
+
 	var variableOneType tokenType
 	var variableOneValue any
 	var variableTwoType tokenType
@@ -743,6 +735,7 @@ func collectConditional() {
 	var variableThreeType tokenType
 	var variableThreeValue any
 	collectValue(&variableOneType, &variableOneValue, ' ')
+
 	if !isToken(LeftBrace) {
 		var collectConditional = collectUntil(' ')
 		var collectConditionalToken = tokenType(collectConditional)
@@ -762,6 +755,7 @@ func collectConditional() {
 		}
 	}
 	isToken(LeftBrace)
+
 	tokens = append(tokens, token{
 		typeof:    Conditional,
 		ident:     groupingUUID,
@@ -781,15 +775,14 @@ func collectConditional() {
 func collectMenu() {
 	reachable()
 	advance()
-	var groupingUUID = shortcutsUUID()
-	closureIdx++
-	closureUUIDs[closureIdx] = groupingUUID
-	closureTypes[closureIdx] = Menu
+	var groupingUUID = groupStatement(Menu)
+
 	var promptType tokenType
 	var promptValue any
 	collectValue(&promptType, &promptValue, '{')
 	collectUntil('{')
 	advance()
+
 	menus[groupingUUID] = []variableValue{}
 	tokens = append(tokens, token{
 		typeof:    Menu,
@@ -801,15 +794,17 @@ func collectMenu() {
 
 func collectMenuItem() {
 	advance()
-	if _, ok := closureUUIDs[closureIdx]; !ok {
+	if _, ok := groupingUUIDs[groupingIdx]; !ok {
 		parserError("Item has no starting menu statement.")
 	}
-	var groupingUUID = closureUUIDs[closureIdx]
+	var groupingUUID = groupingUUIDs[groupingIdx]
+
 	var itemType tokenType
 	var itemValue any
 	collectValue(&itemType, &itemValue, ':')
 	collectUntil(':')
 	advance()
+
 	menus[groupingUUID] = append(menus[groupingUUID], variableValue{
 		valueType: itemType,
 		value:     itemValue,
@@ -822,38 +817,47 @@ func collectMenuItem() {
 	})
 }
 
-func collectEndClosure() {
+func collectEndStatement() {
 	advance()
 	if tokenAhead(Else) {
 		advance()
-		if _, ok := closureUUIDs[closureIdx]; !ok {
+		if _, ok := groupingUUIDs[groupingIdx]; !ok {
 			parserError("Else has no starting if statement.")
 		}
 		tokens = append(tokens, token{
 			typeof:    Conditional,
-			ident:     closureUUIDs[closureIdx],
+			ident:     groupingUUIDs[groupingIdx],
 			valueType: Else,
 			value:     nil,
 		})
 		tokenAhead(LeftBrace)
 	} else {
-		if _, ok := closureUUIDs[closureIdx]; !ok {
-			parserError("Ending closure has no starting statement.")
+		if _, ok := groupingUUIDs[groupingIdx]; !ok {
+			parserError("Ending has no starting statement.")
 		}
-		var closureType = closureTypes[closureIdx]
-		if closureType == Repeat || closureType == RepeatWithEach {
+		var groupType = groupingTypes[groupingIdx]
+		if groupType == Repeat || groupType == RepeatWithEach {
 			reachable()
 			repeatItemIndex--
 			repeatIndexIndex--
 		}
 		tokens = append(tokens, token{
-			typeof:    closureType,
-			ident:     closureUUIDs[closureIdx],
+			typeof:    groupType,
+			ident:     groupingUUIDs[groupingIdx],
 			valueType: EndClosure,
 			value:     nil,
 		})
-		closureIdx--
+		groupingIdx--
 	}
+}
+
+func groupStatement(groupType tokenType) (groupingUUID string) {
+	groupingUUID = shortcutsUUID()
+	groupingIdx++
+	groupingUUIDs[groupingIdx] = groupingUUID
+	groupingTypes[groupingIdx] = groupType
+
+	return
 }
 
 const intTypeString = string(Integer)

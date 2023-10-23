@@ -46,9 +46,9 @@ func resetParser() {
 	idx = 0
 	lineIdx = 0
 	lineCharIdx = 0
-	closureUUIDs = map[int]string{}
-	closureTypes = map[int]tokenType{}
-	closureIdx = 0
+	groupingUUIDs = map[int]string{}
+	groupingTypes = map[int]tokenType{}
+	groupingIdx = 0
 	variables = map[string]variableValue{}
 	actions = map[string]*actionDefinition{}
 	inputContentItems = []plistData{}
