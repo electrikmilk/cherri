@@ -32,6 +32,14 @@ func TestCherri(_ *testing.T) {
 	}
 }
 
+func TestCherriFile(_ *testing.T) {
+	var currentTest = "examples/menus.cherri"
+	fmt.Printf("Compiling %s...\n", ansi(currentTest, bold))
+	os.Args[1] = currentTest
+	main()
+	fmt.Print(ansi("PASSED", green) + "\n\n")
+}
+
 func TestActionList(_ *testing.T) {
 	standardActions()
 	for identifier := range actions {
@@ -51,8 +59,6 @@ func resetParser() {
 	groupingIdx = 0
 	variables = map[string]variableValue{}
 	actions = map[string]*actionDefinition{}
-	inputContentItems = []plistData{}
-	outputContentItems = []plistData{}
 	shortcutActions = []plistData{}
 	iconColor = "-1263359489"
 	iconGlyph = 61440
