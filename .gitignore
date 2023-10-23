@@ -14,8 +14,8 @@ src/aml
 
 # Tests
 *.cherri
-!/examples/*.cherri
-!/examples/*_expected.plist
+!/tests/*.cherri
+!/tests/*_expected.plist
 !stdlib.cherri
 
 # Development

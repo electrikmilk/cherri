@@ -54,8 +54,7 @@ reproduce it and what environment it may be isolated to are clearly communicated
 - Test your code to the best of your ability, do not submit code that does not compile.
 - Write commit titles in the imperative (Fix bug, Add thing, etc.)
 - Don't over explain but don't be vague, briefly but clearly state your changes.
-- If you change how a feature works, modify the existing feature or add a new feature, add or update a related file in the examples folder. These
-  files are language examples obviously, but are also used as test files in the commit checks.
+- If you change how a feature works, modify the existing feature or add a new feature, add or update a related file in the tests folder to add to the commit checks.
 - Test your feature or bug fix by writing a Cherri file and checking that it compiles to a valid Shortcut. If you are on
   a non-macOS platform, the Shortcut will compile but not try to sign, so the format may be invalid. Use an XML linter or validator on the debug plist file you can generate using `--debug`.
 - Squash commits when doing fixups, so that if you remove something, you don't have a commit where you created it

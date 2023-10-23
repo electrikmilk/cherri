@@ -31,7 +31,7 @@ func TestCherri(t *testing.T) {
 }
 
 func TestSingleFile(_ *testing.T) {
-	currentTest = "examples/conditionals.cherri"
+	currentTest = "tests/conditionals.cherri"
 	fmt.Printf("⚙️ Compiling %s...\n", ansi(currentTest, bold))
 	os.Args[1] = currentTest
 	main()
@@ -46,16 +46,16 @@ func TestActionList(_ *testing.T) {
 }
 
 func testFiles(handle func(file os.DirEntry) bool) {
-	var files, err = os.ReadDir("examples")
+	var files, err = os.ReadDir("tests")
 	if err != nil {
-		fmt.Println(ansi("FAILED: unable to read examples directory", red))
+		fmt.Println(ansi("FAILED: unable to read tests directory", red))
 		panic(err)
 	}
 	for _, file := range files {
 		if !strings.Contains(file.Name(), ".cherri") {
 			continue
 		}
-		currentTest = fmt.Sprintf("examples/%s", file.Name())
+		currentTest = fmt.Sprintf("tests/%s", file.Name())
 
 		fmt.Println(ansi(currentTest, underline, bold))
 
@@ -83,7 +83,7 @@ func compile() {
 }
 
 func matchesExpected(_ *testing.T) bool {
-	var expectedPlist = fmt.Sprintf("examples/%s_expected.plist", workflowName)
+	var expectedPlist = fmt.Sprintf("tests/%s_expected.plist", workflowName)
 	var _, statErr = os.Stat(expectedPlist)
 	if os.IsNotExist(statErr) {
 		fmt.Println(ansi("Test has no exported plist to compare against.", yellow))
