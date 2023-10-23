@@ -28,14 +28,16 @@ func handleIncludes() {
 		autoInclude()
 		return
 	}
-	if strings.Contains(contents, "#include") {
-		if args.Using("debug") {
-			fmt.Print("Parsing includes... ")
-		}
-		parseIncludes()
-		if args.Using("debug") {
-			fmt.Print(ansi("done!", green) + "\n")
-		}
+	if !strings.Contains(contents, "#include") {
+		return
+	}
+
+	if args.Using("debug") {
+		fmt.Print("Parsing includes... ")
+	}
+	parseIncludes()
+	if args.Using("debug") {
+		fmt.Print(ansi("done!", green) + "\n")
 	}
 }
 
