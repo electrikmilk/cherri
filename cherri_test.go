@@ -32,7 +32,7 @@ func TestCherri(_ *testing.T) {
 	}
 }
 
-func TestCherriFile(_ *testing.T) {
+func TestSingleFile(_ *testing.T) {
 	var currentTest = "examples/menus.cherri"
 	fmt.Printf("Compiling %s...\n", ansi(currentTest, bold))
 	os.Args[1] = currentTest
