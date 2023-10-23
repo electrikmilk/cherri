@@ -837,16 +837,31 @@ func collectMenuItem() {
 	collectUntil(':')
 	advance()
 
+	if len(menus[groupingUUID]) > 0 {
+		// reduces memory usage by not passing anything to the ending block
+		tokens = append(tokens, token{
+			typeof:    Action,
+			ident:     "nothing",
+			valueType: Action,
+			value: action{
+				ident: "nothing",
+			},
+		})
+	}
+
 	menus[groupingUUID] = append(menus[groupingUUID], variableValue{
 		valueType: itemType,
 		value:     itemValue,
 	})
-	tokens = append(tokens, token{
-		typeof:    Item,
-		ident:     groupingUUID,
-		valueType: itemType,
-		value:     itemValue,
-	})
+
+	tokens = append(tokens,
+		token{
+			typeof:    Item,
+			ident:     groupingUUID,
+			valueType: itemType,
+			value:     itemValue,
+		},
+	)
 }
 
 func collectEndStatement() {
@@ -873,12 +888,23 @@ func collectEndStatement() {
 			repeatItemIndex--
 			repeatIndexIndex--
 		}
-		tokens = append(tokens, token{
-			typeof:    groupType,
-			ident:     groupingUUIDs[groupingIdx],
-			valueType: EndClosure,
-			value:     nil,
-		})
+
+		tokens = append(tokens,
+			token{
+				typeof:    Action,
+				ident:     "nothing",
+				valueType: Action,
+				value: action{
+					ident: "nothing",
+				},
+			},
+			token{
+				typeof:    groupType,
+				ident:     groupingUUIDs[groupingIdx],
+				valueType: EndClosure,
+				value:     nil,
+			},
+		)
 		groupingIdx--
 	}
 }
