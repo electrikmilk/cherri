@@ -49,48 +49,46 @@ const ObjectReplaceChar = "\uFFFC"
 
 var tabLevel = 0
 
-func plistKeyValue(key string, dataType plistDataType, value any) (pair string) {
+func plistKeyValue(key string, dataType plistDataType, value any) string {
+	var pair strings.Builder
 	if key != "" {
-		pair = fmt.Sprintf("%s<key>%s</key>\n", strings.Repeat("\t", tabLevel), key)
+		pair.WriteString(fmt.Sprintf("%s<key>%s</key>\n", strings.Repeat("\t", tabLevel), key))
 	}
-	pair = fmt.Sprintf("%s%s", pair, strings.Repeat("\t", tabLevel))
+	pair.WriteString(strings.Repeat("\t", tabLevel))
 	switch dataType {
 	case Boolean:
-		if value == true {
-			pair = fmt.Sprintf("%s<true/>\n", pair)
-		} else {
-			pair = fmt.Sprintf("%s<false/>\n", pair)
-		}
+		pair.WriteString(fmt.Sprintf("<%t/>\n", value))
 	case Array:
 		if value == nil || len(value.([]plistData)) == 0 {
-			pair = fmt.Sprintf("%s<array/>\n", pair)
+			pair.WriteString("<array/>\n")
 			break
 		}
-		pair = fmt.Sprintf("%s<array>\n%s%s</array>\n", pair, plistDictValue(value), strings.Repeat("\t", tabLevel))
+		pair.WriteString(fmt.Sprintf("<array>\n%s%s</array>\n", plistDictValue(value), strings.Repeat("\t", tabLevel)))
 	case Dictionary:
-		pair = fmt.Sprintf("%s<dict>\n%s%s</dict>\n", pair, plistDictValue(value), strings.Repeat("\t", tabLevel))
+		pair.WriteString(fmt.Sprintf("<dict>\n%s%s</dict>\n", plistDictValue(value), strings.Repeat("\t", tabLevel)))
 	default:
 		if reflect.TypeOf(value).String() == "string" {
 			value = html.EscapeString(value.(string))
 		}
-		pair = fmt.Sprintf("%s<%s>%v</%s>\n", pair, dataType, value, dataType)
+		pair.WriteString(fmt.Sprintf("<%s>%v</%s>\n", dataType, value, dataType))
 	}
-	return
+	return pair.String()
 }
 
 var emptyPlistData = plistData{}
 
-func plistDictValue(value any) (pair string) {
+func plistDictValue(value any) string {
 	tabLevel++
+	var pair strings.Builder
 	for _, data := range value.([]plistData) {
 		if data == emptyPlistData {
 			continue
 		}
 
-		pair = fmt.Sprintf("%s%s", pair, plistKeyValue(data.key, data.dataType, data.value))
+		pair.WriteString(plistKeyValue(data.key, data.dataType, data.value))
 	}
 	tabLevel--
-	return
+	return pair.String()
 }
 
 func plistValue(dataType plistDataType, value any) string {
