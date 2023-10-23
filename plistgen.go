@@ -43,7 +43,7 @@ func makePlist() {
 
 	plistActions()
 
-	plist += plistKeyValue("WFWorkflowClientVersion", Text, "1146.14")
+	plist += plistKeyValue("WFWorkflowClientVersion", Text, "2038.0.2.4")
 
 	if workflowName != "" {
 		plist += plistKeyValue("WFWorkflowName", Text, workflowName)
