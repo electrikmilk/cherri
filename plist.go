@@ -11,7 +11,6 @@ import (
 	"strings"
 )
 
-var shortcutActions []plistData
 var uuids map[string]string
 
 type plistDataType string
@@ -63,7 +62,7 @@ func plistKeyValue(key string, dataType plistDataType, value any) (pair string) 
 			pair = fmt.Sprintf("%s<false/>\n", pair)
 		}
 	case Array:
-		if len(value.([]plistData)) == 0 {
+		if value == nil || len(value.([]plistData)) == 0 {
 			pair = fmt.Sprintf("%s<array/>\n", pair)
 			break
 		}
@@ -96,6 +95,13 @@ func plistDictValue(value any) (pair string) {
 
 func plistValue(dataType plistDataType, value any) string {
 	return plistKeyValue("", dataType, value)
+}
+
+// appendPlist grows and writes to the plist string builder
+func appendPlist(data []plistData) {
+	var xmlStr = plistDictValue(data)
+	plist.Grow(len([]byte(xmlStr)))
+	plist.WriteString(xmlStr)
 }
 
 func conditionalParameter(key string, conditionalParams *[]plistData, typeOf *tokenType, value any) {
@@ -157,7 +163,7 @@ func makeVariableValue(token *token, varUUID *string) {
 	}
 	switch token.valueType {
 	case Integer:
-		shortcutActions = append(shortcutActions, makeStdAction("number", []plistData{
+		appendPlist(makeStdAction("number", []plistData{
 			UUID,
 			outputName,
 			{
@@ -173,7 +179,7 @@ func makeVariableValue(token *token, varUUID *string) {
 		} else {
 			boolValue = "0"
 		}
-		shortcutActions = append(shortcutActions, makeStdAction("number", []plistData{
+		appendPlist(makeStdAction("number", []plistData{
 			UUID,
 			outputName,
 			{
@@ -183,7 +189,7 @@ func makeVariableValue(token *token, varUUID *string) {
 			},
 		}))
 	case String:
-		shortcutActions = append(shortcutActions, makeStdAction("gettext", []plistData{
+		appendPlist(makeStdAction("gettext", []plistData{
 			UUID,
 			outputName,
 			attachmentValues("WFTextActionText", token.value.(string), Text),
@@ -205,7 +211,8 @@ func makeVariableValue(token *token, varUUID *string) {
 				operandTwo = strings.Trim(expressionParts[1], " ")
 				wrapVariableReference(&operandOne)
 				wrapVariableReference(&operandTwo)
-				shortcutActions = append(shortcutActions, makeStdAction("math", []plistData{
+
+				appendPlist(makeStdAction("math", []plistData{
 					UUID,
 					outputName,
 					attachmentValues("WFScientificMathOperation", operation, Text),
@@ -223,7 +230,7 @@ func makeVariableValue(token *token, varUUID *string) {
 			formattedExpression = append(formattedExpression, p)
 		}
 		expression = strings.Join(formattedExpression, " ")
-		shortcutActions = append(shortcutActions, makeStdAction("calculateexpression", []plistData{
+		appendPlist(makeStdAction("calculateexpression", []plistData{
 			UUID,
 			outputName,
 			attachmentValues("Input", expression, Text),
@@ -232,7 +239,7 @@ func makeVariableValue(token *token, varUUID *string) {
 		currentAction = token.value.(action).ident
 		plistAction(token.value.(action).args, outputName, UUID)
 	case Dict:
-		shortcutActions = append(shortcutActions, makeStdAction("dictionary", []plistData{
+		appendPlist(makeStdAction("dictionary", []plistData{
 			outputName,
 			UUID,
 			{

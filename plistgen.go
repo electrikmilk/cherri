@@ -5,7 +5,6 @@
 package main
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 )
@@ -13,70 +12,130 @@ import (
 const header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"https://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n\t<dict>\n"
 const footer = "\t</dict>\n</plist>"
 
-var plist string
+var plist strings.Builder
 
 func makePlist() {
 	tabLevel = 2
 	uuids = make(map[string]string)
-	plist = header
+	plist.WriteString(header)
 
-	plist += plistKeyValue("WFWorkflowHasOutputFallback", Boolean, false)
-	plist += plistKeyValue("WFWorkflowMinimumClientVersion", Number, minVersion)
-	plist += plistKeyValue("WFWorkflowMinimumClientVersionString", Text, minVersion)
-	plist += plistKeyValue("WFWorkflowHasShortcutInputVariables", Boolean, hasShortcutInputVariables)
-
-	plist += plistKeyValue("WFQuickActionSurfaces", Array, []plistData{})
+	appendPlist([]plistData{
+		{
+			key:      "WFWorkflowHasOutputFallback",
+			dataType: Boolean,
+			value:    false,
+		},
+		{
+			key:      "WFWorkflowMinimumClientVersion",
+			dataType: Number,
+			value:    minVersion,
+		},
+		{
+			key:      "WFWorkflowMinimumClientVersionString",
+			dataType: Text,
+			value:    minVersion,
+		},
+		{
+			key:      "WFWorkflowHasShortcutInputVariables",
+			dataType: Boolean,
+			value:    hasShortcutInputVariables,
+		},
+		{
+			key:      "WFQuickActionSurfaces",
+			dataType: Array,
+		},
+	})
 
 	if noInput.name != "" {
-		plist += plistKeyValue("WFWorkflowNoInputBehavior", Dictionary, []plistData{
+		appendPlist([]plistData{
 			{
-				key:      "Name",
-				dataType: Text,
-				value:    noInput.name,
-			},
-			{
-				key:      "Parameters",
+				key:      "WFWorkflowNoInputBehavior",
 				dataType: Dictionary,
-				value:    noInput.params,
+				value: []plistData{
+					{
+						key:      "Name",
+						dataType: Text,
+						value:    noInput.name,
+					},
+					{
+						key:      "Parameters",
+						dataType: Dictionary,
+						value:    noInput.params,
+					},
+				},
 			},
 		})
 	}
 
 	plistActions()
 
-	plist += plistKeyValue("WFWorkflowClientVersion", Text, "2038.0.2.4")
-
-	if workflowName != "" {
-		plist += plistKeyValue("WFWorkflowName", Text, workflowName)
-	}
-
-	plist += plistKeyValue("WFWorkflowIcon", Dictionary, []plistData{
+	appendPlist([]plistData{
 		{
-			key:      "WFWorkflowIconStartColor",
-			dataType: Number,
-			value:    iconColor,
-		},
-		{
-			key:      "WFWorkflowIconGlyphNumber",
-			dataType: Number,
-			value:    iconGlyph,
+			key:      "WFWorkflowClientVersion",
+			dataType: Text,
+			value:    "2038.0.2.4",
 		},
 	})
 
-	if len(questions) > 0 {
-		plist += plistKeyValue("WFWorkflowImportQuestions", Array, plistImportQuestions())
-	} else {
-		plist += plistKeyValue("WFWorkflowImportQuestions", Array, []plistData{})
+	if workflowName != "" {
+		appendPlist([]plistData{
+			{
+				key:      "WFWorkflowName",
+				dataType: Text,
+				value:    workflowName,
+			},
+		})
 	}
 
-	plist += plistKeyValue("WFWorkflowInputContentItemClasses", Array, plistInputContentItems())
-	plist += plistKeyValue("WFWorkflowOutputContentItemClasses", Array, plistOutputContentItems())
-	plist += plistKeyValue("WFWorkflowTypes", Array, plistWorkflowTypes())
+	appendPlist([]plistData{
+		{
+			key:      "WFWorkflowIcon",
+			dataType: Dictionary,
+			value: []plistData{
+				{
+					key:      "WFWorkflowIconStartColor",
+					dataType: Number,
+					value:    iconColor,
+				},
+				{
+					key:      "WFWorkflowIconGlyphNumber",
+					dataType: Number,
+					value:    iconGlyph,
+				},
+			},
+		},
+	})
 
-	plist += footer
+	appendPlist([]plistData{
+		{
+			key:      "WFWorkflowImportQuestions",
+			dataType: Array,
+			value:    plistImportQuestions(),
+		},
+		{
+			key:      "WFWorkflowInputContentItemClasses",
+			dataType: Array,
+			value:    plistInputContentItems(),
+		},
+		{
+			key:      "WFWorkflowOutputContentItemClasses",
+			dataType: Array,
+			value:    plistOutputContentItems(),
+		},
+		{
+			key:      "WFWorkflowTypes",
+			dataType: Array,
+			value:    plistWorkflowTypes(),
+		},
+	})
+
+	plist.WriteString(footer)
 }
 
 func plistActions() {
+	var tabs = strings.Repeat("\t", tabLevel)
+	plist.WriteString(tabs + "<key>WFWorkflowActions</key>\n" + tabs + "<array>\n")
+	tabLevel++
 	for _, t := range tokens {
 		switch t.typeof {
 		case Var, AddTo:
@@ -107,12 +166,12 @@ func plistActions() {
 			break
 		}
 	}
-	plist = fmt.Sprintf("%s%s", plist, plistKeyValue("WFWorkflowActions", Array, shortcutActions))
-	shortcutActions = []plistData{}
+	tabLevel--
+	plist.WriteString(strings.Repeat("\t", tabLevel) + "</array>\n")
 }
 
 func plistComment(comment string) {
-	shortcutActions = append(shortcutActions, makeStdAction("comment", []plistData{
+	appendPlist(makeStdAction("comment", []plistData{
 		{
 			key:      "WFCommentActionText",
 			dataType: Text,
@@ -129,6 +188,7 @@ func plistVariable(t *token) {
 			value:    t.ident,
 		},
 	}
+
 	if t.value != nil {
 		var varUUID = shortcutsUUID()
 		makeVariableValue(t, &varUUID)
@@ -146,6 +206,7 @@ func plistVariable(t *token) {
 			})
 		}
 	}
+
 	if t.typeof == Var {
 		var lowerIdent = strings.ToLower(t.ident)
 		if variable, found := variables[lowerIdent]; found {
@@ -153,13 +214,16 @@ func plistVariable(t *token) {
 				return
 			}
 		}
-		shortcutActions = append(shortcutActions, makeStdAction("setvariable", setVariableParams))
-	} else if t.typeof == AddTo && t.valueType != Arr {
-		shortcutActions = append(shortcutActions, makeStdAction("appendvariable", setVariableParams))
+		appendPlist(makeStdAction("setvariable", setVariableParams))
+		if t.valueType == Arr {
+			plistArrayVariable(t)
+		}
 		return
 	}
-	if t.valueType == Arr {
-		plistArrayVariable(t)
+
+	if t.typeof == AddTo && t.valueType != Arr {
+		appendPlist(makeStdAction("appendvariable", setVariableParams))
+		return
 	}
 }
 
@@ -197,7 +261,7 @@ func plistArrayVariable(t *token) {
 				value:    t.ident,
 			},
 		)
-		shortcutActions = append(shortcutActions, makeStdAction("appendvariable", addToVariableParams))
+		appendPlist(makeStdAction("appendvariable", addToVariableParams))
 	}
 }
 
@@ -252,7 +316,7 @@ func plistConditional(t *token) {
 		dataType: Number,
 		value:    controlFlowMode,
 	})
-	shortcutActions = append(shortcutActions, makeStdAction("conditional", conditionalParams))
+	appendPlist(makeStdAction("conditional", conditionalParams))
 }
 
 func plistMenu(t *token) {
@@ -303,11 +367,11 @@ func plistMenu(t *token) {
 			value:    menuItems,
 		})
 	}
-	shortcutActions = append(shortcutActions, makeStdAction("choosefrommenu", menuParams))
+	appendPlist(makeStdAction("choosefrommenu", menuParams))
 }
 
 func plistMenuItem(t *token) {
-	shortcutActions = append(shortcutActions, makeStdAction("choosefrommenu", []plistData{
+	appendPlist(makeStdAction("choosefrommenu", []plistData{
 		{
 			key:      "GroupingIdentifier",
 			dataType: Text,
@@ -330,84 +394,71 @@ func plistMenuItem(t *token) {
 }
 
 func plistRepeat(t *token) {
+	var controlFlowMode = startStatement
 	if t.valueType == EndClosure {
-		shortcutActions = append(shortcutActions, makeStdAction("repeat.count", []plistData{
-			{
-				key:      "WFControlFlowMode",
-				dataType: Number,
-				value:    endStatement,
-			},
-			{
-				key:      "GroupingIdentifier",
-				dataType: Text,
-				value:    t.ident,
-			},
-			{
-				key:      "UUID",
-				dataType: Text,
-				value:    shortcutsUUID(),
-			},
-		}))
-	} else {
-		shortcutActions = append(shortcutActions, makeStdAction("repeat.count", []plistData{
-			{
-				key:      "WFControlFlowMode",
-				dataType: Number,
-				value:    startStatement,
-			},
-			paramValue("WFRepeatCount", actionArgument{
-				valueType: t.valueType,
-				value:     t.value,
-			}, Integer, Number),
-			{
-				key:      "GroupingIdentifier",
-				dataType: Text,
-				value:    t.ident,
-			},
-		}))
+		controlFlowMode = endStatement
 	}
+	var repeatData = []plistData{
+		{
+			key:      "WFControlFlowMode",
+			dataType: Number,
+			value:    controlFlowMode,
+		},
+		{
+			key:      "GroupingIdentifier",
+			dataType: Text,
+			value:    t.ident,
+		},
+		{
+			key:      "UUID",
+			dataType: Text,
+			value:    shortcutsUUID(),
+		},
+	}
+	if controlFlowMode == startStatement {
+		repeatData = append(repeatData, paramValue("WFRepeatCount", actionArgument{
+			valueType: t.valueType,
+			value:     t.value,
+		}, Integer, Number))
+	}
+	appendPlist(makeStdAction("repeat.count", repeatData))
 }
 
 func plistRepeatEach(t *token) {
+	var controlFlowMode = startStatement
 	if t.valueType == EndClosure {
-		shortcutActions = append(shortcutActions, makeStdAction("repeat.each", []plistData{
-			{
-				key:      "WFControlFlowMode",
-				dataType: Number,
-				value:    endStatement,
-			},
-			{
-				key:      "GroupingIdentifier",
-				dataType: Text,
-				value:    t.ident,
-			},
-			{
-				key:      "UUID",
-				dataType: Text,
-				value:    shortcutsUUID(),
-			},
-		}))
-	} else {
-		shortcutActions = append(shortcutActions, makeStdAction("repeat.each", []plistData{
-			{
-				key:      "WFControlFlowMode",
-				dataType: Number,
-				value:    startStatement,
-			},
-			paramValue("WFInput", actionArgument{
-				valueType: t.valueType,
-				value:     t.value,
-			}, Variable, Text),
-			{
-				key:      "GroupingIdentifier",
-				dataType: Text,
-				value:    t.ident,
-			},
-		}))
+		controlFlowMode = endStatement
 	}
+	var repeatData = []plistData{
+		{
+			key:      "WFControlFlowMode",
+			dataType: Number,
+			value:    controlFlowMode,
+		},
+		{
+			key:      "GroupingIdentifier",
+			dataType: Text,
+			value:    t.ident,
+		},
+		{
+			key:      "UUID",
+			dataType: Text,
+			value:    shortcutsUUID(),
+		},
+	}
+	if controlFlowMode == startStatement {
+		repeatData = append(repeatData, paramValue("WFInput", actionArgument{
+			valueType: t.valueType,
+			value:     t.value,
+		}, Variable, Text))
+	}
+	appendPlist(makeStdAction("repeat.each", repeatData))
 }
 
 func plistImportQuestions() (importQuestions []plistData) {
+	if len(questions) == 0 {
+		return
+	}
 	for _, q := range questions {
 		importQuestions = append(importQuestions, plistData{
 			dataType: Dictionary,

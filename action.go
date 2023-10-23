@@ -79,8 +79,11 @@ type libraryDefinition struct {
 	make func(identifier string)
 }
 
-// plistAction builds an action based on its actionDefinition and adds it to the shortcutActions map which makePlist will use to build the actions section of the Shortcut file format.
+var actionIndex int
+
+// plistAction builds an action based on its actionDefinition and adds it to the plist.
 func plistAction(arguments []actionArgument, outputName plistData, actionUUID plistData) {
+	actionIndex++
 	// Check for question arguments
 	questionArgs(arguments)
 	// Determine identifier
@@ -94,7 +97,7 @@ func plistAction(arguments []actionArgument, outputName plistData, actionUUID pl
 	if actionUUID.value != nil {
 		params = append(params, actionUUID)
 	}
-	shortcutActions = append(shortcutActions, makeAction(ident, params))
+	appendPlist(makeAction(ident, params))
 }
 
 // actionIdentifier determines the identifier of currentAction.
@@ -151,33 +154,35 @@ func questionArgs(arguments []actionArgument) {
 		if question, found := questions[lowerIdentifier]; found {
 			var parameter = actions[currentAction].parameters[i]
 			question.parameter = parameter.key
-			question.actionIndex = len(shortcutActions)
+			question.actionIndex = actionIndex
 			arguments[i].value = ""
 		}
 	}
 }
 
 // makeAction constructs the action for the plist using ident and params.
-func makeAction(ident string, params []plistData) plistData {
-	return plistData{
-		dataType: Dictionary,
-		value: []plistData{
-			{
-				key:      "WFWorkflowActionIdentifier",
-				dataType: Text,
-				value:    ident,
-			},
-			{
-				key:      "WFWorkflowActionParameters",
-				dataType: Dictionary,
-				value:    params,
+func makeAction(ident string, params []plistData) []plistData {
+	return []plistData{
+		{
+			dataType: Dictionary,
+			value: []plistData{
+				{
+					key:      "WFWorkflowActionIdentifier",
+					dataType: Text,
+					value:    ident,
+				},
+				{
+					key:      "WFWorkflowActionParameters",
+					dataType: Dictionary,
+					value:    params,
+				},
 			},
 		},
 	}
 }
 
 // makeStdAction is an alias of makeAction that simply prepends the shortcuts bundle identifier to ident.
-func makeStdAction(ident string, params []plistData) plistData {
+func makeStdAction(ident string, params []plistData) []plistData {
 	ident = "is.workflow.actions." + ident
 	return makeAction(ident, params)
 }

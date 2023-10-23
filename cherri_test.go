@@ -59,7 +59,6 @@ func resetParser() {
 	groupingIdx = 0
 	variables = map[string]variableValue{}
 	actions = map[string]*actionDefinition{}
-	shortcutActions = []plistData{}
 	iconColor = "-1263359489"
 	iconGlyph = 61440
 	minVersion = "900"
@@ -76,7 +75,7 @@ func resetParser() {
 	included = []string{}
 	includes = []include{}
 	workflowName = ""
-	plist = ""
+	plist.Reset()
 	menus = map[string][]variableValue{}
 	uuids = map[string]string{}
 	customActions = map[string]customAction{}
