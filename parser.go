@@ -11,6 +11,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 var idx int
@@ -26,7 +27,7 @@ var groupingTypes map[int]tokenType
 var groupingIdx int
 
 func initParse() {
-	tokenChars = make(map[tokenType][]string)
+	tokenChars = make(map[tokenType][]rune)
 	if strings.Contains(contents, "action") {
 		standardActions()
 		parseCustomActions()
@@ -1089,11 +1090,11 @@ func advanceTimes(times int) {
 }
 
 func isToken(token tokenType) bool {
-	if strings.ToLower(string(char)) != string(token) {
+	var tokenChar = []rune(token)[0]
+	if unicode.ToLower(char) != tokenChar {
 		return false
 	}
-	var tokenLength = len(string(token))
-	advanceTimes(tokenLength)
+	advance()
 	return true
 }
 
@@ -1102,22 +1103,22 @@ func tokenAhead(token tokenType) bool {
 		advance()
 		return true
 	}
-	var tChars []string
+	var tChars []rune
 	if tokensChars, found := tokenChars[token]; found {
 		tChars = tokensChars
 	} else {
-		tChars = strings.Split(string(token), "")
+		tChars = []rune(token)
 		tokenChars[token] = tChars
 	}
 	for i, tokenChar := range tChars {
-		if tokenChar == "\t" || tokenChar == "\n" {
+		if tokenChar == '\t' || tokenChar == '\n' {
 			continue
 		}
 		if i == 0 {
-			if strings.ToLower(string(char)) != tokenChar {
+			if unicode.ToLower(char) != tokenChar {
 				return false
 			}
-		} else if next(i) != []rune(tokenChar)[0] {
+		} else if next(i) != tokenChar {
 			return false
 		}
 	}
