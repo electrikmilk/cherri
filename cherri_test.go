@@ -83,7 +83,7 @@ func compile() {
 }
 
 func matchesExpected(_ *testing.T) bool {
-	var expectedPlist = fmt.Sprintf("examples/%s_expected.plist", basename)
+	var expectedPlist = fmt.Sprintf("examples/%s_expected.plist", workflowName)
 	var _, statErr = os.Stat(expectedPlist)
 	if os.IsNotExist(statErr) {
 		fmt.Println(ansi("Test has no exported plist to compare against.", yellow))
