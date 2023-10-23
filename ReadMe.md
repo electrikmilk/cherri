@@ -17,7 +17,7 @@ programming language, that compiles directly to a valid runnable Shortcut.
 
 ### Top Features
 
-- 🌟Clear and consistent abstractions that make programming Shortcuts easy.
+- 🌟 Clear and consistent abstractions that make programming Shortcuts easy.
 - 🪄 No explicit magic variables, they're constants instead.
 - #️⃣ Include files within each other or auto-include.
 - 🔧 Define your own custom actions.
