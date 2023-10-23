@@ -41,7 +41,7 @@ func TestActionList(_ *testing.T) {
 
 func resetParser() {
 	lines = []string{}
-	chars = []string{}
+	chars = []rune{}
 	char = -1
 	idx = 0
 	lineIdx = 0

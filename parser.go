@@ -15,7 +15,7 @@ import (
 
 var idx int
 var lines []string
-var chars []string
+var chars []rune
 var char rune
 
 var lineIdx int
@@ -40,7 +40,7 @@ func initParse() {
 	groupingUUIDs = make(map[int]string)
 	groupingTypes = make(map[int]tokenType)
 	makeGlobals()
-	chars = strings.Split(contents, "")
+	chars = []rune(contents)
 	idx = -1
 	advance()
 	parse()
@@ -156,8 +156,8 @@ func lookAheadUntil(until rune) (ahead string) {
 	var nextChar rune
 	for nextChar != until {
 		if len(chars) > nextIdx {
-			nextChar = []rune(chars[nextIdx])[0]
-			ahead += chars[nextIdx]
+			nextChar = chars[nextIdx]
+			ahead += string(chars[nextIdx])
 			nextIdx++
 		} else {
 			break
@@ -1012,16 +1012,17 @@ func collectAction() (identifier string, value action) {
 
 func advance() {
 	idx++
-	if len(chars) > idx {
-		char = []rune(chars[idx])[0]
-		if char == '\n' {
-			lineCharIdx = 0
-			lineIdx++
-		} else {
-			lineCharIdx++
-		}
-	} else {
+	if len(chars) <= idx {
 		char = -1
+		return
+	}
+
+	char = chars[idx]
+	if char == '\n' {
+		lineCharIdx = 0
+		lineIdx++
+	} else {
+		lineCharIdx++
 	}
 }
 
@@ -1127,7 +1128,7 @@ func getChar(atIndex int) rune {
 		return -1
 	}
 	if len(chars) > atIndex {
-		return []rune(chars[atIndex])[0]
+		return chars[atIndex]
 	}
 	return -1
 }

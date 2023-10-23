@@ -54,7 +54,7 @@ func parseIncludes() {
 		}
 
 		// Prepare for possible error
-		chars = strings.Split(line, "")
+		chars = []rune(line)
 		lineIdx = l
 		idx = len("#include") + 1
 		lineCharIdx = idx

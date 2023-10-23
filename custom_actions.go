@@ -25,7 +25,7 @@ func parseCustomActions() {
 		fmt.Print("Parsing custom actions... ")
 	}
 	customActions = make(map[string]customAction)
-	chars = strings.Split(contents, "")
+	chars = []rune(contents)
 	idx = -1
 	advance()
 	for char != -1 {
@@ -36,7 +36,7 @@ func parseCustomActions() {
 		parseCustomAction()
 	}
 	lines = strings.Split(contents, "\n")
-	chars = strings.Split(contents, "")
+	chars = []rune(contents)
 	findCustomActionRefs()
 	firstChar()
 	if args.Using("debug") {

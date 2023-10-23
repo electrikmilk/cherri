@@ -359,7 +359,7 @@ func printLogo() {
 func splitContents() {
 	contents = strings.Join(lines, "\n")
 	lines = strings.Split(contents, "\n")
-	chars = strings.Split(contents, "")
+	chars = []rune(contents)
 }
 
 func printChar(ch rune) {
