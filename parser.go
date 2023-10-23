@@ -46,8 +46,10 @@ func initParse() {
 	advance()
 	parse()
 
+	if !testRun {
+		contents = ""
+	}
 	chars = []rune{}
-	contents = ""
 	lines = []string{}
 	idx = -1
 }

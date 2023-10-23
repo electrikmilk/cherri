@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/xml"
 	"fmt"
 	"os"
 	"strings"
@@ -13,31 +14,28 @@ import (
 
 var currentTest string
 
-func TestCherri(_ *testing.T) {
-	var files, err = os.ReadDir("examples")
-	if err != nil {
-		fmt.Println(ansi("FAILED", red))
-		panic(err)
-	}
-	for _, file := range files {
-		if strings.Contains(file.Name(), ".cherri") {
-			currentTest = "examples/" + file.Name()
-			fmt.Printf("Compiling %s...\n", ansi(currentTest, bold))
-			os.Args[1] = currentTest
-			main()
-			fmt.Print(ansi("PASSED", green) + "\n\n")
+func TestProfile(t *testing.T) {
+	testFiles(func(file os.DirEntry) bool {
+		compile()
 
-			resetParser()
-		}
-	}
+		return true
+	})
+}
+
+func TestCherri(t *testing.T) {
+	testFiles(func(file os.DirEntry) bool {
+		compile()
+
+		return matchesExpected(t)
+	})
 }
 
 func TestSingleFile(_ *testing.T) {
-	var currentTest = "examples/menus.cherri"
-	fmt.Printf("Compiling %s...\n", ansi(currentTest, bold))
+	currentTest = "examples/conditionals.cherri"
+	fmt.Printf("⚙️ Compiling %s...\n", ansi(currentTest, bold))
 	os.Args[1] = currentTest
 	main()
-	fmt.Print(ansi("PASSED", green) + "\n\n")
+	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
 }
 
 func TestActionList(_ *testing.T) {
@@ -45,6 +43,72 @@ func TestActionList(_ *testing.T) {
 	for identifier := range actions {
 		fmt.Println("{label: '" + identifier + "', type: 'function', detail: 'action'},")
 	}
+}
+
+func testFiles(handle func(file os.DirEntry) bool) {
+	var files, err = os.ReadDir("examples")
+	if err != nil {
+		fmt.Println(ansi("FAILED: unable to read examples directory", red))
+		panic(err)
+	}
+	for _, file := range files {
+		if !strings.Contains(file.Name(), ".cherri") {
+			continue
+		}
+		currentTest = fmt.Sprintf("examples/%s", file.Name())
+
+		fmt.Println(ansi(currentTest, underline, bold))
+
+		if handle(file) {
+			fmt.Println(ansi("✅  PASSED", green, bold))
+		}
+
+		fmt.Print("\n")
+
+		resetParser()
+	}
+}
+
+func compile() {
+	os.Args[1] = currentTest
+	defer func() {
+		if recover() != nil {
+			fmt.Println(ansi("‼️DID NOT COMPILE", bold, green))
+		}
+	}()
+
+	main()
+
+	fmt.Println(ansi("☑️ COMPILED", bold))
+}
+
+func matchesExpected(_ *testing.T) bool {
+	var expectedPlist = fmt.Sprintf("examples/%s_expected.plist", basename)
+	var _, statErr = os.Stat(expectedPlist)
+	if os.IsNotExist(statErr) {
+		fmt.Println(ansi("Test has no exported plist to compare against.", yellow))
+		return true
+	}
+	var expectedBytes, readErr = os.ReadFile(expectedPlist)
+	handle(readErr)
+
+	var xmlErr error
+
+	var compiled interface{}
+	xmlErr = xml.Unmarshal([]byte(plist.String()), &compiled)
+	handle(xmlErr)
+
+	var expected interface{}
+	xmlErr = xml.Unmarshal(expectedBytes, &expected)
+	handle(xmlErr)
+
+	if expected != compiled {
+		fmt.Print(ansi("‼️ DOES NOT MATCH EXPECTED", red, bold) + "\n")
+		return false
+	}
+
+	fmt.Println(ansi("☑️ MATCHES EXPECTED", bold))
+	return true
 }
 
 func resetParser() {
