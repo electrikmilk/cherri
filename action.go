@@ -148,10 +148,10 @@ func questionArgs(arguments []actionArgument) {
 			continue
 		}
 		var lowerIdentifier = strings.ToLower(a.value.(string))
-		if _, found := questions[lowerIdentifier]; found {
+		if question, found := questions[lowerIdentifier]; found {
 			var parameter = actions[currentAction].parameters[i]
-			questions[lowerIdentifier].parameter = parameter.key
-			questions[lowerIdentifier].actionIndex = len(shortcutActions)
+			question.parameter = parameter.key
+			question.actionIndex = len(shortcutActions)
 			arguments[i].value = ""
 		}
 	}
@@ -330,8 +330,8 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 // validActionOutput checks the output of an action in the case that the output has been assigned to a variable.
 func validActionOutput(field string, validType tokenType, value any) {
 	var actionIdent = value.(action).ident
-	if _, found := actions[actionIdent]; found {
-		var actionOutputType = actions[actionIdent].outputType
+	if action, found := actions[actionIdent]; found {
+		var actionOutputType = action.outputType
 		if actionOutputType != "" {
 			if actionOutputType != validType {
 				parserError(

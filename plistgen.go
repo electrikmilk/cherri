@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 )
@@ -63,13 +64,14 @@ func makePlist() {
 	})
 
 	if len(questions) > 0 {
-		plistImportQuestions()
+		plist += plistKeyValue("WFWorkflowImportQuestions", Array, plistImportQuestions())
 	} else {
 		plist += plistKeyValue("WFWorkflowImportQuestions", Array, []plistData{})
 	}
 
-	plistContentItems()
-	plistWorkflowTypes()
+	plist += plistKeyValue("WFWorkflowInputContentItemClasses", Array, plistInputContentItems())
+	plist += plistKeyValue("WFWorkflowOutputContentItemClasses", Array, plistOutputContentItems())
+	plist += plistKeyValue("WFWorkflowTypes", Array, plistWorkflowTypes())
 
 	plist += footer
 }
@@ -79,25 +81,34 @@ func plistActions() {
 		switch t.typeof {
 		case Var, AddTo:
 			plistVariable(&t)
+			break
 		case Comment:
 			plistComment(t.value.(string))
+			break
 		case Action:
 			var tokenAction = t.value.(action)
 			currentAction = tokenAction.ident
 			plistAction(tokenAction.args, plistData{}, plistData{})
+			break
 		case Repeat:
 			plistRepeat(&t)
+			break
 		case RepeatWithEach:
 			plistRepeatEach(&t)
+			break
 		case Menu:
 			plistMenu(&t)
+			break
 		case Item:
 			plistMenuItem(&t)
+			break
 		case Conditional:
 			plistConditional(&t)
+			break
 		}
 	}
-	plist += plistKeyValue("WFWorkflowActions", Array, shortcutActions)
+	plist = fmt.Sprintf("%s%s", plist, plistKeyValue("WFWorkflowActions", Array, shortcutActions))
+	shortcutActions = []plistData{}
 }
 
 func plistComment(comment string) {
@@ -137,14 +148,15 @@ func plistVariable(t *token) {
 	}
 	if t.typeof == Var {
 		var lowerIdent = strings.ToLower(t.ident)
-		if _, found := variables[lowerIdent]; found {
-			if variables[lowerIdent].constant {
+		if variable, found := variables[lowerIdent]; found {
+			if variable.constant {
 				return
 			}
 		}
 		shortcutActions = append(shortcutActions, makeStdAction("setvariable", setVariableParams))
 	} else if t.typeof == AddTo && t.valueType != Arr {
 		shortcutActions = append(shortcutActions, makeStdAction("appendvariable", setVariableParams))
+		return
 	}
 	if t.valueType == Arr {
 		plistArrayVariable(t)
@@ -161,12 +173,15 @@ func plistArrayVariable(t *token) {
 		case stringType:
 			valueType = String
 			itemIdent = "Text"
+			break
 		case intType:
 			valueType = Integer
 			itemIdent = "Number"
+			break
 		case dictType:
 			valueType = Dict
 			itemIdent = "Dictionary"
+			break
 		}
 		makeVariableValue(&token{
 			typeof:    valueType,
@@ -174,12 +189,14 @@ func plistArrayVariable(t *token) {
 			valueType: valueType,
 			value:     value,
 		}, &UUID)
-		addToVariableParams = append(addToVariableParams, inputValue("WFInput", itemIdent, UUID))
-		addToVariableParams = append(addToVariableParams, plistData{
-			key:      "WFVariableName",
-			dataType: Text,
-			value:    t.ident,
-		})
+		addToVariableParams = append(addToVariableParams,
+			inputValue("WFInput", itemIdent, UUID),
+			plistData{
+				key:      "WFVariableName",
+				dataType: Text,
+				value:    t.ident,
+			},
+		)
 		shortcutActions = append(shortcutActions, makeStdAction("appendvariable", addToVariableParams))
 	}
 }
@@ -390,9 +407,7 @@ func plistRepeatEach(t *token) {
 	}
 }
 
-var importQuestions []plistData
-
-func plistImportQuestions() {
+func plistImportQuestions() (importQuestions []plistData) {
 	for _, q := range questions {
 		importQuestions = append(importQuestions, plistData{
 			dataType: Dictionary,
@@ -425,34 +440,25 @@ func plistImportQuestions() {
 			},
 		})
 	}
-	plist += plistKeyValue("WFWorkflowImportQuestions", Array, importQuestions)
+	return
 }
 
-func plistWorkflowTypes() {
-	var wfWorkflowTypes []plistData
-	if len(types) != 0 {
-		for _, wtype := range types {
-			wfWorkflowTypes = append(wfWorkflowTypes, plistData{
-				dataType: Text,
-				value:    wtype,
-			})
-		}
+func plistWorkflowTypes() (wfWorkflowTypes []plistData) {
+	if len(types) == 0 {
+		return
 	}
-	plist += plistKeyValue("WFWorkflowTypes", Array, wfWorkflowTypes)
+
+	for _, workflowType := range types {
+		wfWorkflowTypes = append(wfWorkflowTypes, plistData{
+			dataType: Text,
+			value:    workflowType,
+		})
+	}
+	return
 }
 
-var inputContentItems []plistData
-var outputContentItems []plistData
-
-func plistContentItems() {
-	if len(inputs) != 0 {
-		for _, input := range inputs {
-			inputContentItems = append(inputContentItems, plistData{
-				dataType: Text,
-				value:    input,
-			})
-		}
-	} else {
+func plistInputContentItems() (inputContentItems []plistData) {
+	if len(inputs) == 0 {
 		makeContentItems()
 		for _, input := range contentItems {
 			inputContentItems = append(inputContentItems, plistData{
@@ -460,17 +466,29 @@ func plistContentItems() {
 				value:    input,
 			})
 		}
+		return
 	}
-	plist += plistKeyValue("WFWorkflowInputContentItemClasses", Array, inputContentItems)
 
-	if len(outputs) != 0 {
-		makeContentItems()
-		for _, output := range outputs {
-			outputContentItems = append(outputContentItems, plistData{
-				dataType: Text,
-				value:    output,
-			})
-		}
+	for _, input := range inputs {
+		inputContentItems = append(inputContentItems, plistData{
+			dataType: Text,
+			value:    input,
+		})
 	}
-	plist += plistKeyValue("WFWorkflowOutputContentItemClasses", Array, outputContentItems)
+	return
+}
+
+func plistOutputContentItems() (outputContentItems []plistData) {
+	if len(outputs) == 0 {
+		return
+	}
+	makeContentItems()
+	for _, output := range outputs {
+		outputContentItems = append(outputContentItems, plistData{
+			dataType: Text,
+			value:    output,
+		})
+	}
+
+	return
 }

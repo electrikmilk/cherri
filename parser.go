@@ -41,9 +41,15 @@ func initParse() {
 	groupingTypes = make(map[int]tokenType)
 	makeGlobals()
 	chars = []rune(contents)
+	lines = strings.Split(contents, "\n")
 	idx = -1
 	advance()
 	parse()
+
+	chars = []rune{}
+	contents = ""
+	lines = []string{}
+	idx = -1
 }
 
 func parse() {
@@ -51,33 +57,47 @@ func parse() {
 		switch {
 		case char == ' ' || char == '\t' || char == '\n':
 			advance()
+			break
 		case tokenAhead(Question):
 			collectQuestion()
+			break
 		case tokenAhead(Definition):
 			collectDefinition()
+			break
 		case tokenAhead(Import):
 			collectImport()
+			break
 		case isToken(At):
 			collectVariable(false)
+			break
 		case tokenAhead(Constant):
 			advance()
 			collectVariable(true)
+			break
 		case isToken(ForwardSlash):
 			collectComment()
+			break
 		case tokenAhead(Repeat):
 			collectRepeat()
+			break
 		case tokenAhead(RepeatWithEach):
 			collectRepeatEach()
+			break
 		case tokenAhead(Menu):
 			collectMenu()
+			break
 		case tokenAhead(Item):
 			collectMenuItem()
+			break
 		case tokenAhead(If):
 			collectConditional()
+			break
 		case tokenAhead(RightBrace):
 			collectEndStatement()
+			break
 		case strings.Contains(lookAheadUntil(' '), "("):
 			collectActionCall()
+			break
 		default:
 			parserError(fmt.Sprintf("Illegal character '%s'", string(char)))
 		}
@@ -110,13 +130,9 @@ func collectUntilIgnoreStrings(ch rune) (collected string) {
 			break
 		}
 		if char == '"' {
-			if insideString && prev(1) != '\\' {
-				insideString = false
-			} else {
-				insideString = true
-			}
+			insideString = insideString && prev(1) == '\\'
 		}
-		collected += string(char)
+		collected = fmt.Sprintf("%s%c", collected, char)
 		advance()
 	}
 	collected = strings.Trim(collected, " ")
@@ -155,13 +171,13 @@ func lookAheadUntil(until rune) (ahead string) {
 	var nextIdx = idx
 	var nextChar rune
 	for nextChar != until {
-		if len(chars) > nextIdx {
-			nextChar = chars[nextIdx]
-			ahead += string(chars[nextIdx])
-			nextIdx++
-		} else {
+		if len(chars) <= nextIdx {
 			break
 		}
+
+		nextChar = chars[nextIdx]
+		ahead = fmt.Sprintf("%s%c", ahead, chars[nextIdx])
+		nextIdx++
 	}
 	ahead = strings.Trim(strings.ToLower(ahead), " \t\n")
 	return
@@ -173,26 +189,27 @@ func collectVariableValue(valueType *tokenType, value *any, varType *tokenType, 
 	} else {
 		tokensAhead(Set)
 	}
+
 	advance()
 	collectValue(valueType, value, '\n')
 	if *valueType != Variable {
 		return
 	}
+
 	var stringValue = fmt.Sprintf("%v", *value)
 	if strings.Contains(stringValue, ".") {
 		var dotParts = strings.Split(stringValue, ".")
 		*coerce = strings.Trim(dotParts[1], " ")
-		if strings.Contains(stringValue, "[") {
-			var varParts = strings.Split(stringValue, "[")
-			*value = varParts[0]
-			*getAs = strings.Trim(strings.TrimSuffix(varParts[1], "]"), " ")
-		} else {
+		if !strings.Contains(stringValue, "[") {
 			*value = dotParts[0]
+			return
 		}
-	} else if strings.Contains(stringValue, "[") {
+	}
+
+	if strings.Contains(stringValue, "[") {
 		var varParts = strings.Split(stringValue, "[")
 		*value = varParts[0]
-		*getAs = strings.TrimSuffix(varParts[1], "]")
+		*getAs = strings.Trim(strings.TrimSuffix(varParts[1], "]"), " ")
 	}
 }
 
@@ -200,27 +217,35 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	switch {
 	case intChar():
 		collectIntegerValue(valueType, value, &until)
+		break
 	case isToken(String):
 		*valueType = String
 		*value = collectString()
+		break
 	case isToken(Arr):
 		*valueType = Arr
 		*value = collectArray()
+		break
 	case isToken(Dict):
 		*valueType = Dict
 		*value = collectDictionary()
+		break
 	case tokenAhead(True):
 		*valueType = Bool
 		*value = true
+		break
 	case tokenAhead(False):
 		*valueType = Bool
 		*value = false
+		break
 	case tokenAhead(Nil):
 		*valueType = Nil
 		collectUntil(until)
+		break
 	case strings.Contains(lookAheadUntil(until), "("):
 		*valueType = Action
 		_, *value = collectAction()
+		break
 	default:
 		if lookAheadUntil(until) == "" {
 			parserError("Value expected")
@@ -374,7 +399,7 @@ func collectComment() {
 func collectVariable(constant bool) {
 	reachable()
 	var identifier string
-	if strings.Contains(lookAheadUntil('\n'), "=") {
+	if strings.Contains(lines[lineIdx], "=") {
 		identifier = collectUntil(' ')
 		advance()
 	} else {
@@ -383,8 +408,7 @@ func collectVariable(constant bool) {
 		}
 		identifier = collectUntil('\n')
 	}
-	if _, found := variables[identifier]; found {
-		var variable = variables[identifier]
+	if variable, found := variables[identifier]; found {
 		if variable.constant {
 			parserError(fmt.Sprintf("Cannot redefine constant '%s'.", identifier))
 		}
@@ -406,26 +430,28 @@ func collectVariable(constant bool) {
 	if strings.Contains(lookAheadUntil('\n'), "=") {
 		collectVariableValue(&valueType, &value, &varType, &coerce, &getAs)
 	}
-	if (valueType == Arr || valueType == Variable) && constant {
+	if constant && (valueType == Arr || valueType == Variable) {
 		lineIdx--
 		var valueTypeName = capitalize(typeName(valueType))
 		parserError(fmt.Sprintf("%v values cannot be constants.", valueTypeName))
 	}
+
 	tokens = append(tokens, token{
 		typeof:    varType,
 		ident:     identifier,
 		valueType: valueType,
 		value:     value,
 	})
-	if varType == Var {
-		variables[strings.ToLower(identifier)] = variableValue{
-			variableType: "Variable",
-			valueType:    valueType,
-			value:        value,
-			getAs:        getAs,
-			coerce:       coerce,
-			constant:     constant,
-		}
+	if varType != Var {
+		return
+	}
+	variables[strings.ToLower(identifier)] = variableValue{
+		variableType: "Variable",
+		valueType:    valueType,
+		value:        value,
+		getAs:        getAs,
+		coerce:       coerce,
+		constant:     constant,
 	}
 }
 
@@ -441,8 +467,8 @@ func collectDefinition() {
 		var collectColor = collectUntil('\n')
 		makeColors()
 		collectColor = strings.ToLower(collectColor)
-		if _, found := colors[collectColor]; found {
-			iconColor = colors[collectColor]
+		if color, found := colors[collectColor]; found {
+			iconColor = color
 		} else {
 			var list = makeKeyList("Available icon colors:", colors)
 			parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s", collectColor, list))
@@ -452,8 +478,8 @@ func collectDefinition() {
 		var collectGlyph = collectUntil('\n')
 		makeGlyphs()
 		collectGlyph = strings.ToLower(collectGlyph)
-		if _, found := glyphs[collectGlyph]; found {
-			glyphInt, hexErr := strconv.ParseInt(fmt.Sprintf("%d", glyphs[collectGlyph]), 10, 64)
+		if glyph, found := glyphs[collectGlyph]; found {
+			glyphInt, hexErr := strconv.ParseInt(fmt.Sprintf("%d", glyph), 10, 64)
 			handle(hexErr)
 			iconGlyph = glyphInt
 		} else {
@@ -471,8 +497,8 @@ func collectDefinition() {
 			for _, input := range inputTypes {
 				input = strings.Trim(input, " ")
 				makeContentItems()
-				if _, found := contentItems[input]; found {
-					inputs = append(inputs, contentItems[input])
+				if contentItem, found := contentItems[input]; found {
+					inputs = append(inputs, contentItem)
 				} else {
 					var list = makeKeyList("Available content item types:", contentItems)
 					parserError(fmt.Sprintf("Invalid input type '%s'\n\n%s", input, list))
@@ -487,8 +513,8 @@ func collectDefinition() {
 			for _, output := range outputTypes {
 				output = strings.Trim(output, " ")
 				makeContentItems()
-				if _, found := contentItems[output]; found {
-					outputs = append(outputs, contentItems[output])
+				if contentItem, found := contentItems[output]; found {
+					outputs = append(outputs, contentItem)
 				} else {
 					var list = makeKeyList("Available content item types:", contentItems)
 					parserError(fmt.Sprintf("Invalid output type '%s'\n\n%s", output, list))
@@ -501,13 +527,13 @@ func collectDefinition() {
 		var collectWorkflowTypes = collectUntil('\n')
 		if collectWorkflowTypes != "" {
 			var definedWorkflowTypes = strings.Split(collectWorkflowTypes, ",")
-			for _, wtype := range definedWorkflowTypes {
-				wtype = strings.Trim(wtype, " ")
-				if _, found := workflowTypes[wtype]; found {
-					types = append(types, workflowTypes[wtype])
+			for _, wt := range definedWorkflowTypes {
+				wt = strings.Trim(wt, " ")
+				if wtype, found := workflowTypes[wt]; found {
+					types = append(types, wtype)
 				} else {
 					var list = makeKeyList("Available workflow types:", workflowTypes)
-					parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
+					parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wt, list))
 				}
 			}
 		}
@@ -531,14 +557,14 @@ func collectDefinition() {
 			advance()
 			var wtype = collectUntil('\n')
 			makeContentItems()
-			if _, found := contentItems[wtype]; found {
+			if wt, found := contentItems[wtype]; found {
 				noInput = noInputParams{
 					name: "WFWorkflowNoInputBehaviorAskForInput",
 					params: []plistData{
 						{
 							key:      "ItemClass",
 							dataType: Text,
-							value:    contentItems[wtype],
+							value:    wt,
 						},
 					},
 				}
@@ -565,8 +591,8 @@ func collectDefinition() {
 	case tokenAhead(Version):
 		var collectVersion = collectUntil('\n')
 		makeVersions()
-		if _, found := versions[collectVersion]; found {
-			minVersion = versions[collectVersion]
+		if version, found := versions[collectVersion]; found {
+			minVersion = version
 			iosVersion, _ = strconv.ParseFloat(collectVersion, 8)
 		} else {
 			var list = makeKeyList("Available versions:", versions)
@@ -583,8 +609,8 @@ func collectImport() {
 	makeLibraries()
 	advanceTimes(2)
 	var collectedLibrary = collectString()
-	if _, found := libraries[collectedLibrary]; found {
-		libraries[collectedLibrary].make(libraries[collectedLibrary].identifier)
+	if lib, found := libraries[collectedLibrary]; found {
+		lib.make(lib.identifier)
 	} else {
 		parserError(fmt.Sprintf("Import library '%s' does not exist!", collectedLibrary))
 	}
@@ -739,8 +765,8 @@ func collectConditional() {
 	if !isToken(LeftBrace) {
 		var collectConditional = collectUntil(' ')
 		var collectConditionalToken = tokenType(collectConditional)
-		if _, found := conditions[collectConditionalToken]; found {
-			conditionType = conditions[collectConditionalToken]
+		if condition, found := conditions[collectConditionalToken]; found {
+			conditionType = condition
 		} else {
 			parserError(fmt.Sprintf("Invalid conditional '%s'", collectConditional))
 		}
@@ -1047,8 +1073,8 @@ func tokenAhead(token tokenType) bool {
 		return true
 	}
 	var tChars []string
-	if _, found := tokenChars[token]; found {
-		tChars = tokenChars[token]
+	if tokensChars, found := tokenChars[token]; found {
+		tChars = tokensChars
 	} else {
 		tChars = strings.Split(string(token), "")
 		tokenChars[token] = tChars

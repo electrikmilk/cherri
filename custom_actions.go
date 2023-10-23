@@ -37,8 +37,11 @@ func parseCustomActions() {
 	}
 	lines = strings.Split(contents, "\n")
 	chars = []rune(contents)
+
+	firstChar()
 	findCustomActionRefs()
 	firstChar()
+
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
 	}
@@ -77,7 +80,6 @@ func parseCustomAction() {
 
 // findCustomActionRefs replaces references to defined actions with their collected body.
 func findCustomActionRefs() {
-	firstChar()
 	for char != -1 {
 		if !strings.Contains(lookAheadUntil('\n'), "(") {
 			advance()

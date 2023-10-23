@@ -5091,8 +5091,8 @@ func replaceText(caseSensitive bool, regExp bool, args []actionArgument) []plist
 
 func languageCode(language string) string {
 	makeLanguages()
-	if _, found := languages[language]; found {
-		return languages[language]
+	if lang, found := languages[language]; found {
+		return lang
 	}
 	return language
 }
@@ -5145,8 +5145,8 @@ func replaceAppID(args []actionArgument, idx int) {
 	}
 	if len(args) >= 1 {
 		var id = getArgValue(args[idx]).(string)
-		if _, found := appIds[id]; found {
-			args[idx].value = appIds[id]
+		if appId, found := appIds[id]; found {
+			args[idx].value = appId
 		}
 	}
 }
@@ -5158,8 +5158,8 @@ func replaceAppIDs(args []actionArgument) {
 	if len(args) >= 1 {
 		for a := range args {
 			var id = getArgValue(args[a]).(string)
-			if _, found := appIds[id]; found {
-				args[a].value = appIds[id]
+			if appId, found := appIds[id]; found {
+				args[a].value = appId
 			}
 		}
 	}

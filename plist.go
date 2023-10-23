@@ -52,44 +52,43 @@ var tabLevel = 0
 
 func plistKeyValue(key string, dataType plistDataType, value any) (pair string) {
 	if key != "" {
-		pair += strings.Repeat("\t", tabLevel) + "<key>" + key + "</key>\n"
+		pair = fmt.Sprintf("%s<key>%s</key>\n", strings.Repeat("\t", tabLevel), key)
 	}
-	pair += strings.Repeat("\t", tabLevel)
+	pair = fmt.Sprintf("%s%s", pair, strings.Repeat("\t", tabLevel))
 	switch dataType {
 	case Boolean:
 		if value == true {
-			pair += "<true/>\n"
+			pair = fmt.Sprintf("%s<true/>\n", pair)
 		} else {
-			pair += "<false/>\n"
+			pair = fmt.Sprintf("%s<false/>\n", pair)
 		}
 	case Array:
 		if len(value.([]plistData)) == 0 {
-			pair += "<array/>\n"
+			pair = fmt.Sprintf("%s<array/>\n", pair)
 			break
 		}
-		pair += "<array>\n"
-		pair += plistDictValue(value)
-		pair += strings.Repeat("\t", tabLevel) + "</array>\n"
+		pair = fmt.Sprintf("%s<array>\n%s%s</array>\n", pair, plistDictValue(value), strings.Repeat("\t", tabLevel))
 	case Dictionary:
-		pair += "<dict>\n"
-		pair += plistDictValue(value)
-		pair += strings.Repeat("\t", tabLevel) + "</dict>\n"
+		pair = fmt.Sprintf("%s<dict>\n%s%s</dict>\n", pair, plistDictValue(value), strings.Repeat("\t", tabLevel))
 	default:
 		if reflect.TypeOf(value).String() == "string" {
 			value = html.EscapeString(value.(string))
 		}
-		pair += fmt.Sprintf("<%s>%v</%s>\n", dataType, value, dataType)
+		pair = fmt.Sprintf("%s<%s>%v</%s>\n", pair, dataType, value, dataType)
 	}
 	return
 }
 
+var emptyPlistData = plistData{}
+
 func plistDictValue(value any) (pair string) {
 	tabLevel++
-	var empty = plistData{}
 	for _, data := range value.([]plistData) {
-		if data != empty {
-			pair += plistKeyValue(data.key, data.dataType, data.value)
+		if data == emptyPlistData {
+			continue
 		}
+
+		pair = fmt.Sprintf("%s%s", pair, plistKeyValue(data.key, data.dataType, data.value))
 	}
 	tabLevel--
 	return
@@ -305,12 +304,12 @@ func inputValue(key string, name string, varUUID string) plistData {
 				},
 			}
 		}
-	} else if _, found := globals[name]; found {
+	} else if global, found := globals[name]; found {
 		value = []plistData{
 			{
 				key:      "Type",
 				dataType: Text,
-				value:    globals[name].variableType,
+				value:    global.variableType,
 			},
 		}
 	} else {
