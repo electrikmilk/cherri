@@ -98,7 +98,6 @@ func plistValue(dataType plistDataType, value any) string {
 // appendPlist grows and writes to the plist string builder
 func appendPlist(data []plistData) {
 	var xmlStr = plistDictValue(data)
-	plist.Grow(len([]byte(xmlStr)))
 	plist.WriteString(xmlStr)
 }
 
