@@ -193,7 +193,7 @@ func sign() {
 		fmt.Print(ansi("done!", green) + "\n")
 	}
 
-	removeErr := os.Remove(relativePath + workflowName + "_unsigned.shortcut")
+	removeErr := os.Remove(fmt.Sprintf("%s%s_unsigned.shortcut", relativePath, workflowName))
 	handle(removeErr)
 
 	if args.Using("import") {
