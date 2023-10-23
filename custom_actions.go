@@ -81,7 +81,7 @@ func parseCustomAction() {
 // findCustomActionRefs replaces references to defined actions with their collected body.
 func findCustomActionRefs() {
 	for char != -1 {
-		if !strings.Contains(lookAheadUntil('\n'), "(") {
+		if !strings.Contains(lines[lineIdx], "(") {
 			advance()
 			continue
 		}
