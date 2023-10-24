@@ -146,7 +146,7 @@ func writeFile(filename string, debug string) {
 	if args.Using("debug") {
 		fmt.Print(debug + "... ")
 	}
-	writeErr := os.WriteFile(filename, []byte(plist.String()), 0600)
+	writeErr := os.WriteFile(filename, []byte(compiled), 0600)
 	handle(writeErr)
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")

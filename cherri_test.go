@@ -94,15 +94,15 @@ func matchesExpected(_ *testing.T) bool {
 
 	var xmlErr error
 
-	var compiled interface{}
-	xmlErr = xml.Unmarshal([]byte(plist.String()), &compiled)
+	var compiledXML interface{}
+	xmlErr = xml.Unmarshal([]byte(compiled), &compiledXML)
 	handle(xmlErr)
 
-	var expected interface{}
-	xmlErr = xml.Unmarshal(expectedBytes, &expected)
+	var expectedXML interface{}
+	xmlErr = xml.Unmarshal(expectedBytes, &expectedXML)
 	handle(xmlErr)
 
-	if expected != compiled {
+	if expectedXML != compiledXML {
 		fmt.Print(ansi("‼️ DOES NOT MATCH EXPECTED", red, bold) + "\n")
 		return false
 	}

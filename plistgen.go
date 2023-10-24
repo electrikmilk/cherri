@@ -13,6 +13,7 @@ const header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBL
 const footer = "\t</dict>\n</plist>"
 
 var plist strings.Builder
+var compiled string
 
 func makePlist() {
 	tabLevel = 2
@@ -44,6 +45,47 @@ func makePlist() {
 			key:      "WFQuickActionSurfaces",
 			dataType: Array,
 		},
+		{
+			key:      "WFWorkflowClientVersion",
+			dataType: Text,
+			value:    "2038.0.2.4",
+		},
+		{
+			key:      "WFWorkflowIcon",
+			dataType: Dictionary,
+			value: []plistData{
+				{
+					key:      "WFWorkflowIconStartColor",
+					dataType: Number,
+					value:    iconColor,
+				},
+				{
+					key:      "WFWorkflowIconGlyphNumber",
+					dataType: Number,
+					value:    iconGlyph,
+				},
+			},
+		},
+		{
+			key:      "WFWorkflowImportQuestions",
+			dataType: Array,
+			value:    plistImportQuestions(),
+		},
+		{
+			key:      "WFWorkflowInputContentItemClasses",
+			dataType: Array,
+			value:    plistInputContentItems(),
+		},
+		{
+			key:      "WFWorkflowOutputContentItemClasses",
+			dataType: Array,
+			value:    plistOutputContentItems(),
+		},
+		{
+			key:      "WFWorkflowTypes",
+			dataType: Array,
+			value:    plistWorkflowTypes(),
+		},
 	})
 
 	if noInput.name != "" {
@@ -69,14 +111,6 @@ func makePlist() {
 
 	plistActions()
 
-	appendPlist([]plistData{
-		{
-			key:      "WFWorkflowClientVersion",
-			dataType: Text,
-			value:    "2038.0.2.4",
-		},
-	})
-
 	if workflowName != "" {
 		appendPlist([]plistData{
 			{
@@ -87,49 +121,22 @@ func makePlist() {
 		})
 	}
 
-	appendPlist([]plistData{
-		{
-			key:      "WFWorkflowIcon",
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "WFWorkflowIconStartColor",
-					dataType: Number,
-					value:    iconColor,
-				},
-				{
-					key:      "WFWorkflowIconGlyphNumber",
-					dataType: Number,
-					value:    iconGlyph,
-				},
-			},
-		},
-	})
-
-	appendPlist([]plistData{
-		{
-			key:      "WFWorkflowImportQuestions",
-			dataType: Array,
-			value:    plistImportQuestions(),
-		},
-		{
-			key:      "WFWorkflowInputContentItemClasses",
-			dataType: Array,
-			value:    plistInputContentItems(),
-		},
-		{
-			key:      "WFWorkflowOutputContentItemClasses",
-			dataType: Array,
-			value:    plistOutputContentItems(),
-		},
-		{
-			key:      "WFWorkflowTypes",
-			dataType: Array,
-			value:    plistWorkflowTypes(),
-		},
-	})
-
 	plist.WriteString(footer)
+
+	compiled = plist.String()
+	plist.Reset()
+	tabLevel = 0
+	tokens = []token{}
+	menus = map[string][]variableValue{}
+	uuids = map[string]string{}
+	variables = map[string]variableValue{}
+	actions = map[string]*actionDefinition{}
+	questions = map[string]*question{}
+	globals = map[string]variableValue{}
+	noInput = noInputParams{}
+	types = []string{}
+	inputs = []string{}
+	outputs = []string{}
 }
 
 func plistActions() {

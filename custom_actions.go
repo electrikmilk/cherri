@@ -42,6 +42,8 @@ func parseCustomActions() {
 	findCustomActionRefs()
 	firstChar()
 
+	customActions = map[string]customAction{}
+
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
 	}

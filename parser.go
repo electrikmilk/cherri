@@ -47,12 +47,17 @@ func initParse() {
 	advance()
 	parse()
 
-	if !testRun {
-		contents = ""
-	}
+	contents = ""
+	char = -1
+	idx = -1
+	lineIdx = 0
+	lineCharIdx = 0
 	chars = []rune{}
 	lines = []string{}
-	idx = -1
+	groupingUUIDs = map[int]string{}
+	groupingTypes = map[int]tokenType{}
+	groupingIdx = 0
+	includes = []include{}
 }
 
 func parse() {

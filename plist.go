@@ -51,10 +51,12 @@ var tabLevel = 0
 
 func plistKeyValue(key string, dataType plistDataType, value any) string {
 	var pair strings.Builder
+	var tabs = strings.Repeat("\t", tabLevel)
 	if key != "" {
-		pair.WriteString(fmt.Sprintf("%s<key>%s</key>\n", strings.Repeat("\t", tabLevel), key))
+		pair.WriteString(fmt.Sprintf("%s<key>%s</key>\n%s", tabs, key, tabs))
+	} else {
+		pair.WriteString(tabs)
 	}
-	pair.WriteString(strings.Repeat("\t", tabLevel))
 	switch dataType {
 	case Boolean:
 		pair.WriteString(fmt.Sprintf("<%t/>\n", value))
@@ -72,6 +74,7 @@ func plistKeyValue(key string, dataType plistDataType, value any) string {
 		}
 		pair.WriteString(fmt.Sprintf("<%s>%v</%s>\n", dataType, value, dataType))
 	}
+
 	return pair.String()
 }
 

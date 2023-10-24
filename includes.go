@@ -35,7 +35,10 @@ func handleIncludes() {
 	if args.Using("debug") {
 		fmt.Print("Parsing includes... ")
 	}
+
 	parseIncludes()
+	included = []string{}
+
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
 	}
