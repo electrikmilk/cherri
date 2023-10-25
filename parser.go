@@ -375,10 +375,10 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 
 func collectComment() {
 	var collect = args.Using("comments")
-	var comment string
+	var comment strings.Builder
 	if isToken(ForwardSlash) {
 		if collect {
-			comment = collectUntil('\n')
+			comment.WriteString(collectUntil('\n'))
 		} else {
 			advanceUntil('\n')
 		}
@@ -389,22 +389,19 @@ func collectComment() {
 				break
 			}
 			if collect {
-				comment += string(char)
+				comment.WriteRune(char)
 			}
 			advance()
-		}
-		if collect {
-			comment = strings.Trim(comment, "\n")
 		}
 		advanceTimes(3)
 	}
 	if collect {
-		comment = strings.Trim(comment, " ")
+		var commentStr = strings.Trim(comment.String(), " \n")
 		tokens = append(tokens, token{
 			typeof:    Comment,
 			ident:     "",
 			valueType: String,
-			value:     comment,
+			value:     commentStr,
 		})
 	}
 }
@@ -930,12 +927,13 @@ func intChar() bool {
 	return strings.Contains(intTypeString, charStr)
 }
 
-func collectInteger() (integer string) {
+func collectInteger() string {
+	var integer strings.Builder
 	for intChar() {
-		integer += string(char)
+		integer.WriteRune(char)
 		advance()
 	}
-	return
+	return integer.String()
 }
 
 func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
@@ -951,18 +949,19 @@ func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 	*value = collectUntil(*until)
 }
 
-func collectString() (str string) {
+func collectString() string {
+	var collection strings.Builder
 	for char != -1 {
 		if char == '\\' {
 			switch next(1) {
 			case '"':
-				str += "\""
+				collection.WriteRune('"')
 			case 'n':
-				str += "\n"
+				collection.WriteRune('\n')
 			case 't':
-				str += "\t"
+				collection.WriteRune('\t')
 			case 'r':
-				str += "\r"
+				collection.WriteRune('\r')
 			}
 			advanceTimes(2)
 			continue
@@ -970,11 +969,12 @@ func collectString() (str string) {
 		if char == '"' && prev(1) != '\\' {
 			break
 		}
-		str += string(char)
+		collection.WriteRune(char)
 		advance()
 	}
 	advance()
-	return
+
+	return collection.String()
 }
 
 func collectArray() (array interface{}) {
@@ -1005,7 +1005,8 @@ func collectDictionary() (dictionary interface{}) {
 	return
 }
 
-func collectObject() (jsonStr string) {
+func collectObject() string {
+	var jsonStr strings.Builder
 	var insideInnerObject = false
 	var insideString = false
 	for {
@@ -1028,10 +1029,10 @@ func collectObject() (jsonStr string) {
 				insideInnerObject = false
 			}
 		}
-		jsonStr += string(char)
+		jsonStr.WriteRune(char)
 		advance()
 	}
-	return
+	return jsonStr.String()
 }
 
 func collectActionCall() {
