@@ -26,7 +26,7 @@ func TestCherri(t *testing.T) {
 	testFiles(func(file os.DirEntry) bool {
 		compile()
 
-		return matchesExpected(t)
+		return matchesExpected()
 	})
 }
 
@@ -35,6 +35,7 @@ func TestSingleFile(_ *testing.T) {
 	fmt.Printf("⚙️ Compiling %s...\n", ansi(currentTest, bold))
 	os.Args[1] = currentTest
 	main()
+	matchesExpected()
 	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
 }
 
@@ -82,7 +83,7 @@ func compile() {
 	fmt.Println(ansi("☑️ COMPILED", bold))
 }
 
-func matchesExpected(_ *testing.T) bool {
+func matchesExpected() bool {
 	var expectedPlist = fmt.Sprintf("tests/%s_expected.plist", workflowName)
 	var _, statErr = os.Stat(expectedPlist)
 	if os.IsNotExist(statErr) {
