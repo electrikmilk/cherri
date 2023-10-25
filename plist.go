@@ -45,7 +45,7 @@ var noInput noInputParams
 var hasShortcutInputVariables = false
 
 // ObjectReplaceChar is a Shortcuts convention to mark the placement of inline variables in a string.
-const ObjectReplaceChar = "\uFFFC"
+const ObjectReplaceChar = '\uFFFC'
 
 var tabLevel = 0
 
@@ -474,7 +474,7 @@ func variablePlistValue(key string, varName string, ident string) plistData {
 	}
 }
 
-type stringVar struct {
+type inlineVar struct {
 	varName string
 	col     int
 	getAs   string
@@ -488,23 +488,23 @@ type attachmentVariable struct {
 }
 
 var varPositions []plistData
-var stringVars []stringVar
+var inlineVars []inlineVar
 var varIndex map[int]attachmentVariable
 
-func attachmentValues(key string, variable string, outputType plistDataType) plistData {
-	if !strings.ContainsAny(variable, "{}") {
+func attachmentValues(key string, str string, outputType plistDataType) plistData {
+	if !strings.ContainsAny(str, "{}") {
 		return plistData{
 			key:      key,
 			dataType: outputType,
-			value:    variable,
+			value:    str,
 		}
 	}
 	varPositions = []plistData{}
-	stringVars = []stringVar{}
+	inlineVars = []inlineVar{}
 	varIndex = make(map[int]attachmentVariable)
-	var noVarString = collectInlineVariables(&variable)
-	createVariableIndex(&noVarString)
-	for _, stringVar := range stringVars {
+	var noVarString = collectInlineVariables(&str)
+	mapInlineVars(&noVarString)
+	for _, stringVar := range inlineVars {
 		var storedVar variableValue
 		if _, global := globals[stringVar.varName]; global {
 			storedVar = globals[stringVar.varName]
@@ -637,19 +637,20 @@ func attachmentValues(key string, variable string, outputType plistDataType) pli
 	}
 }
 
-func createVariableIndex(noVarString *string) {
+func mapInlineVars(noVarString *string) {
 	var variableIdx int
-	var noVarChars = strings.Split(*noVarString, "")
-	for c, s := range noVarChars {
-		if s == ObjectReplaceChar {
-			stringVars = append(stringVars, stringVar{
-				varName: varIndex[variableIdx].varName,
-				col:     c,
-				getAs:   varIndex[variableIdx].getAs,
-				coerce:  varIndex[variableIdx].coerce,
-			})
-			variableIdx++
+	for c, s := range *noVarString {
+		if s != ObjectReplaceChar {
+			continue
 		}
+
+		inlineVars = append(inlineVars, inlineVar{
+			varName: varIndex[variableIdx].varName,
+			col:     c,
+			getAs:   varIndex[variableIdx].getAs,
+			coerce:  varIndex[variableIdx].coerce,
+		})
+		variableIdx++
 	}
 }
 
@@ -723,7 +724,7 @@ func inlineVariableChar(chr *string, noVarString *string) {
 		*noVarString = strings.Replace(
 			*noVarString,
 			"{"+varName+"}",
-			ObjectReplaceChar,
+			string(ObjectReplaceChar),
 			1)
 		varNum++
 		currentVariable = ""
