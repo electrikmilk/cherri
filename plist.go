@@ -797,9 +797,6 @@ func wrapVariableReference(s *string) {
 	if _, g := globals[reference]; g {
 		*s = fmt.Sprintf("{%s}", *s)
 	}
-	if _, q := questions[reference]; q {
-		*s = fmt.Sprintf("{%s}", *s)
-	}
 }
 
 // isInputVariable checks if varName is the ShortcutInput global to set the global boolean in the final plist.
