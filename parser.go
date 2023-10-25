@@ -1073,6 +1073,7 @@ func collectAction() (identifier string, value action) {
 	return
 }
 
+// advance advances the character cursor.
 func advance() {
 	idx++
 	if len(chars) <= idx {
@@ -1089,18 +1090,22 @@ func advance() {
 	}
 }
 
+// advanceTimes advances the character cursor by `times`.
 func advanceTimes(times int) {
 	for i := 0; i < times; i++ {
 		advance()
 	}
 }
 
+// advanceUntil advances the character cursor until we reach `ch`.
 func advanceUntil(ch rune) {
 	for char != ch && char != -1 {
 		advance()
 	}
 }
 
+// advanceUntilExpect advances the character cursor until we reach `ch`.
+// However, it expects to reach this character by no more than `maxAdvances` advances and throws a parser error if it doesn't.
 func advanceUntilExpect(ch rune, maxAdvances int) {
 	var advances int
 	for char != ch && char != -1 {
