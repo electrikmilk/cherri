@@ -169,7 +169,7 @@ func collectUntilExpect(ch rune, maxAdvances int) string {
 	var advances int
 	for char != ch && char != -1 {
 		if advances > maxAdvances {
-			parserError(fmt.Sprintf("Expected %s, got: %s", string(ch), collected.String()))
+			parserError(fmt.Sprintf("Expected %c, got: %s", ch, collected.String()))
 		}
 		collected.WriteRune(char)
 		advances++
@@ -178,6 +178,7 @@ func collectUntilExpect(ch rune, maxAdvances int) string {
 	return collected.String()
 }
 
+// lookAheadUntil does a pseudo string collection stopping when we reach `until` and returning the collected string.
 func lookAheadUntil(until rune) string {
 	var ahead strings.Builder
 	var nextIdx = idx
@@ -1121,7 +1122,7 @@ func isToken(token tokenType) bool {
 }
 
 func tokenAhead(token tokenType) bool {
-	if len(token) == 1 && strings.ToLower(string(char)) == string(token) {
+	if len(token) == 1 && (unicode.ToLower(char) == []rune(token)[0]) {
 		advance()
 		return true
 	}
