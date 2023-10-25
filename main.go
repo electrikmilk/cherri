@@ -117,7 +117,7 @@ func fileArg() string {
 // createShortcut writes the Shortcut files to disk and signs them if the unsigned argument is not unused.
 func createShortcut() {
 	if args.Using("debug") {
-		writeFile(relativePath+workflowName+".plist", fmt.Sprintf("Creating %s.plist", workflowName))
+		go writeFile(relativePath+workflowName+".plist", fmt.Sprintf("Creating %s.plist", workflowName))
 	}
 	writeFile(relativePath+workflowName+"_unsigned.shortcut", fmt.Sprintf("Creating unsigned %s.shortcut", workflowName))
 
