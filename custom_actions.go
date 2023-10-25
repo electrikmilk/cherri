@@ -60,7 +60,7 @@ func parseCustomAction() {
 	}
 
 	advance()
-	collectUntilExpect('{', 1)
+	advanceUntilExpect('{', 1)
 	advance()
 
 	var body = collectObject()
@@ -90,7 +90,7 @@ func findCustomActionRefs() {
 
 		var identifier = strings.Trim(collectUntil('('), " \t\n")
 		if _, found := customActions[identifier]; !found {
-			collectUntil('\n')
+			advanceUntil('\n')
 			continue
 		}
 		advance()
@@ -102,7 +102,7 @@ func findCustomActionRefs() {
 			continue
 		}
 
-		collectUntilExpect(')', 1)
+		advanceUntilExpect(')', 1)
 
 		var actionBody = customActions[identifier].body
 		lines[lineIdx] = actionBody

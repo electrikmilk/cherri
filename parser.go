@@ -252,7 +252,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		break
 	case tokenAhead(Nil):
 		*valueType = Nil
-		collectUntil(until)
+		advanceUntil(until)
 		break
 	case strings.Contains(lookAheadUntil(until), "("):
 		*valueType = Action
@@ -379,7 +379,7 @@ func collectComment() {
 		if collect {
 			comment = collectUntil('\n')
 		} else {
-			collectUntil('\n')
+			advanceUntil('\n')
 		}
 	} else {
 		advanceTimes(2)
@@ -818,7 +818,7 @@ func collectMenu() {
 	var promptType tokenType
 	var promptValue any
 	collectValue(&promptType, &promptValue, '{')
-	collectUntil('{')
+	advanceUntil('{')
 	advance()
 
 	menus[groupingUUID] = []variableValue{}
@@ -840,7 +840,7 @@ func collectMenuItem() {
 	var itemType tokenType
 	var itemValue any
 	collectValue(&itemType, &itemValue, ':')
-	collectUntil(':')
+	advanceUntil(':')
 	advance()
 
 	if len(menus[groupingUUID]) > 0 {
@@ -1090,6 +1090,23 @@ func advance() {
 
 func advanceTimes(times int) {
 	for i := 0; i < times; i++ {
+		advance()
+	}
+}
+
+func advanceUntil(ch rune) {
+	for char != ch && char != -1 {
+		advance()
+	}
+}
+
+func advanceUntilExpect(ch rune, maxAdvances int) {
+	var advances int
+	for char != ch && char != -1 {
+		if advances > maxAdvances {
+			parserError(fmt.Sprintf("Expected %c", ch))
+		}
+		advances++
 		advance()
 	}
 }

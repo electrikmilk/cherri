@@ -54,7 +54,7 @@ func parseIncludes() {
 			continue
 		}
 		if !startsWith(strings.Trim(line, " "), "#include") {
-			collectUntil('\n')
+			advanceUntil('\n')
 			continue
 		}
 
