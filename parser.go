@@ -372,7 +372,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 func collectReference(valueType *tokenType, value *any, until *rune) {
 	var identifier strings.Builder
 	for char != -1 {
-		if !unicode.IsLetter(char) && !unicode.IsDigit(char) {
+		if !unicode.IsLetter(char) && !unicode.IsDigit(char) && char != '_' {
 			break
 		}
 		identifier.WriteRune(char)
