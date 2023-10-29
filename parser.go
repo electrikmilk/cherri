@@ -478,7 +478,6 @@ func collectVariable(constant bool) {
 	reachable()
 
 	var identifier = collectIdentifier()
-	advance()
 
 	if v, found := variables[identifier]; found {
 		if v.constant {
@@ -500,7 +499,27 @@ func collectVariable(constant bool) {
 	var coerce string
 	var varType = Var
 	if strings.Contains(lookAheadUntil('\n'), "=") {
+		advance()
 		collectVariableValue(constant, &valueType, &value, &varType, &coerce, &getAs)
+	}
+	if tokenAhead(Colon) {
+		advance()
+		switch {
+		case tokenAhead(VarTextType):
+			valueType = String
+		case tokenAhead(VarNumberType):
+			valueType = Integer
+		case tokenAhead(VarBoolType):
+			valueType = Bool
+		case tokenAhead(VarArrayType):
+			valueType = Arr
+		case tokenAhead(VarDictType):
+			valueType = Dict
+		case tokenAhead(VarVariableType):
+			valueType = VarVariableType
+		default:
+			parserError(fmt.Sprintf("Unknown type '%s'", lookAheadUntil('\n')))
+		}
 	}
 
 	tokens = append(tokens, token{

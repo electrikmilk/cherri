@@ -92,6 +92,17 @@ func typeName(typeOf tokenType) string {
 	}
 }
 
+/* Variable Types */
+
+const (
+	VarTextType     tokenType = "text"
+	VarNumberType   tokenType = "number"
+	VarArrayType    tokenType = "array"
+	VarDictType     tokenType = "dictionary"
+	VarBoolType     tokenType = "bool"
+	VarVariableType tokenType = "var"
+)
+
 /* Operators */
 
 const (
@@ -120,4 +131,5 @@ const (
 	Modulus        tokenType = "%"
 	LeftBrace      tokenType = "{"
 	RightBrace     tokenType = "}"
+	Colon          tokenType = ":"
 )
