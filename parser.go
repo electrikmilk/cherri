@@ -734,8 +734,8 @@ func collectQuestion() {
 	if _, found := questions[identifier]; found {
 		parserError(fmt.Sprintf("Duplicate declaration of import question '%s'.", identifier))
 	}
-	if _, found := variables[identifier]; found {
-		parserError(fmt.Sprintf("Import question conflicts with defined variable '%s'.", identifier))
+	if validReference(identifier) {
+		parserError(fmt.Sprintf("Import question conflicts with defined variable or global '%s'.", identifier))
 	}
 	advance()
 	if !isToken("\"") {

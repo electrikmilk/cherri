@@ -4,8 +4,6 @@
 
 package main
 
-import "strings"
-
 var variables map[string]variableValue
 
 type variableValue struct {
@@ -63,42 +61,13 @@ func makeGlobals() {
 }
 
 func validReference(identifier string) bool {
-	if globalExists(identifier) {
-		return true
-	}
-	if variableExists(identifier) {
-		return true
-	}
-
-	return false
-}
-
-func globalExists(identifier string) bool {
 	if _, found := globals[identifier]; found {
 		isInputVariable(identifier)
 		return true
 	}
-
-	return false
-}
-
-func variableExists(identifier string) bool {
 	if _, found := variables[identifier]; found {
 		return true
 	}
 
 	return false
-}
-
-func variable(variableName string) (exists bool, global bool, variable variableValue) {
-	if value, found := globals[variableName]; found {
-		return true, true, value
-	}
-
-	variableName = strings.ToLower(variableName)
-	if value, found := variables[variableName]; found {
-		return true, false, value
-	}
-
-	return false, false, variableValue{}
 }
