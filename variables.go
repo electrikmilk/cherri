@@ -83,7 +83,6 @@ func globalExists(identifier string) bool {
 }
 
 func variableExists(identifier string) bool {
-	identifier = strings.ToLower(identifier)
 	if _, found := variables[identifier]; found {
 		return true
 	}

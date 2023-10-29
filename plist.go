@@ -139,7 +139,7 @@ func conditionalParameter(key string, conditionalParams *[]plistData, typeOf *to
 			}, Integer, Text))
 		}
 	case Variable:
-		var variable = variables[strings.ToLower(value.(string))]
+		var variable = variables[value.(string)]
 		switch variable.valueType {
 		case Integer:
 			*conditionalParams = append(*conditionalParams, variablePlistValue("WFNumberValue", value.(string), uuids[value.(string)]))
@@ -353,23 +353,21 @@ func inputValue(key string, name string, varUUID string) plistData {
 	}
 }
 
-func variablePlistValue(key string, varName string, ident string) plistData {
+func variablePlistValue(key string, identifier string, ident string) plistData {
 	var variable variableValue
 	var getAs string
 	var coerce string
 	var aggrandizements []plistData
-	var lowerVarName = strings.ToLower(varName)
-	var lowerIdent = strings.ToLower(ident)
-	if g, found := globals[varName]; found {
+	if g, found := globals[identifier]; found {
 		variable = g
-		isInputVariable(varName)
-		varName = variable.value.(string)
-	} else if v, found := variables[lowerVarName]; found {
+		isInputVariable(identifier)
+		identifier = variable.value.(string)
+	} else if v, found := variables[identifier]; found {
 		variable = v
 	}
-	if _, found := variables[lowerIdent]; found {
-		getAs = variables[lowerIdent].getAs
-		coerce = variables[lowerIdent].coerce
+	if _, found := variables[ident]; found {
+		getAs = variables[ident].getAs
+		coerce = variables[ident].coerce
 		if getAs != "" {
 			aggrandizements = append(aggrandizements, plistData{
 				dataType: Dictionary,
@@ -419,12 +417,12 @@ func variablePlistValue(key string, varName string, ident string) plistData {
 	}
 	var varValue []plistData
 	if variable.constant {
-		var varUUID = uuids[varName]
+		var varUUID = uuids[identifier]
 		varValue = []plistData{
 			{
 				key:      "OutputName",
 				dataType: Text,
-				value:    varName,
+				value:    identifier,
 			},
 			{
 				key:      "OutputUUID",
@@ -442,7 +440,7 @@ func variablePlistValue(key string, varName string, ident string) plistData {
 			{
 				key:      "VariableName",
 				dataType: Text,
-				value:    varName,
+				value:    identifier,
 			},
 			{
 				key:      "Type",
@@ -477,16 +475,16 @@ func variablePlistValue(key string, varName string, ident string) plistData {
 }
 
 type inlineVar struct {
-	varName string
-	col     int
-	getAs   string
-	coerce  string
+	identifier string
+	col        int
+	getAs      string
+	coerce     string
 }
 
 type attachmentVariable struct {
-	varName string
-	getAs   string
-	coerce  string
+	identifier string
+	getAs      string
+	coerce     string
 }
 
 var varPositions []plistData
@@ -507,17 +505,17 @@ func attachmentValues(key string, str string, outputType plistDataType) plistDat
 	var noVarString = collectInlineVariables(&str)
 	for _, stringVar := range inlineVars {
 		var storedVar variableValue
-		if _, global := globals[stringVar.varName]; global {
-			storedVar = globals[stringVar.varName]
-			isInputVariable(stringVar.varName)
-			stringVar.varName = storedVar.value.(string)
-		} else if _, found := variables[strings.ToLower(stringVar.varName)]; found {
-			storedVar = variables[stringVar.varName]
+		if _, global := globals[stringVar.identifier]; global {
+			storedVar = globals[stringVar.identifier]
+			isInputVariable(stringVar.identifier)
+			stringVar.identifier = storedVar.value.(string)
+		} else if v, found := variables[stringVar.identifier]; found {
+			storedVar = v
 		} else {
-			exit(fmt.Sprintf("Undefined reference '%s'", stringVar.varName))
+			exit(fmt.Sprintf("Undefined reference '%s'", stringVar.identifier))
 		}
-		var variable = variables[strings.ToLower(stringVar.varName)]
-		var varUUID = uuids[stringVar.varName]
+		var variable = variables[stringVar.identifier]
+		var varUUID = uuids[stringVar.identifier]
 		var varValue []plistData
 		var varType = "Variable"
 		var aggr []plistData
@@ -529,7 +527,7 @@ func attachmentValues(key string, str string, outputType plistDataType) plistDat
 				{
 					key:      "VariableName",
 					dataType: Text,
-					value:    stringVar.varName,
+					value:    stringVar.identifier,
 				},
 				{
 					key:      "Type",
@@ -552,7 +550,7 @@ func attachmentValues(key string, str string, outputType plistDataType) plistDat
 				{
 					key:      "OutputName",
 					dataType: Text,
-					value:    stringVar.varName,
+					value:    stringVar.identifier,
 				},
 			}
 		}
@@ -647,10 +645,10 @@ func mapInlineVars(noVarString *string) {
 		}
 
 		inlineVars = append(inlineVars, inlineVar{
-			varName: varIndex[variableIdx].varName,
-			col:     c,
-			getAs:   varIndex[variableIdx].getAs,
-			coerce:  varIndex[variableIdx].coerce,
+			identifier: varIndex[variableIdx].identifier,
+			col:        c,
+			getAs:      varIndex[variableIdx].getAs,
+			coerce:     varIndex[variableIdx].coerce,
 		})
 		variableIdx++
 	}
@@ -667,9 +665,9 @@ func collectInlineVariables(str *string) (noVarString string) {
 			if len(match) < 2 {
 				continue
 			}
-			attachmentVar.varName = match[1]
-			if !validReference(attachmentVar.varName) {
-				parserError(fmt.Sprintf("Inline var '%s' does not exist!", attachmentVar.varName))
+			attachmentVar.identifier = match[1]
+			if !validReference(attachmentVar.identifier) {
+				parserError(fmt.Sprintf("Inline var '%s' does not exist!", attachmentVar.identifier))
 			}
 			if len(match[2]) > 0 {
 				attachmentVar.getAs = match[2]
@@ -737,18 +735,14 @@ func paramValue(key string, arg actionArgument, handleAs tokenType, outputType p
 }
 
 func wrapVariableReference(s *string) {
-	var reference = strings.ToLower(*s)
-	if _, v := variables[reference]; v {
-		*s = fmt.Sprintf("{%s}", *s)
-	}
-	if _, g := globals[reference]; g {
+	if validReference(*s) {
 		*s = fmt.Sprintf("{%s}", *s)
 	}
 }
 
-// isInputVariable checks if varName is the ShortcutInput global to set the global boolean in the final plist.
-func isInputVariable(varName string) {
-	hasShortcutInputVariables = varName == "ShortcutInput"
+// isInputVariable checks if identifier is the ShortcutInput global to set the global boolean in the final plist.
+func isInputVariable(identifier string) {
+	hasShortcutInputVariables = identifier == "ShortcutInput"
 }
 
 const (

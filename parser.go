@@ -534,7 +534,7 @@ func collectVariable(constant bool) {
 	if varType != Var {
 		return
 	}
-	variables[strings.ToLower(identifier)] = variableValue{
+	variables[identifier] = variableValue{
 		variableType: "Variable",
 		valueType:    valueType,
 		value:        value,

@@ -235,8 +235,7 @@ func plistVariable(t *token) {
 	}
 
 	if t.typeof == Var {
-		var lowerIdent = strings.ToLower(t.ident)
-		if v, found := variables[lowerIdent]; found {
+		if v, found := variables[t.ident]; found {
 			if v.constant {
 				return
 			}

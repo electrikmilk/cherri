@@ -268,24 +268,23 @@ func checkEnum(param parameterDefinition, argument actionArgument) {
 }
 
 // realVariableValue recurses to get the real value of a variable given its name.
-func realVariableValue(varName string, lastValueType tokenType) (varValue variableValue) {
-	if _, global := globals[varName]; global {
-		varValue = globals[varName]
+func realVariableValue(identifier string, lastValueType tokenType) (varValue variableValue) {
+	if _, global := globals[identifier]; global {
+		varValue = globals[identifier]
 		return
 	}
-	if _, found := variables[strings.ToLower(varName)]; !found {
-		parserError(fmt.Sprintf("Variable or Global '%s' does not exist", varName))
+	if _, found := variables[identifier]; !found {
+		parserError(fmt.Sprintf("Variable or Global '%s' does not exist", identifier))
 	}
-	varName = strings.ToLower(varName)
-	var argValueType = variables[varName].valueType
-	var value = variables[varName].value
+	var argValueType = variables[identifier].valueType
+	var value = variables[identifier].value
 	if argValueType == Variable {
 		if lastValueType == Variable && argValueType == Variable {
 			parserError("Passed variable value that evaluates to variable")
 		}
 		varValue = realVariableValue(value.(string), argValueType)
 	} else {
-		varValue = variables[varName]
+		varValue = variables[identifier]
 	}
 	return
 }
@@ -299,8 +298,8 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		validActionOutput(param.name, param.validType, argVal)
 		return
 	case argValueType == Variable:
-		var varName = argVal.(string)
-		var getVar = realVariableValue(varName, String)
+		var identifier = argVal.(string)
+		var getVar = realVariableValue(identifier, String)
 		argValueType = getVar.valueType
 		argVal = getVar.value
 		if argValueType == Action {
@@ -360,17 +359,17 @@ func getArgValue(argument actionArgument) any {
 	if argument.valueType != Variable {
 		return argument.value
 	}
-	var variable = argument.value.(string)
-	if _, found := variables[variable]; !found {
+	var identifier = argument.value.(string)
+	if _, found := variables[identifier]; !found {
 		return argument.value
 	}
-	if variables[variable].valueType == Variable {
+	if variables[identifier].valueType == Variable {
 		return getArgValue(actionArgument{
-			valueType: variables[variable].valueType,
-			value:     variables[variable].value,
+			valueType: variables[identifier].valueType,
+			value:     variables[identifier].value,
 		})
 	}
-	return variables[variable].value
+	return variables[identifier].value
 }
 
 // incrementValue increments a string integer value.
