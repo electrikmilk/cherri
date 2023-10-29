@@ -6,7 +6,6 @@ package main
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -16,8 +15,6 @@ import (
 	"github.com/electrikmilk/args-parser"
 	"github.com/google/uuid"
 )
-
-var testRun bool
 
 var filePath string
 var filename string
@@ -29,10 +26,6 @@ var outputPath string
 var included []string
 
 func main() {
-	if flag.Lookup("test.v") != nil {
-		testRun = true
-	}
-
 	if args.Using("help") {
 		args.PrintUsage()
 		os.Exit(0)
