@@ -13,264 +13,265 @@ func makeGlyphs() {
 	if len(glyphs) != 0 {
 		return
 	}
-	glyphs = make(map[string]int)
-	glyphs["car"] = 0xe83c
-	glyphs["bus"] = 0xe91e
-	glyphs["robot"] = 61566
-	glyphs["motorbike"] = 0xe987
-	glyphs["ambulance"] = 0xe904
-	glyphs["airplane"] = 0xe900
-	glyphs["boat"] = 0xe9af
-	glyphs["home"] = 0xe96b
-	glyphs["church"] = 0xe928
-	glyphs["city"] = 0xe91d
-	glyphs["cart"] = 0xe9b4
-	glyphs["bag"] = 0xe966
-	glyphs["shop"] = 0xe963
-	glyphs["utensils"] = 0xe9d7
-	glyphs["fuel"] = 0xe95d
-	glyphs["thermometer"] = 0xe9ce
-	glyphs["sun"] = 0xe9c5
-	glyphs["moon"] = 0xe986
-	glyphs["snow"] = 0xe9bb
-	glyphs["cloud"] = 0xe942
-	glyphs["rain"] = 0xe943
-	glyphs["umbrella"] = 0xe9d5
-	glyphs["tree"] = 0xe953
-	glyphs["flower"] = 0xe84c
-	glyphs["flame"] = 0xe956
-	glyphs["steps"] = 0xe95a
-	glyphs["sign"] = 0xe94c
-	glyphs["binocalars"] = 0xe915
-	glyphs["compass"] = 0xe945
-	glyphs["globe"] = 0xe814
-	glyphs["mountain"] = 0xe989
-	glyphs["image"] = 0xe988
-	glyphs["video"] = 0xe82e
-	glyphs["film"] = 0xe955
-	glyphs["camera"] = 0xe922
-	glyphs["videocam"] = 0xe80a
-	glyphs["microphone"] = 0xe984
-	glyphs["recordvideo"] = 0xe98b
-	glyphs["youtube"] = 0xe8ba
-	glyphs["clipboard"] = 0xe93f
-	glyphs["calendar"] = 0xe921
-	glyphs["chatbubble"] = 0xe816
-	glyphs["chatbubbles"] = 0xe80b
-	glyphs["chatbox"] = 0xe983
-	glyphs["mail"] = 0xe97d
-	glyphs["mailopen"] = 0xe97e
-	glyphs["paperplane"] = 0xe9bc
-	glyphs["briefcase"] = 0xe91c
-	glyphs["folder"] = 0xe959
-	glyphs["card"] = 0xe947
-	glyphs["watch"] = 0xe9d9
-	glyphs["call"] = 0xe86a
-	glyphs["phone"] = 0xe9a6
-	glyphs["laptop"] = 0xe82c
-	glyphs["keyboard"] = 0xe836
-	glyphs["keyboardoutline"] = 0xe866
-	glyphs["calculator"] = 0xe920
-	glyphs["stats"] = 0xe90e
-	glyphs["print"] = 0xe9a9
-	glyphs["hdd"] = 0xe968
-	glyphs["server"] = 0xe94a
-	glyphs["database"] = 0xe87f
-	glyphs["databasenetwork"] = 0xe9b2
-	glyphs["filing"] = 0xe905
-	glyphs["cube"] = 0xe949
-	glyphs["tv"] = 0xe9cb
-	glyphs["gamepad"] = 0xe95e
-	glyphs["puzzle"] = 0xe9aa
-	glyphs["headphones"] = 0xe969
-	glyphs["music"] = 0xe98e
-	glyphs["speaker"] = 0xe9bf
-	glyphs["books"] = 0xe917
-	glyphs["book"] = 0xe849
-	glyphs["bookbookmark"] = 0xe918
-	glyphs["glasses"] = 0xe844
-	glyphs["sunglasses"] = 0xe961
-	glyphs["mask"] = 0xe981
-	glyphs["ticket"] = 0xe98c
-	glyphs["masks"] = 0xe952
-	glyphs["dice"] = 0xe94b
-	glyphs["baseball"] = 0xe90f
-	glyphs["basketball"] = 0xe910
-	glyphs["football"] = 0xe9bd
-	glyphs["tennisball"] = 0xe9cc
-	glyphs["americanfootball"] = 0xe840
-	glyphs["lifering"] = 0xe972
-	glyphs["telescope"] = 0xe9ca
-	glyphs["microscope"] = 0xe985
-	glyphs["horse"] = 0xe96c
-	glyphs["time"] = 0xe940
-	glyphs["alarm"] = 0xe901
-	glyphs["timer"] = 0xe9c4
-	glyphs["sound"] = 0xe86e
-	glyphs["bell"] = 0xe913
-	glyphs["conciergebell"] = 0xe9be
-	glyphs["heart"] = 0xe96a
-	glyphs["star"] = 0xe9c1
-	glyphs["trophy"] = 0xe9d4
-	glyphs["bulb"] = 0xe973
-	glyphs["bolt"] = 0xe974
-	glyphs["flag"] = 0xe958
-	glyphs["tag"] = 0xe9c8
-	glyphs["key"] = 0xe970
-	glyphs["hourglass"] = 0xe96d
-	glyphs["lock"] = 0xe97a
-	glyphs["unlock"] = 0xe9d6
-	glyphs["battery"] = 0xe861
-	glyphs["wand"] = 0xe877
-	glyphs["wandstar"] = 0xe97b
-	glyphs["brush"] = 0xe991
-	glyphs["pencil"] = 0xe996
-	glyphs["attach"] = 0xe992
-	glyphs["cut"] = 0xe9b0
-	glyphs["zoom"] = 0xe97c
-	glyphs["link"] = 0xe925
-	glyphs["pipette"] = 0xe944
-	glyphs["mallet"] = 0xe964
-	glyphs["wrench"] = 0xe9de
-	glyphs["hammerwrench"] = 0xe965
-	glyphs["gears"] = 0xe95f
-	glyphs["hammer"] = 0xe851
-	glyphs["screwdriver"] = 0xe9b1
-	glyphs["hand"] = 0xe967
-	glyphs["stop"] = 0xe84f
-	glyphs["trash"] = 0xe9d3
-	glyphs["water"] = 0xe9da
-	glyphs["mug"] = 0xe98d
-	glyphs["soup"] = 0xe9c2
-	glyphs["apple"] = 0xe95c
-	glyphs["carrot"] = 0xe923
-	glyphs["fish"] = 0xe957
-	glyphs["cake"] = 0xe91f
-	glyphs["bottle"] = 0xe9dc
-	glyphs["cocktail"] = 0xe980
-	glyphs["hanger"] = 0xe941
-	glyphs["washer"] = 0xe971
-	glyphs["oven"] = 0xe990
-	glyphs["shirt"] = 0xe9b3
-	glyphs["bathtub"] = 0xe911
-	glyphs["shower"] = 0xe9b5
-	glyphs["pill"] = 0xe845
-	glyphs["pills"] = 0xe9a7
-	glyphs["medicine"] = 0xe982
-	glyphs["plaster"] = 0xe90c
-	glyphs["inhaler"] = 0xe96f
-	glyphs["stethoscope"] = 0xe9c3
-	glyphs["syringe"] = 0xe9c7
-	glyphs["atom"] = 0xe909
-	glyphs["flask"] = 0xe926
-	glyphs["cat"] = 0xe924
-	glyphs["dog"] = 0xe950
-	glyphs["paw"] = 0xe994
-	glyphs["like"] = 0xe9d1
-	glyphs["school"] = 0xe962
-	glyphs["gift"] = 0xe960
-	glyphs["alien"] = 0xe903
-	glyphs["bed"] = 0xe912
-	glyphs["stairs"] = 0xe9c0
-	glyphs["rocket"] = 0xe9ae
-	glyphs["girl"] = 0xe90a
-	glyphs["boy"] = 0xe90b
-	glyphs["face"] = 0xe927
-	glyphs["man"] = 0xe97f
-	glyphs["woman"] = 0xe9dd
-	glyphs["disabled"] = 0xe99e
-	glyphs["person"] = 0xe999
-	glyphs["people"] = 0xe998
-	glyphs["crowd"] = 0xe997
-	glyphs["body"] = 0xe82d
-	glyphs["podium"] = 0xe99a
-	glyphs["student"] = 0xe99c
-	glyphs["dancing"] = 0xe99b
-	glyphs["weightlifting"] = 0xe99f
-	glyphs["skiing"] = 0xe9a1
-	glyphs["snowboarding"] = 0xe9a2
-	glyphs["swimming"] = 0xe9a3
-	glyphs["hiking"] = 0xe99d
-	glyphs["running"] = 0xe9a0
-	glyphs["walking"] = 0xe9a4
-	glyphs["elderly"] = 0xe9a5
-	glyphs["warning"] = 0xe902
-	glyphs["undo"] = 0xe906
-	glyphs["redo"] = 0xe907
-	glyphs["bookmark"] = 0xe916
-	glyphs["barcode"] = 0xe90d
-	glyphs["qrcode"] = 0xe9ab
-	glyphs["box"] = 0xe919
-	glyphs["boxoutline"] = 0xe91a
-	glyphs["braille"] = 0xe91b
-	glyphs["circleleft"] = 0xe930
-	glyphs["circleright"] = 0xe939
-	glyphs["circlebottom"] = 0xe92d
-	glyphs["circleup"] = 0xe93b
-	glyphs["circledown"] = 0xe92c
-	glyphs["circletop"] = 0xe93c
-	glyphs["circleplay"] = 0xe933
-	glyphs["circlerewind"] = 0xe938
-	glyphs["circlepower"] = 0xe936
-	glyphs["circlestop"] = 0xe93a
-	glyphs["circlefastforward"] = 0xe92f
-	glyphs["circlequestion"] = 0xe937
-	glyphs["circlecheckmark"] = 0xe92a
-	glyphs["circleplus"] = 0xe934
-	glyphs["circlecross"] = 0xe93d
-	glyphs["circledollar"] = 0xe92b
-	glyphs["circleeuro"] = 0xe92e
-	glyphs["circlepound"] = 0xe935
-	glyphs["circleyen"] = 0xe93e
-	glyphs["circlebitcoin"] = 0xe929
-	glyphs["circlepi"] = 0xe932
-	glyphs["circleinfo"] = 0xe931
-	glyphs["smiley"] = 0xe9ba
-	glyphs["css"] = 0xe94d
-	glyphs["dollar"] = 0xe803
-	glyphs["euro"] = 0xe878
-	glyphs["pound"] = 0xe838
-	glyphs["yen"] = 0xe87a
-	glyphs["bitcoin"] = 0xe87b
-	glyphs["medical"] = 0xe908
-	glyphs["document"] = 0xe94e
-	glyphs["documentoutline"] = 0xe94f
-	glyphs["note"] = 0xe975
-	glyphs["paper"] = 0xe976
-	glyphs["news"] = 0xe98f
-	glyphs["apps"] = 0xe95b
-	glyphs["more"] = 0xe800
-	glyphs["list"] = 0xe835
-	glyphs["collection"] = 0xe80d
-	glyphs["share"] = 0xe946
-	glyphs["infinite"] = 0xe96e
-	glyphs["recycle"] = 0xe9ac
-	glyphs["loading"] = 0xe977
-	glyphs["loadingdots"] = 0xe87c
-	glyphs["playvideo"] = 0xe9d8
-	glyphs["target"] = 0xe9c9
-	glyphs["podcast"] = 0xe9a8
-	glyphs["bullseye"] = 0xe83e
-	glyphs["locationarrow"] = 0xe978
-	glyphs["locationmarker"] = 0xe979
-	glyphs["parking"] = 0xe993
-	glyphs["crop"] = 0xe948
-	glyphs["compress"] = 0xe9b6
-	glyphs["minimize"] = 0xe9b7
-	glyphs["move"] = 0xe98a
-	glyphs["repeat"] = 0xe9ad
-	glyphs["sync"] = 0xe9c6
-	glyphs["play"] = 0xe874
-	glyphs["shuffle"] = 0xe9b8
-	glyphs["sliders"] = 0xe9b9
-	glyphs["rss"] = 0xe869
-	glyphs["connection"] = 0xe954
-	glyphs["wifi"] = 0xe9db
-	glyphs["quote"] = 0xe951
-	glyphs["peace"] = 0xe995
-	glyphs["filter"] = 0xe9d0
-	glyphs["font"] = 0xe9cd
-	glyphs["cloudservice"] = 0xe843
-	glyphs["bike"] = 0xe914
-	glyphs["train"] = 0xe9d
+	glyphs = map[string]int{
+		"car":               0xe83c,
+		"bus":               0xe91e,
+		"robot":             61566,
+		"motorbike":         0xe987,
+		"ambulance":         0xe904,
+		"airplane":          0xe900,
+		"boat":              0xe9af,
+		"home":              0xe96b,
+		"church":            0xe928,
+		"city":              0xe91d,
+		"cart":              0xe9b4,
+		"bag":               0xe966,
+		"shop":              0xe963,
+		"utensils":          0xe9d7,
+		"fuel":              0xe95d,
+		"thermometer":       0xe9ce,
+		"sun":               0xe9c5,
+		"moon":              0xe986,
+		"snow":              0xe9bb,
+		"cloud":             0xe942,
+		"rain":              0xe943,
+		"umbrella":          0xe9d5,
+		"tree":              0xe953,
+		"flower":            0xe84c,
+		"flame":             0xe956,
+		"steps":             0xe95a,
+		"sign":              0xe94c,
+		"binocalars":        0xe915,
+		"compass":           0xe945,
+		"globe":             0xe814,
+		"mountain":          0xe989,
+		"image":             0xe988,
+		"video":             0xe82e,
+		"film":              0xe955,
+		"camera":            0xe922,
+		"videocam":          0xe80a,
+		"microphone":        0xe984,
+		"recordvideo":       0xe98b,
+		"youtube":           0xe8ba,
+		"clipboard":         0xe93f,
+		"calendar":          0xe921,
+		"chatbubble":        0xe816,
+		"chatbubbles":       0xe80b,
+		"chatbox":           0xe983,
+		"mail":              0xe97d,
+		"mailopen":          0xe97e,
+		"paperplane":        0xe9bc,
+		"briefcase":         0xe91c,
+		"folder":            0xe959,
+		"card":              0xe947,
+		"watch":             0xe9d9,
+		"call":              0xe86a,
+		"phone":             0xe9a6,
+		"laptop":            0xe82c,
+		"keyboard":          0xe836,
+		"keyboardoutline":   0xe866,
+		"calculator":        0xe920,
+		"stats":             0xe90e,
+		"print":             0xe9a9,
+		"hdd":               0xe968,
+		"server":            0xe94a,
+		"database":          0xe87f,
+		"databasenetwork":   0xe9b2,
+		"filing":            0xe905,
+		"cube":              0xe949,
+		"tv":                0xe9cb,
+		"gamepad":           0xe95e,
+		"puzzle":            0xe9aa,
+		"headphones":        0xe969,
+		"music":             0xe98e,
+		"speaker":           0xe9bf,
+		"books":             0xe917,
+		"book":              0xe849,
+		"bookbookmark":      0xe918,
+		"glasses":           0xe844,
+		"sunglasses":        0xe961,
+		"mask":              0xe981,
+		"ticket":            0xe98c,
+		"masks":             0xe952,
+		"dice":              0xe94b,
+		"baseball":          0xe90f,
+		"basketball":        0xe910,
+		"football":          0xe9bd,
+		"tennisball":        0xe9cc,
+		"americanfootball":  0xe840,
+		"lifering":          0xe972,
+		"telescope":         0xe9ca,
+		"microscope":        0xe985,
+		"horse":             0xe96c,
+		"time":              0xe940,
+		"alarm":             0xe901,
+		"timer":             0xe9c4,
+		"sound":             0xe86e,
+		"bell":              0xe913,
+		"conciergebell":     0xe9be,
+		"heart":             0xe96a,
+		"star":              0xe9c1,
+		"trophy":            0xe9d4,
+		"bulb":              0xe973,
+		"bolt":              0xe974,
+		"flag":              0xe958,
+		"tag":               0xe9c8,
+		"key":               0xe970,
+		"hourglass":         0xe96d,
+		"lock":              0xe97a,
+		"unlock":            0xe9d6,
+		"battery":           0xe861,
+		"wand":              0xe877,
+		"wandstar":          0xe97b,
+		"brush":             0xe991,
+		"pencil":            0xe996,
+		"attach":            0xe992,
+		"cut":               0xe9b0,
+		"zoom":              0xe97c,
+		"link":              0xe925,
+		"pipette":           0xe944,
+		"mallet":            0xe964,
+		"wrench":            0xe9de,
+		"hammerwrench":      0xe965,
+		"gears":             0xe95f,
+		"hammer":            0xe851,
+		"screwdriver":       0xe9b1,
+		"hand":              0xe967,
+		"stop":              0xe84f,
+		"trash":             0xe9d3,
+		"water":             0xe9da,
+		"mug":               0xe98d,
+		"soup":              0xe9c2,
+		"apple":             0xe95c,
+		"carrot":            0xe923,
+		"fish":              0xe957,
+		"cake":              0xe91f,
+		"bottle":            0xe9dc,
+		"cocktail":          0xe980,
+		"hanger":            0xe941,
+		"washer":            0xe971,
+		"oven":              0xe990,
+		"shirt":             0xe9b3,
+		"bathtub":           0xe911,
+		"shower":            0xe9b5,
+		"pill":              0xe845,
+		"pills":             0xe9a7,
+		"medicine":          0xe982,
+		"plaster":           0xe90c,
+		"inhaler":           0xe96f,
+		"stethoscope":       0xe9c3,
+		"syringe":           0xe9c7,
+		"atom":              0xe909,
+		"flask":             0xe926,
+		"cat":               0xe924,
+		"dog":               0xe950,
+		"paw":               0xe994,
+		"like":              0xe9d1,
+		"school":            0xe962,
+		"gift":              0xe960,
+		"alien":             0xe903,
+		"bed":               0xe912,
+		"stairs":            0xe9c0,
+		"rocket":            0xe9ae,
+		"girl":              0xe90a,
+		"boy":               0xe90b,
+		"face":              0xe927,
+		"man":               0xe97f,
+		"woman":             0xe9dd,
+		"disabled":          0xe99e,
+		"person":            0xe999,
+		"people":            0xe998,
+		"crowd":             0xe997,
+		"body":              0xe82d,
+		"podium":            0xe99a,
+		"student":           0xe99c,
+		"dancing":           0xe99b,
+		"weightlifting":     0xe99f,
+		"skiing":            0xe9a1,
+		"snowboarding":      0xe9a2,
+		"swimming":          0xe9a3,
+		"hiking":            0xe99d,
+		"running":           0xe9a0,
+		"walking":           0xe9a4,
+		"elderly":           0xe9a5,
+		"warning":           0xe902,
+		"undo":              0xe906,
+		"redo":              0xe907,
+		"bookmark":          0xe916,
+		"barcode":           0xe90d,
+		"qrcode":            0xe9ab,
+		"box":               0xe919,
+		"boxoutline":        0xe91a,
+		"braille":           0xe91b,
+		"circleleft":        0xe930,
+		"circleright":       0xe939,
+		"circlebottom":      0xe92d,
+		"circleup":          0xe93b,
+		"circledown":        0xe92c,
+		"circletop":         0xe93c,
+		"circleplay":        0xe933,
+		"circlerewind":      0xe938,
+		"circlepower":       0xe936,
+		"circlestop":        0xe93a,
+		"circlefastforward": 0xe92f,
+		"circlequestion":    0xe937,
+		"circlecheckmark":   0xe92a,
+		"circleplus":        0xe934,
+		"circlecross":       0xe93d,
+		"circledollar":      0xe92b,
+		"circleeuro":        0xe92e,
+		"circlepound":       0xe935,
+		"circleyen":         0xe93e,
+		"circlebitcoin":     0xe929,
+		"circlepi":          0xe932,
+		"circleinfo":        0xe931,
+		"smiley":            0xe9ba,
+		"css":               0xe94d,
+		"dollar":            0xe803,
+		"euro":              0xe878,
+		"pound":             0xe838,
+		"yen":               0xe87a,
+		"bitcoin":           0xe87b,
+		"medical":           0xe908,
+		"document":          0xe94e,
+		"documentoutline":   0xe94f,
+		"note":              0xe975,
+		"paper":             0xe976,
+		"news":              0xe98f,
+		"apps":              0xe95b,
+		"more":              0xe800,
+		"list":              0xe835,
+		"collection":        0xe80d,
+		"share":             0xe946,
+		"infinite":          0xe96e,
+		"recycle":           0xe9ac,
+		"loading":           0xe977,
+		"loadingdots":       0xe87c,
+		"playvideo":         0xe9d8,
+		"target":            0xe9c9,
+		"podcast":           0xe9a8,
+		"bullseye":          0xe83e,
+		"locationarrow":     0xe978,
+		"locationmarker":    0xe979,
+		"parking":           0xe993,
+		"crop":              0xe948,
+		"compress":          0xe9b6,
+		"minimize":          0xe9b7,
+		"move":              0xe98a,
+		"repeat":            0xe9ad,
+		"sync":              0xe9c6,
+		"play":              0xe874,
+		"shuffle":           0xe9b8,
+		"sliders":           0xe9b9,
+		"rss":               0xe869,
+		"connection":        0xe954,
+		"wifi":              0xe9db,
+		"quote":             0xe951,
+		"peace":             0xe995,
+		"filter":            0xe9d0,
+		"font":              0xe9cd,
+		"cloudservice":      0xe843,
+		"bike":              0xe914,
+		"train":             0xe9d,
+	}
 }

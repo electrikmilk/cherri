@@ -5114,22 +5114,23 @@ func makeAppIds() {
 	if len(appIds) != 0 {
 		return
 	}
-	appIds = make(map[string]string)
-	appIds["appstore"] = "com.apple.AppStore"
-	appIds["files"] = "com.apple.DocumentsApp"
-	appIds["shortcuts"] = "is.workflow.my.app"
-	appIds["safari"] = "com.apple.mobilesafari"
-	appIds["facetime"] = "com.apple.facetime"
-	appIds["notes"] = "com.apple.mobilenotes"
-	appIds["phone"] = "com.apple.mobilephone"
-	appIds["reminders"] = "com.apple.reminders"
-	appIds["mail"] = "com.apple.mobilemail"
-	appIds["music"] = "com.apple.Music"
-	appIds["calendar"] = "com.apple.mobilecal"
-	appIds["maps"] = "com.apple.Maps"
-	appIds["contacts"] = "com.apple.MobileAddressBook"
-	appIds["health"] = "com.apple.Health"
-	appIds["photos"] = "com.apple.mobileslideshow"
+	appIds = map[string]string{
+		"appstore":  "com.apple.AppStore",
+		"files":     "com.apple.DocumentsApp",
+		"shortcuts": "is.workflow.my.app",
+		"safari":    "com.apple.mobilesafari",
+		"facetime":  "com.apple.facetime",
+		"notes":     "com.apple.mobilenotes",
+		"phone":     "com.apple.mobilephone",
+		"reminders": "com.apple.reminders",
+		"mail":      "com.apple.mobilemail",
+		"music":     "com.apple.Music",
+		"calendar":  "com.apple.mobilecal",
+		"maps":      "com.apple.Maps",
+		"contacts":  "com.apple.MobileAddressBook",
+		"health":    "com.apple.Health",
+		"photos":    "com.apple.mobileslideshow",
+	}
 }
 
 func apps(args []actionArgument) (apps []plistData) {

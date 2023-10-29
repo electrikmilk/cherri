@@ -403,29 +403,30 @@ func makeMeasurementUnits() {
 	if len(units) != 0 {
 		return
 	}
-	units = make(map[string][]string)
-	units["Acceleration"] = []string{"m/s²", "g-force"}
-	units["Angle"] = []string{"degrees", "arcminutes", "arcseconds", "radians", "grad", "revolutions"}
-	units["Area"] = []string{"Mm²", "square kilometers", "square meters", "square centimeters", "mm²", "um²", "nm²", "square inches", "square feet", "square yards", "square miles", "acres", "a", "hectares"}
-	units["Concentration Mass"] = []string{"g/L", "mg/dL", "µg/m³"}
-	units["Dispersion"] = []string{"ppm"}
-	units["Duration"] = []string{"milliseconds", "microseconds", "nanoseconds", "ps", "seconds", "minutes", "hours"}
-	units["Electric Charge"] = []string{"C", "MAh", "kAh", "Ah", "mAh", "µAh"}
-	units["Electric Current"] = []string{"MA", "kA", "amp", "mA", "µA"}
-	units["Electric Potential Difference"] = []string{"MV", "kV", "volt", "mV", "µV"}
-	units["Electric Resistance"] = []string{"MΩ", "kΩ", "ohm", "mΩ", "µΩ"}
-	units["Energy"] = []string{"kJ", "joule", "kcal", "cal", "kWh"}
-	units["Frequency"] = []string{"tHz", "GHz", "MHz", "kHz", "Hz", "mHz", "µHz", "nHz", "fps"}
-	units["Fuel Efficiency"] = []string{"L/100km", "mpg"}
-	units["Illuminance"] = []string{"lux"}
-	units["Information Storage"] = []string{"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"}
-	units["Length"] = []string{"Mm", "km", "hm", "dam", "meter", "dm", "cm", "mm", "µm", "nm", "pm", "in", "ft", "yd", "mi", "smi", "ly", "nmi", "fathom", "furlong", "au", "parsec"}
-	units["Mass"] = []string{"kg", "gram", "dg", "cg", "mg", "µg", "ng", "pg", "oz", "lb", "stone", "t", "ton", "carat", "oz t", "slug"}
-	units["Power"] = []string{"TW", "GW", "MW", "kW", "watt", "mW", "µW", "nW", "pw", "fw", "hp"}
-	units["Pressure"] = []string{"N/m²", "GPa", "MPa", "kPa", "hPa", "\" Hg", "bar", "mbar", "mm Hg", "psi"}
-	units["Speed"] = []string{"m/s", "km/hr", "mi/hr", "kn"}
-	units["Temperature"] = []string{"K", "ºC", "ºF"}
-	units["Volume"] = []string{"ML", "kL", "liter", "dL", "cL", "mL", "km³", "m³", "dm³", "cm³", "mm³", "in³", "ft³", "yd³", "mi³", "acre ft", "bushel", "tsp", "tbsp", "fl oz", "pt", "qt", "Imp gal", "mcup"}
+	units = map[string][]string{
+		"Acceleration":                  {"m/s²", "g-force"},
+		"Angle":                         {"degrees", "arcminutes", "arcseconds", "radians", "grad", "revolutions"},
+		"Area":                          {"Mm²", "square kilometers", "square meters", "square centimeters", "mm²", "um²", "nm²", "square inches", "square feet", "square yards", "square miles", "acres", "a", "hectares"},
+		"Concentration Mass":            {"g/L", "mg/dL", "µg/m³"},
+		"Dispersion":                    {"ppm"},
+		"Duration":                      {"milliseconds", "microseconds", "nanoseconds", "ps", "seconds", "minutes", "hours"},
+		"Electric Charge":               {"C", "MAh", "kAh", "Ah", "mAh", "µAh"},
+		"Electric Current":              {"MA", "kA", "amp", "mA", "µA"},
+		"Electric Potential Difference": {"MV", "kV", "volt", "mV", "µV"},
+		"Electric Resistance":           {"MΩ", "kΩ", "ohm", "mΩ", "µΩ"},
+		"Energy":                        {"kJ", "joule", "kcal", "cal", "kWh"},
+		"Frequency":                     {"tHz", "GHz", "MHz", "kHz", "Hz", "mHz", "µHz", "nHz", "fps"},
+		"Fuel Efficiency":               {"L/100km", "mpg"},
+		"Illuminance":                   {"lux"},
+		"Information Storage":           {"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"},
+		"Length":                        {"Mm", "km", "hm", "dam", "meter", "dm", "cm", "mm", "µm", "nm", "pm", "in", "ft", "yd", "mi", "smi", "ly", "nmi", "fathom", "furlong", "au", "parsec"},
+		"Mass":                          {"kg", "gram", "dg", "cg", "mg", "µg", "ng", "pg", "oz", "lb", "stone", "t", "ton", "carat", "oz t", "slug"},
+		"Power":                         {"TW", "GW", "MW", "kW", "watt", "mW", "µW", "nW", "pw", "fw", "hp"},
+		"Pressure":                      {"N/m²", "GPa", "MPa", "kPa", "hPa", "\" Hg", "bar", "mbar", "mm Hg", "psi"},
+		"Speed":                         {"m/s", "km/hr", "mi/hr", "kn"},
+		"Temperature":                   {"K", "ºC", "ºF"},
+		"Volume":                        {"ML", "kL", "liter", "dL", "cL", "mL", "km³", "m³", "dm³", "cm³", "mm³", "in³", "ft³", "yd³", "mi³", "acre ft", "bushel", "tsp", "tbsp", "fl oz", "pt", "qt", "Imp gal", "mcup"},
+	}
 }
 
 func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) (definition string) {
