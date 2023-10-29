@@ -110,7 +110,38 @@ func printParsingDebug() {
 	fmt.Print("\n")
 
 	fmt.Println(ansi("## VARIABLES ##", bold))
-	fmt.Println(variables)
+	for identifier, v := range variables {
+		if v.constant {
+			fmt.Print("const ")
+		} else {
+			fmt.Print("@")
+		}
+
+		fmt.Print(identifier)
+
+		if v.getAs != "" {
+			fmt.Printf("[%s]", v.getAs)
+		}
+		if v.coerce != "" {
+			fmt.Printf(".%s", v.coerce)
+		}
+
+		fmt.Printf(" (%s) = ", v.variableType)
+
+		if v.valueType != Nil && v.value != nil {
+			fmt.Printf("%s (%s)", v.value, v.valueType)
+		} else if v.valueType == Nil {
+			fmt.Print("nil")
+		} else {
+			fmt.Print("(empty)")
+		}
+
+		if v.repeatItem {
+			fmt.Print(" (repeat item var)")
+		}
+
+		fmt.Print("\n")
+	}
 	fmt.Print("\n")
 
 	fmt.Println(ansi("## MENUS ##", bold))
