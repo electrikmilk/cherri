@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"html"
 	"reflect"
+	"regexp"
 	"strings"
 )
 
@@ -46,6 +47,7 @@ var hasShortcutInputVariables = false
 
 // ObjectReplaceChar is a Shortcuts convention to mark the placement of inline variables in a string.
 const ObjectReplaceChar = '\uFFFC'
+const ObjectReplaceCharStr = "\uFFFC"
 
 var tabLevel = 0
 
@@ -358,12 +360,12 @@ func variablePlistValue(key string, varName string, ident string) plistData {
 	var aggrandizements []plistData
 	var lowerVarName = strings.ToLower(varName)
 	var lowerIdent = strings.ToLower(ident)
-	if _, global := globals[varName]; global {
-		variable = globals[varName]
+	if g, found := globals[varName]; found {
+		variable = g
 		isInputVariable(varName)
 		varName = variable.value.(string)
-	} else if _, found := variables[lowerVarName]; found {
-		variable = variables[lowerVarName]
+	} else if v, found := variables[lowerVarName]; found {
+		variable = v
 	}
 	if _, found := variables[lowerIdent]; found {
 		getAs = variables[lowerIdent].getAs
@@ -489,7 +491,7 @@ type attachmentVariable struct {
 
 var varPositions []plistData
 var inlineVars []inlineVar
-var varIndex map[int]attachmentVariable
+var varIndex []attachmentVariable
 
 func attachmentValues(key string, str string, outputType plistDataType) plistData {
 	if !strings.ContainsAny(str, "{}") {
@@ -501,9 +503,8 @@ func attachmentValues(key string, str string, outputType plistDataType) plistDat
 	}
 	varPositions = []plistData{}
 	inlineVars = []inlineVar{}
-	varIndex = make(map[int]attachmentVariable)
+	varIndex = []attachmentVariable{}
 	var noVarString = collectInlineVariables(&str)
-	mapInlineVars(&noVarString)
 	for _, stringVar := range inlineVars {
 		var storedVar variableValue
 		if _, global := globals[stringVar.varName]; global {
@@ -637,6 +638,7 @@ func attachmentValues(key string, str string, outputType plistDataType) plistDat
 	}
 }
 
+// mapInlineVars finds occurrences of ObjectReplaceChar and adds them to inlineVars to map the inline variables in noVarString.
 func mapInlineVars(noVarString *string) {
 	var variableIdx int
 	for c, s := range *noVarString {
@@ -654,92 +656,37 @@ func mapInlineVars(noVarString *string) {
 	}
 }
 
-var varNum int
-
-var collectingVariable bool
-var collectingGetAs bool
-var collectingCoerce bool
-
-var currentVariable string
-var getAs string
-var coerce string
-
-func collectInlineVariables(variable *string) (noVarString string) {
-	var variableChars = strings.Split(*variable, "")
-	noVarString = *variable
-	varNum = 0
-	currentVariable = ""
-	getAs = ""
-	coerce = ""
-	collectingGetAs = false
-	collectingCoerce = false
-	collectingVariable = false
-	for _, chr := range variableChars {
-		if chr == "{" {
-			collectingVariable = true
-			continue
+// collectInlineVariables collects inline variables from `str` and adds them to a slice of attachmentVariable.
+// It then replaces all instances of inline variables in `str` with ObjectReplaceChar.
+func collectInlineVariables(str *string) (noVarString string) {
+	var collectVarRegex = regexp.MustCompile(`\{(.*?)(?:\[(.*?)])?(?:\.(.*?))?}`)
+	var matches = collectVarRegex.FindAllStringSubmatch(*str, -1)
+	if len(matches) > 0 {
+		for _, match := range matches {
+			var attachmentVar attachmentVariable
+			if len(match) < 2 {
+				continue
+			}
+			attachmentVar.varName = match[1]
+			if !validReference(attachmentVar.varName) {
+				parserError(fmt.Sprintf("Inline var '%s' does not exist!", attachmentVar.varName))
+			}
+			if len(match[2]) > 0 {
+				attachmentVar.getAs = match[2]
+			}
+			if len(match[3]) > 0 {
+				attachmentVar.coerce = match[3]
+			}
+			varIndex = append(varIndex, attachmentVar)
 		}
-		if !collectingVariable {
-			continue
-		}
-		collectInlineVariable(&chr, &noVarString)
+
+		var replaceVarRegex = regexp.MustCompile(`(\{.*?})`)
+		noVarString = replaceVarRegex.ReplaceAllString(*str, ObjectReplaceCharStr)
 	}
+
+	mapInlineVars(&noVarString)
+
 	return
-}
-
-func collectInlineVariable(chr *string, noVarString *string) {
-	switch {
-	case collectingGetAs:
-		if *chr == "]" {
-			collectingGetAs = false
-			break
-		}
-		getAs += *chr
-	case collectingCoerce:
-		if *chr == ")" {
-			collectingCoerce = false
-			break
-		}
-		coerce += *chr
-	default:
-		inlineVariableChar(chr, noVarString)
-	}
-}
-
-func inlineVariableChar(chr *string, noVarString *string) {
-	switch *chr {
-	case "}":
-		varIndex[varNum] = attachmentVariable{
-			varName: currentVariable,
-			getAs:   getAs,
-			coerce:  coerce,
-		}
-		var varName = currentVariable
-		if getAs != "" {
-			varName = currentVariable + "[" + getAs + "]"
-		}
-		if coerce != "" {
-			varName = currentVariable + "(" + coerce + ")"
-		}
-		*noVarString = strings.Replace(
-			*noVarString,
-			"{"+varName+"}",
-			string(ObjectReplaceChar),
-			1)
-		varNum++
-		currentVariable = ""
-		getAs = ""
-		coerce = ""
-		collectingGetAs = false
-		collectingCoerce = false
-		collectingVariable = false
-	case "[":
-		collectingGetAs = true
-	case "(":
-		collectingCoerce = true
-	default:
-		currentVariable += *chr
-	}
 }
 
 func argumentValue(key string, args []actionArgument, idx int) plistData {

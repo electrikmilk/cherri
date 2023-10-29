@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/electrikmilk/args-parser"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
@@ -298,28 +299,34 @@ func collectVariableValue(valueType *tokenType, value *any, varType *tokenType, 
 
 	advance()
 	collectValue(valueType, value, '\n')
+	if *valueType == Question {
+		parserError(fmt.Sprintf("Illegal reference to import question '%s'. Shortcuts does not support import questions as variable values.", *value))
+	}
 	if *valueType != Variable {
 		return
 	}
 
 	var stringValue = fmt.Sprintf("%v", *value)
-	if strings.Contains(stringValue, ".") {
-		var dotParts = strings.Split(stringValue, ".")
-		*coerce = strings.Trim(dotParts[1], " ")
-		if !strings.Contains(stringValue, "[") {
-			*value = dotParts[0]
-			return
+	if strings.ContainsAny(stringValue, "[]") || strings.Contains(stringValue, ".") {
+		var regex = regexp.MustCompile(`^(.*?)(?:\[(.*?)])?(?:\.(.*?))?$`)
+		var matches = regex.FindAllStringSubmatch(stringValue, -1)
+		for _, m := range matches {
+			*value = m[1]
+			if m[2] != "" {
+				*getAs = m[2]
+			}
+			if m[3] != "" {
+				*coerce = m[3]
+			}
 		}
-	}
-
-	if strings.Contains(stringValue, "[") {
-		var varParts = strings.Split(stringValue, "[")
-		*value = varParts[0]
-		*getAs = strings.Trim(strings.TrimSuffix(varParts[1], "]"), " ")
 	}
 }
 
 func collectValue(valueType *tokenType, value *any, until rune) {
+	var ahead = lookAheadUntil(until)
+	if ahead == "" {
+		parserError("Value expected")
+	}
 	switch {
 	case intChar():
 		collectIntegerValue(valueType, value, &until)
@@ -352,68 +359,53 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*valueType = Action
 		_, *value = collectAction()
 		break
+	case containsTokens(lookAheadUntil(until), Plus, Minus, Multiply, Divide, Modulus):
+		*valueType = Expression
+		*value = collectUntil(until)
 	default:
-		if lookAheadUntil(until) == "" {
-			parserError("Value expected")
-		}
 		collectReference(valueType, value, &until)
 	}
 }
 
 func collectReference(valueType *tokenType, value *any, until *rune) {
-	var ahead = lookAheadUntil(*until)
-	if containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
-		*valueType = Expression
-		*value = collectUntil(*until)
-		return
-	}
-	var identifier string
-	var fullIdentifier string
-	switch {
-	case strings.Contains(lookAheadUntil(*until), "["):
-		identifier = collectUntil('[')
-		advance()
-		fullIdentifier = identifier + "[" + collectUntil(*until)
-		advance()
-	case strings.Contains(lookAheadUntil(*until), "."):
-		identifier = collectUntil('.')
-		advance()
-		fullIdentifier = identifier + "." + collectUntil(*until)
-		advance()
-	default:
-		identifier = collectUntil(*until)
-		fullIdentifier = identifier
-		advance()
-	}
-	var lowerIdentifier = strings.ToLower(identifier)
-	if _, g := globals[identifier]; g {
-		*valueType = Variable
-		*value = fullIdentifier
-		isInputVariable(identifier)
-		return
-	}
-	if _, v := variables[lowerIdentifier]; v {
-		*valueType = Variable
-		*value = fullIdentifier
-		return
-	}
-	if _, q := questions[lowerIdentifier]; q {
-		if questions[lowerIdentifier].used {
-			parserError(fmt.Sprintf("Duplicate usage of '%s', import questions can only be referenced once.", fullIdentifier))
+	var identifier strings.Builder
+	for char != -1 {
+		if !unicode.IsLetter(char) && !unicode.IsDigit(char) {
+			break
 		}
+		identifier.WriteRune(char)
+		advance()
+	}
+
+	if q, found := questions[identifier.String()]; found {
+		if q.used {
+			parserError(fmt.Sprintf("Duplicate usage of import question reference '%s', can only be used once.", identifier.String()))
+		}
+
 		*valueType = Question
-		*value = fullIdentifier
-		questions[lowerIdentifier].used = true
+		*value = identifier.String()
+		q.used = true
+
+		advance()
 		return
 	}
-	if fullIdentifier == "" {
-		parserError("Value expected")
+
+	if !validReference(identifier.String()) {
+		parserError(fmt.Sprintf("Undefined reference '%s'", identifier.String()))
 	}
-	if args.Using("debug") {
-		fmt.Println("\nvariables", variables)
-		fmt.Println("questions", questions)
+
+	if char == '[' {
+		identifier.WriteString(collectUntil(']') + `]`)
+		advance()
 	}
-	parserError(fmt.Sprintf("Undefined reference '%s'", fullIdentifier))
+	if char == '.' {
+		identifier.WriteString(collectUntil(*until))
+	}
+
+	*valueType = Variable
+	*value = identifier.String()
+	advance()
+	return
 }
 
 func collectArguments() (arguments []actionArgument) {
@@ -511,11 +503,11 @@ func collectVariable(constant bool) {
 		}
 		identifier = collectUntil('\n')
 	}
-	if variable, found := variables[identifier]; found {
-		if variable.constant {
+	if v, found := variables[identifier]; found {
+		if v.constant {
 			parserError(fmt.Sprintf("Cannot redefine constant '%s'.", identifier))
 		}
-		if variable.repeatItem {
+		if v.repeatItem {
 			parserError(fmt.Sprintf("Cannot redefine repeat item '%s'.", identifier))
 		}
 	}
@@ -1030,8 +1022,7 @@ func collectInteger() string {
 }
 
 func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
-	var ahead = lookAheadUntil(*until)
-	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
+	if !containsTokens(lookAheadUntil(*until), Plus, Minus, Multiply, Divide, Modulus) {
 		var integer = collectInteger()
 		*valueType = Integer
 		*value = integer
@@ -1257,9 +1248,9 @@ func tokensAhead(v ...tokenType) bool {
 	return false
 }
 
-func containsTokens(str *string, v ...tokenType) bool {
+func containsTokens(str string, v ...tokenType) bool {
 	for _, aheadToken := range v {
-		if strings.Contains(*str, string(aheadToken)) {
+		if strings.Contains(str, string(aheadToken)) {
 			return true
 		}
 	}
