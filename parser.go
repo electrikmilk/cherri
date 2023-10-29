@@ -290,15 +290,24 @@ func lookAheadUntil(until rune) string {
 	return strings.Trim(strings.ToLower(ahead.String()), " \t\n")
 }
 
-func collectVariableValue(valueType *tokenType, value *any, varType *tokenType, coerce *string, getAs *string) {
+func collectVariableValue(constant bool, valueType *tokenType, value *any, varType *tokenType, coerce *string, getAs *string) {
 	if tokenAhead(AddTo) {
 		*varType = AddTo
-	} else {
-		tokensAhead(Set)
+		if constant {
+			parserError("Constants cannot be added to.")
+		}
+	} else if !tokensAhead(Set) && constant {
+		parserError("Constants must be initialized with a value.")
 	}
 
 	advance()
 	collectValue(valueType, value, '\n')
+
+	if constant && (*valueType == Arr || *valueType == Variable) {
+		lineIdx--
+		var valueTypeName = capitalize(typeName(*valueType))
+		parserError(fmt.Sprintf("%v values cannot be constants.", valueTypeName))
+	}
 	if *valueType == Question {
 		parserError(fmt.Sprintf("Illegal reference to import question '%s'. Shortcuts does not support import questions as variable values.", *value))
 	}
@@ -525,12 +534,7 @@ func collectVariable(constant bool) {
 	var coerce string
 	var varType = Var
 	if strings.Contains(lookAheadUntil('\n'), "=") {
-		collectVariableValue(&valueType, &value, &varType, &coerce, &getAs)
-	}
-	if constant && (valueType == Arr || valueType == Variable) {
-		lineIdx--
-		var valueTypeName = capitalize(typeName(valueType))
-		parserError(fmt.Sprintf("%v values cannot be constants.", valueTypeName))
+		collectVariableValue(constant, &valueType, &value, &varType, &coerce, &getAs)
 	}
 
 	tokens = append(tokens, token{
