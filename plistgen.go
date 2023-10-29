@@ -167,30 +167,22 @@ func plistActions() {
 		switch t.typeof {
 		case Var, AddTo:
 			plistVariable(&t)
-			break
 		case Comment:
 			plistComment(t.value.(string))
-			break
 		case Action:
 			var tokenAction = t.value.(action)
 			currentAction = tokenAction.ident
 			plistAction(tokenAction.args, plistData{}, plistData{})
-			break
 		case Repeat:
 			plistRepeat(&t)
-			break
 		case RepeatWithEach:
 			plistRepeatEach(&t)
-			break
 		case Menu:
 			plistMenu(&t)
-			break
 		case Item:
 			plistMenuItem(&t)
-			break
 		case Conditional:
 			plistConditional(&t)
-			break
 		}
 	}
 	tabLevel--
@@ -263,15 +255,12 @@ func plistArrayVariable(t *token) {
 		case stringType:
 			valueType = String
 			itemIdent = "Text"
-			break
 		case intType:
 			valueType = Integer
 			itemIdent = "Number"
-			break
 		case dictType:
 			valueType = Dict
 			itemIdent = "Dictionary"
-			break
 		}
 		makeVariableValue(&token{
 			typeof:    valueType,

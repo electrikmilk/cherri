@@ -159,47 +159,33 @@ func parse() {
 		switch {
 		case char == ' ' || char == '\t' || char == '\n':
 			advance()
-			break
 		case tokenAhead(Question):
 			collectQuestion()
-			break
 		case tokenAhead(Definition):
 			collectDefinition()
-			break
 		case tokenAhead(Import):
 			collectImport()
-			break
 		case isToken(At):
 			collectVariable(false)
-			break
 		case tokenAhead(Constant):
 			advance()
 			collectVariable(true)
-			break
 		case isToken(ForwardSlash):
 			collectComment()
-			break
 		case tokenAhead(Repeat):
 			collectRepeat()
-			break
 		case tokenAhead(RepeatWithEach):
 			collectRepeatEach()
-			break
 		case tokenAhead(Menu):
 			collectMenu()
-			break
 		case tokenAhead(Item):
 			collectMenuItem()
-			break
 		case tokenAhead(If):
 			collectConditional()
-			break
 		case tokenAhead(RightBrace):
 			collectEndStatement()
-			break
 		case strings.Contains(lookAheadUntil(' '), "("):
 			collectActionCall()
-			break
 		default:
 			parserError(fmt.Sprintf("Illegal character '%s'", string(char)))
 		}
@@ -341,35 +327,27 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	switch {
 	case intChar():
 		collectIntegerValue(valueType, value, &until)
-		break
 	case isToken(String):
 		*valueType = String
 		*value = collectString()
-		break
 	case isToken(Arr):
 		*valueType = Arr
 		*value = collectArray()
-		break
 	case isToken(Dict):
 		*valueType = Dict
 		*value = collectDictionary()
-		break
 	case tokenAhead(True):
 		*valueType = Bool
 		*value = true
-		break
 	case tokenAhead(False):
 		*valueType = Bool
 		*value = false
-		break
 	case tokenAhead(Nil):
 		*valueType = Nil
 		advanceUntil(until)
-		break
 	case strings.Contains(lookAheadUntil(until), "("):
 		*valueType = Action
 		_, *value = collectAction()
-		break
 	case containsTokens(lookAheadUntil(until), Plus, Minus, Multiply, Divide, Modulus):
 		*valueType = Expression
 		*value = collectUntil(until)
