@@ -307,17 +307,19 @@ func collectVariableValue(valueType *tokenType, value *any, varType *tokenType, 
 	}
 
 	var stringValue = fmt.Sprintf("%v", *value)
-	if strings.ContainsAny(stringValue, "[]") || strings.Contains(stringValue, ".") {
-		var regex = regexp.MustCompile(`^(.*?)(?:\[(.*?)])?(?:\.(.*?))?$`)
-		var matches = regex.FindAllStringSubmatch(stringValue, -1)
-		for _, m := range matches {
-			*value = m[1]
-			if m[2] != "" {
-				*getAs = m[2]
-			}
-			if m[3] != "" {
-				*coerce = m[3]
-			}
+	if !strings.ContainsAny(stringValue, "[]") && !strings.Contains(stringValue, ".") {
+		return
+	}
+
+	var regex = regexp.MustCompile(`^(.*?)(?:\[(.*?)])?(?:\.(.*?))?$`)
+	var matches = regex.FindAllStringSubmatch(stringValue, -1)
+	for _, m := range matches {
+		*value = m[1]
+		if m[2] != "" {
+			*getAs = m[2]
+		}
+		if m[3] != "" {
+			*coerce = m[3]
 		}
 	}
 }
