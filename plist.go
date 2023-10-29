@@ -271,8 +271,8 @@ func makeVariableValue(token *token, varUUID *string) {
 }
 
 func variableInput(key string, name string) plistData {
-	if _, found := uuids[name]; found {
-		return inputValue(key, name, uuids[name])
+	if uuid, found := uuids[name]; found {
+		return inputValue(key, name, uuid)
 	}
 	return inputValue(key, name, "")
 }
@@ -358,16 +358,16 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 	var getAs string
 	var coerce string
 	var aggrandizements []plistData
-	if g, found := globals[identifier]; found {
-		variable = g
+	if global, found := globals[identifier]; found {
+		variable = global
 		isInputVariable(identifier)
 		identifier = variable.value.(string)
 	} else if v, found := variables[identifier]; found {
 		variable = v
 	}
-	if _, found := variables[ident]; found {
-		getAs = variables[ident].getAs
-		coerce = variables[ident].coerce
+	if v, found := variables[ident]; found {
+		getAs = v.getAs
+		coerce = v.coerce
 		if getAs != "" {
 			aggrandizements = append(aggrandizements, plistData{
 				dataType: Dictionary,
@@ -392,7 +392,7 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 		}
 		if coerce != "" {
 			makeContentItems()
-			if _, found := contentItems[coerce]; found {
+			if contentItem, found := contentItems[coerce]; found {
 				aggrandizements = append(aggrandizements, plistData{
 					dataType: Dictionary,
 					value: []plistData{
@@ -404,7 +404,7 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 						{
 							key:      "CoercionItemClass",
 							dataType: Text,
-							value:    contentItems[coerce],
+							value:    contentItem,
 						},
 					},
 				})
@@ -573,7 +573,7 @@ func attachmentValues(key string, str string, outputType plistDataType) plistDat
 		}
 		if stringVar.coerce != "" {
 			makeContentItems()
-			if _, found := contentItems[stringVar.coerce]; found {
+			if contentItem, found := contentItems[stringVar.coerce]; found {
 				aggr = append(aggr, plistData{
 					dataType: Dictionary,
 					value: []plistData{
@@ -585,7 +585,7 @@ func attachmentValues(key string, str string, outputType plistDataType) plistDat
 						{
 							key:      "CoercionItemClass",
 							dataType: Text,
-							value:    contentItems[stringVar.coerce],
+							value:    contentItem,
 						},
 					},
 				})

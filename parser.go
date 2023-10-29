@@ -657,16 +657,16 @@ func collectDefinition() {
 			}
 		case tokenAhead(AskFor):
 			advance()
-			var wtype = collectUntil('\n')
+			var workflowType = collectUntil('\n')
 			makeContentItems()
-			if wt, found := contentItems[wtype]; found {
+			if wtype, found := contentItems[workflowType]; found {
 				noInput = noInputParams{
 					name: "WFWorkflowNoInputBehaviorAskForInput",
 					params: []plistData{
 						{
 							key:      "ItemClass",
 							dataType: Text,
-							value:    wt,
+							value:    wtype,
 						},
 					},
 				}
