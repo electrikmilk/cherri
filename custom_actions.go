@@ -42,11 +42,28 @@ func parseCustomActions() {
 	findCustomActionRefs()
 	firstChar()
 
+	if args.Using("debug") {
+		printCustomActionsDebug()
+	}
+
 	customActions = map[string]customAction{}
 
 	if args.Using("debug") {
 		fmt.Print(ansi("done!", green) + "\n")
 	}
+}
+
+func printCustomActionsDebug() {
+	fmt.Println(ansi("### CUSTOM ACTIONS ###", bold) + "\n")
+
+	for identifier, customAction := range customActions {
+		fmt.Println("identifier: " + identifier)
+		fmt.Println("body:")
+		fmt.Println(customAction.body)
+		fmt.Print("\n")
+	}
+
+	fmt.Print("\n")
 }
 
 func parseCustomAction() {

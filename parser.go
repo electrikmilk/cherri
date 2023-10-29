@@ -33,7 +33,7 @@ func initParse() {
 		parseCustomActions()
 	}
 	if args.Using("debug") {
-		fmt.Printf("Parsing %s... ", filename)
+		fmt.Printf("Parsing %s...\n", filename)
 	}
 	variables = make(map[string]variableValue)
 	questions = make(map[string]*question)
@@ -45,7 +45,11 @@ func initParse() {
 	lines = strings.Split(contents, "\n")
 	idx = -1
 	advance()
+
 	parse()
+	if args.Using("debug") {
+		printParsingDebug()
+	}
 
 	contents = ""
 	char = -1
@@ -58,6 +62,64 @@ func initParse() {
 	groupingTypes = map[int]tokenType{}
 	groupingIdx = 0
 	includes = []include{}
+
+	if args.Using("debug") {
+		fmt.Println(ansi("Done.", green) + "\n")
+	}
+}
+
+func printParsingDebug() {
+	fmt.Println(ansi("### PARSING ###", bold) + "\n")
+
+	if idx != 0 {
+		fmt.Println("Previous Character:")
+		printChar(prev(1))
+	}
+
+	fmt.Println("\nCurrent Character:")
+	printChar(char)
+
+	if len(contents) > idx+1 {
+		fmt.Println("\nNext Character:")
+		printChar(next(1))
+	}
+
+	if len(lines) > lineIdx {
+		fmt.Println("\nCurrent Line: \n" + lines[lineIdx])
+	}
+
+	fmt.Println(ansi("## TOKENS ##", bold))
+	printTokens(tokens)
+	fmt.Print("\n")
+
+	fmt.Println(ansi("## TOKEN CHARS ##", bold))
+	fmt.Println(tokenChars)
+	fmt.Print("\n")
+
+	fmt.Println(ansi("## DEFINITIONS ##", bold))
+	fmt.Println("Name: " + workflowName)
+	fmt.Println("Color: " + iconColor)
+	fmt.Printf("Glyph: %d\n", iconGlyph)
+	fmt.Printf("Inputs: %v\n", inputs)
+	fmt.Printf("Outputs: %v\n", outputs)
+	fmt.Printf("Workflows: %v\n", types)
+	fmt.Printf("No Input: %v\n", noInput)
+	fmt.Printf("macOS Only: %v\n", isMac)
+	fmt.Printf("Mininum Version: %s\n", minVersion)
+	fmt.Printf("iOS Version: %.1f\n", iosVersion)
+	fmt.Print("\n")
+
+	fmt.Println(ansi("## VARIABLES ##", bold))
+	fmt.Println(variables)
+	fmt.Print("\n")
+
+	fmt.Println(ansi("## MENUS ##", bold))
+	fmt.Println(menus)
+	fmt.Print("\n")
+
+	fmt.Println(ansi("## IMPORT QUESTIONS ##", bold))
+	fmt.Println(questions)
+	fmt.Print("\n")
 }
 
 func parse() {
@@ -1252,14 +1314,16 @@ func makeKeyList(title string, list map[string]string) (formattedList string) {
 func parserError(message string) {
 	lines = strings.Split(contents, "\n")
 	var errorFilename, errorLine, errorCol = delinquentFile()
+
 	if args.Using("no-ansi") {
 		fmt.Printf("Error: %s (%d:%d)\n", message, errorLine, errorCol)
 		os.Exit(1)
 	}
+
 	excerptError(message, errorFilename, errorLine, errorCol)
+
 	if args.Using("debug") {
-		printDebug()
-		panic("debug")
+		panicDebug()
 	} else {
 		os.Exit(1)
 	}

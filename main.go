@@ -68,22 +68,9 @@ func main() {
 
 	initParse()
 
-	if args.Using("debug") {
-		fmt.Print(ansi("done!", green) + "\n")
-		fmt.Printf("Generating plist... ")
-	}
-
 	makePlist()
 
-	if args.Using("debug") {
-		fmt.Print(ansi("done!", green) + "\n")
-	}
-
 	createShortcut()
-
-	if args.Using("debug") {
-		printDebug()
-	}
 }
 
 func printActionDefinitions() {
@@ -117,9 +104,9 @@ func fileArg() string {
 // createShortcut writes the Shortcut files to disk and signs them if the unsigned argument is not unused.
 func createShortcut() {
 	if args.Using("debug") {
-		go writeFile(relativePath+workflowName+".plist", fmt.Sprintf("Creating %s.plist", workflowName))
+		writeFile(relativePath+workflowName+".plist", workflowName+".plist")
 	}
-	writeFile(relativePath+workflowName+"_unsigned.shortcut", fmt.Sprintf("Creating unsigned %s.shortcut", workflowName))
+	writeFile(relativePath+workflowName+"_unsigned.shortcut", workflowName+"_unsigned.shortcut")
 
 	sign()
 }
@@ -143,13 +130,16 @@ func handleFile() {
 
 // writeFile writes plist in bytes to filename.
 func writeFile(filename string, debug string) {
-	if args.Using("debug") {
-		fmt.Print(debug + "... ")
+	var writeDebugOutput = args.Using("debug")
+	if writeDebugOutput {
+		fmt.Println("Writing to " + debug + "...")
 	}
+
 	writeErr := os.WriteFile(filename, []byte(compiled), 0600)
 	handle(writeErr)
-	if args.Using("debug") {
-		fmt.Print(ansi("done!", green) + "\n")
+
+	if writeDebugOutput {
+		fmt.Println(ansi("Done.", green) + "\n")
 	}
 }
 
@@ -177,13 +167,14 @@ func sign() {
 	if args.Using("share") && args.Value("share") == "anyone" {
 		signingMode = "anyone"
 	}
+	var inputPath = relativePath + workflowName + "_unsigned.shortcut"
 	if args.Using("debug") {
-		fmt.Printf("Signing %s.shortcut... ", basename)
+		fmt.Printf("Signing %s to %s...\n", inputPath, outputPath)
 	}
 	var sign = exec.Command(
 		"shortcuts",
 		"sign",
-		"-i", relativePath+workflowName+"_unsigned.shortcut",
+		"-i", inputPath,
 		"-o", outputPath,
 		"-m", signingMode,
 	)
@@ -197,11 +188,17 @@ func sign() {
 		exit("Failed to sign Shortcut\n\nshortcuts: " + stdErr.String())
 	}
 	if args.Using("debug") {
-		fmt.Print(ansi("done!", green) + "\n")
+		fmt.Println(ansi("Done.", green) + "\n")
 	}
 
+	if args.Using("debug") {
+		fmt.Println("Removing " + workflowName + "_unsigned.shortcut...")
+	}
 	removeErr := os.Remove(fmt.Sprintf("%s%s_unsigned.shortcut", relativePath, workflowName))
 	handle(removeErr)
+	if args.Using("debug") {
+		fmt.Println(ansi("Done.", green))
+	}
 
 	if args.Using("import") {
 		var _, importErr = exec.Command("open", outputPath).Output()
@@ -218,8 +215,7 @@ func handle(err error) {
 		var message = fmt.Sprintf("%s", err)
 		fmt.Println("\n" + ansi("Error: "+message, red) + "\n")
 		if args.Using("debug") {
-			printDebug()
-			panic(err)
+			panicDebug()
 		} else {
 			os.Exit(1)
 		}
@@ -266,82 +262,14 @@ func printPlistData(data []plistData) {
 	tabLevel = saveTabLevel
 }
 
-func printDebug() {
-	if args.Using("debug") {
-		fmt.Println(ansi("#############\n#   DEBUG   #\n#############\n", red))
-
-		fmt.Println(ansi("### PARSING ###", bold))
-
-		if idx != 0 {
-			fmt.Println("Previous Character:")
-			printChar(prev(1))
-		}
-
-		fmt.Println("\nCurrent Character:")
-		printChar(char)
-
-		if len(contents) > idx+1 {
-			fmt.Println("\nNext Character:")
-			printChar(next(1))
-		}
-
-		if len(lines) > lineIdx {
-			fmt.Println("\nCurrent Line: \n" + lines[lineIdx])
-		}
-
-		fmt.Print("\n")
-
-		fmt.Println(ansi("### PARSING ###", bold) + "\n")
-
-		fmt.Println(ansi("## TOKENS ##", bold))
-		printTokens(tokens)
-		fmt.Print("\n")
-
-		fmt.Println(ansi("## TOKEN CHARS ##", bold))
-		fmt.Println(tokenChars)
-		fmt.Print("\n")
-
-		fmt.Println(ansi("## DEFINITIONS ##", bold))
-		fmt.Println("Name: " + workflowName)
-		fmt.Println("Color: " + iconColor)
-		fmt.Printf("Glyph: %d\n", iconGlyph)
-		fmt.Printf("Inputs: %v\n", inputs)
-		fmt.Printf("Outputs: %v\n", outputs)
-		fmt.Printf("Workflows: %v\n", types)
-		fmt.Printf("No Input: %v\n", noInput)
-		fmt.Printf("macOS Only: %v\n", isMac)
-		fmt.Printf("Mininum Version: %s\n", minVersion)
-		fmt.Printf("iOS Version: %.1f\n", iosVersion)
-		fmt.Print("\n")
-
-		fmt.Println(ansi("## VARIABLES ##", bold))
-		fmt.Println(variables)
-		fmt.Print("\n")
-
-		fmt.Println(ansi("## MENUS ##", bold))
-		fmt.Println(menus)
-		fmt.Print("\n")
-
-		fmt.Println(ansi("## IMPORT QUESTIONS ##", bold))
-		fmt.Println(questions)
-		fmt.Print("\n")
-
-		fmt.Println(ansi("## CUSTOM ACTIONS ##", bold))
-		for identifier, customAction := range customActions {
-			fmt.Println("identifier: " + identifier)
-			fmt.Println("body:")
-			fmt.Println(customAction.body)
-		}
-		fmt.Print("\n")
-
-		fmt.Println(ansi("## INCLUDES ##", bold))
-		fmt.Println(includes)
-		fmt.Print("\n")
-
-		fmt.Println(ansi("## UUIDS ##", bold))
-		fmt.Println(uuids)
-		fmt.Print("\n")
-	}
+func panicDebug() {
+	fmt.Println(ansi("###################\n#   DEBUG PANIC   #\n###################\n", bold, red))
+	printParsingDebug()
+	printPlistGenDebug()
+	printCustomActionsDebug()
+	printIncludesDebug()
+	fmt.Println(ansi("#############################################################\n", bold, red))
+	panic("debug")
 }
 
 func printVersion() {
@@ -413,8 +341,7 @@ func ansi(message string, typeOf ...outputType) string {
 func exit(message string) {
 	fmt.Println(ansi("\nError: "+message, red) + "\n")
 	if args.Using("debug") {
-		printDebug()
-		panic("debug")
+		panicDebug()
 	} else {
 		os.Exit(1)
 	}

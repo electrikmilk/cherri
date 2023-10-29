@@ -33,15 +33,34 @@ func handleIncludes() {
 	}
 
 	if args.Using("debug") {
-		fmt.Print("Parsing includes... ")
+		fmt.Println("Parsing includes...")
 	}
 
 	parseIncludes()
+
+	if args.Using("debug") {
+		printIncludesDebug()
+	}
+
 	included = []string{}
 
 	if args.Using("debug") {
-		fmt.Print(ansi("done!", green) + "\n")
+		fmt.Println(ansi("Done.", green) + "\n")
 	}
+}
+
+func printIncludesDebug() {
+	fmt.Println(ansi("### INCLUDES ###", bold) + "\n")
+
+	fmt.Println(ansi("## INCLUDED ##", bold))
+	fmt.Println(included)
+
+	fmt.Print("\n")
+
+	fmt.Println(ansi("## INCLUDES MAP ##", bold))
+	fmt.Println(includes)
+
+	fmt.Print("\n")
 }
 
 // parseIncludes() searches for include statements within the file and

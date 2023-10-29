@@ -5,6 +5,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/electrikmilk/args-parser"
 	"reflect"
 	"strings"
 )
@@ -16,6 +18,10 @@ var plist strings.Builder
 var compiled string
 
 func makePlist() {
+	if args.Using("debug") {
+		fmt.Println("Generating plist...")
+	}
+
 	tabLevel = 2
 	uuids = make(map[string]string)
 	plist.WriteString(header)
@@ -123,6 +129,11 @@ func makePlist() {
 
 	plist.WriteString(footer)
 
+	if args.Using("debug") {
+		printPlistGenDebug()
+		fmt.Println(ansi("Done.", green) + "\n")
+	}
+
 	compiled = plist.String()
 	plist.Reset()
 	tabLevel = 0
@@ -137,6 +148,15 @@ func makePlist() {
 	types = []string{}
 	inputs = []string{}
 	outputs = []string{}
+}
+
+func printPlistGenDebug() {
+	fmt.Println(ansi("### PLIST GEN ###", bold) + "\n")
+
+	fmt.Println(ansi("## UUIDS ##", bold))
+	fmt.Println(uuids)
+
+	fmt.Print("\n")
 }
 
 func plistActions() {
