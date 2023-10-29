@@ -380,13 +380,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 
 func collectReference(valueType *tokenType, value *any, until *rune) {
 	var identifier strings.Builder
-	for char != -1 {
-		if !unicode.IsLetter(char) && !unicode.IsDigit(char) && char != '_' {
-			break
-		}
-		identifier.WriteRune(char)
-		advance()
-	}
+	identifier.WriteString(collectIdentifier())
 
 	if q, found := questions[identifier.String()]; found {
 		if q.used {
@@ -504,16 +498,10 @@ func collectComment() {
 
 func collectVariable(constant bool) {
 	reachable()
-	var identifier string
-	if strings.Contains(lines[lineIdx], "=") {
-		identifier = collectUntil(' ')
-		advance()
-	} else {
-		if constant {
-			parserError("Constants must be initialized with a value.")
-		}
-		identifier = collectUntil('\n')
-	}
+
+	var identifier = collectIdentifier()
+	advance()
+
 	if v, found := variables[identifier]; found {
 		if v.constant {
 			parserError(fmt.Sprintf("Cannot redefine constant '%s'.", identifier))
@@ -554,6 +542,19 @@ func collectVariable(constant bool) {
 		coerce:       coerce,
 		constant:     constant,
 	}
+}
+
+func collectIdentifier() string {
+	var identifier strings.Builder
+	for char != -1 {
+		if !unicode.IsLetter(char) && !unicode.IsDigit(char) && char != '_' {
+			break
+		}
+		identifier.WriteRune(char)
+		advance()
+	}
+
+	return identifier.String()
 }
 
 func collectDefinition() {
@@ -729,7 +730,7 @@ type question struct {
 
 func collectQuestion() {
 	advance()
-	var identifier = collectUntilExpect(' ', 3)
+	var identifier = collectIdentifier()
 	if _, found := questions[identifier]; found {
 		parserError(fmt.Sprintf("Duplicate declaration of import question '%s'.", identifier))
 	}
@@ -763,7 +764,7 @@ func collectRepeat() {
 	if repeatItemIndex > 1 {
 		index = fmt.Sprintf(" %d", repeatItemIndex)
 	}
-	var repeatIndexIdentifier = collectUntil(' ')
+	var repeatIndexIdentifier = collectIdentifier()
 
 	advance()
 	tokenAhead(RepeatWithEach)
@@ -805,7 +806,7 @@ func collectRepeatEach() {
 	if repeatItemIndex > 1 {
 		index = fmt.Sprintf(" %d", repeatItemIndex)
 	}
-	var repeatItemIdentifier = collectUntil(' ')
+	var repeatItemIdentifier = collectIdentifier()
 
 	advance()
 	tokenAhead(In)
@@ -1139,7 +1140,7 @@ func collectActionCall() {
 func collectAction() (identifier string, value action) {
 	standardActions()
 
-	identifier = collectUntil('(')
+	identifier = collectIdentifier()
 	if _, found := actions[identifier]; !found {
 		lineIdx--
 		parserError(fmt.Sprintf("Undefined action '%s()'", identifier))

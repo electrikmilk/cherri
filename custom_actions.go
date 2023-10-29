@@ -67,8 +67,9 @@ func printCustomActionsDebug() {
 }
 
 func parseCustomAction() {
+	advance()
 	var startActionLineIdx = lineIdx
-	var identifier = collectUntil('(')
+	var identifier = collectIdentifier()
 	if _, found := customActions[identifier]; found {
 		parserError(fmt.Sprintf("Duplication definition of custom action '%s()'", identifier))
 	}
