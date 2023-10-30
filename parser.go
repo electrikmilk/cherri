@@ -497,8 +497,7 @@ func collectVariable(constant bool) {
 	if strings.Contains(lookAheadUntil('\n'), "=") {
 		advance()
 		collectVariableValue(constant, &valueType, &value, &varType, &coerce, &getAs)
-	}
-	if tokenAhead(Colon) {
+	} else if tokenAhead(Colon) {
 		advance()
 		switch {
 		case tokenAhead(VarTextType):
