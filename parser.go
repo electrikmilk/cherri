@@ -1211,7 +1211,8 @@ func isToken(token tokenType) bool {
 }
 
 func tokenAhead(token tokenType) bool {
-	if len(token) == 1 && unicode.ToLower(char) == []rune(token)[0] {
+	var tokenLen = len(token)
+	if tokenLen == 1 && unicode.ToLower(char) == []rune(token)[0] {
 		advance()
 		return true
 	}
@@ -1225,7 +1226,6 @@ func tokenAhead(token tokenType) bool {
 		}
 	}
 
-	var tokenLen = len(token)
 	if tokenLen == 1 {
 		advance()
 		return true
