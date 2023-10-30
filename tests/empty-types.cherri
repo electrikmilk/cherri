@@ -1,6 +1,6 @@
 @string: text
 @integer: number
-@array = [null]
+@array = []
 @array: array
 @data: dictionary
 @data = {}

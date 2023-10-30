@@ -78,25 +78,25 @@
 	<array/>
 	<key>WFWorkflowInputContentItemClasses</key>
 	<array>
-		<string>WFEmailAddressContentItem</string>
-		<string>WFPhoneNumberContentItem</string>
-		<string>WFDCMapsLinkContentItem</string>
-		<string>WFPDFContentItem</string>
-		<string>WFContactContentItem</string>
-		<string>WFFolderContentItem</string>
-		<string>WFLocationContentItem</string>
-		<string>WFAVAssetContentItem</string>
-		<string>WFSafariWebPageContentItem</string>
-		<string>WFAppStoreAppContentItem</string>
-		<string>WFArticleContentItem</string>
 		<string>WFiTunesProductContentItem</string>
-		<string>WFRichTextContentItem</string>
 		<string>WFStringContentItem</string>
 		<string>WFNumberContentItem</string>
-		<string>WFURLContentItem</string>
-		<string>WFDateContentItem</string>
+		<string>WFAppStoreAppContentItem</string>
+		<string>WFContactContentItem</string>
+		<string>WFEmailAddressContentItem</string>
 		<string>WFGenericFileContentItem</string>
 		<string>WFImageContentItem</string>
+		<string>WFURLContentItem</string>
+		<string>WFPhoneNumberContentItem</string>
+		<string>WFRichTextContentItem</string>
+		<string>WFArticleContentItem</string>
+		<string>WFDateContentItem</string>
+		<string>WFFolderContentItem</string>
+		<string>WFDCMapsLinkContentItem</string>
+		<string>WFPDFContentItem</string>
+		<string>WFAVAssetContentItem</string>
+		<string>WFLocationContentItem</string>
+		<string>WFSafariWebPageContentItem</string>
 	</array>
 	<key>WFWorkflowMinimumClientVersion</key>
 	<integer>900</integer>
