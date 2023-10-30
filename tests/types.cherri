@@ -1,0 +1,6 @@
+@string: text
+@integer: number
+@array = []
+@array: array
+@data: dictionary
+@data = {}
