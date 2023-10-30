@@ -1212,30 +1212,27 @@ func isToken(token tokenType) bool {
 }
 
 func tokenAhead(token tokenType) bool {
-	if len(token) == 1 && (unicode.ToLower(char) == []rune(token)[0]) {
+	if len(token) == 1 && unicode.ToLower(char) == []rune(token)[0] {
 		advance()
 		return true
 	}
-	var tChars []rune
-	if tokensChars, found := tokenChars[token]; found {
-		tChars = tokensChars
-	} else {
-		tChars = []rune(token)
-		tokenChars[token] = tChars
-	}
-	for i, tokenChar := range tChars {
+	for i, tokenChar := range token {
 		if tokenChar == '\t' || tokenChar == '\n' {
 			continue
 		}
-		if i == 0 {
-			if unicode.ToLower(char) != tokenChar {
-				return false
-			}
-		} else if next(i) != tokenChar {
+
+		if (i == 0 && unicode.ToLower(char) != tokenChar) || next(i) != tokenChar {
 			return false
 		}
 	}
-	advanceTimes(len(token))
+
+	var tokenLen = len(token)
+	if tokenLen == 1 {
+		advance()
+		return true
+	}
+
+	advanceTimes(tokenLen)
 	return true
 }
 
