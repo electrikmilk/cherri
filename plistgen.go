@@ -250,6 +250,9 @@ func plistArrayVariable(t *token) {
 		return
 	}
 	for _, value := range t.value.([]interface{}) {
+		if value == nil {
+			continue
+		}
 		var UUID = shortcutsUUID()
 		var valueType tokenType
 		var addToVariableParams []plistData

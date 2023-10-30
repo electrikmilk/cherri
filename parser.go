@@ -1076,10 +1076,15 @@ func collectArray() (array interface{}) {
 }
 
 func collectDictionary() (dictionary interface{}) {
+	if char == '}' {
+		advance()
+		return
+	}
 	var rawJSON = "{" + collectObject() + "}"
 	if args.Using("debug") {
 		fmt.Println(ansi("\n\n### COLLECTED DICTIONARY ###", bold))
 		fmt.Println(rawJSON)
+		fmt.Print("\n")
 	}
 	if err := json.Unmarshal([]byte(rawJSON), &dictionary); err != nil {
 		parserError(fmt.Sprintf("JSON error: %s", err))
