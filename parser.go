@@ -1346,7 +1346,7 @@ func parserError(message string) {
 	excerptError(message, errorFilename, errorLine, errorCol)
 
 	if args.Using("debug") {
-		panicDebug()
+		panicDebug(nil)
 	} else {
 		os.Exit(1)
 	}

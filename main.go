@@ -204,14 +204,17 @@ func end(slice []string) string {
 }
 
 func handle(err error) {
-	if err != nil {
-		var message = fmt.Sprintf("%s", err)
-		fmt.Println("\n" + ansi("Error: "+message, red) + "\n")
-		if args.Using("debug") {
-			panicDebug()
-		} else {
-			os.Exit(1)
-		}
+	if err == nil {
+		return
+	}
+
+	fmt.Print(ansi("\nProgram panic :(\n\n", red, bold))
+	fmt.Print(ansi("Please report this: https://github.com/electrikmilk/cherri/issues/new\n\n", red))
+
+	if args.Using("debug") {
+		panicDebug(err)
+	} else {
+		panic(err)
 	}
 }
 
@@ -255,13 +258,18 @@ func printPlistData(data []plistData) {
 	tabLevel = saveTabLevel
 }
 
-func panicDebug() {
+func panicDebug(err error) {
 	fmt.Println(ansi("###################\n#   DEBUG PANIC   #\n###################\n", bold, red))
 	printParsingDebug()
 	printPlistGenDebug()
 	printCustomActionsDebug()
 	printIncludesDebug()
 	fmt.Println(ansi("#############################################################\n", bold, red))
+
+	if err != nil {
+		panic(err)
+	}
+
 	panic("debug")
 }
 
@@ -334,7 +342,7 @@ func ansi(message string, typeOf ...outputType) string {
 func exit(message string) {
 	fmt.Println(ansi("\nError: "+message, red) + "\n")
 	if args.Using("debug") {
-		panicDebug()
+		panicDebug(nil)
 	} else {
 		os.Exit(1)
 	}
