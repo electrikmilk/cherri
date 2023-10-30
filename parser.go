@@ -117,7 +117,6 @@ func printParsingDebug() {
 		} else {
 			fmt.Print("@")
 		}
-
 		fmt.Print(identifier)
 
 		if v.getAs != "" {
@@ -126,21 +125,18 @@ func printParsingDebug() {
 		if v.coerce != "" {
 			fmt.Printf(".%s", v.coerce)
 		}
-
-		fmt.Printf(" (%s) = ", v.variableType)
-
-		if v.valueType != Nil && v.value != nil {
-			fmt.Printf("%s (%s)", v.value, v.valueType)
-		} else if v.valueType == Nil {
-			fmt.Print("nil")
-		} else {
-			fmt.Print("(empty)")
+		if v.variableType != "Variable" {
+			fmt.Printf(" (%s)", v.variableType)
 		}
-
+		if v.value != nil {
+			fmt.Printf(" = %s", v.value)
+		}
+		if string(v.valueType) != "" {
+			fmt.Printf(" (%s)", typeName(v.valueType))
+		}
 		if v.repeatItem {
 			fmt.Print(" (repeat item var)")
 		}
-
 		fmt.Print("\n")
 	}
 	fmt.Print("\n")
