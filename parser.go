@@ -86,7 +86,7 @@ func printParsingDebug() {
 	}
 
 	if len(lines) > lineIdx {
-		fmt.Println("\nCurrent Line: \n" + lines[lineIdx])
+		fmt.Println("\nCurrent Line: \n" + lines[lineIdx] + "\n")
 	}
 
 	fmt.Println(ansi("## TOKENS ##", bold))
