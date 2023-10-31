@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Help improve the Cherri compiler!
-title: 'Bug: '
+title: ''
 labels: bug
 assignees: ''
 
@@ -12,13 +12,13 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 The code to reproduce your issue if applicable:
+
 ```ruby
 
 ```
 
 **Debug output**
-
-Please use `cherri bug.cherri --debug` and copy the output.
+Please use the `--debug` flag and copy the output.
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
