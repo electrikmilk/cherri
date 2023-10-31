@@ -1029,7 +1029,7 @@ func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 
 func collectString() string {
 	var collection strings.Builder
-	escaped := false
+	var escaped = false
 	for char != -1 {
 		if escaped {
 			switch char {
