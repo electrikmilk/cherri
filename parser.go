@@ -1029,9 +1029,10 @@ func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 
 func collectString() string {
 	var collection strings.Builder
+	escaped := false
 	for char != -1 {
-		if char == '\\' {
-			switch next(1) {
+		if escaped {
+			switch char {
 			case '"':
 				collection.WriteRune('"')
 			case 'n':
@@ -1040,18 +1041,24 @@ func collectString() string {
 				collection.WriteRune('\t')
 			case 'r':
 				collection.WriteRune('\r')
+			case '\\':
+				collection.WriteRune('\\')
+			default:
+				// handle other cases or throw an error if needed
 			}
-			advanceTimes(2)
-			continue
+			escaped = false
+		} else {
+			if char == '\\' {
+				escaped = true
+			} else if char == '"' {
+				break
+			} else {
+				collection.WriteRune(char)
+			}
 		}
-		if char == '"' && prev(1) != '\\' {
-			break
-		}
-		collection.WriteRune(char)
 		advance()
 	}
 	advance()
-
 	return collection.String()
 }
 
