@@ -9,7 +9,7 @@ Before making any contributions, familiarize yourself with how the Cherri progra
 Before submitting an issue please confirm the following:
 
 - You can reproduce the issue consistently.
-- You have searched for your issue
+- You have searched for your issue.
 - You are using the latest version.
 - You are describing your issue to the absolute best of your ability. Include any and all relevant information.
 - Your issue is one-to-one. No multiple bug issues.
