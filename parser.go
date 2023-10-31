@@ -28,7 +28,6 @@ var groupingTypes map[int]tokenType
 var groupingIdx int
 
 func initParse() {
-	tokenChars = make(map[tokenType][]rune)
 	if strings.Contains(contents, "action") {
 		standardActions()
 		parseCustomActions()
@@ -91,10 +90,6 @@ func printParsingDebug() {
 
 	fmt.Println(ansi("## TOKENS ##", bold))
 	printTokens(tokens)
-	fmt.Print("\n")
-
-	fmt.Println(ansi("## TOKEN CHARS ##", bold))
-	fmt.Println(tokenChars)
 	fmt.Print("\n")
 
 	fmt.Println(ansi("## DEFINITIONS ##", bold))

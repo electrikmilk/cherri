@@ -15,8 +15,6 @@ type token struct {
 
 var tokens []token
 
-var tokenChars map[tokenType][]rune
-
 /* Keywords */
 
 const (
