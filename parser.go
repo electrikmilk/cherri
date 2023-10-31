@@ -1043,8 +1043,9 @@ func collectString() string {
 				collection.WriteRune('\r')
 			case '\\':
 				collection.WriteRune('\\')
+			// If the escaped char is not explicitly handled above, ignore the escape
 			default:
-				// handle other cases or throw an error if needed
+				collection.WriteRune(char) 
 			}
 			escaped = false
 		} else {
