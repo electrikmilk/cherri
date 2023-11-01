@@ -493,6 +493,9 @@ func collectVariable(constant bool) {
 		advance()
 		collectVariableValue(constant, &valueType, &value, &varType, &coerce, &getAs)
 	} else if tokenAhead(Colon) {
+		if constant {
+			parserError("Constants cannot be initialized without a value")
+		}
 		advance()
 		switch {
 		case tokenAhead(VarTextType):
@@ -510,6 +513,9 @@ func collectVariable(constant bool) {
 		default:
 			parserError(fmt.Sprintf("Unknown type '%s'", lookAheadUntil('\n')))
 		}
+	} else if constant {
+		lineIdx--
+		parserError("Constants must be initialized with a value.")
 	}
 
 	tokens = append(tokens, token{
