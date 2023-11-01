@@ -639,18 +639,18 @@ func attachmentValues(key string, str string, outputType plistDataType) plistDat
 // mapInlineVars finds occurrences of ObjectReplaceChar and adds them to inlineVars to map the inline variables in noVarString.
 func mapInlineVars(noVarString *string) {
 	var variableIdx int
-	for c, s := range *noVarString {
-		if s != ObjectReplaceChar {
-			continue
+	var i = 0
+	for _, c := range *noVarString {
+		if c == ObjectReplaceChar {
+			inlineVars = append(inlineVars, inlineVar{
+				identifier: varIndex[variableIdx].identifier,
+				col:        i,
+				getAs:      varIndex[variableIdx].getAs,
+				coerce:     varIndex[variableIdx].coerce,
+			})
+			variableIdx++
 		}
-
-		inlineVars = append(inlineVars, inlineVar{
-			identifier: varIndex[variableIdx].identifier,
-			col:        c,
-			getAs:      varIndex[variableIdx].getAs,
-			coerce:     varIndex[variableIdx].coerce,
-		})
-		variableIdx++
+		i++
 	}
 }
 
