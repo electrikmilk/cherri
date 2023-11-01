@@ -1249,9 +1249,10 @@ func tokenAhead(token tokenType) bool {
 	return true
 }
 
-func tokensAhead(v ...tokenType) bool {
-	for _, aheadToken := range v {
-		if tokenAhead(aheadToken) {
+// tokensAhead returns a boolean based on if any of `tokens` is ahead.
+func tokensAhead(tokens ...tokenType) bool {
+	for _, t := range tokens {
+		if tokenAhead(t) {
 			return true
 		}
 	}
