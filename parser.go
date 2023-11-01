@@ -1045,7 +1045,7 @@ func collectString() string {
 				collection.WriteRune('\\')
 			// If the escaped char is not explicitly handled above, ignore the escape
 			default:
-				collection.WriteRune(char) 
+				collection.WriteRune(char)
 			}
 			escaped = false
 		} else {
