@@ -168,8 +168,8 @@ func makeVariableValue(token *token, varUUID *string) {
 	switch token.valueType {
 	case Integer:
 		appendPlist(makeStdAction("number", []plistData{
-			UUID,
 			outputName,
+			UUID,
 			{
 				key:      "WFNumberActionNumber",
 				dataType: Text,
@@ -184,8 +184,8 @@ func makeVariableValue(token *token, varUUID *string) {
 			boolValue = "0"
 		}
 		appendPlist(makeStdAction("number", []plistData{
-			UUID,
 			outputName,
+			UUID,
 			{
 				key:      "WFNumberActionNumber",
 				dataType: Text,
@@ -194,8 +194,8 @@ func makeVariableValue(token *token, varUUID *string) {
 		}))
 	case String:
 		appendPlist(makeStdAction("gettext", []plistData{
-			UUID,
 			outputName,
+			UUID,
 			attachmentValues("WFTextActionText", token.value.(string), Text),
 		}))
 	case Expression:
@@ -217,8 +217,8 @@ func makeVariableValue(token *token, varUUID *string) {
 				wrapVariableReference(&operandTwo)
 
 				appendPlist(makeStdAction("math", []plistData{
-					UUID,
 					outputName,
+					UUID,
 					attachmentValues("WFScientificMathOperation", operation, Text),
 					attachmentValues("WFInput", operandOne, Number),
 					attachmentValues("WFMathOperand", operandTwo, Number),
@@ -235,9 +235,9 @@ func makeVariableValue(token *token, varUUID *string) {
 		}
 		expression = strings.Join(formattedExpression, " ")
 		appendPlist(makeStdAction("calculateexpression", []plistData{
-			UUID,
 			outputName,
 			attachmentValues("Input", expression, Text),
+			UUID,
 		}))
 	case Action:
 		currentAction = token.value.(action).ident
@@ -540,6 +540,11 @@ func attachmentValues(key string, str string, outputType plistDataType) plistDat
 		} else {
 			varValue = []plistData{
 				{
+					key:      "OutputName",
+					dataType: Text,
+					value:    stringVar.identifier,
+				},
+				{
 					key:      "OutputUUID",
 					dataType: Text,
 					value:    varUUID,
@@ -548,11 +553,6 @@ func attachmentValues(key string, str string, outputType plistDataType) plistDat
 					key:      "Type",
 					dataType: Text,
 					value:    "ActionOutput",
-				},
-				{
-					key:      "OutputName",
-					dataType: Text,
-					value:    stringVar.identifier,
 				},
 			}
 		}
@@ -618,14 +618,14 @@ func attachmentValues(key string, str string, outputType plistDataType) plistDat
 				dataType: Dictionary,
 				value: []plistData{
 					{
-						key:      "string",
-						dataType: Text,
-						value:    noVarString,
-					},
-					{
 						key:      "attachmentsByRange",
 						dataType: Dictionary,
 						value:    varPositions,
+					},
+					{
+						key:      "string",
+						dataType: Text,
+						value:    noVarString,
 					},
 				},
 			},

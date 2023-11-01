@@ -11,8 +11,8 @@ import (
 	"strings"
 )
 
-const header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"https://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n\t<dict>\n"
-const footer = "\t</dict>\n</plist>"
+const header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n"
+const footer = "</dict>\n</plist>\n"
 
 var plist strings.Builder
 var compiled string
@@ -22,25 +22,29 @@ func makePlist() {
 		fmt.Println("Generating plist...")
 	}
 
-	tabLevel = 1
+	tabLevel = 0
 	uuids = make(map[string]string)
 	plist.WriteString(header)
 
 	appendPlist([]plistData{
 		{
+			key:      "WFQuickActionSurfaces",
+			dataType: Array,
+		},
+	})
+
+	plistActions()
+
+	appendPlist([]plistData{
+		{
+			key:      "WFWorkflowClientVersion",
+			dataType: Text,
+			value:    "2038.0.2.4",
+		},
+		{
 			key:      "WFWorkflowHasOutputFallback",
 			dataType: Boolean,
 			value:    false,
-		},
-		{
-			key:      "WFWorkflowMinimumClientVersion",
-			dataType: Number,
-			value:    minVersion,
-		},
-		{
-			key:      "WFWorkflowMinimumClientVersionString",
-			dataType: Text,
-			value:    minVersion,
 		},
 		{
 			key:      "WFWorkflowHasShortcutInputVariables",
@@ -48,27 +52,18 @@ func makePlist() {
 			value:    hasShortcutInputVariables,
 		},
 		{
-			key:      "WFQuickActionSurfaces",
-			dataType: Array,
-		},
-		{
-			key:      "WFWorkflowClientVersion",
-			dataType: Text,
-			value:    "2038.0.2.4",
-		},
-		{
 			key:      "WFWorkflowIcon",
 			dataType: Dictionary,
 			value: []plistData{
 				{
-					key:      "WFWorkflowIconStartColor",
-					dataType: Number,
-					value:    iconColor,
-				},
-				{
 					key:      "WFWorkflowIconGlyphNumber",
 					dataType: Number,
 					value:    iconGlyph,
+				},
+				{
+					key:      "WFWorkflowIconStartColor",
+					dataType: Number,
+					value:    iconColor,
 				},
 			},
 		},
@@ -81,6 +76,16 @@ func makePlist() {
 			key:      "WFWorkflowInputContentItemClasses",
 			dataType: Array,
 			value:    plistInputContentItems(),
+		},
+		{
+			key:      "WFWorkflowMinimumClientVersion",
+			dataType: Number,
+			value:    minVersion,
+		},
+		{
+			key:      "WFWorkflowMinimumClientVersionString",
+			dataType: Text,
+			value:    minVersion,
 		},
 		{
 			key:      "WFWorkflowOutputContentItemClasses",
@@ -114,8 +119,6 @@ func makePlist() {
 			},
 		})
 	}
-
-	plistActions()
 
 	if workflowName != "" {
 		appendPlist([]plistData{
@@ -517,7 +520,12 @@ func plistImportQuestions() (importQuestions []plistData) {
 
 func plistWorkflowTypes() (wfWorkflowTypes []plistData) {
 	if len(types) == 0 {
-		return
+		return []plistData{
+			{
+				dataType: Text,
+				value:    "Watch",
+			},
+		}
 	}
 
 	for _, workflowType := range types {
