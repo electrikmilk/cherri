@@ -22,7 +22,7 @@ func makePlist() {
 		fmt.Println("Generating plist...")
 	}
 
-	tabLevel = 2
+	tabLevel = 1
 	uuids = make(map[string]string)
 	plist.WriteString(header)
 
@@ -160,9 +160,9 @@ func printPlistGenDebug() {
 }
 
 func plistActions() {
+	tabLevel++
 	var tabs = strings.Repeat("\t", tabLevel)
 	plist.WriteString(tabs + "<key>WFWorkflowActions</key>\n" + tabs + "<array>\n")
-	tabLevel++
 	for _, t := range tokens {
 		switch t.typeof {
 		case Var, AddTo:
@@ -185,8 +185,8 @@ func plistActions() {
 			plistConditional(&t)
 		}
 	}
-	tabLevel--
 	plist.WriteString(strings.Repeat("\t", tabLevel) + "</array>\n")
+	tabLevel--
 }
 
 func plistComment(comment string) {
