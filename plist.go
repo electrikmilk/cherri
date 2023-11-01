@@ -71,8 +71,10 @@ func plistKeyValue(key string, dataType plistDataType, value any) string {
 	case Dictionary:
 		pair.WriteString(fmt.Sprintf("<dict>\n%s%s</dict>\n", plistDictValue(value), strings.Repeat("\t", tabLevel)))
 	default:
-		if reflect.TypeOf(value).String() == "string" {
-			value = html.EscapeString(value.(string))
+		if value != nil {
+			if reflect.TypeOf(value).String() == "string" {
+				value = html.EscapeString(value.(string))
+			}
 		}
 		pair.WriteString(fmt.Sprintf("<%s>%v</%s>\n", dataType, value, dataType))
 	}
