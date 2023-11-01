@@ -268,13 +268,20 @@ func lookAheadUntil(until rune) string {
 }
 
 func collectVariableValue(constant bool, valueType *tokenType, value *any, varType *tokenType, coerce *string, getAs *string) {
-	if tokenAhead(AddTo) {
+	switch {
+	case tokensAhead(AddTo):
 		*varType = AddTo
-		if constant {
-			parserError("Constants cannot be added to.")
-		}
-	} else if !tokensAhead(Set) && constant {
-		parserError("Constants must be initialized with a value.")
+	case tokensAhead(SubFrom):
+		*varType = SubFrom
+	case tokensAhead(MultiplyBy):
+		*varType = MultiplyBy
+	case tokensAhead(DivideBy):
+		*varType = DivideBy
+	case tokensAhead(Set):
+	}
+
+	if *varType != Var && constant {
+		parserError("Constants cannot be added to.")
 	}
 
 	advance()

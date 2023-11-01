@@ -107,6 +107,9 @@ const (
 	At             tokenType = "@"
 	Set            tokenType = "="
 	AddTo          tokenType = "+="
+	SubFrom        tokenType = "-="
+	MultiplyBy     tokenType = "*="
+	DivideBy       tokenType = "/="
 	Is             tokenType = "=="         // is
 	Not            tokenType = "!="         // is not
 	Any            tokenType = "value"      // has any value

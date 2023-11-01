@@ -168,7 +168,7 @@ func plistActions() {
 	plist.WriteString(tabs + "<key>WFWorkflowActions</key>\n" + tabs + "<array>\n")
 	for _, t := range tokens {
 		switch t.typeof {
-		case Var, AddTo:
+		case Var, AddTo, SubFrom, MultiplyBy, DivideBy:
 			plistVariable(&t)
 		case Comment:
 			plistComment(t.value.(string))
@@ -229,22 +229,24 @@ func plistVariable(t *token) {
 		}
 	}
 
-	if t.typeof == Var {
+	if t.typeof != Var {
+		if variables[t.ident].valueType != Arr {
+			appendPlist(makeStdAction("setvariable", setVariableParams))
+			return
+		}
+		appendPlist(makeStdAction("appendvariable", setVariableParams))
+		return
+	} else {
 		if v, found := variables[t.ident]; found {
 			if v.constant {
 				return
 			}
 		}
 		appendPlist(makeStdAction("setvariable", setVariableParams))
-		if t.valueType == Arr {
-			plistArrayVariable(t)
-		}
-		return
 	}
 
-	if t.typeof == AddTo && t.valueType != Arr {
-		appendPlist(makeStdAction("appendvariable", setVariableParams))
-		return
+	if t.valueType == Arr {
+		plistArrayVariable(t)
 	}
 }
 

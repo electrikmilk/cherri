@@ -165,6 +165,62 @@ func makeVariableValue(token *token, varUUID *string) {
 		dataType: Text,
 		value:    token.ident,
 	}
+
+	if token.typeof != Var &&
+		(token.typeof == AddTo || token.typeof == SubFrom || token.typeof == MultiplyBy || token.typeof == DivideBy) &&
+		token.valueType != Arr &&
+		variables[token.ident].valueType != Arr {
+
+		var valueType = token.valueType
+		if valueType == Variable {
+			valueType = variables[token.value.(string)].valueType
+		}
+
+		if valueType == Integer {
+			var operation string
+			switch token.typeof {
+			case AddTo:
+				operation = "+"
+			case SubFrom:
+				operation = "-"
+			case MultiplyBy:
+				operation = "×"
+			case DivideBy:
+				operation = "÷"
+			}
+			var tokenType = convertTypeToken(token.valueType)
+			appendPlist(makeStdAction("math", []plistData{
+				outputName,
+				UUID,
+				paramValue("WFMathOperand", actionArgument{
+					valueType: token.valueType,
+					value:     token.value,
+				}, token.valueType, tokenType),
+				paramValue("WFInput", actionArgument{
+					valueType: Var,
+					value:     token.ident,
+				}, token.valueType, tokenType),
+				{
+					key:      "WFMathOperation",
+					dataType: Text,
+					value:    operation,
+				},
+			}))
+		} else if valueType == String {
+			var varInput = token.value.(string)
+			wrapVariableReference(&varInput)
+			appendPlist(makeStdAction("gettext", []plistData{
+				outputName,
+				UUID,
+				paramValue("WFTextActionText", actionArgument{
+					valueType: String,
+					value:     fmt.Sprintf("{%s}%s", token.ident, varInput),
+				}, token.valueType, convertTypeToken(valueType)),
+			}))
+		}
+		return
+	}
+
 	switch token.valueType {
 	case Integer:
 		appendPlist(makeStdAction("number", []plistData{
@@ -689,6 +745,23 @@ func collectInlineVariables(str *string) (noVarString string) {
 	return
 }
 
+func convertTypeToken(tokenType tokenType) plistDataType {
+	switch tokenType {
+	case String:
+		return Text
+	case Integer:
+		return Number
+	case Arr:
+		return Array
+	case Dict:
+		return Dictionary
+	case Bool:
+		return Boolean
+	default:
+		return ""
+	}
+}
+
 func argumentValue(key string, args []actionArgument, idx int) plistData {
 	var actionArg = actions[currentAction].parameters[idx]
 	var arg actionArgument
@@ -699,20 +772,7 @@ func argumentValue(key string, args []actionArgument, idx int) plistData {
 	} else {
 		arg = args[idx]
 	}
-	var plistType plistDataType
-	switch actionArg.validType {
-	case String:
-		plistType = Text
-	case Integer:
-		plistType = Number
-	case Arr:
-		plistType = Array
-	case Dict:
-		plistType = Dictionary
-	case Bool:
-		plistType = Boolean
-	}
-	return paramValue(key, arg, actionArg.validType, plistType)
+	return paramValue(key, arg, actionArg.validType, convertTypeToken(actionArg.validType))
 }
 
 func paramValue(key string, arg actionArgument, handleAs tokenType, outputType plistDataType) plistData {
