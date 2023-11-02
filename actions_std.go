@@ -1729,7 +1729,7 @@ func mediaActions() {
 				name:         "count",
 				validType:    Integer,
 				key:          "WFPhotoCount",
-				defaultValue: "1",
+				defaultValue: 1,
 			},
 			{
 				name:         "showPreview",
