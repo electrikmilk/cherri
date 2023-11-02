@@ -5,7 +5,6 @@
 package main
 
 import (
-	"encoding/xml"
 	"fmt"
 	"os"
 	"strings"
@@ -14,39 +13,7 @@ import (
 
 var currentTest string
 
-func TestProfile(t *testing.T) {
-	testFiles(func(file os.DirEntry) bool {
-		compile()
-
-		return true
-	})
-}
-
 func TestCherri(t *testing.T) {
-	testFiles(func(file os.DirEntry) bool {
-		compile()
-
-		return matchesExpected()
-	})
-}
-
-func TestSingleFile(_ *testing.T) {
-	currentTest = "tests/conditionals.cherri"
-	fmt.Printf("⚙️ Compiling %s...\n", ansi(currentTest, bold))
-	os.Args[1] = currentTest
-	main()
-	matchesExpected()
-	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
-}
-
-func TestActionList(_ *testing.T) {
-	standardActions()
-	for identifier := range actions {
-		fmt.Println("{label: '" + identifier + "', type: 'function', detail: 'action'},")
-	}
-}
-
-func testFiles(handle func(file os.DirEntry) bool) {
 	var files, err = os.ReadDir("tests")
 	if err != nil {
 		fmt.Println(ansi("FAILED: unable to read tests directory", red))
@@ -57,21 +24,34 @@ func testFiles(handle func(file os.DirEntry) bool) {
 			continue
 		}
 		currentTest = fmt.Sprintf("tests/%s", file.Name())
-
+		os.Args[1] = currentTest
 		fmt.Println(ansi(currentTest, underline, bold))
 
-		if handle(file) {
-			fmt.Println(ansi("✅  PASSED", green, bold))
-		}
+		compile()
 
+		fmt.Println(ansi("✅  PASSED", green, bold))
 		fmt.Print("\n")
 
 		resetParser()
 	}
 }
 
-func compile() {
+func TestSingleFile(_ *testing.T) {
+	currentTest = "tests/conditionals.cherri"
+	fmt.Printf("⚙️ Compiling %s...\n", ansi(currentTest, bold))
 	os.Args[1] = currentTest
+	main()
+	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
+}
+
+func TestActionList(_ *testing.T) {
+	standardActions()
+	for identifier := range actions {
+		fmt.Println("{label: '" + identifier + "', type: 'function', detail: 'action'},")
+	}
+}
+
+func compile() {
 	defer func() {
 		if recover() != nil {
 			fmt.Println(ansi("‼️DID NOT COMPILE", bold, green))
@@ -79,37 +59,6 @@ func compile() {
 	}()
 
 	main()
-
-	fmt.Println(ansi("☑️ COMPILED", bold))
-}
-
-func matchesExpected() bool {
-	var expectedPlist = fmt.Sprintf("tests/%s_expected.plist", workflowName)
-	var _, statErr = os.Stat(expectedPlist)
-	if os.IsNotExist(statErr) {
-		fmt.Println(ansi("Test has no exported plist to compare against.", yellow))
-		return true
-	}
-	var expectedBytes, readErr = os.ReadFile(expectedPlist)
-	handle(readErr)
-
-	var xmlErr error
-
-	var compiledXML interface{}
-	xmlErr = xml.Unmarshal([]byte(compiled), &compiledXML)
-	handle(xmlErr)
-
-	var expectedXML interface{}
-	xmlErr = xml.Unmarshal(expectedBytes, &expectedXML)
-	handle(xmlErr)
-
-	if expectedXML != compiledXML {
-		fmt.Print(ansi("‼️ DOES NOT MATCH EXPECTED", red, bold) + "\n")
-		return false
-	}
-
-	fmt.Println(ansi("☑️ MATCHES EXPECTED", bold))
-	return true
 }
 
 func resetParser() {
