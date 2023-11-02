@@ -1726,38 +1726,26 @@ func mediaActions() {
 	actions["takePhoto"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
+				name:         "count",
+				validType:    Integer,
+				key:          "WFPhotoCount",
+				defaultValue: "1",
+			},
+			{
 				name:         "showPreview",
 				validType:    Bool,
 				key:          "WFCameraCaptureShowPreview",
 				defaultValue: true,
 			},
 		},
-	}
-	actions["takePhotos"] = &actionDefinition{
-		identifier: "takephoto",
-		parameters: []parameterDefinition{
-			{
-				name:      "count",
-				validType: Integer,
-				key:       "WFPhotoCount",
-			},
-		},
 		check: func(args []actionArgument) {
-			var photos = getArgValue(args[0]).(int)
-			if photos == 0 {
+			if len(args) == 0 {
+				return
+			}
+
+			var photos = getArgValue(args[0])
+			if photos == "0" {
 				parserError("Number of photos to take must be greater than zero.")
-			}
-			if photos < 2 {
-				parserError("Use action takePhoto() instead to take only one photo.")
-			}
-		},
-		addParams: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFCameraCaptureShowPreview",
-					dataType: Boolean,
-					value:    true,
-				},
 			}
 		},
 	}
