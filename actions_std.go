@@ -1512,7 +1512,7 @@ func locationActions() {
 		},
 	}
 	actions["getCurrentWeather"] = &actionDefinition{
-		identifier: "currentconditions",
+		identifier: "weather.currentconditions",
 		parameters: []parameterDefinition{
 			{
 				name:         "location",
