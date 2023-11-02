@@ -22,6 +22,7 @@ type include struct {
 }
 
 var includes []include
+var included []string
 
 func handleIncludes() {
 	if args.Using("auto-inc") {

@@ -23,8 +23,6 @@ var contents string
 var relativePath string
 var outputPath string
 
-var included []string
-
 func main() {
 	if args.Using("help") {
 		args.PrintUsage()
