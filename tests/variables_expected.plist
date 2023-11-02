@@ -14,7 +14,7 @@
 				<key>CustomOutputName</key>
 				<string>intVar</string>
 				<key>UUID</key>
-				<string>7E59BA30-160A-4969-A854-C3D4476620F9</string>
+				<string>2F103732-6EA3-4A4D-B29C-09A35D627968</string>
 				<key>WFNumberActionNumber</key>
 				<string>42</string>
 			</dict>
@@ -31,7 +31,7 @@
 						<key>OutputName</key>
 						<string>intVar</string>
 						<key>OutputUUID</key>
-						<string>7E59BA30-160A-4969-A854-C3D4476620F9</string>
+						<string>2F103732-6EA3-4A4D-B29C-09A35D627968</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -52,7 +52,7 @@
 				<key>CustomOutputName</key>
 				<string>intVar2</string>
 				<key>UUID</key>
-				<string>152ACF9C-A5B8-44D4-84B4-9D4A056C9796</string>
+				<string>ED344B45-5D87-4C3D-A648-22B01F170C8E</string>
 				<key>WFNumberActionNumber</key>
 				<string>52</string>
 			</dict>
@@ -69,7 +69,7 @@
 						<key>OutputName</key>
 						<string>intVar2</string>
 						<key>OutputUUID</key>
-						<string>152ACF9C-A5B8-44D4-84B4-9D4A056C9796</string>
+						<string>ED344B45-5D87-4C3D-A648-22B01F170C8E</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -90,7 +90,7 @@
 				<key>CustomOutputName</key>
 				<string>immutable</string>
 				<key>UUID</key>
-				<string>E351648F-4777-4D66-B787-3197DE1C1524</string>
+				<string>E8B695B6-8425-4480-B007-35E72FD38757</string>
 				<key>WFNumberActionNumber</key>
 				<string>5</string>
 			</dict>
@@ -103,7 +103,7 @@
 				<key>CustomOutputName</key>
 				<string>stringVar</string>
 				<key>UUID</key>
-				<string>AB8015D7-70DB-4A33-9044-9CE69515F230</string>
+				<string>B55D6A6D-8A1D-410C-9110-7FC88DA102C5</string>
 				<key>WFTextActionText</key>
 				<dict>
 					<key>Value</key>
@@ -117,9 +117,16 @@
 								<key>VariableName</key>
 								<string>intVar</string>
 							</dict>
+							<key>{7, 1}</key>
+							<dict>
+								<key>Type</key>
+								<string>Variable</string>
+								<key>VariableName</key>
+								<string>intVar2</string>
+							</dict>
 						</dict>
 						<key>string</key>
-						<string>text ￼</string>
+						<string>text ￼ ￼</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenString</string>
@@ -138,7 +145,7 @@
 						<key>OutputName</key>
 						<string>stringVar</string>
 						<key>OutputUUID</key>
-						<string>AB8015D7-70DB-4A33-9044-9CE69515F230</string>
+						<string>B55D6A6D-8A1D-410C-9110-7FC88DA102C5</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -159,7 +166,7 @@
 				<key>CustomOutputName</key>
 				<string>multiString</string>
 				<key>UUID</key>
-				<string>F9CFCB2C-5F12-4F9F-8ED5-D5C5801740B0</string>
+				<string>2782C960-A02C-4CA6-82DB-3F8C9DAFD367</string>
 				<key>WFTextActionText</key>
 				<string>Multiline
 string
@@ -178,7 +185,7 @@ var</string>
 						<key>OutputName</key>
 						<string>multiString</string>
 						<key>OutputUUID</key>
-						<string>F9CFCB2C-5F12-4F9F-8ED5-D5C5801740B0</string>
+						<string>2782C960-A02C-4CA6-82DB-3F8C9DAFD367</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -208,7 +215,7 @@ var</string>
 				<key>CustomOutputName</key>
 				<string>Text</string>
 				<key>UUID</key>
-				<string>33B8D289-213A-4C06-97DC-31DBCE9EE7B0</string>
+				<string>40A333D1-B06F-4BF8-98A4-3B3B84123D39</string>
 				<key>WFTextActionText</key>
 				<dict>
 					<key>Value</key>
@@ -243,7 +250,7 @@ var</string>
 						<key>OutputName</key>
 						<string>Text</string>
 						<key>OutputUUID</key>
-						<string>33B8D289-213A-4C06-97DC-31DBCE9EE7B0</string>
+						<string>40A333D1-B06F-4BF8-98A4-3B3B84123D39</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -262,7 +269,7 @@ var</string>
 				<key>CustomOutputName</key>
 				<string>Text</string>
 				<key>UUID</key>
-				<string>DBE7F661-D4CD-40E3-8F35-BA0235DE4551</string>
+				<string>464958C1-05AC-419E-9B9F-9161F8B1089C</string>
 				<key>WFTextActionText</key>
 				<string>item 2</string>
 			</dict>
@@ -279,7 +286,7 @@ var</string>
 						<key>OutputName</key>
 						<string>Text</string>
 						<key>OutputUUID</key>
-						<string>DBE7F661-D4CD-40E3-8F35-BA0235DE4551</string>
+						<string>464958C1-05AC-419E-9B9F-9161F8B1089C</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -298,7 +305,7 @@ var</string>
 				<key>CustomOutputName</key>
 				<string>Text</string>
 				<key>UUID</key>
-				<string>5A9557DF-9D7A-44CB-B553-6E056EE8307F</string>
+				<string>93235E1E-6FAA-4213-AE09-5C3A8C1AF3D2</string>
 				<key>WFTextActionText</key>
 				<string>item 3</string>
 			</dict>
@@ -315,7 +322,7 @@ var</string>
 						<key>OutputName</key>
 						<string>Text</string>
 						<key>OutputUUID</key>
-						<string>5A9557DF-9D7A-44CB-B553-6E056EE8307F</string>
+						<string>93235E1E-6FAA-4213-AE09-5C3A8C1AF3D2</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -334,7 +341,7 @@ var</string>
 				<key>CustomOutputName</key>
 				<string>Number</string>
 				<key>UUID</key>
-				<string>25CC894A-3BE3-4399-8DD2-D83C1BAC2643</string>
+				<string>7B4E2614-4196-445A-8149-6696BBE270F6</string>
 				<key>WFNumberActionNumber</key>
 				<string>5</string>
 			</dict>
@@ -351,7 +358,7 @@ var</string>
 						<key>OutputName</key>
 						<string>Number</string>
 						<key>OutputUUID</key>
-						<string>25CC894A-3BE3-4399-8DD2-D83C1BAC2643</string>
+						<string>7B4E2614-4196-445A-8149-6696BBE270F6</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -370,13 +377,34 @@ var</string>
 				<key>CustomOutputName</key>
 				<string>Dictionary</string>
 				<key>UUID</key>
-				<string>DB73224B-433E-46F3-AE5D-ED589AEBBC37</string>
+				<string>AC49C011-3CF3-4562-88CA-8752FFE374AC</string>
 				<key>WFItems</key>
 				<dict>
 					<key>Value</key>
 					<dict>
 						<key>WFDictionaryFieldValueItems</key>
 						<array>
+							<dict>
+								<key>WFItemType</key>
+								<integer>4</integer>
+								<key>WFKey</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>key3</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+								<key>WFValue</key>
+								<dict>
+									<key>Value</key>
+									<true/>
+									<key>WFSerializationType</key>
+									<string>WFNumberSubstitutableState</string>
+								</dict>
+							</dict>
 							<dict>
 								<key>WFItemType</key>
 								<integer>0</integer>
@@ -425,27 +453,6 @@ var</string>
 									<string>WFTextTokenString</string>
 								</dict>
 							</dict>
-							<dict>
-								<key>WFItemType</key>
-								<integer>4</integer>
-								<key>WFKey</key>
-								<dict>
-									<key>Value</key>
-									<dict>
-										<key>string</key>
-										<string>key3</string>
-									</dict>
-									<key>WFSerializationType</key>
-									<string>WFTextTokenString</string>
-								</dict>
-								<key>WFValue</key>
-								<dict>
-									<key>Value</key>
-									<true/>
-									<key>WFSerializationType</key>
-									<string>WFNumberSubstitutableState</string>
-								</dict>
-							</dict>
 						</array>
 					</dict>
 					<key>WFSerializationType</key>
@@ -465,7 +472,7 @@ var</string>
 						<key>OutputName</key>
 						<string>Dictionary</string>
 						<key>OutputUUID</key>
-						<string>DB73224B-433E-46F3-AE5D-ED589AEBBC37</string>
+						<string>AC49C011-3CF3-4562-88CA-8752FFE374AC</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -484,7 +491,7 @@ var</string>
 				<key>CustomOutputName</key>
 				<string>boolVarTrue</string>
 				<key>UUID</key>
-				<string>034E8BE5-8F7C-4E4F-A1BF-C565DF9E737F</string>
+				<string>E1C22320-3947-4A8E-B5EB-B598BB9D05F7</string>
 				<key>WFNumberActionNumber</key>
 				<string>1</string>
 			</dict>
@@ -501,7 +508,7 @@ var</string>
 						<key>OutputName</key>
 						<string>boolVarTrue</string>
 						<key>OutputUUID</key>
-						<string>034E8BE5-8F7C-4E4F-A1BF-C565DF9E737F</string>
+						<string>E1C22320-3947-4A8E-B5EB-B598BB9D05F7</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -522,7 +529,7 @@ var</string>
 				<key>CustomOutputName</key>
 				<string>boolVarFalse</string>
 				<key>UUID</key>
-				<string>00B20897-4943-40B4-A2BF-14F0877EB13A</string>
+				<string>DDDB23DD-8394-4DFB-9FC0-045AA8BA3C57</string>
 				<key>WFNumberActionNumber</key>
 				<string>0</string>
 			</dict>
@@ -539,7 +546,7 @@ var</string>
 						<key>OutputName</key>
 						<string>boolVarFalse</string>
 						<key>OutputUUID</key>
-						<string>00B20897-4943-40B4-A2BF-14F0877EB13A</string>
+						<string>DDDB23DD-8394-4DFB-9FC0-045AA8BA3C57</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -562,7 +569,7 @@ var</string>
 				<key>Show-WFURLActionURL</key>
 				<true/>
 				<key>UUID</key>
-				<string>DBB6DB2A-B174-46AD-92FF-43A5AA8D1D74</string>
+				<string>0F0EA336-1627-4A34-A453-4CCC16822D2B</string>
 				<key>WFURLActionURL</key>
 				<array>
 					<string>https://apple.com</string>
@@ -582,7 +589,7 @@ var</string>
 						<key>OutputName</key>
 						<string>urlVar</string>
 						<key>OutputUUID</key>
-						<string>DBB6DB2A-B174-46AD-92FF-43A5AA8D1D74</string>
+						<string>0F0EA336-1627-4A34-A453-4CCC16822D2B</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -603,7 +610,7 @@ var</string>
 				<key>CustomOutputName</key>
 				<string>dateVar</string>
 				<key>UUID</key>
-				<string>C0717367-F93F-4602-B038-E5582FB9E034</string>
+				<string>1EB1D4C0-4FF1-48C4-B638-D833420BEDDB</string>
 				<key>WFDateActionDate</key>
 				<string>October 5, 2022</string>
 				<key>WFDateActionMode</key>
@@ -622,7 +629,7 @@ var</string>
 						<key>OutputName</key>
 						<string>dateVar</string>
 						<key>OutputUUID</key>
-						<string>C0717367-F93F-4602-B038-E5582FB9E034</string>
+						<string>1EB1D4C0-4FF1-48C4-B638-D833420BEDDB</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -643,7 +650,7 @@ var</string>
 				<key>CustomOutputName</key>
 				<string>email</string>
 				<key>UUID</key>
-				<string>0254B96A-46D7-409F-BD31-9AFF91B6CCEE</string>
+				<string>DF4D79F1-8161-413B-AFB7-E58D5B348A2C</string>
 				<key>WFEmailAddress</key>
 				<dict>
 					<key>Value</key>
@@ -678,7 +685,7 @@ var</string>
 						<key>OutputName</key>
 						<string>email</string>
 						<key>OutputUUID</key>
-						<string>0254B96A-46D7-409F-BD31-9AFF91B6CCEE</string>
+						<string>DF4D79F1-8161-413B-AFB7-E58D5B348A2C</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -699,7 +706,7 @@ var</string>
 				<key>CustomOutputName</key>
 				<string>phone</string>
 				<key>UUID</key>
-				<string>436FC04D-C500-4324-AD6B-86F096A80E69</string>
+				<string>09AAE5B7-7935-432C-B425-00C5C1F62CDC</string>
 				<key>WFPhoneNumber</key>
 				<dict>
 					<key>Value</key>
@@ -734,7 +741,7 @@ var</string>
 						<key>OutputName</key>
 						<string>phone</string>
 						<key>OutputUUID</key>
-						<string>436FC04D-C500-4324-AD6B-86F096A80E69</string>
+						<string>09AAE5B7-7935-432C-B425-00C5C1F62CDC</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -755,7 +762,7 @@ var</string>
 				<key>CustomOutputName</key>
 				<string>dictVar</string>
 				<key>UUID</key>
-				<string>51ECEEFB-189B-46DC-ACA7-1701B1EFFE0E</string>
+				<string>17CE8B00-5777-4F6B-B605-241D13B2A05F</string>
 				<key>WFItems</key>
 				<dict>
 					<key>Value</key>
@@ -914,7 +921,7 @@ var</string>
 						<key>OutputName</key>
 						<string>dictVar</string>
 						<key>OutputUUID</key>
-						<string>51ECEEFB-189B-46DC-ACA7-1701B1EFFE0E</string>
+						<string>17CE8B00-5777-4F6B-B605-241D13B2A05F</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -955,7 +962,7 @@ var</string>
 					<string>WFTextTokenString</string>
 				</dict>
 				<key>UUID</key>
-				<string>82F9E563-72AC-4809-B036-A608F28D37F8</string>
+				<string>38BDF1F2-B32B-4F8A-B60C-4F55E75EB514</string>
 			</dict>
 		</dict>
 		<dict>
@@ -970,7 +977,7 @@ var</string>
 						<key>OutputName</key>
 						<string>expVar</string>
 						<key>OutputUUID</key>
-						<string>82F9E563-72AC-4809-B036-A608F28D37F8</string>
+						<string>38BDF1F2-B32B-4F8A-B60C-4F55E75EB514</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -991,7 +998,7 @@ var</string>
 				<key>CustomOutputName</key>
 				<string>listVar</string>
 				<key>UUID</key>
-				<string>5F721EC0-316A-49B5-921C-46C3108B744D</string>
+				<string>DF57D34F-746B-4B27-8246-C9FA5F8E7659</string>
 				<key>WFItems</key>
 				<array>
 					<string>Item 1</string>
@@ -1012,7 +1019,7 @@ var</string>
 						<key>OutputName</key>
 						<string>listVar</string>
 						<key>OutputUUID</key>
-						<string>5F721EC0-316A-49B5-921C-46C3108B744D</string>
+						<string>DF57D34F-746B-4B27-8246-C9FA5F8E7659</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -1042,14 +1049,32 @@ var</string>
 				<key>CustomOutputName</key>
 				<string>stringVar</string>
 				<key>UUID</key>
-				<string>A73213A4-73E2-48E1-8634-86AB97FD82B0</string>
+				<string>A8021102-D696-46DE-8D9F-801C5DD8D943</string>
 				<key>WFTextActionText</key>
-				<string>test</string>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>attachmentsByRange</key>
+						<dict>
+							<key>{0, 1}</key>
+							<dict>
+								<key>Type</key>
+								<string>Variable</string>
+								<key>VariableName</key>
+								<string>stringVar</string>
+							</dict>
+						</dict>
+						<key>string</key>
+						<string>￼test</string>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenString</string>
+				</dict>
 			</dict>
 		</dict>
 		<dict>
 			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.appendvariable</string>
+			<string>is.workflow.actions.setvariable</string>
 			<key>WFWorkflowActionParameters</key>
 			<dict>
 				<key>WFInput</key>
@@ -1059,7 +1084,7 @@ var</string>
 						<key>OutputName</key>
 						<string>stringVar</string>
 						<key>OutputUUID</key>
-						<string>A73213A4-73E2-48E1-8634-86AB97FD82B0</string>
+						<string>A8021102-D696-46DE-8D9F-801C5DD8D943</string>
 						<key>Type</key>
 						<string>ActionOutput</string>
 					</dict>
@@ -1113,25 +1138,25 @@ var</string>
 	<array/>
 	<key>WFWorkflowInputContentItemClasses</key>
 	<array>
-		<string>WFNumberContentItem</string>
 		<string>WFDateContentItem</string>
 		<string>WFPhoneNumberContentItem</string>
 		<string>WFSafariWebPageContentItem</string>
-		<string>WFPDFContentItem</string>
+		<string>WFNumberContentItem</string>
 		<string>WFAppStoreAppContentItem</string>
 		<string>WFiTunesProductContentItem</string>
 		<string>WFLocationContentItem</string>
-		<string>WFRichTextContentItem</string>
+		<string>WFPDFContentItem</string>
 		<string>WFEmailAddressContentItem</string>
 		<string>WFFolderContentItem</string>
 		<string>WFGenericFileContentItem</string>
+		<string>WFRichTextContentItem</string>
+		<string>WFArticleContentItem</string>
+		<string>WFContactContentItem</string>
+		<string>WFImageContentItem</string>
 		<string>WFDCMapsLinkContentItem</string>
 		<string>WFAVAssetContentItem</string>
 		<string>WFStringContentItem</string>
 		<string>WFURLContentItem</string>
-		<string>WFArticleContentItem</string>
-		<string>WFContactContentItem</string>
-		<string>WFImageContentItem</string>
 	</array>
 	<key>WFWorkflowMinimumClientVersion</key>
 	<integer>900</integer>
