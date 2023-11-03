@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"regexp"
 	"strings"
 )
 
@@ -3194,7 +3195,7 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			replaceAppID(args, 0)
+			replaceAppIDs(args)
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -3218,7 +3219,7 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			replaceAppID(args, 0)
+			replaceAppIDs(args)
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -3270,7 +3271,7 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			replaceAppID(args, 0)
+			replaceAppIDs(args)
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -3322,7 +3323,7 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			replaceAppID(args, 0)
+			replaceAppIDs(args)
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -3362,7 +3363,10 @@ func scriptingActions() {
 				{
 					key:      "WFAppsExcept",
 					dataType: Array,
-					value:    []string{plistValue(Dictionary, apps(args))},
+					value: plistData{
+						dataType: Dictionary,
+						value:    apps(args),
+					},
 				},
 				{
 					key:      "WFAskToSaveChanges",
@@ -3393,8 +3397,8 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			replaceAppID(args, 0)
-			replaceAppID(args, 1)
+			args[0].value = replaceAppID(getArgValue(args[0]).(string))
+			args[1].value = replaceAppID(getArgValue(args[1]).(string))
 			if len(args) > 2 {
 				switch args[2].value {
 				case "half":
@@ -5140,28 +5144,25 @@ func apps(args []actionArgument) (apps []plistData) {
 	return
 }
 
-func replaceAppID(args []actionArgument, idx int) {
-	if len(appIds) == 0 {
-		makeAppIds()
-	}
-	if len(args) >= 1 {
-		var id = getArgValue(args[idx]).(string)
-		if appId, found := appIds[id]; found {
-			args[idx].value = appId
+func replaceAppID(id string) string {
+	if appId, found := appIds[id]; found {
+		return appId
+	} else {
+		var regex = regexp.MustCompile(`^([A-Za-z][A-Za-z\d_]*\.)+[A-Za-z][A-Za-z\d_]*$`)
+		var matches = regex.FindAllString(id, -1)
+		if len(matches) == 0 {
+			parserError(fmt.Sprintf("Invalid app bundle identifier: %s", id))
 		}
+		return id
 	}
 }
 
 func replaceAppIDs(args []actionArgument) {
-	if len(appIds) == 0 {
-		makeAppIds()
-	}
+	makeAppIds()
 	if len(args) >= 1 {
 		for a := range args {
 			var id = getArgValue(args[a]).(string)
-			if appId, found := appIds[id]; found {
-				args[a].value = appId
-			}
+			args[a].value = replaceAppID(id)
 		}
 	}
 }
