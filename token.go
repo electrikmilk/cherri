@@ -78,9 +78,9 @@ const (
 func typeName(typeOf tokenType) string {
 	switch typeOf {
 	case String:
-		return "string"
+		return "text"
 	case Integer:
-		return "integer"
+		return "number"
 	case Arr:
 		return "array"
 	case Dict:
