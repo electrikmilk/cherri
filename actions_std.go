@@ -383,6 +383,18 @@ func contactActions() {
 				optional:  true,
 			},
 		},
+		addParams: func(args []actionArgument) []plistData {
+			if len(args) == 4 {
+				return []plistData{
+					{
+						key:      "WFContentItemLimitEnabled",
+						dataType: Boolean,
+						value:    true,
+					},
+				}
+			}
+			return []plistData{}
+		},
 	}
 	actions["emailAddress"] = &actionDefinition{
 		identifier: "email",
