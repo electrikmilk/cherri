@@ -7,18 +7,24 @@ const boolVar = true
 // types of conditions
 if boolVar == true {}
 if boolVar == false {}
+if textVar == textVar2 {}
+if textVar != textVar2 {}
 if textVar {}
 if !textVar {}
 if intVar == 5 {}
 if intVar != 5 {}
-if intVar > 5 {}
+if intVar > intVar2 {}
 if intVar < 5 {}
 if intVar >= 5 {}
 if intVar <= 5 {}
 if textVar contains "string" {}
+if textVar contains textVar2 {}
+if textVar !contains textVar2 {}
 if textVar !contains "2" {}
 if textVar beginsWith "string" {}
-if textVar2 endsWith "2" {}
+if textVar beginsWith textVar2 {}
+if textVar endsWith "2" {}
+if textVar endsWith textVar2 {}
 if intVar <> 5 6 {} // between
 
 // nesting...
