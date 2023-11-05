@@ -69,11 +69,11 @@ func printIncludesDebug() {
 func parseIncludes() {
 	lines = strings.Split(contents, "\n")
 	for l, line := range lines {
-		var lineChars = strings.Split(line, "")
-		if len(lineChars) == 0 {
+		line = strings.Trim(line, " \t\n")
+		if len(line) == 0 {
 			continue
 		}
-		if !startsWith(strings.Trim(line, " "), "#include") {
+		if !startsWith(line, "#include") {
 			advanceUntil('\n')
 			continue
 		}
