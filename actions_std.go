@@ -5150,20 +5150,20 @@ func apps(args []actionArgument) (apps []plistData) {
 }
 
 func replaceAppID(id string) string {
+	makeAppIds()
 	if appId, found := appIds[id]; found {
 		return appId
-	} else {
-		var regex = regexp.MustCompile(`^([A-Za-z][A-Za-z\d_]*\.)+[A-Za-z][A-Za-z\d_]*$`)
-		var matches = regex.FindAllString(id, -1)
-		if len(matches) == 0 {
-			parserError(fmt.Sprintf("Invalid app bundle identifier: %s", id))
-		}
-		return id
 	}
+
+	var regex = regexp.MustCompile(`^([A-Za-z][A-Za-z\d_]*\.)+[A-Za-z][A-Za-z\d_]*$`)
+	var matches = regex.FindAllString(id, -1)
+	if len(matches) == 0 {
+		parserError(fmt.Sprintf("Invalid app bundle identifier: %s", id))
+	}
+	return id
 }
 
 func replaceAppIDs(args []actionArgument) {
-	makeAppIds()
 	if len(args) >= 1 {
 		for a := range args {
 			var id = getArgValue(args[a]).(string)
