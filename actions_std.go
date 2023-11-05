@@ -3214,7 +3214,7 @@ func scriptingActions() {
 		identifier: "hide.app",
 		parameters: []parameterDefinition{
 			{
-				name:      "appId",
+				name:      "appID",
 				validType: String,
 			},
 		},
@@ -3266,7 +3266,7 @@ func scriptingActions() {
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
 			{
-				name:      "appId",
+				name:      "appID",
 				validType: String,
 			},
 		},
@@ -3318,7 +3318,7 @@ func scriptingActions() {
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
 			{
-				name:      "appId",
+				name:      "appID",
 				validType: String,
 			},
 		},
