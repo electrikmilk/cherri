@@ -378,7 +378,7 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 	}
 
 	if char == '[' {
-		identifier.WriteString(collectUntil(']') + `]`)
+		identifier.WriteString(fmt.Sprintf("%s]", collectUntil(']')))
 		advance()
 	}
 	if char == '.' {
