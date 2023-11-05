@@ -37,18 +37,19 @@ reproduce it and what environment it may be isolated to are clearly communicated
 - Only add dependencies that add features that exceed the complexity of the compiler, otherwise, you could probably
   write that code yourself.
 - This compiler is meant to be one static distributed binary. Do not make it depend on external resources.
-- Use the format `var variable = ...` rather than `variable := ...`, unless in a for loop or if statement.
-- Omit types when they can be inferred.
+- Use the syntax `var variable = ...` rather than `variable := ...`, unless in a for loop or if statement.
+- Omit types when they can be inferred, but declare types with no value. (e.g. `var text string`, not: `var text = ""`)
 - Use capitalized case for tokens (e.g. `LeftBrace`).
 - Only put comments in code to explain _why_ something does something, not what it is doing. Your code should be
   readable enough that it is obvious to anyone reading it.
 - No moving code around without a good reason. Only organize code when absolutely necessary.
 - Keep any additions to Cherri syntax consistent with the existing style (e.g. camelCase, scripting-language-like, only
   capitalize globals, minimal parenthesis, concise keywords).
-- In action, names, `detail` is preferred over `component`, and `make` is preferred over `generate` or `create`.
+- In action names, `detail` is preferred over `component`, and `make` is preferred over `generate` or `create`.
 
 ### Code submission policy
 
+- Please use the [Go linter](https://golangci-lint.run/). You can set this up in [GoLand](https://plugins.jetbrains.com/plugin/12496-go-linter). Don't lose focus on your change, but ensure your code is optimal.
 - Test your code to the best of your ability, do not submit code that does not compile.
 - Write commit titles in the imperative (Fix bug, Add thing, etc.)
 - Don't over-explain but don't be vague, briefly but clearly state your changes.
