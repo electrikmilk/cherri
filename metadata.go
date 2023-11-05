@@ -82,7 +82,6 @@ func makeWorkflowTypes() {
 		"sharesheet":    "ActionExtension",
 		"notifications": "NCWidget",
 		"sleepmode":     "Sleep",
-		"watchkit":      "WatchKit",
 		"watch":         "Watch",
 		"onscreen":      "ReceivesOnScreenContent",
 	}
