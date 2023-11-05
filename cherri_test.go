@@ -14,20 +14,6 @@ import (
 
 var currentTest string
 
-func TestPrintData(_ *testing.T) {
-	printData([]parameterDefinition{
-		{
-			name:         "brandon",
-			validType:    String,
-			key:          "myKey",
-			defaultValue: nil,
-			enum:         nil,
-			optional:     false,
-			infinite:     false,
-		},
-	})
-}
-
 func TestCherri(t *testing.T) {
 	makeActionsTest()
 	runTests(func(file os.DirEntry) {
