@@ -98,10 +98,6 @@ func plistDictValue(value any) string {
 	return pair.String()
 }
 
-func plistValue(dataType plistDataType, value any) string {
-	return plistKeyValue("", dataType, value)
-}
-
 // appendPlist grows and writes to the plist string builder
 func appendPlist(data []plistData) {
 	var xmlStr = plistDictValue(data)
