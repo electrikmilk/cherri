@@ -18,9 +18,9 @@ programming language, that compiles directly to a valid runnable Shortcut.
 
 ### Top Features
 
-- 🌟 Clear and consistent abstractions that make programming Shortcuts easy.
-- 🪄 No explicit magic variables, they're constants instead.
-- #️⃣ Include files within each other or auto-include.
+- 🌟 Clear and consistent abstractions that make programming Shortcuts easy
+- 🪄 No explicit magic variables, they're constants instead
+- #️⃣ Include files within each other or auto-include
 - 🔧 Define your own custom actions.
 - 🥩 Raw actions
 - ❓ Import questions
@@ -36,7 +36,7 @@ programming language, that compiles directly to a valid runnable Shortcut.
 
 ### **📣 WIP 📣**
 
-This project has not yet reached a stable version. It is under heavy development, and backwards
+This project has not yet reached a stable version. It is under heavy development, and backward
 incompatible changes may be made.
 
 ## Usage
@@ -58,7 +58,7 @@ browser.
 
 As it stands, I don't want someone to get confused and think Shortcuts compiled using Cherri on other platforms will run
 on their Mac or iOS device. However, you can build the compiler for your platform, it will just skip signing the
-compiled Shortcut, so it will not run on iOS 15+ or macOS 12+. Also note that the compiler is primarily developed and
+compiled Shortcut, so it will not run on iOS 15+ or macOS 12+. Also, note that the compiler is primarily developed and
 tested on Unix-like systems.
 
 [Read my full thoughts on this](https://github.com/electrikmilk/cherri/wiki/Why-macOS-only%3F)
@@ -70,9 +70,7 @@ Because it's fun :)
 Some languages have been abandoned, don't work very well, or no longer work. I don't want Shortcuts languages to die.
 There should be more, not less.
 
-Some stability that comes with the project being on macOS and not iOS. I am not aware of any
-project [other than one](https://github.com/zachary7829/Buttermilk) that compiles a
-Shortcut in a way that is meant for a desktop OS.
+Some stability comes with the project being on macOS and not iOS.
 
 ## Community
 
