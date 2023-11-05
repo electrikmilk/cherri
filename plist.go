@@ -67,9 +67,9 @@ func plistKeyValue(key string, dataType plistDataType, value any) string {
 			pair.WriteString("<array/>\n")
 			break
 		}
-		pair.WriteString(fmt.Sprintf("<array>\n%s%s</array>\n", plistDictValue(value), strings.Repeat("\t", tabLevel)))
+		pair.WriteString(fmt.Sprintf("<array>\n%s%s</array>\n", plistDictValue(value.([]plistData)), strings.Repeat("\t", tabLevel)))
 	case Dictionary:
-		pair.WriteString(fmt.Sprintf("<dict>\n%s%s</dict>\n", plistDictValue(value), strings.Repeat("\t", tabLevel)))
+		pair.WriteString(fmt.Sprintf("<dict>\n%s%s</dict>\n", plistDictValue(value.([]plistData)), strings.Repeat("\t", tabLevel)))
 	default:
 		if value != nil {
 			if reflect.TypeOf(value).String() == "string" {
@@ -84,10 +84,10 @@ func plistKeyValue(key string, dataType plistDataType, value any) string {
 
 var emptyPlistData = plistData{}
 
-func plistDictValue(value any) string {
+func plistDictValue(value []plistData) string {
 	tabLevel++
 	var pair strings.Builder
-	for _, data := range value.([]plistData) {
+	for _, data := range value {
 		if data == emptyPlistData {
 			continue
 		}
