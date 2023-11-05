@@ -3254,10 +3254,7 @@ func scriptingActions() {
 				{
 					key:      "WFAppsExcept",
 					dataType: Array,
-					value: plistData{
-						dataType: Dictionary,
-						value:    apps(args),
-					},
+					value:    apps(args),
 				},
 			}
 		},
@@ -3306,10 +3303,7 @@ func scriptingActions() {
 				{
 					key:      "WFAppsExcept",
 					dataType: Array,
-					value: plistData{
-						dataType: Dictionary,
-						value:    apps(args),
-					},
+					value:    apps(args),
 				},
 			}
 		},
@@ -3363,10 +3357,7 @@ func scriptingActions() {
 				{
 					key:      "WFAppsExcept",
 					dataType: Array,
-					value: plistData{
-						dataType: Dictionary,
-						value:    apps(args),
-					},
+					value:    apps(args),
 				},
 				{
 					key:      "WFAskToSaveChanges",
@@ -5138,8 +5129,22 @@ func makeAppIds() {
 }
 
 func apps(args []actionArgument) (apps []plistData) {
-	for a := range args {
-		apps = append(apps, argumentValue("BundleIdentifier", args, a))
+	for _, arg := range args {
+		apps = append(apps, plistData{
+			dataType: Dictionary,
+			value: []plistData{
+				{
+					key:      "BundleIdentifier",
+					dataType: Text,
+					value:    arg.value,
+				},
+				{
+					key:      "TeamIdentifier",
+					dataType: Text,
+					value:    "0000000000",
+				},
+			},
+		})
 	}
 	return
 }
