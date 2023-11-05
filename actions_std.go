@@ -1797,7 +1797,7 @@ func mediaActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "volume",
-				validType: Integer,
+				validType: String,
 				key:       "WFVolume",
 			},
 		},
@@ -2591,7 +2591,7 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "brightness",
-				validType: Integer,
+				validType: String,
 				key:       "WFBrightness",
 			},
 		},
