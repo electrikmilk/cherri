@@ -1356,7 +1356,7 @@ func documentActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
-				validType: Arr,
+				validType: Variable,
 			},
 			{
 				name:      "separator",
