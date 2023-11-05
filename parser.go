@@ -435,7 +435,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 		valueType: valueType,
 		value:     value,
 	}
-	if !param.infinite {
+	if !param.infinite && (valueType != Nil && value != nil) {
 		checkArg(param, &argument)
 	}
 	return

@@ -776,7 +776,7 @@ func argumentValue(key string, args []actionArgument, idx int) plistData {
 }
 
 func paramValue(key string, arg actionArgument, handleAs tokenType, outputType plistDataType) plistData {
-	if arg.valueType == Nil {
+	if arg.valueType == Nil || arg.value == nil {
 		return plistData{}
 	}
 	switch arg.valueType {
