@@ -141,11 +141,8 @@ func conditionalParameter(key string, conditionalParams *[]plistData, typeOf *to
 		switch variable.valueType {
 		case Integer:
 			*conditionalParams = append(*conditionalParams, variablePlistValue("WFNumberValue", value.(string), uuids[value.(string)]))
-		case String:
-			*conditionalParams = append(*conditionalParams, attachmentValues("WFConditionalActionString", fmt.Sprintf("{%s}", value.(string)), Text))
 		default:
-			var realVar = realVariableValue(value.(string), String)
-			conditionalParameter(key, conditionalParams, &realVar.valueType, realVar.value)
+			*conditionalParams = append(*conditionalParams, attachmentValues("WFConditionalActionString", fmt.Sprintf("{%s}", value.(string)), Text))
 		}
 	}
 }
