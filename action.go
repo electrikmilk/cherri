@@ -254,8 +254,11 @@ func checkRequiredArgs() {
 
 // checkEnum checks an argument value against a string slice.
 func checkEnum(param parameterDefinition, argument actionArgument) {
-	var value = getArgValue(argument).(string)
-	if !contains(param.enum, value) {
+	var value = getArgValue(argument)
+	if value == nil {
+		return
+	}
+	if !contains(param.enum, value.(string)) {
 		parserError(
 			fmt.Sprintf(
 				"Invalid argument '%s' for %s.\n\n%s",
