@@ -1044,10 +1044,9 @@ func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 
 func collectString() string {
 	var collection strings.Builder
-	var escaped = false
 	for char != -1 {
-		if escaped {
-			switch char {
+		if char == '\\' {
+			switch next(1) {
 			case '"':
 				collection.WriteRune('"')
 			case 'n':
@@ -1058,20 +1057,16 @@ func collectString() string {
 				collection.WriteRune('\r')
 			case '\\':
 				collection.WriteRune('\\')
-			// If the escaped char is not explicitly handled above, ignore the escape
 			default:
-				collection.WriteRune(char)
+				collection.WriteRune(next(1))
 			}
-			escaped = false
-		} else {
-			if char == '\\' {
-				escaped = true
-			} else if char == '"' {
-				break
-			} else {
-				collection.WriteRune(char)
-			}
+			advanceTimes(2)
+			continue
+		} else if char == '"' {
+			break
 		}
+
+		collection.WriteRune(char)
 		advance()
 	}
 	advance()
