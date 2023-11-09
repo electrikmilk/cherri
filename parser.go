@@ -51,6 +51,14 @@ func initParse() {
 		printParsingDebug()
 	}
 
+	for identifier := range actions {
+		if contains(usedActions, identifier) {
+			continue
+		}
+
+		delete(actions, identifier)
+	}
+
 	contents = ""
 	char = -1
 	idx = -1
@@ -1012,6 +1020,7 @@ func addNothing() {
 			ident: "nothing",
 		},
 	})
+	usedActions = append(usedActions, "nothing")
 }
 
 const intTypeString = string(Integer)
@@ -1157,6 +1166,7 @@ func collectAction() (identifier string, value action) {
 	}
 	advance()
 	currentAction = identifier
+	usedActions = append(usedActions, identifier)
 
 	var arguments = collectArguments()
 	currentArguments = arguments

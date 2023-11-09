@@ -191,6 +191,7 @@ func resetParser() {
 	includes = []include{}
 	workflowName = ""
 	plist.Reset()
+	usedActions = []string{}
 	menus = map[string][]variableValue{}
 	uuids = map[string]string{}
 	customActions = map[string]customAction{}
