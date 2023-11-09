@@ -66,10 +66,46 @@ func main() {
 
 func printActionDefinitions() {
 	standardActions()
-	var action = args.Value("action")
+	var action = args.Value(`action`)
 	if action != "" {
 		if _, found := actions[action]; !found {
-			exit(fmt.Sprintf("Action %s() does not exist or has not yet been defined.", action))
+			fmt.Println(ansi(fmt.Sprintf("\nAction %s() does not exist or has not yet been defined.", action), red))
+
+			switch action {
+			case `text`:
+				fmt.Print("\nText actions are abstracted into string statements. For example:\n\n@variable = \"Hello, Cherri!\"\n\n")
+				os.Exit(1)
+			case `dictionary`:
+				fmt.Print("\nDictionary actions are abstracted into JSON object statements. For example:\n\n{\"test\":5\", \"key\":\"value\"}\n\n")
+				os.Exit(1)
+			}
+
+			var actionSearchResults strings.Builder
+			for identifier := range actions {
+				if strings.Contains(strings.ToLower(identifier), action) {
+					currentAction = identifier
+					var definition = generateActionDefinition(parameterDefinition{}, false, false)
+					definition, _ = strings.CutPrefix(definition, identifier)
+
+					var capitalized = capitalize(action)
+					var lowercase = strings.ToLower(action)
+					switch {
+					case strings.Contains(identifier, action):
+						identifier = strings.ReplaceAll(identifier, action, ansi(action, red))
+					case strings.Contains(identifier, capitalized):
+						identifier = strings.ReplaceAll(identifier, capitalized, ansi(capitalized, red))
+					case strings.Contains(identifier, lowercase):
+						identifier = strings.ReplaceAll(identifier, lowercase, ansi(lowercase, red))
+					}
+					actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n", identifier, definition))
+				}
+			}
+			if actionSearchResults.Len() > 0 {
+				fmt.Println(ansi("\nThe closest action(s) are:", yellow, italic, bold))
+				fmt.Println(actionSearchResults.String())
+			}
+
+			os.Exit(1)
 		}
 		currentAction = action
 		fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
