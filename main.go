@@ -76,7 +76,7 @@ func printActionDefinitions() {
 				fmt.Print("\nText actions are abstracted into string statements. For example:\n\n@variable = \"Hello, Cherri!\"\n\n")
 				os.Exit(1)
 			case `dictionary`:
-				fmt.Print("\nDictionary actions are abstracted into JSON object statements. For example:\n\n{\"test\":5\", \"key\":\"value\"}\n\n")
+				fmt.Print("\nDictionary actions are abstracted into JSON object statements. For example:\n\n@variable = {\"test\":5\", \"key\":\"value\"}\n\n")
 				os.Exit(1)
 			}
 
