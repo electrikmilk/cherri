@@ -45,6 +45,7 @@ reproduce it and what environment it may be isolated to are clearly communicated
 - No moving code around without a good reason. Only organize code when absolutely necessary.
 - Keep any additions to Cherri syntax consistent with the existing style (e.g. camelCase, scripting-language-like, only
   capitalize globals, minimal parenthesis, concise keywords).
+- Set the default for action parameter to the default in Shortcuts or best option for the user's privacy. For example, if it's a record audio action, default to recording when the user taps the record button.
 - In action names, `detail` is preferred over `component`, and `make` is preferred over `generate` or `create`.
 
 ### Code submission policy
