@@ -1670,10 +1670,16 @@ func mediaActions() {
 		identifier: "image.removebackground",
 		parameters: []parameterDefinition{
 			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
 				name:         "crop",
 				validType:    Bool,
-				key:          "WFInput",
+				key:          "WFCropToBounds",
 				defaultValue: false,
+				optional:     true,
 			},
 		},
 	}
