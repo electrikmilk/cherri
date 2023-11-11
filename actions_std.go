@@ -2555,8 +2555,10 @@ func mediaActions() {
 func scriptingActions() {
 	actions["shutdown"] = &actionDefinition{
 		identifier: "reboot",
+		minVersion: 17,
 	}
 	actions["reboot"] = &actionDefinition{
+		minVersion: 17,
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -2568,15 +2570,20 @@ func scriptingActions() {
 		},
 	}
 	actions["sleep"] = &actionDefinition{
-		mac: true,
+		minVersion: 17,
+		mac:        true,
 	}
 	actions["displaySleep"] = &actionDefinition{
-		mac: true,
+		minVersion: 17,
+		mac:        true,
 	}
 	actions["logout"] = &actionDefinition{
-		mac: true,
+		minVersion: 17,
+		mac:        true,
 	}
-	actions["lockScreen"] = &actionDefinition{}
+	actions["lockScreen"] = &actionDefinition{
+		minVersion: 17,
+	}
 	actions["number"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
