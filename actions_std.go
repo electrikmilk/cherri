@@ -2525,6 +2525,30 @@ func mediaActions() {
 }
 
 func scriptingActions() {
+	actions["shutdown"] = &actionDefinition{
+		identifier: "reboot",
+	}
+	actions["reboot"] = &actionDefinition{
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFShutdownMode",
+					dataType: Text,
+					value:    "Restart",
+				},
+			}
+		},
+	}
+	actions["sleep"] = &actionDefinition{
+		mac: true,
+	}
+	actions["displaySleep"] = &actionDefinition{
+		mac: true,
+	}
+	actions["logout"] = &actionDefinition{
+		mac: true,
+	}
+	actions["lockScreen"] = &actionDefinition{}
 	actions["number"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
