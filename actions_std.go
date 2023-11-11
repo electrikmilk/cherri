@@ -824,7 +824,8 @@ func documentActions() {
 			},
 		},
 	}
-	actions["showNote"] = &actionDefinition{
+	actions["openNote"] = &actionDefinition{
+		identifier: "shownote",
 		parameters: []parameterDefinition{
 			{
 				name:      "note",
