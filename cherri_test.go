@@ -79,7 +79,7 @@ func compile() {
 func makeActionsTest() {
 	standardActions()
 	var actionsTest strings.Builder
-	actionsTest.WriteString("#define mac true\n@emptyVar = nil\n")
+	actionsTest.WriteString("/*\nThis is a generated test of all the actions the compiler supports.\nDO NOT RUN THIS, it is a random list of actions that would likely do bad things.\n*/\n#define mac true\n@emptyVar = nil\n")
 	for identifier, definition := range actions {
 		actionsTest.WriteString(identifier)
 		actionsTest.WriteRune('(')
