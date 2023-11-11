@@ -597,11 +597,12 @@ func collectDefinition() {
 			handle(hexErr)
 			iconGlyph = glyphInt
 		} else {
-			var list = "Available icon glyphs:\n"
+			var list strings.Builder
+			list.WriteString("Available icon glyphs:\n")
 			for key := range glyphs {
-				list += "- " + key + "\n"
+				list.WriteString(fmt.Sprintf("- %s\n", key))
 			}
-			parserError(fmt.Sprintf("Invalid icon glyph '%s'\n\n%s", collectGlyph, list))
+			parserError(fmt.Sprintf("Invalid icon glyph '%s'\n\n%s", collectGlyph, list.String()))
 		}
 	case tokenAhead(Inputs):
 		advance()
@@ -1352,12 +1353,13 @@ func parserWarning(message string) {
 	fmt.Println(ansi("\nWarning: ", yellow, bold) + fmt.Sprintf("%s %s:%d:%d", message, errorFilename, errorLine, errorCol))
 }
 
-func makeKeyList(title string, list map[string]string) (formattedList string) {
-	formattedList = title + "\n"
+func makeKeyList(title string, list map[string]string) string {
+	var formattedList strings.Builder
+	formattedList.WriteString(fmt.Sprintf("%s\n", title))
 	for key := range list {
-		formattedList += "- " + key + "\n"
+		formattedList.WriteString(fmt.Sprintf("- %s\n", key))
 	}
-	return
+	return formattedList.String()
 }
 
 func parserError(message string) {
