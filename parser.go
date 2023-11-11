@@ -557,11 +557,13 @@ func collectVariable(constant bool) {
 func collectIdentifier() string {
 	var identifier strings.Builder
 	for char != -1 {
-		if !unicode.IsLetter(char) && !unicode.IsDigit(char) && char != '_' {
-			break
+		if (char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') || char == '_' {
+			identifier.WriteRune(char)
+			advance()
+			continue
 		}
-		identifier.WriteRune(char)
-		advance()
+
+		break
 	}
 
 	return identifier.String()
