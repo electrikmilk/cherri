@@ -37,7 +37,6 @@ func initParse() {
 	}
 	variables = make(map[string]variableValue)
 	questions = make(map[string]*question)
-	menus = make(map[string][]variableValue)
 	groupingUUIDs = make(map[int]string)
 	groupingTypes = make(map[int]tokenType)
 	makeGlobals()
@@ -921,6 +920,10 @@ func collectConditional() {
 }
 
 func collectMenu() {
+	if len(menus) == 0 {
+		menus = make(map[string][]variableValue)
+	}
+
 	reachable()
 	advance()
 	var groupingUUID = groupStatement(Menu)
