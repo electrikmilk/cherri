@@ -21,9 +21,6 @@ var currentAction string
 var currentArguments []actionArgument
 var currentArgumentsSize int
 
-// isMac is set based on if the mac definition is set.
-var isMac = false
-
 // parameterDefinition is used to define an actions parameters and to check against collected argument values.
 type parameterDefinition struct {
 	name         string
@@ -214,10 +211,12 @@ func checkAction() {
 			)
 		}
 	}
-	if !isMac && action.mac {
-		parserError(
-			fmt.Sprintf("You've set your Shortcut as non-Mac. Action '%s()' is a Mac only action.", currentAction),
-		)
+	if isMac, found := definitions["mac"]; found {
+		if !isMac.(bool) && action.mac {
+			parserError(
+				fmt.Sprintf("You've set your Shortcut as non-Mac. Action '%s()' is a Mac only action", currentAction),
+			)
+		}
 	}
 }
 

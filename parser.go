@@ -110,7 +110,11 @@ func printParsingDebug() {
 	fmt.Printf("Outputs: %v\n", outputs)
 	fmt.Printf("Workflows: %v\n", types)
 	fmt.Printf("No Input: %v\n", noInput)
-	fmt.Printf("macOS Only: %v\n", isMac)
+	if def, found := definitions["mac"]; found {
+		fmt.Printf("macOS Only: %v\n", def)
+	} else {
+		fmt.Println("macOS Only: false")
+	}
 	fmt.Printf("Mininum Version: %s\n", minVersion)
 	fmt.Printf("iOS Version: %.1f\n", iosVersion)
 	fmt.Print("\n")
@@ -697,9 +701,9 @@ func collectDefinition() {
 		var defValue = collectUntil('\n')
 		switch defValue {
 		case "true":
-			isMac = true
+			definitions["mac"] = true
 		case "false":
-			isMac = false
+			definitions["mac"] = false
 		default:
 			parserError(fmt.Sprintf("Invalid value of '%s' for boolean definition 'mac'", defValue))
 		}
