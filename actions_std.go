@@ -2860,15 +2860,24 @@ func scriptingActions() {
 			{
 				name:      "url",
 				validType: String,
-				key:       "WFURL",
+				infinite:  true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		make: func(args []actionArgument) []plistData {
+			var urlItems []plistData
+			for _, item := range args {
+				urlItems = append(urlItems, paramValue("", item, String, Text))
+			}
 			return []plistData{
 				{
-					key:      "Show-WFURL",
+					key:      "Show-WFURLActionURL",
 					dataType: Boolean,
 					value:    true,
+				},
+				{
+					key:      "WFURL",
+					dataType: Array,
+					value:    urlItems,
 				},
 			}
 		},
