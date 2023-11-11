@@ -4,6 +4,8 @@
 
 package main
 
+var definitions map[string]any
+
 var workflowName string
 
 /* Colors */
