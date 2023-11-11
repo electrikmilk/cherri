@@ -66,16 +66,16 @@ func main() {
 
 func printActionDefinitions() {
 	standardActions()
-	var action = args.Value(`action`)
+	var action = args.Value("action")
 	if action != "" {
 		if _, found := actions[action]; !found {
 			fmt.Println(ansi(fmt.Sprintf("\nAction %s() does not exist or has not yet been defined.", action), red))
 
 			switch action {
-			case `text`:
+			case "text":
 				fmt.Print("\nText actions are abstracted into string statements. For example:\n\n@variable = \"Hello, Cherri!\"\n\n")
 				os.Exit(1)
-			case `dictionary`:
+			case "dictionary":
 				fmt.Print("\nDictionary actions are abstracted into JSON object statements. For example:\n\n@variable = {\"test\":5\", \"key\":\"value\"}\n\n")
 				os.Exit(1)
 			}
