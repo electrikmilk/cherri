@@ -4153,16 +4153,6 @@ func scriptingActions() {
 			},
 		},
 	}
-	actions["setCellularVoice"] = &actionDefinition{
-		identifier: "cellular.rat.set",
-		parameters: []parameterDefinition{
-			{
-				name:      "status",
-				key:       "OnValue",
-				validType: Bool,
-			},
-		},
-	}
 	actions["toggleBluetooth"] = &actionDefinition{
 		identifier: "bluetooth.set",
 		make: func(args []actionArgument) []plistData {
