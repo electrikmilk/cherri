@@ -474,21 +474,26 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 func generateActionRestrictions() string {
 	var definition strings.Builder
 	definition.WriteString("\nRestrictions: ")
+	var restrictions []string
 	if actions[currentAction].minVersion != 0 {
-		definition.WriteString(fmt.Sprintf("iOS %1.f+", actions[currentAction].minVersion))
+		restrictions = append(restrictions, fmt.Sprintf("iOS %1.f+", actions[currentAction].minVersion))
 	}
-	if actions[currentAction].minVersion != 0 && actions[currentAction].mac {
-		definition.WriteString(", ")
+	if actions[currentAction].maxVersion != 0 {
+		restrictions = append(restrictions, fmt.Sprintf("Removed or significantly changed after iOS %1.f+", actions[currentAction].maxVersion))
 	}
 	if actions[currentAction].mac {
-		definition.WriteString("macOS only")
+		restrictions = append(restrictions, "macOS only")
 	}
+	definition.WriteString(strings.Join(restrictions, ", "))
 
-	return definition.String()
+	return ansi(definition.String(), red, bold)
 }
 
 func generateActionParamEnums(focus parameterDefinition) string {
 	var definition strings.Builder
+	if len(actions[currentAction].parameters) != 0 {
+		definition.WriteRune('\n')
+	}
 	var hasEnum = false
 	for _, param := range actions[currentAction].parameters {
 		if param.enum == nil {
@@ -498,13 +503,13 @@ func generateActionParamEnums(focus parameterDefinition) string {
 			continue
 		}
 		hasEnum = true
-		definition.WriteString(fmt.Sprintf("\n\nAvailable %ss:\n", param.name))
+		definition.WriteString(ansi(fmt.Sprintf("\nAvailable %ss:\n", param.name), yellow))
 		for _, e := range param.enum {
 			definition.WriteString(fmt.Sprintf("- %s\n", e))
 		}
 	}
 	if hasEnum {
-		definition.WriteString("\nNote: Enum values are case-sensitive.")
+		definition.WriteString(ansi("\nNote: Enum values are case-sensitive.", bold))
 	}
 
 	return definition.String()
