@@ -63,6 +63,7 @@ type actionDefinition struct {
 	outputType    tokenType
 	mac           bool
 	minVersion    float64
+	maxVersion    float64
 }
 
 // actions is the data structure that determines every action the compiler knows about.
@@ -206,6 +207,14 @@ func checkAction() {
 	}
 	if action.minVersion != 0 {
 		if action.minVersion > iosVersion {
+			parserError(
+				fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentAction, math.Ceil(iosVersion)),
+			)
+		}
+	}
+	if action.maxVersion != 0 {
+		parserWarning(fmt.Sprintf("Action '%s()' has been deprecated as it was removed or significantly modified.", currentAction))
+		if action.maxVersion < iosVersion {
 			parserError(
 				fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentAction, math.Ceil(iosVersion)),
 			)
@@ -452,7 +461,7 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 		definition.WriteString(generateActionParamDefinition(param))
 	}
 	definition.WriteRune(')')
-	if restrictions && (action.minVersion != 0 || action.mac) {
+	if restrictions && (action.minVersion != 0 || action.maxVersion != 0 || action.mac) {
 		definition.WriteString(generateActionRestrictions())
 	}
 	if showEnums {
