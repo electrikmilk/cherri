@@ -434,48 +434,53 @@ func makeMeasurementUnits() {
 	}
 }
 
-func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) (definition string) {
+func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) string {
 	var action = actions[currentAction]
-	definition += currentAction + "("
+	var definition strings.Builder
+	definition.WriteString(fmt.Sprintf("%s(", currentAction))
 	for i, param := range action.parameters {
 		if i != 0 && i < len(action.parameters) {
-			definition += ", "
+			definition.WriteString(", ")
 		}
 		if focus.name != "" {
 			if param.name == focus.name {
-				definition += generateActionParamDefinition(param)
+				definition.WriteString(generateActionParamDefinition(param))
 			} else {
-				definition += "..."
+				definition.WriteString("...")
 			}
 			continue
 		}
-		definition += generateActionParamDefinition(param)
+		definition.WriteString(generateActionParamDefinition(param))
 	}
-	definition += ")"
+	definition.WriteRune(')')
 	if restrictions && (action.minVersion != 0 || action.mac) {
-		definition += generateActionRestrictions()
+		definition.WriteString(generateActionRestrictions())
 	}
 	if showEnums {
-		definition += generateActionParamEnums(focus)
+		definition.WriteString(generateActionParamEnums(focus))
 	}
-	return definition
+
+	return definition.String()
 }
 
-func generateActionRestrictions() (definition string) {
-	definition += "\nRestrictions: "
+func generateActionRestrictions() string {
+	var definition strings.Builder
+	definition.WriteString("\nRestrictions: ")
 	if actions[currentAction].minVersion != 0 {
-		definition += fmt.Sprintf("iOS %1.f+", actions[currentAction].minVersion)
+		definition.WriteString(fmt.Sprintf("iOS %1.f+", actions[currentAction].minVersion))
 	}
 	if actions[currentAction].minVersion != 0 && actions[currentAction].mac {
-		definition += ", "
+		definition.WriteString(", ")
 	}
 	if actions[currentAction].mac {
-		definition += "macOS only"
+		definition.WriteString("macOS only")
 	}
-	return
+
+	return definition.String()
 }
 
-func generateActionParamEnums(focus parameterDefinition) (definition string) {
+func generateActionParamEnums(focus parameterDefinition) string {
+	var definition strings.Builder
 	var hasEnum = false
 	for _, param := range actions[currentAction].parameters {
 		if param.enum == nil {
@@ -485,38 +490,41 @@ func generateActionParamEnums(focus parameterDefinition) (definition string) {
 			continue
 		}
 		hasEnum = true
-		definition += "\n\nAvailable " + param.name + "s:\n"
+		definition.WriteString(fmt.Sprintf("\n\nAvailable %ss:\n", param.name))
 		for _, e := range param.enum {
-			definition += "- " + e + "\n"
+			definition.WriteString(fmt.Sprintf("- %s\n", e))
 		}
 	}
 	if hasEnum {
-		definition += "\nNote: Enum values are case-sensitive."
+		definition.WriteString("\nNote: Enum values are case-sensitive.")
 	}
-	return
+
+	return definition.String()
 }
 
-func generateActionParamDefinition(param parameterDefinition) (definition string) {
+func generateActionParamDefinition(param parameterDefinition) string {
+	var definition strings.Builder
 	if param.enum == nil {
-		definition += typeName(param.validType) + " "
+		definition.WriteString(fmt.Sprintf("%s ", typeName(param.validType)))
 	} else {
-		definition += "enum "
+		definition.WriteString("enum ")
 	}
 	if param.infinite {
-		definition += "..."
+		definition.WriteString("...")
 	}
 	if param.optional || param.defaultValue != nil {
-		definition += "?"
+		definition.WriteRune('?')
 	}
-	definition += param.name
+	definition.WriteString(param.name)
 	if param.defaultValue != nil {
 		if reflect.TypeOf(param.defaultValue).String() == stringType {
-			definition += fmt.Sprintf(" = \"%v\"", param.defaultValue)
+			definition.WriteString(fmt.Sprintf(" = \"%v\"", param.defaultValue))
 		} else {
-			definition += fmt.Sprintf(" = %v", param.defaultValue)
+			definition.WriteString(fmt.Sprintf(" = %v", param.defaultValue))
 		}
 	}
-	return
+
+	return definition.String()
 }
 
 // makeLibraries makes the library variable, this is where 3rd party action library definitions will start.
