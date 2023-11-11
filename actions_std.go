@@ -981,6 +981,7 @@ func documentActions() {
 		},
 	}
 	actions["connectToServer"] = &actionDefinition{
+		identifier: "connecttoservers",
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -1004,6 +1005,7 @@ func documentActions() {
 		},
 	}
 	actions["addToBooks"] = &actionDefinition{
+		appIdentifier: "com.apple.iBooksX.openin",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1400,6 +1402,7 @@ func documentActions() {
 	}
 	var storageUnits = []string{"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"}
 	actions["makeSizedDiskImage"] = &actionDefinition{
+		identifier: "makediskimage",
 		parameters: []parameterDefinition{
 			{
 				name:      "name",
@@ -2154,7 +2157,9 @@ func mediaActions() {
 			}
 		},
 	}
-	actions["skipFwd"] = &actionDefinition{}
+	actions["skipFwd"] = &actionDefinition{
+		identifier: "skipforward",
+	}
 	actions["searchAppStore"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
@@ -2208,7 +2213,7 @@ func mediaActions() {
 	}
 	var recordingQualities = []string{"Normal", "Very High"}
 	var recordingStarts = []string{"On Tap", "Immediately"}
-	actions["record"] = &actionDefinition{
+	actions["recordAudio"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:         "quality",
@@ -2638,6 +2643,7 @@ func scriptingActions() {
 	}
 	var deviceDetails = []string{"Device Name", "Device Hostname", "Device Model", "Device Is Watch", "System Version", "Screen Width", "Screen Height", "Current Volume", "Current Brightness", "Current Appearance"}
 	actions["getDeviceDetail"] = &actionDefinition{
+		identifier: "getdevicedetails",
 		parameters: []parameterDefinition{
 			{
 				name:      "detail",
@@ -4565,6 +4571,7 @@ func webActions() {
 	}
 	var urlComponents = []string{"Scheme", "User", "Password", "Host", "Port", "Path", "Query", "Fragment"}
 	actions["getURLDetail"] = &actionDefinition{
+		identifier: "geturlcomponent",
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -4664,6 +4671,7 @@ func webActions() {
 		mac: true,
 	}
 	actions["runJSAutomation"] = &actionDefinition{
+		identifier: "runjavascriptforautomation",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
