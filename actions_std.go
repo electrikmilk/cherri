@@ -1666,6 +1666,17 @@ func locationActions() {
 }
 
 func mediaActions() {
+	actions["removeBackground"] = &actionDefinition{
+		identifier: "image.removebackground",
+		parameters: []parameterDefinition{
+			{
+				name:         "crop",
+				validType:    Bool,
+				key:          "WFInput",
+				defaultValue: false,
+			},
+		},
+	}
 	actions["clearUpNext"] = &actionDefinition{}
 	actions["getCurrentSong"] = &actionDefinition{}
 	actions["getLastImport"] = &actionDefinition{identifier: "getlatestphotoimport"}
