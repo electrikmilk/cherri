@@ -574,6 +574,9 @@ func collectIdentifier() string {
 }
 
 func collectDefinition() {
+	if len(definitions) == 0 {
+		definitions = make(map[string]any)
+	}
 	advance()
 	switch {
 	case tokenAhead(Name):
