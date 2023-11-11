@@ -4146,9 +4146,10 @@ func scriptingActions() {
 		identifier: "cellulardata.set",
 		parameters: []parameterDefinition{
 			{
-				name:      "status",
-				key:       "OnValue",
-				validType: Bool,
+				name:         "status",
+				key:          "OnValue",
+				validType:    Bool,
+				defaultValue: true,
 			},
 		},
 	}
