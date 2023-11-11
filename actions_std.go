@@ -1493,6 +1493,17 @@ func documentActions() {
 			},
 		},
 	}
+	actions["transcribeText"] = &actionDefinition{
+		appIdentifier: "com.apple.ShortcutsActions.TranscribeAudioAction",
+		parameters: []parameterDefinition{
+			{
+				name:      "audioFile",
+				validType: Variable,
+				key:       "audioFile",
+			},
+		},
+		minVersion: 17,
+	}
 }
 
 func locationActions() {
