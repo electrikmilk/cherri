@@ -245,23 +245,6 @@ func collectUntil(ch rune) string {
 	return strings.Trim(collected.String(), " ")
 }
 
-// collectUntilExpect advances ahead until the current character is `ch`.
-// If we advance more times than `maxAdvances` before finding `ch`, we throw
-// an error that we expected `ch` and return the characters collected.
-func collectUntilExpect(ch rune, maxAdvances int) string {
-	var collected strings.Builder
-	var advances int
-	for char != ch && char != -1 {
-		if advances > maxAdvances {
-			parserError(fmt.Sprintf("Expected %c, got: %s", ch, collected.String()))
-		}
-		collected.WriteRune(char)
-		advances++
-		advance()
-	}
-	return collected.String()
-}
-
 // lookAheadUntil does a pseudo string collection stopping when we reach `until` and returning the collected string.
 func lookAheadUntil(until rune) string {
 	var ahead strings.Builder
@@ -772,7 +755,6 @@ func collectQuestion() {
 	}
 }
 
-var repeatIndexIndex = 1
 var repeatItemIndex = 1
 
 func collectRepeat() {
@@ -813,8 +795,6 @@ func collectRepeat() {
 		value:        repeatIndexIdentifier,
 		repeatItem:   true,
 	}
-
-	repeatIndexIndex++
 }
 
 func collectRepeatEach() {
@@ -858,7 +838,6 @@ func collectRepeatEach() {
 	}
 
 	repeatItemIndex++
-	repeatIndexIndex++
 }
 
 func collectConditional() {
@@ -997,7 +976,6 @@ func collectEndStatement() {
 		if groupType == Repeat || groupType == RepeatWithEach {
 			reachable()
 			repeatItemIndex--
-			repeatIndexIndex--
 		}
 
 		addNothing()
