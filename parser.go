@@ -495,6 +495,7 @@ func collectType(valueType *tokenType, value *any) {
 	switch {
 	case tokenAhead(String):
 		*valueType = String
+		*value = ""
 	case tokenAhead(Integer):
 		*valueType = Integer
 		*value = "0"
@@ -505,6 +506,7 @@ func collectType(valueType *tokenType, value *any) {
 		*valueType = Arr
 	case tokenAhead(Dict):
 		*valueType = Dict
+		*value = make(map[string]interface{})
 	case tokenAhead(VariableType):
 		*valueType = Var
 	default:
