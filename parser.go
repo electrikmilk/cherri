@@ -508,7 +508,7 @@ func collectType(valueType *tokenType, value *any) {
 	case tokenAhead(VariableType):
 		*valueType = Var
 	default:
-		parserError(fmt.Sprintf("Unknown type '%s'", lookAheadUntil('\n')))
+		parserError(fmt.Sprintf("Unknown type '%s'\n\nAvailable types: \n- text\n- number\n- bool\n- array\n- dictionary\n- var", lookAheadUntil('\n')))
 	}
 }
 
