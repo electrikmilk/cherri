@@ -559,10 +559,10 @@ func collectDefinition() {
 		collectGlyphDefinition()
 	case tokenAhead(Inputs):
 		advance()
-		collectInputsDefinition()
+		inputs = collectContentItemTypes()
 	case tokenAhead(Outputs):
 		advance()
-		collectOutputsDefinition()
+		outputs = collectContentItemTypes()
 	case tokenAhead(From):
 		advance()
 		makeWorkflowTypes()
@@ -665,40 +665,25 @@ func collectNoInputDefinition() {
 	}
 }
 
-func collectInputsDefinition() {
-	var collectInputs = collectUntil('\n')
-	if collectInputs == "" {
-		parserError("Expected input types")
+func collectContentItemTypes() (contentItemTypes []string) {
+	makeContentItems()
+	var collectedItemTypes = collectUntil('\n')
+	if collectedItemTypes == "" {
+		parserError("Expected content item types")
 	}
-	var inputTypes = strings.Split(collectInputs, ",")
-	for _, input := range inputTypes {
-		input = strings.Trim(input, " ")
-		makeContentItems()
-		if contentItem, found := contentItems[input]; found {
-			inputs = append(inputs, contentItem)
-		} else {
-			var list = makeKeyList("Available content item types:", contentItems)
-			parserError(fmt.Sprintf("Invalid input type '%s'\n\n%s", input, list))
-		}
-	}
-}
 
-func collectOutputsDefinition() {
-	var collectOutputs = collectUntil('\n')
-	if collectOutputs == "" {
-		parserError("Expected output types")
-	}
-	var outputTypes = strings.Split(collectOutputs, ",")
-	for _, output := range outputTypes {
-		output = strings.Trim(output, " ")
-		makeContentItems()
-		if contentItem, found := contentItems[output]; found {
-			outputs = append(outputs, contentItem)
-		} else {
-			var list = makeKeyList("Available content item types:", contentItems)
-			parserError(fmt.Sprintf("Invalid output type '%s'\n\n%s", output, list))
+	var itemTypes = strings.Split(collectedItemTypes, ",")
+	for _, itemType := range itemTypes {
+		itemType = strings.Trim(itemType, " ")
+		if contentItem, found := contentItems[itemType]; found {
+			contentItemTypes = append(contentItemTypes, contentItem)
+			continue
 		}
+
+		var list = makeKeyList("Available content item types:", contentItems)
+		parserError(fmt.Sprintf("Invalid content item type '%s'\n\n%s", itemType, list))
 	}
+	return
 }
 
 // libraries is a map of the 3rd party libraries defined in the compiler.
