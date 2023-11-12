@@ -23,7 +23,13 @@ var contents string
 var relativePath string
 var outputPath string
 
+var darwin bool
+
+const unsignedEnd = "_unsigned.shortcut"
+
 func main() {
+	darwin = runtime.GOOS != "darwin"
+
 	if args.Using("help") {
 		args.PrintUsage()
 		os.Exit(0)
@@ -35,7 +41,15 @@ func main() {
 	}
 
 	if args.Using("action") {
-		printActionDefinitions()
+		if args.Value("action") == "" {
+			for action := range actions {
+				currentAction = action
+				fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
+				fmt.Print("\n")
+			}
+		} else {
+			printActionDefinitions()
+		}
 		os.Exit(0)
 	}
 
@@ -43,7 +57,7 @@ func main() {
 	if len(os.Args) == 1 || filePath == "" {
 		printLogo()
 		printVersion()
-		if runtime.GOOS != "darwin" {
+		if darwin {
 			fmt.Println(ansi("\nWarning:", yellow, bold), "Shortcuts compiled on this platform will not run on iOS 15+ or macOS 12+.")
 		}
 		fmt.Print("\n")
@@ -66,55 +80,48 @@ func main() {
 
 func printActionDefinitions() {
 	standardActions()
-	var action = args.Value("action")
-	if action != "" {
-		if _, found := actions[action]; !found {
-			fmt.Println(ansi(fmt.Sprintf("\nAction %s() does not exist or has not yet been defined.", action), red))
+	var identifier = args.Value("action")
+	if _, found := actions[identifier]; !found {
+		fmt.Println(ansi(fmt.Sprintf("\nAction %s() does not exist or has not yet been defined.", identifier), red))
 
-			switch action {
-			case "text":
-				fmt.Print("\nText actions are abstracted into string statements. For example:\n\n@variable = \"Hello, Cherri!\"\n\n")
-				os.Exit(1)
-			case "dictionary":
-				fmt.Print("\nDictionary actions are abstracted into JSON object statements. For example:\n\n@variable = {\"test\":5\", \"key\":\"value\"}\n\n")
-				os.Exit(1)
-			}
-
-			var actionSearchResults strings.Builder
-			for identifier := range actions {
-				if strings.Contains(strings.ToLower(identifier), action) {
-					currentAction = identifier
-					var definition = generateActionDefinition(parameterDefinition{}, false, false)
-					definition, _ = strings.CutPrefix(definition, identifier)
-
-					var capitalized = capitalize(action)
-					var lowercase = strings.ToLower(action)
-					switch {
-					case strings.Contains(identifier, action):
-						identifier = strings.ReplaceAll(identifier, action, ansi(action, red))
-					case strings.Contains(identifier, capitalized):
-						identifier = strings.ReplaceAll(identifier, capitalized, ansi(capitalized, red))
-					case strings.Contains(identifier, lowercase):
-						identifier = strings.ReplaceAll(identifier, lowercase, ansi(lowercase, red))
-					}
-					actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n", identifier, definition))
-				}
-			}
-			if actionSearchResults.Len() > 0 {
-				fmt.Println(ansi("\nThe closest action(s) are:", yellow, italic, bold))
-				fmt.Println(actionSearchResults.String())
-			}
-
+		switch identifier {
+		case "text":
+			fmt.Print("\nText actions are abstracted into string statements. For example:\n\n@variable = \"Hello, Cherri!\"\n\n")
+			os.Exit(1)
+		case "dictionary":
+			fmt.Print("\nDictionary actions are abstracted into JSON object statements. For example:\n\n@variable = {\"test\":5\", \"key\":\"value\"}\n\n")
 			os.Exit(1)
 		}
-		currentAction = action
-		fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
-		os.Exit(0)
+
+		var actionSearchResults strings.Builder
+		for actionIdentifier := range actions {
+			if strings.Contains(strings.ToLower(actionIdentifier), identifier) {
+				currentAction = identifier
+				var definition = generateActionDefinition(parameterDefinition{}, false, false)
+				definition, _ = strings.CutPrefix(definition, actionIdentifier)
+
+				var capitalized = capitalize(identifier)
+				var lowercase = strings.ToLower(identifier)
+				switch {
+				case strings.Contains(actionIdentifier, identifier):
+					identifier = strings.ReplaceAll(actionIdentifier, identifier, ansi(identifier, red))
+				case strings.Contains(identifier, capitalized):
+					identifier = strings.ReplaceAll(actionIdentifier, capitalized, ansi(capitalized, red))
+				case strings.Contains(identifier, lowercase):
+					identifier = strings.ReplaceAll(actionIdentifier, lowercase, ansi(lowercase, red))
+				}
+				actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n", identifier, definition))
+			}
+		}
+		if actionSearchResults.Len() > 0 {
+			fmt.Println(ansi("\nThe closest identifier(s) are:", yellow, italic, bold))
+			fmt.Println(actionSearchResults.String())
+		}
+
+		os.Exit(1)
 	}
-	for action := range actions {
-		currentAction = action
-		fmt.Println(generateActionDefinition(parameterDefinition{}, true, true) + "\n")
-	}
+	currentAction = identifier
+	fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
 }
 
 func fileArg() string {
@@ -130,10 +137,11 @@ func fileArg() string {
 
 // createShortcut writes the Shortcut files to disk and signs them if the unsigned argument is not unused.
 func createShortcut() {
+	var path = fmt.Sprintf("%s%s", relativePath, workflowName)
 	if args.Using("debug") {
-		writeFile(relativePath+workflowName+".plist", workflowName+".plist")
+		writeFile(path+".plist", workflowName+".plist")
 	}
-	writeFile(relativePath+workflowName+"_unsigned.shortcut", workflowName+"_unsigned.shortcut")
+	writeFile(path+unsignedEnd, workflowName+unsignedEnd)
 
 	sign()
 }
@@ -186,7 +194,7 @@ func checkFile(filePath string) (filename string) {
 
 // sign runs the shortcuts sign command on the unsigned shortcut file.
 func sign() {
-	if runtime.GOOS != "darwin" {
+	if darwin {
 		fmt.Println(ansi("Warning:", bold, yellow), "macOS is required to sign shortcuts. The compiled Shortcut will not run on iOS 15+ or macOS 12+.")
 		return
 	}
@@ -194,7 +202,7 @@ func sign() {
 	if args.Using("share") && args.Value("share") == "anyone" {
 		signingMode = "anyone"
 	}
-	var inputPath = relativePath + workflowName + "_unsigned.shortcut"
+	var inputPath = fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd)
 	if args.Using("debug") {
 		fmt.Printf("Signing %s to %s...\n", inputPath, outputPath)
 	}
@@ -221,7 +229,7 @@ func sign() {
 	if args.Using("debug") {
 		fmt.Println("Removing " + workflowName + "_unsigned.shortcut...")
 	}
-	removeErr := os.Remove(fmt.Sprintf("%s%s_unsigned.shortcut", relativePath, workflowName))
+	removeErr := os.Remove(inputPath)
 	handle(removeErr)
 	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green))

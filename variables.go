@@ -4,6 +4,8 @@
 
 package main
 
+import "fmt"
+
 var variables map[string]variableValue
 
 type variableValue struct {
@@ -57,6 +59,23 @@ func makeGlobals() {
 		variableType: "Variable",
 		valueType:    String,
 		value:        "Repeat Index",
+	}
+}
+
+func availableIdentifier(identifier *string) {
+	if v, found := variables[*identifier]; found {
+		if v.constant {
+			parserError(fmt.Sprintf("Cannot redefine constant '%s'.", *identifier))
+		}
+		if v.repeatItem {
+			parserError(fmt.Sprintf("Cannot redefine repeat item '%s'.", *identifier))
+		}
+	}
+	if _, found := globals[*identifier]; found {
+		parserError(fmt.Sprintf("Cannot redefine global variable '%s'.", *identifier))
+	}
+	if _, found := questions[*identifier]; found {
+		parserError(fmt.Sprintf("Variable conflicts with defined import question '%s'.", *identifier))
 	}
 }
 

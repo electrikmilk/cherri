@@ -45,7 +45,9 @@ func initParse() {
 	idx = -1
 	advance()
 
-	parse()
+	for char != -1 {
+		parse()
+	}
 	if args.Using("debug") {
 		printParsingDebug()
 	}
@@ -119,34 +121,7 @@ func printParsingDebug() {
 	fmt.Print("\n")
 
 	fmt.Println(ansi("## VARIABLES ##", bold))
-	for identifier, v := range variables {
-		if v.constant {
-			fmt.Print("const ")
-		} else {
-			fmt.Print("@")
-		}
-		fmt.Print(identifier)
-
-		if v.getAs != "" {
-			fmt.Printf("[%s]", v.getAs)
-		}
-		if v.coerce != "" {
-			fmt.Printf(".%s", v.coerce)
-		}
-		if v.variableType != "Variable" {
-			fmt.Printf(" (%s)", v.variableType)
-		}
-		if v.value != nil {
-			fmt.Printf(" = %s", v.value)
-		}
-		if string(v.valueType) != "" {
-			fmt.Printf(" (%s)", typeName(v.valueType))
-		}
-		if v.repeatItem {
-			fmt.Print(" (repeat item var)")
-		}
-		fmt.Print("\n")
-	}
+	printVariables()
 	fmt.Print("\n")
 
 	fmt.Println(ansi("## MENUS ##", bold))
@@ -159,40 +134,38 @@ func printParsingDebug() {
 }
 
 func parse() {
-	for char != -1 {
-		switch {
-		case char == ' ' || char == '\t' || char == '\n':
-			advance()
-		case tokenAhead(Question):
-			collectQuestion()
-		case tokenAhead(Definition):
-			collectDefinition()
-		case tokenAhead(Import):
-			collectImport()
-		case isToken(At):
-			collectVariable(false)
-		case tokenAhead(Constant):
-			advance()
-			collectVariable(true)
-		case isToken(ForwardSlash):
-			collectComment()
-		case tokenAhead(Repeat):
-			collectRepeat()
-		case tokenAhead(RepeatWithEach):
-			collectRepeatEach()
-		case tokenAhead(Menu):
-			collectMenu()
-		case tokenAhead(Item):
-			collectMenuItem()
-		case tokenAhead(If):
-			collectConditional()
-		case tokenAhead(RightBrace):
-			collectEndStatement()
-		case strings.Contains(lookAheadUntil(' '), "("):
-			collectActionCall()
-		default:
-			parserError(fmt.Sprintf("Illegal character '%s'", string(char)))
-		}
+	switch {
+	case char == ' ' || char == '\t' || char == '\n':
+		advance()
+	case tokenAhead(Question):
+		collectQuestion()
+	case tokenAhead(Definition):
+		collectDefinition()
+	case tokenAhead(Import):
+		collectImport()
+	case isToken(At):
+		collectVariable(false)
+	case tokenAhead(Constant):
+		advance()
+		collectVariable(true)
+	case isToken(ForwardSlash):
+		collectComment()
+	case tokenAhead(Repeat):
+		collectRepeat()
+	case tokenAhead(RepeatWithEach):
+		collectRepeatEach()
+	case tokenAhead(Menu):
+		collectMenu()
+	case tokenAhead(Item):
+		collectMenuItem()
+	case tokenAhead(If):
+		collectConditional()
+	case tokenAhead(RightBrace):
+		collectEndStatement()
+	case strings.Contains(lookAheadUntil(' '), "("):
+		collectActionCall()
+	default:
+		parserError(fmt.Sprintf("Illegal character '%s'", string(char)))
 	}
 }
 
@@ -382,7 +355,6 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 	*valueType = Variable
 	*value = identifier.String()
 	advance()
-	return
 }
 
 func collectArguments() (arguments []actionArgument) {
@@ -445,17 +417,7 @@ func collectComment() {
 			advanceUntil('\n')
 		}
 	} else {
-		advanceTimes(2)
-		for {
-			if char == '*' && next(1) == '/' {
-				break
-			}
-			if collect {
-				comment.WriteRune(char)
-			}
-			advance()
-		}
-		advanceTimes(3)
+		collectMultilineComment(&comment, &collect)
 	}
 	if collect {
 		var commentStr = strings.Trim(comment.String(), " \n")
@@ -468,55 +430,41 @@ func collectComment() {
 	}
 }
 
+func collectMultilineComment(comment *strings.Builder, collect *bool) {
+	advanceTimes(2)
+	for char != 1 {
+		if char == '*' && next(1) == '/' {
+			break
+		}
+		if *collect {
+			comment.WriteRune(char)
+		}
+		advance()
+	}
+	advanceTimes(3)
+}
+
 func collectVariable(constant bool) {
 	reachable()
 
 	var identifier = collectIdentifier()
+	availableIdentifier(&identifier)
 
-	if v, found := variables[identifier]; found {
-		if v.constant {
-			parserError(fmt.Sprintf("Cannot redefine constant '%s'.", identifier))
-		}
-		if v.repeatItem {
-			parserError(fmt.Sprintf("Cannot redefine repeat item '%s'.", identifier))
-		}
-	}
-	if _, found := globals[identifier]; found {
-		parserError(fmt.Sprintf("Cannot redefine global variable '%s'.", identifier))
-	}
-	if _, found := questions[identifier]; found {
-		parserError(fmt.Sprintf("Variable conflicts with defined import question '%s'.", identifier))
-	}
 	var valueType tokenType
 	var value any
 	var getAs string
 	var coerce string
 	var varType = Var
-	if strings.Contains(lookAheadUntil('\n'), "=") {
+	switch {
+	case strings.Contains(lookAheadUntil('\n'), "="):
 		advance()
 		collectVariableValue(constant, &valueType, &value, &varType, &coerce, &getAs)
-	} else if tokenAhead(Colon) {
+	case tokenAhead(Colon):
 		if constant {
 			parserError("Constants cannot be initialized without a value")
 		}
-		advance()
-		switch {
-		case tokenAhead(VarTextType):
-			valueType = String
-		case tokenAhead(VarNumberType):
-			valueType = Integer
-		case tokenAhead(VarBoolType):
-			valueType = Bool
-		case tokenAhead(VarArrayType):
-			valueType = Arr
-		case tokenAhead(VarDictType):
-			valueType = Dict
-		case tokenAhead(VarVariableType):
-			valueType = VarVariableType
-		default:
-			parserError(fmt.Sprintf("Unknown type '%s'", lookAheadUntil('\n')))
-		}
-	} else if constant {
+		collectType(&valueType)
+	case constant:
 		lineIdx--
 		parserError("Constants must be initialized with a value.")
 	}
@@ -537,6 +485,26 @@ func collectVariable(constant bool) {
 		getAs:        getAs,
 		coerce:       coerce,
 		constant:     constant,
+	}
+}
+
+func collectType(valueType *tokenType) {
+	advance()
+	switch {
+	case tokenAhead(VarTextType):
+		*valueType = String
+	case tokenAhead(VarNumberType):
+		*valueType = Integer
+	case tokenAhead(VarBoolType):
+		*valueType = Bool
+	case tokenAhead(VarArrayType):
+		*valueType = Arr
+	case tokenAhead(VarDictType):
+		*valueType = Dict
+	case tokenAhead(VarVariableType):
+		*valueType = VarVariableType
+	default:
+		parserError(fmt.Sprintf("Unknown type '%s'", lookAheadUntil('\n')))
 	}
 }
 
@@ -582,53 +550,13 @@ func collectDefinition() {
 		}
 	case tokenAhead(Glyph):
 		advance()
-		var collectGlyph = collectUntil('\n')
-		makeGlyphs()
-		collectGlyph = strings.ToLower(collectGlyph)
-		if glyph, found := glyphs[collectGlyph]; found {
-			glyphInt, hexErr := strconv.ParseInt(fmt.Sprintf("%d", glyph), 10, 64)
-			handle(hexErr)
-			iconGlyph = glyphInt
-		} else {
-			var list strings.Builder
-			list.WriteString("Available icon glyphs:\n")
-			for key := range glyphs {
-				list.WriteString(fmt.Sprintf("- %s\n", key))
-			}
-			parserError(fmt.Sprintf("Invalid icon glyph '%s'\n\n%s", collectGlyph, list.String()))
-		}
+		collectGlyphDefinition()
 	case tokenAhead(Inputs):
 		advance()
-		var collectInputs = collectUntil('\n')
-		if collectInputs != "" {
-			var inputTypes = strings.Split(collectInputs, ",")
-			for _, input := range inputTypes {
-				input = strings.Trim(input, " ")
-				makeContentItems()
-				if contentItem, found := contentItems[input]; found {
-					inputs = append(inputs, contentItem)
-				} else {
-					var list = makeKeyList("Available content item types:", contentItems)
-					parserError(fmt.Sprintf("Invalid input type '%s'\n\n%s", input, list))
-				}
-			}
-		}
+		collectInputsDefinition()
 	case tokenAhead(Outputs):
 		advance()
-		var collectOutputs = collectUntil('\n')
-		if collectOutputs != "" {
-			var outputTypes = strings.Split(collectOutputs, ",")
-			for _, output := range outputTypes {
-				output = strings.Trim(output, " ")
-				makeContentItems()
-				if contentItem, found := contentItems[output]; found {
-					outputs = append(outputs, contentItem)
-				} else {
-					var list = makeKeyList("Available content item types:", contentItems)
-					parserError(fmt.Sprintf("Invalid output type '%s'\n\n%s", output, list))
-				}
-			}
-		}
+		collectOutputsDefinition()
 	case tokenAhead(From):
 		advance()
 		makeWorkflowTypes()
@@ -647,45 +575,7 @@ func collectDefinition() {
 		}
 	case tokenAhead(NoInput):
 		advance()
-		switch {
-		case tokenAhead(StopWith):
-			advance()
-			var stopWithError = collectString()
-			noInput = noInputParams{
-				name: "WFWorkflowNoInputBehaviorShowError",
-				params: []plistData{
-					{
-						key:      "Error",
-						dataType: Text,
-						value:    stopWithError,
-					},
-				},
-			}
-		case tokenAhead(AskFor):
-			advance()
-			var workflowType = collectUntil('\n')
-			makeContentItems()
-			if wtype, found := contentItems[workflowType]; found {
-				noInput = noInputParams{
-					name: "WFWorkflowNoInputBehaviorAskForInput",
-					params: []plistData{
-						{
-							key:      "ItemClass",
-							dataType: Text,
-							value:    wtype,
-						},
-					},
-				}
-			} else {
-				var list = makeKeyList("Available workflow types:", workflowTypes)
-				parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
-			}
-		case tokenAhead(GetClipboard):
-			noInput = noInputParams{
-				name:   "WFWorkflowNoInputBehaviorGetClipboard",
-				params: []plistData{},
-			}
-		}
+		collectNoInputDefinition()
 	case tokenAhead(Mac):
 		var defValue = collectUntil('\n')
 		switch defValue {
@@ -705,6 +595,102 @@ func collectDefinition() {
 		} else {
 			var list = makeKeyList("Available versions:", versions)
 			parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
+		}
+	}
+}
+
+func collectGlyphDefinition() {
+	var collectGlyph = collectUntil('\n')
+	makeGlyphs()
+	collectGlyph = strings.ToLower(collectGlyph)
+	if glyph, found := glyphs[collectGlyph]; found {
+		glyphInt, hexErr := strconv.ParseInt(fmt.Sprintf("%d", glyph), 10, 64)
+		handle(hexErr)
+		iconGlyph = glyphInt
+	} else {
+		var list strings.Builder
+		list.WriteString("Available icon glyphs:\n")
+		for key := range glyphs {
+			list.WriteString(fmt.Sprintf("- %s\n", key))
+		}
+		parserError(fmt.Sprintf("Invalid icon glyph '%s'\n\n%s", collectGlyph, list.String()))
+	}
+}
+
+func collectNoInputDefinition() {
+	switch {
+	case tokenAhead(StopWith):
+		advance()
+		var stopWithError = collectString()
+		noInput = noInputParams{
+			name: "WFWorkflowNoInputBehaviorShowError",
+			params: []plistData{
+				{
+					key:      "Error",
+					dataType: Text,
+					value:    stopWithError,
+				},
+			},
+		}
+	case tokenAhead(AskFor):
+		advance()
+		var workflowType = collectUntil('\n')
+		makeContentItems()
+		if wtype, found := contentItems[workflowType]; found {
+			noInput = noInputParams{
+				name: "WFWorkflowNoInputBehaviorAskForInput",
+				params: []plistData{
+					{
+						key:      "ItemClass",
+						dataType: Text,
+						value:    wtype,
+					},
+				},
+			}
+		} else {
+			var list = makeKeyList("Available workflow types:", workflowTypes)
+			parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
+		}
+	case tokenAhead(GetClipboard):
+		noInput = noInputParams{
+			name:   "WFWorkflowNoInputBehaviorGetClipboard",
+			params: []plistData{},
+		}
+	}
+}
+
+func collectInputsDefinition() {
+	var collectInputs = collectUntil('\n')
+	if collectInputs == "" {
+		parserError("Expected input types")
+	}
+	var inputTypes = strings.Split(collectInputs, ",")
+	for _, input := range inputTypes {
+		input = strings.Trim(input, " ")
+		makeContentItems()
+		if contentItem, found := contentItems[input]; found {
+			inputs = append(inputs, contentItem)
+		} else {
+			var list = makeKeyList("Available content item types:", contentItems)
+			parserError(fmt.Sprintf("Invalid input type '%s'\n\n%s", input, list))
+		}
+	}
+}
+
+func collectOutputsDefinition() {
+	var collectOutputs = collectUntil('\n')
+	if collectOutputs == "" {
+		parserError("Expected output types")
+	}
+	var outputTypes = strings.Split(collectOutputs, ",")
+	for _, output := range outputTypes {
+		output = strings.Trim(output, " ")
+		makeContentItems()
+		if contentItem, found := contentItems[output]; found {
+			outputs = append(outputs, contentItem)
+		} else {
+			var list = makeKeyList("Available content item types:", contentItems)
+			parserError(fmt.Sprintf("Invalid output type '%s'\n\n%s", output, list))
 		}
 	}
 }
@@ -744,14 +730,20 @@ func collectQuestion() {
 		parserError(fmt.Sprintf("Import question conflicts with defined variable or global '%s'.", identifier))
 	}
 	advance()
-	if !isToken("\"") {
+
+	if char != '"' {
 		parserError("Expected question prompt string.")
 	}
+	advance()
+
 	var text = collectString()
 	advance()
-	if !isToken("\"") {
+
+	if char != '"' {
 		parserError("Expected question default string value.")
 	}
+	advance()
+
 	var defaultValue = collectString()
 	questions[identifier] = &question{
 		text:         text,
@@ -1018,11 +1010,8 @@ func addNothing() {
 	usedActions = append(usedActions, "nothing")
 }
 
-const intTypeString = string(Integer)
-
 func intChar() bool {
-	var charStr = string(char)
-	return strings.Contains(intTypeString, charStr)
+	return (char >= '0' && char <= '9') || char == '-' || char == '.'
 }
 
 func collectInteger() string {
@@ -1226,7 +1215,7 @@ func advanceUntilExpect(ch rune, maxAdvances int) {
 
 func isToken(token tokenType) bool {
 	var tokenChar = []rune(token)[0]
-	if unicode.ToLower(char) != tokenChar {
+	if char != tokenChar {
 		return false
 	}
 	advance()
@@ -1328,6 +1317,37 @@ func firstChar() {
 	lineCharIdx = 0
 	idx = -1
 	advance()
+}
+
+func printVariables() {
+	for identifier, v := range variables {
+		if v.constant {
+			fmt.Print("const ")
+		} else {
+			fmt.Print("@")
+		}
+		fmt.Print(identifier)
+
+		if v.getAs != "" {
+			fmt.Printf("[%s]", v.getAs)
+		}
+		if v.coerce != "" {
+			fmt.Printf(".%s", v.coerce)
+		}
+		if v.variableType != "Variable" {
+			fmt.Printf(" (%s)", v.variableType)
+		}
+		if v.value != nil {
+			fmt.Printf(" = %s", v.value)
+		}
+		if string(v.valueType) != "" {
+			fmt.Printf(" (%s)", typeName(v.valueType))
+		}
+		if v.repeatItem {
+			fmt.Print(" (repeat item var)")
+		}
+		fmt.Print("\n")
+	}
 }
 
 func printTokens(tokens []token) {

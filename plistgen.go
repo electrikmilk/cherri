@@ -234,16 +234,17 @@ func plistVariable(t *token) {
 			appendPlist(makeStdAction("setvariable", setVariableParams))
 			return
 		}
+
 		appendPlist(makeStdAction("appendvariable", setVariableParams))
 		return
-	} else {
-		if v, found := variables[t.ident]; found {
-			if v.constant {
-				return
-			}
-		}
-		appendPlist(makeStdAction("setvariable", setVariableParams))
 	}
+
+	if v, found := variables[t.ident]; found {
+		if v.constant {
+			return
+		}
+	}
+	appendPlist(makeStdAction("setvariable", setVariableParams))
 
 	if t.valueType == Arr {
 		plistArrayVariable(t)

@@ -117,28 +117,32 @@ func actionIdentifier() (ident string) {
 
 // actionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
 func actionParameters(arguments []actionArgument) (params []plistData) {
-	if actions[currentAction].make == nil && actions[currentAction].parameters != nil {
+	if actions[currentAction].addParams != nil {
+		params = append(params, actions[currentAction].addParams(arguments)...)
+	}
+	if actions[currentAction].make != nil {
+		params = actions[currentAction].make(arguments)
+		return
+	}
+	if actions[currentAction].parameters != nil {
+		var argumentsSize = len(arguments)
+		if argumentsSize == 0 {
+			return
+		}
 		for i, a := range actions[currentAction].parameters {
-			if len(arguments) <= i || len(arguments) == 0 {
-				break
+			if argumentsSize <= i {
+				return
 			}
 			if arguments[i].valueType == Nil || a.key == "" {
 				continue
 			}
-
 			if a.validType == Variable {
 				params = append(params, variableInput(a.key, arguments[i].value.(string)))
-			} else {
-				params = append(params, argumentValue(a.key, arguments, i))
+				continue
 			}
+
+			params = append(params, argumentValue(a.key, arguments, i))
 		}
-	}
-	if actions[currentAction].make != nil {
-		params = actions[currentAction].make(arguments)
-	}
-	if actions[currentAction].addParams != nil {
-		var addParams = actions[currentAction].addParams(arguments)
-		params = append(params, addParams...)
 	}
 	return
 }
@@ -193,14 +197,6 @@ func checkAction() {
 	var action = actions[currentAction]
 	if len(action.parameters) > 0 {
 		checkRequiredArgs()
-
-		for i, param := range actions[currentAction].parameters {
-			if !param.infinite {
-				continue
-			}
-			checkInfiniteArgs(i)
-			break
-		}
 	}
 	if action.check != nil {
 		action.check(currentArguments)
@@ -242,7 +238,8 @@ func checkInfiniteArgs(startIdx int) {
 func checkRequiredArgs() {
 	for i, param := range actions[currentAction].parameters {
 		if param.infinite {
-			return
+			checkInfiniteArgs(i)
+			continue
 		}
 		if i+1 > currentArgumentsSize && !param.optional && param.defaultValue == nil {
 			var argIndex = i + 1
@@ -446,20 +443,15 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 	var action = actions[currentAction]
 	var definition strings.Builder
 	definition.WriteString(fmt.Sprintf("%s(", currentAction))
-	for i, param := range action.parameters {
-		if i != 0 && i < len(action.parameters) {
-			definition.WriteString(", ")
+	var arguments []string
+	for _, param := range action.parameters {
+		if param.name == focus.name || focus.name == "" {
+			arguments = append(arguments, generateActionParamDefinition(param))
+		} else {
+			arguments = append(arguments, "...")
 		}
-		if focus.name != "" {
-			if param.name == focus.name {
-				definition.WriteString(generateActionParamDefinition(param))
-			} else {
-				definition.WriteString("...")
-			}
-			continue
-		}
-		definition.WriteString(generateActionParamDefinition(param))
 	}
+	definition.WriteString(strings.Join(arguments, ", "))
 	definition.WriteRune(')')
 	if restrictions && (action.minVersion != 0 || action.maxVersion != 0 || action.mac) {
 		definition.WriteString(generateActionRestrictions())

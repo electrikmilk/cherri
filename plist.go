@@ -106,10 +106,9 @@ func appendPlist(data []plistData) {
 
 func conditionalParameter(key string, conditionalParams *[]plistData, typeOf *tokenType, value any) {
 	if key == "" {
-		switch *typeOf {
-		case String:
+		if *typeOf == String {
 			key = "WFConditionalActionString"
-		case Integer, Bool:
+		} else if *typeOf == Integer || *typeOf == Bool {
 			key = "WFNumberValue"
 		}
 	}
@@ -137,13 +136,18 @@ func conditionalParameter(key string, conditionalParams *[]plistData, typeOf *to
 			}, Integer, Text))
 		}
 	case Variable:
-		var variable = variables[value.(string)]
-		switch variable.valueType {
-		case Integer:
-			*conditionalParams = append(*conditionalParams, variablePlistValue("WFNumberValue", value.(string), uuids[value.(string)]))
-		default:
-			*conditionalParams = append(*conditionalParams, attachmentValues("WFConditionalActionString", fmt.Sprintf("{%s}", value.(string)), Text))
-		}
+		conditionalParameterVariable(conditionalParams, value)
+	}
+}
+
+func conditionalParameterVariable(conditionalParams *[]plistData, value any) {
+	var stringValue = value.(string)
+	var variable = variables[stringValue]
+	switch variable.valueType {
+	case Integer:
+		*conditionalParams = append(*conditionalParams, variablePlistValue("WFNumberValue", stringValue, uuids[stringValue]))
+	default:
+		*conditionalParams = append(*conditionalParams, attachmentValues("WFConditionalActionString", fmt.Sprintf("{%s}", stringValue), Text))
 	}
 }
 
@@ -163,54 +167,7 @@ func makeVariableValue(token *token, varUUID *string) {
 		(token.typeof == AddTo || token.typeof == SubFrom || token.typeof == MultiplyBy || token.typeof == DivideBy) &&
 		token.valueType != Arr &&
 		variables[token.ident].valueType != Arr {
-
-		var valueType = token.valueType
-		if valueType == Variable {
-			valueType = variables[token.value.(string)].valueType
-		}
-
-		if valueType == Integer {
-			var operation string
-			switch token.typeof {
-			case AddTo:
-				operation = "+"
-			case SubFrom:
-				operation = "-"
-			case MultiplyBy:
-				operation = "×"
-			case DivideBy:
-				operation = "÷"
-			}
-			var tokenType = convertTypeToken(token.valueType)
-			appendPlist(makeStdAction("math", []plistData{
-				outputName,
-				UUID,
-				paramValue("WFMathOperand", actionArgument{
-					valueType: token.valueType,
-					value:     token.value,
-				}, token.valueType, tokenType),
-				paramValue("WFInput", actionArgument{
-					valueType: Var,
-					value:     token.ident,
-				}, token.valueType, tokenType),
-				{
-					key:      "WFMathOperation",
-					dataType: Text,
-					value:    operation,
-				},
-			}))
-		} else if valueType == String {
-			var varInput = token.value.(string)
-			wrapVariableReference(&varInput)
-			appendPlist(makeStdAction("gettext", []plistData{
-				outputName,
-				UUID,
-				paramValue("WFTextActionText", actionArgument{
-					valueType: String,
-					value:     fmt.Sprintf("{%s}%s", token.ident, varInput),
-				}, token.valueType, convertTypeToken(valueType)),
-			}))
-		}
+		variableValueModifier(token, &outputName, &UUID)
 		return
 	}
 
@@ -317,6 +274,56 @@ func makeVariableValue(token *token, varUUID *string) {
 					},
 				},
 			},
+		}))
+	}
+}
+
+func variableValueModifier(token *token, outputName *plistData, UUID *plistData) {
+	var valueType = token.valueType
+	if valueType == Variable {
+		valueType = variables[token.value.(string)].valueType
+	}
+	switch valueType {
+	case Integer:
+		var operation string
+		switch token.typeof {
+		case AddTo:
+			operation = "+"
+		case SubFrom:
+			operation = "-"
+		case MultiplyBy:
+			operation = "×"
+		case DivideBy:
+			operation = "÷"
+		}
+		var tokenType = convertTypeToken(token.valueType)
+		appendPlist(makeStdAction("math", []plistData{
+			*outputName,
+			*UUID,
+			paramValue("WFMathOperand", actionArgument{
+				valueType: token.valueType,
+				value:     token.value,
+			}, token.valueType, tokenType),
+			paramValue("WFInput", actionArgument{
+				valueType: Var,
+				value:     token.ident,
+			}, token.valueType, tokenType),
+			{
+				key:      "WFMathOperation",
+				dataType: Text,
+				value:    operation,
+			},
+		}))
+	case String:
+		var varInput = token.value.(string)
+		wrapVariableReference(&varInput)
+		appendPlist(makeStdAction("gettext", []plistData{
+			*outputName,
+			*UUID,
+			paramValue("WFTextActionText", actionArgument{
+				valueType: String,
+				value:     fmt.Sprintf("{%s}%s", token.ident, varInput),
+			}, token.valueType, convertTypeToken(valueType)),
 		}))
 	}
 }
@@ -556,10 +563,10 @@ func attachmentValues(key string, str string, outputType plistDataType) plistDat
 	var noVarString = collectInlineVariables(&str)
 	for _, stringVar := range inlineVars {
 		var storedVar variableValue
-		if _, global := globals[stringVar.identifier]; global {
-			storedVar = globals[stringVar.identifier]
+		if g, global := globals[stringVar.identifier]; global {
+			storedVar = g
 			isInputVariable(stringVar.identifier)
-			stringVar.identifier = storedVar.value.(string)
+			stringVar.identifier = g.value.(string)
 		} else if v, found := variables[stringVar.identifier]; found {
 			storedVar = v
 		} else {
