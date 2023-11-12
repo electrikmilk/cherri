@@ -560,10 +560,14 @@ func collectDefinition() {
 		definitions = make(map[string]any)
 	}
 	advance()
+
 	switch {
 	case tokenAhead(Name):
 		advance()
 		workflowName = collectUntil('\n')
+		if strings.Trim(workflowName, " \n\t") == "" {
+			parserError("Expected name")
+		}
 		outputPath = relativePath + workflowName + ".shortcut"
 	case tokenAhead(Color):
 		advance()
