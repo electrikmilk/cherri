@@ -294,13 +294,16 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	switch {
 	case intChar():
 		collectIntegerValue(valueType, value, &until)
-	case isToken(String):
+	case char == '"':
+		advance()
 		*valueType = String
 		*value = collectString()
-	case isToken(Arr):
+	case char == '[':
+		advance()
 		*valueType = Arr
 		*value = collectArray()
-	case isToken(Dict):
+	case char == '{':
+		advance()
 		*valueType = Dict
 		*value = collectDictionary()
 	case tokenAhead(True):
@@ -312,10 +315,10 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	case tokenAhead(Nil):
 		*valueType = Nil
 		advanceUntil(until)
-	case strings.Contains(lookAheadUntil(until), "("):
+	case strings.Contains(ahead, "("):
 		*valueType = Action
 		_, *value = collectAction()
-	case containsTokens(lookAheadUntil(until), Plus, Minus, Multiply, Divide, Modulus):
+	case containsTokens(ahead, Plus, Minus, Multiply, Divide, Modulus):
 		*valueType = Expression
 		*value = collectUntil(until)
 	default:
