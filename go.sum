@@ -2,3 +2,5 @@ github.com/electrikmilk/args-parser v1.1.3 h1:66xFYBDmsO3mZvIM1ThO/AV/3zTRwfE45A
 github.com/electrikmilk/args-parser v1.1.3/go.mod h1:mb/l2JFNNBSA8GVYL0eQCJF6Jd7UtAJTpenLZs6iIJ0=
 github.com/google/uuid v1.3.1 h1:KjJaJ9iWZ3jOFZIf1Lqf4laDRCasjl0BCmnEGxkdLb4=
 github.com/google/uuid v1.3.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/google/uuid v1.4.0 h1:MtMxsa51/r9yyhkyLsVeVt0B+BGQZzpQiTQ4eHZ8bc4=
+github.com/google/uuid v1.4.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
