@@ -28,7 +28,7 @@ var darwin bool
 const unsignedEnd = "_unsigned.shortcut"
 
 func main() {
-	darwin = runtime.GOOS != "darwin"
+	darwin = runtime.GOOS == "darwin"
 
 	if args.Using("help") {
 		args.PrintUsage()
@@ -57,7 +57,7 @@ func main() {
 	if len(os.Args) == 1 || filePath == "" {
 		printLogo()
 		printVersion()
-		if darwin {
+		if !darwin {
 			fmt.Println(ansi("\nWarning:", yellow, bold), "Shortcuts compiled on this platform will not run on iOS 15+ or macOS 12+.")
 		}
 		fmt.Print("\n")
@@ -194,7 +194,7 @@ func checkFile(filePath string) (filename string) {
 
 // sign runs the shortcuts sign command on the unsigned shortcut file.
 func sign() {
-	if darwin {
+	if !darwin {
 		fmt.Println(ansi("Warning:", bold, yellow), "macOS is required to sign shortcuts. The compiled Shortcut will not run on iOS 15+ or macOS 12+.")
 		return
 	}
