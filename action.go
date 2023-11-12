@@ -319,9 +319,9 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		if argValueType != param.validType && param.validType != Variable {
 			parserError(fmt.Sprintf("Invalid variable value %v (%s) for argument '%s' (%s).\n%s",
 				argVal,
-				typeName(argValueType),
+				argValueType,
 				param.name,
-				typeName(param.validType),
+				param.validType,
 				generateActionDefinition(*param, false, false),
 			))
 		}
@@ -333,9 +333,9 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		}
 		parserError(fmt.Sprintf("Invalid value %v (%s) for argument '%s' (%s).\n%s",
 			argVal,
-			typeName(argValueType),
+			argValueType,
 			param.name,
-			typeName(param.validType),
+			param.validType,
 			generateActionDefinition(*param, false, false),
 		))
 	}
@@ -352,9 +352,9 @@ func validActionOutput(field string, validType tokenType, value any) {
 					fmt.Sprintf(
 						"Invalid variable value of action '%v' that outputs type '%s' for argument '%s' of type '%s' in '%s()'",
 						actionIdent+"()",
-						typeName(actionOutputType),
+						actionOutputType,
 						field,
-						typeName(validType),
+						validType,
 						currentAction,
 					),
 				)
@@ -510,7 +510,7 @@ func generateActionParamEnums(focus parameterDefinition) string {
 func generateActionParamDefinition(param parameterDefinition) string {
 	var definition strings.Builder
 	if param.enum == nil {
-		definition.WriteString(fmt.Sprintf("%s ", typeName(param.validType)))
+		definition.WriteString(fmt.Sprintf("%s ", param.validType))
 	} else {
 		definition.WriteString("enum ")
 	}

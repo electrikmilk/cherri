@@ -236,30 +236,12 @@ func lookAheadUntil(until rune) string {
 	return strings.Trim(strings.ToLower(ahead.String()), " \t\n")
 }
 
-func collectVariableValue(constant bool, valueType *tokenType, value *any, varType *tokenType, coerce *string, getAs *string) {
-	switch {
-	case tokensAhead(AddTo):
-		*varType = AddTo
-	case tokensAhead(SubFrom):
-		*varType = SubFrom
-	case tokensAhead(MultiplyBy):
-		*varType = MultiplyBy
-	case tokensAhead(DivideBy):
-		*varType = DivideBy
-	case tokensAhead(Set):
-	}
-
-	if *varType != Var && constant {
-		parserError("Constants cannot be added to.")
-	}
-
-	advance()
+func collectVariableValue(constant bool, valueType *tokenType, value *any, coerce *string, getAs *string) {
 	collectValue(valueType, value, '\n')
 
 	if constant && (*valueType == Arr || *valueType == Variable) {
 		lineIdx--
-		var valueTypeName = capitalize(typeName(*valueType))
-		parserError(fmt.Sprintf("%v values cannot be constants.", valueTypeName))
+		parserError(fmt.Sprintf("Type %v values cannot be constants.", *valueType))
 	}
 	if *valueType == Question {
 		parserError(fmt.Sprintf("Illegal reference to import question '%s'. Shortcuts does not support import questions as variable values.", *value))
@@ -461,12 +443,28 @@ func collectVariable(constant bool) {
 	switch {
 	case strings.Contains(lookAheadUntil('\n'), "="):
 		advance()
-		collectVariableValue(constant, &valueType, &value, &varType, &coerce, &getAs)
+		switch {
+		case tokensAhead(AddTo):
+			varType = AddTo
+		case tokensAhead(SubFrom):
+			varType = SubFrom
+		case tokensAhead(MultiplyBy):
+			varType = MultiplyBy
+		case tokensAhead(DivideBy):
+			varType = DivideBy
+		case tokensAhead(Set):
+		}
+		if varType != Var && constant {
+			parserError("Constants cannot be added to.")
+		}
+		advance()
+
+		collectVariableValue(constant, &valueType, &value, &coerce, &getAs)
 	case tokenAhead(Colon):
 		if constant {
 			parserError("Constants cannot be initialized without a value")
 		}
-		collectType(&valueType)
+		collectType(&valueType, &value)
 	case constant:
 		lineIdx--
 		parserError("Constants must be initialized with a value.")
@@ -492,21 +490,23 @@ func collectVariable(constant bool) {
 	}
 }
 
-func collectType(valueType *tokenType) {
+func collectType(valueType *tokenType, value *any) {
 	advance()
 	switch {
-	case tokenAhead(VarTextType):
+	case tokenAhead(String):
 		*valueType = String
-	case tokenAhead(VarNumberType):
+	case tokenAhead(Integer):
 		*valueType = Integer
-	case tokenAhead(VarBoolType):
+		*value = "0"
+	case tokenAhead(Bool):
 		*valueType = Bool
-	case tokenAhead(VarArrayType):
+		*value = false
+	case tokenAhead(Arr):
 		*valueType = Arr
-	case tokenAhead(VarDictType):
+	case tokenAhead(Dict):
 		*valueType = Dict
-	case tokenAhead(VarVariableType):
-		*valueType = VarVariableType
+	case tokenAhead(VariableType):
+		*valueType = Var
 	default:
 		parserError(fmt.Sprintf("Unknown type '%s'", lookAheadUntil('\n')))
 	}
@@ -1345,7 +1345,7 @@ func printVariables() {
 			fmt.Printf(" = %s", v.value)
 		}
 		if string(v.valueType) != "" {
-			fmt.Printf(" (%s)", typeName(v.valueType))
+			fmt.Printf(" (%s)", v.valueType)
 		}
 		if v.repeatItem {
 			fmt.Print(" (repeat item var)")

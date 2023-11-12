@@ -59,46 +59,21 @@ const (
 /* Types */
 
 const (
-	String      tokenType = "\""
-	Integer     tokenType = "0123456789.-"
-	Dict        tokenType = "{"
-	Arr         tokenType = "["
-	Bool        tokenType = "boolean"
-	Date        tokenType = "date"
-	True        tokenType = "true"
-	False       tokenType = "false"
-	Nil         tokenType = "nil"
-	Comment     tokenType = "comment"
-	Expression  tokenType = "expression"
-	Variable    tokenType = "variable"
-	Action      tokenType = "action"
-	Conditional tokenType = "conditional"
-)
-
-func typeName(typeOf tokenType) string {
-	switch typeOf {
-	case String:
-		return "text"
-	case Integer:
-		return "number"
-	case Arr:
-		return "array"
-	case Dict:
-		return "dictionary"
-	default:
-		return string(typeOf)
-	}
-}
-
-/* Variable Types */
-
-const (
-	VarTextType     tokenType = "text"
-	VarNumberType   tokenType = "number"
-	VarArrayType    tokenType = "array"
-	VarDictType     tokenType = "dictionary"
-	VarBoolType     tokenType = "bool"
-	VarVariableType tokenType = "var"
+	String       tokenType = "text"
+	Integer      tokenType = "number"
+	Dict         tokenType = "dictionary"
+	Arr          tokenType = "array"
+	Bool         tokenType = "bool"
+	Date         tokenType = "date"
+	True         tokenType = "true"
+	False        tokenType = "false"
+	Nil          tokenType = "nil"
+	Comment      tokenType = "comment"
+	Expression   tokenType = "expression"
+	Variable     tokenType = "variable"
+	Action       tokenType = "action"
+	Conditional  tokenType = "conditional"
+	VariableType tokenType = "var"
 )
 
 /* Operators */
