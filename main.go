@@ -21,6 +21,7 @@ var filename string
 var basename string
 var contents string
 var relativePath string
+var inputPath string
 var outputPath string
 
 var darwin bool
@@ -143,6 +144,8 @@ func createShortcut() {
 	}
 	writeFile(path+unsignedEnd, workflowName+unsignedEnd)
 
+	inputPath = fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd)
+
 	sign()
 }
 
@@ -198,11 +201,12 @@ func sign() {
 		fmt.Println(ansi("Warning:", bold, yellow), "macOS is required to sign shortcuts. The compiled Shortcut will not run on iOS 15+ or macOS 12+.")
 		return
 	}
+
 	var signingMode = "people-who-know-me"
 	if args.Using("share") && args.Value("share") == "anyone" {
 		signingMode = "anyone"
 	}
-	var inputPath = fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd)
+
 	if args.Using("debug") {
 		fmt.Printf("Signing %s to %s...\n", inputPath, outputPath)
 	}
@@ -226,19 +230,29 @@ func sign() {
 		fmt.Println(ansi("Done.", green) + "\n")
 	}
 
+	removeUnsigned()
+
+	if args.Using("import") {
+		openShortcut()
+	}
+}
+
+func removeUnsigned() {
 	if args.Using("debug") {
 		fmt.Println("Removing " + workflowName + "_unsigned.shortcut...")
 	}
+
 	removeErr := os.Remove(inputPath)
 	handle(removeErr)
+
 	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green))
 	}
+}
 
-	if args.Using("import") {
-		var _, importErr = exec.Command("open", outputPath).Output()
-		handle(importErr)
-	}
+func openShortcut() {
+	var _, importErr = exec.Command("open", outputPath).Output()
+	handle(importErr)
 }
 
 func end(slice []string) string {
