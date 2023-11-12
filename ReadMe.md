@@ -14,14 +14,14 @@
 **Cherri** (pronounced cherry) is a [iOS Siri Shortcuts](https://apps.apple.com/us/app/shortcuts/id915249334)
 programming language, that compiles directly to a valid runnable Shortcut.
 
-[![Hello World Example](https://cherrilang.org/assets/example.png)](tests/hello-world.cherri)
+[![Hello World Example](https://github.com/electrikmilk/cherri/assets/4368524/4205308b-4358-47c9-a1b4-66930c8db1c2)](https://playground.cherrilang.org)
 
 ### Top Features
 
 - 🌟 Clear and consistent abstractions that make programming Shortcuts easy
 - 🪄 No explicit magic variables, they're constants instead
 - #️⃣ Include files within each other or auto-include
-- 🔧 Define your own custom actions.
+- 🔧 Define your own custom actions
 - 🥩 Raw actions
 - ❓ Import questions
 - 📇 VCard generation
@@ -29,14 +29,14 @@ programming language, that compiles directly to a valid runnable Shortcut.
 
 ### Learn more
 
-- 🧸 [Playground](https://playground.cherrilang.org/)
+- 🛝 [Playground](https://playground.cherrilang.org/)
 - 📄 [Documentation](https://cherrilang.org/language/)
 - 🧑‍💻 [Code Tour](https://youtu.be/gU8TsI96uww)
 - 🗺️ [_Idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap)
 
 ### **📣 WIP 📣**
 
-This project has not yet reached a stable version. It is under heavy development, and backward
+This project has not yet reached a stable version. It is under heavy development and backward
 incompatible changes may be made.
 
 ## Usage
@@ -45,8 +45,8 @@ incompatible changes may be made.
 cherri file.cherri
 ```
 
-Run `cherri` without any arguments to see all options and usage. For development, use the `--debug` (or `-d`) option for
-stack traces and to output a .plist file.
+Run `cherri` without any arguments to see all options and usage. For development, use the `--debug` (or `-d`) option to print
+stack traces, debug information, and output a .plist file.
 
 ## Why macOS only?
 
@@ -74,7 +74,7 @@ Some stability comes with the project being on macOS and not iOS.
 
 ## Community
 
-- [VS Code Syntax Highlighting](https://github.com/erenyenigul/cherri-vscode-highlight)
+- [VS Code Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=erenyenigul.cherri) ([Github](https://github.com/erenyenigul/cherri-vscode-highlight))
 
 ## Credits
 
