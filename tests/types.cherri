@@ -1,2 +1,6 @@
 @string: text
 @integer: number
+@boolean: bool
+@dict: dictionary
+@collection: array
+@ref: var
