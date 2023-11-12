@@ -154,7 +154,6 @@ func makeActionsTest() {
 				actionsTest.WriteString(paramValue)
 			}
 		}
-
 		actionsTest.WriteString(")\n")
 	}
 

@@ -475,6 +475,7 @@ func collectVariable(constant bool) {
 		valueType: valueType,
 		value:     value,
 	})
+
 	if varType != Var {
 		return
 	}

@@ -5219,8 +5219,8 @@ func apps(args []actionArgument) (apps []plistData) {
 
 func replaceAppID(id string) string {
 	makeAppIds()
-	if appId, found := appIds[id]; found {
-		return appId
+	if appID, found := appIds[id]; found {
+		return appID
 	}
 
 	var regex = regexp.MustCompile(`^([A-Za-z][A-Za-z\d_]*\.)+[A-Za-z][A-Za-z\d_]*$`)
