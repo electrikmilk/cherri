@@ -2594,7 +2594,7 @@ func scriptingActions() {
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
-				validType: Integer,
+				validType: Variable,
 				key:       "WFNumberActionNumber",
 			},
 		},
