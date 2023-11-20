@@ -989,6 +989,11 @@ func groupStatement(groupType tokenType) (groupingUUID string) {
 
 // addNothing helps reduce memory usage by not passing anything to the next action.
 func addNothing() {
+	lastToken = tokens[len(tokens)-1]
+	if lastToken.typeof == Action && lastToken.ident == "nothing" {
+		return
+	}
+
 	standardActions()
 	tokens = append(tokens, token{
 		typeof:    Action,
