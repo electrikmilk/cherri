@@ -3168,6 +3168,13 @@ func scriptingActions() {
 				optional:     true,
 				defaultValue: false,
 			},
+			{
+				name:         "selectAll",
+				key:          "WFChooseFromListActionSelectAll",
+				validType:    Bool,
+				optional:     true,
+				defaultValue: false,
+			},
 		},
 	}
 	actions["typeOf"] = &actionDefinition{
