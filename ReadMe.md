@@ -27,7 +27,7 @@ programming language, that compiles directly to a valid runnable Shortcut.
 - 🥩 Enter actions raw with custom identifier and parameters
 - ❓ Define import questions
 - 📇 Generate VCards for menus
-- 🔢 Strongly typed with type inference
+- 🔢 Strongly statically typed with type inference
 
 ### Learn more
 
