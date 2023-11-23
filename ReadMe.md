@@ -20,7 +20,7 @@ programming language, that compiles directly to a valid runnable Shortcut.
 
 - 🌟 Clear and consistent abstractions that make programming Shortcuts easy
 - 🪄 No explicit magic variables, they're constants instead
-- #️⃣ Include files within each other or auto-include
+- #️⃣ Include files within each other
 - 🔧 Define your own custom actions
 - 🥩 Raw actions
 - ❓ Import questions

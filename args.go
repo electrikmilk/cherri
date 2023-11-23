@@ -20,6 +20,7 @@ func init() {
 	})
 	args.Register(args.Argument{
 		Name:         "action",
+		Short:        "a",
 		Description:  "Print an action's definition. Leave empty to print all action definitions.",
 		DefaultValue: "",
 		ExpectsValue: true,
@@ -46,11 +47,6 @@ func init() {
 		Name:        "import",
 		Short:       "i",
 		Description: "Opens compiled Shortcut after compilation (ignored if unsigned).",
-	})
-	args.Register(args.Argument{
-		Name:        "auto-inc",
-		Short:       "a",
-		Description: "Automatically include Cherri files in this directory.",
 	})
 	args.Register(args.Argument{
 		Name:        "comments",
