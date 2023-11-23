@@ -16,16 +16,18 @@ programming language, that compiles directly to a valid runnable Shortcut.
 
 [![Hello World Example](https://github.com/electrikmilk/cherri/assets/4368524/4205308b-4358-47c9-a1b4-66930c8db1c2)](https://playground.cherrilang.org)
 
-### Top Features
+### 🌟 Top Features
 
-- 🌟 Clear and consistent abstractions that make programming Shortcuts easy
+- 🎓 Easy to learn and syntax similar to other languages
+- 🐞 Direct translation as possible to Shortcut actions to make debugging easier
 - 🪄 No explicit magic variables, they're constants instead
-- #️⃣ Include files within each other
-- 🔧 Define your own custom actions
-- 🥩 Raw actions
-- ❓ Import questions
-- 📇 VCard generation
-- 🔢 Typechecker
+- 🪶 Optimized to use as few actions as possible and reduces memory usage at runtime
+- #️⃣ Include files within each other for large Shortcut projects
+- 🔧 Define your own custom actions to paste actions
+- 🥩 Enter actions raw with custom identifier and parameters
+- ❓ Define import questions
+- 📇 Generate VCards for menus
+- 🔢 Strongly typed with type inference
 
 ### Learn more
 
