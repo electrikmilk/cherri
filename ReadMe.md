@@ -19,7 +19,7 @@ programming language, that compiles directly to a valid runnable Shortcut.
 ### 🌟 Top Features
 
 - 🎓 Easy to learn and syntax similar to other languages
-- 🐞 Direct translation as possible to Shortcut actions to make debugging easier
+- 🐞 Direct translation to Shortcut actions as much as possible to make debugging easier
 - 🪄 No explicit magic variables, they're constants instead
 - 🪶 Optimized to use as few actions as possible and reduces memory usage at runtime
 - #️⃣ Include files within each other for large Shortcut projects
