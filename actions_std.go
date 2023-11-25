@@ -5125,20 +5125,48 @@ func changeCase(textCase string, args []actionArgument) []plistData {
 }
 
 func textParts(args []actionArgument) []plistData {
-	return []plistData{
+	var data = []plistData{
 		{
 			key:      "Show-text",
 			dataType: Boolean,
 			value:    true,
 		},
-		{
+
+		argumentValue("text", args, 0),
+	}
+
+	var separator = getArgValue(args[1])
+	switch {
+	case separator == " ":
+		data = append(data, plistData{
 			key:      "WFTextSeparator",
 			dataType: Text,
-			value:    "Custom",
-		},
-		argumentValue("text", args, 0),
-		argumentValue("WFTextCustomSeparator", args, 1),
+			value:    "Spaces",
+		})
+	case separator == "\n":
+		data = append(data, plistData{
+			key:      "WFTextSeparator",
+			dataType: Text,
+			value:    "New Lines",
+		})
+	case separator == "" && currentAction == "splitText":
+		data = append(data, plistData{
+			key:      "WFTextSeparator",
+			dataType: Text,
+			value:    "Every Character",
+		})
+	default:
+		data = append(data,
+			plistData{
+				key:      "WFTextSeparator",
+				dataType: Text,
+				value:    "Custom",
+			},
+			argumentValue("WFTextCustomSeparator", args, 1),
+		)
 	}
+
+	return data
 }
 
 func replaceText(caseSensitive bool, regExp bool, args []actionArgument) []plistData {
