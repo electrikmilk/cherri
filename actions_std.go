@@ -1362,7 +1362,7 @@ func documentActions() {
 				validType: Variable,
 			},
 			{
-				name:      "separator",
+				name:      "glue",
 				validType: String,
 			},
 		},
