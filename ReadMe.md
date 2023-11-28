@@ -19,9 +19,9 @@ programming language, that compiles directly to a valid runnable Shortcut.
 ### 🌟 Top Features
 
 - 🎓 Easy to learn and syntax similar to other languages
-- 🐞 Direct translation to Shortcut actions as much as possible to make debugging easier
-- 🪄 No explicit magic variables, they're constants instead
-- 🪶 Optimized to use as few actions as possible and reduces memory usage at runtime
+- 🐞 1-1 translation to Shortcut actions as much as possible to make debugging easier
+- 🪄 No magic variables syntax, they're constants instead
+- 🪶 Optimized to create small as possible Shortcuts and reduces memory usage at runtime
 - #️⃣ Include files within each other for large Shortcut projects
 - 🔧 Define your own custom actions to paste actions
 - 🥩 Enter actions raw with custom identifier and parameters
