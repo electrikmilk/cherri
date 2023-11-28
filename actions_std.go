@@ -669,6 +669,19 @@ func contactActions() {
 }
 
 func documentActions() {
+	actions["speak"] = &actionDefinition{
+		identifier: "speaktext",
+		parameters: []parameterDefinition{
+			{
+				name:      "prompt",
+				validType: String,
+				key:       "WFText",
+			},
+		},
+	}
+	actions["listen"] = &actionDefinition{
+		identifier: "dictatetext",
+	}
 	// TODO: Writing to locations other than the Shortcuts folder.
 	actions["createFolder"] = &actionDefinition{
 		identifier: "file.createfolder",
