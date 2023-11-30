@@ -883,6 +883,8 @@ func collectConditional() {
 			variableThreeValue: variableThreeValue,
 		},
 	})
+
+	addNothing()
 }
 
 func collectMenu() {
