@@ -5205,7 +5205,9 @@ func languageCode(language string) string {
 	if lang, found := languages[language]; found {
 		return lang
 	}
-	return language
+
+	parserError(fmt.Sprintf("Unknown language '%s'", language))
+	return ""
 }
 
 func countParams(countType string, args []actionArgument) []plistData {
