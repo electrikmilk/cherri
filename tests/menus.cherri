@@ -2,19 +2,15 @@
 
 #include "stdlib"
 
-@menuPrefix = "Menu"
-@subtitle = "{menuPrefix} Subtitle"
-@items
+@items = []
 repeat i for 3 {
-    @items += makeVCard("{menuPrefix} Title {i}",subtitle,"assets/cherri_icon.png")
+    @items += makeVCard("Title {i}", "Subtitle {i}","assets/cherri_icon.png")
 }
-
-const menuItems = "{items}"
-const vcf = setName(menuItems,"menu.vcf")
+@menuItems = "{items}"
+@vcf = setName(menuItems, "menu.vcf")
 @contact = vcf.contact
-@chosenItem = chooseFromList(contact,"Prompt")
-
-alert(chosenItem,"You chose:")
+@chosenItem = chooseFromList(contact, "Prompt")
+alert(chosenItem, "You chose:")
 
 // Choose from menu
 
