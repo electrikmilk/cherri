@@ -3099,6 +3099,15 @@ func scriptingActions() {
 	actions["stop"] = &actionDefinition{
 		identifier: "exit",
 	}
+	actions["comment"] = &actionDefinition{
+		parameters: []parameterDefinition{
+			{
+				name:      "text",
+				validType: String,
+				key:       "WFCommentActionText",
+			},
+		},
+	}
 	actions["nothing"] = &actionDefinition{}
 	actions["wait"] = &actionDefinition{
 		identifier: "delay",
