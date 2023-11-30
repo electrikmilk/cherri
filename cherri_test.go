@@ -108,11 +108,9 @@ func makeActionsTest() {
 						paramValue = "g-force"
 					case contains(appIDParams, param.name):
 						paramValue = "shortcuts"
-					}
-					if identifier == "rawAction" {
+					case identifier == "rawAction":
 						paramValue = "is.workflow.actions.alert"
-					}
-					if identifier == "setVolume" || identifier == "setBrightness" {
+					case identifier == "setVolume" || identifier == "setBrightness":
 						paramValue = "10"
 					}
 					paramValue = fmt.Sprintf("\"%s\"", paramValue)
