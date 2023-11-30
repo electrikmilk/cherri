@@ -82,9 +82,8 @@ Some stability comes with the project being on macOS and not iOS.
 
 ### Reference
 
-- [zachary7829](https://github.com/zachary7829)'
-  s [Shortcut File Format Reference](https://zachary7829.github.io/blog/shortcuts/fileformat)
-- [sebj](https://github.com/sebj)'s [Shortcut File Format Reference](https://github.com/sebj/iOS-Shortcuts-Reference)
+- [zachary7829/Shortcuts File Format Documentation](https://zachary7829.github.io/blog/shortcuts/fileformat)
+- [sebj/iOS-Shortcuts-Reference](https://github.com/sebj/iOS-Shortcuts-Reference)
 - [[Tip] Reducing memory usage of repeat loops](https://www.reddit.com/r/shortcuts/comments/taceg7/tip_reducing_memory_usage_of_repeat_loops/)
 
 ### Inspiration
