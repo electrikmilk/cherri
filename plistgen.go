@@ -523,12 +523,7 @@ func plistImportQuestions() (importQuestions []plistData) {
 
 func plistWorkflowTypes() (wfWorkflowTypes []plistData) {
 	if len(types) == 0 {
-		return []plistData{
-			{
-				dataType: Text,
-				value:    "Watch",
-			},
-		}
+		return []plistData{}
 	}
 
 	for _, workflowType := range types {
