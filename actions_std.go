@@ -4996,15 +4996,17 @@ func builtinActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			if len(args) > 2 {
-				var image = getArgValue(args[2])
-				if reflect.TypeOf(image).String() != stringType {
-					parserError("Image path for VCard must be a string literal")
-				}
-				var iconFile = getArgValue(args[2]).(string)
-				if _, err := os.Stat(iconFile); os.IsNotExist(err) {
-					parserError(fmt.Sprintf("File '%s' does not exist!", iconFile))
-				}
+			if len(args) != 3 {
+				return
+			}
+
+			var image = getArgValue(args[2])
+			if reflect.TypeOf(image).String() != stringType {
+				parserError("Image path for VCard must be a string literal")
+			}
+			var iconFile = getArgValue(args[2]).(string)
+			if _, err := os.Stat(iconFile); os.IsNotExist(err) {
+				parserError(fmt.Sprintf("File '%s' does not exist!", iconFile))
 			}
 		},
 		make: func(args []actionArgument) []plistData {
@@ -5012,19 +5014,18 @@ func builtinActions() {
 			var subtitle = args[1].value.(string)
 			wrapVariableReference(&title)
 			wrapVariableReference(&subtitle)
-			var vcard = "BEGIN:VCARD\nVERSION:3.0\n"
-			vcard += "N;CHARSET=utf-8:" + title + "\n"
-			vcard += "ORG:" + subtitle + "\n"
+			var vcard strings.Builder
+			vcard.WriteString(fmt.Sprintf("BEGIN:VCARD\nVERSION:3.0\nN;CHARSET=utf-8:%s\nORG:%s\n", title, subtitle))
 			if len(args) > 2 {
 				var iconFile = getArgValue(args[2]).(string)
 				var bytes, readErr = os.ReadFile(iconFile)
 				handle(readErr)
-				vcard += "PHOTO;ENCODING=b:" + base64.StdEncoding.EncodeToString(bytes)
+				vcard.WriteString(fmt.Sprintf("PHOTO;ENCODING=b:%s\n", base64.StdEncoding.EncodeToString(bytes)))
 			}
-			vcard += "\nEND:VCARD"
+			vcard.WriteString("END:VCARD")
 			args[0] = actionArgument{
 				valueType: String,
-				value:     vcard,
+				value:     vcard.String(),
 			}
 			return []plistData{
 				argumentValue("WFTextActionText", args, 0),
