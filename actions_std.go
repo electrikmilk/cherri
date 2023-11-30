@@ -5014,12 +5014,12 @@ func builtinActions() {
 			wrapVariableReference(&subtitle)
 			var vcard = "BEGIN:VCARD\nVERSION:3.0\n"
 			vcard += "N;CHARSET=utf-8:" + title + "\n"
-			vcard += "ORG:" + subtitle + "\nPHOTO;ENCODING=b:"
+			vcard += "ORG:" + subtitle + "\n"
 			if len(args) > 2 {
 				var iconFile = getArgValue(args[2]).(string)
 				var bytes, readErr = os.ReadFile(iconFile)
 				handle(readErr)
-				vcard += base64.StdEncoding.EncodeToString(bytes)
+				vcard += "PHOTO;ENCODING=b:" + base64.StdEncoding.EncodeToString(bytes)
 			}
 			vcard += "\nEND:VCARD"
 			args[0] = actionArgument{
