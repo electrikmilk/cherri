@@ -677,10 +677,45 @@ func documentActions() {
 				validType: String,
 				key:       "WFText",
 			},
+			{
+				name:         "waitUntilFinished",
+				validType:    Bool,
+				key:          "WFSpeakTextWait",
+				defaultValue: true,
+			},
+			{
+				name:      "language",
+				validType: String,
+				key:       "WFSpeakTextLanguage",
+				optional:  true,
+			},
 		},
 	}
+	var stopListening = []string{"After Pause", "After Short Pause", "On Tap"}
 	actions["listen"] = &actionDefinition{
 		identifier: "dictatetext",
+		check: func(args []actionArgument) {
+			if len(args) != 2 {
+				return
+			}
+			args[1].value = languageCode(getArgValue(args[1]).(string))
+		},
+		parameters: []parameterDefinition{
+			{
+				name:         "stopListening",
+				validType:    String,
+				key:          "WFDictateTextStopListening",
+				defaultValue: "After Pause",
+				enum:         stopListening,
+				optional:     true,
+			},
+			{
+				name:      "language",
+				validType: String,
+				key:       "WFSpeechLanguage",
+				optional:  true,
+			},
+		},
 	}
 	// TODO: Writing to locations other than the Shortcuts folder.
 	actions["createFolder"] = &actionDefinition{
