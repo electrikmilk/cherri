@@ -1228,18 +1228,9 @@ func tokenAhead(token tokenType) bool {
 		return true
 	}
 	for i, tokenChar := range token {
-		if tokenChar == '\t' || tokenChar == '\n' {
-			continue
-		}
-
 		if (i == 0 && unicode.ToLower(char) != tokenChar) || next(i) != tokenChar {
 			return false
 		}
-	}
-
-	if tokenLen == 1 {
-		advance()
-		return true
 	}
 
 	advanceTimes(tokenLen)
