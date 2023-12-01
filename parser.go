@@ -545,15 +545,7 @@ func collectDefinition() {
 		outputPath = relativePath + workflowName + ".shortcut"
 	case tokenAhead(Color):
 		advance()
-		var collectColor = collectUntil('\n')
-		makeColors()
-		collectColor = strings.ToLower(collectColor)
-		if color, found := colors[collectColor]; found {
-			iconColor = color
-		} else {
-			var list = makeKeyList("Available icon colors:", colors)
-			parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s", collectColor, list))
-		}
+		collectColorDefinition()
 	case tokenAhead(Glyph):
 		advance()
 		collectGlyphDefinition()
@@ -565,20 +557,7 @@ func collectDefinition() {
 		outputs = collectContentItemTypes()
 	case tokenAhead(From):
 		advance()
-		makeWorkflowTypes()
-		var collectWorkflowTypes = collectUntil('\n')
-		if collectWorkflowTypes != "" {
-			var definedWorkflowTypes = strings.Split(collectWorkflowTypes, ",")
-			for _, wt := range definedWorkflowTypes {
-				wt = strings.Trim(wt, " ")
-				if wtype, found := workflowTypes[wt]; found {
-					types = append(types, wtype)
-				} else {
-					var list = makeKeyList("Available workflow types:", workflowTypes)
-					parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wt, list))
-				}
-			}
-		}
+		collectWorkflowType()
 	case tokenAhead(NoInput):
 		advance()
 		collectNoInputDefinition()
@@ -601,6 +580,35 @@ func collectDefinition() {
 		} else {
 			var list = makeKeyList("Available versions:", versions)
 			parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
+		}
+	}
+}
+
+func collectColorDefinition() {
+	var collectColor = collectUntil('\n')
+	makeColors()
+	collectColor = strings.ToLower(collectColor)
+	if color, found := colors[collectColor]; found {
+		iconColor = color
+	} else {
+		var list = makeKeyList("Available icon colors:", colors)
+		parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s", collectColor, list))
+	}
+}
+
+func collectWorkflowType() {
+	makeWorkflowTypes()
+	var collectWorkflowTypes = collectUntil('\n')
+	if collectWorkflowTypes != "" {
+		var definedWorkflowTypes = strings.Split(collectWorkflowTypes, ",")
+		for _, wt := range definedWorkflowTypes {
+			wt = strings.Trim(wt, " ")
+			if wtype, found := workflowTypes[wt]; found {
+				types = append(types, wtype)
+			} else {
+				var list = makeKeyList("Available workflow types:", workflowTypes)
+				parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wt, list))
+			}
 		}
 	}
 }
