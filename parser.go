@@ -280,6 +280,11 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		advance()
 		*valueType = String
 		*value = collectString()
+
+		var stringValue = fmt.Sprintf("%s", *value)
+		if strings.ContainsAny(stringValue, "{}") {
+			checkInlineVars(&stringValue)
+		}
 	case char == '[':
 		advance()
 		*valueType = Arr
@@ -305,6 +310,24 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*value = collectUntil(until)
 	default:
 		collectReference(valueType, value, &until)
+	}
+}
+
+func checkInlineVars(value *string) {
+	var collectVarRegex = regexp.MustCompile(`\{(.*?)(?:\[(.*?)])?(?:\.(.*?))?}`)
+	var matches = collectVarRegex.FindAllStringSubmatch(*value, -1)
+	if len(matches) == 0 {
+		return
+	}
+
+	for _, match := range matches {
+		if len(match) < 2 {
+			continue
+		}
+		var identifier = match[1]
+		if !validReference(identifier) {
+			parserError(fmt.Sprintf("Inline var '%s' does not exist!", identifier))
+		}
 	}
 }
 

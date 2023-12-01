@@ -758,9 +758,6 @@ func collectInlineVariables(str *string) (noVarString string) {
 				continue
 			}
 			attachmentVar.identifier = match[1]
-			if !validReference(attachmentVar.identifier) {
-				parserError(fmt.Sprintf("Inline var '%s' does not exist!", attachmentVar.identifier))
-			}
 			if len(match[2]) > 0 {
 				attachmentVar.getAs = match[2]
 			}
