@@ -883,8 +883,6 @@ func collectConditional() {
 			variableThreeValue: variableThreeValue,
 		},
 	})
-
-	addNothing()
 }
 
 func collectMenu() {
@@ -946,6 +944,8 @@ func collectMenuItem() {
 func collectEndStatement() {
 	advance()
 	if tokenAhead(Else) {
+		addNothing()
+
 		advance()
 		if _, ok := groupingUUIDs[groupingIdx]; !ok {
 			parserError("Else has no starting if statement.")
