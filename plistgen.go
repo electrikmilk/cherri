@@ -175,7 +175,7 @@ func plistActions() {
 		case Action:
 			var tokenAction = t.value.(action)
 			currentAction = tokenAction.ident
-			plistAction(tokenAction.args, plistData{}, plistData{})
+			plistAction(tokenAction.args, &plistData{}, &plistData{})
 		case Repeat:
 			plistRepeat(&t)
 		case RepeatWithEach:
@@ -213,7 +213,7 @@ func plistVariable(t *token) {
 
 	if t.value != nil {
 		var varUUID = shortcutsUUID()
-		makeVariableValue(t, &varUUID)
+		makeVariableAction(t, &varUUID)
 		uuids[t.ident] = varUUID
 		if t.valueType != Arr {
 			if t.valueType == Variable {
@@ -274,7 +274,7 @@ func plistArrayVariable(t *token) {
 			valueType = Dict
 			itemIdent = "Dictionary"
 		}
-		makeVariableValue(&token{
+		makeVariableAction(&token{
 			typeof:    valueType,
 			ident:     itemIdent,
 			valueType: valueType,

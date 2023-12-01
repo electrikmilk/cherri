@@ -82,7 +82,7 @@ type libraryDefinition struct {
 var actionIndex int
 
 // plistAction builds an action based on its actionDefinition and adds it to the plist.
-func plistAction(arguments []actionArgument, outputName plistData, actionUUID plistData) {
+func plistAction(arguments []actionArgument, outputName *plistData, actionUUID *plistData) {
 	actionIndex++
 	// Check for question arguments
 	questionArgs(arguments)
@@ -92,10 +92,10 @@ func plistAction(arguments []actionArgument, outputName plistData, actionUUID pl
 	var params = actionParameters(arguments)
 	// Additionally add the output name and UUID of this action if provided
 	if outputName.value != nil {
-		params = append(params, outputName)
+		params = append(params, *outputName)
 	}
 	if actionUUID.value != nil {
-		params = append(params, actionUUID)
+		params = append(params, *actionUUID)
 	}
 	appendPlist(makeAction(ident, params))
 }
