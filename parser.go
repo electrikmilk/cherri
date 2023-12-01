@@ -316,7 +316,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 func checkInlineVars(value *string) {
 	var collectVarRegex = regexp.MustCompile(`\{(.*?)(?:\[(.*?)])?(?:\.(.*?))?}`)
 	var matches = collectVarRegex.FindAllStringSubmatch(*value, -1)
-	if len(matches) == 0 {
+	if matches == nil {
 		return
 	}
 

@@ -751,7 +751,7 @@ func mapInlineVars(noVarString *string) {
 func collectInlineVariables(str *string) (noVarString string) {
 	var collectVarRegex = regexp.MustCompile(`\{(.*?)(?:\[(.*?)])?(?:\.(.*?))?}`)
 	var matches = collectVarRegex.FindAllStringSubmatch(*str, -1)
-	if len(matches) > 0 {
+	if matches != nil {
 		for _, match := range matches {
 			var attachmentVar attachmentVariable
 			if len(match) < 2 {
@@ -772,7 +772,6 @@ func collectInlineVariables(str *string) (noVarString string) {
 	}
 
 	mapInlineVars(&noVarString)
-
 	return
 }
 
