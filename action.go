@@ -397,7 +397,7 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 	}
 	typeCheck(param, argument)
 	var realValue = getArgValue(*argument)
-	var stringDefaultValue = fmt.Sprintf("%v", param.defaultValue)
+	var stringDefaultValue = fmt.Sprintf("%s", param.defaultValue)
 	if param.defaultValue != nil && stringDefaultValue == realValue {
 		parserWarning(
 			fmt.Sprintf(

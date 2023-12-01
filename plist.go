@@ -208,7 +208,7 @@ func makeStringValue(outputName *plistData, UUID *plistData, value *any) {
 	appendPlist(makeStdAction("gettext", []plistData{
 		*outputName,
 		*UUID,
-		attachmentValues("WFTextActionText", fmt.Sprintf("%v", *value), Text),
+		attachmentValues("WFTextActionText", fmt.Sprintf("%s", *value), Text),
 	}))
 }
 
@@ -232,7 +232,7 @@ var formattedExpression []string
 
 func makeExpressionValue(outputName *plistData, UUID *plistData, value *any) {
 	formattedExpression = []string{}
-	var expression = fmt.Sprintf("%v", *value)
+	var expression = fmt.Sprintf("%s", *value)
 	var expressionParts []string
 
 	if containsTokens(&expression, Plus, Minus, Multiply, Divide, Modulus) {

@@ -250,7 +250,7 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any, coerc
 		return
 	}
 
-	var stringValue = fmt.Sprintf("%v", *value)
+	var stringValue = fmt.Sprintf("%s", *value)
 	if !strings.ContainsAny(stringValue, "[]") && !strings.Contains(stringValue, ".") {
 		return
 	}
