@@ -576,7 +576,7 @@ func collectDefinition() {
 		makeVersions()
 		if version, found := versions[collectVersion]; found {
 			minVersion = version
-			iosVersion, _ = strconv.ParseFloat(collectVersion, 8)
+			iosVersion, _ = strconv.ParseFloat(collectVersion, 32)
 		} else {
 			var list = makeKeyList("Available versions:", versions)
 			parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
