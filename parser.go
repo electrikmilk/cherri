@@ -300,7 +300,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	case strings.Contains(ahead, "("):
 		*valueType = Action
 		_, *value = collectAction()
-	case containsTokens(ahead, Plus, Minus, Multiply, Divide, Modulus):
+	case containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus):
 		*valueType = Expression
 		*value = collectUntil(until)
 	default:
@@ -1022,7 +1022,8 @@ func collectInteger() string {
 }
 
 func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
-	if !containsTokens(lookAheadUntil(*until), Plus, Minus, Multiply, Divide, Modulus) {
+	var ahead = lookAheadUntil(*until)
+	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
 		var integer = collectInteger()
 		*valueType = Integer
 		*value = integer
@@ -1255,18 +1256,9 @@ func tokensAhead(tokens ...tokenType) bool {
 	return false
 }
 
-func containsTokens(str string, v ...tokenType) bool {
+func containsTokens(str *string, v ...tokenType) bool {
 	for _, aheadToken := range v {
-		if strings.Contains(str, string(aheadToken)) {
-			return true
-		}
-	}
-	return false
-}
-
-func tokensOccur(str *string, v ...tokenType) bool {
-	for _, aheadToken := range v {
-		if strings.Count(*str, string(aheadToken)) != 0 {
+		if strings.Contains(*str, string(aheadToken)) {
 			return true
 		}
 	}

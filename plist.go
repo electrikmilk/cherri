@@ -235,7 +235,7 @@ func makeExpressionValue(outputName *plistData, UUID *plistData, value *any) {
 	var expression = fmt.Sprintf("%v", *value)
 	var expressionParts []string
 
-	if tokensOccur(&expression, Plus, Minus, Multiply, Divide, Modulus) {
+	if containsTokens(&expression, Plus, Minus, Multiply, Divide, Modulus) {
 		var operandOne string
 		var operandTwo string
 		var operation string
