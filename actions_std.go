@@ -4865,8 +4865,14 @@ func webActions() {
 			},
 		},
 		check: func(args []actionArgument) {
+			var value = getArgValue(args[1])
+			if reflect.TypeOf(value).String() != "string" {
+				return
+			}
+
 			makeMeasurementUnits()
-			var unitType = getArgValue(args[1]).(string)
+
+			var unitType = value.(string)
 			checkEnum(parameterDefinition{
 				name: "measurement unit",
 				enum: units[unitType],
@@ -4905,8 +4911,14 @@ func webActions() {
 			},
 		},
 		check: func(args []actionArgument) {
+			var value = getArgValue(args[1])
+			if reflect.TypeOf(value).String() != "string" {
+				return
+			}
+
 			makeMeasurementUnits()
-			var unitType = getArgValue(args[1]).(string)
+
+			var unitType = value.(string)
 			checkEnum(parameterDefinition{
 				name: "unit",
 				enum: units[unitType],
