@@ -64,6 +64,8 @@ func printIncludesDebug() {
 // injects the contents of the file at the specified path.
 func parseIncludes() {
 	lines = strings.Split(contents, "\n")
+	var reCommentedIncludes = regexp.MustCompile(`(?m)^.*//.*#include\s*".*?".*$|/\*[\s\S]*?#include\s*".*?"[\s\S]*?\*/`)
+
 	for l, line := range lines {
 		line = strings.Trim(line, " \t\n")
 		if len(line) == 0 {
@@ -104,6 +106,7 @@ func parseIncludes() {
 		handle(includeReadErr)
 
 		var includeContents = string(includeFileBytes)
+		includeContents = reCommentedIncludes.ReplaceAllString(includeContents, "")
 		var includeLines = strings.Split(includeContents, "\n")
 		var includeLinesCount = len(includeLines)
 		if strings.Contains(includeContents, "#include") {
@@ -124,6 +127,7 @@ func parseIncludes() {
 		included = append(included, includePath)
 	}
 	contents = strings.Join(lines, "\n")
+	contents = reCommentedIncludes.ReplaceAllString(contents, "")
 	lines = strings.Split(contents, "\n")
 	lineIdx = 0
 	if strings.Contains(contents, "#include") {
