@@ -1374,7 +1374,15 @@ func printTokens(tokens []token) {
 
 func parserWarning(message string) {
 	var errorFilename, errorLine, errorCol = delinquentFile()
-	fmt.Println(ansi("\nWarning: ", yellow, bold) + fmt.Sprintf("%s %s:%d:%d", message, errorFilename, errorLine, errorCol))
+	var warning = fmt.Sprintf("%s %s", ansi("\nWarning:", yellow, bold), message)
+
+	if !args.Using("no-ansi") {
+		warning += fmt.Sprintf(" %s:%d:%d", errorFilename, errorLine, errorCol)
+	} else {
+		warning += fmt.Sprintf(" (%d:%d)", errorLine, errorCol)
+	}
+
+	fmt.Println(warning + "\n")
 }
 
 func makeKeyList(title string, list map[string]string) string {
