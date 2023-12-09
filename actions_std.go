@@ -406,7 +406,18 @@ func contactActions() {
 				infinite:  true,
 			},
 		},
+		check: func(args []actionArgument) {
+			if len(args) > 1 && args[0].valueType == Variable {
+				parserError("Shortcuts only allows one variable for an email address.")
+			}
+		},
 		make: func(args []actionArgument) []plistData {
+			if args[0].valueType == Variable {
+				return []plistData{
+					argumentValue("WFEmailAddress", args, 0),
+				}
+			}
+
 			return []plistData{
 				contactValue("WFEmailAddress", emailAddress, args),
 			}
@@ -420,7 +431,17 @@ func contactActions() {
 				infinite:  true,
 			},
 		},
+		check: func(args []actionArgument) {
+			if len(args) > 1 && args[0].valueType == Variable {
+				parserError("Shortcuts only allows one variable for a phone number.")
+			}
+		},
 		make: func(args []actionArgument) []plistData {
+			if args[0].valueType == Variable {
+				return []plistData{
+					argumentValue("WFPhoneNumber", args, 0),
+				}
+			}
 			return []plistData{
 				contactValue("WFPhoneNumber", phoneNumber, args),
 			}
@@ -3671,10 +3692,18 @@ func scriptingActions() {
 			var listItems []plistData
 			for _, item := range args {
 				listItems = append(listItems, plistData{
-					dataType: Text,
-					value:    item.value,
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "WFItemType",
+							dataType: Number,
+							value:    0,
+						},
+						paramValue("WFValue", item, String, Text),
+					},
 				})
 			}
+
 			return []plistData{
 				{
 					key:      "WFItems",
