@@ -60,6 +60,8 @@ func printIncludesDebug() {
 	fmt.Print("\n")
 }
 
+var includeStatementRegex = regexp.MustCompile(`^#include "(.*?)"$`)
+
 // parseIncludes() searches for include statements within the file and
 // injects the contents of the file at the specified path.
 func parseIncludes() {
@@ -80,8 +82,12 @@ func parseIncludes() {
 		idx = len("#include") + 1
 		lineCharIdx = idx
 
-		r := regexp.MustCompile("\"(.*?)\"")
-		var includePath = strings.Trim(r.FindString(line), "\"")
+		var includeMatches = includeStatementRegex.FindStringSubmatch(line)
+		if len(includeMatches) != 2 {
+			parserError("Expected file path")
+		}
+
+		var includePath = strings.Trim(includeMatches[1], "\"\n\t ")
 		if includePath == "" {
 			parserError("Expected file path")
 		}

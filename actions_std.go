@@ -5353,14 +5353,15 @@ func apps(args []actionArgument) (apps []plistData) {
 	return
 }
 
+var appIdentifierRegex = regexp.MustCompile(`^([A-Za-z][A-Za-z\d_]*\.)+[A-Za-z][A-Za-z\d_]*$`)
+
 func replaceAppID(id string) string {
 	makeAppIds()
 	if appID, found := appIds[id]; found {
 		return appID
 	}
 
-	var regex = regexp.MustCompile(`^([A-Za-z][A-Za-z\d_]*\.)+[A-Za-z][A-Za-z\d_]*$`)
-	var matches = regex.FindAllString(id, -1)
+	var matches = appIdentifierRegex.FindAllString(id, -1)
 	if len(matches) == 0 {
 		parserError(fmt.Sprintf("Invalid app bundle identifier: %s", id))
 	}

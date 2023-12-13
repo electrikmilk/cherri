@@ -236,6 +236,8 @@ func lookAheadUntil(until rune) string {
 	return strings.Trim(strings.ToLower(ahead.String()), " \t\n")
 }
 
+var variableValueRegex = regexp.MustCompile(`^(.*?)(?:\[(.*?)])?(?:\.(.*?))?$`)
+
 func collectVariableValue(constant bool, valueType *tokenType, value *any, coerce *string, getAs *string) {
 	collectValue(valueType, value, '\n')
 
@@ -255,8 +257,7 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any, coerc
 		return
 	}
 
-	var regex = regexp.MustCompile(`^(.*?)(?:\[(.*?)])?(?:\.(.*?))?$`)
-	var matches = regex.FindAllStringSubmatch(stringValue, -1)
+	var matches = variableValueRegex.FindAllStringSubmatch(stringValue, -1)
 	for _, m := range matches {
 		*value = m[1]
 		if m[2] != "" {
@@ -313,8 +314,9 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	}
 }
 
+var collectVarRegex = regexp.MustCompile(`\{(.*?)(?:\[(.*?)])?(?:\.(.*?))?}`)
+
 func checkInlineVars(value *string) {
-	var collectVarRegex = regexp.MustCompile(`\{(.*?)(?:\[(.*?)])?(?:\.(.*?))?}`)
 	var matches = collectVarRegex.FindAllStringSubmatch(*value, -1)
 	if matches == nil {
 		return
