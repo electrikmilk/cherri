@@ -5170,8 +5170,8 @@ func roundingValue(mode string, args []actionArgument) []plistData {
 	}
 }
 
-func adjustDate(operation string, unit string, args []actionArgument) []plistData {
-	var adjustDateParams = []plistData{
+func adjustDate(operation string, unit string, args []actionArgument) (adjustDateParams []plistData) {
+	adjustDateParams = []plistData{
 		{
 			key:      "WFAdjustOperation",
 			dataType: Text,
@@ -5179,31 +5179,40 @@ func adjustDate(operation string, unit string, args []actionArgument) []plistDat
 		},
 		argumentValue("WFDate", args, 0),
 	}
-	if unit != "" {
-		adjustDateParams = append(adjustDateParams, plistData{
-			key:      "WFDuration",
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "Value",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "Unit",
-							dataType: Text,
-							value:    unit,
-						},
-						argumentValue("Magnitude", args, 1),
+	if unit == "" {
+		return adjustDateParams
+	}
+
+	var magnitudeValue = argumentValue("Magnitude", args, 1)
+	if magnitudeValue.dataType == Dictionary {
+		var value = magnitudeValue.value.([]plistData)
+		magnitudeValue.dataType = Dictionary
+		magnitudeValue.value = value[0].value
+	}
+	adjustDateParams = append(adjustDateParams, plistData{
+		key:      "WFDuration",
+		dataType: Dictionary,
+		value: []plistData{
+			{
+				key:      "Value",
+				dataType: Dictionary,
+				value: []plistData{
+					{
+						key:      "Unit",
+						dataType: Text,
+						value:    unit,
 					},
-				},
-				{
-					key:      "WFSerializationType",
-					dataType: Text,
-					value:    "WFQuantityFieldValue",
+					magnitudeValue,
 				},
 			},
-		})
-	}
+			{
+				key:      "WFSerializationType",
+				dataType: Text,
+				value:    "WFQuantityFieldValue",
+			},
+		},
+	})
+
 	return adjustDateParams
 }
 
