@@ -793,22 +793,22 @@ func convertTypeToken(tokenType tokenType) plistDataType {
 }
 
 func argumentValue(key string, args []actionArgument, idx int) plistData {
-	var actionArg parameterDefinition
+	var actionParameter parameterDefinition
 	if len(actions[currentAction].parameters) <= idx {
 		// First parameter is likely infinite
-		actionArg = actions[currentAction].parameters[0]
+		actionParameter = actions[currentAction].parameters[0]
 	} else {
-		actionArg = actions[currentAction].parameters[idx]
+		actionParameter = actions[currentAction].parameters[idx]
 	}
 	var arg actionArgument
 	if len(args) <= idx {
-		if actionArg.optional || actionArg.defaultValue != nil {
+		if actionParameter.optional || actionParameter.defaultValue != nil {
 			return plistData{}
 		}
 	} else {
 		arg = args[idx]
 	}
-	return paramValue(key, arg, actionArg.validType, convertTypeToken(actionArg.validType))
+	return paramValue(key, arg, actionParameter.validType, convertTypeToken(actionParameter.validType))
 }
 
 func paramValue(key string, arg actionArgument, handleAs tokenType, outputType plistDataType) plistData {
