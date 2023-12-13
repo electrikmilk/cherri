@@ -659,7 +659,7 @@ func collectGlyphDefinition() {
 func collectNoInputDefinition() {
 	switch {
 	case tokenAhead(StopWith):
-		advance()
+		advanceTimes(2)
 		var stopWithError = collectString()
 		noInput = noInputParams{
 			name: "WFWorkflowNoInputBehaviorShowError",
