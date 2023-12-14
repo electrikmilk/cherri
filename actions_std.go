@@ -614,18 +614,27 @@ func contactActions() {
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
-			if len(args) == 3 {
-				return []plistData{
-					contactValue("WFContactPhoneNumbers", phoneNumber, []actionArgument{args[2]}),
+			addParams: func(args []actionArgument) []plistData {
+			var plistDataArray = []plistData{}
+
+			if len(args) >= 3 {
+				if args[2].valueType == Variable {
+					plistDataArray = append(plistDataArray, argumentValue("WFContactPhoneNumbers", args, 2))
+				} else {
+					plistDataArray = append(plistDataArray, contactValue("WFContactPhoneNumbers", phoneNumber, []actionArgument{args[2]}))
 				}
 			}
-			if len(args) > 3 {
-				return []plistData{
-					contactValue("WFContactPhoneNumbers", phoneNumber, []actionArgument{args[2]}),
-					contactValue("WFContactEmails", emailAddress, []actionArgument{args[3]}),
+
+			if len(args) >= 4 {
+				if args[3].valueType == Variable {
+					plistDataArray = append(plistDataArray, argumentValue("WFContactEmails", args, 3))
+				} else {
+					plistDataArray = append(plistDataArray, contactValue("WFContactEmails", emailAddress, []actionArgument{args[3]}))
 				}
 			}
-			return []plistData{}
+
+			return plistDataArray
+		}
 		},
 	}
 	actions["updateContact"] = &actionDefinition{
