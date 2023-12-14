@@ -319,15 +319,15 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 			validActionOutput(param.name, param.validType, argVal)
 			return
 		}
-		if argValueType != param.validType && param.validType != Variable {
-			parserError(fmt.Sprintf("Invalid variable value %v (%s) for argument '%s' (%s).\n%s",
-				argVal,
-				argValueType,
-				param.name,
-				param.validType,
-				generateActionDefinition(*param, false, false),
-			))
-		}
+		// if argValueType != param.validType && param.validType != Variable {
+		// 	parserError(fmt.Sprintf("Invalid variable value %v (%s) for argument '%s' (%s).\n%s",
+		// 		argVal,
+		// 		argValueType,
+		// 		param.name,
+		// 		param.validType,
+		// 		generateActionDefinition(*param, false, false),
+		// 	))
+		// }
 	case argValueType == Question:
 	case argValueType == Nil:
 	case argument.valueType != param.validType:
