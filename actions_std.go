@@ -3897,9 +3897,11 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			args[1] = actionArgument{
-				valueType: Integer,
-				value:     incrementValue(args[1].value),
+			if args[1].valueType != Variable {
+				args[1] = actionArgument{
+					valueType: Integer,
+					value:     incrementValue(args[1].value),
+				}
 			}
 		},
 		addParams: func(args []actionArgument) []plistData {
@@ -3932,13 +3934,17 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			args[1] = actionArgument{
-				valueType: Integer,
-				value:     incrementValue(args[1].value),
+			if args[1].valueType != Variable {
+				args[1] = actionArgument{
+					valueType: Integer,
+					value:     incrementValue(args[1].value),
+				}
 			}
-			args[2] = actionArgument{
-				valueType: Integer,
-				value:     incrementValue(args[2].value),
+			if args[2].valueType != Variable {
+				args[2] = actionArgument{
+					valueType: Integer,
+					value:     incrementValue(args[2].value),
+				}
 			}
 		},
 		addParams: func(args []actionArgument) []plistData {
