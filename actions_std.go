@@ -614,7 +614,6 @@ func contactActions() {
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
-			addParams: func(args []actionArgument) []plistData {
 			var plistDataArray = []plistData{}
 
 			if len(args) >= 3 {
@@ -634,7 +633,6 @@ func contactActions() {
 			}
 
 			return plistDataArray
-		}
 		},
 	}
 	actions["updateContact"] = &actionDefinition{
