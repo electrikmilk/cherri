@@ -3897,6 +3897,9 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
+			if args[1].valueType == Variable {
+				return
+			}
 			args[1] = actionArgument{
 				valueType: Integer,
 				value:     incrementValue(args[1].value),
@@ -3932,6 +3935,9 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
+			if args[1].valueType == Variable || args[2].valueType == Variable {
+				return
+			}
 			args[1] = actionArgument{
 				valueType: Integer,
 				value:     incrementValue(args[1].value),
