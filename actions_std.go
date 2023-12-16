@@ -3357,17 +3357,24 @@ func scriptingActions() {
 		check: func(args []actionArgument) {
 			replaceAppIDs(args)
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
+		make: func(args []actionArgument) (params []plistData) {
+			params = []plistData{
 				argumentValue("WFAppIdentifier", args, 0),
-				{
+			}
+
+			if args[0].valueType == Variable {
+				params = append(params, argumentValue("WFSelectedApp", args, 0))
+			} else {
+				params = append(params, plistData{
 					key:      "WFSelectedApp",
 					dataType: Dictionary,
 					value: []plistData{
 						argumentValue("BundleIdentifier", args, 0),
 					},
-				},
+				})
 			}
+
+			return
 		},
 	}
 	actions["hideApp"] = &actionDefinition{
@@ -3382,14 +3389,20 @@ func scriptingActions() {
 			replaceAppIDs(args)
 		},
 		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFApp",
-					dataType: Dictionary,
-					value: []plistData{
-						argumentValue("BundleIdentifier", args, 0),
+			if args[0].valueType == Variable {
+				return []plistData{
+					argumentValue("WFApp", args, 0),
+				}
+			} else {
+				return []plistData{
+					{
+						key:      "WFApp",
+						dataType: Dictionary,
+						value: []plistData{
+							argumentValue("BundleIdentifier", args, 0),
+						},
 					},
-				},
+				}
 			}
 		},
 	}
@@ -3404,19 +3417,26 @@ func scriptingActions() {
 			},
 		},
 		check: replaceAppIDs,
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
+		make: func(args []actionArgument) (params []plistData) {
+			params = []plistData{
 				{
 					key:      "WFHideAppMode",
 					dataType: Text,
 					value:    "All Apps",
 				},
-				{
+			}
+
+			if args[0].valueType != Variable {
+				params = append(params, plistData{
 					key:      "WFAppsExcept",
 					dataType: Array,
 					value:    apps(args),
-				},
+				})
+			} else {
+				params = append(params, argumentValue("WFAppsExcept", args, 0))
 			}
+
+			return
 		},
 	}
 	actions["quitApp"] = &actionDefinition{
@@ -3431,14 +3451,20 @@ func scriptingActions() {
 			replaceAppIDs(args)
 		},
 		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFApp",
-					dataType: Dictionary,
-					value: []plistData{
-						argumentValue("BundleIdentifier", args, 0),
+			if args[0].valueType == Variable {
+				return []plistData{
+					argumentValue("WFApp", args, 0),
+				}
+			} else {
+				return []plistData{
+					{
+						key:      "WFApp",
+						dataType: Dictionary,
+						value: []plistData{
+							argumentValue("BundleIdentifier", args, 0),
+						},
 					},
-				},
+				}
 			}
 		},
 	}
@@ -3453,19 +3479,26 @@ func scriptingActions() {
 			},
 		},
 		check: replaceAppIDs,
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
+		make: func(args []actionArgument) (params []plistData) {
+			params = []plistData{
 				{
 					key:      "WFQuitAppMode",
 					dataType: Text,
 					value:    "All Apps",
 				},
-				{
+			}
+
+			if args[0].valueType != Variable {
+				params = append(params, plistData{
 					key:      "WFAppsExcept",
 					dataType: Array,
 					value:    apps(args),
-				},
+				})
+			} else {
+				params = append(params, argumentValue("WFAppsExcept", args, 0))
 			}
+
+			return
 		},
 	}
 	actions["killApp"] = &actionDefinition{
@@ -3479,20 +3512,29 @@ func scriptingActions() {
 		check: func(args []actionArgument) {
 			replaceAppIDs(args)
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFApp",
-					dataType: Dictionary,
-					value: []plistData{
-						argumentValue("BundleIdentifier", args, 0),
-					},
-				},
+		make: func(args []actionArgument) (params []plistData) {
+			params = []plistData{
 				{
 					key:      "WFAskToSaveChanges",
 					dataType: Boolean,
 					value:    false,
 				},
+			}
+
+			if args[0].valueType == Variable {
+				return []plistData{
+					argumentValue("WFApp", args, 0),
+				}
+			} else {
+				return []plistData{
+					{
+						key:      "WFApp",
+						dataType: Dictionary,
+						value: []plistData{
+							argumentValue("BundleIdentifier", args, 0),
+						},
+					},
+				}
 			}
 		},
 	}
@@ -3507,17 +3549,12 @@ func scriptingActions() {
 			},
 		},
 		check: replaceAppIDs,
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
+		make: func(args []actionArgument) (params []plistData) {
+			params = []plistData{
 				{
 					key:      "WFQuitAppMode",
 					dataType: Text,
 					value:    "All Apps",
-				},
-				{
-					key:      "WFAppsExcept",
-					dataType: Array,
-					value:    apps(args),
 				},
 				{
 					key:      "WFAskToSaveChanges",
@@ -3525,6 +3562,18 @@ func scriptingActions() {
 					value:    false,
 				},
 			}
+
+			if args[0].valueType != Variable {
+				params = append(params, plistData{
+					key:      "WFAppsExcept",
+					dataType: Array,
+					value:    apps(args),
+				})
+			} else {
+				params = append(params, argumentValue("WFAppsExcept", args, 0))
+			}
+
+			return
 		},
 	}
 	var appSplitRatios = []string{"half", "thirdByTwo"}
@@ -3548,9 +3597,16 @@ func scriptingActions() {
 			},
 		},
 		check: func(args []actionArgument) {
-			args[0].value = replaceAppID(getArgValue(args[0]).(string))
-			args[1].value = replaceAppID(getArgValue(args[1]).(string))
+			if args[0].valueType != Variable {
+				args[0].value = replaceAppID(getArgValue(args[0]).(string))
+			}
+			if args[1].valueType != Variable {
+				args[1].value = replaceAppID(getArgValue(args[1]).(string))
+			}
 			if len(args) > 2 {
+				if args[2].valueType == Variable {
+					return
+				}
 				switch args[2].value {
 				case "half":
 					args[2].value = "½ + ½"
@@ -3559,24 +3615,36 @@ func scriptingActions() {
 				}
 			}
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
+		make: func(args []actionArgument) (params []plistData) {
+			params = []plistData{
+				argumentValue("WFAppRatio", args, 2),
+			}
+
+			if args[0].valueType == Variable {
+				params = append(params, argumentValue("WFPrimaryAppIdentifier", args, 0))
+			} else {
+				params = append(params, plistData{
 					key:      "WFPrimaryAppIdentifier",
 					dataType: Dictionary,
 					value: []plistData{
 						argumentValue("BundleIdentifier", args, 0),
 					},
-				},
-				{
+				})
+			}
+
+			if args[0].valueType == Variable {
+				params = append(params, argumentValue("WFSecondaryAppIdentifier", args, 0))
+			} else {
+				params = append(params, plistData{
 					key:      "WFSecondaryAppIdentifier",
 					dataType: Dictionary,
 					value: []plistData{
-						argumentValue("BundleIdentifier", args, 1),
+						argumentValue("BundleIdentifier", args, 0),
 					},
-				},
-				argumentValue("WFAppRatio", args, 2),
+				})
 			}
+
+			return
 		},
 	}
 	actions["open"] = &actionDefinition{
@@ -5349,21 +5417,23 @@ func makeAppIds() {
 
 func apps(args []actionArgument) (apps []plistData) {
 	for _, arg := range args {
-		apps = append(apps, plistData{
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "BundleIdentifier",
-					dataType: Text,
-					value:    arg.value,
+		if arg.valueType != Variable {
+			apps = append(apps, plistData{
+				dataType: Dictionary,
+				value: []plistData{
+					{
+						key:      "BundleIdentifier",
+						dataType: Text,
+						value:    arg.value,
+					},
+					{
+						key:      "TeamIdentifier",
+						dataType: Text,
+						value:    "0000000000",
+					},
 				},
-				{
-					key:      "TeamIdentifier",
-					dataType: Text,
-					value:    "0000000000",
-				},
-			},
-		})
+			})
+		}
 	}
 	return
 }
@@ -5386,6 +5456,10 @@ func replaceAppID(id string) string {
 func replaceAppIDs(args []actionArgument) {
 	if len(args) >= 1 {
 		for a := range args {
+			if args[a].valueType == Variable {
+				continue
+			}
+
 			var id = getArgValue(args[a]).(string)
 			args[a].value = replaceAppID(id)
 		}
