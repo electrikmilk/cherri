@@ -811,7 +811,7 @@ func collectRepeat() {
 
 	variables[repeatIndexIdentifier] = variableValue{
 		variableType: "Variable",
-		valueType:    String,
+		valueType:    Integer,
 		value:        repeatIndexIdentifier,
 		repeatItem:   true,
 	}
