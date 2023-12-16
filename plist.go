@@ -746,10 +746,11 @@ func mapInlineVars(noVarString *string) {
 	}
 }
 
+var replaceVarRegex = regexp.MustCompile(`(\{.*?})`)
+
 // collectInlineVariables collects inline variables from `str` and adds them to a slice of attachmentVariable.
 // It then replaces all instances of inline variables in `str` with ObjectReplaceChar.
 func collectInlineVariables(str *string) (noVarString string) {
-	var collectVarRegex = regexp.MustCompile(`\{(.*?)(?:\[(.*?)])?(?:\.(.*?))?}`)
 	var matches = collectVarRegex.FindAllStringSubmatch(*str, -1)
 	if matches != nil {
 		for _, match := range matches {
@@ -767,7 +768,6 @@ func collectInlineVariables(str *string) (noVarString string) {
 			varIndex = append(varIndex, attachmentVar)
 		}
 
-		var replaceVarRegex = regexp.MustCompile(`(\{.*?})`)
 		noVarString = replaceVarRegex.ReplaceAllString(*str, ObjectReplaceCharStr)
 	}
 
@@ -793,22 +793,22 @@ func convertTypeToken(tokenType tokenType) plistDataType {
 }
 
 func argumentValue(key string, args []actionArgument, idx int) plistData {
-	var actionArg parameterDefinition
+	var actionParameter parameterDefinition
 	if len(actions[currentAction].parameters) <= idx {
 		// First parameter is likely infinite
-		actionArg = actions[currentAction].parameters[0]
+		actionParameter = actions[currentAction].parameters[0]
 	} else {
-		actionArg = actions[currentAction].parameters[idx]
+		actionParameter = actions[currentAction].parameters[idx]
 	}
 	var arg actionArgument
 	if len(args) <= idx {
-		if actionArg.optional || actionArg.defaultValue != nil {
+		if actionParameter.optional || actionParameter.defaultValue != nil {
 			return plistData{}
 		}
 	} else {
 		arg = args[idx]
 	}
-	return paramValue(key, arg, actionArg.validType, convertTypeToken(actionArg.validType))
+	return paramValue(key, arg, actionParameter.validType, convertTypeToken(actionParameter.validType))
 }
 
 func paramValue(key string, arg actionArgument, handleAs tokenType, outputType plistDataType) plistData {

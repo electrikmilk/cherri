@@ -5,3 +5,4 @@
 #define from menubar, sleepmode, onscreen
 #define noinput getclipboard
 #define name Test
+#define version 17

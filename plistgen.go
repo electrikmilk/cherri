@@ -39,7 +39,7 @@ func makePlist() {
 		{
 			key:      "WFWorkflowClientVersion",
 			dataType: Text,
-			value:    "2038.0.2.4",
+			value:    minVersion,
 		},
 		{
 			key:      "WFWorkflowHasOutputFallback",
@@ -80,12 +80,12 @@ func makePlist() {
 		{
 			key:      "WFWorkflowMinimumClientVersion",
 			dataType: Number,
-			value:    minVersion,
+			value:    "900",
 		},
 		{
 			key:      "WFWorkflowMinimumClientVersionString",
 			dataType: Text,
-			value:    minVersion,
+			value:    "900",
 		},
 		{
 			key:      "WFWorkflowOutputContentItemClasses",
