@@ -52,8 +52,7 @@ stack traces, debug information, and output a .plist file.
 
 ## Why macOS only?
 
-Generating valid Shortcuts is only possible on macOS. However, I am hoping to add a signing server to
-the [web editor](https://playground.cherrilang.org) that will turn out valid Shortcuts on any platform with a web
+Generating valid Shortcuts is only possible on macOS. However, there is a [Cherri Playground](https://playground.cherrilang.org) that outputs valid Shortcuts on any platform with a web
 browser.
 
 ### Development on other platforms
