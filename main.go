@@ -115,7 +115,7 @@ func printActionDefinitions() {
 			}
 		}
 		if actionSearchResults.Len() > 0 {
-			fmt.Println(ansi("\nThe closest identifier(s) are:", yellow, italic, bold))
+			fmt.Println(ansi("\nThe closest actions are:", yellow, italic, bold))
 			fmt.Println(actionSearchResults.String())
 		}
 
