@@ -96,7 +96,7 @@ func makeActionsTest() {
 					}
 					var appIDParams = []string{"appID", "except", "firstAppID", "secondAppID"}
 					switch {
-					case identifier == "makeVCard" && param.name == "imagePath":
+					case (identifier == "makeVCard" && param.name == "imagePath") || (identifier == "base64File" && param.name == "filePath"):
 						paramValue = "assets/cherri_icon.png"
 					case identifier == "makeSizedDiskImage" && param.name == "size":
 						var randInt = rand.Intn(10)
