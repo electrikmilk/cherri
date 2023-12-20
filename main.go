@@ -97,7 +97,7 @@ func printActionDefinitions() {
 		var actionSearchResults strings.Builder
 		for actionIdentifier := range actions {
 			if strings.Contains(strings.ToLower(actionIdentifier), identifier) {
-				currentAction = identifier
+				currentAction = actionIdentifier
 				var definition = generateActionDefinition(parameterDefinition{}, false, false)
 				definition, _ = strings.CutPrefix(definition, actionIdentifier)
 
