@@ -21,12 +21,13 @@ programming language, that compiles directly to a valid runnable Shortcut.
 - 🎓 Easy to learn and syntax similar to other languages
 - 🐞 1-1 translation to Shortcut actions as much as possible to make debugging easier
 - 🪄 No magic variables syntax, they're constants instead
-- 🪶 Optimized to create small as possible Shortcuts and reduces memory usage at runtime
+- 🪶 Optimized to create as small as possible Shortcuts and reduces memory usage at runtime
 - #️⃣ Include files within each other for large Shortcut projects
-- 🔧 Define your own custom actions to paste actions
+- 🔧 Define your custom actions to paste actions
 - 🥩 Enter actions raw with custom identifier and parameters
 - ❓ Define import questions
 - 📇 Generate VCards for menus
+- 📄 Embed files in base64
 - 🔢 Strongly statically typed with type inference
 
 ### Learn more
