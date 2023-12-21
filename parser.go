@@ -1177,7 +1177,6 @@ func collectAction() (identifier string, value action) {
 
 	identifier = collectIdentifier()
 	if _, found := actions[identifier]; !found {
-		lineIdx--
 		parserError(fmt.Sprintf("Undefined action '%s()'", identifier))
 	}
 	advance()
