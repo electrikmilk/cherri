@@ -1,4 +1,4 @@
-![Cherri](https://github.com/electrikmilk/cherri/blob/main/assets/cherri_icon.png?raw=true)
+<img src="https://github.com/electrikmilk/cherri/blob/main/assets/cherri_icon.png" width="300"/>
 
 # Cherri
 
@@ -33,6 +33,7 @@ programming language, that compiles directly to a valid runnable Shortcut.
 ### Learn more
 
 - 🛝 [Playground](https://playground.cherrilang.org/)
+- 🍒 [macOS IDE](https://github.com/electrikmilk/cherri-macos-app)
 - 📄 [Documentation](https://cherrilang.org/language/)
 - 🧑‍💻 [Code Tour](https://youtu.be/gU8TsI96uww)
 - 🗺️ [_Idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap)
