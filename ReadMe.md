@@ -1,4 +1,4 @@
-<img src="https://github.com/electrikmilk/cherri/blob/main/assets/cherri_icon.png" width="300"/>
+<img src="https://github.com/electrikmilk/cherri/blob/main/assets/cherri_icon.png" width="200"/>
 
 # Cherri
 
