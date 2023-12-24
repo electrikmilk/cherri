@@ -3971,15 +3971,6 @@ func scriptingActions() {
 				key:       "WFItemIndex",
 			},
 		},
-		check: func(args []actionArgument) {
-			if args[1].valueType == Variable {
-				return
-			}
-			args[1] = actionArgument{
-				valueType: Integer,
-				value:     incrementValue(args[1].value),
-			}
-		},
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -4008,19 +3999,6 @@ func scriptingActions() {
 				validType: Integer,
 				key:       "WFItemRangeEnd",
 			},
-		},
-		check: func(args []actionArgument) {
-			if args[1].valueType == Variable || args[2].valueType == Variable {
-				return
-			}
-			args[1] = actionArgument{
-				valueType: Integer,
-				value:     incrementValue(args[1].value),
-			}
-			args[2] = actionArgument{
-				valueType: Integer,
-				value:     incrementValue(args[2].value),
-			}
 		},
 		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -5151,6 +5129,38 @@ func builtinActions() {
 			}
 			return []plistData{
 				argumentValue("WFTextActionText", args, 0),
+			}
+		},
+	}
+	actions["base64File"] = &actionDefinition{
+		identifier: "gettext",
+		parameters: []parameterDefinition{
+			{
+				name:      "filePath",
+				validType: String,
+			},
+		},
+		check: func(args []actionArgument) {
+			var file = getArgValue(args[0])
+			if args[0].valueType == Variable && reflect.TypeOf(file).String() != stringType {
+				parserError("File path must be a string literal")
+			}
+			if _, err := os.Stat(file.(string)); os.IsNotExist(err) {
+				parserError(fmt.Sprintf("File '%s' does not exist!", file))
+			}
+		},
+		make: func(args []actionArgument) []plistData {
+			var file = getArgValue(args[0]).(string)
+			var bytes, readErr = os.ReadFile(file)
+			handle(readErr)
+			var encodedFile = base64.StdEncoding.EncodeToString(bytes)
+
+			return []plistData{
+				{
+					key:      "WFTextActionText",
+					dataType: Text,
+					value:    encodedFile,
+				},
 			}
 		},
 	}

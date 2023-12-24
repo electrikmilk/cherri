@@ -115,7 +115,7 @@ func parseIncludes() {
 		includeContents = reCommentedIncludes.ReplaceAllString(includeContents, "")
 		var includeLines = strings.Split(includeContents, "\n")
 		var includeLinesCount = len(includeLines)
-		if strings.Contains(includeContents, "#include") {
+		if hasIncludes(includeContents) {
 			includeLinesCount--
 		}
 
@@ -136,9 +136,17 @@ func parseIncludes() {
 	contents = reCommentedIncludes.ReplaceAllString(contents, "")
 	lines = strings.Split(contents, "\n")
 	lineIdx = 0
-	if strings.Contains(contents, "#include") {
+	if hasIncludes(contents) {
 		parseIncludes()
 	}
+}
+
+var includeRegex = regexp.MustCompile(`^#include "(.+)"`)
+
+func hasIncludes(str string) bool {
+	var matches = includeRegex.FindStringSubmatch(str)
+
+	return len(matches) != 0
 }
 
 // updateIncludesMap checks if an included file starts on `line`.
