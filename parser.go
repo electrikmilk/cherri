@@ -837,12 +837,17 @@ func collectRepeatEach() {
 	var repeatItemIdentifier = collectIdentifier()
 
 	advance()
-	tokenAhead(In)
-	advance()
+	if !tokenAhead(In) {
+		parserError(fmt.Sprintf("Expected `in`, got: %c", char))
+	}
 
 	var iterableType tokenType
 	var iterableValue any
 	collectValue(&iterableType, &iterableValue, '{')
+
+	if char == '{' {
+		parserError("Expected value")
+	}
 
 	advance()
 	tokens = append(tokens,
@@ -1006,7 +1011,6 @@ func collectEndStatement() {
 		var groupType = groupingTypes[groupingIdx]
 		if groupType == Repeat || groupType == RepeatWithEach {
 			reachable()
-			repeatItemIndex--
 		}
 
 		addNothing()
