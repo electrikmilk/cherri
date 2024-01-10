@@ -105,7 +105,7 @@ func printParsingDebug() {
 
 	fmt.Println(ansi("## DEFINITIONS ##", bold))
 	fmt.Println("Name: " + workflowName)
-	fmt.Println("Color: " + iconColor)
+	fmt.Println("Color:", iconColor)
 	fmt.Printf("Glyph: %d\n", iconGlyph)
 	fmt.Printf("Inputs: %v\n", inputs)
 	fmt.Printf("Outputs: %v\n", outputs)
@@ -616,7 +616,10 @@ func collectColorDefinition() {
 	if color, found := colors[collectColor]; found {
 		iconColor = color
 	} else {
-		var list = makeKeyList("Available icon colors:", colors)
+		var list = "Available icon colors:\n"
+		for c := range colors {
+			list += fmt.Sprintf("- %s\n", c)
+		}
 		parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s", collectColor, list))
 	}
 }

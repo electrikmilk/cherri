@@ -10,29 +10,29 @@ var workflowName string
 
 /* Colors */
 
-var colors map[string]string
-var iconColor = "-1263359489"
+var colors map[string]int
+var iconColor = -1263359489
 
 func makeColors() {
 	if len(colors) != 0 {
 		return
 	}
-	colors = map[string]string{
-		"red":        "4282601983",
-		"darkorange": "4251333119",
-		"orange":     "4271458815",
-		"yellow":     "4274264319",
-		"green":      "4292093695",
-		"teal":       "431817727",
-		"lightblue":  "1440408063",
-		"blue":       "463140863",
-		"darkblue":   "946986751",
-		"violet":     "2071128575",
-		"purple":     "3679049983",
-		"pink":       "3980825855",
-		"taupe":      "3031607807",
-		"gray":       "2846468607",
-		"darkgray":   "255",
+	colors = map[string]int{
+		"red":        4282601983,
+		"darkorange": 4251333119,
+		"orange":     4271458815,
+		"yellow":     4274264319,
+		"green":      4292093695,
+		"teal":       431817727,
+		"lightblue":  1440408063,
+		"blue":       463140863,
+		"darkblue":   946986751,
+		"violet":     2071128575,
+		"purple":     3679049983,
+		"pink":       3980825855,
+		"taupe":      -1448498689,
+		"gray":       2846468607,
+		"darkgray":   255,
 	}
 }
 

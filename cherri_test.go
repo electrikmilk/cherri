@@ -173,7 +173,7 @@ func resetParser() {
 	groupingIdx = 0
 	variables = map[string]variableValue{}
 	actions = map[string]*actionDefinition{}
-	iconColor = "-1263359489"
+	iconColor = -1263359489
 	iconGlyph = 61440
 	minVersion = "900"
 	iosVersion = 16.5
