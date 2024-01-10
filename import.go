@@ -7,11 +7,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"io"
 	"net/http"
 	"os"
-	"regexp"
 	"strings"
 )
 
@@ -36,19 +34,14 @@ type ShortcutRecordValue struct {
 	DownloadURL string
 }
 
+var importPath string
+
 func downloadShortcut() []byte {
-	var icloudURL = args.Value("icloud")
-
-	var icloudURLRegex = regexp.MustCompile(`^https://(?:www.)?icloud\.com/shortcuts/.+$`)
-	if !icloudURLRegex.MatchString(icloudURL) {
-		exit(fmt.Sprintf("import: iCloud URL `%s` does not match format.", icloudURL))
-	}
-
-	icloudURL = strings.Replace(icloudURL, "/shortcuts/", "/shortcuts/api/records/", 1)
+	importPath = strings.Replace(importPath, "/shortcuts/", "/shortcuts/api/records/", 1)
 
 	fmt.Println("Retrieving record from iCloud...")
 
-	var apiResponse, apiErr = http.Get(icloudURL)
+	var apiResponse, apiErr = http.Get(importPath)
 	handle(apiErr)
 	defer apiResponse.Body.Close()
 	if apiResponse.StatusCode != http.StatusOK {
@@ -79,13 +72,12 @@ func downloadShortcut() []byte {
 }
 
 func importShortcut() []byte {
-	var path = args.Value("import")
-	var _, statErr = os.Stat(path)
+	var _, statErr = os.Stat(importPath)
 	if os.IsNotExist(statErr) {
-		exit(fmt.Sprintf("import: File '%s' does not exist!", path))
+		exit("import: File does not exist!")
 	}
 
-	var segments = strings.Split(path, "/")
+	var segments = strings.Split(importPath, "/")
 	filename = segments[len(segments)-1]
 	var nameSegments = strings.Split(filename, ".")
 	var extension = nameSegments[len(nameSegments)-1]
@@ -93,7 +85,7 @@ func importShortcut() []byte {
 		exit(fmt.Sprintf("import: File is not a Shortcut."))
 	}
 
-	var b, readErr = os.ReadFile(path)
+	var b, readErr = os.ReadFile(importPath)
 	handle(readErr)
 
 	return b

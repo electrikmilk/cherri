@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -54,12 +55,15 @@ func main() {
 		os.Exit(0)
 	}
 
-	if args.Using("import") || args.Using("icloud") {
+	if args.Using("import") {
+		importPath = args.Value("import")
 		var shortcutBytes []byte
-		if args.Using("import") {
-			shortcutBytes = importShortcut()
-		} else if args.Using("icloud") {
+
+		var icloudURLRegex = regexp.MustCompile(`^https://(?:www.)?icloud\.com/shortcuts/.+$`)
+		if icloudURLRegex.MatchString(importPath) {
 			shortcutBytes = downloadShortcut()
+		} else {
+			shortcutBytes = importShortcut()
 		}
 
 		if hasSignedBytes(shortcutBytes) {
