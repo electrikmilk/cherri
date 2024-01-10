@@ -44,9 +44,18 @@ func init() {
 		Description: "Optional output file path. (e.g. path/to/file.shortcut).",
 	})
 	args.Register(args.Argument{
-		Name:        "import",
-		Short:       "i",
-		Description: "Opens compiled Shortcut after compilation (ignored if unsigned).",
+		Name:        "open",
+		Description: "Open the compiled Shortcut after compilation (ignored if unsigned).",
+	})
+	args.Register(args.Argument{
+		Name:         "import",
+		Description:  "Import local Shortcut file and convert into Cherri.",
+		ExpectsValue: true,
+	})
+	args.Register(args.Argument{
+		Name:         "icloud",
+		Description:  "Import Shortcut from iCloud URL and convert into Cherri.",
+		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
 		Name:        "comments",

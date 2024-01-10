@@ -232,7 +232,7 @@ func sign() {
 
 	removeUnsigned()
 
-	if args.Using("import") {
+	if args.Using("open") {
 		openShortcut()
 	}
 }
