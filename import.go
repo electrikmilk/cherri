@@ -92,9 +92,10 @@ func importShortcut() []byte {
 }
 
 func hasSignedBytes(b []byte) bool {
-	var unsignedBytes = []byte{98, 112, 108, 105, 115, 116, 48, 48}
+	var rawUnsignedBytes = []byte{98, 112, 108, 105, 115, 116, 48, 48}
+	var unsignedBytes = []byte{60, 63, 120, 109, 108, 32, 118, 101}
 	for i, ub := range unsignedBytes {
-		if ub == b[i] {
+		if ub == b[i] || b[i] == rawUnsignedBytes[i] {
 			continue
 		}
 
