@@ -54,6 +54,23 @@ func main() {
 		os.Exit(0)
 	}
 
+	if args.Using("import") || args.Using("icloud") {
+		var shortcutBytes []byte
+		if args.Using("import") {
+			shortcutBytes = importShortcut()
+		} else if args.Using("icloud") {
+			shortcutBytes = downloadShortcut()
+		}
+
+		if hasSignedBytes(shortcutBytes) {
+			exit("import: Unable to read Shortcut as it has been signed and the contents are encrypted.")
+		}
+
+		decompile(shortcutBytes)
+
+		os.Exit(0)
+	}
+
 	filePath = fileArg()
 	if len(os.Args) == 1 || filePath == "" {
 		printLogo()
