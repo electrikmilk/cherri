@@ -55,7 +55,7 @@ func decompileIcon() {
 				continue
 			}
 
-			code.WriteString(fmt.Sprintf("#define color %s", name))
+			code.WriteString(fmt.Sprintf("#define color %s\n", name))
 		}
 	}
 
