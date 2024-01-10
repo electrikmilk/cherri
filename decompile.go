@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	plists "howett.net/plist"
+	"reflect"
 	"strings"
 )
 
@@ -65,23 +66,48 @@ func decompileIcon() {
 				continue
 			}
 
-			code.WriteString(fmt.Sprintf("#define glyph %s", name))
+			code.WriteString(fmt.Sprintf("#define glyph %s\n", name))
 		}
 	}
+
+	code.WriteRune('\n')
 }
 
 func decompileActions() {
+	var variableValue any
 	for _, action := range data.WFWorkflowActions {
 		var identifier = matchAction(action.WFWorkflowActionIdentifier)
 		if identifier == "" {
-			fmt.Println("no action match for identifier:", action.WFWorkflowActionIdentifier)
+			switch action.WFWorkflowActionIdentifier {
+			case "is.workflow.actions.gettext":
+				var text = action.WFWorkflowActionParameters["WFTextActionText"].(map[string]any)
+
+				if reflect.TypeOf(text).String() == "string" {
+					variableValue = fmt.Sprintf("\"%v\"", text)
+				}
+			case "is.workflow.actions.number":
+				variableValue = action.WFWorkflowActionParameters["WFNumberActionNumber"].(string)
+			case "is.workflow.actions.setvariable":
+				code.WriteRune('@')
+				code.WriteString(action.WFWorkflowActionParameters["WFVariableName"].(string))
+
+				if variableValue != nil {
+					code.WriteRune(' ')
+					code.WriteRune('=')
+					code.WriteRune(' ')
+					code.WriteString(fmt.Sprintf("%v", variableValue))
+				}
+
+				variableValue = nil
+				code.WriteRune('\n')
+			}
 			continue
 		}
 
 		code.WriteString(identifier)
 		code.WriteRune('(')
 
-		code.WriteRune(')')
+		code.WriteString(")\n")
 	}
 }
 
