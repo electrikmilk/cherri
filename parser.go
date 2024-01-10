@@ -791,7 +791,13 @@ func collectRepeat() {
 	var repeatIndexIdentifier = collectIdentifier()
 
 	advance()
-	tokenAhead(RepeatWithEach)
+	if !tokenAhead(RepeatWithEach) {
+		parserError(fmt.Sprintf("Expected `for`, got: %c", char))
+	}
+
+	if char == '{' {
+		parserError("Expected number of times to repeat")
+	}
 
 	var timesType tokenType
 	var timesValue any
