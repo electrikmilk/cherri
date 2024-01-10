@@ -6,14 +6,14 @@
 
 package main
 
-var glyphs map[string]int
+var glyphs map[string]int64
 var iconGlyph int64 = 61440
 
 func makeGlyphs() {
 	if len(glyphs) != 0 {
 		return
 	}
-	glyphs = map[string]int{
+	glyphs = map[string]int64{
 		"car":               0xe83c,
 		"bus":               0xe91e,
 		"robot":             61566,
