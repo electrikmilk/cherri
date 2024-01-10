@@ -840,16 +840,18 @@ func collectRepeatEach() {
 	if !tokenAhead(In) {
 		parserError(fmt.Sprintf("Expected `in`, got: %c", char))
 	}
-
-	var iterableType tokenType
-	var iterableValue any
-	collectValue(&iterableType, &iterableValue, '{')
+	advance()
 
 	if char == '{' {
 		parserError("Expected value")
 	}
 
+	var iterableType tokenType
+	var iterableValue any
+	collectValue(&iterableType, &iterableValue, '{')
+
 	advance()
+
 	tokens = append(tokens,
 		token{
 			typeof:    RepeatWithEach,
