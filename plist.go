@@ -181,6 +181,8 @@ func makeVariableValue(outputName *plistData, UUID *plistData, valueType tokenTy
 		makeBoolValue(outputName, UUID, value)
 	case String:
 		makeStringValue(outputName, UUID, value)
+	case RawString:
+		makeRawStringValue(outputName, UUID, value)
 	case Expression:
 		makeExpressionValue(outputName, UUID, value)
 	case Action:
@@ -209,6 +211,18 @@ func makeStringValue(outputName *plistData, UUID *plistData, value *any) {
 		*outputName,
 		*UUID,
 		attachmentValues("WFTextActionText", fmt.Sprintf("%s", *value), Text),
+	}))
+}
+
+func makeRawStringValue(outputName *plistData, UUID *plistData, value *any) {
+	appendPlist(makeStdAction("gettext", []plistData{
+		*outputName,
+		*UUID,
+		{
+			key:      "WFTextActionText",
+			dataType: Text,
+			value:    fmt.Sprintf("%s", *value),
+		},
 	}))
 }
 
