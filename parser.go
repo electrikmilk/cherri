@@ -286,6 +286,11 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		if strings.ContainsAny(stringValue, "{}") {
 			checkInlineVars(&stringValue)
 		}
+	case char == '\'':
+		advance()
+		*valueType = RawString
+		*value = collectUntil('\'')
+		advance()
 	case char == '[':
 		advance()
 		*valueType = Arr
