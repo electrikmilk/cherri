@@ -329,6 +329,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		}
 	case argValueType == Question:
 	case argValueType == Nil:
+	case param.validType == String && argument.valueType == RawString:
 	case argument.valueType != param.validType:
 		if argValueType == String {
 			argVal = "\"" + argVal.(string) + "\""
