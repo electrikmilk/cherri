@@ -292,7 +292,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	case char == '\'':
 		advance()
 		*valueType = RawString
-		*value = collectUntil('\'')
+		*value = collectRawString()
 		advance()
 	case char == '[':
 		advance()
@@ -1118,6 +1118,26 @@ func collectString() string {
 		advance()
 	}
 	advance()
+	return collection.String()
+}
+
+func collectRawString() string {
+	var collection strings.Builder
+	for char != -1 {
+		if char == '\\' && next(1) == '\'' {
+			collection.WriteRune('\'')
+			advanceTimes(2)
+			continue
+		}
+		if char == '\'' {
+			break
+		}
+
+		collection.WriteRune(char)
+		advance()
+	}
+	advance()
+
 	return collection.String()
 }
 
