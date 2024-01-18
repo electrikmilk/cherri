@@ -47,11 +47,6 @@ func makePlist() {
 			value:    false,
 		},
 		{
-			key:      "WFWorkflowHasShortcutInputVariables",
-			dataType: Boolean,
-			value:    hasShortcutInputVariables,
-		},
-		{
 			key:      "WFWorkflowIcon",
 			dataType: Dictionary,
 			value: []plistData{
@@ -129,6 +124,14 @@ func makePlist() {
 			},
 		})
 	}
+
+	appendPlist([]plistData{
+		{
+			key:      "WFWorkflowHasShortcutInputVariables",
+			dataType: Boolean,
+			value:    hasShortcutInputVariables,
+		},
+	})
 
 	plist.WriteString(footer)
 
