@@ -459,7 +459,6 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 	var aggrandizements []plistData
 	if global, found := globals[identifier]; found {
 		variable = global
-		isInputVariable(identifier)
 		identifier = variable.value.(string)
 	} else if v, found := variables[identifier]; found {
 		variable = v
@@ -640,7 +639,6 @@ func makeAttachmentValues() {
 		var storedVar variableValue
 		if g, global := globals[stringVar.identifier]; global {
 			storedVar = g
-			isInputVariable(stringVar.identifier)
 			stringVar.identifier = g.value.(string)
 		} else if v, found := variables[stringVar.identifier]; found {
 			storedVar = v

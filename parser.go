@@ -367,6 +367,8 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		identifier.WriteString(collectUntil(*until))
 	}
 
+	isInputVariable(identifier.String())
+
 	*valueType = Variable
 	*value = identifier.String()
 	advance()
