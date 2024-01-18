@@ -198,9 +198,6 @@ func collectUntilIgnoreStrings(ch rune) string {
 		if char == '"' {
 			insideString = insideString && prev(1) == '\\'
 		}
-		if char == '\'' {
-			insideString = insideString && prev(1) == '\\'
-		}
 		collected.WriteRune(char)
 		advance()
 	}
