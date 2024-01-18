@@ -7,10 +7,11 @@ const immutable = 5
 @multiString = "Multiline
 string
 var"
+@rawString = 'not allowed inline variables, new lines, single quotes, etc. but i compile faster!'
 @arrayVar = ["item 1 {intVar}","item 2","item 3",5,{"key1":"value","key2":5,"key3":true}]
 @boolVarTrue = true
 @boolVarFalse = false
-@urlVar = url("https://apple.com","https://google.com")
+@urlVar = url('https://apple.com','https://google.com')
 @dateVar = date("October 5, 2022")
 @email = emailAddress("test@test.com")
 @phone = phoneNumber("(555) 555-5555")
