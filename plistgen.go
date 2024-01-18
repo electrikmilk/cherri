@@ -130,14 +130,6 @@ func makePlist() {
 		})
 	}
 
-	appendPlist([]plistData{
-		{
-			key:      "WFWorkflowHasShortcutInputVariables",
-			dataType: Boolean,
-			value:    hasShortcutInputVariables,
-		},
-	})
-
 	plist.WriteString(footer)
 
 	if args.Using("debug") {
