@@ -3900,7 +3900,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["firstListItem"] = &actionDefinition{
+	actions["getFirstItem"] = &actionDefinition{
 		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
@@ -3919,7 +3919,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["lastListItem"] = &actionDefinition{
+	actions["getLastItem"] = &actionDefinition{
 		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
@@ -3938,7 +3938,7 @@ func scriptingActions() {
 			}
 		},
 	}
-	actions["randomListItem"] = &actionDefinition{
+	actions["getRandomItem"] = &actionDefinition{
 		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
