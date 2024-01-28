@@ -2,7 +2,7 @@
 
 @combined = combineImages(images, "grid")
 
-@image = firstListItem(images)
+@image = getFirstItem(images)
 
 cropImage(image)
 
