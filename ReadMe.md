@@ -30,15 +30,15 @@ programming language, that compiles directly to a valid runnable Shortcut.
 - 📄 Embed files in base64
 - 🔢 Strongly statically typed with type inference
 
-### Learn more
+### Resources
 
-- 🛝 [Playground](https://playground.cherrilang.org/)
-- 🍒 [macOS IDE](https://github.com/electrikmilk/cherri-macos-app)
-- 📄 [Documentation](https://cherrilang.org/language/)
+- 🛝 [Playground](https://playground.cherrilang.org/) - Try out Cherri on any platform, preview the result, and export signed Shortcuts
+- 🍒 [macOS IDE](https://github.com/electrikmilk/cherri-macos-app) - Defines Cherri file type, write and build Shortcuts on Mac with a GUI
+- 📄 [Documentation](https://cherrilang.org/language/) - Learn Cherri or how to contribute
 - 🧑‍💻 [Code Tour](https://youtu.be/gU8TsI96uww)
 - 🗺️ [_Idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap)
 
-### **📣 WIP 📣**
+## 📣 WIP 📣
 
 This project has not yet reached a stable version. It is under heavy development and backward
 incompatible changes may be made.
@@ -50,7 +50,7 @@ cherri file.cherri
 ```
 
 Run `cherri` without any arguments to see all options and usage. For development, use the `--debug` (or `-d`) option to print
-stack traces, debug information, and output a .plist file.
+stack traces, debug information, and output a `.plist` file.
 
 ## Why macOS only?
 
@@ -73,7 +73,7 @@ Because it's fun :)
 Some languages have been abandoned, don't work very well, or no longer work. I don't want Shortcuts languages to die.
 There should be more, not less.
 
-Some stability comes with the project being on macOS and not iOS.
+Plus, some stability comes with this project being on macOS and not iOS, and I'm not aware of another Shortcuts language with macOS as it's platform other than [Buttermilk](https://github.com/zachary7829/Buttermilk).
 
 ## Community
 
