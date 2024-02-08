@@ -11,8 +11,7 @@
 [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://pkg.go.dev/github.com/electrikmilk/cherri?tab=doc)
 [![Go Report Card](https://goreportcard.com/badge/github.com/electrikmilk/cherri)](https://goreportcard.com/report/github.com/electrikmilk/cherri)
 
-**Cherri** (pronounced cherry) is a [Shortcuts](https://apps.apple.com/us/app/shortcuts/id915249334)
-programming language, that compiles directly to a valid runnable Shortcut.
+**Cherri** (pronounced cherry) is a [Shortcuts](https://apps.apple.com/us/app/shortcuts/id1462947752) programming language, that compiles directly to a valid runnable Shortcut.
 
 [![Hello World Example](https://github.com/electrikmilk/cherri/assets/4368524/4205308b-4358-47c9-a1b4-66930c8db1c2)](https://playground.cherrilang.org)
 
