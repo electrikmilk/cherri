@@ -29,7 +29,7 @@ The main goal is to make it trivial and practical to create large Shortcut proje
 - ❓ Define import questions
 - 📇 Generate VCards for menus
 - 📄 Embed files in base64
-- 🔢 Strongly statically typed with type inference
+- 🔢 Type system and type inference
 
 ### Resources
 
