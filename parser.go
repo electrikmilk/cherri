@@ -28,10 +28,6 @@ var groupingTypes map[int]tokenType
 var groupingIdx int
 
 func initParse() {
-	if strings.Contains(contents, "action") {
-		standardActions()
-		parseCustomActions()
-	}
 	if args.Using("debug") {
 		fmt.Printf("Parsing %s...\n", filename)
 	}
