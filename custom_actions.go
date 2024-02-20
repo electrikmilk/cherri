@@ -24,6 +24,7 @@ func parseCustomActions() {
 	if !regexp.MustCompile(`action (.*?)\((.*?)\) \{`).MatchString(contents) {
 		return
 	}
+	standardActions()
 
 	customActions = make(map[string]customAction)
 	for char != -1 {
@@ -49,6 +50,13 @@ func collectActionDefinition() {
 	var startLine = lineIdx
 
 	var identifier = collectIdentifier()
+	if _, found := customActions[identifier]; found {
+		parserError(fmt.Sprintf("Duplication declaration of custom action '%s()'", identifier))
+	}
+	if _, found := actions[identifier]; found {
+		parserError(fmt.Sprintf("Declaration conflicts with built-in action '%s()'", identifier))
+	}
+
 	var arguments = collectArgumentDefinitions()
 	advance()
 	var body = strings.TrimSpace(collectObject())
