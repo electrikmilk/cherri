@@ -21,7 +21,7 @@ var customActions map[string]customAction
 
 // parseCustomActions parses defined actions and collects them.
 func parseCustomActions() {
-	if !regexp.MustCompile(`[^/]action (.*?)\((.*?)\) \{`).MatchString(contents) {
+	if !regexp.MustCompile(`action (.*?)\((.*?)\) \{`).MatchString(contents) {
 		return
 	}
 
