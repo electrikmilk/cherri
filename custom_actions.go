@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/electrikmilk/args-parser"
 	"regexp"
 	"strings"
 )
@@ -71,6 +72,10 @@ func collectActionDefinition() {
 		arguments: arguments,
 		body:      body,
 	}
+
+	if args.Using("debug") {
+		printCustomActionsDebug()
+	}
 }
 
 func collectArgumentDefinitions() (arguments []parameterDefinition) {
@@ -104,6 +109,7 @@ func printCustomActionsDebug() {
 		fmt.Println(customAction.arguments)
 		fmt.Println("body:")
 		fmt.Println(customAction.body)
+		fmt.Println("(end)")
 		fmt.Print("\n")
 	}
 }
