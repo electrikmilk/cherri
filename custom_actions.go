@@ -57,8 +57,13 @@ func collectActionDefinition() {
 		parserError(fmt.Sprintf("Declaration conflicts with built-in action '%s()'", identifier))
 	}
 
-	var arguments = collectArgumentDefinitions()
+	var arguments []parameterDefinition
+	if next(1) != ')' {
+		arguments = collectArgumentDefinitions()
+	}
+
 	advance()
+
 	var body = strings.TrimSpace(collectObject())
 
 	var endLine = lineIdx
