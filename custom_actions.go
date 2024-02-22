@@ -142,7 +142,18 @@ func customActionCall() {
 	skipWhitespace()
 	if char != ')' {
 		var arguments = collectArguments()
+		fmt.Println(arguments)
 	}
+	/*
+		TODO:
+			const myFunctionCall = {
+			    "cherri_functions": 1,
+			    "function": "add",
+			    "arguments": ["{operandOne}", "{operandTwo}"]
+			}
+			const myFunctionReturn = runSelf(myFunctionCall)
+	*/
+	lines[lineIdx] = ""
 }
 
 func printCustomActionsDebug() {
