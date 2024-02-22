@@ -24,8 +24,8 @@ func parseCustomActions() {
 	if !regexp.MustCompile(`action (.*?)\((.*?)\) \{`).MatchString(contents) {
 		return
 	}
-
 	customActions = make(map[string]customAction)
+
 	for char != -1 {
 		switch {
 		case isToken(ForwardSlash):
@@ -38,11 +38,7 @@ func parseCustomActions() {
 		advance()
 	}
 
-	fmt.Println(customActions)
-
-	contents = strings.Join(lines, "\n")
-
-	firstChar()
+	resetParse()
 }
 
 func collectActionDefinition() {
