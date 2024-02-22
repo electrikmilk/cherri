@@ -27,7 +27,7 @@ var groupingUUIDs map[int]string
 var groupingTypes map[int]tokenType
 var groupingIdx int
 
-// resetParser will take the current lines and merge them together to create new contents,
+// resetParse will take the current lines and merge them together to create new contents,
 // then reset the chars and lines, then reset the parser cursor position.
 func resetParse() {
 	contents = strings.Join(lines, "\n")
