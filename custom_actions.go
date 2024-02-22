@@ -58,7 +58,6 @@ func collectActionDefinition() {
 		advance()
 		skipWhitespace()
 		arguments = collectArgumentDefinitions()
-		advance()
 	} else {
 		advanceTimes(2)
 	}
