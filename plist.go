@@ -186,9 +186,10 @@ func makeVariableValue(outputName *plistData, UUID *plistData, valueType tokenTy
 	case Expression:
 		makeExpressionValue(outputName, UUID, value)
 	case Action:
-		var p = *value
-		currentAction = p.(action).ident
-		plistAction(p.(action).args, outputName, UUID)
+		var valuePtr = *value
+		var action = valuePtr.(action)
+		setCurrentAction(action.ident, actions[action.ident])
+		plistAction(action.args, outputName, UUID)
 	case Dict:
 		makeDictionaryValue(outputName, UUID, value)
 	}
@@ -806,11 +807,11 @@ func convertTypeToken(tokenType tokenType) plistDataType {
 
 func argumentValue(key string, args []actionArgument, idx int) plistData {
 	var actionParameter parameterDefinition
-	if len(actions[currentAction].parameters) <= idx {
+	if len(currentAction.parameters) <= idx {
 		// First parameter is likely infinite
-		actionParameter = actions[currentAction].parameters[0]
+		actionParameter = currentAction.parameters[0]
 	} else {
-		actionParameter = actions[currentAction].parameters[idx]
+		actionParameter = currentAction.parameters[idx]
 	}
 	var arg actionArgument
 	if len(args) <= idx {

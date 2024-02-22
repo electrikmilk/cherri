@@ -37,7 +37,6 @@ func TestSingleFile(_ *testing.T) {
 }
 
 func TestActionList(_ *testing.T) {
-	standardActions()
 	for identifier := range actions {
 		fmt.Println("{label: '" + identifier + "', type: 'function', detail: 'action'},")
 	}
@@ -77,7 +76,6 @@ func compile() {
 }
 
 func makeActionsTest() {
-	standardActions()
 	var actionsTest strings.Builder
 	actionsTest.WriteString("/*\nThis is a generated test of all the actions the compiler supports.\nDO NOT RUN THIS, it is a random list of actions that would likely do bad things.\n*/\n#define mac true\n@emptyVar = nil\n")
 	for identifier, definition := range actions {
@@ -172,7 +170,6 @@ func resetParser() {
 	groupingTypes = map[int]tokenType{}
 	groupingIdx = 0
 	variables = map[string]variableValue{}
-	actions = map[string]*actionDefinition{}
 	iconColor = -1263359489
 	iconGlyph = 61440
 	minVersion = "900"
@@ -190,7 +187,6 @@ func resetParser() {
 	includes = []include{}
 	workflowName = ""
 	plist.Reset()
-	usedActions = []string{}
 	menus = map[string][]variableValue{}
 	uuids = map[string]string{}
 	customActions = map[string]customAction{}
