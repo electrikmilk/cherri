@@ -495,6 +495,7 @@ func collectVariable(constant bool) {
 		if constant {
 			parserError("Constants cannot be initialized without a value")
 		}
+		skipWhitespace()
 		collectType(&valueType, &value)
 	case constant:
 		lineIdx--
@@ -522,7 +523,6 @@ func collectVariable(constant bool) {
 }
 
 func collectType(valueType *tokenType, value *any) {
-	advance()
 	switch {
 	case tokenAhead(String):
 		*valueType = String

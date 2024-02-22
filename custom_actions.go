@@ -96,7 +96,7 @@ func collectArgumentDefinitions() (arguments []parameterDefinition) {
 			advance()
 		}
 	}
-	advanceTimes(2)
+	advance()
 
 	return
 }
