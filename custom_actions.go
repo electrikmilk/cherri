@@ -13,8 +13,8 @@ import (
 
 // customAction contains the collected declaration of a custom action.
 type customAction struct {
-	arguments []parameterDefinition
-	body      string
+	definition actionDefinition
+	body       string
 }
 
 // customActions is a map of all the custom actions that have been defined.
@@ -39,6 +39,7 @@ func parseCustomActions() {
 		advance()
 	}
 
+	replaceCustomActionRefs()
 	resetParse()
 }
 
@@ -57,7 +58,7 @@ func collectActionDefinition() {
 	if next(1) != ')' {
 		advance()
 		skipWhitespace()
-		arguments = collectArgumentDefinitions()
+		arguments = collectParameterDefinitions()
 	} else {
 		advanceTimes(2)
 	}
@@ -74,8 +75,10 @@ func collectActionDefinition() {
 	}
 
 	customActions[identifier] = customAction{
-		arguments: arguments,
-		body:      body,
+		definition: actionDefinition{
+			parameters: arguments,
+		},
+		body: body,
 	}
 
 	if args.Using("debug") {
@@ -83,7 +86,7 @@ func collectActionDefinition() {
 	}
 }
 
-func collectArgumentDefinitions() (arguments []parameterDefinition) {
+func collectParameterDefinitions() (arguments []parameterDefinition) {
 	for char != ')' {
 		var valueType tokenType
 		var value any
@@ -107,12 +110,47 @@ func collectArgumentDefinitions() (arguments []parameterDefinition) {
 	return
 }
 
+func replaceCustomActionRefs() {
+	resetParse()
+
+	for char != -1 {
+		switch {
+		case isToken(ForwardSlash):
+			collectComment()
+		case strings.Contains(lookAheadUntil('\n'), "("):
+			customActionCall()
+			continue
+		}
+		advance()
+	}
+}
+
+func customActionCall() {
+	var identifier = collectIdentifier()
+	if _, found := actions[identifier]; found {
+		advanceUntil('\n')
+		return
+	}
+	if _, found := customActions[identifier]; !found {
+		parserError(fmt.Sprintf("Undefined custom action '%s()'", identifier))
+	}
+	var action = customActions[identifier]
+
+	setCurrentAction(identifier, &action.definition)
+
+	advance()
+	skipWhitespace()
+	if char != ')' {
+		var arguments = collectArguments()
+	}
+}
+
 func printCustomActionsDebug() {
 	fmt.Println(ansi("### CUSTOM ACTIONS ###", bold) + "\n")
 	for identifier, customAction := range customActions {
 		fmt.Println("identifier:", identifier+"()")
-		fmt.Println("arguments:")
-		fmt.Println(customAction.arguments)
+		fmt.Println("parameters:")
+		fmt.Println(customAction.definition.parameters)
 		fmt.Println("body:")
 		fmt.Println(customAction.body)
 		fmt.Println("(end)")
