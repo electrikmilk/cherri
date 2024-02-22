@@ -24,7 +24,6 @@ func parseCustomActions() {
 	if !regexp.MustCompile(`action (.*?)\((.*?)\) \{`).MatchString(contents) {
 		return
 	}
-	standardActions()
 
 	customActions = make(map[string]customAction)
 	for char != -1 {
