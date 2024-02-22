@@ -45,7 +45,7 @@ func calendarActions() {
 				key:       "WFDateActionDate",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFDateActionMode",
@@ -564,7 +564,7 @@ func contactActions() {
 				optional:     true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFFaceTimeType",
@@ -659,7 +659,7 @@ func contactActions() {
 			var contactDetailKey = strings.ReplaceAll(contactDetail, " ", "")
 			actions[currentAction].parameters[2].key = "WFContactContentItem" + contactDetailKey
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "Mode",
@@ -684,7 +684,7 @@ func contactActions() {
 				enum:      contactDetails,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "Mode",
@@ -787,7 +787,7 @@ func documentActions() {
 				key:       "WFGroupIndex",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFGetGroupType",
@@ -1111,7 +1111,7 @@ func documentActions() {
 				optional:     true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFAskWhereToSave",
@@ -1227,7 +1227,7 @@ func documentActions() {
 				args[1].value = languageCode(getArgValue(args[1]).(string))
 			}
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFSelectedFromLanguage",
@@ -3971,7 +3971,7 @@ func scriptingActions() {
 				key:       "WFItemIndex",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFItemSpecifier",
