@@ -1418,7 +1418,7 @@ var actions = map[string]*actionDefinition{
 				key:       "text",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "Show-text",
@@ -2693,7 +2693,7 @@ var actions = map[string]*actionDefinition{
 				enum:      fileSizeUnits,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFFileSizeIncludeUnits",
@@ -3145,7 +3145,7 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFAlertActionCancelButtonShown",
@@ -3170,7 +3170,7 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFAlertActionCancelButtonShown",
@@ -3264,7 +3264,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFGetDictionaryValueType",
@@ -3283,7 +3283,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFGetDictionaryValueType",
@@ -3307,7 +3307,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFDictionaryKey",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFGetDictionaryValueType",
@@ -3791,7 +3791,7 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFMathOperation",
@@ -3847,7 +3847,7 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFIPAddressSourceOption",
@@ -3869,7 +3869,7 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFIPAddressSourceOption",
@@ -3979,7 +3979,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFItemRangeEnd",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFItemSpecifier",
@@ -4192,7 +4192,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFResponse",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFNoOutputSurfaceBehavior",
@@ -4211,7 +4211,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFOutput",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFNoOutputSurfaceBehavior",
@@ -4294,7 +4294,7 @@ var actions = map[string]*actionDefinition{
 				key:       "OnValue",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "operation",
@@ -4492,7 +4492,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "Show-WFInput",
@@ -4636,7 +4636,7 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFGiphyShowPicker",
@@ -4696,7 +4696,7 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFHTTPMethod",

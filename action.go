@@ -259,12 +259,12 @@ func checkRequiredArgs() {
 }
 
 // checkEnum checks an argument value against a string slice.
-func checkEnum(param parameterDefinition, argument actionArgument) {
-	var value = getArgValue(argument)
+func checkEnum(param *parameterDefinition, argument *actionArgument) {
+	var value = getArgValue(*argument)
 	if value == nil {
 		return
 	}
-	if reflect.TypeOf(value).String() != "string" {
+	if reflect.TypeOf(value).String() != stringType {
 		return
 	}
 	if !contains(param.enum, value.(string)) {
@@ -273,7 +273,7 @@ func checkEnum(param parameterDefinition, argument actionArgument) {
 				"Invalid argument '%s' for %s.\n\n%s",
 				value,
 				param.name,
-				generateActionDefinition(param, false, true),
+				generateActionDefinition(*param, false, true),
 			),
 		)
 	}
@@ -388,7 +388,7 @@ func getArgValue(argument actionArgument) any {
 // checkArg checks to ensure the collected argument for the current action is valid.
 func checkArg(param *parameterDefinition, argument *actionArgument) {
 	if param.enum != nil {
-		checkEnum(*param, *argument)
+		checkEnum(param, argument)
 	}
 	typeCheck(param, argument)
 	var realValue = getArgValue(*argument)
