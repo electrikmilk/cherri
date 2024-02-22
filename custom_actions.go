@@ -22,7 +22,7 @@ var customActions map[string]customAction
 
 // parseCustomActions parses defined actions and collects them.
 func parseCustomActions() {
-	if !regexp.MustCompile(`action (.*?)\((.*?)\) \{`).MatchString(contents) {
+	if !regexp.MustCompile(`action (.*?)\((.*?)\)`).MatchString(contents) {
 		return
 	}
 	customActions = make(map[string]customAction)
@@ -55,9 +55,15 @@ func collectActionDefinition() {
 
 	var arguments []parameterDefinition
 	if next(1) != ')' {
+		advance()
+		skipWhitespace()
 		arguments = collectArgumentDefinitions()
+		advance()
+	} else {
+		advanceTimes(2)
 	}
 
+	advanceUntilExpect('{', 3)
 	advance()
 
 	var body = strings.TrimSpace(collectObject())
@@ -92,9 +98,10 @@ func collectArgumentDefinitions() (arguments []parameterDefinition) {
 			validType: valueType,
 		})
 
-		if char == ',' || char == ' ' {
+		if char == ',' {
 			advance()
 		}
+		skipWhitespace()
 	}
 	advance()
 

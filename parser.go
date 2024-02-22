@@ -1369,8 +1369,6 @@ func firstChar() {
 
 func skipWhitespace() {
 	for char == ' ' || char == '\t' || char == '\n' {
-		fmt.Println("skipping whitespace")
-		printChar(char)
 		advance()
 	}
 }
