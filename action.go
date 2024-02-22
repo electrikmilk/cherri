@@ -108,7 +108,7 @@ func actionIdentifier() (ident string) {
 		if currentAction.identifier != "" {
 			ident = currentAction.identifier
 		} else {
-			ident = strings.ToLower(currentAction.identifier)
+			ident = strings.ToLower(currentActionIdentifier)
 		}
 		ident = "is.workflow.actions." + ident
 	}
