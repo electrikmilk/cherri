@@ -1173,7 +1173,7 @@ func collectObject() string {
 	var jsonStr strings.Builder
 	var insideInnerObject = false
 	var insideString = false
-	for {
+	for char != -1 {
 		if char == '"' {
 			if insideString {
 				if prev(1) != '\\' {
