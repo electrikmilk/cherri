@@ -3,7 +3,8 @@
 @intVar = 42
 @intVar2 = 52
 const immutable = 5
-@stringVar = "text {intVar} {intVar2}"
+@stringVar = "text {intVar} {intVar2} {immutable}"
+number(immutable)
 @multiString = "Multiline
 string
 var"
