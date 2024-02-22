@@ -380,7 +380,7 @@ func inputValue(key string, name string, varUUID string) plistData {
 	var value []plistData
 	if varUUID != "" {
 		var variable = variables[name]
-		if variable.valueType != Variable {
+		if (variable.valueType != Variable && variable.valueType != Action) || (variable.valueType == Action && variable.constant) {
 			value = []plistData{
 				{
 					key:      "OutputName",
