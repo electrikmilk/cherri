@@ -1367,6 +1367,14 @@ func firstChar() {
 	advance()
 }
 
+func skipWhitespace() {
+	for char == ' ' || char == '\t' || char == '\n' {
+		fmt.Println("skipping whitespace")
+		printChar(char)
+		advance()
+	}
+}
+
 func printVariables() {
 	for identifier, v := range variables {
 		if v.constant {
