@@ -24,13 +24,10 @@ var relativePath string
 var inputPath string
 var outputPath string
 
-var darwin bool
-
 const unsignedEnd = "_unsigned.shortcut"
+const darwin = runtime.GOOS == "darwin"
 
 func main() {
-	darwin = runtime.GOOS == "darwin"
-
 	if args.Using("help") {
 		args.PrintUsage()
 		os.Exit(0)
