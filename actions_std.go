@@ -1519,10 +1519,10 @@ var actions = map[string]*actionDefinition{
 				valueType: String,
 				value:     size[1],
 			}
-			checkEnum(parameterDefinition{
+			checkEnum(&parameterDefinition{
 				name: "disk size",
 				enum: storageUnits,
-			}, storageUnitArg)
+			}, &storageUnitArg)
 		},
 		make: func(args []actionArgument) []plistData {
 			var size = strings.Split(getArgValue(args[2]).(string), " ")
@@ -4886,10 +4886,10 @@ var actions = map[string]*actionDefinition{
 			makeMeasurementUnits()
 
 			var unitType = value.(string)
-			checkEnum(parameterDefinition{
+			checkEnum(&parameterDefinition{
 				name: "measurement unit",
 				enum: units[unitType],
-			}, args[2])
+			}, &args[2])
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
@@ -4932,10 +4932,10 @@ var actions = map[string]*actionDefinition{
 			makeMeasurementUnits()
 
 			var unitType = value.(string)
-			checkEnum(parameterDefinition{
+			checkEnum(&parameterDefinition{
 				name: "unit",
 				enum: units[unitType],
-			}, args[2])
+			}, &args[2])
 		},
 		make: func(args []actionArgument) []plistData {
 			return []plistData{
