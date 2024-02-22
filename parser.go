@@ -641,7 +641,6 @@ func collectWorkflowType() {
 
 func collectGlyphDefinition() {
 	var collectGlyph = collectUntil('\n')
-	makeGlyphs()
 	collectGlyph = strings.ToLower(collectGlyph)
 	if glyph, found := glyphs[collectGlyph]; found {
 		glyphInt, hexErr := strconv.ParseInt(fmt.Sprintf("%d", glyph), 10, 64)
