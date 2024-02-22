@@ -173,31 +173,32 @@ func makeVariableAction(token *token, varUUID *string) {
 	makeVariableValue(&outputName, &UUID, token.valueType, &token.value)
 }
 
-func makeVariableValue(outputName *plistData, UUID *plistData, valueType tokenType, value *any) {
+func makeVariableValue(outputName *plistData, uuid *plistData, valueType tokenType, value *any) {
 	switch valueType {
 	case Integer:
-		makeIntValue(outputName, UUID, value)
+		makeIntValue(outputName, uuid, value)
 	case Bool:
-		makeBoolValue(outputName, UUID, value)
+		makeBoolValue(outputName, uuid, value)
 	case String:
-		makeStringValue(outputName, UUID, value)
+		makeStringValue(outputName, uuid, value)
 	case RawString:
-		makeRawStringValue(outputName, UUID, value)
+		makeRawStringValue(outputName, uuid, value)
 	case Expression:
-		makeExpressionValue(outputName, UUID, value)
+		makeExpressionValue(outputName, uuid, value)
 	case Action:
-		var p = *value
-		currentAction = p.(action).ident
-		plistAction(p.(action).args, outputName, UUID)
+		var valuePtr = *value
+		var action = valuePtr.(action)
+		setCurrentAction(action.ident, actions[action.ident])
+		plistAction(action.args, outputName, uuid)
 	case Dict:
-		makeDictionaryValue(outputName, UUID, value)
+		makeDictionaryValue(outputName, uuid, value)
 	}
 }
 
-func makeIntValue(outputName *plistData, UUID *plistData, value *any) {
+func makeIntValue(outputName *plistData, uuid *plistData, value *any) {
 	appendPlist(makeStdAction("number", []plistData{
 		*outputName,
-		*UUID,
+		*uuid,
 		{
 			key:      "WFNumberActionNumber",
 			dataType: Text,
@@ -206,18 +207,18 @@ func makeIntValue(outputName *plistData, UUID *plistData, value *any) {
 	}))
 }
 
-func makeStringValue(outputName *plistData, UUID *plistData, value *any) {
+func makeStringValue(outputName *plistData, uuid *plistData, value *any) {
 	appendPlist(makeStdAction("gettext", []plistData{
 		*outputName,
-		*UUID,
+		*uuid,
 		attachmentValues("WFTextActionText", fmt.Sprintf("%s", *value), Text),
 	}))
 }
 
-func makeRawStringValue(outputName *plistData, UUID *plistData, value *any) {
+func makeRawStringValue(outputName *plistData, uuid *plistData, value *any) {
 	appendPlist(makeStdAction("gettext", []plistData{
 		*outputName,
-		*UUID,
+		*uuid,
 		{
 			key:      "WFTextActionText",
 			dataType: Text,
@@ -226,14 +227,14 @@ func makeRawStringValue(outputName *plistData, UUID *plistData, value *any) {
 	}))
 }
 
-func makeBoolValue(outputName *plistData, UUID *plistData, value *any) {
+func makeBoolValue(outputName *plistData, uuid *plistData, value *any) {
 	var boolValue = "0"
 	if *value == true {
 		boolValue = "1"
 	}
 	appendPlist(makeStdAction("number", []plistData{
 		*outputName,
-		*UUID,
+		*uuid,
 		{
 			key:      "WFNumberActionNumber",
 			dataType: Text,
@@ -380,7 +381,7 @@ func inputValue(key string, name string, varUUID string) plistData {
 	var value []plistData
 	if varUUID != "" {
 		var variable = variables[name]
-		if variable.valueType != Variable && variable.valueType != Action {
+		if (variable.valueType != Variable && variable.valueType != Action) || (variable.valueType == Action && variable.constant) {
 			value = []plistData{
 				{
 					key:      "OutputName",
@@ -806,11 +807,11 @@ func convertTypeToken(tokenType tokenType) plistDataType {
 
 func argumentValue(key string, args []actionArgument, idx int) plistData {
 	var actionParameter parameterDefinition
-	if len(actions[currentAction].parameters) <= idx {
+	if len(currentAction.parameters) <= idx {
 		// First parameter is likely infinite
-		actionParameter = actions[currentAction].parameters[0]
+		actionParameter = currentAction.parameters[0]
 	} else {
-		actionParameter = actions[currentAction].parameters[idx]
+		actionParameter = currentAction.parameters[idx]
 	}
 	var arg actionArgument
 	if len(args) <= idx {

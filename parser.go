@@ -50,14 +50,6 @@ func initParse() {
 		printParsingDebug()
 	}
 
-	for identifier := range actions {
-		if contains(usedActions, identifier) {
-			continue
-		}
-
-		delete(actions, identifier)
-	}
-
 	contents = ""
 	char = -1
 	idx = -1
@@ -373,7 +365,7 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 }
 
 func collectArguments() (arguments []actionArgument) {
-	var params = actions[currentAction].parameters
+	var params = currentAction.parameters
 	var paramsSize = len(params)
 	var argIndex = 0
 	var param parameterDefinition
@@ -394,7 +386,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	if *argIndex == *paramsSize && !param.infinite {
 		parserError(
 			fmt.Sprintf("Too many arguments for action %s()\n\n%s",
-				currentAction,
+				currentActionIdentifier,
 				generateActionDefinition(parameterDefinition{}, false, false),
 			),
 		)
@@ -648,7 +640,6 @@ func collectWorkflowType() {
 
 func collectGlyphDefinition() {
 	var collectGlyph = collectUntil('\n')
-	makeGlyphs()
 	collectGlyph = strings.ToLower(collectGlyph)
 	if glyph, found := glyphs[collectGlyph]; found {
 		glyphInt, hexErr := strconv.ParseInt(fmt.Sprintf("%d", glyph), 10, 64)
@@ -1049,7 +1040,6 @@ func addNothing() {
 		return
 	}
 
-	standardActions()
 	tokens = append(tokens, token{
 		typeof:    Action,
 		ident:     "nothing",
@@ -1058,7 +1048,6 @@ func addNothing() {
 			ident: "nothing",
 		},
 	})
-	usedActions = append(usedActions, "nothing")
 }
 
 func intChar() bool {
@@ -1213,15 +1202,12 @@ func collectActionCall() {
 }
 
 func collectAction() (identifier string, value action) {
-	standardActions()
-
 	identifier = collectIdentifier()
 	if _, found := actions[identifier]; !found {
 		parserError(fmt.Sprintf("Undefined action '%s()'", identifier))
 	}
 	advance()
-	currentAction = identifier
-	usedActions = append(usedActions, identifier)
+	setCurrentAction(identifier, actions[identifier])
 
 	var arguments = collectArguments()
 	currentArguments = arguments

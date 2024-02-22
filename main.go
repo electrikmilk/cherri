@@ -24,13 +24,10 @@ var relativePath string
 var inputPath string
 var outputPath string
 
-var darwin bool
-
 const unsignedEnd = "_unsigned.shortcut"
+const darwin = runtime.GOOS == "darwin"
 
 func main() {
-	darwin = runtime.GOOS == "darwin"
-
 	if args.Using("help") {
 		args.PrintUsage()
 		os.Exit(0)
@@ -43,8 +40,8 @@ func main() {
 
 	if args.Using("action") {
 		if args.Value("action") == "" {
-			for action := range actions {
-				currentAction = action
+			for identifier, definition := range actions {
+				setCurrentAction(identifier, definition)
 				fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
 				fmt.Print("\n")
 			}
@@ -80,7 +77,6 @@ func main() {
 }
 
 func printActionDefinitions() {
-	standardActions()
 	var identifier = args.Value("action")
 	if _, found := actions[identifier]; !found {
 		fmt.Println(ansi(fmt.Sprintf("\nAction %s() does not exist or has not yet been defined.", identifier), red))
@@ -95,9 +91,9 @@ func printActionDefinitions() {
 		}
 
 		var actionSearchResults strings.Builder
-		for actionIdentifier := range actions {
+		for actionIdentifier, definition := range actions {
 			if strings.Contains(strings.ToLower(actionIdentifier), identifier) {
-				currentAction = actionIdentifier
+				setCurrentAction(actionIdentifier, definition)
 				var definition = generateActionDefinition(parameterDefinition{}, false, false)
 				definition, _ = strings.CutPrefix(definition, actionIdentifier)
 
@@ -121,7 +117,7 @@ func printActionDefinitions() {
 
 		os.Exit(1)
 	}
-	currentAction = identifier
+	setCurrentAction(identifier, actions[identifier])
 	fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
 }
 
