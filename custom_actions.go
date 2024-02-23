@@ -112,19 +112,15 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 
 func checkCustomActionUsage() {
 	resetParse()
-	var actionUsageRegex = regexp.MustCompile(`[^action](.*?)\(`)
+	var actionUsageRegex = regexp.MustCompile(`[^action] ([a-zA-Z0-9]+)\(`)
 	var matches = actionUsageRegex.FindAllStringSubmatch(contents, -1)
-	if len(matches) > 0 {
-		for _, match := range matches {
-			var ref = strings.TrimSpace(match[1])
-			if strings.Contains(ref, "=") {
-				var splitRef = strings.Split(ref, "=")
-				ref = strings.TrimSpace(splitRef[1])
-			}
-
-			if _, found := customActions[ref]; found {
-				customActions[ref].used = true
-			}
+	if len(matches) == 0 {
+		return
+	}
+	for _, match := range matches {
+		var ref = match[1]
+		if _, found := customActions[ref]; found {
+			customActions[ref].used = true
 		}
 	}
 }
