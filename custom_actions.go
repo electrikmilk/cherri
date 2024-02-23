@@ -119,42 +119,69 @@ func replaceCustomActionRefs() {
 		case isToken(ForwardSlash):
 			collectComment()
 		case strings.Contains(lookAheadUntil('\n'), "("):
-			customActionCall()
+			var identifier = collectIdentifier()
+			if _, found := actions[identifier]; found {
+				advanceUntil('\n')
+				return
+			}
+			makeCustomActionCall(&identifier)
 			continue
 		}
 		advance()
 	}
 }
 
-func customActionCall() {
-	var identifier = collectIdentifier()
-	if _, found := actions[identifier]; found {
-		advanceUntil('\n')
-		return
+func makeCustomActionCall(identifier *string) {
+	if _, found := customActions[*identifier]; !found {
+		parserError(fmt.Sprintf("Undefined custom action '%s()'", *identifier))
 	}
-	if _, found := customActions[identifier]; !found {
-		parserError(fmt.Sprintf("Undefined custom action '%s()'", identifier))
-	}
-	var action = customActions[identifier]
+	var action = customActions[*identifier]
 	action.used = true
 
 	advance()
 	skipWhitespace()
+	var arguments []actionArgument
 	if char != ')' {
-		setCurrentAction(identifier, &action.definition)
-		var arguments = collectArguments()
-		fmt.Println(arguments)
+		setCurrentAction(*identifier, &action.definition)
+		arguments = collectArguments()
 	}
-	/*
-		TODO:
-			const myFunctionCall = {
-			    "cherri_functions": 1,
-			    "function": "add",
-			    "arguments": ["{operandOne}", "{operandTwo}"]
+
+	var collectSpaces strings.Builder
+	for _, char := range lines[lineIdx] {
+		if char != ' ' {
+			break
+		}
+		collectSpaces.WriteRune(' ')
+	}
+	var spaces = collectSpaces.String()
+	collectSpaces.Reset()
+
+	var customActionCall strings.Builder
+	customActionCall.WriteString(fmt.Sprintf("%sconst %sCherriCall = {\n", spaces, *identifier))
+	customActionCall.WriteString(fmt.Sprintf("%s\"cherri_functions\": 1,\n\"function\": \"", spaces))
+	customActionCall.WriteString(*identifier)
+	customActionCall.WriteString("\",\n")
+	customActionCall.WriteString(fmt.Sprintf("%s\"arguments\": [", spaces))
+	if len(arguments) > 0 {
+		for i, argument := range arguments {
+			var argumentValue = fmt.Sprintf("%v", argument.value)
+			if argument.valueType == String {
+				argumentValue = fmt.Sprintf("\"%s\"", argumentValue)
 			}
-			const myFunctionReturn = runSelf(myFunctionCall)
-	*/
-	lines[lineIdx] = ""
+			customActionCall.WriteString(argumentValue)
+
+			if len(arguments)-1 != i {
+				customActionCall.WriteRune(',')
+			}
+		}
+	}
+	customActionCall.WriteString("]\n")
+	customActionCall.WriteString(fmt.Sprintf("%s}\n", spaces))
+
+	customActionCall.WriteString(fmt.Sprintf("%sconst myFunctionReturn = runSelf(", spaces))
+	customActionCall.WriteString(fmt.Sprintf("%sCherriCall)\n", *identifier))
+
+	lines[lineIdx] = customActionCall.String()
 }
 
 func makeCustomActionsHeader() {
@@ -199,7 +226,6 @@ func makeCustomActionsHeader() {
 		customActionsHeader.WriteRune('\n')
 
 		customActionsHeader.WriteString("            }\n")
-		fmt.Println(identifier, customAction)
 	}
 
 	customActionsHeader.WriteString("        }\n    }\n}")
