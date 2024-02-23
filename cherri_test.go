@@ -189,5 +189,5 @@ func resetParser() {
 	plist.Reset()
 	menus = map[string][]variableValue{}
 	uuids = map[string]string{}
-	customActions = map[string]customAction{}
+	customActions = map[string]*customAction{}
 }
