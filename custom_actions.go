@@ -150,7 +150,7 @@ func makeCustomActionsHeader() {
 		customActionsHeader.WriteString(identifier)
 		customActionsHeader.WriteString("\" {\n")
 
-		for i, param := range currentAction.parameters {
+		for i, param := range customAction.definition.parameters {
 			var idx = i + 1
 			customActionsHeader.WriteString(fmt.Sprintf("                const arg%d = ", idx))
 			customActionsHeader.WriteString(fmt.Sprintf("getListItem(args, %d)\n", idx))
