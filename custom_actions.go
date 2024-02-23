@@ -15,7 +15,6 @@ import (
 type customAction struct {
 	definition actionDefinition
 	body       string
-	used       bool
 }
 
 // customActions is a map of all the custom actions that have been defined.
@@ -197,10 +196,6 @@ func makeCustomActionsHeader() {
 	customActionsHeader.WriteString("            const args = getValue(input, \"arguments\")\n")
 
 	for identifier, customAction := range customActions {
-		if !customAction.used {
-			continue
-		}
-
 		customActionsHeader.WriteString("            if function == \"")
 		customActionsHeader.WriteString(identifier)
 		customActionsHeader.WriteString("\" {\n")
