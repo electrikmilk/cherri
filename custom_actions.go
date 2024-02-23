@@ -110,78 +110,7 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 	return
 }
 
-func replaceCustomActionRefs() {
-	resetParse()
-
-	for char != -1 {
-		switch {
-		case isToken(ForwardSlash):
-			collectComment()
-		case strings.Contains(lookAheadUntil('\n'), "("):
-			var identifier = collectIdentifier()
-			if _, found := actions[identifier]; found {
-				advanceUntil('\n')
-				return
-			}
-			makeCustomActionCall(&identifier)
-			continue
-		}
-		advance()
-	}
-}
-
-func makeCustomActionCall(identifier *string) {
-	if _, found := customActions[*identifier]; !found {
-		parserError(fmt.Sprintf("Undefined custom action '%s()'", *identifier))
-	}
-	var action = customActions[*identifier]
-	action.used = true
-
-	advance()
-	skipWhitespace()
-	var arguments []actionArgument
-	if char != ')' {
-		setCurrentAction(*identifier, &action.definition)
-		arguments = collectArguments()
-	}
-
-	var collectSpaces strings.Builder
-	for _, char := range lines[lineIdx] {
-		if char != ' ' {
-			break
-		}
-		collectSpaces.WriteRune(' ')
-	}
-	var spaces = collectSpaces.String()
-	collectSpaces.Reset()
-
-	var customActionCall strings.Builder
-	customActionCall.WriteString(fmt.Sprintf("%sconst %sCherriCall = {\n", spaces, *identifier))
-	customActionCall.WriteString(fmt.Sprintf("%s\"cherri_functions\": 1,\n\"function\": \"", spaces))
-	customActionCall.WriteString(*identifier)
-	customActionCall.WriteString("\",\n")
-	customActionCall.WriteString(fmt.Sprintf("%s\"arguments\": [", spaces))
-	if len(arguments) > 0 {
-		for i, argument := range arguments {
-			var argumentValue = fmt.Sprintf("%v", argument.value)
-			if argument.valueType == String {
-				argumentValue = fmt.Sprintf("\"%s\"", argumentValue)
-			}
-			customActionCall.WriteString(argumentValue)
-
-			if len(arguments)-1 != i {
-				customActionCall.WriteRune(',')
-			}
-		}
-	}
-	customActionCall.WriteString("]\n")
-	customActionCall.WriteString(fmt.Sprintf("%s}\n", spaces))
-
-	customActionCall.WriteString(fmt.Sprintf("%sconst myFunctionReturn = runSelf(", spaces))
-	customActionCall.WriteString(fmt.Sprintf("%sCherriCall)\n", *identifier))
-
-	lines[lineIdx] = customActionCall.String()
-}
+var outputActionRegex = regexp.MustCompile(`(?:must)?[o|O]utput(?:OrClipboard)?\((.*?)\)`)
 
 func makeCustomActionsHeader() {
 	var customActionsHeader strings.Builder
@@ -218,6 +147,11 @@ func makeCustomActionsHeader() {
 		}
 
 		customActionsHeader.WriteString(customAction.body)
+
+		if !outputActionRegex.MatchString(customAction.body) {
+			customActionsHeader.WriteString("\noutput(nil)")
+		}
+
 		customActionsHeader.WriteRune('\n')
 
 		customActionsHeader.WriteString("            }\n")
