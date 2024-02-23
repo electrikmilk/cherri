@@ -16,6 +16,7 @@ import (
 type customAction struct {
 	definition actionDefinition
 	body       string
+	used       bool
 }
 
 // customActions is a map of all the custom actions that have been defined.
@@ -44,9 +45,8 @@ func parseCustomActions() {
 		printCustomActionsDebug()
 	}
 
+	checkCustomActionUsage()
 	makeCustomActionsHeader()
-
-	resetParse()
 }
 
 func collectActionDefinition() {
@@ -110,9 +110,27 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 	return
 }
 
-var outputActionRegex = regexp.MustCompile(`(?:must)?[o|O]utput(?:OrClipboard)?\((.*?)\)`)
+func checkCustomActionUsage() {
+	resetParse()
+	var actionUsageRegex = regexp.MustCompile(`[^action](.*?)\(`)
+	var matches = actionUsageRegex.FindAllStringSubmatch(contents, -1)
+	if len(matches) > 0 {
+		for _, match := range matches {
+			var ref = strings.TrimSpace(match[1])
+			if strings.Contains(ref, "=") {
+				var splitRef = strings.Split(ref, "=")
+				ref = strings.TrimSpace(splitRef[1])
+			}
+
+			if _, found := customActions[ref]; found {
+				customActions[ref].used = true
+			}
+		}
+	}
+}
 
 func makeCustomActionsHeader() {
+	var outputActionRegex = regexp.MustCompile(`(?:must)?[o|O]utput(?:OrClipboard)?\((.*?)\)`)
 	var customActionsHeader strings.Builder
 	customActionsHeader.WriteString("if ShortcutInput {\n")
 	customActionsHeader.WriteString("    const inputType = typeOf(ShortcutInput)\n")
@@ -126,6 +144,10 @@ func makeCustomActionsHeader() {
 	customActionsHeader.WriteString("            const args = getValue(input, \"arguments\")\n")
 
 	for identifier, customAction := range customActions {
+		if !customAction.used {
+			continue
+		}
+
 		customActionsHeader.WriteString("            if function == \"")
 		customActionsHeader.WriteString(identifier)
 		customActionsHeader.WriteString("\" {\n")
@@ -160,6 +182,8 @@ func makeCustomActionsHeader() {
 	customActionsHeader.WriteString("        }\n    }\n}")
 
 	lines = append([]string{customActionsHeader.String()}, lines...)
+
+	resetParse()
 }
 
 func handleCustomActionRef(identifier *string) action {
