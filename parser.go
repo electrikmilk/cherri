@@ -1211,7 +1211,12 @@ func collectActionCall() {
 	reachable()
 	var identifier = collectIdentifier()
 	if _, found := customActions[identifier]; found {
-		handleCustomActionRef(&identifier)
+		tokens = append(tokens, token{
+			typeof:    Action,
+			ident:     "runSelf",
+			valueType: Action,
+			value:     handleCustomActionRef(&identifier),
+		})
 		return
 	}
 
