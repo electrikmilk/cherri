@@ -40,7 +40,12 @@ func parseCustomActions() {
 		advance()
 	}
 
+	if args.Using("debug") {
+		printCustomActionsDebug()
+	}
+
 	replaceCustomActionRefs()
+	makeCustomActionsHeader()
 	resetParse()
 }
 
@@ -152,10 +157,61 @@ func customActionCall() {
 	lines[lineIdx] = ""
 }
 
+func makeCustomActionsHeader() {
+	var customActionsHeader strings.Builder
+	customActionsHeader.WriteString("if ShortcutInput {\n")
+	customActionsHeader.WriteString("    const inputType = typeOf(ShortcutInput)\n")
+	customActionsHeader.WriteString("    if inputType == \"Dictionary\" {\n")
+	customActionsHeader.WriteString("        const input = getDictionary(ShortcutInput)\n")
+	customActionsHeader.WriteString("        const identifier = getValue(input, \"cherri_functions\")\n")
+	customActionsHeader.WriteString("        const valid = number(identifier)\n")
+	customActionsHeader.WriteString("        if valid == true {\n")
+	customActionsHeader.WriteString("            const function_name = getValue(input, \"function\")\n")
+	customActionsHeader.WriteString("            const function = \"{function_name}\"\n")
+	customActionsHeader.WriteString("            const args = getValue(input, \"arguments\")\n")
+
+	for identifier, customAction := range customActions {
+		if !customAction.used {
+			continue
+		}
+
+		customActionsHeader.WriteString("            if function == \"")
+		customActionsHeader.WriteString(identifier)
+		customActionsHeader.WriteString("\" {\n")
+
+		for i, param := range currentAction.parameters {
+			var idx = i + 1
+			customActionsHeader.WriteString(fmt.Sprintf("                const arg%d = ", idx))
+			customActionsHeader.WriteString(fmt.Sprintf("getListItem(args, %d)\n", idx))
+			customActionsHeader.WriteString(fmt.Sprintf("                const %s = ", param.name))
+
+			switch param.validType {
+			case String:
+				customActionsHeader.WriteString(fmt.Sprintf("\"{arg%d}\"", idx))
+			case Integer:
+				customActionsHeader.WriteString(fmt.Sprintf("number(arg%d)", idx))
+			}
+
+			customActionsHeader.WriteRune('\n')
+		}
+
+		customActionsHeader.WriteString(customAction.body)
+		customActionsHeader.WriteRune('\n')
+
+		customActionsHeader.WriteString("            }\n")
+		fmt.Println(identifier, customAction)
+	}
+
+	customActionsHeader.WriteString("        }\n    }\n}")
+
+	lines = append([]string{customActionsHeader.String()}, lines...)
+}
+
 func printCustomActionsDebug() {
 	fmt.Println(ansi("### CUSTOM ACTIONS ###", bold) + "\n")
 	for identifier, customAction := range customActions {
 		fmt.Println("identifier:", identifier+"()")
+		fmt.Println("used:", customAction.used)
 		fmt.Println("parameters:")
 		fmt.Println(customAction.definition.parameters)
 		fmt.Println("body:")
