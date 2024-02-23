@@ -15,17 +15,18 @@ import (
 type customAction struct {
 	definition actionDefinition
 	body       string
+	used       bool
 }
 
 // customActions is a map of all the custom actions that have been defined.
-var customActions map[string]customAction
+var customActions map[string]*customAction
 
 // parseCustomActions parses defined actions and collects them.
 func parseCustomActions() {
 	if !regexp.MustCompile(`action (.*?)\((.*?)\)`).MatchString(contents) {
 		return
 	}
-	customActions = make(map[string]customAction)
+	customActions = make(map[string]*customAction)
 
 	for char != -1 {
 		switch {
@@ -69,20 +70,15 @@ func collectActionDefinition() {
 	var body = strings.TrimSpace(collectObject())
 
 	var endLine = lineIdx
-
 	for i := 0; i <= endLine && i >= startLine; i++ {
 		lines[i] = ""
 	}
 
-	customActions[identifier] = customAction{
+	customActions[identifier] = &customAction{
 		definition: actionDefinition{
 			parameters: arguments,
 		},
 		body: body,
-	}
-
-	if args.Using("debug") {
-		printCustomActionsDebug()
 	}
 }
 
@@ -135,12 +131,12 @@ func customActionCall() {
 		parserError(fmt.Sprintf("Undefined custom action '%s()'", identifier))
 	}
 	var action = customActions[identifier]
-
-	setCurrentAction(identifier, &action.definition)
+	action.used = true
 
 	advance()
 	skipWhitespace()
 	if char != ')' {
+		setCurrentAction(identifier, &action.definition)
 		var arguments = collectArguments()
 		fmt.Println(arguments)
 	}
