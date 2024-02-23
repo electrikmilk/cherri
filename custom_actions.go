@@ -74,8 +74,7 @@ func collectActionDefinition() {
 
 	var body = strings.TrimSpace(collectObject())
 
-	var endLine = lineIdx
-	for i := 0; i <= endLine && i >= startLine; i++ {
+	for i := startLine; i <= lineIdx; i++ {
 		lines[i] = ""
 	}
 
