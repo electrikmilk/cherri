@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/electrikmilk/args-parser"
 	"regexp"
@@ -43,8 +44,8 @@ func parseCustomActions() {
 		printCustomActionsDebug()
 	}
 
-	replaceCustomActionRefs()
 	makeCustomActionsHeader()
+
 	resetParse()
 }
 
