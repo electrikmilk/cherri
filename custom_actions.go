@@ -257,6 +257,7 @@ func printCustomActionsDebug() {
 	fmt.Println(ansi("### CUSTOM ACTIONS ###", bold) + "\n")
 	for identifier, customAction := range customActions {
 		fmt.Println("identifier:", identifier+"()")
+		fmt.Println("used:", customAction.used)
 		fmt.Println("parameters:")
 		fmt.Println(customAction.definition.parameters)
 		fmt.Println("body:")
