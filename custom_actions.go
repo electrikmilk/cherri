@@ -41,8 +41,11 @@ func parseCustomActions() {
 		advance()
 	}
 
+	resetParse()
+
 	if args.Using("debug") {
 		printCustomActionsDebug()
+		fmt.Println(contents)
 	}
 
 	checkCustomActionUsage()
@@ -111,7 +114,6 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 }
 
 func checkCustomActionUsage() {
-	resetParse()
 	var actionUsageRegex = regexp.MustCompile(`[^action] ([a-zA-Z0-9]+)\(`)
 	var matches = actionUsageRegex.FindAllStringSubmatch(contents, -1)
 	if len(matches) == 0 {
