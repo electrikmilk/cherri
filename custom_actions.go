@@ -43,13 +43,13 @@ func parseCustomActions() {
 
 	resetParse()
 
+	checkCustomActionUsage()
+	makeCustomActionsHeader()
+
 	if args.Using("debug") {
 		printCustomActionsDebug()
 		fmt.Println(contents)
 	}
-
-	checkCustomActionUsage()
-	makeCustomActionsHeader()
 }
 
 func collectActionDefinition() {
