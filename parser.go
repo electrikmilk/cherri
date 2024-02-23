@@ -309,7 +309,14 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		advanceUntil(until)
 	case strings.Contains(ahead, "("):
 		*valueType = Action
-		_, *value = collectAction()
+		var identifier = collectIdentifier()
+
+		if _, found := customActions[identifier]; found {
+			*value = handleCustomActionRef(&identifier)
+			return
+		}
+
+		*value = collectAction(&identifier)
 	case containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus):
 		*valueType = Expression
 		*value = collectUntil(until)
@@ -1201,7 +1208,13 @@ func collectObject() string {
 
 func collectActionCall() {
 	reachable()
-	var identifier, value = collectAction()
+	var identifier = collectIdentifier()
+	if _, found := customActions[identifier]; found {
+		handleCustomActionRef(&identifier)
+		return
+	}
+
+	var value = collectAction(&identifier)
 	tokens = append(tokens, token{
 		typeof:    Action,
 		ident:     identifier,
@@ -1210,13 +1223,12 @@ func collectActionCall() {
 	})
 }
 
-func collectAction() (identifier string, value action) {
-	identifier = collectIdentifier()
-	if _, found := actions[identifier]; !found {
-		parserError(fmt.Sprintf("Undefined action '%s()'", identifier))
+func collectAction(identifier *string) (value action) {
+	if _, found := actions[*identifier]; !found {
+		parserError(fmt.Sprintf("Undefined action '%s()'", *identifier))
 	}
 	advance()
-	setCurrentAction(identifier, actions[identifier])
+	setCurrentAction(*identifier, actions[*identifier])
 
 	var arguments = collectArguments()
 	currentArguments = arguments
@@ -1225,7 +1237,7 @@ func collectAction() (identifier string, value action) {
 	checkAction()
 
 	value = action{
-		ident: identifier,
+		ident: *identifier,
 		args:  arguments,
 	}
 

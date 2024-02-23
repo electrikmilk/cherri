@@ -227,6 +227,75 @@ func makeCustomActionsHeader() {
 	lines = append([]string{customActionsHeader.String()}, lines...)
 }
 
+func handleCustomActionRef(identifier *string) action {
+	var customAction = customActions[*identifier]
+
+	var arguments []actionArgument
+	advance()
+	if char != ')' {
+		setCurrentAction(*identifier, &customAction.definition)
+		arguments = collectArguments()
+	}
+
+	var customActionCall = makeCustomActionCall(identifier, &arguments)
+
+	tokens = append(tokens, token{
+		typeof:    Var,
+		ident:     fmt.Sprintf("%sCherriCall", *identifier),
+		valueType: Dict,
+		value:     customActionCall,
+	})
+
+	variables[*identifier] = variableValue{
+		variableType: "Variable",
+		valueType:    Dict,
+		value:        customActionCall,
+		constant:     true,
+	}
+
+	advanceUntil('\n')
+
+	return action{
+		ident: "runSelf",
+		args: []actionArgument{
+			{
+				valueType: Var,
+				value:     fmt.Sprintf("%sCherriCall", *identifier),
+			},
+		},
+	}
+}
+
+func makeCustomActionCall(identifier *string, arguments *[]actionArgument) (customActionCall interface{}) {
+	var customActionCallJSON strings.Builder
+	customActionCallJSON.WriteString("{\"cherri_functions\": 1,\"function\": \"")
+	customActionCallJSON.WriteString(*identifier)
+	customActionCallJSON.WriteString("\",\"arguments\": [")
+	if len(*arguments) > 0 {
+		for i, argument := range *arguments {
+			var argumentValue = fmt.Sprintf("%v", argument.value)
+			switch argument.valueType {
+			case String:
+				argumentValue = fmt.Sprintf("\"%s\"", argumentValue)
+			case Variable:
+				argumentValue = fmt.Sprintf("\"{%s}\"", argumentValue)
+			}
+			customActionCallJSON.WriteString(argumentValue)
+
+			if len(*arguments)-1 != i {
+				customActionCallJSON.WriteRune(',')
+			}
+		}
+	}
+	customActionCallJSON.WriteString("]}")
+
+	if err := json.Unmarshal([]byte(customActionCallJSON.String()), &customActionCall); err != nil {
+		parserError(fmt.Sprintf("Custom action JSON error: %s", err))
+	}
+
+	return
+}
+
 func printCustomActionsDebug() {
 	fmt.Println(ansi("### CUSTOM ACTIONS ###", bold) + "\n")
 	for identifier, customAction := range customActions {
