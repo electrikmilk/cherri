@@ -279,14 +279,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	case intChar():
 		collectIntegerValue(valueType, value, &until)
 	case char == '"':
-		advance()
-		*valueType = String
-		*value = collectString()
-
-		var stringValue = fmt.Sprintf("%s", *value)
-		if strings.ContainsAny(stringValue, "{}") {
-			checkInlineVars(&stringValue)
-		}
+		collectStringValue(valueType, value)
 	case char == '\'':
 		advance()
 		*valueType = RawString
@@ -310,21 +303,36 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*valueType = Nil
 		advanceUntil(until)
 	case strings.Contains(ahead, "("):
-		*valueType = Action
-		var identifier = collectIdentifier()
-
-		if _, found := customActions[identifier]; found {
-			*value = handleCustomActionRef(&identifier)
-			return
-		}
-
-		*value = collectAction(&identifier)
+		collectActionValue(valueType, value)
 	case containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus):
 		*valueType = Expression
 		*value = collectUntil(until)
 	default:
 		collectReference(valueType, value, &until)
 	}
+}
+
+func collectStringValue(valueType *tokenType, value *any) {
+	advance()
+	*valueType = String
+	*value = collectString()
+
+	var stringValue = fmt.Sprintf("%s", *value)
+	if strings.ContainsAny(stringValue, "{}") {
+		checkInlineVars(&stringValue)
+	}
+}
+
+func collectActionValue(valueType *tokenType, value *any) {
+	*valueType = Action
+	var identifier = collectIdentifier()
+
+	if _, found := customActions[identifier]; found {
+		*value = handleCustomActionRef(&identifier)
+		return
+	}
+
+	*value = collectAction(&identifier)
 }
 
 var collectVarRegex = regexp.MustCompile(`\{(.*?)(?:\[(.*?)])?(?:\.(.*?))?}`)
