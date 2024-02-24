@@ -1,0 +1,11 @@
+alert("Hello, world!")
+
+copy carbon {
+    alert("Hello, Cherri!")
+}
+
+paste carbon
+
+paste carbon
+
+paste carbon
