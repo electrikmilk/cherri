@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/electrikmilk/args-parser"
 	"os"
-	"regexp"
 	"strings"
 )
 
@@ -25,10 +24,6 @@ var includes []include
 var included []string
 
 func handleIncludes() {
-	if !strings.Contains(contents, "#include") {
-		return
-	}
-
 	if args.Using("debug") {
 		fmt.Println("Parsing includes...")
 	}
@@ -46,103 +41,77 @@ func handleIncludes() {
 	}
 }
 
-func printIncludesDebug() {
-	fmt.Println(ansi("### INCLUDES ###", bold) + "\n")
-
-	fmt.Println(ansi("## INCLUDED ##", bold))
-	fmt.Println(included)
-
-	fmt.Print("\n")
-
-	fmt.Println(ansi("## INCLUDES MAP ##", bold))
-	fmt.Println(includes)
-
-	fmt.Print("\n")
-}
-
-var includeStatementRegex = regexp.MustCompile(`^#include "(.*?)"$`)
+var includedFile bool
 
 // parseIncludes() searches for include statements within the file and
 // injects the contents of the file at the specified path.
 func parseIncludes() {
-	lines = strings.Split(contents, "\n")
-	for l, line := range lines {
-		line = strings.Trim(line, " \t\n")
-		if len(line) == 0 {
-			continue
+	includedFile = false
+	for char != -1 {
+		switch {
+		case isToken(ForwardSlash):
+			collectComment()
+		case tokenAhead(Include):
+			advance()
+			parseInclude()
+			includedFile = true
+			break
 		}
-		if !startsWith(line, "#include") {
-			advanceUntil('\n')
-			continue
-		}
-
-		// Prepare for possible error
-		chars = []rune(line)
-		lineIdx = l
-		idx = len("#include") + 1
-		lineCharIdx = idx
-
-		var includeMatches = includeStatementRegex.FindStringSubmatch(line)
-		if len(includeMatches) != 2 {
-			parserError("Expected file path")
-		}
-
-		var includePath = strings.Trim(includeMatches[1], "\"\n\t ")
-		if includePath == "" {
-			parserError("Expected file path")
-		}
-
-		if contains(included, includePath) {
-			parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
-		}
-
-		var includeFileBytes []byte
-		var includeReadErr error
-		if includePath == "stdlib" {
-			includeFileBytes, includeReadErr = stdLib.ReadFile("stdlib.cherri")
-		} else {
-			if !strings.Contains(includePath, "..") {
-				includePath = relativePath + includePath
-			}
-			checkFile(includePath)
-			includeFileBytes, includeReadErr = os.ReadFile(includePath)
-		}
-		handle(includeReadErr)
-
-		var includeContents = string(includeFileBytes)
-		var includeLines = strings.Split(includeContents, "\n")
-		var includeLinesCount = len(includeLines)
-		if hasIncludes(includeContents) {
-			includeLinesCount--
-		}
-
-		updateIncludesMap(l, includeLinesCount)
-
-		includes = append(includes, include{
-			file:   includePath,
-			start:  l,
-			end:    l + includeLinesCount,
-			lines:  includeLines,
-			length: includeLinesCount,
-		})
-
-		lines[l] = includeContents
-		included = append(included, includePath)
+		advance()
 	}
-	contents = strings.Join(lines, "\n")
-	lines = strings.Split(contents, "\n")
-	lineIdx = 0
-	if hasIncludes(contents) {
+
+	resetParse()
+
+	if includedFile {
 		parseIncludes()
 	}
 }
 
-var includeRegex = regexp.MustCompile(`^#include "(.+)"`)
+func parseInclude() {
+	if char != '\'' {
+		parserError("Expected file path")
+	}
+	if char == '"' {
+		parserError("Use raw string (') for include file paths")
+	}
+	advance()
 
-func hasIncludes(str string) bool {
-	var matches = includeRegex.FindStringSubmatch(str)
+	var includePath = collectRawString()
+	lineIdx--
 
-	return len(matches) != 0
+	if contains(included, includePath) {
+		parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
+	}
+
+	var includeFileBytes []byte
+	var includeReadErr error
+	if includePath == "stdlib" {
+		includeFileBytes, includeReadErr = stdLib.ReadFile("stdlib.cherri")
+	} else {
+		if !strings.Contains(includePath, "..") {
+			includePath = relativePath + includePath
+		}
+		checkFile(includePath)
+		includeFileBytes, includeReadErr = os.ReadFile(includePath)
+	}
+	handle(includeReadErr)
+
+	var includeContents = string(includeFileBytes)
+	var includeLines = strings.Split(includeContents, "\n")
+	var includeLinesCount = len(includeLines)
+
+	updateIncludesMap(lineIdx, includeLinesCount)
+
+	includes = append(includes, include{
+		file:   includePath,
+		start:  lineIdx,
+		end:    lineIdx + includeLinesCount,
+		lines:  includeLines,
+		length: includeLinesCount,
+	})
+
+	lines[lineIdx] = includeContents
+	included = append(included, includePath)
 }
 
 // updateIncludesMap checks if an included file starts on `line`.
@@ -177,4 +146,18 @@ func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
 		}
 	}
 	return
+}
+
+func printIncludesDebug() {
+	fmt.Println(ansi("### INCLUDES ###", bold) + "\n")
+
+	fmt.Println(ansi("## INCLUDED ##", bold))
+	fmt.Println(included)
+
+	fmt.Print("\n")
+
+	fmt.Println(ansi("## INCLUDES MAP ##", bold))
+	fmt.Println(includes)
+
+	fmt.Print("\n")
 }

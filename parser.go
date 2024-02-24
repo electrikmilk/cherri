@@ -51,6 +51,7 @@ func initParse() {
 	idx = -1
 	advance()
 
+	handleIncludes()
 	parseCustomActions()
 
 	for char != -1 {
