@@ -128,6 +128,7 @@ func checkCustomActionUsage() {
 }
 
 func makeCustomActionsHeader() {
+	var outputActionRegex = regexp.MustCompile(`(?:must)?[o|O]utput(?:OrClipboard)?\((.*?)\)`)
 	var customActionsHeader strings.Builder
 	customActionsHeader.WriteString("if ShortcutInput {\n")
 	customActionsHeader.WriteString("    const inputType = typeOf(ShortcutInput)\n")
@@ -166,7 +167,13 @@ func makeCustomActionsHeader() {
 		}
 
 		customActionsHeader.WriteString(customAction.body)
+
+		if !outputActionRegex.MatchString(customAction.body) {
+			customActionsHeader.WriteString("\noutput(nil)")
+		}
+
 		customActionsHeader.WriteRune('\n')
+
 		customActionsHeader.WriteString("            }\n")
 	}
 
