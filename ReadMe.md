@@ -25,6 +25,7 @@ The main goal is to make it trivial and practical to create large Shortcut proje
 - 🪶 Optimized to create as small as possible Shortcuts and reduces memory usage at runtime
 - #️⃣ Include files within each other for large Shortcut projects
 - 🔧 Define custom actions
+- 📋 Copy paste actions
 - 🥩 Enter actions raw with custom identifier and parameters
 - ❓ Define import questions
 - 📇 Generate VCards for menus
