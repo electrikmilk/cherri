@@ -131,32 +131,33 @@ func makeCustomActionsHeader() {
 	var outputActionRegex = regexp.MustCompile(`(?:must)?[o|O]utput(?:OrClipboard)?\((.*?)\)`)
 	var customActionsHeader strings.Builder
 	customActionsHeader.WriteString("if ShortcutInput {\n")
-	customActionsHeader.WriteString("    const inputType = typeOf(ShortcutInput)\n")
-	customActionsHeader.WriteString("    if inputType == \"Dictionary\" {\n")
-	customActionsHeader.WriteString("        const input = getDictionary(ShortcutInput)\n")
-	customActionsHeader.WriteString("        const identifier = getValue(input, \"cherri_functions\")\n")
-	customActionsHeader.WriteString("        const valid = number(identifier)\n")
-	customActionsHeader.WriteString("        if valid == true {\n")
-	customActionsHeader.WriteString("            const function_name = getValue(input, \"function\")\n")
-	customActionsHeader.WriteString("            const function = \"{function_name}\"\n")
-	customActionsHeader.WriteString("            const args = getValue(input, \"arguments\")\n")
+	customActionsHeader.WriteString("    const _cherri_inputType = typeOf(ShortcutInput)\n")
+	customActionsHeader.WriteString("    if _cherri_inputType == \"Dictionary\" {\n")
+	customActionsHeader.WriteString("        const _cherri_input = getDictionary(ShortcutInput)\n")
+	customActionsHeader.WriteString("        const _cherri_identifier = getValue(_cherri_input, \"cherri_functions\")\n")
+	customActionsHeader.WriteString("        const _cherri_valid = number(_cherri_identifier)\n")
+	customActionsHeader.WriteString("        if _cherri_valid == true {\n")
+	customActionsHeader.WriteString("            const _cherri_function = getValue(_cherri_input, \"function\")\n")
+	customActionsHeader.WriteString("            const _cherri_function_name = \"{_cherri_function}\"\n")
+	customActionsHeader.WriteString("            const _cherri_function_args = getValue(_cherri_input, \"arguments\")\n")
 
 	for identifier, customAction := range customActions {
 		if !customAction.used {
 			continue
 		}
 
-		customActionsHeader.WriteString("            if function == \"")
+		customActionsHeader.WriteString("            if _cherri_function_name == \"")
 		customActionsHeader.WriteString(identifier)
 		customActionsHeader.WriteString("\" {\n")
 
 		for i, param := range customAction.definition.parameters {
 			var idx = i + 1
-			customActionsHeader.WriteString(fmt.Sprintf("                const arg%s%d = ", identifier, idx))
-			customActionsHeader.WriteString(fmt.Sprintf("getListItem(args, %d)\n", idx))
+			var argumentReference = fmt.Sprintf("arg%s%d", identifier, idx)
+
+			customActionsHeader.WriteString(fmt.Sprintf("                const %s = ", argumentReference))
+			customActionsHeader.WriteString(fmt.Sprintf("getListItem(_cherri_function_args, %d)\n", idx))
 			customActionsHeader.WriteString(fmt.Sprintf("                const %s = ", param.name))
 
-			var argumentReference = fmt.Sprintf("arg%s%d", identifier, idx)
 			switch param.validType {
 			case String:
 				customActionsHeader.WriteString(fmt.Sprintf("\"{%s}\"", argumentReference))
