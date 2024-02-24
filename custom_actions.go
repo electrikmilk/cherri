@@ -163,6 +163,10 @@ func makeCustomActionsHeader() {
 				customActionsHeader.WriteString(fmt.Sprintf("\"{%s}\"", argumentReference))
 			case Integer:
 				customActionsHeader.WriteString(fmt.Sprintf("number(%s)", argumentReference))
+			case Dict:
+				customActionsHeader.WriteString(fmt.Sprintf("getDictionary(%s)", argumentReference))
+			default:
+				customActionsHeader.WriteString(argumentReference)
 			}
 
 			customActionsHeader.WriteRune('\n')
