@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/electrikmilk/args-parser"
 	"regexp"
 	"strings"
 )
@@ -35,8 +36,10 @@ func parseCopyPastes() {
 	}
 
 	resetParse()
-	//fmt.Println(contents)
-	//fmt.Println(pastables)
+
+	if args.Using("debug") {
+		printPastablesDebug()
+	}
 }
 
 func collectCopy() {
@@ -64,5 +67,16 @@ func pasteCopy() {
 		lines[lineIdx] = contents
 	} else {
 		parserError(fmt.Sprintf("Unable to paste undefined copy '%s'", identifier))
+	}
+}
+
+func printPastablesDebug() {
+	fmt.Println(ansi("### COPY/PASTE ###", bold) + "\n")
+	for identifier, contents := range pastables {
+		fmt.Println("identifier:", identifier+"()")
+		fmt.Println("contents:")
+		fmt.Println(contents)
+		fmt.Println("(end)")
+		fmt.Print("\n")
 	}
 }
