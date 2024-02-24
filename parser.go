@@ -51,6 +51,7 @@ func initParse() {
 	advance()
 
 	handleIncludes()
+	parseCopyPastes()
 	parseCustomActions()
 
 	for char != -1 {

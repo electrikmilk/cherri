@@ -33,6 +33,8 @@ const (
 	Question       tokenType = "#question"
 	Include        tokenType = "#include"
 	Action         tokenType = "action"
+	Copy           tokenType = "copy"
+	Paste          tokenType = "paste"
 )
 
 /* Definitions */
