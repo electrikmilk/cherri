@@ -55,7 +55,6 @@ func parseIncludes() {
 			advance()
 			parseInclude()
 			includedFile = true
-			break
 		}
 		advance()
 	}
@@ -68,11 +67,11 @@ func parseIncludes() {
 }
 
 func parseInclude() {
-	if char != '\'' {
-		parserError("Expected file path")
-	}
 	if char == '"' {
 		parserError("Use raw string (') for include file paths")
+	}
+	if char != '\'' {
+		parserError("Expected file path")
 	}
 	advance()
 

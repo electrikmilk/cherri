@@ -441,7 +441,7 @@ func collectComment() {
 		} else {
 			advanceUntil('\n')
 		}
-	} else {
+	} else if char == '*' {
 		collectMultilineComment(&comment, &collect)
 	}
 	if collect {
