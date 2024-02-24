@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/electrikmilk/args-parser"
 	"os"
-	"regexp"
 	"strings"
 )
 
@@ -25,10 +24,6 @@ var includes []include
 var included []string
 
 func handleIncludes() {
-	if !strings.Contains(contents, "#include") {
-		return
-	}
-
 	if args.Using("debug") {
 		fmt.Println("Parsing includes...")
 	}
