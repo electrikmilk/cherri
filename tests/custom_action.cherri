@@ -2,4 +2,11 @@ action doSomething() {
     nothing()
 }
 
+action add(number op1, number op2) {
+    const result = op1 + op2
+    output("{result}")
+}
+
 doSomething()
+
+add(2,2)
