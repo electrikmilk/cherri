@@ -45,6 +45,11 @@ func parseCopyPastes() {
 func collectCopy() {
 	var startLine = lineIdx
 	var identifier = collectIdentifier()
+
+	if _, found := pastables[identifier]; found {
+		parserError(fmt.Sprintf("Duplication declaration of copy/paste '%s'", identifier))
+	}
+
 	advanceUntil('{')
 	advance()
 	var contents = collectObject()
