@@ -245,7 +245,7 @@ func makeBoolValue(outputName *plistData, uuid *plistData, value *any) {
 
 var formattedExpression []string
 
-func makeExpressionValue(outputName *plistData, UUID *plistData, value *any) {
+func makeExpressionValue(outputName *plistData, uuid *plistData, value *any) {
 	formattedExpression = []string{}
 	var expression = fmt.Sprintf("%s", *value)
 	var expressionParts []string
@@ -267,7 +267,7 @@ func makeExpressionValue(outputName *plistData, UUID *plistData, value *any) {
 
 			appendPlist(makeStdAction("math", []plistData{
 				*outputName,
-				*UUID,
+				*uuid,
 				attachmentValues("WFScientificMathOperation", operation, Text),
 				attachmentValues("WFInput", operandOne, Number),
 				attachmentValues("WFMathOperand", operandTwo, Number),
@@ -287,14 +287,14 @@ func makeExpressionValue(outputName *plistData, UUID *plistData, value *any) {
 	appendPlist(makeStdAction("calculateexpression", []plistData{
 		*outputName,
 		attachmentValues("Input", expression, Text),
-		*UUID,
+		*uuid,
 	}))
 }
 
-func makeDictionaryValue(outputName *plistData, UUID *plistData, value *any) {
+func makeDictionaryValue(outputName *plistData, uuid *plistData, value *any) {
 	appendPlist(makeStdAction("dictionary", []plistData{
 		*outputName,
-		*UUID,
+		*uuid,
 		{
 			key:      "WFItems",
 			dataType: Dictionary,
