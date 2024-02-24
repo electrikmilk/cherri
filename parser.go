@@ -27,6 +27,8 @@ var groupingUUIDs map[int]string
 var groupingTypes map[int]tokenType
 var groupingIdx int
 
+var preParsing bool
+
 // resetParse will take the current lines and merge them together to create new contents,
 // then reset the chars and lines, then reset the parser cursor position.
 // This is usually done when something modifies the contents of the file like custom actions or includes.
@@ -50,10 +52,13 @@ func initParse() {
 	idx = -1
 	advance()
 
+	preParsing = true
+
 	handleIncludes()
 	parseCopyPastes()
 	parseCustomActions()
 
+	preParsing = false
 	for char != -1 {
 		parse()
 	}
@@ -452,7 +457,7 @@ func collectComment() {
 	} else if char == '*' {
 		collectMultilineComment(&comment, &collect)
 	}
-	if collect {
+	if collect && !preParsing {
 		var commentStr = strings.Trim(comment.String(), " \n")
 		tokens = append(tokens, token{
 			typeof:    Comment,
