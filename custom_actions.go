@@ -152,15 +152,16 @@ func makeCustomActionsHeader() {
 
 		for i, param := range customAction.definition.parameters {
 			var idx = i + 1
-			customActionsHeader.WriteString(fmt.Sprintf("                const arg%d = ", idx))
+			customActionsHeader.WriteString(fmt.Sprintf("                const arg%s%d = ", identifier, idx))
 			customActionsHeader.WriteString(fmt.Sprintf("getListItem(args, %d)\n", idx))
 			customActionsHeader.WriteString(fmt.Sprintf("                const %s = ", param.name))
 
+			var argumentReference = fmt.Sprintf("arg%s%d", identifier, idx)
 			switch param.validType {
 			case String:
-				customActionsHeader.WriteString(fmt.Sprintf("\"{arg%d}\"", idx))
+				customActionsHeader.WriteString(fmt.Sprintf("\"{%s}\"", argumentReference))
 			case Integer:
-				customActionsHeader.WriteString(fmt.Sprintf("number(arg%d)", idx))
+				customActionsHeader.WriteString(fmt.Sprintf("number(%s)", argumentReference))
 			}
 
 			customActionsHeader.WriteRune('\n')
