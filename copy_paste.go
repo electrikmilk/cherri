@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-var pastables map[string]string
+var pasteables map[string]string
 var copyPasteRegex = regexp.MustCompile(`copy .+ \{`)
 
 func parseCopyPastes() {
@@ -19,7 +19,7 @@ func parseCopyPastes() {
 		return
 	}
 
-	pastables = make(map[string]string)
+	pasteables = make(map[string]string)
 	for char != -1 {
 		switch {
 		case isToken(ForwardSlash):
@@ -38,7 +38,7 @@ func parseCopyPastes() {
 	resetParse()
 
 	if args.Using("debug") {
-		printPastablesDebug()
+		printPasteablesDebug()
 	}
 }
 
@@ -46,7 +46,7 @@ func collectCopy() {
 	var startLine = lineIdx
 	var identifier = collectIdentifier()
 
-	if _, found := pastables[identifier]; found {
+	if _, found := pasteables[identifier]; found {
 		parserError(fmt.Sprintf("Duplication declaration of copy/paste '%s'", identifier))
 	}
 
@@ -58,7 +58,7 @@ func collectCopy() {
 		lines[i] = ""
 	}
 
-	pastables[identifier] = strings.TrimSpace(contents)
+	pasteables[identifier] = strings.TrimSpace(contents)
 }
 
 func pasteCopy() {
@@ -68,16 +68,16 @@ func pasteCopy() {
 		lineIdx--
 		lineCharIdx = len(lines[lineIdx])
 	}
-	if contents, found := pastables[identifier]; found {
+	if contents, found := pasteables[identifier]; found {
 		lines[lineIdx] = contents
 	} else {
 		parserError(fmt.Sprintf("Unable to paste undefined copy '%s'", identifier))
 	}
 }
 
-func printPastablesDebug() {
+func printPasteablesDebug() {
 	fmt.Println(ansi("### COPY/PASTE ###", bold) + "\n")
-	for identifier, contents := range pastables {
+	for identifier, contents := range pasteables {
 		fmt.Println("identifier:", identifier+"()")
 		fmt.Println("contents:")
 		fmt.Println(contents)
