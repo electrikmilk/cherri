@@ -137,6 +137,10 @@ func makePlist() {
 		fmt.Println(ansi("Done.", green) + "\n")
 	}
 
+	resetPlistGen()
+}
+
+func resetPlistGen() {
 	compiled = plist.String()
 	plist.Reset()
 	tabLevel = 0
