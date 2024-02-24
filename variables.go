@@ -18,48 +18,42 @@ type variableValue struct {
 	repeatItem   bool
 }
 
-var globals map[string]variableValue
-
-func makeGlobals() {
-	if len(globals) != 0 {
-		return
-	}
-	globals = make(map[string]variableValue)
-	globals["ShortcutInput"] = variableValue{
+var globals = map[string]variableValue{
+	"ShortcutInput": {
 		variableType: "ExtensionInput",
 		valueType:    String,
 		value:        "ShortcutInput",
-	}
-	globals["CurrentDate"] = variableValue{
+	},
+	"CurrentDate": {
 		variableType: "CurrentDate",
 		valueType:    Date,
 		value:        "CurrentDate",
-	}
-	globals["Clipboard"] = variableValue{
+	},
+	"Clipboard": {
 		variableType: "Clipboard",
 		valueType:    String,
 		value:        "Clipboard",
-	}
-	globals["Device"] = variableValue{
+	},
+	"Device": {
 		variableType: "DeviceDetails",
 		valueType:    String,
 		value:        "DeviceDetails",
-	}
-	globals["Ask"] = variableValue{
+	},
+	"Ask": {
 		variableType: "Ask",
 		valueType:    String,
 		value:        "Ask",
-	}
-	globals["RepeatItem"] = variableValue{
+	},
+	"RepeatItem": {
 		variableType: "Variable",
 		valueType:    String,
 		value:        "Repeat Item",
-	}
-	globals["RepeatIndex"] = variableValue{
+	},
+	"RepeatIndex": {
 		variableType: "Variable",
 		valueType:    String,
 		value:        "Repeat Index",
-	}
+	},
 }
 
 func availableIdentifier(identifier *string) {

@@ -45,7 +45,6 @@ func initParse() {
 	questions = make(map[string]*question)
 	groupingUUIDs = make(map[int]string)
 	groupingTypes = make(map[int]tokenType)
-	makeGlobals()
 	chars = []rune(contents)
 	lines = strings.Split(contents, "\n")
 	idx = -1
