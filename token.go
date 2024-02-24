@@ -31,7 +31,10 @@ const (
 	Definition     tokenType = "#define"
 	Import         tokenType = "#import"
 	Question       tokenType = "#question"
-	CustomAction   tokenType = "action"
+	Include        tokenType = "#include"
+	Action         tokenType = "action"
+	Copy           tokenType = "copy"
+	Paste          tokenType = "paste"
 )
 
 /* Definitions */
@@ -60,6 +63,7 @@ const (
 
 const (
 	String       tokenType = "text"
+	RawString    tokenType = "rawtext"
 	Integer      tokenType = "number"
 	Dict         tokenType = "dictionary"
 	Arr          tokenType = "array"
@@ -71,7 +75,6 @@ const (
 	Comment      tokenType = "comment"
 	Expression   tokenType = "expression"
 	Variable     tokenType = "variable"
-	Action       tokenType = "action"
 	Conditional  tokenType = "conditional"
 	VariableType tokenType = "var"
 )

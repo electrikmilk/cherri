@@ -15,8 +15,9 @@ import (
 //go:embed stdlib.cherri
 var stdLib embed.FS
 
-// currentAction holds the current action identifier between functions.
-var currentAction string
+// currentAction holds the current action definition between functions.
+var currentAction actionDefinition
+var currentActionIdentifier string
 var currentArguments []actionArgument
 var currentArgumentsSize int
 
@@ -45,8 +46,8 @@ type action struct {
 	args []actionArgument
 }
 
-// argsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument.
-type argsFunc func(args []actionArgument)
+// checkFunc is a function that can be passed a collected actions arguments as a slice of actionArgument and the current action's definition.
+type checkFunc func(args []actionArgument, definition *actionDefinition)
 
 // paramsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument that must return a slice of plistData as a result.
 type paramsFunc func(args []actionArgument) []plistData
@@ -56,7 +57,7 @@ type actionDefinition struct {
 	identifier    string
 	appIdentifier string
 	parameters    []parameterDefinition
-	check         argsFunc
+	check         checkFunc
 	make          paramsFunc
 	addParams     paramsFunc
 	outputType    tokenType
@@ -64,12 +65,6 @@ type actionDefinition struct {
 	minVersion    float64
 	maxVersion    float64
 }
-
-// actions is the data structure that determines every action the compiler knows about.
-// The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
-var actions map[string]*actionDefinition
-
-var usedActions []string
 
 // libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
 type libraryDefinition struct {
@@ -79,6 +74,12 @@ type libraryDefinition struct {
 }
 
 var actionIndex int
+
+// setCurrentAction sets the current action identifier and definition for use between functions.
+func setCurrentAction(identifier string, definition *actionDefinition) {
+	currentActionIdentifier = identifier
+	currentAction = *definition
+}
 
 // plistAction builds an action based on its actionDefinition and adds it to the plist.
 func plistAction(arguments []actionArgument, outputName *plistData, actionUUID *plistData) {
@@ -101,13 +102,13 @@ func plistAction(arguments []actionArgument, outputName *plistData, actionUUID *
 
 // actionIdentifier determines the identifier of currentAction.
 func actionIdentifier() (ident string) {
-	if actions[currentAction].appIdentifier != "" {
-		ident = actions[currentAction].appIdentifier
+	if currentAction.appIdentifier != "" {
+		ident = currentAction.appIdentifier
 	} else {
-		if actions[currentAction].identifier != "" {
-			ident = actions[currentAction].identifier
+		if currentAction.identifier != "" {
+			ident = currentAction.identifier
 		} else {
-			ident = strings.ToLower(currentAction)
+			ident = strings.ToLower(currentActionIdentifier)
 		}
 		ident = "is.workflow.actions." + ident
 	}
@@ -116,19 +117,19 @@ func actionIdentifier() (ident string) {
 
 // actionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
 func actionParameters(arguments []actionArgument) (params []plistData) {
-	if actions[currentAction].addParams != nil {
-		params = append(params, actions[currentAction].addParams(arguments)...)
+	if currentAction.addParams != nil {
+		params = append(params, currentAction.addParams(arguments)...)
 	}
-	if actions[currentAction].make != nil {
-		params = actions[currentAction].make(arguments)
+	if currentAction.make != nil {
+		params = currentAction.make(arguments)
 		return
 	}
-	if actions[currentAction].parameters != nil {
+	if currentAction.parameters != nil {
 		var argumentsSize = len(arguments)
 		if argumentsSize == 0 {
 			return
 		}
-		for i, a := range actions[currentAction].parameters {
+		for i, a := range currentAction.parameters {
 			if argumentsSize <= i {
 				return
 			}
@@ -155,7 +156,7 @@ func questionArgs(arguments []actionArgument) {
 		}
 		var lowerIdentifier = strings.ToLower(a.value.(string))
 		if question, found := questions[lowerIdentifier]; found {
-			var parameter = actions[currentAction].parameters[i]
+			var parameter = currentAction.parameters[i]
 			question.parameter = parameter.key
 			question.actionIndex = actionIndex
 			arguments[i].value = ""
@@ -193,32 +194,31 @@ func makeStdAction(ident string, params []plistData) []plistData {
 // checkAction checks the parsed arguments provided for an action and if it can be used based on definitions set.
 // If an action has a check function defined this will be called and provided the parsed arguments.
 func checkAction() {
-	var action = actions[currentAction]
-	if len(action.parameters) > 0 {
+	if len(currentAction.parameters) > 0 {
 		checkRequiredArgs()
 	}
-	if action.check != nil {
-		action.check(currentArguments)
+	if currentAction.check != nil {
+		currentAction.check(currentArguments, &currentAction)
 	}
-	if action.minVersion != 0 {
-		if action.minVersion > iosVersion {
+	if currentAction.minVersion != 0 {
+		if currentAction.minVersion > iosVersion {
 			parserError(
-				fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentAction, math.Ceil(iosVersion)),
+				fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentActionIdentifier, math.Ceil(iosVersion)),
 			)
 		}
 	}
-	if action.maxVersion != 0 {
-		parserWarning(fmt.Sprintf("Action '%s()' has been deprecated as it was removed or significantly modified.", currentAction))
-		if action.maxVersion < iosVersion {
+	if currentAction.maxVersion != 0 {
+		parserWarning(fmt.Sprintf("Action '%s()' has been deprecated as it was removed or significantly modified.", currentActionIdentifier))
+		if currentAction.maxVersion < iosVersion {
 			parserError(
-				fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentAction, math.Ceil(iosVersion)),
+				fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentActionIdentifier, math.Ceil(iosVersion)),
 			)
 		}
 	}
 	if isMac, found := definitions["mac"]; found {
-		if !isMac.(bool) && action.mac {
+		if !isMac.(bool) && currentAction.mac {
 			parserError(
-				fmt.Sprintf("You've set your Shortcut as non-Mac. Action '%s()' is a Mac only action", currentAction),
+				fmt.Sprintf("You've set your Shortcut as non-Mac. Action '%s()' is a Mac only action", currentActionIdentifier),
 			)
 		}
 	}
@@ -229,13 +229,13 @@ func checkInfiniteArgs(startIdx int) {
 		if i < startIdx {
 			continue
 		}
-		checkArg(&actions[currentAction].parameters[startIdx], &arg)
+		checkArg(&currentAction.parameters[startIdx], &arg)
 	}
 }
 
 // checkRequiredArgs checks if all required arguments for an action have a value.
 func checkRequiredArgs() {
-	for i, param := range actions[currentAction].parameters {
+	for i, param := range currentAction.parameters {
 		if param.infinite {
 			checkInfiniteArgs(i)
 			continue
@@ -253,18 +253,18 @@ func checkRequiredArgs() {
 			default:
 				suffix = "th"
 			}
-			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'.\n%s", argIndex, suffix, param.name, currentAction, generateActionDefinition(param, false, true)))
+			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'.\n%s", argIndex, suffix, param.name, currentActionIdentifier, generateActionDefinition(param, false, true)))
 		}
 	}
 }
 
 // checkEnum checks an argument value against a string slice.
-func checkEnum(param parameterDefinition, argument actionArgument) {
-	var value = getArgValue(argument)
+func checkEnum(param *parameterDefinition, argument *actionArgument) {
+	var value = getArgValue(*argument)
 	if value == nil {
 		return
 	}
-	if reflect.TypeOf(value).String() != "string" {
+	if reflect.TypeOf(value).String() != stringType {
 		return
 	}
 	if !contains(param.enum, value.(string)) {
@@ -273,7 +273,7 @@ func checkEnum(param parameterDefinition, argument actionArgument) {
 				"Invalid argument '%s' for %s.\n\n%s",
 				value,
 				param.name,
-				generateActionDefinition(param, false, true),
+				generateActionDefinition(*param, false, true),
 			),
 		)
 	}
@@ -329,6 +329,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		}
 	case argValueType == Question:
 	case argValueType == Nil:
+	case param.validType == String && argument.valueType == RawString:
 	case argument.valueType != param.validType:
 		if argValueType == String {
 			argVal = "\"" + argVal.(string) + "\""
@@ -357,7 +358,7 @@ func validActionOutput(field string, validType tokenType, value any) {
 						actionOutputType,
 						field,
 						validType,
-						currentAction,
+						currentActionIdentifier,
 					),
 				)
 			}
@@ -387,7 +388,7 @@ func getArgValue(argument actionArgument) any {
 // checkArg checks to ensure the collected argument for the current action is valid.
 func checkArg(param *parameterDefinition, argument *actionArgument) {
 	if param.enum != nil {
-		checkEnum(*param, *argument)
+		checkEnum(param, argument)
 	}
 	typeCheck(param, argument)
 	var realValue = getArgValue(*argument)
@@ -434,11 +435,10 @@ func makeMeasurementUnits() {
 }
 
 func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) string {
-	var action = actions[currentAction]
 	var definition strings.Builder
-	definition.WriteString(fmt.Sprintf("%s(", currentAction))
+	definition.WriteString(fmt.Sprintf("%s(", currentActionIdentifier))
 	var arguments []string
-	for _, param := range action.parameters {
+	for _, param := range currentAction.parameters {
 		if param.name == focus.name || focus.name == "" {
 			arguments = append(arguments, generateActionParamDefinition(param))
 		} else {
@@ -447,7 +447,7 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 	}
 	definition.WriteString(strings.Join(arguments, ", "))
 	definition.WriteRune(')')
-	if restrictions && (action.minVersion != 0 || action.maxVersion != 0 || action.mac) {
+	if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
 		definition.WriteString(generateActionRestrictions())
 	}
 	if showEnums {
@@ -461,13 +461,13 @@ func generateActionRestrictions() string {
 	var definition strings.Builder
 	definition.WriteString("\nRestrictions: ")
 	var restrictions []string
-	if actions[currentAction].minVersion != 0 {
-		restrictions = append(restrictions, fmt.Sprintf("iOS %1.f+", actions[currentAction].minVersion))
+	if currentAction.minVersion != 0 {
+		restrictions = append(restrictions, fmt.Sprintf("iOS %1.f+", currentAction.minVersion))
 	}
-	if actions[currentAction].maxVersion != 0 {
-		restrictions = append(restrictions, fmt.Sprintf("Removed or significantly changed after iOS %1.f+", actions[currentAction].maxVersion))
+	if currentAction.maxVersion != 0 {
+		restrictions = append(restrictions, fmt.Sprintf("Removed or significantly changed after iOS %1.f+", currentAction.maxVersion))
 	}
-	if actions[currentAction].mac {
+	if currentAction.mac {
 		restrictions = append(restrictions, "macOS only")
 	}
 	definition.WriteString(strings.Join(restrictions, ", "))
@@ -477,11 +477,11 @@ func generateActionRestrictions() string {
 
 func generateActionParamEnums(focus parameterDefinition) string {
 	var definition strings.Builder
-	if len(actions[currentAction].parameters) != 0 {
+	if len(currentAction.parameters) != 0 {
 		definition.WriteRune('\n')
 	}
 	var hasEnum = false
-	for _, param := range actions[currentAction].parameters {
+	for _, param := range currentAction.parameters {
 		if param.enum == nil {
 			continue
 		}

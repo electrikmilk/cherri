@@ -27,11 +27,19 @@ var groupingUUIDs map[int]string
 var groupingTypes map[int]tokenType
 var groupingIdx int
 
+var preParsing bool
+
+// resetParse will take the current lines and merge them together to create new contents,
+// then reset the chars and lines, then reset the parser cursor position.
+// This is usually done when something modifies the contents of the file like custom actions or includes.
+func resetParse() {
+	contents = strings.Join(lines, "\n")
+	chars = []rune(contents)
+	lines = strings.Split(contents, "\n")
+	firstChar()
+}
+
 func initParse() {
-	if strings.Contains(contents, "action") {
-		standardActions()
-		parseCustomActions()
-	}
 	if args.Using("debug") {
 		fmt.Printf("Parsing %s...\n", filename)
 	}
@@ -39,25 +47,23 @@ func initParse() {
 	questions = make(map[string]*question)
 	groupingUUIDs = make(map[int]string)
 	groupingTypes = make(map[int]tokenType)
-	makeGlobals()
 	chars = []rune(contents)
 	lines = strings.Split(contents, "\n")
 	idx = -1
 	advance()
 
+	preParsing = true
+
+	handleIncludes()
+	parseCopyPastes()
+	parseCustomActions()
+
+	preParsing = false
 	for char != -1 {
 		parse()
 	}
 	if args.Using("debug") {
 		printParsingDebug()
-	}
-
-	for identifier := range actions {
-		if contains(usedActions, identifier) {
-			continue
-		}
-
-		delete(actions, identifier)
 	}
 
 	contents = ""
@@ -278,14 +284,12 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	case intChar():
 		collectIntegerValue(valueType, value, &until)
 	case char == '"':
+		collectStringValue(valueType, value)
+	case char == '\'':
 		advance()
-		*valueType = String
-		*value = collectString()
-
-		var stringValue = fmt.Sprintf("%s", *value)
-		if strings.ContainsAny(stringValue, "{}") {
-			checkInlineVars(&stringValue)
-		}
+		*valueType = RawString
+		*value = collectRawString()
+		advance()
 	case char == '[':
 		advance()
 		*valueType = Arr
@@ -304,14 +308,36 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*valueType = Nil
 		advanceUntil(until)
 	case strings.Contains(ahead, "("):
-		*valueType = Action
-		_, *value = collectAction()
+		collectActionValue(valueType, value)
 	case containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus):
 		*valueType = Expression
 		*value = collectUntil(until)
 	default:
 		collectReference(valueType, value, &until)
 	}
+}
+
+func collectStringValue(valueType *tokenType, value *any) {
+	advance()
+	*valueType = String
+	*value = collectString()
+
+	var stringValue = fmt.Sprintf("%s", *value)
+	if strings.ContainsAny(stringValue, "{}") {
+		checkInlineVars(&stringValue)
+	}
+}
+
+func collectActionValue(valueType *tokenType, value *any) {
+	*valueType = Action
+	var identifier = collectIdentifier()
+
+	if _, found := customActions[identifier]; found {
+		*value = handleCustomActionRef(&identifier)
+		return
+	}
+
+	*value = collectAction(&identifier)
 }
 
 var collectVarRegex = regexp.MustCompile(`\{(.*?)(?:\[(.*?)])?(?:\.(.*?))?}`)
@@ -362,13 +388,15 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		identifier.WriteString(collectUntil(*until))
 	}
 
+	isInputVariable(identifier.String())
+
 	*valueType = Variable
 	*value = identifier.String()
 	advance()
 }
 
 func collectArguments() (arguments []actionArgument) {
-	var params = actions[currentAction].parameters
+	var params = currentAction.parameters
 	var paramsSize = len(params)
 	var argIndex = 0
 	var param parameterDefinition
@@ -389,7 +417,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	if *argIndex == *paramsSize && !param.infinite {
 		parserError(
 			fmt.Sprintf("Too many arguments for action %s()\n\n%s",
-				currentAction,
+				currentActionIdentifier,
 				generateActionDefinition(parameterDefinition{}, false, false),
 			),
 		)
@@ -426,10 +454,10 @@ func collectComment() {
 		} else {
 			advanceUntil('\n')
 		}
-	} else {
+	} else if char == '*' {
 		collectMultilineComment(&comment, &collect)
 	}
-	if collect {
+	if collect && !preParsing {
 		var commentStr = strings.Trim(comment.String(), " \n")
 		tokens = append(tokens, token{
 			typeof:    Comment,
@@ -489,6 +517,7 @@ func collectVariable(constant bool) {
 		if constant {
 			parserError("Constants cannot be initialized without a value")
 		}
+		skipWhitespace()
 		collectType(&valueType, &value)
 	case constant:
 		lineIdx--
@@ -516,7 +545,6 @@ func collectVariable(constant bool) {
 }
 
 func collectType(valueType *tokenType, value *any) {
-	advance()
 	switch {
 	case tokenAhead(String):
 		*valueType = String
@@ -587,15 +615,7 @@ func collectDefinition() {
 		advance()
 		collectNoInputDefinition()
 	case tokenAhead(Mac):
-		var defValue = collectUntil('\n')
-		switch defValue {
-		case "true":
-			definitions["mac"] = true
-		case "false":
-			definitions["mac"] = false
-		default:
-			parserError(fmt.Sprintf("Invalid value of '%s' for boolean definition 'mac'", defValue))
-		}
+		collectMacDefinition()
 	case tokenAhead(Version):
 		var collectVersion = collectUntil('\n')
 		makeVersions()
@@ -643,7 +663,6 @@ func collectWorkflowType() {
 
 func collectGlyphDefinition() {
 	var collectGlyph = collectUntil('\n')
-	makeGlyphs()
 	collectGlyph = strings.ToLower(collectGlyph)
 	if glyph, found := glyphs[collectGlyph]; found {
 		glyphInt, hexErr := strconv.ParseInt(fmt.Sprintf("%d", glyph), 10, 64)
@@ -722,6 +741,18 @@ func collectContentItemTypes() (contentItemTypes []string) {
 	return
 }
 
+func collectMacDefinition() {
+	var defValue = collectUntil('\n')
+	switch defValue {
+	case "true":
+		definitions["mac"] = true
+	case "false":
+		definitions["mac"] = false
+	default:
+		parserError(fmt.Sprintf("Invalid value of '%s' for boolean definition 'mac'", defValue))
+	}
+}
+
 // libraries is a map of the 3rd party libraries defined in the compiler.
 // The key determines the identifier of the identifier name that must be used in the syntax, it's value defines its behavior, etc. using an libraryDefinition.
 var libraries map[string]libraryDefinition
@@ -791,7 +822,13 @@ func collectRepeat() {
 	var repeatIndexIdentifier = collectIdentifier()
 
 	advance()
-	tokenAhead(RepeatWithEach)
+	if !tokenAhead(RepeatWithEach) {
+		parserError(fmt.Sprintf("Expected `for`, got: %c", char))
+	}
+
+	if char == '{' {
+		parserError("Expected number of times to repeat")
+	}
 
 	var timesType tokenType
 	var timesValue any
@@ -831,14 +868,21 @@ func collectRepeatEach() {
 	var repeatItemIdentifier = collectIdentifier()
 
 	advance()
-	tokenAhead(In)
+	if !tokenAhead(In) {
+		parserError(fmt.Sprintf("Expected `in`, got: %c", char))
+	}
 	advance()
+
+	if char == '{' {
+		parserError("Expected value")
+	}
 
 	var iterableType tokenType
 	var iterableValue any
 	collectValue(&iterableType, &iterableValue, '{')
 
 	advance()
+
 	tokens = append(tokens,
 		token{
 			typeof:    RepeatWithEach,
@@ -1000,7 +1044,6 @@ func collectEndStatement() {
 		var groupType = groupingTypes[groupingIdx]
 		if groupType == Repeat || groupType == RepeatWithEach {
 			reachable()
-			repeatItemIndex--
 		}
 
 		addNothing()
@@ -1032,7 +1075,6 @@ func addNothing() {
 		return
 	}
 
-	standardActions()
 	tokens = append(tokens, token{
 		typeof:    Action,
 		ident:     "nothing",
@@ -1041,7 +1083,6 @@ func addNothing() {
 			ident: "nothing",
 		},
 	})
-	usedActions = append(usedActions, "nothing")
 }
 
 func intChar() bool {
@@ -1101,6 +1142,26 @@ func collectString() string {
 	return collection.String()
 }
 
+func collectRawString() string {
+	var collection strings.Builder
+	for char != -1 {
+		if char == '\\' && next(1) == '\'' {
+			collection.WriteRune('\'')
+			advanceTimes(2)
+			continue
+		}
+		if char == '\'' {
+			break
+		}
+
+		collection.WriteRune(char)
+		advance()
+	}
+	advance()
+
+	return collection.String()
+}
+
 func collectArray() (array interface{}) {
 	var rawJSON = "{\"array\":[" + collectUntilIgnoreStrings(']') + "]}"
 	if err := json.Unmarshal([]byte(rawJSON), &array); err != nil {
@@ -1138,7 +1199,7 @@ func collectObject() string {
 	var jsonStr strings.Builder
 	var insideInnerObject = false
 	var insideString = false
-	for {
+	for char != -1 {
 		if char == '"' {
 			if insideString {
 				if prev(1) != '\\' {
@@ -1166,7 +1227,18 @@ func collectObject() string {
 
 func collectActionCall() {
 	reachable()
-	var identifier, value = collectAction()
+	var identifier = collectIdentifier()
+	if _, found := customActions[identifier]; found {
+		tokens = append(tokens, token{
+			typeof:    Action,
+			ident:     "runSelf",
+			valueType: Action,
+			value:     handleCustomActionRef(&identifier),
+		})
+		return
+	}
+
+	var value = collectAction(&identifier)
 	tokens = append(tokens, token{
 		typeof:    Action,
 		ident:     identifier,
@@ -1175,16 +1247,12 @@ func collectActionCall() {
 	})
 }
 
-func collectAction() (identifier string, value action) {
-	standardActions()
-
-	identifier = collectIdentifier()
-	if _, found := actions[identifier]; !found {
-		parserError(fmt.Sprintf("Undefined action '%s()'", identifier))
+func collectAction(identifier *string) (value action) {
+	if _, found := actions[*identifier]; !found {
+		parserError(fmt.Sprintf("Undefined action '%s()'", *identifier))
 	}
 	advance()
-	currentAction = identifier
-	usedActions = append(usedActions, identifier)
+	setCurrentAction(*identifier, actions[*identifier])
 
 	var arguments = collectArguments()
 	currentArguments = arguments
@@ -1193,7 +1261,7 @@ func collectAction() (identifier string, value action) {
 	checkAction()
 
 	value = action{
-		ident: identifier,
+		ident: *identifier,
 		args:  arguments,
 	}
 
@@ -1333,6 +1401,12 @@ func firstChar() {
 	lineCharIdx = 0
 	idx = -1
 	advance()
+}
+
+func skipWhitespace() {
+	for char == ' ' || char == '\t' || char == '\n' {
+		advance()
+	}
 }
 
 func printVariables() {

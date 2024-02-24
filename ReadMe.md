@@ -11,8 +11,9 @@
 [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://pkg.go.dev/github.com/electrikmilk/cherri?tab=doc)
 [![Go Report Card](https://goreportcard.com/badge/github.com/electrikmilk/cherri)](https://goreportcard.com/report/github.com/electrikmilk/cherri)
 
-**Cherri** (pronounced cherry) is a [iOS Siri Shortcuts](https://apps.apple.com/us/app/shortcuts/id915249334)
-programming language, that compiles directly to a valid runnable Shortcut.
+**Cherri** (pronounced cherry) is a [Shortcuts](https://apps.apple.com/us/app/shortcuts/id1462947752) programming language, that compiles directly to a valid runnable Shortcut.
+
+The main goal is to make it trivial and practical to create large Shortcut projects (within the limits of Shortcuts) and maintain them long-term.
 
 [![Hello World Example](https://github.com/electrikmilk/cherri/assets/4368524/4205308b-4358-47c9-a1b4-66930c8db1c2)](https://playground.cherrilang.org)
 
@@ -23,22 +24,23 @@ programming language, that compiles directly to a valid runnable Shortcut.
 - 🪄 No magic variables syntax, they're constants instead
 - 🪶 Optimized to create as small as possible Shortcuts and reduces memory usage at runtime
 - #️⃣ Include files within each other for large Shortcut projects
-- 🔧 Define your custom actions to paste actions
+- 🔧 Define custom actions
+- 📋 Copy paste actions
 - 🥩 Enter actions raw with custom identifier and parameters
 - ❓ Define import questions
 - 📇 Generate VCards for menus
 - 📄 Embed files in base64
-- 🔢 Strongly statically typed with type inference
+- 🔢 Type system and type inference
 
-### Learn more
+### Resources
 
-- 🛝 [Playground](https://playground.cherrilang.org/)
-- 🍒 [macOS IDE](https://github.com/electrikmilk/cherri-macos-app)
-- 📄 [Documentation](https://cherrilang.org/language/)
+- 🛝 [Playground](https://playground.cherrilang.org/) - Try out Cherri on any platform, preview the result, and export signed Shortcuts
+- 🍒 [macOS IDE](https://github.com/electrikmilk/cherri-macos-app) - Defines Cherri file type, write and build Shortcuts on Mac with a GUI
+- 📄 [Documentation](https://cherrilang.org/language/) - Learn Cherri or how to contribute
 - 🧑‍💻 [Code Tour](https://youtu.be/gU8TsI96uww)
 - 🗺️ [_Idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap)
 
-### **📣 WIP 📣**
+## 📣 WIP 📣
 
 This project has not yet reached a stable version. It is under heavy development and backward
 incompatible changes may be made.
@@ -50,7 +52,7 @@ cherri file.cherri
 ```
 
 Run `cherri` without any arguments to see all options and usage. For development, use the `--debug` (or `-d`) option to print
-stack traces, debug information, and output a .plist file.
+stack traces, debug information, and output a `.plist` file.
 
 ## Why macOS only?
 
@@ -73,7 +75,7 @@ Because it's fun :)
 Some languages have been abandoned, don't work very well, or no longer work. I don't want Shortcuts languages to die.
 There should be more, not less.
 
-Some stability comes with the project being on macOS and not iOS.
+Plus, some stability comes with this project being on macOS and not iOS, and I'm not aware of another Shortcuts language with macOS as it's platform other than [Buttermilk](https://github.com/zachary7829/Buttermilk).
 
 ## Community
 

@@ -137,6 +137,10 @@ func makePlist() {
 		fmt.Println(ansi("Done.", green) + "\n")
 	}
 
+	resetPlistGen()
+}
+
+func resetPlistGen() {
 	compiled = plist.String()
 	plist.Reset()
 	tabLevel = 0
@@ -144,9 +148,7 @@ func makePlist() {
 	menus = map[string][]variableValue{}
 	uuids = map[string]string{}
 	variables = map[string]variableValue{}
-	actions = map[string]*actionDefinition{}
 	questions = map[string]*question{}
-	globals = map[string]variableValue{}
 	noInput = noInputParams{}
 	types = []string{}
 	inputs = []string{}
@@ -174,7 +176,7 @@ func plistActions() {
 			plistComment(t.value.(string))
 		case Action:
 			var tokenAction = t.value.(action)
-			currentAction = tokenAction.ident
+			setCurrentAction(tokenAction.ident, actions[tokenAction.ident])
 			plistAction(tokenAction.args, &plistData{}, &plistData{})
 		case Repeat:
 			plistRepeat(&t)
