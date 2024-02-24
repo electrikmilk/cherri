@@ -149,7 +149,6 @@ func resetPlistGen() {
 	uuids = map[string]string{}
 	variables = map[string]variableValue{}
 	questions = map[string]*question{}
-	globals = map[string]variableValue{}
 	noInput = noInputParams{}
 	types = []string{}
 	inputs = []string{}

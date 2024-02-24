@@ -81,7 +81,6 @@ func resetParser() {
 	types = []string{}
 	inputs = []string{}
 	outputs = []string{}
-	globals = map[string]variableValue{}
 	noInput = noInputParams{}
 	tokens = []token{}
 	included = []string{}
