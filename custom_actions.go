@@ -177,7 +177,7 @@ func makeCustomActionsHeader() {
 		customActionsHeader.WriteString("            }\n")
 	}
 
-	customActionsHeader.WriteString("        output(nil)")
+	customActionsHeader.WriteString("            output(nil)\n")
 	customActionsHeader.WriteString("        }\n    }\n}")
 
 	lines = append([]string{customActionsHeader.String()}, lines...)
