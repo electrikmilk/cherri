@@ -610,15 +610,7 @@ func collectDefinition() {
 		advance()
 		collectNoInputDefinition()
 	case tokenAhead(Mac):
-		var defValue = collectUntil('\n')
-		switch defValue {
-		case "true":
-			definitions["mac"] = true
-		case "false":
-			definitions["mac"] = false
-		default:
-			parserError(fmt.Sprintf("Invalid value of '%s' for boolean definition 'mac'", defValue))
-		}
+		collectMacDefinition()
 	case tokenAhead(Version):
 		var collectVersion = collectUntil('\n')
 		makeVersions()
@@ -742,6 +734,18 @@ func collectContentItemTypes() (contentItemTypes []string) {
 		parserError(fmt.Sprintf("Invalid content item type '%s'\n\n%s", itemType, list))
 	}
 	return
+}
+
+func collectMacDefinition() {
+	var defValue = collectUntil('\n')
+	switch defValue {
+	case "true":
+		definitions["mac"] = true
+	case "false":
+		definitions["mac"] = false
+	default:
+		parserError(fmt.Sprintf("Invalid value of '%s' for boolean definition 'mac'", defValue))
+	}
 }
 
 // libraries is a map of the 3rd party libraries defined in the compiler.
