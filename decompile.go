@@ -60,7 +60,6 @@ func decompileIcon() {
 	}
 
 	if icon.WFWorkflowIconGlyphNumber != iconGlyph {
-		makeGlyphs()
 		for name, i := range glyphs {
 			if icon.WFWorkflowIconGlyphNumber != i {
 				continue
@@ -112,7 +111,6 @@ func decompileActions() {
 }
 
 func matchAction(identifier string) string {
-	standardActions()
 	for action, data := range actions {
 		if data.identifier == identifier {
 			return action
