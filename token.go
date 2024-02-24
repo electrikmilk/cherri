@@ -32,6 +32,7 @@ const (
 	Import         tokenType = "#import"
 	Question       tokenType = "#question"
 	Include        tokenType = "#include"
+	Action         tokenType = "action"
 )
 
 /* Definitions */
@@ -72,7 +73,6 @@ const (
 	Comment      tokenType = "comment"
 	Expression   tokenType = "expression"
 	Variable     tokenType = "variable"
-	Action       tokenType = "action"
 	Conditional  tokenType = "conditional"
 	VariableType tokenType = "var"
 )
