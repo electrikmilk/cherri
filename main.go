@@ -67,8 +67,6 @@ func main() {
 
 	handleFile()
 
-	handleIncludes()
-
 	initParse()
 
 	makePlist()

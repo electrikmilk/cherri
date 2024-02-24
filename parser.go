@@ -54,6 +54,8 @@ func initParse() {
 	idx = -1
 	advance()
 
+	handleIncludes()
+
 	for char != -1 {
 		parse()
 	}
