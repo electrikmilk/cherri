@@ -1476,7 +1476,7 @@ var actions = map[string]*actionDefinition{
 				defaultValue: false,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "SizeToFit",
@@ -1597,7 +1597,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"getCurrentLocation": {
 		identifier: "location",
-		make: func(args []actionArgument) []plistData {
+		make: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFLocation",
@@ -1947,7 +1947,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFMusic",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFWhenToPlay",
@@ -1966,7 +1966,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFMusic",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFWhenToPlay",
@@ -2066,7 +2066,7 @@ var actions = map[string]*actionDefinition{
 				defaultValue: true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFImageFormat",
@@ -2221,7 +2221,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"skipBack": {
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFSkipBackBehavior",
@@ -2385,7 +2385,7 @@ var actions = map[string]*actionDefinition{
 				enum:         speeds,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			var params = []plistData{
 				{
 					key:      "WFMediaAudioOnly",
@@ -2441,7 +2441,7 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "Metadata",
@@ -2460,7 +2460,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFMedia",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "Metadata",
@@ -2479,7 +2479,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFImagePreserveMetadata",
@@ -2503,7 +2503,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFCameraRollSelectedGroup",
@@ -2515,7 +2515,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"play": {
 		identifier: "pausemusic",
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFPlayPauseBehavior",
@@ -2527,7 +2527,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"pause": {
 		identifier: "pausemusic",
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFPlayPauseBehavior",
@@ -2539,7 +2539,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"togglePlayPause": {
 		identifier: "pausemusic",
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFPlayPauseBehavior",
@@ -2588,7 +2588,7 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFTakeScreenshotScreenshotType",
@@ -2611,7 +2611,7 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFTakeScreenshotScreenshotType",
@@ -2628,7 +2628,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"reboot": {
 		minVersion: 17,
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFShutdownMode",
@@ -2821,7 +2821,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"toggleAppearance": {
 		identifier: "appearance",
-		make: func(args []actionArgument) []plistData {
+		make: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "operation",
@@ -2833,7 +2833,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"lightMode": {
 		identifier: "appearance",
-		make: func(args []actionArgument) []plistData {
+		make: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "operation",
@@ -2850,7 +2850,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"darkMode": {
 		identifier: "appearance",
-		make: func(args []actionArgument) []plistData {
+		make: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "operation",
