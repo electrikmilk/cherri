@@ -79,26 +79,46 @@ func decompileActions() {
 		if identifier == "" {
 			switch action.WFWorkflowActionIdentifier {
 			case "is.workflow.actions.gettext":
-				var text = action.WFWorkflowActionParameters["WFTextActionText"].(map[string]any)
-
+				var text = action.WFWorkflowActionParameters["WFTextActionText"]
 				if reflect.TypeOf(text).String() == "string" {
 					variableValue = fmt.Sprintf("\"%v\"", text)
 				}
 			case "is.workflow.actions.number":
-				variableValue = action.WFWorkflowActionParameters["WFNumberActionNumber"].(string)
+				variableValue = fmt.Sprintf("%v", action.WFWorkflowActionParameters["WFNumberActionNumber"])
 			case "is.workflow.actions.setvariable":
 				code.WriteRune('@')
 				code.WriteString(action.WFWorkflowActionParameters["WFVariableName"].(string))
 
 				if variableValue != nil {
-					code.WriteRune(' ')
-					code.WriteRune('=')
-					code.WriteRune(' ')
+					code.WriteString(" = ")
 					code.WriteString(fmt.Sprintf("%v", variableValue))
 				}
 
 				variableValue = nil
 				code.WriteRune('\n')
+			default:
+				var matchedAction actionDefinition
+				for identifier, definition := range actions {
+					var shortcutsIdentifier = "is.workflow.actions." + definition.identifier
+					if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
+						matchedAction = *definition
+						code.WriteString(fmt.Sprintf("%s(", identifier))
+						break
+					}
+				}
+				if matchedAction.identifier != "" {
+					for _, param := range matchedAction.parameters {
+						if param.key == "" {
+							// TODO: Run make functions
+							return
+						}
+						if value, found := action.WFWorkflowActionParameters[param.key]; found {
+							code.WriteString(fmt.Sprintf("%v", value))
+						}
+						// action.WFWorkflowActionParameters
+					}
+					code.WriteString(")\n")
+				}
 			}
 			continue
 		}
