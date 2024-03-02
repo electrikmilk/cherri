@@ -115,7 +115,6 @@ func decompileActions() {
 						if value, found := action.WFWorkflowActionParameters[param.key]; found {
 							code.WriteString(fmt.Sprintf("%v", value))
 						}
-						// action.WFWorkflowActionParameters
 					}
 					code.WriteString(")\n")
 				}

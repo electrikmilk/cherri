@@ -62,7 +62,7 @@ func downloadShortcut() []byte {
 	handle(httpErr)
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		exit(fmt.Sprintf("icloud: Failed to download Shortcut file."))
+		exit("icloud: Failed to download Shortcut file.")
 	}
 
 	var b, readErr = io.ReadAll(response.Body)
