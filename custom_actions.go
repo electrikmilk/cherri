@@ -152,19 +152,23 @@ func makeCustomActionsHeader() {
 
 		for i, param := range customAction.definition.parameters {
 			var idx = i + 1
-			var argumentReference = fmt.Sprintf("arg%s%d", identifier, idx)
+			var argumentReference = fmt.Sprintf("_cherri_%s_arg_%d_%s", identifier, idx, param.name)
 
-			customActionsHeader.WriteString(fmt.Sprintf("                const %s = ", argumentReference))
-			customActionsHeader.WriteString(fmt.Sprintf("getListItem(_cherri_function_args, %d)\n", idx))
-			customActionsHeader.WriteString(fmt.Sprintf("                const %s = ", param.name))
+			customActionsHeader.WriteString(fmt.Sprintf("                const %s = getListItem(_cherri_function_args, %d)\n", argumentReference, idx))
+			customActionsHeader.WriteString(fmt.Sprintf("                @%s: %s\n                ", param.name, param.validType))
 
 			switch param.validType {
 			case String:
-				customActionsHeader.WriteString(fmt.Sprintf("\"{%s}\"", argumentReference))
+				customActionsHeader.WriteString(fmt.Sprintf("@%s = \"{%s}\"\n", param.name, argumentReference))
 			case Integer:
-				customActionsHeader.WriteString(fmt.Sprintf("number(%s)", argumentReference))
+				customActionsHeader.WriteString(fmt.Sprintf("@%s = number(%s)\n", param.name, argumentReference))
 			case Dict:
-				customActionsHeader.WriteString(fmt.Sprintf("getDictionary(%s)", argumentReference))
+				customActionsHeader.WriteString(fmt.Sprintf("@%s = getDictionary(%s)\n", param.name, argumentReference))
+			case Arr:
+				customActionsHeader.WriteString(fmt.Sprintf("const %s_array_dictionary = getDictionary(%s)\n", argumentReference, argumentReference))
+				customActionsHeader.WriteString(fmt.Sprintf("                const %s_array = getValue(%s,\"array\")\n", argumentReference, argumentReference))
+				customActionsHeader.WriteString(fmt.Sprintf("                for %s_array_item in %s_array {\n", argumentReference, argumentReference))
+				customActionsHeader.WriteString(fmt.Sprintf("                    @%s += %s_array_item\n                }", param.name, argumentReference))
 			default:
 				customActionsHeader.WriteString(argumentReference)
 			}
@@ -243,6 +247,14 @@ func makeCustomActionCall(identifier *string, arguments *[]actionArgument) (cust
 				argumentValue = fmt.Sprintf("\"%s\"", argumentValue)
 			case Variable:
 				argumentValue = fmt.Sprintf("\"{%s}\"", argumentValue)
+			case Arr:
+				var jsonBytes, jsonErr = json.Marshal(argument.value)
+				handle(jsonErr)
+				argumentValue = fmt.Sprintf("{\"array\":%s}", string(jsonBytes))
+			case Dict:
+				var jsonBytes, jsonErr = json.Marshal(argument.value)
+				handle(jsonErr)
+				argumentValue = string(jsonBytes)
 			}
 			customActionCallJSON.WriteString(argumentValue)
 
