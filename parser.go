@@ -1045,6 +1045,7 @@ func collectEndStatement() {
 		}
 		var groupType = groupingTypes[groupingIdx]
 		if groupType == Repeat || groupType == RepeatWithEach {
+			repeatItemIndex--
 			reachable()
 		}
 
