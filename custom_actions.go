@@ -209,7 +209,7 @@ func handleCustomActionRef(identifier *string) action {
 
 	tokens = append(tokens, token{
 		typeof:    Var,
-		ident:     fmt.Sprintf("%sCherriCall", *identifier),
+		ident:     fmt.Sprintf("_%s_cherri_call", *identifier),
 		valueType: Dict,
 		value:     customActionCall,
 	})
@@ -228,7 +228,7 @@ func handleCustomActionRef(identifier *string) action {
 		args: []actionArgument{
 			{
 				valueType: Var,
-				value:     fmt.Sprintf("%sCherriCall", *identifier),
+				value:     fmt.Sprintf("_%s_cherri_call", *identifier),
 			},
 		},
 	}
