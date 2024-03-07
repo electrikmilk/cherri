@@ -2869,7 +2869,7 @@ var actions = map[string]*actionDefinition{
 	"isCharging": {
 		identifier: "getbatterylevel",
 		minVersion: 16.2,
-		make: func(args []actionArgument) []plistData {
+		make: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "Subject",
@@ -2882,7 +2882,7 @@ var actions = map[string]*actionDefinition{
 	"connectedToCharger": {
 		identifier: "getbatterylevel",
 		minVersion: 16.2,
-		make: func(args []actionArgument) []plistData {
+		make: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "Subject",
@@ -3383,16 +3383,16 @@ var actions = map[string]*actionDefinition{
 				return []plistData{
 					argumentValue("WFApp", args, 0),
 				}
-			} else {
-				return []plistData{
-					{
-						key:      "WFApp",
-						dataType: Dictionary,
-						value: []plistData{
-							argumentValue("BundleIdentifier", args, 0),
-						},
+			}
+
+			return []plistData{
+				{
+					key:      "WFApp",
+					dataType: Dictionary,
+					value: []plistData{
+						argumentValue("BundleIdentifier", args, 0),
 					},
-				}
+				},
 			}
 		},
 	},
@@ -3515,16 +3515,16 @@ var actions = map[string]*actionDefinition{
 				return []plistData{
 					argumentValue("WFApp", args, 0),
 				}
-			} else {
-				return []plistData{
-					{
-						key:      "WFApp",
-						dataType: Dictionary,
-						value: []plistData{
-							argumentValue("BundleIdentifier", args, 0),
-						},
+			}
+
+			return []plistData{
+				{
+					key:      "WFApp",
+					dataType: Dictionary,
+					value: []plistData{
+						argumentValue("BundleIdentifier", args, 0),
 					},
-				}
+				},
 			}
 		},
 	},
@@ -3820,7 +3820,7 @@ var actions = map[string]*actionDefinition{
 	"dismissSiri": {},
 	"isOnline": {
 		identifier: "getipaddress",
-		make: func(args []actionArgument) []plistData {
+		make: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFIPAddressSourceOption",
@@ -4076,7 +4076,7 @@ var actions = map[string]*actionDefinition{
 	"getWallpaper": {
 		identifier: "posters.get",
 		minVersion: 16.2,
-		make: func(args []actionArgument) []plistData {
+		make: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFPosterType",
@@ -4223,7 +4223,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"DNDOn": {
 		identifier: "dnd.set",
-		make: func(args []actionArgument) []plistData {
+		make: func(_ []actionArgument) []plistData {
 			return []plistData{
 				focusModes,
 				{
@@ -4236,7 +4236,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"DNDOff": {
 		identifier: "dnd.set",
-		make: func(args []actionArgument) []plistData {
+		make: func(_ []actionArgument) []plistData {
 			return []plistData{
 				focusModes,
 				{
@@ -4270,7 +4270,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"toggleBluetooth": {
 		identifier: "bluetooth.set",
-		make: func(args []actionArgument) []plistData {
+		make: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "OnValue",
@@ -4879,7 +4879,7 @@ var actions = map[string]*actionDefinition{
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			var value = getArgValue(args[1])
-			if reflect.TypeOf(value).String() != "string" {
+			if reflect.TypeOf(value).String() != stringType {
 				return
 			}
 

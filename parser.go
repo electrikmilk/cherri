@@ -534,13 +534,15 @@ func collectVariable(constant bool) {
 	if varType != Var {
 		return
 	}
-	variables[identifier] = variableValue{
-		variableType: "Variable",
-		valueType:    valueType,
-		value:        value,
-		getAs:        getAs,
-		coerce:       coerce,
-		constant:     constant,
+	if _, found := variables[identifier]; !found {
+		variables[identifier] = variableValue{
+			variableType: "Variable",
+			valueType:    valueType,
+			value:        value,
+			getAs:        getAs,
+			coerce:       coerce,
+			constant:     constant,
+		}
 	}
 }
 
@@ -1043,6 +1045,7 @@ func collectEndStatement() {
 		}
 		var groupType = groupingTypes[groupingIdx]
 		if groupType == Repeat || groupType == RepeatWithEach {
+			repeatItemIndex--
 			reachable()
 		}
 
