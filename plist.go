@@ -356,7 +356,7 @@ func variableValueModifier(token *token, outputName *plistData, UUID *plistData)
 				value:    operation,
 			},
 		}))
-	case String:
+	case String, RawString:
 		var varInput = token.value.(string)
 		wrapVariableReference(&varInput)
 		appendPlist(makeStdAction("gettext", []plistData{
