@@ -97,8 +97,16 @@ func decompileActions() {
 		case "is.workflow.actions.gettext":
 			variableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 		case "is.workflow.actions.number":
-			var number, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberActionNumber"].(string))
-			handle(convErr)
+			var value = action.WFWorkflowActionParameters["WFNumberActionNumber"]
+			if reflect.TypeOf(value).String() == dictType {
+				value = decompValue(value)
+			}
+			var number int
+			if value != "" {
+				var convErr error
+				number, convErr = strconv.Atoi(value.(string))
+				handle(convErr)
+			}
 			variableValue = decompValue(number)
 		case "is.workflow.actions.dictionary":
 			variableValue = decompDictionary(action.WFWorkflowActionParameters["WFItems"].(map[string]interface{}))
@@ -201,20 +209,25 @@ func decompDictionaryItems(items []interface{}) (dictionary map[string]interface
 		var itemValue any
 		switch dictDataType(itemValueType) {
 		case itemTypeNumber:
-			var convErr error
-			itemValue, convErr = strconv.Atoi(itemStringValue)
-			handle(convErr)
+			if itemStringValue != "" {
+				var convErr error
+				itemValue, convErr = strconv.Atoi(itemStringValue)
+				handle(convErr)
+			}
 		case itemTypeBool:
 			switch itemStringValue {
 			case "true":
 				itemValue = true
 			case "false":
 				itemValue = false
-			default:
-				itemValue = itemStringValue
 			}
 		case itemTypeText:
 			itemValue = strings.Trim(itemStringValue, "\"")
+		case itemTypeDict:
+			var wfValue = dictionaryItem["WFValue"].(map[string]interface{})
+			var Value = wfValue["Value"].(map[string]interface{})
+			var dictionaryValue = Value["Value"].(map[string]interface{})
+			itemValue = decompDictionaryItems(dictionaryValue["WFDictionaryFieldValueItems"].([]interface{}))
 		default:
 			itemValue = itemStringValue
 		}
@@ -236,18 +249,22 @@ func decompValue(value any) string {
 }
 
 func decompValueObject(value map[string]interface{}) string {
-	// value["WFSerializationType"].(string)
 	var valueType = reflect.TypeOf(value["Value"]).String()
 	switch valueType {
 	case "map[string]interface {}":
+		fmt.Println("value", value)
+		var attachmentString string
 		var Value = value["Value"].(map[string]interface{})
-		var attachmentString = Value["string"].(string)
+		if _, found := Value["string"]; found {
+			attachmentString = Value["string"].(string)
+		}
+
 		if _, found := Value["attachmentsByRange"]; found {
 			for attachmentRange, a := range Value["attachmentsByRange"].(map[string]interface{}) {
 				var position, convErr = strconv.Atoi(strings.TrimPrefix(strings.Split(attachmentRange, ",")[0], "{"))
 				handle(convErr)
+
 				var attachment = a.(map[string]interface{})
-				// attachment["Type"]
 				var variableName = attachment["VariableName"]
 				var chars = strings.Split(attachmentString, "")
 				chars[position] = fmt.Sprintf("{%s}", variableName)
