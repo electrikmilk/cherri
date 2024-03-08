@@ -125,10 +125,11 @@ func decompileActions() {
 							return
 						}
 						if value, found := action.WFWorkflowActionParameters[param.key]; found {
-							code.WriteString(decompValue(value))
-						}
-						if matchedParamsSize != 1 && matchedParamsSize > i {
-							code.WriteRune(',')
+							var dValue = decompValue(value)
+							code.WriteString(dValue)
+							if matchedParamsSize != 1 && matchedParamsSize-1 > i {
+								code.WriteRune(',')
+							}
 						}
 					}
 					code.WriteString(")\n")
