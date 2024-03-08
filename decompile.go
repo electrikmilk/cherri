@@ -110,13 +110,17 @@ func decompileActions() {
 					}
 				}
 				if matchedAction.identifier != "" {
-					for _, param := range matchedAction.parameters {
+					var matchedParamsSize = len(matchedAction.parameters)
+					for i, param := range matchedAction.parameters {
 						if param.key == "" {
 							// TODO: Run make functions
 							return
 						}
 						if value, found := action.WFWorkflowActionParameters[param.key]; found {
-							code.WriteString(fmt.Sprintf("%v", value))
+							code.WriteString(decompValue(value))
+						}
+						if matchedParamsSize != 1 && matchedParamsSize > i {
+							code.WriteRune(',')
 						}
 					}
 					code.WriteString(")\n")
