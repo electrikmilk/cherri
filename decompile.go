@@ -44,8 +44,11 @@ func decompile(b []byte) {
 	var _, marshalErr = plists.Unmarshal(b, &data)
 	handle(marshalErr)
 
+	mapVariables()
 	decompileIcon()
 	decompileActions()
+
+	fmt.Println(code.String())
 }
 
 func decompileIcon() {
@@ -74,8 +77,21 @@ func decompileIcon() {
 	code.WriteRune('\n')
 }
 
+func mapVariables() {
+	variables = make(map[string]variableValue)
+	for _, action := range data.WFWorkflowActions {
+		if action.WFWorkflowActionIdentifier != "is.workflow.actions.setvariable" && action.WFWorkflowActionIdentifier != "is.workflow.actions.appendvariable" {
+			continue
+		}
+		var varName = action.WFWorkflowActionParameters["WFVariableName"].(string)
+		if _, found := variables[varName]; !found {
+			variables[varName] = variableValue{}
+		}
+	}
+}
+
 func decompileActions() {
-	var variableValue any
+	var variableValue string
 	for _, action := range data.WFWorkflowActions {
 		switch action.WFWorkflowActionIdentifier {
 		case "is.workflow.actions.gettext":
@@ -90,23 +106,21 @@ func decompileActions() {
 			code.WriteRune('@')
 			code.WriteString(action.WFWorkflowActionParameters["WFVariableName"].(string))
 
-			if variableValue != nil {
-				code.WriteString(" = ")
-				code.WriteString(fmt.Sprintf("%v", variableValue))
+			if variableValue != "" {
+				code.WriteString(fmt.Sprintf(" = %s", variableValue))
 			}
 
-			variableValue = nil
+			variableValue = ""
 			code.WriteRune('\n')
 		case "is.workflow.actions.appendvariable":
 			code.WriteRune('@')
 			code.WriteString(action.WFWorkflowActionParameters["WFVariableName"].(string))
 
-			if variableValue != nil {
-				code.WriteString(" = ")
-				code.WriteString(fmt.Sprintf("%v", variableValue))
+			if variableValue != "" {
+				code.WriteString(fmt.Sprintf(" += %s", variableValue))
 			}
 
-			variableValue = nil
+			variableValue = ""
 			code.WriteRune('\n')
 		default:
 			var matchedAction actionDefinition
@@ -126,29 +140,43 @@ func decompileActions() {
 					break
 				}
 			}
+			if matchedAction.identifier == "" {
+				continue
+			}
 
-			if matchedAction.identifier != "" {
-				if value, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
-					code.WriteString(fmt.Sprintf("const %s = ", value))
+			var isVariableValue = false
+			var actionCallCode strings.Builder
+			if customOutputName, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
+				if _, foundVar := variables[customOutputName.(string)]; !foundVar {
+					code.WriteString(fmt.Sprintf("const %s = ", customOutputName))
+				} else {
+					isVariableValue = true
 				}
-				code.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
+			}
+			actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
 
-				var matchedParamsSize = len(matchedAction.parameters)
-				for i, param := range matchedAction.parameters {
-					if param.key == "" {
-						// TODO: Run make functions
-						continue
-					}
-					if value, found := action.WFWorkflowActionParameters[param.key]; found {
-						if i != 0 && matchedParamsSize != 1 && matchedParamsSize > i {
-							code.WriteRune(',')
-						}
-
-						var dValue = decompValue(value)
-						code.WriteString(dValue)
-					}
+			var matchedParamsSize = len(matchedAction.parameters)
+			for i, param := range matchedAction.parameters {
+				if param.key == "" {
+					// TODO: Run make functions
+					continue
 				}
-				code.WriteString(")\n")
+				if value, found := action.WFWorkflowActionParameters[param.key]; found {
+					if i != 0 && matchedParamsSize != 1 && matchedParamsSize > i {
+						actionCallCode.WriteRune(',')
+					}
+
+					var dValue = decompValue(value)
+					actionCallCode.WriteString(dValue)
+				}
+			}
+			actionCallCode.WriteString(")")
+
+			if isVariableValue {
+				variableValue = actionCallCode.String()
+			} else {
+				code.WriteString(actionCallCode.String())
+				code.WriteRune('\n')
 			}
 		}
 	}
