@@ -77,71 +77,80 @@ func decompileIcon() {
 func decompileActions() {
 	var variableValue any
 	for _, action := range data.WFWorkflowActions {
-		var identifier = matchAction(action.WFWorkflowActionIdentifier)
-		if identifier == "" {
-			switch action.WFWorkflowActionIdentifier {
-			case "is.workflow.actions.gettext":
-				variableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
-			case "is.workflow.actions.number":
-				var number, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberActionNumber"].(string))
-				handle(convErr)
-				variableValue = decompValue(number)
-			case "is.workflow.actions.dictionary":
-				variableValue = decompDictionary(action.WFWorkflowActionParameters["WFItems"].(map[string]interface{}))
-			case "is.workflow.actions.setvariable":
-				code.WriteRune('@')
-				code.WriteString(action.WFWorkflowActionParameters["WFVariableName"].(string))
+		switch action.WFWorkflowActionIdentifier {
+		case "is.workflow.actions.gettext":
+			variableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
+		case "is.workflow.actions.number":
+			var number, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberActionNumber"].(string))
+			handle(convErr)
+			variableValue = decompValue(number)
+		case "is.workflow.actions.dictionary":
+			variableValue = decompDictionary(action.WFWorkflowActionParameters["WFItems"].(map[string]interface{}))
+		case "is.workflow.actions.setvariable":
+			code.WriteRune('@')
+			code.WriteString(action.WFWorkflowActionParameters["WFVariableName"].(string))
 
-				if variableValue != nil {
-					code.WriteString(" = ")
-					code.WriteString(fmt.Sprintf("%v", variableValue))
-				}
+			if variableValue != nil {
+				code.WriteString(" = ")
+				code.WriteString(fmt.Sprintf("%v", variableValue))
+			}
 
-				variableValue = nil
-				code.WriteRune('\n')
-			default:
-				var matchedAction actionDefinition
-				for identifier, definition := range actions {
-					var shortcutsIdentifier = "is.workflow.actions." + definition.identifier
-					if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
-						if identifier == "confirm" {
-							if value, found := action.WFWorkflowActionParameters["WFAlertActionCancelButtonShown"]; found {
-								if value == false {
-									identifier = "alert"
-								}
-							}
-						}
-						matchedAction = *definition
-						code.WriteString(fmt.Sprintf("%s(", identifier))
-						break
-					}
-				}
+			variableValue = nil
+			code.WriteRune('\n')
+		case "is.workflow.actions.appendvariable":
+			code.WriteRune('@')
+			code.WriteString(action.WFWorkflowActionParameters["WFVariableName"].(string))
 
-				if matchedAction.identifier != "" {
-					var matchedParamsSize = len(matchedAction.parameters)
-					for i, param := range matchedAction.parameters {
-						if param.key == "" {
-							// TODO: Run make functions
-							return
-						}
-						if value, found := action.WFWorkflowActionParameters[param.key]; found {
-							var dValue = decompValue(value)
-							code.WriteString(dValue)
-							if matchedParamsSize != 1 && matchedParamsSize-1 > i {
-								code.WriteRune(',')
+			if variableValue != nil {
+				code.WriteString(" = ")
+				code.WriteString(fmt.Sprintf("%v", variableValue))
+			}
+
+			variableValue = nil
+			code.WriteRune('\n')
+		default:
+			var matchedAction actionDefinition
+			var matchedIdentifier string
+			for identifier, definition := range actions {
+				var shortcutsIdentifier = "is.workflow.actions." + definition.identifier
+				if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
+					matchedIdentifier = identifier
+					if matchedIdentifier == "confirm" {
+						if value, found := action.WFWorkflowActionParameters["WFAlertActionCancelButtonShown"]; found {
+							if value == false {
+								matchedIdentifier = "alert"
 							}
 						}
 					}
-					code.WriteString(")\n")
+					matchedAction = *definition
+					break
 				}
 			}
-			continue
+
+			if matchedAction.identifier != "" {
+				if value, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
+					code.WriteString(fmt.Sprintf("const %s = ", value))
+				}
+				code.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
+
+				var matchedParamsSize = len(matchedAction.parameters)
+				for i, param := range matchedAction.parameters {
+					if param.key == "" {
+						// TODO: Run make functions
+						continue
+					}
+					if value, found := action.WFWorkflowActionParameters[param.key]; found {
+						if i != 0 && matchedParamsSize != 1 && matchedParamsSize > i {
+							code.WriteRune(',')
+						}
+
+						var dValue = decompValue(value)
+						code.WriteString(dValue)
+					}
+				}
+				code.WriteString(")\n")
+			}
 		}
-
-		code.WriteString(identifier)
-		code.WriteRune('(')
-
-		code.WriteString(")\n")
 	}
 }
 
@@ -224,14 +233,4 @@ func decompValueObject(value map[string]interface{}) string {
 	default:
 		return fmt.Sprintf("%v", value["Value"])
 	}
-}
-
-func matchAction(identifier string) string {
-	for action, data := range actions {
-		if data.identifier == identifier {
-			return action
-		}
-	}
-
-	return ""
 }
