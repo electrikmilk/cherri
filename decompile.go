@@ -5,9 +5,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	plists "howett.net/plist"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -79,12 +81,13 @@ func decompileActions() {
 		if identifier == "" {
 			switch action.WFWorkflowActionIdentifier {
 			case "is.workflow.actions.gettext":
-				var text = action.WFWorkflowActionParameters["WFTextActionText"]
-				if reflect.TypeOf(text).String() == "string" {
-					variableValue = fmt.Sprintf("\"%v\"", text)
-				}
+				variableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 			case "is.workflow.actions.number":
-				variableValue = fmt.Sprintf("%v", action.WFWorkflowActionParameters["WFNumberActionNumber"])
+				var number, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberActionNumber"].(string))
+				handle(convErr)
+				variableValue = decompValue(number)
+			case "is.workflow.actions.dictionary":
+				variableValue = decompDictionary(action.WFWorkflowActionParameters["WFItems"].(map[string]interface{}))
 			case "is.workflow.actions.setvariable":
 				code.WriteRune('@')
 				code.WriteString(action.WFWorkflowActionParameters["WFVariableName"].(string))
@@ -126,6 +129,87 @@ func decompileActions() {
 		code.WriteRune('(')
 
 		code.WriteString(")\n")
+	}
+}
+
+func decompDictionary(value map[string]interface{}) string {
+	var Value = value["Value"].(map[string]interface{})
+	var dictionary = decompDictionaryItems(Value["WFDictionaryFieldValueItems"].([]interface{}))
+	var jsonBytes, jsonErr = json.Marshal(dictionary)
+	handle(jsonErr)
+
+	return string(jsonBytes)
+}
+
+func decompDictionaryItems(items []interface{}) (dictionary map[string]interface{}) {
+	dictionary = make(map[string]interface{})
+	for _, item := range items {
+		var dictionaryItem = item.(map[string]interface{})
+		var itemKey = decompValue(dictionaryItem["WFKey"])
+		var itemStringValue = decompValue(dictionaryItem["WFValue"])
+		var itemValueType = fmt.Sprintf("%d", dictionaryItem["WFItemType"])
+		var itemValue any
+		switch dictDataType(itemValueType) {
+		case itemTypeNumber:
+			var convErr error
+			itemValue, convErr = strconv.Atoi(itemStringValue)
+			handle(convErr)
+		case itemTypeBool:
+			switch itemStringValue {
+			case "true":
+				itemValue = true
+			case "false":
+				itemValue = false
+			default:
+				itemValue = itemStringValue
+			}
+		case itemTypeText:
+			itemValue = strings.Trim(itemStringValue, "\"")
+		default:
+			itemValue = itemStringValue
+		}
+		dictionary[itemKey] = itemValue
+	}
+	return
+}
+
+func decompValue(value any) string {
+	var valueType = reflect.TypeOf(value).String()
+	switch valueType {
+	case "map[string]interface {}":
+		return decompValueObject(value.(map[string]interface{}))
+	case stringType:
+		return fmt.Sprintf("\"%s\"", value)
+	default:
+		return fmt.Sprintf("%v", value)
+	}
+}
+
+func decompValueObject(value map[string]interface{}) string {
+	// value["WFSerializationType"].(string)
+	var valueType = reflect.TypeOf(value["Value"]).String()
+	switch valueType {
+	case "map[string]interface {}":
+		var Value = value["Value"].(map[string]interface{})
+		var attachmentString = Value["string"].(string)
+		if _, found := Value["attachmentsByRange"]; found {
+			for attachmentRange, a := range Value["attachmentsByRange"].(map[string]interface{}) {
+				var position, convErr = strconv.Atoi(strings.TrimPrefix(strings.Split(attachmentRange, ",")[0], "{"))
+				handle(convErr)
+				var attachment = a.(map[string]interface{})
+				// attachment["Type"]
+				var variableName = attachment["VariableName"]
+				var chars = strings.Split(attachmentString, "")
+				chars[position] = fmt.Sprintf("{%s}", variableName)
+				attachmentString = strings.Join(chars, "")
+			}
+
+			attachmentString = fmt.Sprintf("\"%s\"", attachmentString)
+		}
+
+		return attachmentString
+	default:
+		return fmt.Sprintf("%v", value["Value"])
 	}
 }
 
