@@ -104,11 +104,19 @@ func decompileActions() {
 				for identifier, definition := range actions {
 					var shortcutsIdentifier = "is.workflow.actions." + definition.identifier
 					if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
+						if identifier == "confirm" {
+							if value, found := action.WFWorkflowActionParameters["WFAlertActionCancelButtonShown"]; found {
+								if value == false {
+									identifier = "alert"
+								}
+							}
+						}
 						matchedAction = *definition
 						code.WriteString(fmt.Sprintf("%s(", identifier))
 						break
 					}
 				}
+
 				if matchedAction.identifier != "" {
 					var matchedParamsSize = len(matchedAction.parameters)
 					for i, param := range matchedAction.parameters {
