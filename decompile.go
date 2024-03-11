@@ -223,6 +223,10 @@ func decompDictionaryItems(items []interface{}) (dictionary map[string]interface
 			}
 		case itemTypeText:
 			itemValue = strings.Trim(itemStringValue, "\"")
+		case itemTypeArray:
+			var wfValue = dictionaryItem["WFValue"].(map[string]interface{})
+			var Value = wfValue["Value"].([]interface{})
+			itemValue = decompArray(Value)
 		case itemTypeDict:
 			var wfValue = dictionaryItem["WFValue"].(map[string]interface{})
 			var Value = wfValue["Value"].(map[string]interface{})
@@ -232,6 +236,32 @@ func decompDictionaryItems(items []interface{}) (dictionary map[string]interface
 			itemValue = itemStringValue
 		}
 		dictionary[itemKey] = itemValue
+	}
+	return
+}
+
+func decompArray(items []interface{}) (array []interface{}) {
+	for _, item := range items {
+		var itemInterface = item.(map[string]interface{})
+		var itemStringValue = decompValue(itemInterface["WFValue"])
+		var itemValue any
+		var itemValueType = fmt.Sprintf("%d", itemInterface["WFItemType"])
+		switch dictDataType(itemValueType) {
+		case itemTypeNumber:
+			if itemStringValue != "" {
+				var convErr error
+				itemValue, convErr = strconv.Atoi(itemStringValue)
+				handle(convErr)
+			}
+		case itemTypeBool:
+			if itemStringValue == "true" {
+				itemValue = true
+			} else if itemStringValue == "false" {
+				itemValue = false
+			}
+		default:
+		}
+		array = append(array, itemValue)
 	}
 	return
 }
@@ -252,7 +282,6 @@ func decompValueObject(value map[string]interface{}) string {
 	var valueType = reflect.TypeOf(value["Value"]).String()
 	switch valueType {
 	case "map[string]interface {}":
-		fmt.Println("value", value)
 		var attachmentString string
 		var Value = value["Value"].(map[string]interface{})
 		if _, found := Value["string"]; found {
