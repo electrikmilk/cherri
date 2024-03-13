@@ -139,6 +139,20 @@ func decompileActions() {
 
 			variableValue = ""
 			code.WriteRune('\n')
+		case "is.workflow.actions.conditional":
+			var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
+			switch controlFlowMode {
+			case startStatement:
+				newCodeLine("if ")
+				code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
+				code.WriteString(" {\n")
+			case statementPart:
+				newCodeLine("} else ")
+				code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
+				code.WriteString(" {\n")
+			case endStatement:
+				code.WriteString("}\n")
+			}
 		default:
 			var matchedAction actionDefinition
 			var matchedIdentifier string
@@ -282,6 +296,10 @@ func decompArray(items []interface{}) (array []interface{}) {
 }
 
 func decompValue(value any) string {
+	if value == nil {
+		return ""
+	}
+
 	var valueType = reflect.TypeOf(value).String()
 	switch valueType {
 	case "map[string]interface {}":
@@ -294,6 +312,10 @@ func decompValue(value any) string {
 }
 
 func decompValueObject(value map[string]interface{}) string {
+	if value["Type"] == "Variable" {
+		value = value["Variable"].(map[string]interface{})
+	}
+
 	var valueType = reflect.TypeOf(value["Value"]).String()
 	switch valueType {
 	case "map[string]interface {}":
