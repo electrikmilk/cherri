@@ -345,3 +345,22 @@ func decompValueObject(value map[string]interface{}) string {
 		return fmt.Sprintf("%v", value["Value"])
 	}
 }
+
+func decompError(message string, action ShortcutAction) {
+	fmt.Print(ansi("[Decompilation Error]\n\n", red, bold))
+
+	fmt.Println(ansi(fmt.Sprintf("%s\n", message), red))
+
+	var identifier = strings.Replace(action.WFWorkflowActionIdentifier, "is.workflow.actions.", "", 1)
+
+	fmt.Println("Action identifier:", identifier)
+	fmt.Println("Full action identifier:", action.WFWorkflowActionIdentifier)
+
+	lines = strings.Split(code.String(), "\n")
+	var linesLen = len(lines)
+	var lastWrittenLine = lines[linesLen-1]
+	var prevWrittenLine = lines[linesLen-2]
+	fmt.Printf("\nStopped while writing line %d:\n", linesLen)
+	fmt.Printf("%s %s\n", ansi(fmt.Sprintf("%d", linesLen-1), dim), ansi(prevWrittenLine, dim))
+	fmt.Printf("%s %s\n", ansi(fmt.Sprintf("%d", linesLen), dim), ansi(lastWrittenLine, red))
+}
