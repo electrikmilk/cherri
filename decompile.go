@@ -154,6 +154,12 @@ func decompileActions() {
 				continue
 			}
 
+			if matchedAction.mac {
+				var saveCode = code.String()
+				code.Reset()
+				code.WriteString(fmt.Sprintf("#define mac true\n%s", saveCode))
+			}
+
 			var isVariableValue = false
 			var actionCallCode strings.Builder
 			if customOutputName, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
