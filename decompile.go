@@ -145,6 +145,33 @@ func decompileActions() {
 			case startStatement:
 				newCodeLine("if ")
 				code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
+
+				code.WriteRune(' ')
+
+				makeConditions()
+				var conditionInt = int(action.WFWorkflowActionParameters["WFCondition"].(uint64))
+				var conditionString = strconv.Itoa(conditionInt)
+				var conditionalOperator string
+				for operator, cond := range conditions {
+					if cond == conditionString {
+						conditionalOperator = string(operator)
+					}
+				}
+				if conditionalOperator == "" {
+					decompError(fmt.Sprintf("Invalid conditional %s", conditionString), action)
+				}
+				code.WriteString(conditionalOperator)
+				code.WriteRune(' ')
+
+				if _, found := action.WFWorkflowActionParameters["WFNumberValue"]; found {
+					var numberValue, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberValue"].(string))
+					handle(convErr)
+					code.WriteString(decompValue(numberValue))
+				} else {
+					var decomp = decompValue(action.WFWorkflowActionParameters["WFConditionalActionString"])
+					code.WriteString(decomp)
+				}
+
 				code.WriteString(" {\n")
 			case statementPart:
 				newCodeLine("} else ")
