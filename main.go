@@ -375,6 +375,7 @@ type outputType int
 
 const (
 	bold      outputType = 1
+	dim       outputType = 2
 	italic    outputType = 3
 	underline outputType = 4
 	red       outputType = 31
