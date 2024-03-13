@@ -53,6 +53,15 @@ func decompile(b []byte) {
 	handle(writeErr)
 }
 
+func newCodeLine(s string, v ...any) {
+	if tabLevel > 0 {
+		for i := 0; i < tabLevel; i++ {
+			code.WriteRune('\t')
+		}
+	}
+	code.WriteString(fmt.Sprintf(s, v...))
+}
+
 func decompileIcon() {
 	var icon = data.WFWorkflowIcon
 	if icon.WFWorkflowIconStartColor != iconColor {
@@ -62,7 +71,7 @@ func decompileIcon() {
 				continue
 			}
 
-			code.WriteString(fmt.Sprintf("#define color %s\n", name))
+			newCodeLine(fmt.Sprintf("#define color %s\n", name))
 		}
 	}
 
@@ -72,7 +81,7 @@ func decompileIcon() {
 				continue
 			}
 
-			code.WriteString(fmt.Sprintf("#define glyph %s\n", name))
+			newCodeLine(fmt.Sprintf("#define glyph %s\n", name))
 		}
 	}
 
@@ -113,8 +122,7 @@ func decompileActions() {
 		case "is.workflow.actions.dictionary":
 			variableValue = decompDictionary(action.WFWorkflowActionParameters["WFItems"].(map[string]interface{}))
 		case "is.workflow.actions.setvariable":
-			code.WriteRune('@')
-			code.WriteString(action.WFWorkflowActionParameters["WFVariableName"].(string))
+			newCodeLine("@%s", action.WFWorkflowActionParameters["WFVariableName"].(string))
 
 			if variableValue != "" {
 				code.WriteString(fmt.Sprintf(" = %s", variableValue))
@@ -123,8 +131,7 @@ func decompileActions() {
 			variableValue = ""
 			code.WriteRune('\n')
 		case "is.workflow.actions.appendvariable":
-			code.WriteRune('@')
-			code.WriteString(action.WFWorkflowActionParameters["WFVariableName"].(string))
+			newCodeLine("@%s", action.WFWorkflowActionParameters["WFVariableName"].(string))
 
 			if variableValue != "" {
 				code.WriteString(fmt.Sprintf(" += %s", variableValue))
