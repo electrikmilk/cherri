@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	plists "howett.net/plist"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -48,7 +49,8 @@ func decompile(b []byte) {
 	decompileIcon()
 	decompileActions()
 
-	fmt.Println(code.String())
+	var writeErr = os.WriteFile(basename+"_decompiled.cherri", []byte(code.String()), 0600)
+	handle(writeErr)
 }
 
 func decompileIcon() {

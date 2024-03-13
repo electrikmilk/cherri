@@ -53,7 +53,7 @@ func downloadShortcut() []byte {
 	handle(decodeErr)
 
 	var downloadURL = record.Fields.Shortcut.Value.DownloadURL
-	filename = record.Fields.Name.Value
+	basename = record.Fields.Name.Value
 	record = iCloudRecord{}
 
 	fmt.Println("Downloading Shortcut...")
@@ -80,9 +80,10 @@ func importShortcut() []byte {
 	var segments = strings.Split(importPath, "/")
 	filename = segments[len(segments)-1]
 	var nameSegments = strings.Split(filename, ".")
+	basename = nameSegments[0]
 	var extension = nameSegments[len(nameSegments)-1]
-	if extension != "shortcut" {
-		exit(fmt.Sprintf("import: File is not a Shortcut."))
+	if extension != "shortcut" && extension != "plist" {
+		exit("import: File is not a Shortcut or property list file.")
 	}
 
 	var b, readErr = os.ReadFile(importPath)
