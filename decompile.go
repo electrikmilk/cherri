@@ -326,7 +326,6 @@ func decompValue(value any) string {
 	if value == nil {
 		return ""
 	}
-
 	var valueType = reflect.TypeOf(value).String()
 	switch valueType {
 	case "map[string]interface {}":
@@ -339,22 +338,48 @@ func decompValue(value any) string {
 }
 
 func decompValueObject(value map[string]interface{}) string {
-	if value["Type"] == "Variable" {
-		value = value["Variable"].(map[string]interface{})
+	if v, found := value["Value"]; found {
+		if reflect.TypeOf(v).String() == "map[string]interface {}" {
+			value = value["Value"].(map[string]interface{})
+		}
 	}
 
-	var valueType = reflect.TypeOf(value["Value"]).String()
+	switch value["Type"] {
+	case "Variable":
+		if _, found := value["VariableName"]; found {
+			return value["VariableName"].(string)
+		}
+
+		var variableValue = value["Variable"].(map[string]interface{})
+		return decompValue(variableValue["Value"])
+	default:
+		return decompObjectValue(value)
+	}
+}
+
+func decompObjectValue(value any) string {
+	var valueType = reflect.TypeOf(value).String()
 	switch valueType {
 	case "map[string]interface {}":
+		var Value = value.(map[string]interface{})
+
 		var attachmentString string
-		var Value = value["Value"].(map[string]interface{})
+		if Value["Value"] != nil {
+			if reflect.TypeOf(Value["Value"]).String() != "map[string]interface {}" {
+				return fmt.Sprintf("%v", value)
+			}
+			Value = Value["Value"].(map[string]interface{})
+		}
+
 		if _, found := Value["string"]; found {
 			attachmentString = Value["string"].(string)
 		}
 
-		if _, found := Value["attachmentsByRange"]; found {
-			for attachmentRange, a := range Value["attachmentsByRange"].(map[string]interface{}) {
-				var position, convErr = strconv.Atoi(strings.TrimPrefix(strings.Split(attachmentRange, ",")[0], "{"))
+		if attachments, found := Value["attachmentsByRange"]; found {
+			for attachmentRange, a := range attachments.(map[string]interface{}) {
+				var attachmentRanges = strings.Split(attachmentRange, ",")
+				var attachmentPosition = strings.TrimPrefix(attachmentRanges[0], "{")
+				var position, convErr = strconv.Atoi(attachmentPosition)
 				handle(convErr)
 
 				var attachment = a.(map[string]interface{})
@@ -369,7 +394,7 @@ func decompValueObject(value map[string]interface{}) string {
 
 		return attachmentString
 	default:
-		return fmt.Sprintf("%v", value["Value"])
+		return fmt.Sprintf("%v", value)
 	}
 }
 
