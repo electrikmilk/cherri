@@ -880,6 +880,9 @@ func makeDictionary(value interface{}) (dictItems []plistData) {
 
 // dictionaryValue creates an inner dictionary value.
 func dictionaryValue(key string, value any) plistData {
+	if value == nil {
+		value = ""
+	}
 	var itemType dictDataType
 	var serializedType string
 	var wfValue = plistData{
