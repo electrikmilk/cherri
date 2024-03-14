@@ -189,7 +189,7 @@ func matchAction(action *ShortcutAction) {
 	}
 
 	var actionCallStart = fmt.Sprintf("%s(", matchedIdentifier)
-	if !isConstant && currentVariableValue == "" {
+	if isConstant || !isVariableValue {
 		newCodeLine(actionCallStart)
 	} else {
 		actionCallCode.WriteString(actionCallStart)
