@@ -101,12 +101,13 @@ func mapVariables() {
 	}
 }
 
+var currentVariableValue string
+
 func decompileActions() {
-	var variableValue string
 	for _, action := range data.WFWorkflowActions {
 		switch action.WFWorkflowActionIdentifier {
 		case "is.workflow.actions.gettext":
-			variableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
+			currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 		case "is.workflow.actions.number":
 			var value = action.WFWorkflowActionParameters["WFNumberActionNumber"]
 			if reflect.TypeOf(value).String() == dictType {
@@ -118,146 +119,156 @@ func decompileActions() {
 				number, convErr = strconv.Atoi(value.(string))
 				handle(convErr)
 			}
-			variableValue = decompValue(number)
+			currentVariableValue = decompValue(number)
 		case "is.workflow.actions.dictionary":
-			variableValue = decompDictionary(action.WFWorkflowActionParameters["WFItems"].(map[string]interface{}))
-		case "is.workflow.actions.setvariable":
-			newCodeLine("@%s", action.WFWorkflowActionParameters["WFVariableName"].(string))
-
-			if variableValue != "" {
-				code.WriteString(fmt.Sprintf(" = %s", variableValue))
-			}
-
-			variableValue = ""
-			code.WriteRune('\n')
-		case "is.workflow.actions.appendvariable":
-			newCodeLine("@%s", action.WFWorkflowActionParameters["WFVariableName"].(string))
-
-			if variableValue != "" {
-				code.WriteString(fmt.Sprintf(" += %s", variableValue))
-			}
-
-			variableValue = ""
-			code.WriteRune('\n')
+			currentVariableValue = decompDictionary(action.WFWorkflowActionParameters["WFItems"].(map[string]interface{}))
+		case "is.workflow.actions.setvariable", "is.workflow.actions.appendvariable":
+			decompVariable(&action)
 		case "is.workflow.actions.conditional":
-			var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
-			switch controlFlowMode {
-			case startStatement:
-				if tabLevel == 0 {
-					newCodeLine("\nif ")
-				} else {
-					newCodeLine("if ")
-				}
-
-				code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
-
-				code.WriteRune(' ')
-
-				makeConditions()
-				var conditionInt = int(action.WFWorkflowActionParameters["WFCondition"].(uint64))
-				var conditionString = strconv.Itoa(conditionInt)
-				var conditionalOperator string
-				for operator, cond := range conditions {
-					if cond == conditionString {
-						conditionalOperator = string(operator)
-					}
-				}
-				if conditionalOperator == "" {
-					decompError(fmt.Sprintf("Invalid conditional %s", conditionString), action)
-				}
-				code.WriteString(conditionalOperator)
-				code.WriteRune(' ')
-
-				if _, found := action.WFWorkflowActionParameters["WFNumberValue"]; found {
-					var numberValue, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberValue"].(string))
-					handle(convErr)
-					code.WriteString(decompValue(numberValue))
-				} else {
-					code.WriteString(decompValue(action.WFWorkflowActionParameters["WFConditionalActionString"]))
-				}
-
-				code.WriteString(" {\n")
-				tabLevel++
-			case statementPart:
-				tabLevel--
-				newCodeLine("} else {\n")
-				tabLevel++
-			case endStatement:
-				tabLevel--
-				newCodeLine("}\n")
-			}
+			decompConditional(&action)
 		default:
-			var matchedAction actionDefinition
-			var matchedIdentifier string
-			for identifier, definition := range actions {
-				var shortcutsIdentifier = "is.workflow.actions."
-				if definition.identifier != "" {
-					shortcutsIdentifier += definition.identifier
-				} else {
-					shortcutsIdentifier += identifier
-				}
-				if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
-					matchedIdentifier = identifier
-					matchedAction = *definition
+			matchAction(&action)
+		}
+	}
+}
 
-					if value, found := action.WFWorkflowActionParameters["WFAlertActionCancelButtonShown"]; found {
-						if value == false {
-							matchedIdentifier = "alert"
-						}
-					}
-					break
-				}
-			}
-			if matchedIdentifier == "" {
-				continue
-			}
+func decompVariable(action *ShortcutAction) {
+	newCodeLine("@%s", action.WFWorkflowActionParameters["WFVariableName"].(string))
 
-			if matchedAction.mac {
-				var saveCode = code.String()
-				code.Reset()
-				code.WriteString(fmt.Sprintf("#define mac true\n%s", saveCode))
-			}
+	if currentVariableValue != "" {
+		code.WriteRune(' ')
+		if action.WFWorkflowActionIdentifier == "is.workflow.actions.appendvariable" {
+			code.WriteString("+=")
+		} else {
+			code.WriteString("=")
+		}
 
-			var isVariableValue = false
-			var actionCallCode strings.Builder
-			if customOutputName, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
-				if _, foundVar := variables[customOutputName.(string)]; !foundVar {
-					newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
-				} else {
-					isVariableValue = true
-				}
-			}
-			var actionCallStart = fmt.Sprintf("%s(", matchedIdentifier)
-			if isVariableValue {
-				actionCallCode.WriteString(actionCallStart)
-			} else {
-				newCodeLine(actionCallStart)
-			}
+		code.WriteString(fmt.Sprintf(" = %s", currentVariableValue))
+	}
 
-			var matchedParamsSize = len(matchedAction.parameters)
-			for i, param := range matchedAction.parameters {
-				if param.key == "" {
-					// TODO: Run make functions
-					continue
-				}
-				if value, found := action.WFWorkflowActionParameters[param.key]; found {
-					if i != 0 && matchedParamsSize != 1 && matchedParamsSize > i {
-						actionCallCode.WriteRune(',')
-					}
+	currentVariableValue = ""
+	code.WriteRune('\n')
+}
 
-					var dValue = decompValue(value)
-					actionCallCode.WriteString(dValue)
+func matchAction(action *ShortcutAction) {
+	var matchedAction actionDefinition
+	var matchedIdentifier string
+	for identifier, definition := range actions {
+		var shortcutsIdentifier = "is.workflow.actions."
+		if definition.identifier != "" {
+			shortcutsIdentifier += definition.identifier
+		} else {
+			shortcutsIdentifier += identifier
+		}
+		if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
+			matchedIdentifier = identifier
+			matchedAction = *definition
+
+			if value, found := action.WFWorkflowActionParameters["WFAlertActionCancelButtonShown"]; found {
+				if value == false {
+					matchedIdentifier = "alert"
 				}
 			}
-			actionCallCode.WriteString(")")
+			break
+		}
+	}
+	if matchedIdentifier == "" {
+		return
+	}
 
-			if isVariableValue {
-				variableValue = actionCallCode.String()
-			} else {
-				code.WriteString(actionCallCode.String())
-				code.WriteRune('\n')
+	if matchedAction.mac {
+		var saveCode = code.String()
+		code.Reset()
+		code.WriteString(fmt.Sprintf("#define mac true\n%s", saveCode))
+	}
+
+	var isVariableValue = false
+	var actionCallCode strings.Builder
+	if customOutputName, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
+		if _, foundVar := variables[customOutputName.(string)]; !foundVar {
+			newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
+		} else {
+			isVariableValue = true
+		}
+	}
+	var actionCallStart = fmt.Sprintf("%s(", matchedIdentifier)
+	if isVariableValue {
+		actionCallCode.WriteString(actionCallStart)
+	} else {
+		newCodeLine(actionCallStart)
+	}
+
+	var matchedParamsSize = len(matchedAction.parameters)
+	for i, param := range matchedAction.parameters {
+		if param.key == "" {
+			// TODO: Run make functions
+			continue
+		}
+		if value, found := action.WFWorkflowActionParameters[param.key]; found {
+			if i != 0 && matchedParamsSize != 1 && matchedParamsSize > i {
+				actionCallCode.WriteRune(',')
+			}
+
+			var dValue = decompValue(value)
+			actionCallCode.WriteString(dValue)
+		}
+	}
+	actionCallCode.WriteString(")")
+
+	if isVariableValue {
+		currentVariableValue = actionCallCode.String()
+	} else {
+		code.WriteString(actionCallCode.String())
+		code.WriteRune('\n')
+	}
+}
+
+func decompConditional(action *ShortcutAction) {
+	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
+	switch controlFlowMode {
+	case startStatement:
+		if tabLevel == 0 {
+			newCodeLine("\nif ")
+		} else {
+			newCodeLine("if ")
+		}
+
+		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
+
+		code.WriteRune(' ')
+
+		makeConditions()
+		var conditionInt = int(action.WFWorkflowActionParameters["WFCondition"].(uint64))
+		var conditionString = strconv.Itoa(conditionInt)
+		var conditionalOperator string
+		for operator, cond := range conditions {
+			if cond == conditionString {
+				conditionalOperator = string(operator)
 			}
 		}
+		if conditionalOperator == "" {
+			decompError(fmt.Sprintf("Invalid conditional %s", conditionString), action)
+		}
+		code.WriteString(conditionalOperator)
+		code.WriteRune(' ')
+
+		if _, found := action.WFWorkflowActionParameters["WFNumberValue"]; found {
+			var numberValue, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberValue"].(string))
+			handle(convErr)
+			code.WriteString(decompValue(numberValue))
+		} else {
+			code.WriteString(decompValue(action.WFWorkflowActionParameters["WFConditionalActionString"]))
+		}
+
+		code.WriteString(" {\n")
+		tabLevel++
+	case statementPart:
+		tabLevel--
+		newCodeLine("} else {\n")
+		tabLevel++
+	case endStatement:
+		tabLevel--
+		newCodeLine("}\n")
 	}
 }
 
@@ -413,7 +424,7 @@ func decompObjectValue(value any) string {
 	}
 }
 
-func decompError(message string, action ShortcutAction) {
+func decompError(message string, action *ShortcutAction) {
 	fmt.Print(ansi("[Decompilation Error]\n\n", red, bold))
 
 	fmt.Println(ansi(fmt.Sprintf("%s\n", message), red))
