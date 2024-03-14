@@ -171,7 +171,7 @@ func decompAction(action *ShortcutAction) {
 	}
 
 	var actionCallStart = fmt.Sprintf("%s(", matchedIdentifier)
-	if isConstant || !isVariableValue {
+	if !isConstant && !isVariableValue {
 		newCodeLine(actionCallStart)
 	} else {
 		actionCallCode.WriteString(actionCallStart)
@@ -206,8 +206,8 @@ func decompAction(action *ShortcutAction) {
 func matchAction(action *ShortcutAction) (identifier string, definition actionDefinition) {
 	for ident, def := range actions {
 		var shortcutsIdentifier = "is.workflow.actions."
-		if definition.identifier != "" {
-			shortcutsIdentifier += definition.identifier
+		if def.identifier != "" {
+			shortcutsIdentifier += def.identifier
 		} else {
 			shortcutsIdentifier += ident
 		}
