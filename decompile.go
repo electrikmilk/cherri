@@ -143,7 +143,12 @@ func decompileActions() {
 			var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 			switch controlFlowMode {
 			case startStatement:
-				newCodeLine("\nif ")
+				if tabLevel == 0 {
+					newCodeLine("\nif ")
+				} else {
+					newCodeLine("if ")
+				}
+
 				code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
 
 				code.WriteRune(' ')
