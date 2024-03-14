@@ -180,13 +180,11 @@ func decompileActions() {
 				tabLevel++
 			case statementPart:
 				tabLevel--
-				newCodeLine("} else ")
-				code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
-				code.WriteString(" {\n")
+				newCodeLine("} else {\n")
 				tabLevel++
 			case endStatement:
-				code.WriteString("}\n")
 				tabLevel--
+				newCodeLine("}\n")
 			}
 		default:
 			var matchedAction actionDefinition
