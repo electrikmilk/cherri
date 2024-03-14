@@ -128,6 +128,8 @@ func decompileActions() {
 			decompConditional(&action)
 		case "is.workflow.actions.repeat.count":
 			decompRepeat(&action)
+		case "is.workflow.actions.repeat.each":
+			decompFor(&action)
 		default:
 			matchAction(&action)
 		}
@@ -222,7 +224,6 @@ func decompVariable(action *ShortcutAction) {
 	} else {
 		var decompInput = decompValue(action.WFWorkflowActionParameters["WFInput"])
 		if decompInput != "" {
-			fmt.Println("WFInput", action.WFWorkflowActionParameters["WFInput"])
 			code.WriteString(fmt.Sprintf(" = %s", decompInput))
 		}
 	}
@@ -244,6 +245,28 @@ func decompRepeat(action *ShortcutAction) {
 		code.WriteString("_ for ")
 
 		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFRepeatCount"]))
+
+		code.WriteString(" {\n")
+		tabLevel++
+	case endStatement:
+		tabLevel--
+		newCodeLine("}\n")
+	}
+}
+
+func decompFor(action *ShortcutAction) {
+	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
+	switch controlFlowMode {
+	case startStatement:
+		if tabLevel == 0 {
+			newCodeLine("\nfor ")
+		} else {
+			newCodeLine("for ")
+		}
+
+		code.WriteString("_ in ")
+
+		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
 
 		code.WriteString(" {\n")
 		tabLevel++
