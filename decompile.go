@@ -144,6 +144,8 @@ func decompileActions() {
 	}
 }
 
+var macDefinition bool
+
 func matchAction(action *ShortcutAction) {
 	var matchedAction actionDefinition
 	var matchedIdentifier string
@@ -170,10 +172,11 @@ func matchAction(action *ShortcutAction) {
 		return
 	}
 
-	if matchedAction.mac {
+	if matchedAction.mac && !macDefinition {
 		var saveCode = code.String()
 		code.Reset()
 		code.WriteString(fmt.Sprintf("#define mac true\n%s", saveCode))
+		macDefinition = true
 	}
 
 	var isVariableValue = false
