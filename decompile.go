@@ -112,27 +112,19 @@ func decompileActions() {
 	for _, action := range data.WFWorkflowActions {
 		switch action.WFWorkflowActionIdentifier {
 		case "is.workflow.actions.gettext":
-			currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
-		case "is.workflow.actions.number":
-			var value = action.WFWorkflowActionParameters["WFNumberActionNumber"]
-			if reflect.TypeOf(value).String() == dictType {
-				var mapValue = value.(map[string]interface{})
-				var Value = mapValue["Value"].(map[string]interface{})
-				value = decompValue(value)
-
-				if Value["Type"] == "ActionOutput" {
-					currentVariableValue = value.(string)
-				}
+			if reflect.TypeOf(action.WFWorkflowActionParameters["WFTextActionText"]).String() == "string" {
+				currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 				break
 			}
-			var number int
-			if value != "" {
-				var convErr error
-				number, convErr = strconv.Atoi(value.(string))
-				handle(convErr)
-			}
 
-			currentVariableValue = decompValue(number)
+			var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
+			if _, found := variables[customOutputName]; !found {
+				newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
+				code.WriteString(decompValue(action.WFWorkflowActionParameters["WFTextActionText"]))
+				code.WriteRune('\n')
+			}
+		case "is.workflow.actions.number":
+			decompNumberValue(&action)
 		case "is.workflow.actions.dictionary":
 			currentVariableValue = decompDictionary(action.WFWorkflowActionParameters["WFItems"].(map[string]interface{}))
 		case "is.workflow.actions.setvariable", "is.workflow.actions.appendvariable":
@@ -229,20 +221,55 @@ func matchAction(action *ShortcutAction) {
 	}
 }
 
+func decompNumberValue(action *ShortcutAction) {
+	var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
+	if _, found := variables[customOutputName]; !found {
+		matchAction(action)
+		return
+	}
+
+	var value = action.WFWorkflowActionParameters["WFNumberActionNumber"]
+	if reflect.TypeOf(value).String() == dictType {
+		var mapValue = value.(map[string]interface{})
+		var Value = mapValue["Value"].(map[string]interface{})
+		value = decompValue(value)
+
+		if Value["Type"] == "ActionOutput" {
+			currentVariableValue = value.(string)
+		}
+		return
+	}
+
+	var number int
+	if value != "" {
+		var convErr error
+		number, convErr = strconv.Atoi(value.(string))
+		handle(convErr)
+	}
+	currentVariableValue = decompValue(number)
+}
+
 func decompVariable(action *ShortcutAction) {
 	newCodeLine("@%s", action.WFWorkflowActionParameters["WFVariableName"].(string))
 
 	if currentVariableValue != "" {
 		code.WriteRune(' ')
 		if action.WFWorkflowActionIdentifier == "is.workflow.actions.appendvariable" {
-			code.WriteString("+=")
+			code.WriteString("+= ")
 		} else {
-			code.WriteRune('=')
+			code.WriteString("= ")
 		}
 
-		code.WriteString(fmt.Sprintf(" = %s", currentVariableValue))
+		code.WriteString(currentVariableValue)
 	} else {
 		var decompInput = decompValue(action.WFWorkflowActionParameters["WFInput"])
+		var wfInput = action.WFWorkflowActionParameters["WFInput"]
+		if reflect.TypeOf(wfInput).String() == dictType {
+			var Value = wfInput.(map[string]interface{})["Value"].(map[string]interface{})
+			if _, found := Value["OutputName"]; found {
+				decompInput = ""
+			}
+		}
 		if decompInput != "" {
 			code.WriteString(fmt.Sprintf(" = %s", decompInput))
 		}
@@ -442,7 +469,7 @@ func decompValue(value any) string {
 func decompValueObject(value map[string]interface{}) string {
 	if v, found := value["Value"]; found {
 		if reflect.TypeOf(v).String() == "map[string]interface {}" {
-			value = value["Value"].(map[string]interface{})
+			value = v.(map[string]interface{})
 		}
 	}
 
@@ -491,7 +518,13 @@ func decompObjectValue(value any) string {
 				handle(convErr)
 
 				var attachment = a.(map[string]interface{})
-				var variableName = attachment["VariableName"]
+				var variableName string
+				if _, found := attachment["OutputName"]; found {
+					variableName = attachment["OutputName"].(string)
+				} else {
+					variableName = attachment["VariableName"].(string)
+				}
+
 				var chars = strings.Split(attachmentString, "")
 				chars[position] = fmt.Sprintf("{%s}", variableName)
 				attachmentString = strings.Join(chars, "")
