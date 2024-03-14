@@ -63,6 +63,7 @@ func newCodeLine(s string, v ...any) {
 }
 
 func decompileIcon() {
+	var hasDefinitions bool
 	var icon = data.WFWorkflowIcon
 	if icon.WFWorkflowIconStartColor != iconColor {
 		makeColors()
@@ -73,6 +74,7 @@ func decompileIcon() {
 
 			newCodeLine(fmt.Sprintf("#define color %s\n", name))
 		}
+		hasDefinitions = true
 	}
 
 	if icon.WFWorkflowIconGlyphNumber != iconGlyph {
@@ -83,9 +85,12 @@ func decompileIcon() {
 
 			newCodeLine(fmt.Sprintf("#define glyph %s\n", name))
 		}
+		hasDefinitions = true
 	}
 
-	code.WriteRune('\n')
+	if hasDefinitions {
+		code.WriteRune('\n')
+	}
 }
 
 func mapVariables() {
