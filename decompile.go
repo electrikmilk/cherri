@@ -284,11 +284,8 @@ func decompConditional(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		newCodeLine("if ")
-		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
-		code.WriteRune(' ')
-
 		makeConditions()
+
 		var conditionInt = int(action.WFWorkflowActionParameters["WFCondition"].(uint64))
 		var conditionString = strconv.Itoa(conditionInt)
 		var conditionalOperator string
@@ -300,8 +297,20 @@ func decompConditional(action *ShortcutAction) {
 		if conditionalOperator == "" {
 			decompError(fmt.Sprintf("Invalid conditional %s", conditionString), action)
 		}
-		code.WriteString(conditionalOperator)
-		code.WriteRune(' ')
+
+		newCodeLine("if ")
+
+		if conditionalOperator == "!value" {
+			code.WriteRune('!')
+		}
+
+		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
+
+		if conditionalOperator != "value" && conditionalOperator != "!value" {
+			code.WriteRune(' ')
+			code.WriteString(conditionalOperator)
+			code.WriteRune(' ')
+		}
 
 		if _, found := action.WFWorkflowActionParameters["WFNumberValue"]; found {
 			var numberValue, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberValue"].(string))
