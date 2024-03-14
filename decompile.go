@@ -431,6 +431,8 @@ func decompValueObject(value map[string]interface{}) string {
 
 		var variableValue = value["Variable"].(map[string]interface{})
 		return decompValue(variableValue["Value"])
+	case "ExtensionInput":
+		return "ShortcutInput"
 	default:
 		return decompObjectValue(value)
 	}
