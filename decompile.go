@@ -169,19 +169,22 @@ func matchAction(action *ShortcutAction) {
 	}
 
 	var isVariableValue = false
+	var isConstant = false
 	var actionCallCode strings.Builder
 	if customOutputName, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
 		if _, foundVar := variables[customOutputName.(string)]; !foundVar {
 			newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
+			isConstant = true
 		} else {
 			isVariableValue = true
 		}
 	}
+
 	var actionCallStart = fmt.Sprintf("%s(", matchedIdentifier)
-	if isVariableValue {
-		actionCallCode.WriteString(actionCallStart)
-	} else {
+	if !isConstant && currentVariableValue == "" {
 		newCodeLine(actionCallStart)
+	} else {
+		actionCallCode.WriteString(actionCallStart)
 	}
 
 	var matchedParamsSize = len(matchedAction.parameters)
@@ -206,6 +209,7 @@ func matchAction(action *ShortcutAction) {
 	} else {
 		code.WriteString(actionCallCode.String())
 		code.WriteRune('\n')
+		currentVariableValue = ""
 	}
 }
 
@@ -280,14 +284,8 @@ func decompConditional(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		if tabLevel == 0 {
-			newCodeLine("\nif ")
-		} else {
-			newCodeLine("if ")
-		}
-
+		newCodeLine("if ")
 		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
-
 		code.WriteRune(' ')
 
 		makeConditions()
