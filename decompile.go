@@ -111,7 +111,14 @@ func decompileActions() {
 		case "is.workflow.actions.number":
 			var value = action.WFWorkflowActionParameters["WFNumberActionNumber"]
 			if reflect.TypeOf(value).String() == dictType {
+				var mapValue = value.(map[string]interface{})
+				var Value = mapValue["Value"].(map[string]interface{})
 				value = decompValue(value)
+
+				if Value["Type"] == "ActionOutput" {
+					currentVariableValue = value.(string)
+				}
+				break
 			}
 			var number int
 			if value != "" {
@@ -119,6 +126,7 @@ func decompileActions() {
 				number, convErr = strconv.Atoi(value.(string))
 				handle(convErr)
 			}
+
 			currentVariableValue = decompValue(number)
 		case "is.workflow.actions.dictionary":
 			currentVariableValue = decompDictionary(action.WFWorkflowActionParameters["WFItems"].(map[string]interface{}))
@@ -440,6 +448,8 @@ func decompValueObject(value map[string]interface{}) string {
 
 		var variableValue = value["Variable"].(map[string]interface{})
 		return decompValue(variableValue["Value"])
+	case "ActionOutput":
+		return value["OutputName"].(string)
 	case "ExtensionInput":
 		return "ShortcutInput"
 	default:
