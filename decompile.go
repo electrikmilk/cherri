@@ -192,7 +192,12 @@ func decompileActions() {
 			var matchedAction actionDefinition
 			var matchedIdentifier string
 			for identifier, definition := range actions {
-				var shortcutsIdentifier = "is.workflow.actions." + definition.identifier
+				var shortcutsIdentifier = "is.workflow.actions."
+				if definition.identifier != "" {
+					shortcutsIdentifier += definition.identifier
+				} else {
+					shortcutsIdentifier += identifier
+				}
 				if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
 					matchedIdentifier = identifier
 					matchedAction = *definition
@@ -205,7 +210,7 @@ func decompileActions() {
 					break
 				}
 			}
-			if matchedAction.identifier == "" {
+			if matchedIdentifier == "" {
 				continue
 			}
 
