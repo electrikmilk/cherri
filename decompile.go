@@ -168,17 +168,20 @@ func decompileActions() {
 					handle(convErr)
 					code.WriteString(decompValue(numberValue))
 				} else {
-					var decomp = decompValue(action.WFWorkflowActionParameters["WFConditionalActionString"])
-					code.WriteString(decomp)
+					code.WriteString(decompValue(action.WFWorkflowActionParameters["WFConditionalActionString"]))
 				}
 
 				code.WriteString(" {\n")
+				tabLevel++
 			case statementPart:
+				tabLevel--
 				newCodeLine("} else ")
 				code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
 				code.WriteString(" {\n")
+				tabLevel++
 			case endStatement:
 				code.WriteString("}\n")
+				tabLevel--
 			}
 		default:
 			var matchedAction actionDefinition
@@ -211,12 +214,17 @@ func decompileActions() {
 			var actionCallCode strings.Builder
 			if customOutputName, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
 				if _, foundVar := variables[customOutputName.(string)]; !foundVar {
-					code.WriteString(fmt.Sprintf("const %s = ", customOutputName))
+					newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
 				} else {
 					isVariableValue = true
 				}
 			}
-			actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
+			var actionCallStart = fmt.Sprintf("%s(", matchedIdentifier)
+			if isVariableValue {
+				actionCallCode.WriteString(actionCallStart)
+			} else {
+				newCodeLine(actionCallStart)
+			}
 
 			var matchedParamsSize = len(matchedAction.parameters)
 			for i, param := range matchedAction.parameters {
