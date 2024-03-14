@@ -112,8 +112,8 @@ func decompileActions() {
 	for _, action := range data.WFWorkflowActions {
 		switch action.WFWorkflowActionIdentifier {
 		case "is.workflow.actions.gettext":
+			currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 			if reflect.TypeOf(action.WFWorkflowActionParameters["WFTextActionText"]).String() == "string" {
-				currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 				break
 			}
 
@@ -122,6 +122,8 @@ func decompileActions() {
 				newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
 				code.WriteString(decompValue(action.WFWorkflowActionParameters["WFTextActionText"]))
 				code.WriteRune('\n')
+			} else {
+				currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 			}
 		case "is.workflow.actions.number":
 			decompNumberValue(&action)
