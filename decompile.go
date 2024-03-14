@@ -307,7 +307,7 @@ func decompConditional(action *ShortcutAction) {
 			var numberValue, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberValue"].(string))
 			handle(convErr)
 			code.WriteString(decompValue(numberValue))
-		} else {
+		} else if _, foundStr := action.WFWorkflowActionParameters["WFConditionalActionString"]; foundStr {
 			code.WriteString(decompValue(action.WFWorkflowActionParameters["WFConditionalActionString"]))
 		}
 
