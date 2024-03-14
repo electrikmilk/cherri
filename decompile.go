@@ -182,7 +182,6 @@ func decompAction(action *ShortcutAction) {
 	var matchedParamsSize = len(matchedAction.parameters)
 	for i, param := range matchedAction.parameters {
 		if param.key == "" {
-			// TODO: Run make functions
 			continue
 		}
 		if value, found := action.WFWorkflowActionParameters[param.key]; found {
