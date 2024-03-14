@@ -135,6 +135,8 @@ func decompileActions() {
 			decompRepeat(&action)
 		case "is.workflow.actions.repeat.each":
 			decompFor(&action)
+		case "is.workflow.actions.choosefrommenu":
+			decompMenu(&action)
 		default:
 			decompAction(&action)
 		}
@@ -282,6 +284,25 @@ func decompVariable(action *ShortcutAction) {
 
 	currentVariableValue = ""
 	code.WriteRune('\n')
+}
+
+func decompMenu(action *ShortcutAction) {
+	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
+	switch controlFlowMode {
+	case startStatement:
+		newCodeLine("menu ")
+		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFMenuPrompt"]))
+		code.WriteString(" {\n")
+		tabLevel++
+	case statementPart:
+		newCodeLine("item ")
+		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFMenuItemAttributedTitle"]))
+		code.WriteString(":\n")
+		tabLevel++
+	case endStatement:
+		tabLevel -= 2
+		newCodeLine("}\n")
+	}
 }
 
 func decompRepeat(action *ShortcutAction) {
