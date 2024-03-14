@@ -427,11 +427,8 @@ func decompValueObject(value map[string]interface{}) string {
 	case "Variable":
 		if _, found := value["VariableName"]; found {
 			var variableName = value["VariableName"].(string)
-			if variableName == "Repeat Index" {
-				variableName = "RepeatIndex"
-			}
 
-			return variableName
+			return strings.ReplaceAll(variableName, " ", "")
 		}
 
 		var variableValue = value["Variable"].(map[string]interface{})
