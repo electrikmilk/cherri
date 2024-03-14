@@ -496,4 +496,6 @@ func decompError(message string, action *ShortcutAction) {
 	fmt.Printf("\nStopped while writing line %d:\n", linesLen)
 	fmt.Printf("%s %s\n", ansi(fmt.Sprintf("%d", linesLen-1), dim), ansi(prevWrittenLine, dim))
 	fmt.Printf("%s %s\n", ansi(fmt.Sprintf("%d", linesLen), dim), ansi(lastWrittenLine, red))
+
+	os.Exit(1)
 }
