@@ -126,28 +126,12 @@ func decompileActions() {
 			decompVariable(&action)
 		case "is.workflow.actions.conditional":
 			decompConditional(&action)
+		case "is.workflow.actions.repeat.count":
+			decompRepeat(&action)
 		default:
 			matchAction(&action)
 		}
 	}
-}
-
-func decompVariable(action *ShortcutAction) {
-	newCodeLine("@%s", action.WFWorkflowActionParameters["WFVariableName"].(string))
-
-	if currentVariableValue != "" {
-		code.WriteRune(' ')
-		if action.WFWorkflowActionIdentifier == "is.workflow.actions.appendvariable" {
-			code.WriteString("+=")
-		} else {
-			code.WriteString("=")
-		}
-
-		code.WriteString(fmt.Sprintf(" = %s", currentVariableValue))
-	}
-
-	currentVariableValue = ""
-	code.WriteRune('\n')
 }
 
 func matchAction(action *ShortcutAction) {
@@ -220,6 +204,52 @@ func matchAction(action *ShortcutAction) {
 	} else {
 		code.WriteString(actionCallCode.String())
 		code.WriteRune('\n')
+	}
+}
+
+func decompVariable(action *ShortcutAction) {
+	newCodeLine("@%s", action.WFWorkflowActionParameters["WFVariableName"].(string))
+
+	if currentVariableValue != "" {
+		code.WriteRune(' ')
+		if action.WFWorkflowActionIdentifier == "is.workflow.actions.appendvariable" {
+			code.WriteString("+=")
+		} else {
+			code.WriteRune('=')
+		}
+
+		code.WriteString(fmt.Sprintf(" = %s", currentVariableValue))
+	} else {
+		var decompInput = decompValue(action.WFWorkflowActionParameters["WFInput"])
+		if decompInput != "" {
+			fmt.Println("WFInput", action.WFWorkflowActionParameters["WFInput"])
+			code.WriteString(fmt.Sprintf(" = %s", decompInput))
+		}
+	}
+
+	currentVariableValue = ""
+	code.WriteRune('\n')
+}
+
+func decompRepeat(action *ShortcutAction) {
+	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
+	switch controlFlowMode {
+	case startStatement:
+		if tabLevel == 0 {
+			newCodeLine("\nrepeat ")
+		} else {
+			newCodeLine("repeat ")
+		}
+
+		code.WriteString("_ for ")
+
+		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFRepeatCount"]))
+
+		code.WriteString(" {\n")
+		tabLevel++
+	case endStatement:
+		tabLevel--
+		newCodeLine("}\n")
 	}
 }
 
@@ -373,7 +403,12 @@ func decompValueObject(value map[string]interface{}) string {
 	switch value["Type"] {
 	case "Variable":
 		if _, found := value["VariableName"]; found {
-			return value["VariableName"].(string)
+			var variableName = value["VariableName"].(string)
+			if variableName == "Repeat Index" {
+				variableName = "RepeatIndex"
+			}
+
+			return variableName
 		}
 
 		var variableValue = value["Variable"].(map[string]interface{})
