@@ -427,12 +427,8 @@ func decompDictionaryItems(items []interface{}) (dictionary map[string]interface
 				handle(convErr)
 			}
 		case itemTypeBool:
-			switch itemStringValue {
-			case "true":
-				itemValue = true
-			case "false":
-				itemValue = false
-			}
+			var wfValue = dictionaryItem["WFValue"].(map[string]interface{})
+			itemValue = wfValue["Value"]
 		case itemTypeText:
 			itemValue = strings.Trim(itemStringValue, "\"")
 		case itemTypeArray:
