@@ -136,35 +136,15 @@ func decompileActions() {
 		case "is.workflow.actions.repeat.each":
 			decompFor(&action)
 		default:
-			matchAction(&action)
+			decompAction(&action)
 		}
 	}
 }
 
 var macDefinition bool
 
-func matchAction(action *ShortcutAction) {
-	var matchedAction actionDefinition
-	var matchedIdentifier string
-	for identifier, definition := range actions {
-		var shortcutsIdentifier = "is.workflow.actions."
-		if definition.identifier != "" {
-			shortcutsIdentifier += definition.identifier
-		} else {
-			shortcutsIdentifier += identifier
-		}
-		if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
-			matchedIdentifier = identifier
-			matchedAction = *definition
-
-			if value, found := action.WFWorkflowActionParameters["WFAlertActionCancelButtonShown"]; found {
-				if value == false {
-					matchedIdentifier = "alert"
-				}
-			}
-			break
-		}
-	}
+func decompAction(action *ShortcutAction) {
+	var matchedIdentifier, matchedAction = matchAction(action)
 	if matchedIdentifier == "" {
 		return
 	}
@@ -219,6 +199,31 @@ func matchAction(action *ShortcutAction) {
 		code.WriteRune('\n')
 		currentVariableValue = ""
 	}
+}
+
+func matchAction(action *ShortcutAction) (identifier string, definition actionDefinition) {
+	for ident, def := range actions {
+		var shortcutsIdentifier = "is.workflow.actions."
+		if definition.identifier != "" {
+			shortcutsIdentifier += definition.identifier
+		} else {
+			shortcutsIdentifier += ident
+		}
+		if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
+			identifier = ident
+			definition = *def
+
+			if identifier == "confirm" {
+				if value, found := action.WFWorkflowActionParameters["WFAlertActionCancelButtonShown"]; found {
+					if value == false {
+						identifier = "alert"
+					}
+				}
+			}
+			break
+		}
+	}
+	return
 }
 
 func decompNumberValue(action *ShortcutAction) {
@@ -457,7 +462,7 @@ func decompValue(value any) string {
 	}
 	var valueType = reflect.TypeOf(value).String()
 	switch valueType {
-	case "map[string]interface {}":
+	case dictType:
 		return decompValueObject(value.(map[string]interface{}))
 	case stringType:
 		return fmt.Sprintf("\"%s\"", value)
@@ -468,7 +473,7 @@ func decompValue(value any) string {
 
 func decompValueObject(value map[string]interface{}) string {
 	if v, found := value["Value"]; found {
-		if reflect.TypeOf(v).String() == "map[string]interface {}" {
+		if reflect.TypeOf(v).String() == dictType {
 			value = v.(map[string]interface{})
 		}
 	}
