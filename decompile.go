@@ -46,11 +46,55 @@ func decompile(b []byte) {
 	handle(marshalErr)
 
 	mapVariables()
+	mapSplitActions()
 	decompileIcon()
 	decompileActions()
 
 	var writeErr = os.WriteFile(basename+"_decompiled.cherri", []byte(code.String()), 0600)
 	handle(writeErr)
+}
+
+// mapVariables creates a map of variables that are assigned throughout the Shortcut, so we know if an identifier is an assigned variable.
+func mapVariables() {
+	variables = make(map[string]variableValue)
+	for _, action := range data.WFWorkflowActions {
+		if action.WFWorkflowActionIdentifier != "is.workflow.actions.setvariable" && action.WFWorkflowActionIdentifier != "is.workflow.actions.appendvariable" {
+			continue
+		}
+		var varName = action.WFWorkflowActionParameters["WFVariableName"].(string)
+		if _, found := variables[varName]; !found {
+			variables[varName] = variableValue{}
+		}
+	}
+}
+
+type actionValue struct {
+	identifier string
+	definition *actionDefinition
+}
+
+var identifierMap map[string][]actionValue
+
+// mapSplitActions creates a map of actions that have been split into a few actions to reduce the number of arguments.
+func mapSplitActions() {
+	identifierMap = make(map[string][]actionValue)
+	for identifier, action := range actions {
+		if action.identifier == "" {
+			continue
+		}
+
+		identifierMap[action.identifier] = append(identifierMap[action.identifier], actionValue{
+			identifier: identifier,
+			definition: action,
+		})
+	}
+	for identifier, actions := range identifierMap {
+		if len(actions) < 2 {
+			delete(identifierMap, identifier)
+			continue
+		}
+	}
+	printIdentifierMap()
 }
 
 func newCodeLine(s string, v ...any) {
@@ -90,20 +134,6 @@ func decompileIcon() {
 
 	if hasDefinitions {
 		code.WriteRune('\n')
-	}
-}
-
-// mapVariables creates a map of variables that are assigned throughout the Shortcut, so we know if an identifier is an assigned variable.
-func mapVariables() {
-	variables = make(map[string]variableValue)
-	for _, action := range data.WFWorkflowActions {
-		if action.WFWorkflowActionIdentifier != "is.workflow.actions.setvariable" && action.WFWorkflowActionIdentifier != "is.workflow.actions.appendvariable" {
-			continue
-		}
-		var varName = action.WFWorkflowActionParameters["WFVariableName"].(string)
-		if _, found := variables[varName]; !found {
-			variables[varName] = variableValue{}
-		}
 	}
 }
 
@@ -519,6 +549,18 @@ func matchAction(action *ShortcutAction) (identifier string, definition actionDe
 		}
 	}
 	return
+}
+
+func printIdentifierMap() {
+	for identifier, actions := range identifierMap {
+		fmt.Println(identifier)
+		for _, action := range actions {
+			fmt.Print("\t")
+			setCurrentAction(action.identifier, action.definition)
+			fmt.Println(generateActionDefinition(parameterDefinition{}, false, false))
+		}
+		fmt.Print("\n")
+	}
 }
 
 func decompAction(action *ShortcutAction) {
