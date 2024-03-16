@@ -538,11 +538,26 @@ func matchAction(action *ShortcutAction) (identifier string, definition actionDe
 			identifier = ident
 			definition = *def
 
-			if identifier == "confirm" {
+			switch identifier {
+			case "confirm":
 				if value, found := action.WFWorkflowActionParameters["WFAlertActionCancelButtonShown"]; found {
 					if value == false {
 						identifier = "alert"
 					}
+				}
+			case "run":
+				var runSelfIdentifier = "runSelf"
+				if _, isSelf := action.WFWorkflowActionParameters["isSelf"]; isSelf {
+					identifier = runSelfIdentifier
+					break
+				}
+				if name, foundName := action.WFWorkflowActionParameters["workflowName"]; foundName {
+					if name == basename {
+						identifier = runSelfIdentifier
+						break
+					}
+				} else {
+					identifier = runSelfIdentifier
 				}
 			}
 			break
