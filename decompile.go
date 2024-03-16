@@ -112,23 +112,19 @@ func decompileActions() {
 	for _, action := range data.WFWorkflowActions {
 		switch action.WFWorkflowActionIdentifier {
 		case "is.workflow.actions.gettext":
-			currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
-			if reflect.TypeOf(action.WFWorkflowActionParameters["WFTextActionText"]).String() == "string" {
-				break
-			}
-
-			var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
-			if _, found := variables[customOutputName]; !found {
-				newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
-				code.WriteString(decompValue(action.WFWorkflowActionParameters["WFTextActionText"]))
-				code.WriteRune('\n')
-			} else {
-				currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
-			}
+			decompTextValue(&action)
 		case "is.workflow.actions.number":
 			decompNumberValue(&action)
 		case "is.workflow.actions.dictionary":
 			currentVariableValue = decompDictionary(action.WFWorkflowActionParameters["WFItems"].(map[string]interface{}))
+
+			var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
+			if _, found := variables[customOutputName]; !found {
+				newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
+				code.WriteString(currentVariableValue)
+				code.WriteRune('\n')
+				currentVariableValue = ""
+			}
 		case "is.workflow.actions.setvariable", "is.workflow.actions.appendvariable":
 			decompVariable(&action)
 		case "is.workflow.actions.conditional":
@@ -142,6 +138,22 @@ func decompileActions() {
 		default:
 			decompAction(&action)
 		}
+	}
+}
+
+func decompTextValue(action *ShortcutAction) {
+	currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
+	if reflect.TypeOf(action.WFWorkflowActionParameters["WFTextActionText"]).String() == "string" {
+		return
+	}
+
+	var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
+	if _, found := variables[customOutputName]; !found {
+		newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
+		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFTextActionText"]))
+		code.WriteRune('\n')
+	} else {
+		currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 	}
 }
 
@@ -455,6 +467,8 @@ func decompArray(items []interface{}) (array []interface{}) {
 		var itemValue any
 		var itemValueType = fmt.Sprintf("%d", itemInterface["WFItemType"])
 		switch dictDataType(itemValueType) {
+		case itemTypeText:
+			itemValue = strings.Trim(itemStringValue, "\"")
 		case itemTypeNumber:
 			if itemStringValue != "" {
 				var convErr error
@@ -468,6 +482,7 @@ func decompArray(items []interface{}) (array []interface{}) {
 				itemValue = false
 			}
 		default:
+			itemValue = itemStringValue
 		}
 		array = append(array, itemValue)
 	}
