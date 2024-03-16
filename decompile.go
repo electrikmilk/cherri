@@ -160,92 +160,10 @@ func decompTextValue(action *ShortcutAction) {
 
 var macDefinition bool
 
-func decompAction(action *ShortcutAction) {
-	var matchedIdentifier, matchedAction = matchAction(action)
-	if matchedIdentifier == "" {
-		return
-	}
-
-	if matchedAction.mac && !macDefinition {
-		var saveCode = code.String()
-		code.Reset()
-		code.WriteString(fmt.Sprintf("#define mac true\n%s", saveCode))
-		macDefinition = true
-	}
-
-	var isVariableValue = false
-	var isConstant = false
-	var actionCallCode strings.Builder
-	if customOutputName, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
-		if _, foundVar := variables[customOutputName.(string)]; !foundVar {
-			newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
-			isConstant = true
-		} else {
-			isVariableValue = true
-		}
-	}
-
-	var actionCallStart = fmt.Sprintf("%s(", matchedIdentifier)
-	if !isConstant && !isVariableValue {
-		newCodeLine(actionCallStart)
-	} else {
-		actionCallCode.WriteString(actionCallStart)
-	}
-
-	var matchedParamsSize = len(matchedAction.parameters)
-	for i, param := range matchedAction.parameters {
-		if param.key == "" {
-			continue
-		}
-		if value, found := action.WFWorkflowActionParameters[param.key]; found {
-			if i != 0 && matchedParamsSize != 1 && matchedParamsSize > i {
-				actionCallCode.WriteRune(',')
-			}
-
-			var dValue = decompValue(value)
-			actionCallCode.WriteString(dValue)
-		}
-	}
-	actionCallCode.WriteString(")")
-
-	if isVariableValue {
-		currentVariableValue = actionCallCode.String()
-	} else {
-		code.WriteString(actionCallCode.String())
-		code.WriteRune('\n')
-		currentVariableValue = ""
-	}
-}
-
-func matchAction(action *ShortcutAction) (identifier string, definition actionDefinition) {
-	for ident, def := range actions {
-		var shortcutsIdentifier = "is.workflow.actions."
-		if def.identifier != "" {
-			shortcutsIdentifier += def.identifier
-		} else {
-			shortcutsIdentifier += ident
-		}
-		if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
-			identifier = ident
-			definition = *def
-
-			if identifier == "confirm" {
-				if value, found := action.WFWorkflowActionParameters["WFAlertActionCancelButtonShown"]; found {
-					if value == false {
-						identifier = "alert"
-					}
-				}
-			}
-			break
-		}
-	}
-	return
-}
-
 func decompNumberValue(action *ShortcutAction) {
 	var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
 	if _, found := variables[customOutputName]; !found {
-		matchAction(action)
+		decompAction(action)
 		return
 	}
 
@@ -575,6 +493,88 @@ func decompObjectValue(value any) string {
 		return attachmentString
 	default:
 		return fmt.Sprintf("%v", value)
+	}
+}
+
+func matchAction(action *ShortcutAction) (identifier string, definition actionDefinition) {
+	for ident, def := range actions {
+		var shortcutsIdentifier = "is.workflow.actions."
+		if def.identifier != "" {
+			shortcutsIdentifier += def.identifier
+		} else {
+			shortcutsIdentifier += ident
+		}
+		if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
+			identifier = ident
+			definition = *def
+
+			if identifier == "confirm" {
+				if value, found := action.WFWorkflowActionParameters["WFAlertActionCancelButtonShown"]; found {
+					if value == false {
+						identifier = "alert"
+					}
+				}
+			}
+			break
+		}
+	}
+	return
+}
+
+func decompAction(action *ShortcutAction) {
+	var matchedIdentifier, matchedAction = matchAction(action)
+	if matchedIdentifier == "" {
+		return
+	}
+
+	if matchedAction.mac && !macDefinition {
+		var saveCode = code.String()
+		code.Reset()
+		code.WriteString(fmt.Sprintf("#define mac true\n%s", saveCode))
+		macDefinition = true
+	}
+
+	var isVariableValue = false
+	var isConstant = false
+	var actionCallCode strings.Builder
+	if customOutputName, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
+		if _, foundVar := variables[customOutputName.(string)]; !foundVar {
+			newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
+			isConstant = true
+		} else {
+			isVariableValue = true
+		}
+	}
+
+	var actionCallStart = fmt.Sprintf("%s(", matchedIdentifier)
+	if !isConstant && !isVariableValue {
+		newCodeLine(actionCallStart)
+	} else {
+		actionCallCode.WriteString(actionCallStart)
+	}
+
+	var matchedParamsSize = len(matchedAction.parameters)
+	for i, param := range matchedAction.parameters {
+		if param.key == "" {
+			continue
+		}
+		if value, found := action.WFWorkflowActionParameters[param.key]; found {
+			if i != 0 && matchedParamsSize != 1 && matchedParamsSize > i {
+				actionCallCode.WriteRune(',')
+			}
+
+			var dValue = decompValue(value)
+			actionCallCode.WriteString(dValue)
+		}
+	}
+	actionCallCode.WriteString(")")
+
+	if isVariableValue {
+		currentVariableValue = actionCallCode.String()
+	} else {
+		code.WriteString(actionCallCode.String())
+		code.WriteRune('\n')
+		currentVariableValue = ""
 	}
 }
 
