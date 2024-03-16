@@ -93,6 +93,7 @@ func decompileIcon() {
 	}
 }
 
+// mapVariables creates a map of variables that are assigned throughout the Shortcut, so we know if an identifier is an assigned variable.
 func mapVariables() {
 	variables = make(map[string]variableValue)
 	for _, action := range data.WFWorkflowActions {
