@@ -143,6 +143,8 @@ var currentVariableValue string
 func decompileActions() {
 	for _, action := range data.WFWorkflowActions {
 		switch action.WFWorkflowActionIdentifier {
+		case "is.workflow.actions.comment":
+			decompComment(&action)
 		case "is.workflow.actions.gettext":
 			decompTextValue(&action)
 		case "is.workflow.actions.number":
@@ -181,6 +183,15 @@ func checkConstantLiteral(action *ShortcutAction) {
 		code.WriteString(currentVariableValue)
 		code.WriteRune('\n')
 		currentVariableValue = ""
+	}
+}
+
+func decompComment(action *ShortcutAction) {
+	var commentText = action.WFWorkflowActionParameters["WFCommentActionText"].(string)
+	if strings.Contains(commentText, "\n") {
+		code.WriteString(fmt.Sprintf("/*\n%s\n*/\n\n", commentText))
+	} else {
+		code.WriteString(fmt.Sprintf("// %s\n\n", commentText))
 	}
 }
 
