@@ -285,7 +285,7 @@ func decompList(action *ShortcutAction) {
 
 func decompURL(action *ShortcutAction) {
 	var urlValueType = reflect.TypeOf(action.WFWorkflowActionParameters["WFURLActionURL"]).String()
-	if urlValueType == dictType {
+	if urlValueType == dictType || urlValueType == "string" {
 		currentVariableValue = fmt.Sprintf("url(%s)", decompValue(action.WFWorkflowActionParameters["WFURLActionURL"]))
 		return
 	}
