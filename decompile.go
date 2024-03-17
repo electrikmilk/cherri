@@ -233,7 +233,8 @@ func decompExpression(action *ShortcutAction) {
 }
 
 func decompVariable(action *ShortcutAction) {
-	newCodeLine("@%s", action.WFWorkflowActionParameters["WFVariableName"].(string))
+	var variableName = action.WFWorkflowActionParameters["WFVariableName"].(string)
+	newCodeLine("@%s", strings.ReplaceAll(variableName, " ", ""))
 
 	if currentVariableValue != "" {
 		code.WriteRune(' ')
@@ -534,7 +535,7 @@ func decompValueObject(value map[string]interface{}) string {
 		var variableValue = value["Variable"].(map[string]interface{})
 		return decompValue(variableValue["Value"])
 	case "ActionOutput":
-		return value["OutputName"].(string)
+		return strings.ReplaceAll(value["OutputName"].(string), " ", "")
 	case "ExtensionInput":
 		return "ShortcutInput"
 	default:
@@ -576,7 +577,7 @@ func decompObjectValue(value any) string {
 					variableName = attachment["VariableName"].(string)
 				}
 
-				attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
+				attachmentChars[position] = fmt.Sprintf("{%s}", strings.ReplaceAll(variableName, " ", ""))
 			}
 
 			attachmentString = fmt.Sprintf("\"%s\"", strings.Join(attachmentChars, ""))
@@ -691,7 +692,7 @@ func decompAction(action *ShortcutAction) {
 	var actionCallCode strings.Builder
 	if customOutputName, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
 		if _, foundVar := variables[customOutputName.(string)]; !foundVar {
-			newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
+			newCodeLine(fmt.Sprintf("const %s = ", strings.ReplaceAll(customOutputName.(string), " ", "")))
 			isConstant = true
 		} else {
 			isVariableValue = true
