@@ -268,7 +268,7 @@ func decompList(action *ShortcutAction) {
 	var listSize = len(listItems)
 	list.WriteString("list(")
 	for i, item := range listItems {
-		list.WriteString(decompValue(item.(map[string]interface{})["WFValue"]))
+		list.WriteString(decompValue(item))
 
 		if i < listSize-1 {
 			list.WriteRune(',')
