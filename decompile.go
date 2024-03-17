@@ -10,6 +10,7 @@ import (
 	plists "howett.net/plist"
 	"os"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -78,13 +79,13 @@ var identifierMap map[string][]actionValue
 // mapSplitActions creates a map of actions that have been split into a few actions to reduce the number of arguments.
 func mapSplitActions() {
 	identifierMap = make(map[string][]actionValue)
-	for _, action := range actions {
+	for identifier, action := range actions {
 		if action.identifier == "" {
 			continue
 		}
 
 		identifierMap[action.identifier] = append(identifierMap[action.identifier], actionValue{
-			identifier: "is.workflow.actions." + action.identifier,
+			identifier: identifier,
 			definition: action,
 		})
 	}
@@ -522,15 +523,16 @@ func decompObjectValue(value any) string {
 }
 
 func matchAction(action *ShortcutAction) (identifier string, definition actionDefinition) {
-	for ident, def := range actions {
-		var shortcutsIdentifier = "is.workflow.actions."
+	for call, def := range actions {
+		var ident string
 		if def.identifier != "" {
-			shortcutsIdentifier += def.identifier
+			ident = def.identifier
 		} else {
-			shortcutsIdentifier += ident
+			ident = call
 		}
+		var shortcutsIdentifier = fmt.Sprintf("is.workflow.actions.%s", ident)
 		if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
-			identifier = ident
+			identifier = call
 			definition = *def
 
 			switch identifier {
@@ -554,11 +556,55 @@ func matchAction(action *ShortcutAction) (identifier string, definition actionDe
 				} else {
 					identifier = runSelfIdentifier
 				}
+			case "outputOrClipboard", "mustOutput":
+				identifier = "output"
 			}
+
+			if splitActions, found := identifierMap[ident]; found {
+				matchSplitAction(&splitActions, action.WFWorkflowActionParameters, &identifier, &definition)
+			}
+
 			break
 		}
 	}
 	return
+}
+
+type actionMatch struct {
+	matchedParams int
+	action        actionValue
+}
+
+func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, identifier *string, definition *actionDefinition) {
+	var matches []actionMatch
+	for _, splitAction := range *splitAction {
+		var matchedParams int
+		var paramsSize = len(splitAction.definition.parameters)
+		for _, param := range splitAction.definition.parameters {
+			if param.key == "" {
+				continue
+			}
+			if _, found := parameters[param.key]; found {
+				matchedParams++
+			}
+		}
+
+		if paramsSize == matchedParams {
+			matches = append(matches, actionMatch{
+				matchedParams: matchedParams,
+				action:        splitAction,
+			})
+		}
+	}
+	if len(matches) < 2 {
+		return
+	}
+	sort.SliceStable(matches, func(i, j int) bool {
+		return matches[i].matchedParams > matches[j].matchedParams
+	})
+	var matchedAction = matches[0]
+	*identifier = matchedAction.action.identifier
+	*definition = *matchedAction.action.definition
 }
 
 func printIdentifierMap() {
