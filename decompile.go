@@ -171,7 +171,11 @@ func decompileActions() {
 	}
 }
 
-func checkConstantLiteral(customOutputName string) {
+func checkConstantLiteral(action *ShortcutAction) {
+	if _, found := action.WFWorkflowActionParameters["CustomOutputName"]; !found {
+		return
+	}
+	var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
 	if _, found := variables[customOutputName]; !found {
 		newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
 		code.WriteString(currentVariableValue)
@@ -186,7 +190,7 @@ func decompTextValue(action *ShortcutAction) {
 		return
 	}
 
-	checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
+	checkConstantLiteral(action)
 }
 
 var macDefinition bool
@@ -225,7 +229,7 @@ func decompExpression(action *ShortcutAction) {
 	var varRegex = regexp.MustCompile(`{(.*?)}`)
 	currentVariableValue = varRegex.ReplaceAllString(expression, "$1")
 
-	checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
+	checkConstantLiteral(action)
 }
 
 func decompVariable(action *ShortcutAction) {
@@ -295,7 +299,7 @@ func decompURL(action *ShortcutAction) {
 	currentVariableValue = urlAction.String()
 	urlAction.Reset()
 
-	checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
+	checkConstantLiteral(action)
 }
 
 func decompMenu(action *ShortcutAction) {
@@ -422,7 +426,7 @@ func decompDictionary(action *ShortcutAction) {
 
 	currentVariableValue = string(jsonBytes)
 
-	checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
+	checkConstantLiteral(action)
 }
 
 func decompDictionaryItems(items []interface{}) (dictionary map[string]interface{}) {
