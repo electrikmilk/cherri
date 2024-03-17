@@ -5083,7 +5083,10 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"rawAction": {
+}
+
+func rawAction() {
+	actions["rawAction"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "identifier",
@@ -5094,8 +5097,8 @@ var actions = map[string]*actionDefinition{
 				validType: Arr,
 			},
 		},
-		check: func(args []actionArgument, definition *actionDefinition) {
-			definition.appIdentifier = getArgValue(args[0]).(string)
+		check: func(args []actionArgument, _ *actionDefinition) {
+			actions["rawAction"].appIdentifier = getArgValue(args[0]).(string)
 		},
 		make: func(args []actionArgument) (params []plistData) {
 			for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
@@ -5120,7 +5123,7 @@ var actions = map[string]*actionDefinition{
 			}
 			return
 		},
-	},
+	}
 }
 
 var contactValues []plistData
