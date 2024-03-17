@@ -78,13 +78,13 @@ var identifierMap map[string][]actionValue
 // mapSplitActions creates a map of actions that have been split into a few actions to reduce the number of arguments.
 func mapSplitActions() {
 	identifierMap = make(map[string][]actionValue)
-	for identifier, action := range actions {
+	for _, action := range actions {
 		if action.identifier == "" {
 			continue
 		}
 
 		identifierMap[action.identifier] = append(identifierMap[action.identifier], actionValue{
-			identifier: identifier,
+			identifier: "is.workflow.actions." + action.identifier,
 			definition: action,
 		})
 	}
