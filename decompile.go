@@ -279,10 +279,16 @@ func decompList(action *ShortcutAction) {
 	currentVariableValue = list.String()
 	list.Reset()
 
-	checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
+	checkConstantLiteral(action)
 }
 
 func decompURL(action *ShortcutAction) {
+	var urlValueType = reflect.TypeOf(action.WFWorkflowActionParameters["WFURLActionURL"]).String()
+	if urlValueType == dictType {
+		currentVariableValue = fmt.Sprintf("url(%s)", decompValue(action.WFWorkflowActionParameters["WFURLActionURL"]))
+		return
+	}
+
 	var urlAction strings.Builder
 	var urls = action.WFWorkflowActionParameters["WFURLActionURL"].([]interface{})
 	var urlsSize = len(urls)
