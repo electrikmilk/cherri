@@ -10,6 +10,7 @@ import (
 	plists "howett.net/plist"
 	"os"
 	"reflect"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -150,6 +151,8 @@ func decompileActions() {
 		case "is.workflow.actions.dictionary":
 			currentVariableValue = decompDictionary(action.WFWorkflowActionParameters["WFItems"].(map[string]interface{}))
 			checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
+		case "is.workflow.actions.calculateexpression":
+			decompExpression(&action)
 		case "is.workflow.actions.setvariable", "is.workflow.actions.appendvariable":
 			decompVariable(&action)
 		case "is.workflow.actions.conditional":
@@ -212,6 +215,15 @@ func decompNumberValue(action *ShortcutAction) {
 		handle(convErr)
 	}
 	currentVariableValue = decompValue(number)
+}
+
+func decompExpression(action *ShortcutAction) {
+	var input = action.WFWorkflowActionParameters["Input"].(map[string]interface{})
+	var expression = strings.Trim(decompValue(input["Value"]), "\"")
+	var varRegex = regexp.MustCompile(`{(.*?)}`)
+	currentVariableValue = varRegex.ReplaceAllString(expression, "$1")
+
+	checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
 }
 
 func decompVariable(action *ShortcutAction) {
