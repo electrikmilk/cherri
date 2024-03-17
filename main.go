@@ -7,13 +7,13 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/electrikmilk/args-parser"
+	"github.com/google/uuid"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
-
-	"github.com/electrikmilk/args-parser"
-	"github.com/google/uuid"
+	"unicode"
 )
 
 var filePath string
@@ -100,9 +100,9 @@ func printActionDefinitions() {
 				switch {
 				case strings.Contains(actionIdentifier, identifier):
 					identifier = strings.ReplaceAll(actionIdentifier, identifier, ansi(identifier, red))
-				case strings.Contains(identifier, capitalized):
+				case strings.Contains(actionIdentifier, capitalized):
 					identifier = strings.ReplaceAll(actionIdentifier, capitalized, ansi(capitalized, red))
-				case strings.Contains(identifier, lowercase):
+				case strings.Contains(actionIdentifier, lowercase):
 					identifier = strings.ReplaceAll(actionIdentifier, lowercase, ansi(lowercase, red))
 				}
 				actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n", identifier, definition))
@@ -269,9 +269,9 @@ func handle(err error) {
 }
 
 func capitalize(s string) string {
-	var chars = strings.Split(s, "")
-	chars[0] = strings.ToUpper(chars[0])
-	return strings.Join(chars, "")
+	var char = s[0]
+	var after, _ = strings.CutPrefix(s, string(char))
+	return fmt.Sprintf("%c%s", unicode.ToUpper(rune(char)), after)
 }
 
 // startsWith determines if the beginning characters of `substr` match `s`.
