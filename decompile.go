@@ -193,8 +193,6 @@ func decompTextValue(action *ShortcutAction) {
 	checkConstantLiteral(action)
 }
 
-var macDefinition bool
-
 func decompNumberValue(action *ShortcutAction) {
 	var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
 	if _, found := variables[customOutputName]; !found {
@@ -678,6 +676,8 @@ func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, ide
 	*identifier = matchedAction.action.identifier
 	*definition = *matchedAction.action.definition
 }
+
+var macDefinition bool
 
 func decompAction(action *ShortcutAction) {
 	var matchedIdentifier, matchedAction = matchAction(action)
