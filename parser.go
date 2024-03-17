@@ -10,6 +10,7 @@ import (
 	"github.com/electrikmilk/args-parser"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -189,7 +190,7 @@ func reachable() {
 	}
 	var lastActionIdentifier = lastToken.value.(action).ident
 	var stoppers = []string{"stop", "output", "mustOutput", "outputOrClipboard"}
-	if contains(stoppers, lastActionIdentifier) {
+	if slices.Contains(stoppers, lastActionIdentifier) {
 		parserWarning(fmt.Sprintf("Statement appears to be unreachable or does not loop as %s() was called outside of conditional.", lastActionIdentifier))
 	}
 }

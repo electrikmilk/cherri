@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"slices"
 	"strings"
 )
 
@@ -267,7 +268,7 @@ func checkEnum(param *parameterDefinition, argument *actionArgument) {
 	if reflect.TypeOf(value).String() != stringType {
 		return
 	}
-	if !contains(param.enum, value.(string)) {
+	if !slices.Contains(param.enum, value.(string)) {
 		parserError(
 			fmt.Sprintf(
 				"Invalid argument '%s' for %s.\n\n%s",

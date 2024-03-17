@@ -268,15 +268,6 @@ func handle(err error) {
 	}
 }
 
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
 func capitalize(s string) string {
 	var chars = strings.Split(s, "")
 	chars[0] = strings.ToUpper(chars[0])
