@@ -96,7 +96,6 @@ func mapSplitActions() {
 			continue
 		}
 	}
-	printIdentifierMap()
 }
 
 func newCodeLine(s string, v ...any) {
@@ -662,18 +661,6 @@ func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, ide
 	var matchedAction = matches[0]
 	*identifier = matchedAction.action.identifier
 	*definition = *matchedAction.action.definition
-}
-
-func printIdentifierMap() {
-	for identifier, actions := range identifierMap {
-		fmt.Println(identifier)
-		for _, action := range actions {
-			fmt.Print("\t")
-			setCurrentAction(action.identifier, action.definition)
-			fmt.Println(generateActionDefinition(parameterDefinition{}, false, false))
-		}
-		fmt.Print("\n")
-	}
 }
 
 func decompAction(action *ShortcutAction) {
