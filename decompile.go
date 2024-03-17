@@ -402,14 +402,19 @@ func decompConditional(action *ShortcutAction) {
 			code.WriteRune(' ')
 			code.WriteString(conditionalOperator)
 			code.WriteRune(' ')
-		}
 
-		if _, found := action.WFWorkflowActionParameters["WFNumberValue"]; found {
-			var numberValue, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberValue"].(string))
-			handle(convErr)
-			code.WriteString(decompValue(numberValue))
-		} else if _, foundStr := action.WFWorkflowActionParameters["WFConditionalActionString"]; foundStr {
-			code.WriteString(decompValue(action.WFWorkflowActionParameters["WFConditionalActionString"]))
+			if _, found := action.WFWorkflowActionParameters["WFNumberValue"]; found {
+				var numberType = reflect.TypeOf(action.WFWorkflowActionParameters["WFNumberValue"]).Kind()
+				if numberType == reflect.Uint64 {
+					code.WriteString(decompValue(action.WFWorkflowActionParameters["WFNumberValue"]))
+				} else {
+					var numberValue, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberValue"].(string))
+					handle(convErr)
+					code.WriteString(decompValue(numberValue))
+				}
+			} else if _, foundStr := action.WFWorkflowActionParameters["WFConditionalActionString"]; foundStr {
+				code.WriteString(decompValue(action.WFWorkflowActionParameters["WFConditionalActionString"]))
+			}
 		}
 
 		code.WriteString(" {\n")
