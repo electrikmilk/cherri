@@ -150,6 +150,8 @@ func decompileActions() {
 			decompNumberValue(&action)
 		case "is.workflow.actions.dictionary":
 			decompDictionary(&action)
+		case "is.workflow.actions.list":
+			decompList(&action)
 		case "is.workflow.actions.calculateexpression":
 			decompExpression(&action)
 		case "is.workflow.actions.setvariable", "is.workflow.actions.appendvariable":
@@ -253,6 +255,26 @@ func decompVariable(action *ShortcutAction) {
 
 	currentVariableValue = ""
 	code.WriteRune('\n')
+}
+
+func decompList(action *ShortcutAction) {
+	var list strings.Builder
+	var listItems = action.WFWorkflowActionParameters["WFItems"].([]interface{})
+	var listSize = len(listItems)
+	list.WriteString("list(")
+	for i, item := range listItems {
+		list.WriteString(decompValue(item.(map[string]interface{})["WFValue"]))
+
+		if i < listSize-1 {
+			list.WriteRune(',')
+		}
+	}
+
+	list.WriteRune(')')
+	currentVariableValue = list.String()
+	list.Reset()
+
+	checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
 }
 
 func decompMenu(action *ShortcutAction) {
