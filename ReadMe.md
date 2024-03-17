@@ -66,7 +66,7 @@ on their Mac or iOS device. However, you can build the compiler for your platfor
 compiled Shortcut, so it will not run on iOS 15+ or macOS 12+. Also, note that the compiler is primarily developed and
 tested on Unix-like systems.
 
-[Read my full thoughts on this](https://github.com/electrikmilk/cherri/wiki/Why-macOS-only%3F)
+[Read my full thoughts on this](https://cherrilang.org/faq#why-macos-only)
 
 ## Why another Shortcuts language?
 
@@ -75,7 +75,7 @@ Because it's fun :)
 Some languages have been abandoned, don't work very well, or no longer work. I don't want Shortcuts languages to die.
 There should be more, not less.
 
-Plus, some stability comes with this project being on macOS and not iOS, and I'm not aware of another Shortcuts language with macOS as it's platform other than [Buttermilk](https://github.com/zachary7829/Buttermilk).
+Plus, some stability comes with this project being on macOS and not iOS, and I'm not aware of another Shortcuts language with macOS as its platform other than [Buttermilk](https://github.com/zachary7829/Buttermilk).
 
 ## Community
 
