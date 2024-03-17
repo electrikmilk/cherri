@@ -607,91 +607,6 @@ func decompObjectValue(value any) string {
 	}
 }
 
-func matchAction(action *ShortcutAction) (identifier string, definition actionDefinition) {
-	for call, def := range actions {
-		var ident string
-		if def.identifier != "" {
-			ident = def.identifier
-		} else {
-			ident = call
-		}
-		var shortcutsIdentifier = fmt.Sprintf("is.workflow.actions.%s", ident)
-		if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
-			identifier = call
-			definition = *def
-
-			switch identifier {
-			case "confirm":
-				if value, found := action.WFWorkflowActionParameters["WFAlertActionCancelButtonShown"]; found {
-					if value == false {
-						identifier = "alert"
-					}
-				}
-			case "run":
-				var runSelfIdentifier = "runSelf"
-				if _, isSelf := action.WFWorkflowActionParameters["isSelf"]; isSelf {
-					identifier = runSelfIdentifier
-					break
-				}
-				if name, foundName := action.WFWorkflowActionParameters["workflowName"]; foundName {
-					if name == basename {
-						identifier = runSelfIdentifier
-						break
-					}
-				} else {
-					identifier = runSelfIdentifier
-				}
-			case "outputOrClipboard", "mustOutput":
-				identifier = "output"
-			}
-
-			if splitActions, found := identifierMap[ident]; found {
-				matchSplitAction(&splitActions, action.WFWorkflowActionParameters, &identifier, &definition)
-			}
-
-			break
-		}
-	}
-	return
-}
-
-type actionMatch struct {
-	matchedParams int
-	action        actionValue
-}
-
-func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, identifier *string, definition *actionDefinition) {
-	var matches []actionMatch
-	for _, splitAction := range *splitAction {
-		var matchedParams int
-		var paramsSize = len(splitAction.definition.parameters)
-		for _, param := range splitAction.definition.parameters {
-			if param.key == "" {
-				continue
-			}
-			if _, found := parameters[param.key]; found {
-				matchedParams++
-			}
-		}
-
-		if paramsSize == matchedParams {
-			matches = append(matches, actionMatch{
-				matchedParams: matchedParams,
-				action:        splitAction,
-			})
-		}
-	}
-	if len(matches) < 2 {
-		return
-	}
-	sort.SliceStable(matches, func(i, j int) bool {
-		return matches[i].matchedParams > matches[j].matchedParams
-	})
-	var matchedAction = matches[0]
-	*identifier = matchedAction.action.identifier
-	*definition = *matchedAction.action.definition
-}
-
 var macDefinition bool
 
 func decompAction(action *ShortcutAction) {
@@ -748,6 +663,116 @@ func decompAction(action *ShortcutAction) {
 		code.WriteString(actionCallCode.String())
 		code.WriteRune('\n')
 		currentVariableValue = ""
+	}
+}
+
+func matchAction(action *ShortcutAction) (identifier string, definition actionDefinition) {
+	for call, def := range actions {
+		var ident string
+		if def.identifier != "" {
+			ident = def.identifier
+		} else {
+			ident = call
+		}
+		var shortcutsIdentifier = fmt.Sprintf("is.workflow.actions.%s", ident)
+		if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
+			identifier = call
+			definition = *def
+
+			switch identifier {
+			case "confirm":
+				if value, found := action.WFWorkflowActionParameters["WFAlertActionCancelButtonShown"]; found {
+					if value == false {
+						identifier = "alert"
+					}
+				}
+			case "run":
+				var runSelfIdentifier = "runSelf"
+				if _, isSelf := action.WFWorkflowActionParameters["isSelf"]; isSelf {
+					identifier = runSelfIdentifier
+					break
+				}
+				if name, foundName := action.WFWorkflowActionParameters["workflowName"]; foundName {
+					if name == basename {
+						identifier = runSelfIdentifier
+						break
+					}
+				} else {
+					identifier = runSelfIdentifier
+				}
+			case "outputOrClipboard", "mustOutput":
+				identifier = "output"
+			}
+
+			if splitActions, found := identifierMap[ident]; found {
+				matchSplitAction(&splitActions, action.WFWorkflowActionParameters, &identifier, &definition)
+			}
+
+			break
+		}
+	}
+	return
+}
+
+type actionMatch struct {
+	matchedParams int
+	action        actionValue
+}
+
+func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, identifier *string, definition *actionDefinition) {
+	var matches []actionMatch
+	for _, splitAction := range *splitAction {
+		if splitAction.definition.identifier == "getitemfromlist" {
+			matchListAction(parameters, identifier, definition)
+			return
+		}
+
+		var matchedParams int
+		var paramsSize = len(splitAction.definition.parameters)
+		for _, param := range splitAction.definition.parameters {
+			if param.key == "" {
+				continue
+			}
+			if _, found := parameters[param.key]; found {
+				matchedParams++
+			}
+		}
+
+		if paramsSize == matchedParams {
+			matches = append(matches, actionMatch{
+				matchedParams: matchedParams,
+				action:        splitAction,
+			})
+		}
+	}
+	if len(matches) < 2 {
+		return
+	}
+	sort.SliceStable(matches, func(i, j int) bool {
+		return matches[i].matchedParams > matches[j].matchedParams
+	})
+	var matchedAction = matches[0]
+	*identifier = matchedAction.action.identifier
+	*definition = *matchedAction.action.definition
+}
+
+func matchListAction(parameters map[string]any, identifier *string, definition *actionDefinition) {
+	switch parameters["WFItemSpecifier"] {
+	case "First Item":
+		*identifier = "getFirstItem"
+		definition = actions["getFirstItem"]
+	case "Last Item":
+		*identifier = "getLastItem"
+		definition = actions["getLastItem"]
+	case "Random Item":
+		*identifier = "getRandomItem"
+		definition = actions["getRandomItem"]
+	case "Item At Index":
+		*identifier = "getListItem"
+		definition = actions["getListItem"]
+	case "Items in Range":
+		*identifier = "getListItems"
+		definition = actions["getListItems"]
 	}
 }
 
