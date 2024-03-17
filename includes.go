@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/electrikmilk/args-parser"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -78,7 +79,7 @@ func parseInclude() {
 	var includePath = collectRawString()
 	lineIdx--
 
-	if contains(included, includePath) {
+	if slices.Contains(included, includePath) {
 		parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
 	}
 

@@ -10,6 +10,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -4799,14 +4800,14 @@ var actions = map[string]*actionDefinition{
 				var sortBy = getArgValue(args[0]).(string)
 				var orderBy = getArgValue(args[1]).(string)
 				if sortBy != "Random" {
-					if contains(alphabetic, sortBy) {
+					if slices.Contains(alphabetic, sortBy) {
 						switch orderBy {
 						case "asc":
 							args[1].value = "A to Z"
 						case "desc":
 							args[1].value = "Z to A"
 						}
-					} else if contains(numeric, sortBy) {
+					} else if slices.Contains(numeric, sortBy) {
 						switch orderBy {
 						case "asc":
 							args[1].value = "Biggest First"
