@@ -66,7 +66,7 @@ on their Mac or iOS device. However, you can build the compiler for your platfor
 compiled Shortcut, so it will not run on iOS 15+ or macOS 12+. Also, note that the compiler is primarily developed and
 tested on Unix-like systems.
 
-[Read my full thoughts on this](https://cherrilang.org/why-macos-only)
+[Read my full thoughts on this](https://cherrilang.org/faq#why-macos-only)
 
 ## Why another Shortcuts language?
 
