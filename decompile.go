@@ -149,8 +149,7 @@ func decompileActions() {
 		case "is.workflow.actions.number":
 			decompNumberValue(&action)
 		case "is.workflow.actions.dictionary":
-			currentVariableValue = decompDictionary(action.WFWorkflowActionParameters["WFItems"].(map[string]interface{}))
-			checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
+			decompDictionary(&action)
 		case "is.workflow.actions.calculateexpression":
 			decompExpression(&action)
 		case "is.workflow.actions.setvariable", "is.workflow.actions.appendvariable":
@@ -371,13 +370,16 @@ func decompConditional(action *ShortcutAction) {
 	}
 }
 
-func decompDictionary(value map[string]interface{}) string {
+func decompDictionary(action *ShortcutAction) {
+	var value = action.WFWorkflowActionParameters["WFItems"].(map[string]interface{})
 	var Value = value["Value"].(map[string]interface{})
 	var dictionary = decompDictionaryItems(Value["WFDictionaryFieldValueItems"].([]interface{}))
 	var jsonBytes, jsonErr = json.Marshal(dictionary)
 	handle(jsonErr)
 
-	return string(jsonBytes)
+	currentVariableValue = string(jsonBytes)
+
+	checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
 }
 
 func decompDictionaryItems(items []interface{}) (dictionary map[string]interface{}) {
