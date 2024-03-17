@@ -493,6 +493,7 @@ func decompObjectValue(value any) string {
 			attachmentString = Value["string"].(string)
 		}
 
+		var attachmentChars = strings.Split(attachmentString, "")
 		if attachments, found := Value["attachmentsByRange"]; found {
 			for attachmentRange, a := range attachments.(map[string]interface{}) {
 				var attachmentRanges = strings.Split(attachmentRange, ",")
@@ -508,12 +509,10 @@ func decompObjectValue(value any) string {
 					variableName = attachment["VariableName"].(string)
 				}
 
-				var chars = strings.Split(attachmentString, "")
-				chars[position] = fmt.Sprintf("{%s}", variableName)
-				attachmentString = strings.Join(chars, "")
+				attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
 			}
 
-			attachmentString = fmt.Sprintf("\"%s\"", attachmentString)
+			attachmentString = fmt.Sprintf("\"%s\"", strings.Join(attachmentChars, ""))
 		}
 
 		return attachmentString
