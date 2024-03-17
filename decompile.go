@@ -148,14 +148,7 @@ func decompileActions() {
 			decompNumberValue(&action)
 		case "is.workflow.actions.dictionary":
 			currentVariableValue = decompDictionary(action.WFWorkflowActionParameters["WFItems"].(map[string]interface{}))
-
-			var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
-			if _, found := variables[customOutputName]; !found {
-				newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
-				code.WriteString(currentVariableValue)
-				code.WriteRune('\n')
-				currentVariableValue = ""
-			}
+			checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
 		case "is.workflow.actions.setvariable", "is.workflow.actions.appendvariable":
 			decompVariable(&action)
 		case "is.workflow.actions.conditional":
@@ -172,20 +165,22 @@ func decompileActions() {
 	}
 }
 
+func checkConstantLiteral(customOutputName string) {
+	if _, found := variables[customOutputName]; !found {
+		newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
+		code.WriteString(currentVariableValue)
+		code.WriteRune('\n')
+		currentVariableValue = ""
+	}
+}
+
 func decompTextValue(action *ShortcutAction) {
 	currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 	if reflect.TypeOf(action.WFWorkflowActionParameters["WFTextActionText"]).String() == "string" {
 		return
 	}
 
-	var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
-	if _, found := variables[customOutputName]; !found {
-		newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
-		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFTextActionText"]))
-		code.WriteRune('\n')
-	} else {
-		currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
-	}
+	checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
 }
 
 var macDefinition bool
