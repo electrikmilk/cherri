@@ -152,6 +152,8 @@ func decompileActions() {
 			decompDictionary(&action)
 		case "is.workflow.actions.list":
 			decompList(&action)
+		case "is.workflow.actions.url":
+			decompURL(&action)
 		case "is.workflow.actions.calculateexpression":
 			decompExpression(&action)
 		case "is.workflow.actions.setvariable", "is.workflow.actions.appendvariable":
@@ -273,6 +275,26 @@ func decompList(action *ShortcutAction) {
 	list.WriteRune(')')
 	currentVariableValue = list.String()
 	list.Reset()
+
+	checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
+}
+
+func decompURL(action *ShortcutAction) {
+	var urlAction strings.Builder
+	var urls = action.WFWorkflowActionParameters["WFURLActionURL"].([]interface{})
+	var urlsSize = len(urls)
+	urlAction.WriteString("url(")
+	for i, url := range urls {
+		urlAction.WriteString(decompValue(url))
+
+		if i < urlsSize-1 {
+			urlAction.WriteRune(',')
+		}
+	}
+
+	urlAction.WriteRune(')')
+	currentVariableValue = urlAction.String()
+	urlAction.Reset()
 
 	checkConstantLiteral(action.WFWorkflowActionParameters["CustomOutputName"].(string))
 }
