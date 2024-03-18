@@ -68,7 +68,7 @@ func mapVariables() {
 		if action.WFWorkflowActionIdentifier != "is.workflow.actions.setvariable" && action.WFWorkflowActionIdentifier != "is.workflow.actions.appendvariable" {
 			continue
 		}
-		var varName = action.WFWorkflowActionParameters["WFVariableName"].(string)
+		var varName = strings.ReplaceAll(action.WFWorkflowActionParameters["WFVariableName"].(string), " ", "")
 		if _, found := variables[varName]; !found {
 			variables[varName] = variableValue{}
 		}
