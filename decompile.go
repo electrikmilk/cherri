@@ -12,6 +12,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -61,12 +62,10 @@ func decompile(b []byte) {
 	handle(writeErr)
 }
 
-var actionOutputs map[string]string
-
 // mapVariables creates a map of variables that are assigned throughout the Shortcut, so we know if an identifier is an assigned variable.
 func mapVariables() {
 	variables = make(map[string]variableValue)
-	actionOutputs = make(map[string]string)
+	uuids = make(map[string]string)
 	for _, action := range data.WFWorkflowActions {
 		if action.WFWorkflowActionIdentifier == "is.workflow.actions.setvariable" || action.WFWorkflowActionIdentifier == "is.workflow.actions.appendvariable" {
 			var varName = strings.ReplaceAll(action.WFWorkflowActionParameters["WFVariableName"].(string), " ", "")
@@ -76,29 +75,22 @@ func mapVariables() {
 			continue
 		}
 
-		if action.WFWorkflowActionIdentifier == "is.workflow.actions.conditional" && action.WFWorkflowActionParameters["WFInput"] != nil {
+		if action.WFWorkflowActionParameters["WFInput"] != nil {
 			var wfInput = action.WFWorkflowActionParameters["WFInput"].(map[string]interface{})
-			if wfInput["Type"] == "Variable" {
-				var Variable = wfInput["Variable"].(map[string]interface{})
-				var Value = Variable["Value"].(map[string]interface{})
+			if wfInput["Value"] != nil {
+				var Value = wfInput["Value"].(map[string]interface{})
 				if _, found := Value["OutputName"]; !found {
 					continue
 				}
-				if _, found := Value["Type"]; !found {
-					continue
-				}
-				if Value["Type"] != "ActionOutput" {
-					continue
-				}
-
 				if _, found := Value["OutputUUID"]; found {
 					if Value["OutputUUID"] == nil {
 						continue
 					}
 					var outputUUID = Value["OutputUUID"].(string)
-					if _, found := actionOutputs[outputUUID]; !found {
+					if _, found := uuids[outputUUID]; !found {
 						var outputName = strings.ReplaceAll(Value["OutputName"].(string), " ", "")
-						actionOutputs[outputUUID] = outputName
+						uuids[outputUUID] = checkDuplicateOutputName(outputName)
+						variables[outputName] = variableValue{}
 					}
 				}
 			}
@@ -222,8 +214,8 @@ func checkConstantLiteral(action *ShortcutAction) {
 	}
 	if _, found := action.WFWorkflowActionParameters["UUID"]; found {
 		var uuid = action.WFWorkflowActionParameters["UUID"].(string)
-		if _, found := actionOutputs[uuid]; found {
-			newCodeLine(fmt.Sprintf("const %s = ", actionOutputs[uuid]))
+		if _, found := uuids[uuid]; found {
+			newCodeLine(fmt.Sprintf("const %s = ", uuids[uuid]))
 			code.WriteString(currentVariableValue)
 			code.WriteRune('\n')
 			currentVariableValue = ""
@@ -852,8 +844,8 @@ func printDecompDebug() {
 	printVariables()
 	fmt.Print("\n")
 
-	fmt.Println("### ACTION OUTPUTS (MAGIC VARIABLES) ###")
-	for uuid, name := range actionOutputs {
+	fmt.Println("### UUIDS ###")
+	for uuid, name := range uuids {
 		fmt.Printf("%s | %s\n", uuid, name)
 	}
 	fmt.Print("\n")
