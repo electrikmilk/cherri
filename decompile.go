@@ -61,16 +61,47 @@ func decompile(b []byte) {
 	handle(writeErr)
 }
 
+var actionOutputs map[string]string
+
 // mapVariables creates a map of variables that are assigned throughout the Shortcut, so we know if an identifier is an assigned variable.
 func mapVariables() {
 	variables = make(map[string]variableValue)
+	actionOutputs = make(map[string]string)
 	for _, action := range data.WFWorkflowActions {
-		if action.WFWorkflowActionIdentifier != "is.workflow.actions.setvariable" && action.WFWorkflowActionIdentifier != "is.workflow.actions.appendvariable" {
+		if action.WFWorkflowActionIdentifier == "is.workflow.actions.setvariable" || action.WFWorkflowActionIdentifier == "is.workflow.actions.appendvariable" {
+			var varName = strings.ReplaceAll(action.WFWorkflowActionParameters["WFVariableName"].(string), " ", "")
+			if _, found := variables[varName]; !found {
+				variables[varName] = variableValue{}
+			}
 			continue
 		}
-		var varName = strings.ReplaceAll(action.WFWorkflowActionParameters["WFVariableName"].(string), " ", "")
-		if _, found := variables[varName]; !found {
-			variables[varName] = variableValue{}
+
+		if action.WFWorkflowActionIdentifier == "is.workflow.actions.conditional" && action.WFWorkflowActionParameters["WFInput"] != nil {
+			var wfInput = action.WFWorkflowActionParameters["WFInput"].(map[string]interface{})
+			if wfInput["Type"] == "Variable" {
+				var Variable = wfInput["Variable"].(map[string]interface{})
+				var Value = Variable["Value"].(map[string]interface{})
+				if _, found := Value["OutputName"]; !found {
+					continue
+				}
+				if _, found := Value["Type"]; !found {
+					continue
+				}
+				if Value["Type"] != "ActionOutput" {
+					continue
+				}
+
+				if _, found := Value["OutputUUID"]; found {
+					if Value["OutputUUID"] == nil {
+						continue
+					}
+					var outputUUID = Value["OutputUUID"].(string)
+					if _, found := actionOutputs[outputUUID]; !found {
+						var outputName = strings.ReplaceAll(Value["OutputName"].(string), " ", "")
+						actionOutputs[outputUUID] = outputName
+					}
+				}
+			}
 		}
 	}
 }
@@ -179,15 +210,24 @@ func decompileActions() {
 }
 
 func checkConstantLiteral(action *ShortcutAction) {
-	if _, found := action.WFWorkflowActionParameters["CustomOutputName"]; !found {
-		return
+	if _, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
+		var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
+		if _, found := variables[customOutputName]; !found {
+			newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
+			code.WriteString(currentVariableValue)
+			code.WriteRune('\n')
+			currentVariableValue = ""
+			return
+		}
 	}
-	var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
-	if _, found := variables[customOutputName]; !found {
-		newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
-		code.WriteString(currentVariableValue)
-		code.WriteRune('\n')
-		currentVariableValue = ""
+	if _, found := action.WFWorkflowActionParameters["UUID"]; found {
+		var uuid = action.WFWorkflowActionParameters["UUID"].(string)
+		if _, found := actionOutputs[uuid]; found {
+			newCodeLine(fmt.Sprintf("const %s = ", actionOutputs[uuid]))
+			code.WriteString(currentVariableValue)
+			code.WriteRune('\n')
+			currentVariableValue = ""
+		}
 	}
 }
 
@@ -638,6 +678,13 @@ func decompAction(action *ShortcutAction) {
 			isVariableValue = true
 		}
 	}
+	if _, found := action.WFWorkflowActionParameters["UUID"]; found {
+		var uuid = action.WFWorkflowActionParameters["UUID"].(string)
+		if _, found := actionOutputs[uuid]; found {
+			newCodeLine(fmt.Sprintf("const %s = ", actionOutputs[uuid]))
+			isConstant = true
+		}
+	}
 
 	var actionCallStart = fmt.Sprintf("%s(", matchedIdentifier)
 	if !isConstant && !isVariableValue {
@@ -803,6 +850,12 @@ func printDecompDebug() {
 
 	fmt.Println("### VARIABLES ###")
 	printVariables()
+	fmt.Print("\n")
+
+	fmt.Println("### ACTION OUTPUTS (MAGIC VARIABLES) ###")
+	for uuid, name := range actionOutputs {
+		fmt.Printf("%s | %s\n", uuid, name)
+	}
 	fmt.Print("\n")
 }
 
