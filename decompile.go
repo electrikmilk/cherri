@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/electrikmilk/args-parser"
 	plists "howett.net/plist"
 	"os"
 	"reflect"
@@ -51,6 +52,10 @@ func decompile(b []byte) {
 	mapSplitActions()
 	decompileIcon()
 	decompileActions()
+
+	if args.Using("debug") {
+		printDecompDebug()
+	}
 
 	var writeErr = os.WriteFile(basename+"_decompiled.cherri", []byte(code.String()), 0600)
 	handle(writeErr)
@@ -774,6 +779,31 @@ func matchListAction(parameters map[string]any, identifier *string, definition *
 		*identifier = "getListItems"
 		definition = actions["getListItems"]
 	}
+}
+
+func printDecompDebug() {
+	fmt.Println(ansi("##### DEBUG #####\n", red))
+
+	fmt.Println("### ACTIONS ###")
+	for _, action := range data.WFWorkflowActions {
+		fmt.Println(action.WFWorkflowActionIdentifier)
+		var maxKeySize int
+		for key := range action.WFWorkflowActionParameters {
+			var keySize = len(key)
+			if keySize > maxKeySize {
+				maxKeySize = keySize
+			}
+		}
+		for key, value := range action.WFWorkflowActionParameters {
+			fmt.Println("\t", key, strings.Repeat(" ", maxKeySize-len(key)), value)
+		}
+		fmt.Print("\n")
+	}
+	fmt.Print("\n")
+
+	fmt.Println("### VARIABLES ###")
+	printVariables()
+	fmt.Print("\n")
 }
 
 func decompError(message string, action *ShortcutAction) {
