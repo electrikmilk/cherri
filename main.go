@@ -141,6 +141,12 @@ func createShortcut() {
 	inputPath = fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd)
 
 	sign()
+
+	removeUnsigned()
+
+	if args.Using("import") {
+		openShortcut()
+	}
 }
 
 // handleFile splits the file argument into parts.
@@ -223,15 +229,14 @@ func sign() {
 	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green) + "\n")
 	}
-
-	removeUnsigned()
-
-	if args.Using("import") {
-		openShortcut()
-	}
 }
 
 func removeUnsigned() {
+	var _, statErr = os.Stat(inputPath)
+	if os.IsNotExist(statErr) {
+		return
+	}
+
 	if args.Using("debug") {
 		fmt.Println("Removing " + workflowName + "_unsigned.shortcut...")
 	}
