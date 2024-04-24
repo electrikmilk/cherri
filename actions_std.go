@@ -5363,7 +5363,7 @@ func countParams(countType string, args []actionArgument) []plistData {
 			dataType: Text,
 			value:    countType,
 		},
-		variableInput("Input", args[0].value.(string)),
+		argumentValue("Input", args, 0),
 	}
 }
 
