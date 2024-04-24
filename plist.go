@@ -381,7 +381,7 @@ func inputValue(key string, name string, varUUID string) plistData {
 	var value []plistData
 	if varUUID != "" {
 		var variable = variables[name]
-		if variable.constant && variable.valueType == Variable || variable.valueType != Variable {
+		if !variable.repeatItem && (variable.constant && variable.valueType == Variable || variable.valueType != Variable) {
 			value = []plistData{
 				{
 					key:      "OutputName",
