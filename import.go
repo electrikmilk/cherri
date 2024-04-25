@@ -45,7 +45,7 @@ func downloadShortcut() []byte {
 	handle(apiErr)
 	defer apiResponse.Body.Close()
 	if apiResponse.StatusCode != http.StatusOK {
-		exit(fmt.Sprintf("icloud: Failed to get Shortcut file URL from API."))
+		exit("icloud: Failed to get Shortcut file URL from API.")
 	}
 
 	var record iCloudRecord
