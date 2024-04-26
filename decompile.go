@@ -75,6 +75,10 @@ func mapVariables() {
 			continue
 		}
 
+		if action.WFWorkflowActionParameters["CustomOutputName"] != nil && action.WFWorkflowActionParameters["UUID"] != nil {
+			mapUUID(action.WFWorkflowActionParameters["UUID"].(string), action.WFWorkflowActionParameters["CustomOutputName"].(string))
+		}
+
 		if action.WFWorkflowActionParameters["WFInput"] != nil {
 			var wfInput = action.WFWorkflowActionParameters["WFInput"].(map[string]interface{})
 			if wfInput["Value"] != nil {
@@ -98,11 +102,15 @@ func mapValueReference(value map[string]interface{}) {
 			return
 		}
 		var outputUUID = value["OutputUUID"].(string)
-		if _, found := uuids[outputUUID]; !found {
-			var outputName = strings.ReplaceAll(value["OutputName"].(string), " ", "")
-			uuids[outputUUID] = checkDuplicateOutputName(outputName)
-			variables[outputName] = variableValue{}
-		}
+		mapUUID(outputUUID, value["OutputName"].(string))
+	}
+}
+
+func mapUUID(uuid string, varName string) {
+	if _, found := uuids[uuid]; !found {
+		var outputName = strings.ReplaceAll(varName, " ", "")
+		uuids[uuid] = checkDuplicateOutputName(outputName)
+		variables[outputName] = variableValue{}
 	}
 }
 
