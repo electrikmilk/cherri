@@ -701,6 +701,7 @@ var macDefinition bool
 func decompAction(action *ShortcutAction) {
 	var matchedIdentifier, matchedAction = matchAction(action)
 	if matchedIdentifier == "" {
+		makeRawAction(action)
 		return
 	}
 
@@ -760,6 +761,33 @@ func decompAction(action *ShortcutAction) {
 		code.WriteRune('\n')
 		currentVariableValue = ""
 	}
+}
+
+func makeRawAction(action *ShortcutAction) {
+	newCodeLine(fmt.Sprintf("rawAction(\"%s\", [\n", action.WFWorkflowActionIdentifier))
+	tabLevel++
+	newCodeLine("{\n")
+
+	for key, param := range action.WFWorkflowActionParameters {
+		if key == "UUID" {
+			continue
+		}
+
+		code.WriteString(strings.Repeat("\t", tabLevel+1))
+		code.WriteString(fmt.Sprintf("\"%s\": ", key))
+
+		var value = decompValue(param)
+		if !strings.Contains(value, "\"") {
+			value = fmt.Sprintf("\"{%s}\"", value)
+		}
+
+		code.WriteString(value)
+		code.WriteRune('\n')
+	}
+
+	newCodeLine("}\n")
+	tabLevel--
+	newCodeLine("])\n")
 }
 
 func matchAction(action *ShortcutAction) (identifier string, definition actionDefinition) {
