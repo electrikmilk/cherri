@@ -744,7 +744,7 @@ func decompAction(action *ShortcutAction) {
 		}
 		if value, found := action.WFWorkflowActionParameters[param.key]; found {
 			if i != 0 && matchedParamsSize != 1 && matchedParamsSize > i {
-				actionCallCode.WriteRune(',')
+				actionCallCode.WriteString(", ")
 			}
 
 			var dValue = decompValue(value)
