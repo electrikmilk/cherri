@@ -535,7 +535,7 @@ func decompDictionary(action *ShortcutAction) {
 	var value = action.WFWorkflowActionParameters["WFItems"].(map[string]interface{})
 	var Value = value["Value"].(map[string]interface{})
 	var dictionary = decompDictionaryItems(Value["WFDictionaryFieldValueItems"].([]interface{}))
-	var jsonBytes, jsonErr = json.Marshal(dictionary)
+	var jsonBytes, jsonErr = json.MarshalIndent(dictionary, strings.Repeat("\t", tabLevel), "\t")
 	handle(jsonErr)
 
 	currentVariableValue = string(jsonBytes)
