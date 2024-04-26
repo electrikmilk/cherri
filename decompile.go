@@ -78,22 +78,30 @@ func mapVariables() {
 		if action.WFWorkflowActionParameters["WFInput"] != nil {
 			var wfInput = action.WFWorkflowActionParameters["WFInput"].(map[string]interface{})
 			if wfInput["Value"] != nil {
-				var Value = wfInput["Value"].(map[string]interface{})
-				if _, found := Value["OutputName"]; !found {
-					continue
-				}
-				if _, found := Value["OutputUUID"]; found {
-					if Value["OutputUUID"] == nil {
-						continue
-					}
-					var outputUUID = Value["OutputUUID"].(string)
-					if _, found := uuids[outputUUID]; !found {
-						var outputName = strings.ReplaceAll(Value["OutputName"].(string), " ", "")
-						uuids[outputUUID] = checkDuplicateOutputName(outputName)
-						variables[outputName] = variableValue{}
-					}
-				}
+				mapValueReference(wfInput["Value"].(map[string]interface{}))
+				continue
 			}
+			if wfInput["Variable"] != nil {
+				var variable = wfInput["Variable"].(map[string]interface{})
+				mapValueReference(variable["Value"].(map[string]interface{}))
+			}
+		}
+	}
+}
+
+func mapValueReference(value map[string]interface{}) {
+	if _, found := value["OutputName"]; !found {
+		return
+	}
+	if _, found := value["OutputUUID"]; found {
+		if value["OutputUUID"] == nil {
+			return
+		}
+		var outputUUID = value["OutputUUID"].(string)
+		if _, found := uuids[outputUUID]; !found {
+			var outputName = strings.ReplaceAll(value["OutputName"].(string), " ", "")
+			uuids[outputUUID] = checkDuplicateOutputName(outputName)
+			variables[outputName] = variableValue{}
 		}
 	}
 }
