@@ -12,11 +12,11 @@ action runJS(text script) {
     output("{decoded}")
 }
 
-action showVCard(array items) {
+action chooseFromVCard(array items, text prompt) {
     const menuItems = "{items}"
     const vcf = setName(menuItems, "menu.vcf")
     @contact = vcf.contact
-    const chosenItem = chooseFromList(contact, "Prompt")
+    const chosenItem = chooseFromList(contact, prompt)
 
     output("{chosenItem}")
 }

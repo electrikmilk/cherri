@@ -4,3 +4,11 @@ const returnStr = "Hello, World"
 
 @jsResult = runJS("document.body.append(document.createTextNode('{returnStr}'));")
 show("{jsResult}")
+
+@items = []
+repeat i for 6 {
+    @items += makeVCard("Title", "Subtitle")
+}
+
+@choice = chooseFromVCard(items, "Prompt")
+show("{choice}")
