@@ -1,0 +1,6 @@
+#include 'stdlib'
+
+const returnStr = "Hello, World"
+
+@jsResult = runJS("document.body.append(document.createTextNode('{returnStr}'));")
+show("{jsResult}")
