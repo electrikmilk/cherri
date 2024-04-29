@@ -4,7 +4,8 @@ Copyright (c) Brandon Jordan
 */
 
 action runJS(text script) {
-    const uri = url("data:text/html;charset=utf-8,<body/><script>{script}</script>")
+    const ios17bug = replaceText("#", "\u0023", script)
+    const uri = url("data:text/html;charset=utf-8,<body/><script>{ios17bug}</script>")
     @richURI = uri.richtext
     const decoded = urlDecode(richURI)
 
