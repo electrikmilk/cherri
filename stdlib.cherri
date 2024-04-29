@@ -3,3 +3,10 @@ Cherri Standard Library
 Copyright (c) Brandon Jordan
 */
 
+action runJS(text script) {
+    const uri = url("data:text/html;charset=utf-8,<body/><script>{script}</script>")
+    @richURI = uri.richtext
+    const decoded = urlDecode(richURI)
+
+    output("{decoded}")
+}
