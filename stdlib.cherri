@@ -5,7 +5,7 @@ Copyright (c) Brandon Jordan
 
 action runJS(text _script) {
     const _ios17bug = replaceText("#", "\u0023", _script)
-    const _uri = url("data:text/html;charset=utf-8,<body/><script>{ios17bug}</script>")
+    const _uri = url("data:text/html;charset=utf-8,<body/><script>{_ios17bug}</script>")
     @richURI = _uri.richtext
     const _decoded = urlDecode(richURI)
 
