@@ -3,20 +3,20 @@ Cherri Standard Library
 Copyright (c) Brandon Jordan
 */
 
-action runJS(text script) {
-    const ios17bug = replaceText("#", "\u0023", script)
-    const uri = url("data:text/html;charset=utf-8,<body/><script>{ios17bug}</script>")
-    @richURI = uri.richtext
-    const decoded = urlDecode(richURI)
+action runJS(text _script) {
+    const _ios17bug = replaceText("#", "\u0023", _script)
+    const _uri = url("data:text/html;charset=utf-8,<body/><script>{ios17bug}</script>")
+    @richURI = _uri.richtext
+    const _decoded = urlDecode(richURI)
 
-    output("{decoded}")
+    output("{_decoded}")
 }
 
-action chooseFromVCard(array items, text prompt) {
-    const menuItems = "{items}"
-    const vcf = setName(menuItems, "menu.vcf")
-    @contact = vcf.contact
-    const chosenItem = chooseFromList(contact, prompt)
+action chooseFromVCard(array _items, text _prompt) {
+    const _menuItems = "{_items}"
+    const _vcf = setName(_menuItems, "cherri_chooseFromVCard.vcf")
+    @contact = _vcf.contact
+    const _chosenItem = chooseFromList(contact, _prompt)
 
-    output("{chosenItem}")
+    output("{_chosenItem}")
 }
