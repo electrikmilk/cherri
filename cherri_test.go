@@ -37,8 +37,9 @@ func TestCherri(_ *testing.T) {
 		resetParser()
 
 		if signFailed || args.Using("hubsign") {
+			fmt.Println(ansi("Using remote service HubSign", cyan, bold))
 			for i := 5; i > 0; i-- {
-				fmt.Print(ansi(fmt.Sprintf("Respectfully waiting %d seconds between tests...\r", i), cyan))
+				fmt.Print(ansi(fmt.Sprintf("Respectfully waiting %d second(s) between tests...\r", i), cyan))
 				time.Sleep(1 * time.Second)
 			}
 			fmt.Print("\n")
