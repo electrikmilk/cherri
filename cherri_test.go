@@ -6,9 +6,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/electrikmilk/args-parser"
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 var currentTest string
@@ -33,6 +35,14 @@ func TestCherri(_ *testing.T) {
 		fmt.Print("\n")
 
 		resetParser()
+
+		if signFailed || args.Using("hubsign") {
+			for i := 5; i > 0; i-- {
+				fmt.Print(ansi(fmt.Sprintf("Respectfully waiting %d seconds between tests...\r", i), cyan))
+				time.Sleep(1 * time.Second)
+			}
+			fmt.Print("\n")
+		}
 	}
 }
 

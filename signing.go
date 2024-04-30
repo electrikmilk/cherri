@@ -13,7 +13,12 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"time"
 )
+
+var signFailed = false
+var hubSignFailed = false
+var hubSignBackoff = 10
 
 // sign runs the shortcuts sign command on the unsigned shortcut file.
 func sign() {
@@ -45,6 +50,7 @@ func sign() {
 	sign.Stderr = &stdErr
 	var signErr = sign.Run()
 	if signErr != nil {
+		signFailed = true
 		if args.Using("debug") {
 			fmt.Print(ansi("Failed!\n", red))
 		}
@@ -58,12 +64,17 @@ const HubSignURL = "https://hubsign.routinehub.services/sign"
 
 // Sign the Shortcut using RoutineHub's signing service.
 func hubSign() {
-	if args.Using("debug") {
-		fmt.Print("Attempting to sign using HubSign...")
+	if hubSignFailed {
+		fmt.Println(ansi("Backing off from HubSign", red))
+		for i := 5; i > 0; i-- {
+			fmt.Printf("%d seconds...\r", i)
+			time.Sleep(1 * time.Second)
+		}
+		fmt.Print("\n\n")
 	}
 
 	if !args.Using("no-ansi") {
-		fmt.Println(ansi("Attempting to sign using HubSign service...", green))
+		fmt.Println(ansi("Signing using HubSign service...", green))
 		fmt.Println(ansi("Shortcut Signing Powered By RoutineHub", dim))
 	}
 
@@ -84,7 +95,16 @@ func hubSign() {
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		exit(fmt.Sprintf("Failed to sign Shortcut (%s)", response.Status))
+		hubSignFailed = true
+		hubSignBackoff += 10
+		fmt.Println(ansi(fmt.Sprintf("Failed to sign Shortcut (%s)", response.Status), red))
+		return
+	}
+
+	if hubSignBackoff > 10 {
+		hubSignBackoff -= 10
+	} else {
+		hubSignBackoff = 10
 	}
 
 	var body, readErr = io.ReadAll(response.Body)
