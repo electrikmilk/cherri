@@ -99,8 +99,12 @@ func hubSign() {
 }
 
 func removeUnsigned() {
-	var _, statErr = os.Stat(inputPath)
-	if os.IsNotExist(statErr) {
+	var _, signedStatErr = os.Stat(fmt.Sprintf("%s%s.shortcut", relativePath, workflowName))
+	if os.IsNotExist(signedStatErr) {
+		return
+	}
+	var _, unsignedStatErr = os.Stat(fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd))
+	if os.IsNotExist(unsignedStatErr) {
 		return
 	}
 
