@@ -388,6 +388,9 @@ func getArgValue(argument actionArgument) any {
 
 // checkArg checks to ensure the collected argument for the current action is valid.
 func checkArg(param *parameterDefinition, argument *actionArgument) {
+	if argument.valueType == Var && argument.value == "Ask" {
+		return
+	}
 	if param.enum != nil {
 		checkEnum(param, argument)
 	}

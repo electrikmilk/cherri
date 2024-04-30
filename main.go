@@ -6,9 +6,12 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/electrikmilk/args-parser"
 	"github.com/google/uuid"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"regexp"
@@ -162,6 +165,11 @@ func createShortcut() {
 	inputPath = fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd)
 
 	sign()
+	removeUnsigned()
+
+	if args.Using("import") {
+		openShortcut()
+	}
 }
 
 // handleFile splits the file argument into parts.
@@ -185,14 +193,14 @@ func handleFile() {
 func writeFile(filename string, debug string) {
 	var writeDebugOutput = args.Using("debug")
 	if writeDebugOutput {
-		fmt.Println("Writing to " + debug + "...")
+		fmt.Printf("Writing to %s...", debug)
 	}
 
 	writeErr := os.WriteFile(filename, []byte(compiled), 0600)
 	handle(writeErr)
 
 	if writeDebugOutput {
-		fmt.Println(ansi("Done.", green) + "\n")
+		fmt.Println(ansi("Done.", green))
 	}
 }
 
@@ -223,7 +231,7 @@ func sign() {
 	}
 
 	if args.Using("debug") {
-		fmt.Printf("Signing %s to %s...\n", inputPath, outputPath)
+		fmt.Printf("Signing %s to %s...", inputPath, outputPath)
 	}
 	var sign = exec.Command(
 		"shortcuts",
@@ -237,24 +245,61 @@ func sign() {
 	var signErr = sign.Run()
 	if signErr != nil {
 		if args.Using("debug") {
-			fmt.Print(ansi("failed!", red) + "\n")
+			fmt.Print(ansi("Failed!\n", red))
 		}
-		exit("Failed to sign Shortcut\n\nshortcuts: " + stdErr.String())
+
+		fmt.Printf("%s\n%s\n", ansi("Failed to sign Shortcut using macOS :(", red, bold), ansi(stdErr.String(), red))
+		hubsign()
 	}
+}
+
+const HubSignURL = "https://hubsign.routinehub.services/sign"
+
+// Sign the Shortcut using RoutineHub's signing service.
+func hubsign() {
 	if args.Using("debug") {
-		fmt.Println(ansi("Done.", green) + "\n")
+		fmt.Print("Attempting to sign using HubSign...")
 	}
 
-	removeUnsigned()
+	var payload = map[string]string{
+		"shortcutName": basename,
+		"shortcut":     compiled,
+	}
+	var jsonPayload, jsonErr = json.Marshal(payload)
+	handle(jsonErr)
 
-	if args.Using("open") {
-		openShortcut()
+	var request, httpErr = http.NewRequest("POST", HubSignURL, bytes.NewReader(jsonPayload))
+	handle(httpErr)
+	request.Header.Set("Content-Type", "application/json")
+
+	var client = &http.Client{}
+	response, resErr := client.Do(request)
+	handle(resErr)
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		exit(fmt.Sprintf("Failed to sign Shortcut (%s)", response.Status))
+	}
+
+	var body, readErr = io.ReadAll(response.Body)
+	handle(readErr)
+
+	var writeErr = os.WriteFile(outputPath, body, 0600)
+	handle(writeErr)
+
+	if args.Using("debug") {
+		fmt.Println(ansi("Done.", green))
 	}
 }
 
 func removeUnsigned() {
+	var _, statErr = os.Stat(inputPath)
+	if os.IsNotExist(statErr) {
+		return
+	}
+
 	if args.Using("debug") {
-		fmt.Println("Removing " + workflowName + "_unsigned.shortcut...")
+		fmt.Printf("Removing %s_unsigned.shortcut...", workflowName)
 	}
 
 	removeErr := os.Remove(inputPath)

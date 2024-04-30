@@ -19,7 +19,7 @@ var compiled string
 
 func makePlist() {
 	if args.Using("debug") {
-		fmt.Println("Generating plist...")
+		fmt.Print("Generating plist...")
 	}
 
 	tabLevel = 0
@@ -134,7 +134,7 @@ func makePlist() {
 
 	if args.Using("debug") {
 		printPlistGenDebug()
-		fmt.Println(ansi("Done.", green) + "\n")
+		fmt.Println(ansi("Done.\n", green))
 	}
 
 	resetPlistGen()
