@@ -143,7 +143,12 @@ func createShortcut() {
 
 	inputPath = fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd)
 
-	sign()
+	if args.Using("hubsign") {
+		hubSign()
+	} else {
+		sign()
+	}
+
 	removeUnsigned()
 
 	if args.Using("import") {
@@ -201,6 +206,10 @@ func checkFile(filePath string) (filename string) {
 func sign() {
 	if !darwin {
 		fmt.Println(ansi("Warning:", bold, yellow), "macOS is required to sign shortcuts. The compiled Shortcut will not run on iOS 15+ or macOS 12+.")
+
+		fmt.Print("\n")
+		fmt.Println("However...")
+		fmt.Println(ansi("NEW!", red), "Use", ansi("--hubsign", cyan), "to use RoutineHub's remote service to sign the compiled Shortcut.")
 		return
 	}
 
@@ -227,17 +236,22 @@ func sign() {
 			fmt.Print(ansi("Failed!\n", red))
 		}
 
-		fmt.Printf("%s\n%s\n", ansi("Failed to sign Shortcut using macOS :(", red, bold), ansi(stdErr.String(), red))
-		hubsign()
+		fmt.Printf("%s\n%s\n", ansi("Failed to sign Shortcut using macOS :(", yellow, bold), ansi(stdErr.String(), yellow))
+		hubSign()
 	}
 }
 
 const HubSignURL = "https://hubsign.routinehub.services/sign"
 
 // Sign the Shortcut using RoutineHub's signing service.
-func hubsign() {
+func hubSign() {
 	if args.Using("debug") {
 		fmt.Print("Attempting to sign using HubSign...")
+	}
+
+	if !args.Using("no-ansi") {
+		fmt.Println(ansi("Attempting to sign using HubSign service...", green))
+		fmt.Println(ansi("Shortcut Signing Powered By RoutineHub", dim))
 	}
 
 	var payload = map[string]string{
@@ -390,11 +404,13 @@ type outputType int
 
 const (
 	bold      outputType = 1
+	dim       outputType = 2
 	italic    outputType = 3
 	underline outputType = 4
 	red       outputType = 31
 	green     outputType = 32
 	yellow    outputType = 33
+	cyan      outputType = 36
 )
 
 const CSI = "\033["

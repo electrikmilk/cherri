@@ -34,6 +34,10 @@ func init() {
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
+		Name:        "hubsign",
+		Description: "Sign the compiled Shortcut using RoutineHub's remote signing service.",
+	})
+	args.Register(args.Argument{
 		Name:        "debug",
 		Short:       "d",
 		Description: "Save the generated plist and print debug messages and stack traces.",
