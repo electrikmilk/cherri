@@ -141,7 +141,6 @@ func createShortcut() {
 	inputPath = fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd)
 
 	sign()
-
 	removeUnsigned()
 
 	if args.Using("import") {
@@ -170,14 +169,14 @@ func handleFile() {
 func writeFile(filename string, debug string) {
 	var writeDebugOutput = args.Using("debug")
 	if writeDebugOutput {
-		fmt.Println("Writing to " + debug + "...")
+		fmt.Printf("Writing to %s...", debug)
 	}
 
 	writeErr := os.WriteFile(filename, []byte(compiled), 0600)
 	handle(writeErr)
 
 	if writeDebugOutput {
-		fmt.Println(ansi("Done.", green) + "\n")
+		fmt.Println(ansi("Done.", green))
 	}
 }
 
@@ -208,7 +207,7 @@ func sign() {
 	}
 
 	if args.Using("debug") {
-		fmt.Printf("Signing %s to %s...\n", inputPath, outputPath)
+		fmt.Printf("Signing %s to %s...", inputPath, outputPath)
 	}
 	var sign = exec.Command(
 		"shortcuts",
@@ -238,7 +237,7 @@ func removeUnsigned() {
 	}
 
 	if args.Using("debug") {
-		fmt.Println("Removing " + workflowName + "_unsigned.shortcut...")
+		fmt.Printf("Removing %s_unsigned.shortcut...", workflowName)
 	}
 
 	removeErr := os.Remove(inputPath)
