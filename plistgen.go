@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"github.com/electrikmilk/args-parser"
+	"github.com/google/uuid"
 	"reflect"
 	"strings"
 )
@@ -214,7 +215,7 @@ func plistVariable(t *token) {
 	}
 
 	if t.value != nil {
-		var varUUID = shortcutsUUID()
+		var varUUID = uuid.New().String()
 		makeVariableAction(t, &varUUID)
 		uuids[t.ident] = varUUID
 		if t.valueType != Arr {
@@ -261,7 +262,7 @@ func plistArrayVariable(t *token) {
 		if value == nil {
 			continue
 		}
-		var UUID = shortcutsUUID()
+		var UUID = uuid.New().String()
 		var valueType tokenType
 		var addToVariableParams []plistData
 		var itemIdent string
@@ -305,7 +306,7 @@ func plistConditional(t *token) {
 		{
 			key:      "UUID",
 			dataType: Text,
-			value:    shortcutsUUID(),
+			value:    uuid.New().String(),
 		},
 	}
 	switch t.valueType {
@@ -441,7 +442,7 @@ func plistRepeat(t *token) {
 		{
 			key:      "UUID",
 			dataType: Text,
-			value:    shortcutsUUID(),
+			value:    uuid.New().String(),
 		},
 	}
 	if controlFlowMode == startStatement {
@@ -472,7 +473,7 @@ func plistRepeatEach(t *token) {
 		{
 			key:      "UUID",
 			dataType: Text,
-			value:    shortcutsUUID(),
+			value:    uuid.New().String(),
 		},
 	}
 	if controlFlowMode == startStatement {

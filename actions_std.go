@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/google/uuid"
 	"os"
 	"reflect"
 	"regexp"
@@ -3654,7 +3655,7 @@ var actions = map[string]*actionDefinition{
 						{
 							key:      "workflowIdentifier",
 							dataType: Text,
-							value:    shortcutsUUID(),
+							value:    uuid.New().String(),
 						},
 						{
 							key:      "isSelf",
@@ -3684,7 +3685,7 @@ var actions = map[string]*actionDefinition{
 						{
 							key:      "workflowIdentifier",
 							dataType: Text,
-							value:    shortcutsUUID(),
+							value:    uuid.New().String(),
 						},
 						{
 							key:      "isSelf",
@@ -3724,7 +3725,7 @@ var actions = map[string]*actionDefinition{
 						{
 							key:      "workflowIdentifier",
 							dataType: Text,
-							value:    shortcutsUUID(),
+							value:    uuid.New().String(),
 						},
 						{
 							key:      "isSelf",

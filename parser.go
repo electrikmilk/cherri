@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/electrikmilk/args-parser"
+	"github.com/google/uuid"
 	"os"
 	"regexp"
 	"slices"
@@ -1065,7 +1066,7 @@ func collectEndStatement() {
 
 // groupStatement creates a grouping UUID for a statement and adds to the statement groupings.
 func groupStatement(groupType tokenType) (groupingUUID string) {
-	groupingUUID = shortcutsUUID()
+	groupingUUID = uuid.New().String()
 	groupingIdx++
 	groupingUUIDs[groupingIdx] = groupingUUID
 	groupingTypes[groupingIdx] = groupType

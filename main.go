@@ -5,15 +5,9 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/electrikmilk/args-parser"
-	"github.com/google/uuid"
-	"io"
-	"net/http"
 	"os"
-	"os/exec"
 	"runtime"
 	"strings"
 	"unicode"
@@ -77,6 +71,119 @@ func main() {
 	createShortcut()
 }
 
+func handle(err error) {
+	if err == nil {
+		return
+	}
+
+	fmt.Print(ansi("\nProgram panic :(\n\n", red, bold))
+	fmt.Print(ansi("Please report this: https://github.com/electrikmilk/cherri/issues/new\n\n", red))
+
+	if args.Using("debug") {
+		panicDebug(err)
+	} else {
+		panic(err)
+	}
+}
+
+func printVersion() {
+	var color outputType
+	if strings.Contains(version, "beta") {
+		color = yellow
+	} else {
+		color = green
+	}
+	fmt.Printf("Cherri Compiler " + ansi(version, color) + "\n")
+}
+
+func printLogo() {
+	fmt.Print(ansi("\n                       $$$\n                     $$$$$\n                 $$$$$$$$$\n            $$$$$$$$  $$$$\n        $$$$      $$  $$$$\n      $$$     $$$$$$  $ $$\n     $    $$$$$$$$$  $  $$              \n   $$   $$$$$$$$$   $   $$              \n  $$  $$$$$$$$$$   $    $$              \n  $$$$$$$$$$$     $$     $$    ", green))
+	fmt.Print(ansi("$$$$$$   \n", red))
+	fmt.Print(ansi("$$$$$$$$$       $$       $$ ", green))
+	fmt.Print(ansi("$$$$$$$$$$\n         $$$$$  ", red))
+	fmt.Print(ansi("$$$    $$  $  ", green))
+	fmt.Print(ansi("$$$$$$$$$\n      $$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$\n     $$$$$$$$$$$$  $$$$$  $$$$$$$$$$$$$$\n    $$$  $$$$$$$$$$$$$$$$  $$$$$$$$$  $$\n    $$   $$$$$$$$$$$$$$$$$ $$$$$$$$$  $$\n    $$  $$$$$$$$$$$$$$$$$$ $$$$$$$$$ $$ \n    $$$ $$$$$$$$$$$$$$$$$$ $$$$$$$$$$$  \n    $$$  $$$$$$$$$$$$$$$$ $$$$$$$$$$$   \n     $$$$$$$$$$$$$$$$$$$  $$$$$$$$$     \n     $$$$$$$$$$$$$$$$$$$                \n       $$$$$$$$$$$$$$$                  \n          $$$$$$$$$$                    \n\n", red))
+}
+
+func fileArg() string {
+	for _, arg := range os.Args {
+		if !strings.Contains(arg, ".cherri") || startsWith("-", arg) {
+			continue
+		}
+
+		return arg
+	}
+	return ""
+}
+
+// handleFile splits the file argument into parts.
+func handleFile() {
+	relativePath = strings.Replace(filePath, filename, "", 1)
+	var nameParts = strings.Split(filename, ".")
+	basename = nameParts[0]
+	workflowName = basename
+
+	outputPath = relativePath + workflowName + ".shortcut"
+	if args.Using("output") {
+		outputPath = args.Value("output")
+	}
+
+	var fileBytes, readErr = os.ReadFile(filePath)
+	handle(readErr)
+	contents = string(fileBytes)
+}
+
+// checkFile checks if the file exists and is a .cherri file.
+func checkFile(filePath string) (filename string) {
+	var file, statErr = os.Stat(filePath)
+	if os.IsNotExist(statErr) {
+		exit(fmt.Sprintf("File '%s' does not exist!", filePath))
+	}
+	var nameParts = strings.Split(file.Name(), ".")
+	var ext = end(nameParts)
+	if ext != "cherri" {
+		exit(fmt.Sprintf("File '%s' is not a .cherri file!", filePath))
+	}
+	return file.Name()
+}
+
+func end(slice []string) string {
+	return slice[len(slice)-1]
+}
+
+func capitalize(s string) string {
+	var char = s[0]
+	var after, _ = strings.CutPrefix(s, string(char))
+	return fmt.Sprintf("%c%s", unicode.ToUpper(rune(char)), after)
+}
+
+// startsWith determines if the beginning characters of `substr` match `s`.
+func startsWith(s string, substr string) bool {
+	var stringChars = []rune(s)
+	var subStringChars = []rune(substr)
+	for i, char := range subStringChars {
+		if char != stringChars[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func panicDebug(err error) {
+	fmt.Println(ansi("###################\n#   DEBUG PANIC   #\n###################\n", bold, red))
+	printParsingDebug()
+	printPlistGenDebug()
+	printCustomActionsDebug()
+	printIncludesDebug()
+	fmt.Println(ansi("#############################################################\n", bold, red))
+
+	if err != nil {
+		panic(err)
+	}
+
+	panic("debug")
+}
+
 func printActionDefinitions() {
 	var identifier = args.Value("action")
 	if _, found := actions[identifier]; !found {
@@ -120,318 +227,4 @@ func printActionDefinitions() {
 	}
 	setCurrentAction(identifier, actions[identifier])
 	fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
-}
-
-func fileArg() string {
-	for _, arg := range os.Args {
-		if !strings.Contains(arg, ".cherri") || startsWith("-", arg) {
-			continue
-		}
-
-		return arg
-	}
-	return ""
-}
-
-// createShortcut writes the Shortcut files to disk and signs them if the unsigned argument is not unused.
-func createShortcut() {
-	var path = fmt.Sprintf("%s%s", relativePath, workflowName)
-	if args.Using("debug") {
-		writeFile(path+".plist", workflowName+".plist")
-	}
-	writeFile(path+unsignedEnd, workflowName+unsignedEnd)
-
-	inputPath = fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd)
-
-	if args.Using("hubsign") {
-		hubSign()
-	} else {
-		sign()
-	}
-
-	removeUnsigned()
-
-	if args.Using("import") {
-		openShortcut()
-	}
-}
-
-// handleFile splits the file argument into parts.
-func handleFile() {
-	relativePath = strings.Replace(filePath, filename, "", 1)
-	var nameParts = strings.Split(filename, ".")
-	basename = nameParts[0]
-	workflowName = basename
-
-	outputPath = relativePath + workflowName + ".shortcut"
-	if args.Using("output") {
-		outputPath = args.Value("output")
-	}
-
-	var fileBytes, readErr = os.ReadFile(filePath)
-	handle(readErr)
-	contents = string(fileBytes)
-}
-
-// writeFile writes plist in bytes to filename.
-func writeFile(filename string, debug string) {
-	var writeDebugOutput = args.Using("debug")
-	if writeDebugOutput {
-		fmt.Printf("Writing to %s...", debug)
-	}
-
-	writeErr := os.WriteFile(filename, []byte(compiled), 0600)
-	handle(writeErr)
-
-	if writeDebugOutput {
-		fmt.Println(ansi("Done.", green))
-	}
-}
-
-// checkFile checks if the file exists and is a .cherri file.
-func checkFile(filePath string) (filename string) {
-	var file, statErr = os.Stat(filePath)
-	if os.IsNotExist(statErr) {
-		exit(fmt.Sprintf("File '%s' does not exist!", filePath))
-	}
-	var nameParts = strings.Split(file.Name(), ".")
-	var ext = end(nameParts)
-	if ext != "cherri" {
-		exit(fmt.Sprintf("File '%s' is not a .cherri file!", filePath))
-	}
-	return file.Name()
-}
-
-// sign runs the shortcuts sign command on the unsigned shortcut file.
-func sign() {
-	if !darwin {
-		fmt.Println(ansi("Warning:", bold, yellow), "macOS is required to sign shortcuts. The compiled Shortcut will not run on iOS 15+ or macOS 12+.")
-
-		fmt.Print("\n")
-		fmt.Println("However...")
-		fmt.Println(ansi("NEW!", red), "Use", ansi("--hubsign", cyan), "to use RoutineHub's remote service to sign the compiled Shortcut.")
-		return
-	}
-
-	var signingMode = "people-who-know-me"
-	if args.Using("share") && args.Value("share") == "anyone" {
-		signingMode = "anyone"
-	}
-
-	if args.Using("debug") {
-		fmt.Printf("Signing %s to %s...", inputPath, outputPath)
-	}
-	var sign = exec.Command(
-		"shortcuts",
-		"sign",
-		"-i", inputPath,
-		"-o", outputPath,
-		"-m", signingMode,
-	)
-	var stdErr bytes.Buffer
-	sign.Stderr = &stdErr
-	var signErr = sign.Run()
-	if signErr != nil {
-		if args.Using("debug") {
-			fmt.Print(ansi("Failed!\n", red))
-		}
-
-		fmt.Printf("%s\n%s\n", ansi("Failed to sign Shortcut using macOS :(", yellow, bold), ansi(stdErr.String(), yellow))
-		hubSign()
-	}
-}
-
-const HubSignURL = "https://hubsign.routinehub.services/sign"
-
-// Sign the Shortcut using RoutineHub's signing service.
-func hubSign() {
-	if args.Using("debug") {
-		fmt.Print("Attempting to sign using HubSign...")
-	}
-
-	if !args.Using("no-ansi") {
-		fmt.Println(ansi("Attempting to sign using HubSign service...", green))
-		fmt.Println(ansi("Shortcut Signing Powered By RoutineHub", dim))
-	}
-
-	var payload = map[string]string{
-		"shortcutName": basename,
-		"shortcut":     compiled,
-	}
-	var jsonPayload, jsonErr = json.Marshal(payload)
-	handle(jsonErr)
-
-	var request, httpErr = http.NewRequest("POST", HubSignURL, bytes.NewReader(jsonPayload))
-	handle(httpErr)
-	request.Header.Set("Content-Type", "application/json")
-
-	var client = &http.Client{}
-	response, resErr := client.Do(request)
-	handle(resErr)
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		exit(fmt.Sprintf("Failed to sign Shortcut (%s)", response.Status))
-	}
-
-	var body, readErr = io.ReadAll(response.Body)
-	handle(readErr)
-
-	var writeErr = os.WriteFile(outputPath, body, 0600)
-	handle(writeErr)
-
-	if args.Using("debug") {
-		fmt.Println(ansi("Done.", green))
-	}
-}
-
-func removeUnsigned() {
-	var _, statErr = os.Stat(inputPath)
-	if os.IsNotExist(statErr) {
-		return
-	}
-
-	if args.Using("debug") {
-		fmt.Printf("Removing %s_unsigned.shortcut...", workflowName)
-	}
-
-	removeErr := os.Remove(inputPath)
-	handle(removeErr)
-
-	if args.Using("debug") {
-		fmt.Println(ansi("Done.", green))
-	}
-}
-
-func openShortcut() {
-	var _, importErr = exec.Command("open", outputPath).Output()
-	handle(importErr)
-}
-
-func end(slice []string) string {
-	return slice[len(slice)-1]
-}
-
-func handle(err error) {
-	if err == nil {
-		return
-	}
-
-	fmt.Print(ansi("\nProgram panic :(\n\n", red, bold))
-	fmt.Print(ansi("Please report this: https://github.com/electrikmilk/cherri/issues/new\n\n", red))
-
-	if args.Using("debug") {
-		panicDebug(err)
-	} else {
-		panic(err)
-	}
-}
-
-func capitalize(s string) string {
-	var char = s[0]
-	var after, _ = strings.CutPrefix(s, string(char))
-	return fmt.Sprintf("%c%s", unicode.ToUpper(rune(char)), after)
-}
-
-// startsWith determines if the beginning characters of `substr` match `s`.
-func startsWith(s string, substr string) bool {
-	var stringChars = []rune(s)
-	var subStringChars = []rune(substr)
-	for i, char := range subStringChars {
-		if char != stringChars[i] {
-			return false
-		}
-	}
-	return true
-}
-
-func shortcutsUUID() string {
-	return strings.ToUpper(uuid.New().String())
-}
-
-func panicDebug(err error) {
-	fmt.Println(ansi("###################\n#   DEBUG PANIC   #\n###################\n", bold, red))
-	printParsingDebug()
-	printPlistGenDebug()
-	printCustomActionsDebug()
-	printIncludesDebug()
-	fmt.Println(ansi("#############################################################\n", bold, red))
-
-	if err != nil {
-		panic(err)
-	}
-
-	panic("debug")
-}
-
-func printVersion() {
-	var color outputType
-	if strings.Contains(version, "beta") {
-		color = yellow
-	} else {
-		color = green
-	}
-	fmt.Printf("Cherri Compiler " + ansi(version, color) + "\n")
-}
-
-func printLogo() {
-	fmt.Print(ansi("\n                       $$$\n                     $$$$$\n                 $$$$$$$$$\n            $$$$$$$$  $$$$\n        $$$$      $$  $$$$\n      $$$     $$$$$$  $ $$\n     $    $$$$$$$$$  $  $$              \n   $$   $$$$$$$$$   $   $$              \n  $$  $$$$$$$$$$   $    $$              \n  $$$$$$$$$$$     $$     $$    ", green))
-	fmt.Print(ansi("$$$$$$   \n", red))
-	fmt.Print(ansi("$$$$$$$$$       $$       $$ ", green))
-	fmt.Print(ansi("$$$$$$$$$$\n         $$$$$  ", red))
-	fmt.Print(ansi("$$$    $$  $  ", green))
-	fmt.Print(ansi("$$$$$$$$$\n      $$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$\n     $$$$$$$$$$$$  $$$$$  $$$$$$$$$$$$$$\n    $$$  $$$$$$$$$$$$$$$$  $$$$$$$$$  $$\n    $$   $$$$$$$$$$$$$$$$$ $$$$$$$$$  $$\n    $$  $$$$$$$$$$$$$$$$$$ $$$$$$$$$ $$ \n    $$$ $$$$$$$$$$$$$$$$$$ $$$$$$$$$$$  \n    $$$  $$$$$$$$$$$$$$$$ $$$$$$$$$$$   \n     $$$$$$$$$$$$$$$$$$$  $$$$$$$$$     \n     $$$$$$$$$$$$$$$$$$$                \n       $$$$$$$$$$$$$$$                  \n          $$$$$$$$$$                    \n\n", red))
-}
-
-func printChar(ch rune) {
-	var currentChar string
-	switch ch {
-	case ' ':
-		currentChar = "SPACE"
-	case '\t':
-		currentChar = "TAB"
-	case '\n':
-		currentChar = "LF"
-	case -1:
-		currentChar = "EMPTY"
-	default:
-		currentChar = string(ch)
-	}
-	fmt.Printf("%s %d:%d\n", currentChar, lineIdx+1, lineCharIdx)
-}
-
-type outputType int
-
-const (
-	bold      outputType = 1
-	dim       outputType = 2
-	italic    outputType = 3
-	underline outputType = 4
-	red       outputType = 31
-	green     outputType = 32
-	yellow    outputType = 33
-	cyan      outputType = 36
-)
-
-const CSI = "\033["
-
-func ansi(message string, typeOf ...outputType) string {
-	if args.Using("no-ansi") {
-		return message
-	}
-	var formattedMessage string
-	for _, t := range typeOf {
-		formattedMessage += fmt.Sprintf("%s%dm", CSI, t)
-	}
-	formattedMessage += message + "\033[0m"
-	return formattedMessage
-}
-
-func exit(message string) {
-	fmt.Println(ansi("\nError: "+message+"\n", red))
-	if args.Using("debug") {
-		panicDebug(nil)
-	} else {
-		os.Exit(1)
-	}
 }
