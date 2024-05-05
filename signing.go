@@ -25,9 +25,11 @@ func sign() {
 	if !darwin {
 		fmt.Println(ansi("Warning:", bold, yellow), "macOS is required to sign shortcuts. The compiled Shortcut will not run on iOS 15+ or macOS 12+.")
 
-		fmt.Print("\n")
-		fmt.Println("However...")
-		fmt.Println(ansi("NEW!", red), "Use", ansi("--hubsign", cyan), "to use RoutineHub's remote service to sign the compiled Shortcut.")
+		if !args.Using("no-ansi") {
+			fmt.Print("\n")
+			fmt.Println("However...")
+			fmt.Println(ansi("NEW!", red), "Use", ansi("--hubsign", cyan), "to use RoutineHub's remote service to sign the compiled Shortcut.")
+		}
 		return
 	}
 
