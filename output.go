@@ -36,10 +36,12 @@ func createShortcut() {
 
 	inputPath = fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd)
 
-	if args.Using("hubsign") {
-		hubSign()
-	} else {
-		sign()
+	if !args.Using("skip-sign") {
+		if args.Using("hubsign") {
+			hubSign()
+		} else {
+			sign()
+		}
 	}
 
 	removeUnsigned()

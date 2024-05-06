@@ -61,4 +61,8 @@ func init() {
 		Name:        "no-ansi",
 		Description: "Don't output ANSI escape sequences that format and color the output.",
 	})
+	args.Register(args.Argument{
+		Name:        "skip-sign",
+		Description: "Do not sign the compiled Shortcut.",
+	})
 }
