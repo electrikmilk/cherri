@@ -992,12 +992,33 @@ var actions = map[string]*actionDefinition{
 		identifier: "file.select",
 		parameters: []parameterDefinition{
 			{
-				name:         "multiple",
+				name:         "selectMultiple",
 				validType:    Bool,
 				key:          "SelectMultiple",
 				defaultValue: false,
 				optional:     true,
 			},
+		},
+	},
+	"selectFolder": {
+		identifier: "file.select",
+		parameters: []parameterDefinition{
+			{
+				name:         "selectMultiple",
+				validType:    Bool,
+				key:          "SelectMultiple",
+				defaultValue: false,
+				optional:     true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFPickingMode",
+					dataType: Text,
+					value:    "Folders",
+				},
+			}
 		},
 	},
 	"getFileLink": {
