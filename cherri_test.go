@@ -16,6 +16,7 @@ import (
 var currentTest string
 
 func TestCherri(_ *testing.T) {
+	args.Args["no-ansi"] = ""
 	var files, err = os.ReadDir("tests")
 	if err != nil {
 		fmt.Println(ansi("FAILED: unable to read tests directory", red))
@@ -36,7 +37,7 @@ func TestCherri(_ *testing.T) {
 
 		resetParser()
 
-		if signFailed || args.Using("hubsign") {
+		if signFailed {
 			fmt.Println(ansi("Using remote service HubSign", cyan, bold))
 			for i := 5; i > 0; i-- {
 				fmt.Print(ansi(fmt.Sprintf("Respectfully waiting %d second(s) between tests...\r", i), cyan))
