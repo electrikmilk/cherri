@@ -19,7 +19,7 @@ The main goal is to make it trivial and practical to create large Shortcut proje
 
 ### 🌟 Top Features
 
-- 🖥️ Laptop/Desktop based development (CLI, VSCode extension, macOS app)
+- 🖥️ Laptop/Desktop based development (CLI, [VSCode extension](https://marketplace.visualstudio.com/items?itemName=electrikmilk.cherri-vscode-extension), macOS app)
 - 🎓 Easy to learn and syntax similar to other languages
 - 🐞 1-1 translation to Shortcut actions as much as possible to make debugging easier
 - 🪄 No magic variables syntax, they're constants instead
@@ -35,8 +35,9 @@ The main goal is to make it trivial and practical to create large Shortcut proje
 
 ### Resources
 
+- 🍒 [Cherri VSCode Extension](https://marketplace.visualstudio.com/items?itemName=electrikmilk.cherri-vscode-extension)
 - 🛝 [Playground](https://playground.cherrilang.org/) - Try out Cherri on any platform, preview the result, and export signed Shortcuts
-- 🍒 [macOS IDE](https://github.com/electrikmilk/cherri-macos-app) - Defines Cherri file type, write and build Shortcuts on Mac with a GUI
+- 🖥️ [macOS IDE](https://github.com/electrikmilk/cherri-macos-app) - Defines Cherri file type, write and build Shortcuts on Mac with a GUI
 - 📄 [Documentation](https://cherrilang.org/language/) - Learn Cherri or how to contribute
 - 🧑‍💻 [Code Tour](https://youtu.be/gU8TsI96uww)
 - 🗺️ [_Idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap)
