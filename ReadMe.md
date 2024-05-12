@@ -81,7 +81,7 @@ Plus, some stability comes with this project being on macOS and not iOS, and I'm
 
 ## Community
 
-- [VS Code Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=erenyenigul.cherri) ([Github](https://github.com/erenyenigul/cherri-vscode-highlight))
+- [VS Code Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=erenyenigul.cherri) ([repo](https://github.com/erenyenigul/cherri-vscode-highlight))
 
 ## Credits
 
