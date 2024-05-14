@@ -55,6 +55,7 @@ func parseIncludes() {
 		case tokenAhead(Include):
 			advance()
 			parseInclude()
+			resetParse()
 			includedFile = true
 		}
 		advance()
