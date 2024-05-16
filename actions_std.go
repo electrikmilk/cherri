@@ -1255,9 +1255,14 @@ var actions = map[string]*actionDefinition{
 				name:      "to",
 				validType: String,
 				key:       "WFSelectedLanguage",
+				optional:  true,
 			},
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
+			if len(args) < 2 {
+				return
+			}
+
 			if args[1].valueType != Variable {
 				args[1].value = languageCode(getArgValue(args[1]).(string))
 			}
