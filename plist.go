@@ -468,26 +468,50 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 		getAs = v.getAs
 		coerce = v.coerce
 		if getAs != "" {
-			aggrandizements = append(aggrandizements, plistData{
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "PropertyUserInfo",
-						dataType: Number,
-						value:    0,
+			var refValueType = v.valueType
+			if v.valueType == Var {
+				if ref, found := variables[v.value.(string)]; found {
+					refValueType = ref.valueType
+				}
+			}
+			if refValueType == Dict {
+				aggrandizements = append(aggrandizements, plistData{
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "Type",
+							dataType: Text,
+							value:    "WFDictionaryValueVariableAggrandizement",
+						},
+						{
+							key:      "DictionaryKey",
+							dataType: Text,
+							value:    getAs,
+						},
 					},
-					{
-						key:      "Type",
-						dataType: Text,
-						value:    "WFPropertyVariableAggrandizement",
+				})
+			} else {
+				aggrandizements = append(aggrandizements, plistData{
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "PropertyUserInfo",
+							dataType: Number,
+							value:    0,
+						},
+						{
+							key:      "Type",
+							dataType: Text,
+							value:    "WFPropertyVariableAggrandizement",
+						},
+						{
+							key:      "PropertyName",
+							dataType: Text,
+							value:    getAs,
+						},
 					},
-					{
-						key:      "PropertyName",
-						dataType: Text,
-						value:    getAs,
-					},
-				},
-			})
+				})
+			}
 		}
 		if coerce != "" {
 			makeContentItems()
