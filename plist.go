@@ -191,7 +191,15 @@ func makeVariableValue(outputName *plistData, uuid *plistData, valueType tokenTy
 		setCurrentAction(action.ident, actions[action.ident])
 		plistAction(action.args, outputName, uuid)
 	case Dict:
-		makeDictionaryValue(outputName, uuid, value)
+		appendPlist(makeStdAction("dictionary", []plistData{
+			*outputName,
+			*uuid,
+			{
+				key:      "WFItems",
+				dataType: Dictionary,
+				value:    makeDictionaryValue(value),
+			},
+		}))
 	}
 }
 
@@ -291,33 +299,25 @@ func makeExpressionValue(outputName *plistData, uuid *plistData, value *any) {
 	}))
 }
 
-func makeDictionaryValue(outputName *plistData, uuid *plistData, value *any) {
-	appendPlist(makeStdAction("dictionary", []plistData{
-		*outputName,
-		*uuid,
+func makeDictionaryValue(value *any) []plistData {
+	return []plistData{
 		{
-			key:      "WFItems",
+			key:      "Value",
 			dataType: Dictionary,
 			value: []plistData{
 				{
-					key:      "Value",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "WFDictionaryFieldValueItems",
-							dataType: Array,
-							value:    makeDictionary(*value),
-						},
-					},
-				},
-				{
-					key:      "WFSerializationType",
-					dataType: Text,
-					value:    "WFDictionaryFieldValue",
+					key:      "WFDictionaryFieldValueItems",
+					dataType: Array,
+					value:    makeDictionary(*value),
 				},
 			},
 		},
-	}))
+		{
+			key:      "WFSerializationType",
+			dataType: Text,
+			value:    "WFDictionaryFieldValue",
+		},
+	}
 }
 
 func variableValueModifier(token *token, outputName *plistData, UUID *plistData) {
@@ -579,6 +579,12 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 			value:    aggrandizements,
 		})
 	}
+
+	var serializationType = "WFTextTokenAttachment"
+	if variable.valueType == Dict {
+		serializationType = "WFDictionaryFieldValue"
+	}
+
 	return plistData{
 		key:      key,
 		dataType: Dictionary,
@@ -591,7 +597,7 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 			{
 				key:      "WFSerializationType",
 				dataType: Text,
-				value:    "WFTextTokenAttachment",
+				value:    serializationType,
 			},
 		},
 	}
@@ -863,6 +869,12 @@ func paramValue(key string, arg actionArgument, handleAs tokenType, outputType p
 			key:      key,
 			dataType: Boolean,
 			value:    arg.value,
+		}
+	case Dict:
+		return plistData{
+			key:      key,
+			dataType: Dictionary,
+			value:    makeDictionaryValue(&arg.value),
 		}
 	default:
 		return attachmentValues(key, arg.value.(string), outputType)
