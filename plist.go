@@ -580,11 +580,6 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 		})
 	}
 
-	var serializationType = "WFTextTokenAttachment"
-	if variable.valueType == Dict {
-		serializationType = "WFDictionaryFieldValue"
-	}
-
 	return plistData{
 		key:      key,
 		dataType: Dictionary,
@@ -597,7 +592,7 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 			{
 				key:      "WFSerializationType",
 				dataType: Text,
-				value:    serializationType,
+				value:    "WFTextTokenAttachment",
 			},
 		},
 	}
