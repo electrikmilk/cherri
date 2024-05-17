@@ -286,18 +286,19 @@ func realVariableValue(identifier string, lastValueType tokenType) (varValue var
 		varValue = globals[identifier]
 		return
 	}
-	if _, found := variables[identifier]; !found {
+	var front = strings.Split(identifier, "[")[0]
+	if _, found := variables[front]; !found {
 		parserError(fmt.Sprintf("Variable or Global '%s' does not exist", identifier))
 	}
-	var argValueType = variables[identifier].valueType
-	var value = variables[identifier].value
+	var argValueType = variables[front].valueType
+	var value = variables[front].value
 	if argValueType == Variable {
-		if lastValueType == Variable && argValueType == Variable {
+		if lastValueType == Variable {
 			parserError("Passed variable value that evaluates to variable")
 		}
 		varValue = realVariableValue(value.(string), argValueType)
 	} else {
-		varValue = variables[identifier]
+		varValue = variables[front]
 	}
 	return
 }
