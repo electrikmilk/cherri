@@ -384,8 +384,15 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 	}
 
 	if char == '[' {
-		identifier.WriteString(fmt.Sprintf("%s]", collectUntil(']')))
 		advance()
+		if char != '\'' {
+			parserError("Expected raw string for key.")
+		}
+		advance()
+		var key = collectRawString()
+		advanceUntil(']')
+		advance()
+		identifier.WriteString(fmt.Sprintf("[%s]", key))
 	}
 	if char == '.' {
 		identifier.WriteString(collectUntil(*until))
