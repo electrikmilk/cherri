@@ -712,21 +712,40 @@ func makeAttachmentValues() {
 			}
 		}
 		if stringVar.getAs != "" {
-			aggr = append(aggr, plistData{
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "Type",
-						dataType: Text,
-						value:    "WFPropertyVariableAggrandizement",
+			var refValueType = variable.valueType
+			if refValueType == Dict {
+				aggr = append(aggr, plistData{
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "Type",
+							dataType: Text,
+							value:    "WFDictionaryValueVariableAggrandizement",
+						},
+						{
+							key:      "DictionaryKey",
+							dataType: Text,
+							value:    stringVar.getAs,
+						},
 					},
-					{
-						key:      "PropertyName",
-						dataType: Text,
-						value:    stringVar.getAs,
+				})
+			} else {
+				aggr = append(aggr, plistData{
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "Type",
+							dataType: Text,
+							value:    "WFPropertyVariableAggrandizement",
+						},
+						{
+							key:      "PropertyName",
+							dataType: Text,
+							value:    stringVar.getAs,
+						},
 					},
-				},
-			})
+				})
+			}
 		}
 		if stringVar.coerce != "" {
 			makeContentItems()
