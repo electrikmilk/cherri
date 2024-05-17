@@ -66,7 +66,7 @@ var httpParams = []parameterDefinition{
 	},
 	{
 		name:      "body",
-		validType: Variable,
+		validType: Dict,
 		optional:  true,
 	},
 	{
