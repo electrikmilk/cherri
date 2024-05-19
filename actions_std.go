@@ -516,6 +516,50 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"removeEvents": {
+		parameters: []parameterDefinition{
+			{
+				name:      "events",
+				validType: Variable,
+				key:       "WFInputEvents",
+			},
+			{
+				name:         "includeFutureEvents",
+				validType:    Bool,
+				key:          "WFCalendarIncludeFutureEvents",
+				defaultValue: false,
+				optional:     true,
+			},
+		},
+	},
+	"removeReminders": {
+		parameters: []parameterDefinition{
+			{
+				name:      "reminders",
+				validType: Variable,
+				key:       "WFInputReminders",
+			},
+		},
+	},
+	"showInCalendar": {
+		parameters: []parameterDefinition{
+			{
+				name:      "event",
+				validType: Variable,
+				key:       "WFEvent",
+			},
+		},
+	},
+	"openReminderList": {
+		identifier: "showlist",
+		parameters: []parameterDefinition{
+			{
+				name:      "list",
+				validType: Variable,
+				key:       "WFList",
+			},
+		},
+	},
 	"filterContacts": {
 		identifier: "filter.contacts",
 		parameters: []parameterDefinition{
