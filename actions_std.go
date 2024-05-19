@@ -511,7 +511,7 @@ var actions = map[string]*actionDefinition{
 				validType:    String,
 				key:          "WFTimeFormatStyle",
 				defaultValue: "Short",
-				enum:         dateFormats,
+				enum:         timeFormats,
 				optional:     true,
 			},
 		},
