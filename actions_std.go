@@ -96,6 +96,8 @@ var focusModes = plistData{
 		},
 	},
 }
+var dateFormats = []string{"None", "Short", "Medium", "Long", "Relative", "RFC 2822", "ISO 8601", "Custom"}
+var timeFormats = []string{"None", "Short", "Medium", "Long", "Relative"}
 
 // actions is the data structure that determines every action the compiler knows about.
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
@@ -410,6 +412,86 @@ var actions = map[string]*actionDefinition{
 		},
 		make: func(args []actionArgument) []plistData {
 			return adjustDate("Get Start of Year", "", args)
+		},
+	},
+	"formatTime": {
+		identifier: "format.date",
+		parameters: []parameterDefinition{
+			{
+				name:      "time",
+				validType: Variable,
+				key:       "WFDate",
+			},
+			{
+				name:         "timeFormat",
+				validType:    String,
+				key:          "WFTimeFormatStyle",
+				defaultValue: "Short",
+				enum:         timeFormats,
+				optional:     true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFDateFormatStyle",
+					dataType: Text,
+					value:    "None",
+				},
+			}
+		},
+	},
+	"formatDate": {
+		identifier: "format.date",
+		parameters: []parameterDefinition{
+			{
+				name:      "date",
+				validType: Variable,
+				key:       "WFDate",
+			},
+			{
+				name:         "dateFormat",
+				validType:    String,
+				key:          "WFDateFormatStyle",
+				defaultValue: "Short",
+				enum:         dateFormats,
+				optional:     true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFTimeFormatStyle",
+					dataType: Text,
+					value:    "None",
+				},
+			}
+		},
+	},
+	"formatTimestamp": {
+		identifier: "format.date",
+		parameters: []parameterDefinition{
+			{
+				name:      "date",
+				validType: Variable,
+				key:       "WFDate",
+			},
+			{
+				name:         "dateFormat",
+				validType:    String,
+				key:          "WFDateFormatStyle",
+				defaultValue: "Short",
+				enum:         dateFormats,
+				optional:     true,
+			},
+			{
+				name:         "timeFormat",
+				validType:    String,
+				key:          "WFTimeFormatStyle",
+				defaultValue: "Short",
+				enum:         dateFormats,
+				optional:     true,
+			},
 		},
 	},
 	"filterContacts": {
