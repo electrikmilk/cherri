@@ -3768,7 +3768,7 @@ var actions = map[string]*actionDefinition{
 			return
 		},
 	},
-	"open": {
+	"openShortcut": {
 		identifier: "openworkflow",
 		parameters: []parameterDefinition{
 			{
