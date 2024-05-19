@@ -96,6 +96,7 @@ var focusModes = plistData{
 		},
 	},
 }
+var eventDetails = []string{"Start Date", "End Date", "Is All Day", "Location", "Duration", "My Status", "Attendees", "URL", "Title", "Notes", "Attachments"}
 var dateFormats = []string{"None", "Short", "Medium", "Long", "Relative", "RFC 2822", "ISO 8601", "Custom"}
 var timeFormats = []string{"None", "Short", "Medium", "Long", "Relative"}
 
@@ -412,6 +413,27 @@ var actions = map[string]*actionDefinition{
 		},
 		make: func(args []actionArgument) []plistData {
 			return adjustDate("Get Start of Year", "", args)
+		},
+	},
+	"editEvent": {
+		identifier: "setters.calendarevents",
+		parameters: []parameterDefinition{
+			{
+				name:      "event",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+				enum:      eventDetails,
+			},
+			{
+				name:      "newValue",
+				validType: String,
+				key:       "WFCalendarEventContentItemStartDate",
+			},
 		},
 	},
 	"formatTime": {
