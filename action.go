@@ -53,6 +53,12 @@ type checkFunc func(args []actionArgument, definition *actionDefinition)
 // paramsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument that must return a slice of plistData as a result.
 type paramsFunc func(args []actionArgument) []plistData
 
+type appIntent struct {
+	name                string
+	bundleIdentifier    string
+	appIntentIdentifier string
+}
+
 // actionDefinition defines an action, what it expects and has functions for checking the arguments and creating the parameters.
 type actionDefinition struct {
 	identifier    string
@@ -61,6 +67,7 @@ type actionDefinition struct {
 	check         checkFunc
 	make          paramsFunc
 	addParams     paramsFunc
+	appIntent     appIntent
 	outputType    tokenType
 	mac           bool
 	minVersion    float64
@@ -116,10 +123,15 @@ func actionIdentifier() (ident string) {
 	return
 }
 
+var emptyAppIntent = appIntent{}
+
 // actionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
 func actionParameters(arguments []actionArgument) (params []plistData) {
 	if currentAction.addParams != nil {
 		params = append(params, currentAction.addParams(arguments)...)
+	}
+	if currentAction.appIntent != emptyAppIntent {
+		params = append(params, appIntentDescriptor(currentAction.appIntent))
 	}
 	if currentAction.make != nil {
 		params = currentAction.make(arguments)
@@ -534,4 +546,33 @@ func generateActionParamDefinition(param parameterDefinition) string {
 // makeLibraries makes the library variable, this is where 3rd party action library definitions will start.
 func makeLibraries() {
 	libraries = make(map[string]libraryDefinition)
+}
+
+func appIntentDescriptor(intent appIntent) plistData {
+	return plistData{
+		key:      "AppIntentDescriptor",
+		dataType: Dictionary,
+		value: []plistData{
+			{
+				key:      "TeamIdentifier",
+				dataType: Text,
+				value:    "0000000000",
+			},
+			{
+				key:      "BundleIdentifier",
+				dataType: Text,
+				value:    intent.bundleIdentifier,
+			},
+			{
+				key:      "Name",
+				dataType: Text,
+				value:    intent.name,
+			},
+			{
+				key:      "AppIntentIdentifier",
+				dataType: Text,
+				value:    intent.appIntentIdentifier,
+			},
+		},
+	}
 }

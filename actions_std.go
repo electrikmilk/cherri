@@ -99,6 +99,14 @@ var focusModes = plistData{
 var eventDetails = []string{"Start Date", "End Date", "Is All Day", "Location", "Duration", "My Status", "Attendees", "URL", "Title", "Notes", "Attachments"}
 var dateFormats = []string{"None", "Short", "Medium", "Long", "Relative", "RFC 2822", "ISO 8601", "Custom"}
 var timeFormats = []string{"None", "Short", "Medium", "Long", "Relative"}
+var timerDurations = []string{"hr", "min", "sec"}
+var weekdays = []string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+
+var toggleAlarmIntent = appIntent{
+	name:                "Clock",
+	bundleIdentifier:    "com.apple.clock",
+	appIntentIdentifier: "ToggleAlarmIntent",
+}
 
 // actions is the data structure that determines every action the compiler knows about.
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
@@ -559,6 +567,222 @@ var actions = map[string]*actionDefinition{
 				key:       "WFList",
 			},
 		},
+	},
+	"startTimer": {
+		identifier: "timer.start",
+		parameters: []parameterDefinition{
+			{
+				name:      "magnitude",
+				validType: Integer,
+			},
+			{
+				name:         "unit",
+				validType:    String,
+				defaultValue: "min",
+				enum:         timerDurations,
+			},
+		},
+	},
+	"createAlarm": {
+		appIdentifier: "com.apple.mobiletimer-framework.MobileTimerIntents.MTCreateAlarmIntent",
+		parameters: []parameterDefinition{
+			{
+				name:      "name",
+				validType: String,
+				key:       "name",
+			},
+			{
+				name:      "time",
+				validType: String,
+				key:       "dateComponents",
+			},
+			{
+				name:         "allowsSnooze",
+				validType:    Bool,
+				key:          "allowsSnooze",
+				defaultValue: true,
+				optional:     true,
+			},
+			{
+				name:      "repeatWeekdays",
+				validType: Arr,
+				optional:  true,
+			},
+		},
+		appIntent: appIntent{
+			name:                "Clock",
+			bundleIdentifier:    "com.apple.clock",
+			appIntentIdentifier: "CreateAlarmIntent",
+		},
+		check: func(args []actionArgument, _ *actionDefinition) {
+			if len(args) < 4 {
+				return
+			}
+
+			var repeatDays = getArgValue(args[3])
+			for _, day := range repeatDays.([]interface{}) {
+				if !slices.Contains(weekdays, strings.ToLower(day.(string))) {
+					parserError(fmt.Sprintf("Invalid repeat weekday for alarm '%s'", day))
+				}
+			}
+		},
+		addParams: func(args []actionArgument) []plistData {
+			if len(args) < 4 {
+				return []plistData{}
+			}
+
+			var repeatDays = getArgValue(args[3])
+			var repeats []plistData
+			for _, day := range repeatDays.([]interface{}) {
+				var dayStr = day.(string)
+				var dayLower = strings.ToLower(dayStr)
+				var dayCap = capitalize(dayStr)
+
+				repeats = append(repeats, plistData{
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "value",
+							dataType: Text,
+							value:    dayLower,
+						},
+						{
+							key:      "title",
+							dataType: Dictionary,
+							value: []plistData{
+								{
+									key:      "key",
+									dataType: Text,
+									value:    dayCap,
+								},
+							},
+						},
+						{
+							key:      "identifier",
+							dataType: Text,
+							value:    dayLower,
+						},
+						{
+							key:      "subtitle",
+							dataType: Dictionary,
+							value: []plistData{
+								{
+									key:      "key",
+									dataType: Text,
+									value:    dayCap,
+								},
+							},
+						},
+					},
+				})
+			}
+
+			return []plistData{
+				{
+					key:      "repeats",
+					dataType: Array,
+					value:    repeats,
+				},
+			}
+		},
+	},
+	"deleteAlarm": {
+		appIdentifier: "com.apple.clock.DeleteAlarmIntent",
+		appIntent: appIntent{
+			name:                "Clock",
+			bundleIdentifier:    "com.apple.clock",
+			appIntentIdentifier: "DeleteAlarmIntent",
+		},
+		parameters: []parameterDefinition{
+			{
+				name:      "alarm",
+				validType: Variable,
+				key:       "entities",
+			},
+		},
+	},
+	"turnOnAlarm": {
+		appIdentifier: "com.apple.mobiletimer-framework.MobileTimerIntents.MTToggleAlarmIntent",
+		appIntent:     toggleAlarmIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "alarm",
+				validType: Variable,
+				key:       "alarm",
+			},
+			{
+				name:         "showWhenRun",
+				validType:    Bool,
+				key:          "ShowWhenRun",
+				defaultValue: true,
+				optional:     true,
+			},
+		},
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "state",
+					dataType: Number,
+					value:    1,
+				},
+			}
+		},
+	},
+	"turnOffAlarm": {
+		appIdentifier: "com.apple.mobiletimer-framework.MobileTimerIntents.MTToggleAlarmIntent",
+		appIntent:     toggleAlarmIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "alarm",
+				validType: Variable,
+				key:       "alarm",
+			},
+			{
+				name:         "showWhenRun",
+				validType:    Bool,
+				key:          "ShowWhenRun",
+				defaultValue: true,
+				optional:     true,
+			},
+		},
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "state",
+					dataType: Number,
+					value:    0,
+				},
+			}
+		},
+	},
+	"toggleAlarm": {
+		parameters: []parameterDefinition{
+			{
+				name:      "alarm",
+				validType: Variable,
+				key:       "alarm",
+			},
+			{
+				name:         "showWhenRun",
+				validType:    Bool,
+				key:          "ShowWhenRun",
+				defaultValue: true,
+				optional:     true,
+			},
+		},
+		appIntent: toggleAlarmIntent,
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "operation",
+					dataType: Text,
+					value:    "toggle",
+				},
+			}
+		},
+	},
+	"getAlarms": {
+		appIdentifier: "com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent",
 	},
 	"filterContacts": {
 		identifier: "filter.contacts",
@@ -5409,13 +5633,20 @@ func adjustDate(operation string, unit string, args []actionArgument) (adjustDat
 		return adjustDateParams
 	}
 
-	var magnitudeValue = argumentValue("Magnitude", args, 1)
+	adjustDateParams = append(adjustDateParams, magnitudeValue(unit, args, 1))
+
+	return adjustDateParams
+}
+
+func magnitudeValue(unit string, args []actionArgument, index int) plistData {
+	var magnitudeValue = argumentValue("Magnitude", args, index)
 	if magnitudeValue.dataType == Dictionary {
 		var value = magnitudeValue.value.([]plistData)
 		magnitudeValue.dataType = Dictionary
 		magnitudeValue.value = value[0].value
 	}
-	adjustDateParams = append(adjustDateParams, plistData{
+
+	return plistData{
 		key:      "WFDuration",
 		dataType: Dictionary,
 		value: []plistData{
@@ -5437,9 +5668,7 @@ func adjustDate(operation string, unit string, args []actionArgument) (adjustDat
 				value:    "WFQuantityFieldValue",
 			},
 		},
-	})
-
-	return adjustDateParams
+	}
 }
 
 func changeCase(textCase string, args []actionArgument) []plistData {
