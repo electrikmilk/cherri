@@ -332,7 +332,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 			validActionOutput(param.name, param.validType, argVal)
 			return
 		}
-		if argValueType != param.validType && param.validType != Variable {
+		if argValueType != param.validType && param.validType != Variable && getVar.variableType != "Ask" {
 			parserError(fmt.Sprintf("Invalid variable value %v (%s) for argument '%s' (%s).\n%s",
 				argVal,
 				argValueType,
