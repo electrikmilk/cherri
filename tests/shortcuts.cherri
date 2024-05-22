@@ -1,6 +1,6 @@
 getShortcuts()
 
-open("Add Song to Favorites")
+openShortcut("Add Song to Favorites")
 
 @intVar = 2
 
