@@ -558,7 +558,7 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"openReminderList": {
+	"openRemindersList": {
 		identifier: "showlist",
 		parameters: []parameterDefinition{
 			{
