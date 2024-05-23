@@ -41,6 +41,7 @@ The main goal is to make it trivial and practical to create large Shortcut proje
 - 📄 [Documentation](https://cherrilang.org/language/) - Learn Cherri or how to contribute
 - 🧑‍💻 [Code Tour](https://youtu.be/gU8TsI96uww)
 - 🗺️ [_Idealistic_ roadmap](https://github.com/electrikmilk/cherri/wiki/Project-Roadmap)
+- ❓ [FAQ](https://cherrilang.org/faq)
 
 ## 📣 WIP 📣
 
