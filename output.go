@@ -42,9 +42,9 @@ func createShortcut() {
 		} else {
 			sign()
 		}
-	}
 
-	removeUnsigned()
+		removeUnsigned()
+	}
 
 	if args.Using("import") {
 		openShortcut()
