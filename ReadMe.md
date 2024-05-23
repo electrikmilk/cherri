@@ -3,7 +3,6 @@
 # Cherri
 
 [![Build & Test](https://github.com/electrikmilk/cherri/actions/workflows/go.yml/badge.svg)](https://github.com/electrikmilk/cherri/actions/workflows/go.yml)
-[![macOS Build](https://github.com/electrikmilk/cherri/actions/workflows/go-macos.yml/badge.svg)](https://github.com/electrikmilk/cherri/actions/workflows/go-macos.yml)
 [![Releases](https://img.shields.io/github/v/release/electrikmilk/cherri?include_prereleases)](https://github.com/electrikmilk/cherri/releases)
 [![Go](https://img.shields.io/github/go-mod/go-version/electrikmilk/cherri)](https://github.com/electrikmilk/cherri/blob/main/go.mod)
 [![License](https://img.shields.io/github/license/electrikmilk/cherri)](https://github.com/electrikmilk/cherri/blob/main/LICENSE)
