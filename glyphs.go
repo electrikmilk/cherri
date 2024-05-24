@@ -329,7 +329,7 @@ var glyphs = map[string]int{
 	"trueTone":                   61519,
 	"dialMin":                    61520,
 	"dialMax":                    61521,
-	"QRViewFinder":               61522,
+	"qrViewFinder":               61522,
 	"cameraViewFinder":           61523,
 	"walletPass":                 61524,
 	"appearance":                 61525,
