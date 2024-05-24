@@ -266,7 +266,7 @@ var glyphs = map[string]int{
 	"circledX":                   59709,
 	"circledPi":                  59698,
 	"circledI":                   59697,
-	"smileyFace":                 59834,
+	"smiley":                     59834,
 	"document":                   59725,
 	"dollarSign":                 59395,
 	"poundSign":                  59512,
