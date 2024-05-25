@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"github.com/electrikmilk/args-parser"
+	"json"
 	"os"
 	"strings"
 	"testing"
