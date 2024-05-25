@@ -266,7 +266,7 @@ func checkRequiredArgs() {
 			default:
 				suffix = "th"
 			}
-			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'.\n%s", argIndex, suffix, param.name, currentActionIdentifier, generateActionDefinition(param, false, true)))
+			parserError(fmt.Sprintf("Missing required %d%s argument '%s'.\n%s", argIndex, suffix, param.name, generateActionDefinition(param, false, true)))
 		}
 	}
 }
