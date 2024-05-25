@@ -5,9 +5,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/electrikmilk/args-parser"
-	"json"
 	"os"
 	"strings"
 	"testing"
