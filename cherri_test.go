@@ -62,6 +62,13 @@ func TestActionList(_ *testing.T) {
 	}
 }
 
+func TestGlyphList(_ *testing.T) {
+	var data, jsonErr = json.Marshal(glyphs)
+	handle(jsonErr)
+
+	fmt.Println(string(data))
+}
+
 func compile() {
 	defer func() {
 		if recover() != nil {
