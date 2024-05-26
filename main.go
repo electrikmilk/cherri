@@ -43,7 +43,16 @@ func main() {
 				fmt.Print("\n")
 			}
 		} else {
-			printActionDefinitions()
+			actionsSearch()
+		}
+		os.Exit(0)
+	}
+
+	if args.Using("glyph") {
+		if args.Value("glyph") == "" {
+			fmt.Println("Search all usable glyphs at https://glyphs.cherrilang.org.")
+		} else {
+			glyphsSearch()
 		}
 		os.Exit(0)
 	}
@@ -182,49 +191,4 @@ func panicDebug(err error) {
 	}
 
 	panic("debug")
-}
-
-func printActionDefinitions() {
-	var identifier = args.Value("action")
-	if _, found := actions[identifier]; !found {
-		fmt.Println(ansi(fmt.Sprintf("\nAction %s() does not exist or has not yet been defined.", identifier), red))
-
-		switch identifier {
-		case "text":
-			fmt.Print("\nText actions are abstracted into string statements. For example:\n\n@variable = \"Hello, Cherri!\"\n\n")
-			os.Exit(1)
-		case "dictionary":
-			fmt.Print("\nDictionary actions are abstracted into JSON object statements. For example:\n\n@variable = {\"test\":5\", \"key\":\"value\"}\n\n")
-			os.Exit(1)
-		}
-
-		var actionSearchResults strings.Builder
-		for actionIdentifier, definition := range actions {
-			if strings.Contains(strings.ToLower(actionIdentifier), identifier) {
-				setCurrentAction(actionIdentifier, definition)
-				var definition = generateActionDefinition(parameterDefinition{}, false, false)
-				definition, _ = strings.CutPrefix(definition, actionIdentifier)
-
-				var capitalized = capitalize(identifier)
-				var lowercase = strings.ToLower(identifier)
-				switch {
-				case strings.Contains(actionIdentifier, identifier):
-					identifier = strings.ReplaceAll(actionIdentifier, identifier, ansi(identifier, red))
-				case strings.Contains(actionIdentifier, capitalized):
-					identifier = strings.ReplaceAll(actionIdentifier, capitalized, ansi(capitalized, red))
-				case strings.Contains(actionIdentifier, lowercase):
-					identifier = strings.ReplaceAll(actionIdentifier, lowercase, ansi(lowercase, red))
-				}
-				actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n", identifier, definition))
-			}
-		}
-		if actionSearchResults.Len() > 0 {
-			fmt.Println(ansi("\nThe closest actions are:", yellow, italic, bold))
-			fmt.Println(actionSearchResults.String())
-		}
-
-		os.Exit(1)
-	}
-	setCurrentAction(identifier, actions[identifier])
-	fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
 }

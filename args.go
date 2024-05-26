@@ -19,13 +19,6 @@ func init() {
 		Description: "Print this usage information.",
 	})
 	args.Register(args.Argument{
-		Name:         "action",
-		Short:        "a",
-		Description:  "Print an action's definition. Leave empty to print all action definitions.",
-		DefaultValue: "",
-		ExpectsValue: true,
-	})
-	args.Register(args.Argument{
 		Name:         "share",
 		Short:        "s",
 		Description:  "Set the Shortcuts signing mode, passed to the `shortcuts` binary.",
@@ -64,5 +57,17 @@ func init() {
 	args.Register(args.Argument{
 		Name:        "skip-sign",
 		Description: "Do not sign the compiled Shortcut.",
+	})
+	args.Register(args.Argument{
+		Name:         "action",
+		Description:  "Print an action's definition. Leave empty to print all action definitions.",
+		DefaultValue: "",
+		ExpectsValue: true,
+	})
+	args.Register(args.Argument{
+		Name:         "glyph",
+		Description:  "Search glyphs in the compiler. Icon editor at https://glyphs.cherrilang.org.",
+		DefaultValue: "",
+		ExpectsValue: true,
 	})
 }
