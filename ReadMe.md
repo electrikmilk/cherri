@@ -14,7 +14,7 @@
 
 The main goal is to make it trivial and practical to create large Shortcut projects (within the limits of Shortcuts) and maintain them long-term.
 
-[![Hello World Example](https://github.com/electrikmilk/cherri/assets/4368524/4205308b-4358-47c9-a1b4-66930c8db1c2)](https://playground.cherrilang.org)
+[![Hello World Example](https://github.com/electrikmilk/cherri/assets/4368524/8532e8f7-245b-47f3-9691-8b1eac5774c7)](https://playground.cherrilang.org)
 
 ### 🌟 Top Features
 
