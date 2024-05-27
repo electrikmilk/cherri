@@ -1207,7 +1207,7 @@ func collectDictionary() (dictionary interface{}) {
 
 func collectObject() string {
 	var jsonStr strings.Builder
-	var insideInnerObject = false
+	var innerObjectDepth = 0
 	var insideString = false
 	for char != -1 {
 		if char == '"' {
@@ -1221,12 +1221,12 @@ func collectObject() string {
 		}
 		if !insideString {
 			if char == '{' {
-				insideInnerObject = true
+				innerObjectDepth += 1
 			} else if char == '}' {
-				if !insideInnerObject {
+				if innerObjectDepth == 0 {
 					break
 				}
-				insideInnerObject = false
+				innerObjectDepth -= 1
 			}
 		}
 		jsonStr.WriteRune(char)
