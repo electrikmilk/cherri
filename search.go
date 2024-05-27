@@ -27,22 +27,13 @@ func actionsSearch() {
 
 		var actionSearchResults strings.Builder
 		for actionIdentifier, definition := range actions {
-			if strings.Contains(strings.ToLower(actionIdentifier), identifier) {
+			var matched, result = matchString(&actionIdentifier, &identifier)
+			if matched {
 				setCurrentAction(actionIdentifier, definition)
 				var definition = generateActionDefinition(parameterDefinition{}, false, false)
 				definition, _ = strings.CutPrefix(definition, actionIdentifier)
 
-				var capitalized = capitalize(identifier)
-				var lowercase = strings.ToLower(identifier)
-				switch {
-				case strings.Contains(actionIdentifier, identifier):
-					identifier = strings.ReplaceAll(actionIdentifier, identifier, ansi(identifier, red))
-				case strings.Contains(actionIdentifier, capitalized):
-					identifier = strings.ReplaceAll(actionIdentifier, capitalized, ansi(capitalized, red))
-				case strings.Contains(actionIdentifier, lowercase):
-					identifier = strings.ReplaceAll(actionIdentifier, lowercase, ansi(lowercase, red))
-				}
-				actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n", identifier, definition))
+				actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n", result, definition))
 			}
 		}
 		if actionSearchResults.Len() > 0 {
@@ -78,7 +69,7 @@ func matchString(subject *string, search *string) (matched bool, result string) 
 		return
 	}
 
-	if strings.Contains(*subject, strings.ToLower(*search)) {
+	if strings.Contains(strings.ToLower(*subject), strings.ToLower(*search)) {
 		matched = true
 		var capitalized = capitalize(*search)
 		var lowercase = strings.ToLower(*search)
