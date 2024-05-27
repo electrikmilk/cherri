@@ -635,7 +635,7 @@ func collectDefinition() {
 			minVersion = version
 			iosVersion, _ = strconv.ParseFloat(collectVersion, 32)
 		} else {
-			var list = makeKeyList("Available versions:", versions)
+			var list = makeKeyList("Available versions:", versions, collectVersion)
 			parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
 		}
 	}
@@ -666,7 +666,7 @@ func collectWorkflowType() {
 			if wtype, found := workflowTypes[wt]; found {
 				types = append(types, wtype)
 			} else {
-				var list = makeKeyList("Available workflow types:", workflowTypes)
+				var list = makeKeyList("Available workflow types:", workflowTypes, wt)
 				parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wt, list))
 			}
 		}
@@ -718,7 +718,7 @@ func collectNoInputDefinition() {
 				},
 			}
 		} else {
-			var list = makeKeyList("Available workflow types:", workflowTypes)
+			var list = makeKeyList("Available workflow types:", workflowTypes, wtype)
 			parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
 		}
 	case tokenAhead(GetClipboard):
@@ -744,7 +744,7 @@ func collectContentItemTypes() (contentItemTypes []string) {
 			continue
 		}
 
-		var list = makeKeyList("Available content item types:", contentItems)
+		var list = makeKeyList("Available content item types:", contentItems, itemType)
 		parserError(fmt.Sprintf("Invalid content item type '%s'\n\n%s", itemType, list))
 	}
 	return
@@ -1473,12 +1473,20 @@ func parserWarning(message string) {
 	fmt.Println(warning + "\n")
 }
 
-func makeKeyList(title string, list map[string]string) string {
+func makeKeyList(title string, list map[string]string, value string) string {
 	var formattedList strings.Builder
+	formattedList.WriteString("\033[0m")
 	formattedList.WriteString(fmt.Sprintf("%s\n", title))
 	for key := range list {
-		formattedList.WriteString(fmt.Sprintf("- %s\n", key))
+		var matchedKey = key
+		var matched, result = matchString(&key, &value)
+		if matched {
+			matchedKey = result
+		}
+		formattedList.WriteString(fmt.Sprintf("- %s\n", matchedKey))
 	}
+	formattedList.WriteString("\033[0m")
+
 	return formattedList.String()
 }
 

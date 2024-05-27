@@ -766,7 +766,7 @@ func makeAttachmentValues() {
 					},
 				})
 			} else {
-				var list = makeKeyList("Available content item types:", contentItems)
+				var list = makeKeyList("Available content item types:", contentItems, stringVar.coerce)
 				parserError(fmt.Sprintf("Invalid content item for type coerce '%s'\n\n%s\n", stringVar.coerce, list))
 			}
 		}
