@@ -78,7 +78,7 @@ func matchString(subject *string, search *string) (matched bool, result string) 
 		return
 	}
 
-	if strings.Contains(*subject, strings.ToLower(*search)) {
+	if strings.Contains(strings.ToLower(*subject), strings.ToLower(*search)) {
 		matched = true
 		var capitalized = capitalize(*search)
 		var lowercase = strings.ToLower(*search)
