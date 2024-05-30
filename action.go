@@ -487,16 +487,15 @@ func generateActionRestrictions() string {
 	if currentAction.mac {
 		restrictions = append(restrictions, "macOS only")
 	}
-	definition.WriteString(strings.Join(restrictions, ", "))
+	if len(restrictions) > 0 {
+		definition.WriteString(strings.Join(restrictions, ", "))
+	}
 
 	return ansi(definition.String(), red, bold)
 }
 
 func generateActionParamEnums(focus parameterDefinition) string {
 	var definition strings.Builder
-	if len(currentAction.parameters) != 0 {
-		definition.WriteRune('\n')
-	}
 	var hasEnum = false
 	for _, param := range currentAction.parameters {
 		if param.enum == nil {
@@ -505,6 +504,7 @@ func generateActionParamEnums(focus parameterDefinition) string {
 		if focus.name != "" && focus.name != param.name {
 			continue
 		}
+		definition.WriteRune('\n')
 		hasEnum = true
 		definition.WriteString(ansi(fmt.Sprintf("\nAvailable %ss:\n", param.name), yellow))
 		for _, e := range param.enum {
