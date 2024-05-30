@@ -246,7 +246,18 @@ func makeCustomActionCall(identifier *string, arguments *[]actionArgument) (cust
 			case String:
 				argumentValue = fmt.Sprintf("\"%s\"", argumentValue)
 			case Variable:
-				argumentValue = fmt.Sprintf("\"{%s}\"", argumentValue)
+				var variableValue, found = getVariableValue(argumentValue)
+				if !found {
+					// Not sure what to do here
+					exit("Variable not found!")
+				}
+				if variableValue.valueType == Arr {
+					var jsonBytes, jsonErr = json.Marshal(variableValue.value)
+					handle(jsonErr)
+					argumentValue = fmt.Sprintf("{\"array\":%s}", string(jsonBytes))
+				} else {
+					argumentValue = fmt.Sprintf("\"{%s}\"", argumentValue)
+				}
 			case Arr:
 				var jsonBytes, jsonErr = json.Marshal(argument.value)
 				handle(jsonErr)
