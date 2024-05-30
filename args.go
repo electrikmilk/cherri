@@ -21,38 +21,38 @@ func init() {
 	args.Register(args.Argument{
 		Name:         "share",
 		Short:        "s",
-		Description:  "Set the Shortcuts signing mode, passed to the `shortcuts` binary.",
+		Description:  "Set the signing mode.",
 		Values:       []string{"anyone", "contacts"},
 		DefaultValue: "contacts",
 		ExpectsValue: true,
+	})
+	args.Register(args.Argument{
+		Name:        "debug",
+		Short:       "d",
+		Description: "Create plist file, print debug and stack traces.",
+	})
+	args.Register(args.Argument{
+		Name:        "output",
+		Short:       "o",
+		Description: "Set custom output file path.",
+	})
+	args.Register(args.Argument{
+		Name:        "import",
+		Short:       "i",
+		Description: "Import compiled Shortcut (ignored if unsigned).",
+	})
+	args.Register(args.Argument{
+		Name:        "comments",
+		Short:       "c",
+		Description: "Create comment actions for text comments (e.g. //, /**/)",
 	})
 	args.Register(args.Argument{
 		Name:        "hubsign",
 		Description: "Sign the compiled Shortcut using RoutineHub's remote signing service.",
 	})
 	args.Register(args.Argument{
-		Name:        "debug",
-		Short:       "d",
-		Description: "Save the generated plist and print debug messages and stack traces.",
-	})
-	args.Register(args.Argument{
-		Name:        "output",
-		Short:       "o",
-		Description: "Optional output file path. (e.g. path/to/file.shortcut).",
-	})
-	args.Register(args.Argument{
-		Name:        "import",
-		Short:       "i",
-		Description: "Opens compiled Shortcut after compilation (ignored if unsigned).",
-	})
-	args.Register(args.Argument{
-		Name:        "comments",
-		Short:       "c",
-		Description: "Include comments in the compiled Shortcut.",
-	})
-	args.Register(args.Argument{
 		Name:        "no-ansi",
-		Description: "Don't output ANSI escape sequences that format and color the output.",
+		Description: "Don't output ANSI escape sequences that format the output.",
 	})
 	args.Register(args.Argument{
 		Name:        "skip-sign",
@@ -60,13 +60,13 @@ func init() {
 	})
 	args.Register(args.Argument{
 		Name:         "action",
-		Description:  "Print an action's definition. Leave empty to print all action definitions.",
+		Description:  "Print action definition. Empty prints all definitions.",
 		DefaultValue: "",
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
 		Name:         "glyph",
-		Description:  "Search glyphs in the compiler. Icon editor at https://glyphs.cherrilang.org.",
+		Description:  "Search glyphs in the compiler.",
 		DefaultValue: "",
 		ExpectsValue: true,
 	})
