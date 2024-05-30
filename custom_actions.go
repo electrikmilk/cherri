@@ -115,16 +115,26 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 
 func checkCustomActionUsage() {
 	var actionUsageRegex = regexp.MustCompile(`(action )?([a-zA-Z0-9]+)\(`)
-	var matches = actionUsageRegex.FindAllStringSubmatch(contents, -1)
-	if len(matches) == 0 {
-		return
-	}
-	for _, match := range matches {
-		var ref = strings.TrimSpace(match[2])
-		if _, found := customActions[ref]; found {
-			customActions[ref].used = true
+
+	customActions[""] = &customAction{body: contents}
+
+	var actionQueue = []string{""}
+	for len(actionQueue) > 0 {
+		var matches = actionUsageRegex.FindAllStringSubmatch(customActions[actionQueue[0]].body, -1)
+		actionQueue = actionQueue[1:]
+		if len(matches) == 0 {
+			continue
+		}
+		for _, match := range matches {
+			var ref = strings.TrimSpace(match[2])
+			if _, found := customActions[ref]; found && !customActions[ref].used {
+				customActions[ref].used = true
+				actionQueue = append(actionQueue, ref)
+			}
 		}
 	}
+
+	delete(customActions, "")
 }
 
 func makeCustomActionsHeader() {
