@@ -680,9 +680,11 @@ func collectGlyphDefinition() {
 		handle(hexErr)
 		iconGlyph = glyphInt
 	} else {
-		fmt.Println(ansi("Build an icon for your Shortcut at https://glyphs.cherrilang.org/.", cyan))
-		args.Args["glyph"] = collectGlyph
-		glyphsSearch()
+		if !args.Using("no-ansi") {
+			fmt.Println(ansi("Build an icon for your Shortcut at https://glyphs.cherrilang.org/.", cyan))
+			args.Args["glyph"] = collectGlyph
+			glyphsSearch()
+		}
 		parserError(fmt.Sprintf("Invalid icon glyph '%s'", collectGlyph))
 	}
 }
