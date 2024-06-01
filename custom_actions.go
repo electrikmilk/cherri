@@ -7,9 +7,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"regexp"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 // customAction contains the collected declaration of a custom action.
@@ -43,7 +44,12 @@ func parseCustomActions() {
 
 	resetParse()
 
-	checkCustomActionUsage()
+	checkCustomActionUsage(contents)
+	for _, action := range customActions {
+		if strings.ContainsAny(action.body, "()") {
+			checkCustomActionUsage(action.body)
+		}
+	}
 	makeCustomActionsHeader()
 
 	if args.Using("debug") {
@@ -113,28 +119,18 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 	return
 }
 
-func checkCustomActionUsage() {
+func checkCustomActionUsage(content string) {
 	var actionUsageRegex = regexp.MustCompile(`(action )?([a-zA-Z0-9]+)\(`)
-
-	customActions[""] = &customAction{body: contents}
-
-	var actionQueue = []string{""}
-	for len(actionQueue) > 0 {
-		var matches = actionUsageRegex.FindAllStringSubmatch(customActions[actionQueue[0]].body, -1)
-		actionQueue = actionQueue[1:]
-		if len(matches) == 0 {
-			continue
-		}
-		for _, match := range matches {
-			var ref = strings.TrimSpace(match[2])
-			if _, found := customActions[ref]; found && !customActions[ref].used {
-				customActions[ref].used = true
-				actionQueue = append(actionQueue, ref)
-			}
+	var matches = actionUsageRegex.FindAllStringSubmatch(content, -1)
+	if len(matches) == 0 {
+		return
+	}
+	for _, match := range matches {
+		var ref = strings.TrimSpace(match[2])
+		if _, found := customActions[ref]; found {
+			customActions[ref].used = true
 		}
 	}
-
-	delete(customActions, "")
 }
 
 func makeCustomActionsHeader() {
