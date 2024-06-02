@@ -101,7 +101,7 @@ var dateFormats = []string{"None", "Short", "Medium", "Long", "Relative", "RFC 2
 var timeFormats = []string{"None", "Short", "Medium", "Long", "Relative"}
 var timerDurations = []string{"hr", "min", "sec"}
 var weekdays = []string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
-var fileLabels = map[string]int{
+var fileLabelsMap = map[string]int{
 	"red":    6,
 	"orange": 7,
 	"yellow": 5,
@@ -110,6 +110,7 @@ var fileLabels = map[string]int{
 	"purple": 3,
 	"gray":   1,
 }
+var fileLabels = []string{"red", "orange", "yellow", "green", "blue", "purple", "gray"}
 var filesSortBy = []string{"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
 
 var toggleAlarmIntent = appIntent{
@@ -1204,6 +1205,7 @@ var actions = map[string]*actionDefinition{
 				name:      "color",
 				validType: String,
 				optional:  false,
+				enum:      fileLabels,
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
@@ -1213,7 +1215,7 @@ var actions = map[string]*actionDefinition{
 				{
 					key:      "WFLabelColorNumber",
 					dataType: Number,
-					value:    fileLabels[color],
+					value:    fileLabelsMap[color],
 				},
 			}
 		},
