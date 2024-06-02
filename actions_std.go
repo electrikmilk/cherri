@@ -5824,7 +5824,7 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"getAppleMusicID": {
+	"getShazamDetail": {
 		identifier: "properties.shazam",
 		parameters: []parameterDefinition{
 			{
@@ -5832,15 +5832,12 @@ var actions = map[string]*actionDefinition{
 				validType: Var,
 				key:       "WFInput",
 			},
-		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFContentItemPropertyName",
-					dataType: Text,
-					value:    "Apple Music ID",
-				},
-			}
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+				enum:      []string{"Apple Music ID", "Artist", "Title", "Is Explicit", "Lyrics Snippet", "Lyric Snippet Synced", "Artwork", "Video URL", "Shazam URL", "Apple Music URL", "Name"},
+			},
 		},
 	},
 	"springBoard": {
