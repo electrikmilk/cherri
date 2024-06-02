@@ -143,6 +143,18 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
+	"currentDate": {
+		identifier: "date",
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFDateActionMode",
+					dataType: Text,
+					value:    "Current Date",
+				},
+			}
+		},
+	},
 	"addCalendar": {
 		identifier: "addnewcalendar",
 		parameters: []parameterDefinition{
