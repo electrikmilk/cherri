@@ -1411,7 +1411,7 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"compareText": {
+	"containsText": {
 		identifier: "text.match",
 		parameters: []parameterDefinition{
 			{
