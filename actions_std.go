@@ -5840,6 +5840,74 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
+	"getAppleMusicID": {
+		identifier: "properties.shazam",
+		parameters: []parameterDefinition{
+			{
+				name:      "input",
+				validType: Var,
+				key:       "WFInput",
+			},
+		},
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFContentItemPropertyName",
+					dataType: Text,
+					value:    "Apple Music ID",
+				},
+			}
+		},
+	},
+	"springBoard": {
+		identifier: "openapp",
+		make: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFAppIdentifier",
+					dataType: Text,
+					value:    "com.apple.springboard",
+				},
+				{
+					key:      "WFSelectedApp",
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "BundleIdentifier",
+							dataType: Text,
+							value:    "com.apple.springboard",
+						},
+						{
+							key:      "Name",
+							dataType: Text,
+							value:    "SpringBoard",
+						},
+						{
+							key:      "TeamIdentifier",
+							dataType: Text,
+							value:    "0000000000",
+						},
+					},
+				},
+			}
+		},
+	},
+	"getShortcutDetail": {
+		identifier: "properties.workflow",
+		parameters: []parameterDefinition{
+			{
+				name:      "shortcut",
+				validType: Var,
+				key:       "WFInput",
+			},
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+				enum:      []string{"Folder", "Icon", "Action Count", "File Size", "File Extension Creation Date", "File Path", "Last Modified Date", "Name"},
+			},
+		},
+	},
 }
 
 func rawAction() {
