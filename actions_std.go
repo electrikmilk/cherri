@@ -1411,6 +1411,42 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"compareText": {
+		identifier: "text.match",
+		parameters: []parameterDefinition{
+			{
+				name:      "subject",
+				validType: String,
+				key:       "text",
+			},
+			{
+				name:      "text",
+				validType: String,
+			},
+			{
+				name:         "caseSensitive",
+				validType:    Bool,
+				key:          "WFMatchTextCaseSensitive",
+				defaultValue: true,
+				optional:     true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			var textArg = args[1]
+			if textArg.valueType == Var {
+				args[1] = actionArgument{
+					valueType: String,
+					value:     fmt.Sprintf("^{%s}", textArg.value),
+				}
+			} else {
+				args[1].value = fmt.Sprintf("^%s", textArg.value)
+			}
+
+			return []plistData{
+				argumentValue("WFMatchTextPattern", args, 1),
+			}
+		},
+	},
 	"matchText": {
 		identifier: "text.match",
 		parameters: []parameterDefinition{
