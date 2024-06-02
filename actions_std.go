@@ -113,6 +113,8 @@ var fileLabelsMap = map[string]int{
 var fileLabels = []string{"red", "orange", "yellow", "green", "blue", "purple", "gray"}
 var filesSortBy = []string{"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
 var pdfMergeBehaviors = []string{"Append", "Shuffle"}
+var cameras = []string{"Front", "Back"}
+var cameraQualities = []string{"Low", "Medium", "High"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -2521,18 +2523,21 @@ var actions = map[string]*actionDefinition{
 				validType:    String,
 				key:          "WFCameraCaptureDevice",
 				defaultValue: "Front",
+				enum:         cameras,
 			},
 			{
 				name:         "quality",
 				validType:    String,
 				key:          "WFCameraCaptureQuality",
-				defaultValue: "Medium",
+				defaultValue: "High",
+				enum:         cameraQualities,
 			},
 			{
-				name:         "startImmediately",
-				validType:    Bool,
+				name:         "recordingStart",
+				validType:    String,
 				key:          "WFRecordingStart",
-				defaultValue: false,
+				defaultValue: "Immediately",
+				enum:         recordingStarts,
 			},
 		},
 	},
