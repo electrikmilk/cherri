@@ -1156,7 +1156,7 @@ var actions = map[string]*actionDefinition{
 				key:          "Recursive",
 				name:         "recursive",
 				validType:    Bool,
-				defaultValue: true,
+				defaultValue: false,
 				optional:     true,
 			},
 		},
