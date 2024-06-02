@@ -5173,22 +5173,6 @@ var actions = map[string]*actionDefinition{
 		},
 		minVersion: 16.4,
 	},
-	"shortcutDetail": {
-		identifier: "properties.workflow",
-		parameters: []parameterDefinition{
-			{
-				name:      "detail",
-				validType: String,
-				key:       "WFContentItemPropertyName",
-				enum:      shortcutDetails,
-			},
-			{
-				name:      "shortcut",
-				validType: Variable,
-				key:       "WFInput",
-			},
-		},
-	},
 	"airdrop": {
 		identifier: "airdropdocument",
 		parameters: []parameterDefinition{
