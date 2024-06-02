@@ -44,7 +44,12 @@ func parseCustomActions() {
 
 	resetParse()
 
-	checkCustomActionUsage()
+	checkCustomActionUsage(contents)
+	for _, action := range customActions {
+		if strings.ContainsAny(action.body, "()") {
+			checkCustomActionUsage(action.body)
+		}
+	}
 	makeCustomActionsHeader()
 
 	if args.Using("debug") {
@@ -114,9 +119,9 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 	return
 }
 
-func checkCustomActionUsage() {
+func checkCustomActionUsage(content string) {
 	var actionUsageRegex = regexp.MustCompile(`(action )?([a-zA-Z0-9]+)\(`)
-	var matches = actionUsageRegex.FindAllStringSubmatch(contents, -1)
+	var matches = actionUsageRegex.FindAllStringSubmatch(content, -1)
 	if len(matches) == 0 {
 		return
 	}
