@@ -254,7 +254,7 @@ func makeCustomActionCall(identifier *string, arguments *[]actionArgument) (cust
 			case Variable:
 				var variableValue, found = getVariableValue(argumentValue)
 				if !found {
-					parserError(fmt.Sprintf("Variable not found: %s", argumentValue))
+					parserError(fmt.Sprintf("Undefined reference '%s'", argumentValue))
 				}
 				if variableValue.valueType == Arr {
 					var jsonBytes, jsonErr = json.Marshal(variableValue.value)

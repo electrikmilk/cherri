@@ -357,7 +357,7 @@ func checkInlineVars(value *string) {
 		}
 		var identifier = match[1]
 		if !validReference(identifier) {
-			parserError(fmt.Sprintf("Inline var '%s' does not exist!", identifier))
+			parserError(fmt.Sprintf("Undefined reference '%s'", identifier))
 		}
 	}
 }
