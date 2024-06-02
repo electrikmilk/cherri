@@ -2893,6 +2893,34 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"getPodcasts": {
+		identifier: "getpodcastsfromlibrary",
+	},
+	"playPodcast": {
+		parameters: []parameterDefinition{
+			{
+				name:      "podcast",
+				validType: Var,
+				key:       "WFPodcastShow",
+			},
+		},
+	},
+	"getPodcastDetail": {
+		identifier: "properties.podcastshow",
+		parameters: []parameterDefinition{
+			{
+				name:      "podcast",
+				validType: Var,
+				key:       "WFInput",
+			},
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+				enum:      []string{"Feed URL", "Genre", "Episode Count", "Artist", "Store ID", "Store URL", "Artwork", "Artwork URL", "Name"},
+			},
+		},
+	},
 	"makeVideoFromGIF": {
 		parameters: []parameterDefinition{
 			{
