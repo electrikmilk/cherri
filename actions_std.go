@@ -101,6 +101,20 @@ var dateFormats = []string{"None", "Short", "Medium", "Long", "Relative", "RFC 2
 var timeFormats = []string{"None", "Short", "Medium", "Long", "Relative"}
 var timerDurations = []string{"hr", "min", "sec"}
 var weekdays = []string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+var fileLabelsMap = map[string]int{
+	"red":    6,
+	"orange": 7,
+	"yellow": 5,
+	"green":  2,
+	"blue":   4,
+	"purple": 3,
+	"gray":   1,
+}
+var fileLabels = []string{"red", "orange", "yellow", "green", "blue", "purple", "gray"}
+var filesSortBy = []string{"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
+var pdfMergeBehaviors = []string{"Append", "Shuffle"}
+var cameras = []string{"Front", "Back"}
+var cameraQualities = []string{"Low", "Medium", "High"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -1134,6 +1148,230 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"prependToFile": {
+		identifier: "file.append",
+		parameters: []parameterDefinition{
+			{
+				name:      "filePath",
+				validType: String,
+				key:       "WFFilePath",
+			},
+			{
+				name:      "text",
+				validType: String,
+				key:       "WFInput",
+			},
+		},
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFAppendFileWriteMode",
+					dataType: Boolean,
+					value:    "Prepend",
+				},
+			}
+		},
+	},
+	"appendToFile": {
+		identifier: "file.append",
+		parameters: []parameterDefinition{
+			{
+				name:      "filePath",
+				validType: String,
+				key:       "WFFilePath",
+			},
+			{
+				name:      "text",
+				validType: String,
+				key:       "WFInput",
+			},
+		},
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFAppendFileWriteMode",
+					dataType: Boolean,
+					value:    "Append",
+				},
+			}
+		},
+	},
+	"labelFile": {
+		identifier: "file.label",
+		parameters: []parameterDefinition{
+			{
+				name:      "file",
+				validType: Var,
+				key:       "WFInput",
+			},
+			{
+				name:      "color",
+				validType: String,
+				optional:  false,
+				enum:      fileLabels,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			var color = strings.ToLower(getArgValue(args[1]).(string))
+
+			return []plistData{
+				{
+					key:      "WFLabelColorNumber",
+					dataType: Number,
+					value:    fileLabelsMap[color],
+				},
+			}
+		},
+	},
+	"filterFiles": {
+		identifier: "filter.files",
+		parameters: []parameterDefinition{
+			{
+				name:      "files",
+				validType: Var,
+				key:       "WFContentItemInputParameter",
+			},
+			{
+				name:      "limit",
+				validType: Integer,
+				key:       "WFContentItemLimitNumber",
+				optional:  true,
+			},
+			{
+				name:      "sortBy",
+				validType: String,
+				key:       "WFContentItemSortProperty",
+				enum:      filesSortBy,
+				optional:  true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			if len(args) != 1 {
+				return []plistData{
+					{
+						key:      "WFContentItemLimitEnabled",
+						dataType: Boolean,
+						value:    true,
+					},
+				}
+			}
+
+			return []plistData{}
+		},
+	},
+	"optimizePDF": {
+		identifier: "compresspdf",
+		parameters: []parameterDefinition{
+			{
+				name:      "pdfFile",
+				validType: Var,
+				key:       "WFInput",
+			},
+		},
+	},
+	"getPDFText": {
+		identifier: "gettextfrompdf",
+		parameters: []parameterDefinition{
+			{
+				name:      "pdfFile",
+				validType: Var,
+				key:       "WFInput",
+			},
+			{
+				name:         "richText",
+				validType:    Bool,
+				defaultValue: false,
+				optional:     true,
+			},
+			{
+				name:         "combinePages",
+				validType:    Bool,
+				key:          "WFCombinePages",
+				defaultValue: true,
+				optional:     true,
+			},
+			{
+				name:      "headerText",
+				validType: String,
+				key:       "WFGetTextFromPDFPageHeader",
+				optional:  true,
+			},
+			{
+				name:      "footerText",
+				validType: String,
+				key:       "WFGetTextFromPDFPageFooter",
+				optional:  true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			if len(args) != 1 {
+				var richText = getArgValue(args[1]).(bool)
+				if richText {
+					return []plistData{
+						{
+							key:      "WFGetTextFromPDFTextType",
+							dataType: Text,
+							value:    "Rich Text",
+						},
+					}
+				}
+			}
+
+			return []plistData{
+				{
+					key:      "WFGetTextFromPDFTextType",
+					dataType: Text,
+					value:    "Text",
+				},
+			}
+		},
+	},
+	"makePDF": {
+		parameters: []parameterDefinition{
+			{
+				name:      "input",
+				validType: Var,
+				key:       "WFInput",
+			},
+			{
+				name:         "includeMargin",
+				validType:    Bool,
+				key:          "WFPDFIncludeMargin",
+				defaultValue: false,
+				optional:     true,
+			},
+			{
+				name:         "mergeBehavior",
+				validType:    String,
+				key:          "WFPDFDocumentMergeBehavior",
+				defaultValue: "Append",
+				enum:         pdfMergeBehaviors,
+				optional:     true,
+			},
+		},
+	},
+	"makeSpokenAudio": {
+		identifier: "makespokenaudiofromtext",
+		parameters: []parameterDefinition{
+			{
+				name:      "text",
+				validType: String,
+				key:       "WFInput",
+			},
+			{
+				name:      "rate",
+				validType: Integer,
+				key:       "WFSpeakTextRate",
+				optional:  true,
+			},
+			{
+				name:      "pitch",
+				validType: Integer,
+				key:       "WFSpeakTextPitch",
+				optional:  true,
+			},
+		},
+	},
 	"createFolder": { // TODO: Writing to locations other than the Shortcuts folder.
 		identifier: "file.createfolder",
 		parameters: []parameterDefinition{
@@ -1156,7 +1394,7 @@ var actions = map[string]*actionDefinition{
 				key:          "Recursive",
 				name:         "recursive",
 				validType:    Bool,
-				defaultValue: true,
+				defaultValue: false,
 				optional:     true,
 			},
 		},
@@ -2285,18 +2523,21 @@ var actions = map[string]*actionDefinition{
 				validType:    String,
 				key:          "WFCameraCaptureDevice",
 				defaultValue: "Front",
+				enum:         cameras,
 			},
 			{
 				name:         "quality",
 				validType:    String,
 				key:          "WFCameraCaptureQuality",
-				defaultValue: "Medium",
+				defaultValue: "High",
+				enum:         cameraQualities,
 			},
 			{
-				name:         "startImmediately",
-				validType:    Bool,
+				name:         "recordingStart",
+				validType:    String,
 				key:          "WFRecordingStart",
-				defaultValue: false,
+				defaultValue: "Immediately",
+				enum:         recordingStarts,
 			},
 		},
 	},
@@ -2564,6 +2805,7 @@ var actions = map[string]*actionDefinition{
 				name:         "position",
 				validType:    String,
 				key:          "WFImageCropPosition",
+				enum:         cropPositions,
 				optional:     true,
 				defaultValue: "Center",
 			},
@@ -2578,7 +2820,6 @@ var actions = map[string]*actionDefinition{
 				name:         "height",
 				validType:    String,
 				key:          "WFImageCropHeight",
-				enum:         cropPositions,
 				optional:     true,
 				defaultValue: "100",
 			},
