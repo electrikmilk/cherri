@@ -112,6 +112,7 @@ var fileLabelsMap = map[string]int{
 }
 var fileLabels = []string{"red", "orange", "yellow", "green", "blue", "purple", "gray"}
 var filesSortBy = []string{"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
+var pdfMergeBehaviors = []string{"Append", "Shuffle"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -1321,6 +1322,30 @@ var actions = map[string]*actionDefinition{
 					value:    "Text",
 				},
 			}
+		},
+	},
+	"makePDF": {
+		parameters: []parameterDefinition{
+			{
+				name:      "input",
+				validType: Var,
+				key:       "WFInput",
+			},
+			{
+				name:         "includeMargin",
+				validType:    Bool,
+				key:          "WFPDFIncludeMargin",
+				defaultValue: false,
+				optional:     true,
+			},
+			{
+				name:         "mergeBehavior",
+				validType:    String,
+				key:          "WFPDFDocumentMergeBehavior",
+				defaultValue: "Append",
+				enum:         pdfMergeBehaviors,
+				optional:     true,
+			},
 		},
 	},
 	"makeSpokenAudio": {
