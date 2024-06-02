@@ -1411,7 +1411,48 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"matchedTextGroupIndex": {
+	"matchText": {
+		identifier: "text.match",
+		parameters: []parameterDefinition{
+			{
+				name:      "regexPattern",
+				validType: String,
+				key:       "WFMatchTextPattern",
+			},
+			{
+				name:      "text",
+				validType: String,
+				key:       "text",
+			},
+			{
+				name:         "caseSensitive",
+				validType:    Bool,
+				key:          "WFMatchTextCaseSensitive",
+				defaultValue: true,
+				optional:     true,
+			},
+		},
+	},
+	"getMatchGroups": {
+		identifier: "text.match.getgroup",
+		parameters: []parameterDefinition{
+			{
+				name:      "matches",
+				validType: Var,
+				key:       "matches",
+			},
+		},
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFGetGroupType",
+					dataType: Text,
+					value:    "All Groups",
+				},
+			}
+		},
+	},
+	"getMatchGroup": {
 		identifier: "text.match.getgroup",
 		parameters: []parameterDefinition{
 			{
