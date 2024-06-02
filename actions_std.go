@@ -101,6 +101,16 @@ var dateFormats = []string{"None", "Short", "Medium", "Long", "Relative", "RFC 2
 var timeFormats = []string{"None", "Short", "Medium", "Long", "Relative"}
 var timerDurations = []string{"hr", "min", "sec"}
 var weekdays = []string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+var fileLabels = map[string]int{
+	"red":    6,
+	"orange": 7,
+	"yellow": 5,
+	"green":  2,
+	"blue":   4,
+	"purple": 3,
+	"gray":   1,
+}
+var filesSortBy = []string{"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -1130,6 +1140,205 @@ var actions = map[string]*actionDefinition{
 				name:      "language",
 				validType: String,
 				key:       "WFSpeechLanguage",
+				optional:  true,
+			},
+		},
+	},
+	"prependToFile": {
+		identifier: "file.append",
+		parameters: []parameterDefinition{
+			{
+				name:      "filePath",
+				validType: String,
+				key:       "WFFilePath",
+			},
+			{
+				name:      "text",
+				validType: String,
+				key:       "WFInput",
+			},
+		},
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFAppendFileWriteMode",
+					dataType: Boolean,
+					value:    "Prepend",
+				},
+			}
+		},
+	},
+	"appendToFile": {
+		identifier: "file.append",
+		parameters: []parameterDefinition{
+			{
+				name:      "filePath",
+				validType: String,
+				key:       "WFFilePath",
+			},
+			{
+				name:      "text",
+				validType: String,
+				key:       "WFInput",
+			},
+		},
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFAppendFileWriteMode",
+					dataType: Boolean,
+					value:    "Append",
+				},
+			}
+		},
+	},
+	"labelFile": {
+		identifier: "file.label",
+		parameters: []parameterDefinition{
+			{
+				name:      "file",
+				validType: Var,
+				key:       "WFInput",
+			},
+			{
+				name:      "color",
+				validType: String,
+				optional:  false,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			var color = strings.ToLower(getArgValue(args[1]).(string))
+
+			return []plistData{
+				{
+					key:      "WFLabelColorNumber",
+					dataType: Number,
+					value:    fileLabels[color],
+				},
+			}
+		},
+	},
+	"filterFiles": {
+		identifier: "filter.files",
+		parameters: []parameterDefinition{
+			{
+				name:      "files",
+				validType: Var,
+				key:       "WFContentItemInputParameter",
+			},
+			{
+				name:      "limit",
+				validType: Integer,
+				key:       "WFContentItemLimitNumber",
+				optional:  true,
+			},
+			{
+				name:      "sortBy",
+				validType: String,
+				key:       "WFContentItemSortProperty",
+				enum:      filesSortBy,
+				optional:  true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			if len(args) != 1 {
+				return []plistData{
+					{
+						key:      "WFContentItemLimitEnabled",
+						dataType: Boolean,
+						value:    true,
+					},
+				}
+			}
+
+			return []plistData{}
+		},
+	},
+	"optimizePDF": {
+		identifier: "compresspdf",
+		parameters: []parameterDefinition{
+			{
+				name:      "pdfFile",
+				validType: Var,
+				key:       "WFInput",
+			},
+		},
+	},
+	"getPDFText": {
+		identifier: "gettextfrompdf",
+		parameters: []parameterDefinition{
+			{
+				name:      "pdfFile",
+				validType: Var,
+				key:       "WFInput",
+			},
+			{
+				name:         "richText",
+				validType:    Bool,
+				defaultValue: false,
+				optional:     true,
+			},
+			{
+				name:         "combinePages",
+				validType:    Bool,
+				key:          "WFCombinePages",
+				defaultValue: true,
+				optional:     true,
+			},
+			{
+				name:      "headerText",
+				validType: String,
+				key:       "WFGetTextFromPDFPageHeader",
+				optional:  true,
+			},
+			{
+				name:      "footerText",
+				validType: String,
+				key:       "WFGetTextFromPDFPageFooter",
+				optional:  true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			if len(args) != 1 {
+				var richText = getArgValue(args[1]).(bool)
+				if richText {
+					return []plistData{
+						{
+							key:      "WFGetTextFromPDFTextType",
+							dataType: Text,
+							value:    "Rich Text",
+						},
+					}
+				}
+			}
+
+			return []plistData{
+				{
+					key:      "WFGetTextFromPDFTextType",
+					dataType: Text,
+					value:    "Text",
+				},
+			}
+		},
+	},
+	"makeSpokenAudio": {
+		identifier: "makespokenaudiofromtext",
+		parameters: []parameterDefinition{
+			{
+				name:      "text",
+				validType: String,
+				key:       "WFInput",
+			},
+			{
+				name:      "rate",
+				validType: Integer,
+				key:       "WFSpeakTextRate",
+				optional:  true,
+			},
+			{
+				name:      "pitch",
+				validType: Integer,
+				key:       "WFSpeakTextPitch",
 				optional:  true,
 			},
 		},
