@@ -5727,12 +5727,11 @@ var actions = map[string]*actionDefinition{
 			}
 
 			var image = getArgValue(args[2])
-			if reflect.TypeOf(image).String() != stringType {
-				parserError("Image path for VCard must be a string literal")
-			}
-			var iconFile = getArgValue(args[2]).(string)
-			if _, err := os.Stat(iconFile); os.IsNotExist(err) {
-				parserError(fmt.Sprintf("File '%s' does not exist!", iconFile))
+			if reflect.TypeOf(image).String() == stringType {
+				var iconFile = getArgValue(args[2]).(string)
+				if _, err := os.Stat(iconFile); os.IsNotExist(err) {
+					parserError(fmt.Sprintf("File '%s' does not exist!", iconFile))
+				}
 			}
 		},
 		make: func(args []actionArgument) []plistData {
@@ -5742,12 +5741,24 @@ var actions = map[string]*actionDefinition{
 			wrapVariableReference(&subtitle)
 			var vcard strings.Builder
 			vcard.WriteString(fmt.Sprintf("BEGIN:VCARD\nVERSION:3.0\nN;CHARSET=utf-8:%s\nORG:%s\n", title, subtitle))
+
 			if len(args) > 2 {
-				var iconFile = getArgValue(args[2]).(string)
-				var bytes, readErr = os.ReadFile(iconFile)
-				handle(readErr)
-				vcard.WriteString(fmt.Sprintf("PHOTO;ENCODING=b:%s\n", base64.StdEncoding.EncodeToString(bytes)))
+				var photo string
+				var image = getArgValue(args[2])
+				if reflect.TypeOf(image).String() != stringType && args[2].valueType == Variable {
+					photo = fmt.Sprintf("{%s}", args[2].value)
+				} else {
+					var iconFile = getArgValue(args[2]).(string)
+					var bytes, readErr = os.ReadFile(iconFile)
+					handle(readErr)
+					photo = base64.StdEncoding.EncodeToString(bytes)
+				}
+
+				if photo != "" {
+					vcard.WriteString(fmt.Sprintf("PHOTO;ENCODING=b:%s\n", photo))
+				}
 			}
+
 			vcard.WriteString("END:VCARD")
 			args[0] = actionArgument{
 				valueType: String,
