@@ -61,6 +61,8 @@ func initParse() {
 	parseCopyPastes()
 	parseCustomActions()
 
+	writeProcessed()
+
 	preParsing = false
 	for char != -1 {
 		parse()
@@ -84,6 +86,20 @@ func initParse() {
 	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green) + "\n")
 	}
+}
+
+func writeProcessed() {
+	if !args.Using("debug") {
+		return
+	}
+	fmt.Printf("Writing processed...")
+
+	var path = fmt.Sprintf("%s%s_processed.cherri", relativePath, workflowName)
+	fmt.Println("path", path)
+	var writeErr = os.WriteFile(path, []byte(contents), 0600)
+	handle(writeErr)
+
+	fmt.Println(ansi("Done.", green))
 }
 
 func printParsingDebug() {
