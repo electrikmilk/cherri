@@ -205,10 +205,19 @@ func handleCustomActionRef(identifier *string) action {
 	var customAction = customActions[*identifier]
 
 	var arguments []actionArgument
-	advance()
-	if char != ')' {
+	var paramsSize = len(customAction.definition.parameters)
+	if paramsSize > 0 {
+		advance()
 		setCurrentAction(*identifier, &customAction.definition)
 		arguments = collectArguments()
+
+		if len(arguments) != paramsSize {
+			parserError(
+				fmt.Sprintf("Too few arguments\n\n%s",
+					generateActionDefinition(parameterDefinition{}, false, false),
+				),
+			)
+		}
 	}
 
 	var customActionCall = makeCustomActionCall(identifier, &arguments)
