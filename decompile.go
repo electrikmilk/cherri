@@ -212,7 +212,7 @@ func decompileIcon() {
 
 	if icon.WFWorkflowIconGlyphNumber != iconGlyph {
 		for name, i := range glyphs {
-			if icon.WFWorkflowIconGlyphNumber != i {
+			if icon.WFWorkflowIconGlyphNumber != int64(i) {
 				continue
 			}
 
