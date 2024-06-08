@@ -191,7 +191,15 @@ func makeVariableValue(outputName *plistData, uuid *plistData, valueType tokenTy
 		setCurrentAction(action.ident, actions[action.ident])
 		plistAction(action.args, outputName, uuid)
 	case Dict:
-		makeDictionaryValue(outputName, uuid, value)
+		appendPlist(makeStdAction("dictionary", []plistData{
+			*outputName,
+			*uuid,
+			{
+				key:      "WFItems",
+				dataType: Dictionary,
+				value:    makeDictionaryValue(value),
+			},
+		}))
 	}
 }
 
@@ -291,33 +299,25 @@ func makeExpressionValue(outputName *plistData, uuid *plistData, value *any) {
 	}))
 }
 
-func makeDictionaryValue(outputName *plistData, uuid *plistData, value *any) {
-	appendPlist(makeStdAction("dictionary", []plistData{
-		*outputName,
-		*uuid,
+func makeDictionaryValue(value *any) []plistData {
+	return []plistData{
 		{
-			key:      "WFItems",
+			key:      "Value",
 			dataType: Dictionary,
 			value: []plistData{
 				{
-					key:      "Value",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "WFDictionaryFieldValueItems",
-							dataType: Array,
-							value:    makeDictionary(*value),
-						},
-					},
-				},
-				{
-					key:      "WFSerializationType",
-					dataType: Text,
-					value:    "WFDictionaryFieldValue",
+					key:      "WFDictionaryFieldValueItems",
+					dataType: Array,
+					value:    makeDictionary(*value),
 				},
 			},
 		},
-	}))
+		{
+			key:      "WFSerializationType",
+			dataType: Text,
+			value:    "WFDictionaryFieldValue",
+		},
+	}
 }
 
 func variableValueModifier(token *token, outputName *plistData, UUID *plistData) {
@@ -381,7 +381,7 @@ func inputValue(key string, name string, varUUID string) plistData {
 	var value []plistData
 	if varUUID != "" {
 		var variable = variables[name]
-		if !variable.repeatItem && (variable.constant && variable.valueType == Variable || variable.valueType != Variable) {
+		if !variable.repeatItem && ((variable.constant && variable.valueType == Variable) || variable.valueType != Variable) {
 			value = []plistData{
 				{
 					key:      "OutputName",
@@ -468,26 +468,50 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 		getAs = v.getAs
 		coerce = v.coerce
 		if getAs != "" {
-			aggrandizements = append(aggrandizements, plistData{
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "PropertyUserInfo",
-						dataType: Number,
-						value:    0,
+			var refValueType = v.valueType
+			if v.valueType == Var {
+				if ref, found := variables[v.value.(string)]; found {
+					refValueType = ref.valueType
+				}
+			}
+			if refValueType == Dict {
+				aggrandizements = append(aggrandizements, plistData{
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "Type",
+							dataType: Text,
+							value:    "WFDictionaryValueVariableAggrandizement",
+						},
+						{
+							key:      "DictionaryKey",
+							dataType: Text,
+							value:    getAs,
+						},
 					},
-					{
-						key:      "Type",
-						dataType: Text,
-						value:    "WFPropertyVariableAggrandizement",
+				})
+			} else {
+				aggrandizements = append(aggrandizements, plistData{
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "PropertyUserInfo",
+							dataType: Number,
+							value:    0,
+						},
+						{
+							key:      "Type",
+							dataType: Text,
+							value:    "WFPropertyVariableAggrandizement",
+						},
+						{
+							key:      "PropertyName",
+							dataType: Text,
+							value:    getAs,
+						},
 					},
-					{
-						key:      "PropertyName",
-						dataType: Text,
-						value:    getAs,
-					},
-				},
-			})
+				})
+			}
 		}
 		if coerce != "" {
 			makeContentItems()
@@ -555,6 +579,7 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 			value:    aggrandizements,
 		})
 	}
+
 	return plistData{
 		key:      key,
 		dataType: Dictionary,
@@ -687,21 +712,40 @@ func makeAttachmentValues() {
 			}
 		}
 		if stringVar.getAs != "" {
-			aggr = append(aggr, plistData{
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "Type",
-						dataType: Text,
-						value:    "WFPropertyVariableAggrandizement",
+			var refValueType = variable.valueType
+			if refValueType == Dict {
+				aggr = append(aggr, plistData{
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "Type",
+							dataType: Text,
+							value:    "WFDictionaryValueVariableAggrandizement",
+						},
+						{
+							key:      "DictionaryKey",
+							dataType: Text,
+							value:    stringVar.getAs,
+						},
 					},
-					{
-						key:      "PropertyName",
-						dataType: Text,
-						value:    stringVar.getAs,
+				})
+			} else {
+				aggr = append(aggr, plistData{
+					dataType: Dictionary,
+					value: []plistData{
+						{
+							key:      "Type",
+							dataType: Text,
+							value:    "WFPropertyVariableAggrandizement",
+						},
+						{
+							key:      "PropertyName",
+							dataType: Text,
+							value:    stringVar.getAs,
+						},
 					},
-				},
-			})
+				})
+			}
 		}
 		if stringVar.coerce != "" {
 			makeContentItems()
@@ -722,7 +766,7 @@ func makeAttachmentValues() {
 					},
 				})
 			} else {
-				var list = makeKeyList("Available content item types:", contentItems)
+				var list = makeKeyList("Available content item types:", contentItems, stringVar.coerce)
 				parserError(fmt.Sprintf("Invalid content item for type coerce '%s'\n\n%s\n", stringVar.coerce, list))
 			}
 		}
@@ -839,6 +883,12 @@ func paramValue(key string, arg actionArgument, handleAs tokenType, outputType p
 			key:      key,
 			dataType: Boolean,
 			value:    arg.value,
+		}
+	case Dict:
+		return plistData{
+			key:      key,
+			dataType: Dictionary,
+			value:    makeDictionaryValue(&arg.value),
 		}
 	default:
 		return attachmentValues(key, arg.value.(string), outputType)

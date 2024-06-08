@@ -53,6 +53,12 @@ type checkFunc func(args []actionArgument, definition *actionDefinition)
 // paramsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument that must return a slice of plistData as a result.
 type paramsFunc func(args []actionArgument) []plistData
 
+type appIntent struct {
+	name                string
+	bundleIdentifier    string
+	appIntentIdentifier string
+}
+
 // actionDefinition defines an action, what it expects and has functions for checking the arguments and creating the parameters.
 type actionDefinition struct {
 	identifier    string
@@ -61,6 +67,7 @@ type actionDefinition struct {
 	check         checkFunc
 	make          paramsFunc
 	addParams     paramsFunc
+	appIntent     appIntent
 	outputType    tokenType
 	mac           bool
 	minVersion    float64
@@ -116,10 +123,15 @@ func actionIdentifier() (ident string) {
 	return
 }
 
+var emptyAppIntent = appIntent{}
+
 // actionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
 func actionParameters(arguments []actionArgument) (params []plistData) {
 	if currentAction.addParams != nil {
 		params = append(params, currentAction.addParams(arguments)...)
+	}
+	if currentAction.appIntent != emptyAppIntent {
+		params = append(params, appIntentDescriptor(currentAction.appIntent))
 	}
 	if currentAction.make != nil {
 		params = currentAction.make(arguments)
@@ -254,7 +266,7 @@ func checkRequiredArgs() {
 			default:
 				suffix = "th"
 			}
-			parserError(fmt.Sprintf("Missing required %d%s argument '%s' for action '%s'.\n%s", argIndex, suffix, param.name, currentActionIdentifier, generateActionDefinition(param, false, true)))
+			parserError(fmt.Sprintf("Missing required %d%s argument '%s'.\n%s", argIndex, suffix, param.name, generateActionDefinition(param, false, true)))
 		}
 	}
 }
@@ -286,18 +298,19 @@ func realVariableValue(identifier string, lastValueType tokenType) (varValue var
 		varValue = globals[identifier]
 		return
 	}
-	if _, found := variables[identifier]; !found {
+	var front = strings.Split(identifier, "[")[0]
+	if _, found := variables[front]; !found {
 		parserError(fmt.Sprintf("Variable or Global '%s' does not exist", identifier))
 	}
-	var argValueType = variables[identifier].valueType
-	var value = variables[identifier].value
+	var argValueType = variables[front].valueType
+	var value = variables[front].value
 	if argValueType == Variable {
-		if lastValueType == Variable && argValueType == Variable {
+		if lastValueType == Variable {
 			parserError("Passed variable value that evaluates to variable")
 		}
 		varValue = realVariableValue(value.(string), argValueType)
 	} else {
-		varValue = variables[identifier]
+		varValue = variables[front]
 	}
 	return
 }
@@ -319,7 +332,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 			validActionOutput(param.name, param.validType, argVal)
 			return
 		}
-		if argValueType != param.validType && param.validType != Variable {
+		if argValueType != param.validType && param.validType != Variable && getVar.variableType != "Ask" {
 			parserError(fmt.Sprintf("Invalid variable value %v (%s) for argument '%s' (%s).\n%s",
 				argVal,
 				argValueType,
@@ -474,16 +487,15 @@ func generateActionRestrictions() string {
 	if currentAction.mac {
 		restrictions = append(restrictions, "macOS only")
 	}
-	definition.WriteString(strings.Join(restrictions, ", "))
+	if len(restrictions) > 0 {
+		definition.WriteString(strings.Join(restrictions, ", "))
+	}
 
 	return ansi(definition.String(), red, bold)
 }
 
 func generateActionParamEnums(focus parameterDefinition) string {
 	var definition strings.Builder
-	if len(currentAction.parameters) != 0 {
-		definition.WriteRune('\n')
-	}
 	var hasEnum = false
 	for _, param := range currentAction.parameters {
 		if param.enum == nil {
@@ -492,6 +504,7 @@ func generateActionParamEnums(focus parameterDefinition) string {
 		if focus.name != "" && focus.name != param.name {
 			continue
 		}
+		definition.WriteRune('\n')
 		hasEnum = true
 		definition.WriteString(ansi(fmt.Sprintf("\nAvailable %ss:\n", param.name), yellow))
 		for _, e := range param.enum {
@@ -533,4 +546,33 @@ func generateActionParamDefinition(param parameterDefinition) string {
 // makeLibraries makes the library variable, this is where 3rd party action library definitions will start.
 func makeLibraries() {
 	libraries = make(map[string]libraryDefinition)
+}
+
+func appIntentDescriptor(intent appIntent) plistData {
+	return plistData{
+		key:      "AppIntentDescriptor",
+		dataType: Dictionary,
+		value: []plistData{
+			{
+				key:      "TeamIdentifier",
+				dataType: Text,
+				value:    "0000000000",
+			},
+			{
+				key:      "BundleIdentifier",
+				dataType: Text,
+				value:    intent.bundleIdentifier,
+			},
+			{
+				key:      "Name",
+				dataType: Text,
+				value:    intent.name,
+			},
+			{
+				key:      "AppIntentIdentifier",
+				dataType: Text,
+				value:    intent.appIntentIdentifier,
+			},
+		},
+	}
 }

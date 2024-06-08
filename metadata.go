@@ -30,9 +30,9 @@ func makeColors() {
 		"violet":     2071128575,
 		"purple":     3679049983,
 		"pink":       3980825855,
-		"taupe":      -1448498689,
-		"gray":       2846468607,
 		"darkgray":   255,
+		"gray":       3031607807,
+		"taupe":      2846468607,
 	}
 }
 

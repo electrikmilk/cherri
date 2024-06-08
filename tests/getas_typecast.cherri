@@ -1,9 +1,9 @@
 // Get as...
-@deviceOS = Device[OS]
-@versionNumber = Device[System Version].text
+@deviceOS = Device['OS']
+@versionNumber = Device['System Version'].text
 
 // Inline get as...
-@osVersion = "{Device[OS]} {Device[System Version]}"
+@osVersion = "{Device['OS']} {Device['System Version']}"
 
 // Type coercion...
 @number = 5

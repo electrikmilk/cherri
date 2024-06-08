@@ -10,7 +10,6 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   build-test:
     runs-on: ubuntu-latest
     steps:
@@ -26,3 +25,29 @@ jobs:
 
     - name: Test
       run: go test -run TestCherri -v ./...
+
+  build-macos:
+    runs-on: macos-13
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.22
+
+    - name: Build
+      run: go build -v ./...
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.22
+
+    - name: Build
+      run: go build -v ./...

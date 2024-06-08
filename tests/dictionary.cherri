@@ -21,6 +21,9 @@ as the value of a dictionary
 // Get values, keys, and values for keys...
 
 @value = getValue(dictVar, "key1")
+
+// you can also access it like this with a raw string, but no variable references are allowed.
+@value = dictVar['key1']
 alert(value,"Value of key1")
 
 @keys = getKeys(dictVar)

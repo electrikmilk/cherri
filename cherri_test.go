@@ -5,15 +5,19 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/electrikmilk/args-parser"
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 var currentTest string
 
 func TestCherri(_ *testing.T) {
+	args.Args["no-ansi"] = ""
 	var files, err = os.ReadDir("tests")
 	if err != nil {
 		fmt.Println(ansi("FAILED: unable to read tests directory", red))
@@ -33,6 +37,15 @@ func TestCherri(_ *testing.T) {
 		fmt.Print("\n")
 
 		resetParser()
+
+		if signFailed {
+			fmt.Println(ansi("Using remote service HubSign", cyan, bold))
+			for i := 5; i > 0; i-- {
+				fmt.Print(ansi(fmt.Sprintf("Respectfully waiting %d second(s) between tests...\r", i), cyan))
+				time.Sleep(1 * time.Second)
+			}
+			fmt.Print("\n")
+		}
 	}
 }
 
@@ -48,6 +61,13 @@ func TestActionList(_ *testing.T) {
 	for identifier := range actions {
 		fmt.Println("{label: '" + identifier + "', type: 'function', detail: 'action'},")
 	}
+}
+
+func TestGlyphList(_ *testing.T) {
+	var data, jsonErr = json.Marshal(glyphs)
+	handle(jsonErr)
+
+	fmt.Println(string(data))
 }
 
 func compile() {

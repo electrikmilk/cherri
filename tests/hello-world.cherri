@@ -1,7 +1,7 @@
 /* Hello, World! */
 
 #define color yellow
-#define glyph smiley
+#define glyph smileyFace
 #define name Hello, Cherri!
 
 @message = "Hello, Cherri!"

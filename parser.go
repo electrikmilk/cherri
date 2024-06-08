@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/electrikmilk/args-parser"
+	"github.com/google/uuid"
 	"os"
 	"regexp"
 	"slices"
@@ -342,7 +343,7 @@ func collectActionValue(valueType *tokenType, value *any) {
 	*value = collectAction(&identifier)
 }
 
-var collectVarRegex = regexp.MustCompile(`\{(.*?)(?:\[(.*?)])?(?:\.(.*?))?}`)
+var collectVarRegex = regexp.MustCompile(`\{(.*?)(?:\['(.*?)'])?(?:\.(.*?))?}`)
 
 func checkInlineVars(value *string) {
 	var matches = collectVarRegex.FindAllStringSubmatch(*value, -1)
@@ -356,7 +357,7 @@ func checkInlineVars(value *string) {
 		}
 		var identifier = match[1]
 		if !validReference(identifier) {
-			parserError(fmt.Sprintf("Inline var '%s' does not exist!", identifier))
+			parserError(fmt.Sprintf("Undefined reference '%s'", identifier))
 		}
 	}
 }
@@ -383,8 +384,15 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 	}
 
 	if char == '[' {
-		identifier.WriteString(fmt.Sprintf("%s]", collectUntil(']')))
 		advance()
+		if char != '\'' {
+			parserError("Expected raw string for key.")
+		}
+		advance()
+		var key = collectRawString()
+		advanceUntil(']')
+		advance()
+		identifier.WriteString(fmt.Sprintf("[%s]", key))
 	}
 	if char == '.' {
 		identifier.WriteString(collectUntil(*until))
@@ -418,8 +426,7 @@ func collectArguments() (arguments []actionArgument) {
 func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int) (argument actionArgument) {
 	if *argIndex == *paramsSize && !param.infinite {
 		parserError(
-			fmt.Sprintf("Too many arguments for action %s()\n\n%s",
-				currentActionIdentifier,
+			fmt.Sprintf("Too many arguments\n\n%s",
 				generateActionDefinition(parameterDefinition{}, false, false),
 			),
 		)
@@ -627,7 +634,7 @@ func collectDefinition() {
 			minVersion = version
 			iosVersion, _ = strconv.ParseFloat(collectVersion, 32)
 		} else {
-			var list = makeKeyList("Available versions:", versions)
+			var list = makeKeyList("Available versions:", versions, collectVersion)
 			parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
 		}
 	}
@@ -658,7 +665,7 @@ func collectWorkflowType() {
 			if wtype, found := workflowTypes[wt]; found {
 				types = append(types, wtype)
 			} else {
-				var list = makeKeyList("Available workflow types:", workflowTypes)
+				var list = makeKeyList("Available workflow types:", workflowTypes, wt)
 				parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wt, list))
 			}
 		}
@@ -667,18 +674,17 @@ func collectWorkflowType() {
 
 func collectGlyphDefinition() {
 	var collectGlyph = collectUntil('\n')
-	collectGlyph = strings.ToLower(collectGlyph)
 	if glyph, found := glyphs[collectGlyph]; found {
 		glyphInt, hexErr := strconv.ParseInt(fmt.Sprintf("%d", glyph), 10, 64)
 		handle(hexErr)
 		iconGlyph = glyphInt
 	} else {
-		var list strings.Builder
-		list.WriteString("Available icon glyphs:\n")
-		for key := range glyphs {
-			list.WriteString(fmt.Sprintf("- %s\n", key))
+		if !args.Using("no-ansi") {
+			fmt.Println(ansi("Build an icon for your Shortcut at https://glyphs.cherrilang.org/.", cyan))
+			args.Args["glyph"] = collectGlyph
+			glyphsSearch()
 		}
-		parserError(fmt.Sprintf("Invalid icon glyph '%s'\n\n%s", collectGlyph, list.String()))
+		parserError(fmt.Sprintf("Invalid icon glyph '%s'", collectGlyph))
 	}
 }
 
@@ -713,7 +719,7 @@ func collectNoInputDefinition() {
 				},
 			}
 		} else {
-			var list = makeKeyList("Available workflow types:", workflowTypes)
+			var list = makeKeyList("Available workflow types:", workflowTypes, wtype)
 			parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
 		}
 	case tokenAhead(GetClipboard):
@@ -739,7 +745,7 @@ func collectContentItemTypes() (contentItemTypes []string) {
 			continue
 		}
 
-		var list = makeKeyList("Available content item types:", contentItems)
+		var list = makeKeyList("Available content item types:", contentItems, itemType)
 		parserError(fmt.Sprintf("Invalid content item type '%s'\n\n%s", itemType, list))
 	}
 	return
@@ -1065,7 +1071,7 @@ func collectEndStatement() {
 
 // groupStatement creates a grouping UUID for a statement and adds to the statement groupings.
 func groupStatement(groupType tokenType) (groupingUUID string) {
-	groupingUUID = shortcutsUUID()
+	groupingUUID = uuid.New().String()
 	groupingIdx++
 	groupingUUIDs[groupingIdx] = groupingUUID
 	groupingTypes[groupingIdx] = groupType
@@ -1202,7 +1208,7 @@ func collectDictionary() (dictionary interface{}) {
 
 func collectObject() string {
 	var jsonStr strings.Builder
-	var insideInnerObject = false
+	var innerObjectDepth = 0
 	var insideString = false
 	for char != -1 {
 		if char == '"' {
@@ -1216,12 +1222,12 @@ func collectObject() string {
 		}
 		if !insideString {
 			if char == '{' {
-				insideInnerObject = true
+				innerObjectDepth += 1
 			} else if char == '}' {
-				if !insideInnerObject {
+				if innerObjectDepth == 0 {
 					break
 				}
-				insideInnerObject = false
+				innerObjectDepth -= 1
 			}
 		}
 		jsonStr.WriteRune(char)
@@ -1468,12 +1474,20 @@ func parserWarning(message string) {
 	fmt.Println(warning + "\n")
 }
 
-func makeKeyList(title string, list map[string]string) string {
+func makeKeyList(title string, list map[string]string, value string) string {
 	var formattedList strings.Builder
+	formattedList.WriteString("\033[0m")
 	formattedList.WriteString(fmt.Sprintf("%s\n", title))
 	for key := range list {
-		formattedList.WriteString(fmt.Sprintf("- %s\n", key))
+		var matchedKey = key
+		var matched, result = matchString(&key, &value)
+		if matched {
+			matchedKey = result
+		}
+		formattedList.WriteString(fmt.Sprintf("- %s\n", matchedKey))
 	}
+	formattedList.WriteString("\033[0m")
+
 	return formattedList.String()
 }
 

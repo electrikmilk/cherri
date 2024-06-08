@@ -7,9 +7,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"regexp"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 // customAction contains the collected declaration of a custom action.
@@ -43,7 +44,12 @@ func parseCustomActions() {
 
 	resetParse()
 
-	checkCustomActionUsage()
+	checkCustomActionUsage(contents)
+	for _, action := range customActions {
+		if strings.ContainsAny(action.body, "()") {
+			checkCustomActionUsage(action.body)
+		}
+	}
 	makeCustomActionsHeader()
 
 	if args.Using("debug") {
@@ -113,9 +119,9 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 	return
 }
 
-func checkCustomActionUsage() {
+func checkCustomActionUsage(content string) {
 	var actionUsageRegex = regexp.MustCompile(`(action )?([a-zA-Z0-9]+)\(`)
-	var matches = actionUsageRegex.FindAllStringSubmatch(contents, -1)
+	var matches = actionUsageRegex.FindAllStringSubmatch(content, -1)
 	if len(matches) == 0 {
 		return
 	}
@@ -199,10 +205,19 @@ func handleCustomActionRef(identifier *string) action {
 	var customAction = customActions[*identifier]
 
 	var arguments []actionArgument
-	advance()
-	if char != ')' {
+	var paramsSize = len(customAction.definition.parameters)
+	if paramsSize > 0 {
+		advance()
 		setCurrentAction(*identifier, &customAction.definition)
 		arguments = collectArguments()
+
+		if len(arguments) != paramsSize {
+			parserError(
+				fmt.Sprintf("Too few arguments\n\n%s",
+					generateActionDefinition(parameterDefinition{}, false, false),
+				),
+			)
+		}
 	}
 
 	var customActionCall = makeCustomActionCall(identifier, &arguments)
@@ -246,7 +261,17 @@ func makeCustomActionCall(identifier *string, arguments *[]actionArgument) (cust
 			case String:
 				argumentValue = fmt.Sprintf("\"%s\"", argumentValue)
 			case Variable:
-				argumentValue = fmt.Sprintf("\"{%s}\"", argumentValue)
+				var variableValue, found = getVariableValue(argumentValue)
+				if !found {
+					parserError(fmt.Sprintf("Undefined reference '%s'", argumentValue))
+				}
+				if variableValue.valueType == Arr {
+					var jsonBytes, jsonErr = json.Marshal(variableValue.value)
+					handle(jsonErr)
+					argumentValue = fmt.Sprintf("{\"array\":%s}", string(jsonBytes))
+				} else {
+					argumentValue = fmt.Sprintf("\"{%s}\"", argumentValue)
+				}
 			case Arr:
 				var jsonBytes, jsonErr = json.Marshal(argument.value)
 				handle(jsonErr)
