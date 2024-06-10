@@ -92,10 +92,13 @@ func writeProcessed() {
 	if !args.Using("debug") {
 		return
 	}
-	fmt.Printf("Writing processed...")
+	if len(included) == 0 && len(customActions) == 0 && len(pasteables) == 0 {
+		return
+	}
 
 	var path = fmt.Sprintf("%s%s_processed.cherri", relativePath, workflowName)
-	fmt.Println("path", path)
+	fmt.Printf("Writing processed version to %s...", path)
+
 	var writeErr = os.WriteFile(path, []byte(contents), 0600)
 	handle(writeErr)
 
