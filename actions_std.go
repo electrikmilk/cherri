@@ -7,12 +7,13 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/google/uuid"
 	"os"
 	"reflect"
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 // FIXME: Some of these actions have a value with a set list values for an arguments,
@@ -3259,15 +3260,13 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 				key:       "WFInput",
 			},
-		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFCameraRollSelectedGroup",
-					dataType: Text,
-					value:    "Recents",
-				},
-			}
+			{
+				name:         "album",
+				validType:    String,
+				key:          "WFCameraRollSelectedGroup",
+				defaultValue: "Recents",
+				optional:     true,
+			},
 		},
 	},
 	"play": {
