@@ -1397,23 +1397,15 @@ func prev(mov int) rune {
 	return seek(&mov, true)
 }
 
-func seek(mov *int, reverse bool) (requestedChar rune) {
+func seek(mov *int, reverse bool) rune {
 	var nextChar = idx
 	if reverse {
 		nextChar -= *mov
 	} else {
 		nextChar += *mov
 	}
-	requestedChar = getChar(nextChar)
-	for requestedChar == '\t' || requestedChar == '\n' {
-		if reverse {
-			nextChar--
-		} else {
-			nextChar++
-		}
-		requestedChar = getChar(nextChar)
-	}
-	return
+
+	return getChar(nextChar)
 }
 
 func getChar(atIndex int) rune {
