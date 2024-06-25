@@ -212,7 +212,7 @@ func reachable() {
 	var lastActionIdentifier = lastToken.value.(action).ident
 	var stoppers = []string{"stop", "output", "mustOutput", "outputOrClipboard"}
 	if slices.Contains(stoppers, lastActionIdentifier) {
-		parserWarning(fmt.Sprintf("Statement appears to be unreachable or does not loop as %s() was called outside of conditional.", lastActionIdentifier))
+		parserWarning(fmt.Sprintf("Dead actions: Statement appears to be unreachable or does not loop as %s() was called outside of conditional.", lastActionIdentifier))
 	}
 }
 
