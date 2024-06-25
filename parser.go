@@ -1241,12 +1241,12 @@ func collectObject() string {
 		}
 		if !insideString {
 			if char == '{' {
-				innerObjectDepth += 1
+				innerObjectDepth++
 			} else if char == '}' {
 				if innerObjectDepth == 0 {
 					break
 				}
-				innerObjectDepth -= 1
+				innerObjectDepth--
 			}
 		}
 		jsonStr.WriteRune(char)
