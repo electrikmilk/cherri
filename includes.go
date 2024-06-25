@@ -50,7 +50,7 @@ func parseIncludes() {
 	includedFile = false
 	for char != -1 {
 		switch {
-		case isToken(ForwardSlash):
+		case isChar('/'):
 			collectComment()
 		case tokenAhead(Include):
 			advance()

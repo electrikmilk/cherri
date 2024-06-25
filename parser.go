@@ -171,12 +171,12 @@ func parse() {
 		collectDefinition()
 	case tokenAhead(Import):
 		collectImport()
-	case isToken(At):
+	case isChar('@'):
 		collectVariable(false)
 	case tokenAhead(Constant):
 		advance()
 		collectVariable(true)
-	case isToken(ForwardSlash):
+	case isChar('/'):
 		collectComment()
 	case tokenAhead(Repeat):
 		collectRepeat()
@@ -476,7 +476,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 func collectComment() {
 	var collect = args.Using("comments")
 	var comment strings.Builder
-	if isToken(ForwardSlash) {
+	if isChar('/') {
 		if collect {
 			comment.WriteString(collectUntil('\n'))
 		} else {
@@ -944,7 +944,7 @@ func collectConditional() {
 	var groupingUUID = groupStatement(Conditional)
 
 	var conditionType string
-	if isToken(Exclamation) {
+	if isChar('!') {
 		conditionType = conditions[Empty]
 	} else {
 		conditionType = conditions[Any]
@@ -958,7 +958,7 @@ func collectConditional() {
 	var variableThreeValue any
 	collectValue(&variableOneType, &variableOneValue, ' ')
 
-	if !isToken(LeftBrace) {
+	if !isChar('{') {
 		var collectConditional = collectUntil(' ')
 		var collectConditionalToken = tokenType(collectConditional)
 		if condition, found := conditions[collectConditionalToken]; found {
@@ -971,12 +971,12 @@ func collectConditional() {
 		if char == ' ' {
 			advance()
 		}
-		if !isToken(LeftBrace) {
+		if !isChar('{') {
 			collectValue(&variableThreeType, &variableThreeValue, '{')
 			advance()
 		}
 	}
-	isToken(LeftBrace)
+	isChar('{')
 
 	tokens = append(tokens, token{
 		typeof:    Conditional,
@@ -1345,8 +1345,8 @@ func advanceUntilExpect(ch rune, maxAdvances int) {
 	}
 }
 
-func isToken(token tokenType) bool {
-	var tokenChar = []rune(token)[0]
+// If char is tokenChar, advance.
+func isChar(tokenChar rune) bool {
 	if char != tokenChar {
 		return false
 	}
