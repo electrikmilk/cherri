@@ -453,9 +453,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	if char == ',' {
 		advance()
 	}
-	if char == ' ' {
-		advance()
-	}
+	skipWhitespace()
 	var valueType tokenType
 	var value any
 	if strings.Contains(lookAheadUntil('\n'), ",") {
@@ -968,9 +966,7 @@ func collectConditional() {
 		}
 		advance()
 		collectValue(&variableTwoType, &variableTwoValue, ' ')
-		if char == ' ' {
-			advance()
-		}
+		skipWhitespace()
 		if !isChar('{') {
 			collectValue(&variableThreeType, &variableThreeValue, '{')
 			advance()
