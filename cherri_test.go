@@ -49,6 +49,11 @@ func TestCherri(_ *testing.T) {
 	}
 }
 
+func TestCherriNoSign(t *testing.T) {
+	args.Args["skip-sign"] = ""
+	TestCherri(t)
+}
+
 func TestSingleFile(_ *testing.T) {
 	currentTest = "tests/conditionals.cherri"
 	fmt.Printf("⚙️ Compiling %s...\n", ansi(currentTest, bold))
