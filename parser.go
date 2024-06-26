@@ -1356,10 +1356,6 @@ func isChar(tokenChar rune) bool {
 
 func tokenAhead(token tokenType) bool {
 	var tokenLen = len(token)
-	if tokenLen == 1 && unicode.ToLower(char) == []rune(token)[0] {
-		advance()
-		return true
-	}
 	for i, tokenChar := range token {
 		if (i == 0 && unicode.ToLower(char) != tokenChar) || next(i) != tokenChar {
 			return false
