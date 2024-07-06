@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Brandon Jordan
+ * Copyright (c) Cherri
  */
 
 package main
@@ -32,7 +32,7 @@ func parseCustomActions() {
 
 	for char != -1 {
 		switch {
-		case isToken(ForwardSlash):
+		case isChar('/'):
 			collectComment()
 		case tokenAhead(Action):
 			advance()

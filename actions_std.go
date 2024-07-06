@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Brandon Jordan
+ * Copyright (c) Cherri
  */
 
 package main
@@ -7,12 +7,13 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/google/uuid"
 	"os"
 	"reflect"
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 // FIXME: Some of these actions have a value with a set list values for an arguments,
@@ -47,7 +48,6 @@ var appSplitRatios = []string{"half", "thirdByTwo"}
 var calculationOperations = []string{"x^2", "х^3", "x^у", "e^x", "10^x", "In(x)", "log(x)", "√x", "∛x", "x!", "sin(x)", "cos(X)", "tan(x)", "abs(x)"}
 var statisticsOperations = []string{"Average", "Minimum", "Maximum", "Sum", "Median", "Mode", "Range", "Standard Deviation"}
 var ipTypes = []string{"IPv4", "IPv6"}
-var shortcutDetails = []string{"Folder", "Icon", "Action Count", "File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name"}
 var engines = []string{"Amazon", "Bing", "DuckDuckGo", "eBay", "Google", "Reddit", "Twitter", "Yahoo!", "YouTube"}
 var webpageDetails = []string{"Page Contents", "Page Selection", "Page URL", "Name"}
 var urlComponents = []string{"Scheme", "User", "Password", "Host", "Port", "Path", "Query", "Fragment"}
@@ -3260,15 +3260,13 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 				key:       "WFInput",
 			},
-		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFCameraRollSelectedGroup",
-					dataType: Text,
-					value:    "Recents",
-				},
-			}
+			{
+				name:         "album",
+				validType:    String,
+				key:          "WFCameraRollSelectedGroup",
+				defaultValue: "Recents",
+				optional:     true,
+			},
 		},
 	},
 	"play": {

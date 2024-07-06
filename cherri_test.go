@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Brandon Jordan
+ * Copyright (c) Cherri
  */
 
 package main
@@ -47,6 +47,11 @@ func TestCherri(_ *testing.T) {
 			fmt.Print("\n")
 		}
 	}
+}
+
+func TestCherriNoSign(t *testing.T) {
+	args.Args["skip-sign"] = ""
+	TestCherri(t)
 }
 
 func TestSingleFile(_ *testing.T) {

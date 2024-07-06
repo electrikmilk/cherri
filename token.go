@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Brandon Jordan
+ * Copyright (c) Cherri
  */
 
 package main
@@ -82,7 +82,6 @@ const (
 /* Operators */
 
 const (
-	At             tokenType = "@"
 	Set            tokenType = "="
 	AddTo          tokenType = "+="
 	SubFrom        tokenType = "-="
@@ -100,9 +99,7 @@ const (
 	GreaterOrEqual tokenType = ">="
 	LessThan       tokenType = "<"
 	LessOrEqual    tokenType = "<="
-	Exclamation    tokenType = "!"
 	Between        tokenType = "<>"
-	ForwardSlash   tokenType = "/"
 	Plus           tokenType = "+"
 	Minus          tokenType = "-"
 	Multiply       tokenType = "*"
