@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/electrikmilk/args-parser"
 	"os"
-	"regexp"
 	"runtime"
 	"strings"
 	"unicode"
@@ -37,20 +36,7 @@ func main() {
 	}
 
 	if args.Using("import") {
-		importPath = args.Value("import")
-		var shortcutBytes []byte
-
-		var icloudURLRegex = regexp.MustCompile(`^https://(?:www.)?icloud\.com/shortcuts/.+$`)
-		if icloudURLRegex.MatchString(importPath) {
-			shortcutBytes = downloadShortcut()
-		} else {
-			shortcutBytes = importShortcut()
-		}
-
-		if hasSignedBytes(shortcutBytes) {
-			exit("import: Unable to read Shortcut as it has been signed and the contents are encrypted.")
-		}
-
+		var shortcutBytes = importShortcut()
 		decompile(shortcutBytes)
 
 		os.Exit(0)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Brandon Jordan
+ * Copyright (c) Cherri
  */
 
 package main
@@ -7,9 +7,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/electrikmilk/args-parser"
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -35,6 +37,24 @@ type ShortcutRecordValue struct {
 }
 
 var importPath string
+
+// Imports a Shortcut for decompilation based on path given.
+func importShortcut() (shortcutBytes []byte) {
+	importPath = args.Value("import")
+
+	var icloudURLRegex = regexp.MustCompile(`^https://(?:www.)?icloud\.com/shortcuts/.+$`)
+	if icloudURLRegex.MatchString(importPath) {
+		shortcutBytes = downloadShortcut()
+	} else {
+		shortcutBytes = readShortcutFile()
+	}
+
+	if hasSignedBytes(shortcutBytes) {
+		exit("import: Signed Shortcuts are currently not supported :(")
+	}
+
+	return
+}
 
 func downloadShortcut() []byte {
 	importPath = strings.Replace(importPath, "/shortcuts/", "/shortcuts/api/records/", 1)
@@ -71,7 +91,7 @@ func downloadShortcut() []byte {
 	return b
 }
 
-func importShortcut() []byte {
+func readShortcutFile() []byte {
 	var _, statErr = os.Stat(importPath)
 	if os.IsNotExist(statErr) {
 		exit("import: File does not exist!")
