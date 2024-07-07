@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Brandon Jordan
+ * Copyright (c) Cherri
  */
 
 package main
@@ -800,41 +800,16 @@ func makeRawAction(action *ShortcutAction) {
 
 func matchAction(action *ShortcutAction) (identifier string, definition actionDefinition) {
 	for call, def := range actions {
-		var ident string
+		var ident = call
 		if def.identifier != "" {
 			ident = def.identifier
-		} else {
-			ident = call
 		}
 		var shortcutsIdentifier = fmt.Sprintf("is.workflow.actions.%s", ident)
 		if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
 			identifier = call
 			definition = *def
 
-			switch identifier {
-			case "confirm":
-				if value, found := action.WFWorkflowActionParameters["WFAlertActionCancelButtonShown"]; found {
-					if value == false {
-						identifier = "alert"
-					}
-				}
-			case "run":
-				var runSelfIdentifier = "runSelf"
-				if _, isSelf := action.WFWorkflowActionParameters["isSelf"]; isSelf {
-					identifier = runSelfIdentifier
-					break
-				}
-				if name, foundName := action.WFWorkflowActionParameters["workflowName"]; foundName {
-					if name == basename {
-						identifier = runSelfIdentifier
-						break
-					}
-				} else {
-					identifier = runSelfIdentifier
-				}
-			case "outputOrClipboard", "mustOutput":
-				identifier = "output"
-			}
+			checkSplitAction(&identifier, action.WFWorkflowActionParameters)
 
 			if splitActions, found := identifierMap[ident]; found {
 				matchSplitAction(&splitActions, action.WFWorkflowActionParameters, &identifier, &definition)
@@ -846,8 +821,42 @@ func matchAction(action *ShortcutAction) (identifier string, definition actionDe
 	return
 }
 
+func checkSplitAction(identifier *string, params map[string]any) {
+	switch *identifier {
+	case "confirm":
+		if value, found := params["WFAlertActionCancelButtonShown"]; found {
+			if value == false {
+				*identifier = "alert"
+			}
+		}
+	case "run":
+		if _, isSelf := params["isSelf"]; isSelf {
+			*identifier = "runSelf"
+			break
+		}
+		if name, foundName := params["workflowName"]; foundName {
+			if name == basename {
+				*identifier = "runSelf"
+				break
+			}
+		}
+	case "output", "outputOrClipboard", "mustOutput":
+		if _, found := params["WFNoOutputSurfaceBehavior"]; found {
+			switch params["WFNoOutputSurfaceBehavior"] {
+			case "Copy to Clipboard":
+				*identifier = "outputOrClipboard"
+			case "Respond":
+				*identifier = "mustOutput"
+			default:
+				*identifier = "output"
+			}
+		}
+	}
+}
+
 type actionMatch struct {
 	matchedParams int
+	matchedValues int
 	action        actionValue
 }
 
@@ -860,19 +869,25 @@ func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, ide
 		}
 
 		var matchedParams int
+		var matchedValues int
 		var paramsSize = len(splitAction.definition.parameters)
-		for _, param := range splitAction.definition.parameters {
+		for value, param := range splitAction.definition.parameters {
 			if param.key == "" {
 				continue
 			}
 			if _, found := parameters[param.key]; found {
 				matchedParams++
+
+				if parameters[param.key] == value {
+					matchedValues++
+				}
 			}
 		}
 
 		if paramsSize == matchedParams {
 			matches = append(matches, actionMatch{
 				matchedParams: matchedParams,
+				matchedValues: matchedValues,
 				action:        splitAction,
 			})
 		}
@@ -881,7 +896,7 @@ func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, ide
 		return
 	}
 	sort.SliceStable(matches, func(i, j int) bool {
-		return matches[i].matchedParams > matches[j].matchedParams
+		return matches[i].matchedParams > matches[j].matchedParams || matches[i].matchedValues > matches[j].matchedValues
 	})
 	var matchedAction = matches[0]
 	*identifier = matchedAction.action.identifier
