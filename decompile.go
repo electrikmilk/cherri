@@ -888,7 +888,7 @@ func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, ide
 			if value, found := parameters[param.key]; found {
 				matchedParams++
 
-				if param.defaultValue == value {
+				if param.defaultValue == decompValue(value) {
 					matchedValues++
 				}
 			}
