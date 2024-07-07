@@ -855,9 +855,9 @@ func checkSplitAction(identifier *string, params map[string]any) {
 }
 
 type actionMatch struct {
-	matchedParams int
-	matchedValues int
-	action        actionValue
+	params int
+	values int
+	action actionValue
 }
 
 func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, identifier *string, definition *actionDefinition) {
@@ -868,17 +868,27 @@ func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, ide
 			return
 		}
 
+		var splitActionParams = splitAction.definition.parameters
+		if splitAction.definition.addParams != nil {
+			for _, addParam := range splitAction.definition.addParams([]actionArgument{}) {
+				splitActionParams = append(splitActionParams, parameterDefinition{
+					key:          addParam.key,
+					defaultValue: addParam.value,
+				})
+			}
+		}
+
 		var matchedParams int
 		var matchedValues int
-		var paramsSize = len(splitAction.definition.parameters)
-		for value, param := range splitAction.definition.parameters {
+		var paramsSize = len(splitActionParams)
+		for _, param := range splitActionParams {
 			if param.key == "" {
 				continue
 			}
-			if _, found := parameters[param.key]; found {
+			if value, found := parameters[param.key]; found {
 				matchedParams++
 
-				if parameters[param.key] == value {
+				if param.defaultValue == value {
 					matchedValues++
 				}
 			}
@@ -886,9 +896,9 @@ func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, ide
 
 		if paramsSize == matchedParams {
 			matches = append(matches, actionMatch{
-				matchedParams: matchedParams,
-				matchedValues: matchedValues,
-				action:        splitAction,
+				params: matchedParams,
+				values: matchedValues,
+				action: splitAction,
 			})
 		}
 	}
@@ -896,7 +906,7 @@ func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, ide
 		return
 	}
 	sort.SliceStable(matches, func(i, j int) bool {
-		return matches[i].matchedParams > matches[j].matchedParams || matches[i].matchedValues > matches[j].matchedValues
+		return matches[i].params > matches[j].params || matches[i].values > matches[j].values
 	})
 	var matchedAction = matches[0]
 	*identifier = matchedAction.action.identifier
