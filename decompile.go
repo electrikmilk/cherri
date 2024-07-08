@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/electrikmilk/args-parser"
 	plists "howett.net/plist"
+	"math"
 	"os"
 	"reflect"
 	"regexp"
@@ -801,79 +802,60 @@ func makeRawAction(action *ShortcutAction) {
 	newCodeLine("])\n")
 }
 
-func matchAction(action *ShortcutAction) (identifier string, definition actionDefinition) {
+func matchAction(action *ShortcutAction) (name string, definition actionDefinition) {
 	for call, def := range actions {
-		var ident = call
+		var identifier = strings.ToLower(call)
 		if def.identifier != "" {
-			ident = def.identifier
+			identifier = def.identifier
 		}
-		var shortcutsIdentifier = fmt.Sprintf("is.workflow.actions.%s", ident)
+		var shortcutsIdentifier = fmt.Sprintf("is.workflow.actions.%s", identifier)
 		if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
-			identifier = call
 			definition = *def
+			name = call
 
-			checkSplitAction(&identifier, action.WFWorkflowActionParameters)
-
-			if splitActions, found := identifierMap[ident]; found {
-				matchSplitAction(&splitActions, action.WFWorkflowActionParameters, &identifier, &definition)
+			if splitActions, found := identifierMap[identifier]; found {
+				matchSplitAction(&splitActions, action.WFWorkflowActionParameters, &name, &definition)
+				break
 			}
-
+			if name == "run" {
+				if _, isSelf := action.WFWorkflowActionParameters["isSelf"]; isSelf {
+					name = "runSelf"
+				} else if wfName, foundName := action.WFWorkflowActionParameters["workflowName"]; foundName {
+					if wfName == basename {
+						name = "runSelf"
+					}
+				}
+			}
 			break
 		}
 	}
 	return
 }
 
-func checkSplitAction(identifier *string, params map[string]any) {
-	switch *identifier {
-	case "confirm":
-		if value, found := params["WFAlertActionCancelButtonShown"]; found {
-			if value == false {
-				*identifier = "alert"
-			}
-		}
-	case "run":
-		if _, isSelf := params["isSelf"]; isSelf {
-			*identifier = "runSelf"
-			break
-		}
-		if name, foundName := params["workflowName"]; foundName {
-			if name == basename {
-				*identifier = "runSelf"
-				break
-			}
-		}
-	case "output", "outputOrClipboard", "mustOutput":
-		if _, found := params["WFNoOutputSurfaceBehavior"]; found {
-			switch params["WFNoOutputSurfaceBehavior"] {
-			case "Copy to Clipboard":
-				*identifier = "outputOrClipboard"
-			case "Respond":
-				*identifier = "mustOutput"
-			default:
-				*identifier = "output"
-			}
-		}
-	}
-}
-
 type actionMatch struct {
-	params int
-	values int
+	params float64
+	values float64
 	action actionValue
 }
 
-func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, identifier *string, definition *actionDefinition) {
-	var matches []actionMatch
-	for _, splitAction := range *splitAction {
-		if splitAction.definition.identifier == "getitemfromlist" {
-			matchListAction(parameters, identifier, definition)
-			return
-		}
+var matches []actionMatch
 
+func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, identifier *string, definition *actionDefinition) {
+	matches = []actionMatch{}
+
+	var defaultAction, hasDefaultAction = getDefaultAction(splitActions)
+	if hasDefaultAction {
+		*identifier = defaultAction.identifier
+		*definition = *defaultAction.definition
+	}
+
+	for _, splitAction := range *splitActions {
 		var splitActionParams = splitAction.definition.parameters
 		if splitAction.definition.addParams != nil {
 			for _, addParam := range splitAction.definition.addParams([]actionArgument{}) {
+				if addParam.key == "CustomOutputName" || addParam.key == "UUID" {
+					continue
+				}
 				splitActionParams = append(splitActionParams, parameterDefinition{
 					key:          addParam.key,
 					defaultValue: addParam.value,
@@ -881,59 +863,102 @@ func matchSplitAction(splitAction *[]actionValue, parameters map[string]any, ide
 			}
 		}
 
-		var matchedParams int
-		var matchedValues int
-		var paramsSize = len(splitActionParams)
+		if !hasRequiredParams(parameters, &splitActionParams) {
+			continue
+		}
+
+		var matchedParams float64
+		var matchedValues float64
 		for _, param := range splitActionParams {
-			if param.key == "" {
+			if param.key == "" || param.defaultValue == nil {
 				continue
 			}
 			if value, found := parameters[param.key]; found {
 				matchedParams++
 
-				if param.defaultValue == decompValue(value) {
+				var defaultValue = fmt.Sprintf("%v", param.defaultValue)
+				var rawValue = strings.Trim(decompValue(value), "\"")
+				if defaultValue == rawValue && defaultValue != "" && rawValue != "" {
 					matchedValues++
 				}
 			}
 		}
 
-		if paramsSize == matchedParams {
-			matches = append(matches, actionMatch{
-				params: matchedParams,
-				values: matchedValues,
-				action: splitAction,
-			})
+		if matchedParams == 0 {
+			continue
 		}
+		var splitActionParamsSize = float64(len(splitActionParams))
+		if matchedParams > 0 {
+			matchedParams = math.Max(splitActionParamsSize-matchedParams, 0)
+		}
+		if matchedValues > 0 {
+			matchedValues = math.Max(splitActionParamsSize-matchedValues, 0)
+		}
+
+		matches = append(matches, actionMatch{
+			params: matchedParams,
+			values: matchedValues,
+			action: splitAction,
+		})
 	}
-	if len(matches) < 2 {
+	if len(matches) < 1 {
 		return
 	}
+
 	sort.SliceStable(matches, func(i, j int) bool {
 		return matches[i].params > matches[j].params || matches[i].values > matches[j].values
 	})
+
 	var matchedAction = matches[0]
 	*identifier = matchedAction.action.identifier
 	*definition = *matchedAction.action.definition
 }
 
-func matchListAction(parameters map[string]any, identifier *string, definition *actionDefinition) {
-	switch parameters["WFItemSpecifier"] {
-	case "First Item":
-		*identifier = "getFirstItem"
-		definition = actions["getFirstItem"]
-	case "Last Item":
-		*identifier = "getLastItem"
-		definition = actions["getLastItem"]
-	case "Random Item":
-		*identifier = "getRandomItem"
-		definition = actions["getRandomItem"]
-	case "Item At Index":
-		*identifier = "getListItem"
-		definition = actions["getListItem"]
-	case "Items in Range":
-		*identifier = "getListItems"
-		definition = actions["getListItems"]
+func hasRequiredParams(parameters map[string]any, definitions *[]parameterDefinition) bool {
+	for _, def := range *definitions {
+		if def.optional || def.key == "" {
+			continue
+		}
+		if _, found := parameters[def.key]; !found {
+			return false
+		}
 	}
+
+	for key := range parameters {
+		if key == "CustomOutputName" || key == "UUID" {
+			continue
+		}
+		if isKeyDefined(definitions, &key) {
+			continue
+		}
+
+		return false
+	}
+
+	return true
+}
+
+func isKeyDefined(definitions *[]parameterDefinition, key *string) bool {
+	for _, def := range *definitions {
+		if def.key == *key {
+			return true
+		}
+	}
+
+	return false
+}
+
+// Get default action from a slice of split actions for an identifier.
+func getDefaultAction(splitActions *[]actionValue) (action actionValue, found bool) {
+	for _, splitAction := range *splitActions {
+		if splitAction.definition.defaultAction {
+			action = splitAction
+			found = true
+			return
+		}
+	}
+
+	return
 }
 
 func printDecompDebug() {
