@@ -69,6 +69,7 @@ type actionDefinition struct {
 	addParams     paramsFunc
 	appIntent     appIntent
 	outputType    tokenType
+	defaultAction bool // Default action for this identifier during decompilation.
 	mac           bool
 	minVersion    float64
 	maxVersion    float64

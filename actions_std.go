@@ -1535,7 +1535,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getFile": {
-		identifier: "documentpicker.open",
+		identifier:    "documentpicker.open",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "path",
@@ -3379,8 +3380,9 @@ var actions = map[string]*actionDefinition{
 		mac: true,
 	},
 	"shutdown": {
-		identifier: "reboot",
-		minVersion: 17,
+		defaultAction: true,
+		identifier:    "reboot",
+		minVersion:    17,
 	},
 	"reboot": {
 		minVersion: 17,
@@ -4614,7 +4616,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getExternalIP": {
-		identifier: "getipaddress",
+		identifier:    "getipaddress",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:         "type",
@@ -4926,6 +4929,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"output": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "output",
