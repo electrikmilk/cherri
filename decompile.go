@@ -169,11 +169,14 @@ var identifierMap map[string][]actionValue
 func mapSplitActions() {
 	identifierMap = make(map[string][]actionValue)
 	for identifier, action := range actions {
+		var ident = action.identifier
 		if action.identifier == "" {
-			continue
+			ident = identifier
 		}
 
-		identifierMap[action.identifier] = append(identifierMap[action.identifier], actionValue{
+		ident = strings.ToLower(ident)
+
+		identifierMap[ident] = append(identifierMap[ident], actionValue{
 			identifier: identifier,
 			definition: action,
 		})
