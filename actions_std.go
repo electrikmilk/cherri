@@ -4643,12 +4643,12 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "list",
+				key:       "WFInput",
 				validType: Variable,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
 				{
 					key:      "WFItemSpecifier",
 					dataType: Text,
@@ -4662,12 +4662,12 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "list",
+				key:       "WFInput",
 				validType: Variable,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
 				{
 					key:      "WFItemSpecifier",
 					dataType: Text,
@@ -4681,12 +4681,12 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "list",
+				key:       "WFInput",
 				validType: Variable,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
 				{
 					key:      "WFItemSpecifier",
 					dataType: Text,
