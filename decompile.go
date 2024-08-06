@@ -50,7 +50,7 @@ func decompile(b []byte) {
 	var _, marshalErr = plists.Unmarshal(b, &data)
 	handle(marshalErr)
 
-	mapVariables()
+	mapIdentifiers()
 	mapSplitActions()
 	decompileIcon()
 	decompileActions()
@@ -63,12 +63,12 @@ func decompile(b []byte) {
 	handle(writeErr)
 }
 
-// mapVariables creates a map of variables that are assigned throughout the Shortcut, so we know if an identifier is an assigned variable.
-func mapVariables() {
+// mapIdentifiers creates a map of variable identifiers and UUIDs that are assigned throughout the Shortcut.
+func mapIdentifiers() {
 	variables = make(map[string]variableValue)
 	uuids = make(map[string]string)
 	for _, action := range data.WFWorkflowActions {
-		if action.WFWorkflowActionIdentifier == "is.workflow.actions.setvariable" || action.WFWorkflowActionIdentifier == "is.workflow.actions.appendvariable" {
+		if action.WFWorkflowActionIdentifier == "is.workflow.actions.setvariable" || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
 			var varName = strings.ReplaceAll(action.WFWorkflowActionParameters["WFVariableName"].(string), " ", "")
 			if _, found := variables[varName]; !found {
 				variables[varName] = variableValue{}
@@ -249,7 +249,7 @@ func decompileActions() {
 			decompURL(&action)
 		case "is.workflow.actions.calculateexpression":
 			decompExpression(&action)
-		case "is.workflow.actions.setvariable", "is.workflow.actions.appendvariable":
+		case "is.workflow.actions.setvariable", AppendVariableIdentifier:
 			decompVariable(&action)
 		case "is.workflow.actions.conditional":
 			decompConditional(&action)
@@ -348,7 +348,7 @@ func decompVariable(action *ShortcutAction) {
 
 	if currentVariableValue != "" {
 		code.WriteRune(' ')
-		if action.WFWorkflowActionIdentifier == "is.workflow.actions.appendvariable" {
+		if action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
 			code.WriteString("+= ")
 		} else {
 			code.WriteString("= ")

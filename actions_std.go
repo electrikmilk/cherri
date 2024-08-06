@@ -16,6 +16,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const AppendVariableIdentifier = "is.workflow.actions.appendvariable"
+
 // FIXME: Some of these actions have a value with a set list values for an arguments,
 //  but the argument value is not being checked against its possible values.
 //  Use the "hash" action as an example.
