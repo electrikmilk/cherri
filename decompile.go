@@ -266,7 +266,7 @@ func decompileActions() {
 
 func checkConstantLiteral(action *ShortcutAction) {
 	if _, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
-		var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
+		var customOutputName = strings.ReplaceAll(action.WFWorkflowActionParameters["CustomOutputName"].(string), " ", "")
 		if _, found := variables[customOutputName]; !found {
 			newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
 			code.WriteString(currentVariableValue)
@@ -305,7 +305,7 @@ func decompTextValue(action *ShortcutAction) {
 }
 
 func decompNumberValue(action *ShortcutAction) {
-	var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
+	var customOutputName = strings.ReplaceAll(action.WFWorkflowActionParameters["CustomOutputName"].(string), " ", "")
 	if _, found := variables[customOutputName]; !found {
 		decompAction(action)
 		return
@@ -722,8 +722,9 @@ func decompAction(action *ShortcutAction) {
 	var isConstant = false
 	var actionCallCode strings.Builder
 	if customOutputName, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
+		customOutputName = strings.ReplaceAll(customOutputName.(string), " ", "")
 		if _, foundVar := variables[customOutputName.(string)]; !foundVar {
-			newCodeLine(fmt.Sprintf("const %s = ", strings.ReplaceAll(customOutputName.(string), " ", "")))
+			newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
 			isConstant = true
 		} else {
 			isVariableValue = true
