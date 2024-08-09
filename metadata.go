@@ -38,36 +38,31 @@ func makeColors() {
 
 /* Inputs */
 
-var contentItems map[string]string
+var contentItems = map[string]string{
+	"app":         "WFAppStoreAppContentItem",
+	"article":     "WFArticleContentItem",
+	"contact":     "WFContactContentItem",
+	"date":        "WFDateContentItem",
+	"email":       "WFEmailAddressContentItem",
+	"folder":      "WFFolderContentItem",
+	"file":        "WFGenericFileContentItem",
+	"image":       "WFImageContentItem",
+	"itunes":      "WFiTunesProductContentItem",
+	"location":    "WFLocationContentItem",
+	"maplink":     "WFDCMapsLinkContentItem",
+	"media":       "WFAVAssetContentItem",
+	"pdf":         "WFPDFContentItem",
+	"phonenumber": "WFPhoneNumberContentItem",
+	"richtext":    "WFRichTextContentItem",
+	"webpage":     "WFSafariWebPageContentItem",
+	"text":        "WFStringContentItem",
+	"dictionary":  "WFDictionaryContentItem",
+	"number":      "WFNumberContentItem",
+	"url":         "WFURLContentItem",
+}
+
 var inputs []string
 var outputs []string
-
-func makeContentItems() {
-	if len(contentItems) != 0 {
-		return
-	}
-	contentItems = map[string]string{
-		"app":         "WFAppStoreAppContentItem",
-		"article":     "WFArticleContentItem",
-		"contact":     "WFContactContentItem",
-		"date":        "WFDateContentItem",
-		"email":       "WFEmailAddressContentItem",
-		"folder":      "WFFolderContentItem",
-		"file":        "WFGenericFileContentItem",
-		"image":       "WFImageContentItem",
-		"itunes":      "WFiTunesProductContentItem",
-		"location":    "WFLocationContentItem",
-		"maplink":     "WFDCMapsLinkContentItem",
-		"media":       "WFAVAssetContentItem",
-		"pdf":         "WFPDFContentItem",
-		"phonenumber": "WFPhoneNumberContentItem",
-		"richtext":    "WFRichTextContentItem",
-		"webpage":     "WFSafariWebPageContentItem",
-		"text":        "WFStringContentItem",
-		"number":      "WFNumberContentItem",
-		"url":         "WFURLContentItem",
-	}
-}
 
 /* Workflow Types */
 

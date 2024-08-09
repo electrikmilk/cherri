@@ -540,7 +540,6 @@ func plistWorkflowTypes() (wfWorkflowTypes []plistData) {
 
 func plistInputContentItems() (inputContentItems []plistData) {
 	if len(inputs) == 0 {
-		makeContentItems()
 		for _, input := range contentItems {
 			inputContentItems = append(inputContentItems, plistData{
 				dataType: Text,
@@ -563,7 +562,6 @@ func plistOutputContentItems() (outputContentItems []plistData) {
 	if len(outputs) == 0 {
 		return
 	}
-	makeContentItems()
 	for _, output := range outputs {
 		outputContentItems = append(outputContentItems, plistData{
 			dataType: Text,

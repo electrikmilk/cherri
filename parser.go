@@ -723,7 +723,6 @@ func collectNoInputDefinition() {
 	case tokenAhead(AskFor):
 		advance()
 		var workflowType = collectUntil('\n')
-		makeContentItems()
 		if wtype, found := contentItems[workflowType]; found {
 			noInput = noInputParams{
 				name: "WFWorkflowNoInputBehaviorAskForInput",
@@ -748,7 +747,6 @@ func collectNoInputDefinition() {
 }
 
 func collectContentItemTypes() (contentItemTypes []string) {
-	makeContentItems()
 	var collectedItemTypes = collectUntil('\n')
 	if collectedItemTypes == "" {
 		parserError("Expected content item types")
