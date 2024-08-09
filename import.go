@@ -6,7 +6,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/electrikmilk/args-parser"
 	"io"
 	"net/http"
@@ -59,8 +58,6 @@ func importShortcut() (shortcutBytes []byte) {
 func downloadShortcut() []byte {
 	importPath = strings.Replace(importPath, "/shortcuts/", "/shortcuts/api/records/", 1)
 
-	fmt.Println("Retrieving record from iCloud...")
-
 	var apiResponse, apiErr = http.Get(importPath)
 	handle(apiErr)
 	defer apiResponse.Body.Close()
@@ -76,13 +73,11 @@ func downloadShortcut() []byte {
 	basename = record.Fields.Name.Value
 	record = iCloudRecord{}
 
-	fmt.Println("Downloading Shortcut...")
-
 	var response, httpErr = http.Get(downloadURL)
 	handle(httpErr)
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		exit("icloud: Failed to download Shortcut file.")
+		exit("icloud: Failed to download Shortcut file :(")
 	}
 
 	var b, readErr = io.ReadAll(response.Body)
@@ -103,7 +98,7 @@ func readShortcutFile() []byte {
 	basename = nameSegments[0]
 	var extension = nameSegments[len(nameSegments)-1]
 	if extension != "shortcut" && extension != "plist" {
-		exit("import: File is not a Shortcut or property list file.")
+		exit("import: File is not a Shortcut or property list (plist) file.")
 	}
 	relativePath = strings.Replace(importPath, filename, "", 1)
 
