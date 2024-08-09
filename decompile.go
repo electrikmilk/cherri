@@ -59,7 +59,7 @@ func decompile(b []byte) {
 		printDecompDebug()
 	}
 
-	var writeErr = os.WriteFile(basename+"_decompiled.cherri", []byte(code.String()), 0600)
+	var writeErr = os.WriteFile(relativePath+basename+"_decompiled.cherri", []byte(code.String()), 0600)
 	handle(writeErr)
 }
 

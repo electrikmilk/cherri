@@ -105,6 +105,7 @@ func readShortcutFile() []byte {
 	if extension != "shortcut" && extension != "plist" {
 		exit("import: File is not a Shortcut or property list file.")
 	}
+	relativePath = strings.Replace(importPath, filename, "", 1)
 
 	var b, readErr = os.ReadFile(importPath)
 	handle(readErr)
