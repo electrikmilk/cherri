@@ -73,7 +73,6 @@ func mapIdentifiers() {
 			if _, found := variables[varName]; !found {
 				variables[varName] = variableValue{}
 			}
-			continue
 		}
 
 		if action.WFWorkflowActionParameters["CustomOutputName"] != nil && action.WFWorkflowActionParameters["UUID"] != nil {
