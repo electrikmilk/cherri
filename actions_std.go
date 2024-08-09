@@ -16,6 +16,7 @@ import (
 	"github.com/google/uuid"
 )
 
+const SetVariableIdentifier = "is.workflow.actions.setvariable"
 const AppendVariableIdentifier = "is.workflow.actions.appendvariable"
 
 // FIXME: Some of these actions have a value with a set list values for an arguments,

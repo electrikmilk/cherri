@@ -68,7 +68,7 @@ func mapIdentifiers() {
 	variables = make(map[string]variableValue)
 	uuids = make(map[string]string)
 	for _, action := range data.WFWorkflowActions {
-		if action.WFWorkflowActionIdentifier == "is.workflow.actions.setvariable" || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
+		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
 			var varName = strings.ReplaceAll(action.WFWorkflowActionParameters["WFVariableName"].(string), " ", "")
 			if _, found := variables[varName]; !found {
 				variables[varName] = variableValue{}
@@ -249,7 +249,7 @@ func decompileActions() {
 			decompURL(&action)
 		case "is.workflow.actions.calculateexpression":
 			decompExpression(&action)
-		case "is.workflow.actions.setvariable", AppendVariableIdentifier:
+		case SetVariableIdentifier, AppendVariableIdentifier:
 			decompVariable(&action)
 		case "is.workflow.actions.conditional":
 			decompConditional(&action)
