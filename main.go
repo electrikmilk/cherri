@@ -35,7 +35,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	if args.Using("import") {
+	if args.Using("import") && args.Value("import") != "" {
 		var shortcutBytes = importShortcut()
 		decompile(shortcutBytes)
 
