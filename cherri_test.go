@@ -74,6 +74,7 @@ func TestDecomp(t *testing.T) {
 	if code.String() != string(bytes) {
 		fmt.Println(ansi("Does not match expected!", red, bold))
 		t.Fail()
+		return
 	}
 
 	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
