@@ -356,13 +356,6 @@ func decompVariable(action *ShortcutAction) {
 		code.WriteString(currentVariableValue)
 	} else {
 		var decompInput = decompValue(action.WFWorkflowActionParameters["WFInput"])
-		var wfInput = action.WFWorkflowActionParameters["WFInput"]
-		if reflect.TypeOf(wfInput).String() == dictType {
-			var Value = wfInput.(map[string]interface{})["Value"].(map[string]interface{})
-			if _, found := Value["OutputName"]; found {
-				decompInput = ""
-			}
-		}
 		if decompInput != "" {
 			code.WriteString(fmt.Sprintf(" = %s", decompInput))
 		}
@@ -653,12 +646,14 @@ func decompValueObject(value map[string]interface{}) string {
 		var variableValue = value["Variable"].(map[string]interface{})
 		return decompValue(variableValue["Value"])
 	case "ActionOutput":
-		return strings.ReplaceAll(value["OutputName"].(string), " ", "")
+		if _, found := value["OutputUUID"]; found {
+			return strings.ReplaceAll(uuids[value["OutputUUID"].(string)], " ", "")
+		}
 	case "ExtensionInput":
 		return "ShortcutInput"
-	default:
-		return decompObjectValue(value)
 	}
+
+	return decompObjectValue(value)
 }
 
 func decompObjectValue(value any) string {
