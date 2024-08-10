@@ -19,6 +19,8 @@ import (
 	"strings"
 )
 
+const UUID = "UUID"
+
 var shortcut Shortcut
 var genericShortcut GenericShortcut
 var code strings.Builder
@@ -241,8 +243,8 @@ func checkConstantLiteral(action *ShortcutAction) {
 			return
 		}
 	}
-	if _, found := action.WFWorkflowActionParameters["UUID"]; found {
-		var uuid = action.WFWorkflowActionParameters["UUID"].(string)
+	if _, found := action.WFWorkflowActionParameters[UUID]; found {
+		var uuid = action.WFWorkflowActionParameters[UUID].(string)
 		if _, found := uuids[uuid]; found {
 			newCodeLine(fmt.Sprintf("const %s = ", uuids[uuid]))
 			code.WriteString(currentVariableValue)
@@ -702,8 +704,8 @@ func decompAction(action *ShortcutAction) {
 			isVariableValue = true
 		}
 	}
-	if action.WFWorkflowActionParameters["UUID"] != nil {
-		var uuid = action.WFWorkflowActionParameters["UUID"].(string)
+	if action.WFWorkflowActionParameters[UUID] != nil {
+		var uuid = action.WFWorkflowActionParameters[UUID].(string)
 		if _, found := uuids[uuid]; found {
 			newCodeLine(fmt.Sprintf("const %s = ", uuids[uuid]))
 			isConstant = true
@@ -748,7 +750,7 @@ func makeRawAction(action *ShortcutAction) {
 	newCodeLine("{\n")
 
 	for key, param := range action.WFWorkflowActionParameters {
-		if key == "UUID" {
+		if key == UUID {
 			continue
 		}
 
@@ -820,7 +822,7 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 		var splitActionParams = splitAction.definition.parameters
 		if splitAction.definition.addParams != nil {
 			for _, addParam := range splitAction.definition.addParams([]actionArgument{}) {
-				if addParam.key == "CustomOutputName" || addParam.key == "UUID" {
+				if addParam.key == "CustomOutputName" || addParam.key == UUID {
 					continue
 				}
 				splitActionParams = append(splitActionParams, parameterDefinition{
@@ -892,7 +894,7 @@ func hasRequiredParams(parameters map[string]any, definitions *[]parameterDefini
 	}
 
 	for key := range parameters {
-		if key == "CustomOutputName" || key == "UUID" {
+		if key == "CustomOutputName" || key == UUID {
 			continue
 		}
 		if isKeyDefined(definitions, &key) {
