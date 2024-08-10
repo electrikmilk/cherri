@@ -45,8 +45,10 @@ type GenericActionParameters struct {
 }
 
 type WFInput struct {
-	Value    Value
-	Variable VariableValue
+	Value      Value
+	Variable   VariableValue
+	OutputName string
+	OutputUUID string
 }
 
 type VariableValue struct {
@@ -54,13 +56,15 @@ type VariableValue struct {
 }
 
 type Value struct {
-	Value                       any
-	Type                        any
+	Type                        string
 	VariableName                string
 	OutputUUID                  string
 	OutputName                  string
+	Value                       any
 	Variable                    any
 	WFDictionaryFieldValueItems []WFDictionaryFieldValueItem
+	AttachmentsByRange          map[string]Value
+	String                      string
 }
 
 type WFDictionaryFieldValueItem struct {
@@ -71,7 +75,7 @@ type WFDictionaryFieldValueItem struct {
 
 type WFValue struct {
 	Value  any
-	string string
+	String string
 }
 
 type ArrayValue struct {

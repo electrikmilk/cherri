@@ -64,6 +64,10 @@ func mapIdentifiers() {
 
 		mapValueReference(params.WFInput.Value)
 		mapValueReference(params.WFInput.Variable.Value)
+
+		for _, attachment := range params.WFInput.Value.AttachmentsByRange {
+			mapValueReference(attachment)
+		}
 	}
 }
 
@@ -533,7 +537,7 @@ func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary map[s
 		var itemValue any
 		switch dictDataType(itemValueType) {
 		case itemTypeNumber:
-			itemStringValue = item.WFValue.string
+			itemStringValue = item.WFValue.String
 			if itemStringValue != "" {
 				var convErr error
 				itemValue, convErr = strconv.Atoi(itemStringValue)
