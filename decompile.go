@@ -49,24 +49,39 @@ func decompile(b []byte) {
 func mapIdentifiers() {
 	variables = make(map[string]variableValue)
 	uuids = make(map[string]string)
-	for _, action := range genericShortcut.WFWorkflowActions {
+	for _, action := range shortcut.WFWorkflowActions {
 		var params = action.WFWorkflowActionParameters
 		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
-			var varName = strings.ReplaceAll(params.WFVariableName, " ", "")
+			var varName = strings.ReplaceAll(params["WFVariableName"].(string), " ", "")
 			if _, found := variables[varName]; !found {
 				variables[varName] = variableValue{}
 			}
 		}
 
-		if params.UUID != "" && params.CustomOutputName != "" {
-			mapUUID(params.UUID, params.CustomOutputName)
+		if params["UUID"] != nil && params["CustomOutputName"] != nil {
+			mapUUID(params["UUID"].(string), params["CustomOutputName"].(string))
 		}
 
-		mapValueReference(params.WFInput.Value)
-		mapValueReference(params.WFInput.Variable.Value)
+		var input WFInput
+		mapToStruct(params["WFInput"], &input)
 
-		for _, attachment := range params.WFInput.Value.AttachmentsByRange {
-			mapValueReference(attachment)
+		mapValueReference(input.Value)
+		mapValueReference(input.Variable.Value)
+
+		if params["WFInput"] != nil {
+			var WFInput = params["WFInput"].(map[string]interface{})
+			if WFInput["Value"] != nil {
+				var value = WFInput["Value"].(map[string]interface{})
+				if value["attachmentsByRange"] != nil {
+					var attachments = value["attachmentsByRange"].(map[string]interface{})
+
+					for _, attachment := range attachments {
+						var attachmentValue Value
+						mapToStruct(attachment, &attachmentValue)
+						mapValueReference(attachmentValue)
+					}
+				}
+			}
 		}
 	}
 }
