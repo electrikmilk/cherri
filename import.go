@@ -19,8 +19,8 @@ type iCloudRecord struct {
 }
 
 type RecordFields struct {
-	Shortcut ShortcutRecord
 	Name     ShortcutName
+	Shortcut ShortcutRecord
 }
 
 type ShortcutName struct {
