@@ -44,42 +44,29 @@ func mapIdentifiers() {
 	variables = make(map[string]variableValue)
 	uuids = make(map[string]string)
 	for _, action := range data.WFWorkflowActions {
+		var params GenericActionParameters
+		mapToStruct(action.WFWorkflowActionParameters, &params)
 		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
-			var varName = strings.ReplaceAll(action.WFWorkflowActionParameters["WFVariableName"].(string), " ", "")
+			var varName = strings.ReplaceAll(params.WFVariableName, " ", "")
 			if _, found := variables[varName]; !found {
 				variables[varName] = variableValue{}
 			}
 		}
 
-		if action.WFWorkflowActionParameters["CustomOutputName"] != nil && action.WFWorkflowActionParameters["UUID"] != nil {
-			mapUUID(action.WFWorkflowActionParameters["UUID"].(string), action.WFWorkflowActionParameters["CustomOutputName"].(string))
+		if params.UUID != "" && params.CustomOutputName != "" {
+			mapUUID(params.UUID, params.CustomOutputName)
 		}
 
-		if action.WFWorkflowActionParameters["WFInput"] != nil {
-			var wfInput = action.WFWorkflowActionParameters["WFInput"].(map[string]interface{})
-			if wfInput["Value"] != nil {
-				mapValueReference(wfInput["Value"].(map[string]interface{}))
-				continue
-			}
-			if wfInput["Variable"] != nil {
-				var variable = wfInput["Variable"].(map[string]interface{})
-				mapValueReference(variable["Value"].(map[string]interface{}))
-			}
-		}
+		mapValueReference(params.WFInput.Value)
+		mapValueReference(params.WFInput.Variable.Value)
 	}
 }
 
-func mapValueReference(value map[string]interface{}) {
-	if _, found := value["OutputName"]; !found {
+func mapValueReference(value Value) {
+	if value.OutputName == "" || value.OutputUUID == "" {
 		return
 	}
-	if _, found := value["OutputUUID"]; found {
-		if value["OutputUUID"] == nil {
-			return
-		}
-		var outputUUID = value["OutputUUID"].(string)
-		mapUUID(outputUUID, value["OutputName"].(string))
-	}
+	mapUUID(value.OutputUUID, value.OutputName)
 }
 
 func mapUUID(uuid string, varName string) {

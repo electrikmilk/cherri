@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/electrikmilk/args-parser"
 	"os"
@@ -198,4 +199,13 @@ func panicDebug(err error) {
 	}
 
 	panic("debug")
+}
+
+// Converts a map[string]interface{} to a matching struct data type.
+func mapToStruct(data map[string]interface{}, structure interface{}) {
+	jsonStr, marshalErr := json.Marshal(data)
+	handle(marshalErr)
+
+	var jsonErr = json.Unmarshal(jsonStr, &structure)
+	handle(jsonErr)
 }
