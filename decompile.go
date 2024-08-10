@@ -19,11 +19,15 @@ import (
 	"strings"
 )
 
-var data Shortcut
+var shortcut Shortcut
+var genericShortcut GenericShortcut
 var code strings.Builder
 
 func decompile(b []byte) {
-	var _, marshalErr = plists.Unmarshal(b, &data)
+	var _, marshalIndexedErr = plists.Unmarshal(b, &shortcut)
+	handle(marshalIndexedErr)
+
+	var _, marshalErr = plists.Unmarshal(b, &genericShortcut)
 	handle(marshalErr)
 
 	mapIdentifiers()
@@ -43,9 +47,8 @@ func decompile(b []byte) {
 func mapIdentifiers() {
 	variables = make(map[string]variableValue)
 	uuids = make(map[string]string)
-	for _, action := range data.WFWorkflowActions {
-		var params GenericActionParameters
-		mapToStruct(action.WFWorkflowActionParameters, &params)
+	for _, action := range genericShortcut.WFWorkflowActions {
+		var params = action.WFWorkflowActionParameters
 		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
 			var varName = strings.ReplaceAll(params.WFVariableName, " ", "")
 			if _, found := variables[varName]; !found {
@@ -163,7 +166,7 @@ func newCodeLine(s string, v ...any) {
 
 func decompileIcon() {
 	var hasDefinitions bool
-	var icon = data.WFWorkflowIcon
+	var icon = shortcut.WFWorkflowIcon
 	if icon.WFWorkflowIconStartColor != iconColor {
 		makeColors()
 		for name, i := range colors {
@@ -195,7 +198,7 @@ func decompileIcon() {
 var currentVariableValue string
 
 func decompileActions() {
-	for _, action := range data.WFWorkflowActions {
+	for _, action := range shortcut.WFWorkflowActions {
 		switch action.WFWorkflowActionIdentifier {
 		case "is.workflow.actions.comment":
 			decompComment(&action)
@@ -923,7 +926,7 @@ func printDecompDebug() {
 	fmt.Println(ansi("##### DEBUG #####\n", red))
 
 	fmt.Println("### ACTIONS ###")
-	for _, action := range data.WFWorkflowActions {
+	for _, action := range shortcut.WFWorkflowActions {
 		fmt.Println(action.WFWorkflowActionIdentifier)
 		var maxKeySize int
 		for key := range action.WFWorkflowActionParameters {

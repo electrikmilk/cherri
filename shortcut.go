@@ -4,6 +4,11 @@
 
 package main
 
+type ShortcutIcon struct {
+	WFWorkflowIconGlyphNumber int64
+	WFWorkflowIconStartColor  int
+}
+
 type Shortcut struct {
 	WFWorkflowIcon                      ShortcutIcon
 	WFWorkflowActions                   []ShortcutAction
@@ -18,14 +23,18 @@ type Shortcut struct {
 	WFWorkflowHasOutputFallback         bool
 }
 
-type ShortcutIcon struct {
-	WFWorkflowIconGlyphNumber int64
-	WFWorkflowIconStartColor  int
-}
-
 type ShortcutAction struct {
 	WFWorkflowActionIdentifier string
 	WFWorkflowActionParameters map[string]any
+}
+
+type GenericShortcut struct {
+	WFWorkflowActions []GenericShortcutAction
+}
+
+type GenericShortcutAction struct {
+	WFWorkflowActionIdentifier string
+	WFWorkflowActionParameters GenericActionParameters
 }
 
 type GenericActionParameters struct {
