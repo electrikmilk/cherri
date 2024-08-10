@@ -693,16 +693,16 @@ func decompAction(action *ShortcutAction) {
 	var isVariableValue = false
 	var isConstant = false
 	var actionCallCode strings.Builder
-	if customOutputName, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
-		customOutputName = strings.ReplaceAll(customOutputName.(string), " ", "")
-		if _, foundVar := variables[customOutputName.(string)]; !foundVar {
+	if action.WFWorkflowActionParameters["CustomOutputName"] != nil {
+		var customOutputName = strings.ReplaceAll(action.WFWorkflowActionParameters["CustomOutputName"].(string), " ", "")
+		if _, foundVar := variables[customOutputName]; !foundVar {
 			newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
 			isConstant = true
 		} else {
 			isVariableValue = true
 		}
 	}
-	if _, found := action.WFWorkflowActionParameters["UUID"]; found {
+	if action.WFWorkflowActionParameters["UUID"] != nil {
 		var uuid = action.WFWorkflowActionParameters["UUID"].(string)
 		if _, found := uuids[uuid]; found {
 			newCodeLine(fmt.Sprintf("const %s = ", uuids[uuid]))
