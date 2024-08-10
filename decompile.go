@@ -19,30 +19,6 @@ import (
 	"strings"
 )
 
-type Shortcut struct {
-	WFWorkflowIcon                      ShortcutIcon
-	WFWorkflowActions                   []ShortcutAction
-	WFQuickActionSurfaces               []string
-	WFWorkflowInputContentItemClasses   []string
-	WFWorkflowClientVersion             string
-	WFWorkflowMinimumClientVersion      int
-	WFWorkflowImportQuestions           interface{}
-	WFWorkflowTypes                     []string
-	WFWorkflowOutputContentItemClasses  []string
-	WFWorkflowHasShortcutInputVariables bool
-	WFWorkflowHasOutputFallback         bool
-}
-
-type ShortcutIcon struct {
-	WFWorkflowIconGlyphNumber int64
-	WFWorkflowIconStartColor  int
-}
-
-type ShortcutAction struct {
-	WFWorkflowActionIdentifier string
-	WFWorkflowActionParameters map[string]any
-}
-
 var data Shortcut
 var code strings.Builder
 
