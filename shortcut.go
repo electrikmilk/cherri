@@ -54,10 +54,27 @@ type VariableValue struct {
 }
 
 type Value struct {
-	Value        any
-	Type         any
-	VariableName string
-	OutputUUID   string
-	OutputName   string
-	Variable     any
+	Value                       any
+	Type                        any
+	VariableName                string
+	OutputUUID                  string
+	OutputName                  string
+	Variable                    any
+	WFDictionaryFieldValueItems []WFDictionaryFieldValueItem
+}
+
+type WFDictionaryFieldValueItem struct {
+	WFKey      any
+	WFItemType int
+	WFValue    WFValue
+}
+
+type WFValue struct {
+	Value  any
+	string string
+}
+
+type ArrayValue struct {
+	WFValue    any
+	WFItemType int
 }

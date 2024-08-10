@@ -202,7 +202,7 @@ func panicDebug(err error) {
 }
 
 // Converts a map[string]interface{} to a matching struct data type.
-func mapToStruct(data map[string]interface{}, structure interface{}) {
+func mapToStruct(data any, structure any) {
 	jsonStr, marshalErr := json.Marshal(data)
 	handle(marshalErr)
 

@@ -501,10 +501,19 @@ func decompConditional(action *ShortcutAction) {
 	}
 }
 
+type DictionaryActionParameters struct {
+	WFItems WFItems
+}
+
+type WFItems struct {
+	Value Value
+}
+
 func decompDictionary(action *ShortcutAction) {
-	var value = action.WFWorkflowActionParameters["WFItems"].(map[string]interface{})
-	var Value = value["Value"].(map[string]interface{})
-	var dictionary = decompDictionaryItems(Value["WFDictionaryFieldValueItems"].([]interface{}))
+	var params DictionaryActionParameters
+	mapToStruct(action.WFWorkflowActionParameters, &params)
+
+	var dictionary = decompDictionaryItems(params.WFItems.Value.WFDictionaryFieldValueItems)
 	var jsonBytes, jsonErr = json.MarshalIndent(dictionary, strings.Repeat("\t", tabLevel), "\t")
 	handle(jsonErr)
 
@@ -513,35 +522,33 @@ func decompDictionary(action *ShortcutAction) {
 	checkConstantLiteral(action)
 }
 
-func decompDictionaryItems(items []interface{}) (dictionary map[string]interface{}) {
+func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary map[string]interface{}) {
 	dictionary = make(map[string]interface{})
 	for _, item := range items {
-		var dictionaryItem = item.(map[string]interface{})
-		var itemKey = decompValue(dictionaryItem["WFKey"])
-		var itemStringValue = decompValue(dictionaryItem["WFValue"])
-		var itemValueType = fmt.Sprintf("%d", dictionaryItem["WFItemType"])
+		var itemKey = decompValue(item.WFKey)
+		var itemStringValue = decompValue(item.WFValue.Value)
+		var itemValueType = fmt.Sprintf("%d", item.WFItemType)
 		var itemValue any
 		switch dictDataType(itemValueType) {
 		case itemTypeNumber:
+			itemStringValue = item.WFValue.string
 			if itemStringValue != "" {
 				var convErr error
 				itemValue, convErr = strconv.Atoi(itemStringValue)
 				handle(convErr)
 			}
 		case itemTypeBool:
-			var wfValue = dictionaryItem["WFValue"].(map[string]interface{})
-			itemValue = wfValue["Value"]
+			itemValue = item.WFValue.Value
 		case itemTypeText:
 			itemValue = strings.Trim(itemStringValue, "\"")
 		case itemTypeArray:
-			var wfValue = dictionaryItem["WFValue"].(map[string]interface{})
-			var Value = wfValue["Value"].([]interface{})
-			itemValue = decompArray(Value)
+			var arrayItems []ArrayValue
+			mapToStruct(item.WFValue.Value.([]interface{}), arrayItems)
+			itemValue = decompArray(arrayItems)
 		case itemTypeDict:
-			var wfValue = dictionaryItem["WFValue"].(map[string]interface{})
-			var Value = wfValue["Value"].(map[string]interface{})
-			var dictionaryValue = Value["Value"].(map[string]interface{})
-			itemValue = decompDictionaryItems(dictionaryValue["WFDictionaryFieldValueItems"].([]interface{}))
+			var dictionaryItems []WFDictionaryFieldValueItem
+			mapToStruct(item.WFValue.Value.(map[string]interface{}), dictionaryItems)
+			itemValue = decompDictionaryItems(dictionaryItems)
 		default:
 			itemValue = itemStringValue
 		}
@@ -550,12 +557,11 @@ func decompDictionaryItems(items []interface{}) (dictionary map[string]interface
 	return
 }
 
-func decompArray(items []interface{}) (array []interface{}) {
+func decompArray(items []ArrayValue) (array []interface{}) {
 	for _, item := range items {
-		var itemInterface = item.(map[string]interface{})
-		var itemStringValue = decompValue(itemInterface["WFValue"])
+		var itemStringValue = decompValue(item.WFValue)
 		var itemValue any
-		var itemValueType = fmt.Sprintf("%d", itemInterface["WFItemType"])
+		var itemValueType = fmt.Sprintf("%d", item.WFItemType)
 		switch dictDataType(itemValueType) {
 		case itemTypeText:
 			itemValue = strings.Trim(itemStringValue, "\"")
