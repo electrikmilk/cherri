@@ -755,7 +755,6 @@ func decompAction(action *ShortcutAction) {
 	if action.WFWorkflowActionParameters["CustomOutputName"] != nil {
 		var customOutputName = strings.ReplaceAll(action.WFWorkflowActionParameters["CustomOutputName"].(string), " ", "")
 		if _, foundVar := variables[customOutputName]; !foundVar {
-			newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
 			isVariableValue = true
 		} else {
 			isConstant = true
