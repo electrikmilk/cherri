@@ -65,6 +65,15 @@ type Value struct {
 	WFDictionaryFieldValueItems []WFDictionaryFieldValueItem
 	AttachmentsByRange          map[string]Value
 	String                      string
+	Aggrandizements             []Aggrandizement
+}
+
+type Aggrandizement struct {
+	Type              string
+	CoercionItemClass string
+	DictionaryKey     string
+	PropertyName      string
+	PropertyUserInfo  any
 }
 
 type WFDictionaryFieldValueItem struct {

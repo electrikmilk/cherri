@@ -649,38 +649,42 @@ func decompValueObject(value map[string]interface{}) string {
 	return decompObjectValue(value)
 }
 
-func decompObjectValue(value any) string {
-	var valueType = reflect.TypeOf(value).String()
+func decompObjectValue(valueObj any) string {
+	var valueType = reflect.TypeOf(valueObj).String()
 	switch valueType {
 	case "map[string]interface {}":
-		var Value = value.(map[string]interface{})
+		var value = valueObj.(map[string]interface{})
 
 		var attachmentString string
-		if Value["Value"] != nil {
-			if reflect.TypeOf(Value["Value"]).String() != "map[string]interface {}" {
-				return fmt.Sprintf("%v", value)
+		if value["value"] != nil {
+			if reflect.TypeOf(value["value"]).String() != "map[string]interface {}" {
+				return fmt.Sprintf("%v", valueObj)
 			}
-			Value = Value["Value"].(map[string]interface{})
+			value = value["value"].(map[string]interface{})
 		}
 
-		if _, found := Value["string"]; found {
-			attachmentString = Value["string"].(string)
+		if _, found := value["string"]; found {
+			attachmentString = value["string"].(string)
 		}
 
 		var attachmentChars = strings.Split(attachmentString, "")
-		if attachments, found := Value["attachmentsByRange"]; found {
+		if attachments, found := value["attachmentsByRange"]; found {
 			for attachmentRange, a := range attachments.(map[string]interface{}) {
 				var attachmentRanges = strings.Split(attachmentRange, ",")
 				var attachmentPosition = strings.TrimPrefix(attachmentRanges[0], "{")
 				var position, convErr = strconv.Atoi(attachmentPosition)
 				handle(convErr)
 
-				var attachment = a.(map[string]interface{})
-				var variableName string
-				if _, found := attachment["OutputName"]; found {
-					variableName = attachment["OutputName"].(string)
-				} else {
-					variableName = attachment["VariableName"].(string)
+				var attachment Value
+				mapToStruct(a, &attachment)
+
+				var variableName = attachment.VariableName
+				if attachment.OutputName != "" {
+					variableName = attachment.OutputName
+				}
+
+				if len(attachment.Aggrandizements) != 0 {
+					decompAggrandizements(&variableName, attachment.Aggrandizements)
 				}
 
 				attachmentChars[position] = fmt.Sprintf("{%s}", strings.ReplaceAll(variableName, " ", ""))
@@ -691,7 +695,40 @@ func decompObjectValue(value any) string {
 
 		return attachmentString
 	default:
-		return fmt.Sprintf("%v", value)
+		return fmt.Sprintf("%v", valueObj)
+	}
+}
+
+var revContentItems map[string]string
+
+func decompAggrandizements(reference *string, aggrs []Aggrandizement) {
+	if len(revContentItems) == 0 {
+		revContentItems = make(map[string]string)
+		for key, item := range contentItems {
+			revContentItems[item] = key
+		}
+	}
+
+	var index string
+	var coerce string
+	for _, aggr := range aggrs {
+		switch aggr.Type {
+		case "WFCoercionVariableAggrandizement":
+			if _, found := revContentItems[aggr.CoercionItemClass]; found {
+				coerce = revContentItems[coerce]
+			}
+		case "WFDictionaryValueVariableAggrandizement":
+			index = aggr.DictionaryKey
+		case "WFPropertyVariableAggrandizement":
+			index = aggr.PropertyName
+		}
+	}
+
+	if index != "" {
+		*reference = fmt.Sprintf("%s['%s']", *reference, index)
+	}
+	if index != "" && coerce != "" {
+		*reference = fmt.Sprintf("%s.%s", *reference, coerce)
 	}
 }
 
