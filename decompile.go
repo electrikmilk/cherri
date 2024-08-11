@@ -682,12 +682,13 @@ func decompObjectValue(valueObj any) string {
 				if attachment.OutputName != "" {
 					variableName = attachment.OutputName
 				}
+				variableName = strings.ReplaceAll(variableName, " ", "")
 
 				if len(attachment.Aggrandizements) != 0 {
 					decompAggrandizements(&variableName, attachment.Aggrandizements)
 				}
 
-				attachmentChars[position] = fmt.Sprintf("{%s}", strings.ReplaceAll(variableName, " ", ""))
+				attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
 			}
 
 			attachmentString = fmt.Sprintf("\"%s\"", strings.Join(attachmentChars, ""))
