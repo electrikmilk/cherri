@@ -756,11 +756,12 @@ func decompAction(action *ShortcutAction) {
 		var customOutputName = strings.ReplaceAll(action.WFWorkflowActionParameters["CustomOutputName"].(string), " ", "")
 		if _, foundVar := variables[customOutputName]; !foundVar {
 			newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
-			isConstant = true
-		} else {
 			isVariableValue = true
+		} else {
+			isConstant = true
 		}
 	}
+
 	if action.WFWorkflowActionParameters[UUID] != nil {
 		var uuid = action.WFWorkflowActionParameters[UUID].(string)
 		if _, found := uuids[uuid]; found {
