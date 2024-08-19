@@ -291,10 +291,6 @@ func decompComment(action *ShortcutAction) {
 
 func decompTextValue(action *ShortcutAction) {
 	currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
-	if reflect.TypeOf(action.WFWorkflowActionParameters["WFTextActionText"]).String() == "string" {
-		return
-	}
-
 	checkConstantLiteral(action)
 }
 
