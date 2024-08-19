@@ -68,10 +68,17 @@ func mapIdentifiers() {
 		mapValueReference(input.Value)
 		mapValueReference(input.Variable.Value)
 
-		if params["WFInput"] != nil {
-			var WFInput = params["WFInput"].(map[string]interface{})
-			if WFInput["Value"] != nil {
-				var value = WFInput["Value"].(map[string]interface{})
+		var valueInput map[string]interface{}
+		switch {
+		case params["WFInput"] != nil:
+			valueInput = params["WFInput"].(map[string]interface{})
+		case params["WFInputText"] != nil:
+			valueInput = params["WFInputText"].(map[string]interface{})
+		}
+
+		if valueInput != nil {
+			if valueInput["Value"] != nil {
+				var value = valueInput["Value"].(map[string]interface{})
 				if value["attachmentsByRange"] != nil {
 					var attachments = value["attachmentsByRange"].(map[string]interface{})
 
