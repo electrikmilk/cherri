@@ -623,8 +623,7 @@ func decompValue(value any) string {
 
 func escapeString(value string) string {
 	var escapedString strings.Builder
-	fmt.Println(value)
-	var escapedRunes = []rune{'\n', '\t', 'r', '\\', '"'}
+	var escapedRunes = []rune{'\n', '\t', '\r', '\\', '"'}
 	for _, ch := range value {
 		if slices.Contains(escapedRunes, ch) {
 			escapedString.WriteRune('\\')
