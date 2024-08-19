@@ -615,10 +615,24 @@ func decompValue(value any) string {
 	case dictType:
 		return decompValueObject(value.(map[string]interface{}))
 	case stringType:
-		return fmt.Sprintf("\"%s\"", value)
+		return fmt.Sprintf("\"%s\"", escapeString(value.(string)))
 	default:
 		return fmt.Sprintf("%v", value)
 	}
+}
+
+func escapeString(value string) string {
+	var escapedString strings.Builder
+	fmt.Println(value)
+	var escapedRunes = []rune{'\n', '\t', 'r', '\\', '"'}
+	for _, ch := range value {
+		if slices.Contains(escapedRunes, ch) {
+			escapedString.WriteRune('\\')
+		}
+		escapedString.WriteRune(ch)
+	}
+
+	return escapedString.String()
 }
 
 func decompValueObject(value map[string]interface{}) string {
@@ -691,7 +705,7 @@ func decompObjectValue(valueObj any) string {
 				attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
 			}
 
-			attachmentString = fmt.Sprintf("\"%s\"", strings.Join(attachmentChars, ""))
+			attachmentString = fmt.Sprintf("\"%s\"", escapeString(strings.Join(attachmentChars, "")))
 		}
 
 		return attachmentString
