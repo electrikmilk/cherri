@@ -308,7 +308,9 @@ func realVariableValue(identifier string, lastValueType tokenType) (varValue var
 		if lastValueType == Variable {
 			parserError("Passed variable value that evaluates to variable")
 		}
-		varValue = realVariableValue(value.(string), argValueType)
+		if value != nil {
+			varValue = realVariableValue(value.(string), argValueType)
+		}
 	} else {
 		varValue = variables[front]
 	}
@@ -394,6 +396,9 @@ func validActionOutput(field string, validType tokenType, value any) {
 func getArgValue(argument actionArgument) any {
 	if argument.valueType != Variable {
 		return argument.value
+	}
+	if argument.value == nil {
+		return nil
 	}
 	var identifier = argument.value.(string)
 	if _, found := variables[identifier]; !found {
