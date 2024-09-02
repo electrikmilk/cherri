@@ -363,19 +363,20 @@ func validActionOutput(field string, validType tokenType, value any) {
 	var actionIdent = value.(action).ident
 	if action, found := actions[actionIdent]; found {
 		var actionOutputType = action.outputType
-		if actionOutputType != "" {
-			if actionOutputType != validType {
-				parserError(
-					fmt.Sprintf(
-						"Invalid variable value of action '%v' that outputs type '%s' for argument '%s' of type '%s' in '%s()'",
-						actionIdent+"()",
-						actionOutputType,
-						field,
-						validType,
-						currentActionIdentifier,
-					),
-				)
-			}
+		if actionOutputType == "" {
+			return
+		}
+		if actionOutputType != validType {
+			parserError(
+				fmt.Sprintf(
+					"Invalid variable value of action '%v' that outputs type '%s' for argument '%s' of type '%s' in '%s()'",
+					actionIdent+"()",
+					actionOutputType,
+					field,
+					validType,
+					currentActionIdentifier,
+				),
+			)
 		}
 	}
 }
