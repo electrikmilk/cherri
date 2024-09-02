@@ -4088,7 +4088,7 @@ var actions = map[string]*actionDefinition{
 			},
 			{
 				name:      "value",
-				validType: String,
+				validType: Variable,
 				key:       "WFDictionaryValue",
 			},
 		},
