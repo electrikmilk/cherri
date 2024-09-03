@@ -102,9 +102,15 @@ func mapValueReference(value Value) {
 }
 
 func mapUUID(uuid string, varName string) {
+	var outputName string
 	if _, found := uuids[uuid]; !found {
-		var outputName = strings.ReplaceAll(varName, " ", "")
+		outputName = strings.ReplaceAll(varName, " ", "")
 		uuids[uuid] = checkDuplicateOutputName(outputName)
+	}
+	if outputName == "" {
+		return
+	}
+	if _, found := variables[outputName]; found {
 		variables[outputName] = variableValue{}
 	}
 }
@@ -771,14 +777,16 @@ func decompAction(action *ShortcutAction) {
 	var actionCallCode strings.Builder
 	if action.WFWorkflowActionParameters["CustomOutputName"] != nil {
 		var customOutputName = strings.ReplaceAll(action.WFWorkflowActionParameters["CustomOutputName"].(string), " ", "")
-		if _, foundVar := variables[customOutputName]; !foundVar {
-			isVariableValue = true
-		} else {
-			isConstant = true
+		if ref, foundVar := variables[customOutputName]; foundVar {
+			if ref.constant {
+				isConstant = true
+			} else {
+				isVariableValue = true
+			}
 		}
 	}
 
-	if action.WFWorkflowActionParameters[UUID] != nil {
+	if action.WFWorkflowActionParameters[UUID] != nil && isConstant {
 		var uuid = action.WFWorkflowActionParameters[UUID].(string)
 		if _, found := uuids[uuid]; found {
 			newCodeLine(fmt.Sprintf("const %s = ", uuids[uuid]))
