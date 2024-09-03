@@ -384,22 +384,23 @@ func checkInlineVars(value *string) {
 func collectReference(valueType *tokenType, value *any, until *rune) {
 	var identifier strings.Builder
 	identifier.WriteString(collectIdentifier())
+	var reference = identifier.String()
 
-	if q, found := questions[identifier.String()]; found {
+	if q, found := questions[reference]; found {
 		if q.used {
-			parserError(fmt.Sprintf("Duplicate usage of import question reference '%s', can only be used once.", identifier.String()))
+			parserError(fmt.Sprintf("Duplicate usage of import question reference '%s', can only be used once.", reference))
 		}
 
 		*valueType = Question
-		*value = identifier.String()
+		*value = reference
 		q.used = true
 
 		advance()
 		return
 	}
 
-	if !validReference(identifier.String()) {
-		parserError(fmt.Sprintf("Undefined reference '%s'", identifier.String()))
+	if !validReference(reference) {
+		parserError(fmt.Sprintf("Undefined reference '%s'", reference))
 	}
 
 	if char == '[' {
@@ -412,15 +413,17 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		advanceUntil(']')
 		advance()
 		identifier.WriteString(fmt.Sprintf("[%s]", key))
+		reference = identifier.String()
 	}
 	if char == '.' {
 		identifier.WriteString(collectUntil(*until))
+		reference = identifier.String()
 	}
 
-	isInputVariable(identifier.String())
+	isInputVariable(reference)
 
 	*valueType = Variable
-	*value = identifier.String()
+	*value = reference
 	advance()
 }
 
