@@ -76,19 +76,20 @@ func mapIdentifiers() {
 			valueInput = params["WFInputText"].(map[string]interface{})
 		}
 
-		if valueInput != nil {
-			if valueInput["Value"] != nil {
-				var value = valueInput["Value"].(map[string]interface{})
-				if value["attachmentsByRange"] != nil {
-					var attachments = value["attachmentsByRange"].(map[string]interface{})
+		if valueInput == nil || valueInput["Value"] == nil {
+			continue
+		}
 
-					for _, attachment := range attachments {
-						var attachmentValue Value
-						mapToStruct(attachment, &attachmentValue)
-						mapValueReference(attachmentValue)
-					}
-				}
-			}
+		var value Value
+		mapToStruct(valueInput["Value"].(map[string]interface{}), value)
+		if value.AttachmentsByRange == nil {
+			continue
+		}
+
+		for _, attachment := range value.AttachmentsByRange {
+			var attachmentValue Value
+			mapToStruct(attachment, &attachmentValue)
+			mapValueReference(attachmentValue)
 		}
 	}
 }
