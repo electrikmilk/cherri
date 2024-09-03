@@ -786,7 +786,7 @@ func decompAction(action *ShortcutAction) {
 		}
 	}
 
-	if action.WFWorkflowActionParameters[UUID] != nil && isConstant {
+	if action.WFWorkflowActionParameters[UUID] != nil && !isVariableValue {
 		var uuid = action.WFWorkflowActionParameters[UUID].(string)
 		if _, found := uuids[uuid]; found {
 			newCodeLine(fmt.Sprintf("const %s = ", uuids[uuid]))
