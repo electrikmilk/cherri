@@ -183,13 +183,13 @@ func mapSplitActions() {
 	}
 }
 
-func newCodeLine(s string, v ...any) {
+func newCodeLine(s string) {
 	if tabLevel > 0 {
 		for i := 0; i < tabLevel; i++ {
 			code.WriteRune('\t')
 		}
 	}
-	code.WriteString(fmt.Sprintf(s, v...))
+	code.WriteString(s)
 }
 
 func decompileIcon() {
@@ -333,7 +333,7 @@ func decompExpression(action *ShortcutAction) {
 
 func decompVariable(action *ShortcutAction) {
 	var variableName = action.WFWorkflowActionParameters["WFVariableName"].(string)
-	newCodeLine("@%s", strings.ReplaceAll(variableName, " ", ""))
+	newCodeLine(fmt.Sprintf("@%s", strings.ReplaceAll(variableName, " ", "")))
 
 	if currentVariableValue != "" {
 		code.WriteRune(' ')
