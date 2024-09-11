@@ -2,7 +2,9 @@
 
 Before making any contributions, familiarize yourself with how the Cherri programming language generally works for issues, and how the compiler works on a deeper level for PRs.
 
-[Read documentation](https://cherrilang.org/compiler/)
+[Read language documentation](https://cherrilang.org/language/)
+
+[Read compiler documentation](https://cherrilang.org/compiler/)
 
 ## Issue policy
 
@@ -54,14 +56,14 @@ reproduce it and what environment it may be isolated to are clearly communicated
 - Test your code to the best of your ability, do not submit code that does not compile.
 - Write commit titles in the imperative (Fix bug, Add thing, etc.)
 - Don't over-explain but don't be vague, briefly but clearly state your changes.
-- If you change how a feature works, modify the existing feature, or add a new feature, add or update a related file in the tests folder to add to the commit checks.
+- If you change how a feature works, modify the existing feature or add a new feature, add or update a related file in the tests folder to add to the commit checks.
 - Test your feature or bug fix by writing a Cherri file and checking that it compiles to a valid Shortcut. If you are on
   a non-macOS platform, the Shortcut will compile but not try to sign, so the format may be invalid. Use an XML linter or validator on the debug plist file you can generate using `--debug`.
 - Squash commits when doing fixups so that if you remove something, you don't have a commit where you created it
   and then another commit where you remove it, and squash them together so that whatever ended up not being needed is also
   removed from the commit history.
 - Make sure your fork is up-to-date every time you are about to submit a contribution. It's best to not make a branch for
-  your feature until you are ready to submit it so that you are able to sync your fork beforehand. If this ends up
+  your feature until you are ready to submit it so that you can sync your fork beforehand. If this ends up
   happening just sync your main branch with upstream and rebase your feature branch from your main branch.
 - No merge commits.
 - Commits and changes should be one-to-one, as in, every commit should correlate to a major change in your contribution.
@@ -116,7 +118,7 @@ This isn't a requirement, but a suggestion. If you've found that you've thorough
 project, try another area, that way you won't burn yourself out doing the same thing. It is also understood and
 encouraged to take breaks from the project from time to time.
 
-## No political, religious or other ideological changes
+## No political, religious, or other ideological changes
 
 This is a technical project only. We do not make changes or decisions based on our personal religious, political,
 or other ideological beliefs. We make changes based on technology and technical standards. Any contributions or issues
