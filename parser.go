@@ -224,7 +224,7 @@ func collectUntilIgnoreStrings(ch rune) string {
 			break
 		}
 		if char == '"' {
-			insideString = insideString && prev(1) == '\\'
+			insideString = prev(1) == '\\'
 		}
 		collected.WriteRune(char)
 		advance()
