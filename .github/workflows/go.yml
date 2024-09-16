@@ -10,7 +10,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-test:
+  build-test-linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -39,7 +39,7 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-  build-windows:
+  build-test-windows:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
@@ -51,3 +51,6 @@ jobs:
 
     - name: Build
       run: go build -v ./...
+
+    - name: Test
+      run: go test -run TestCherri -v ./...
