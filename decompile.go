@@ -62,11 +62,19 @@ func mapIdentifiers() {
 			mapUUID(params["UUID"].(string), params["CustomOutputName"].(string))
 		}
 
-		var input WFInput
-		mapToStruct(params["WFInput"], &input)
+		if params["Input"] != nil {
+			var input WFInput
+			mapToStruct(params["Input"], &input)
+			mapValueReference(input.Value)
+			mapValueReference(input.Variable.Value)
+		}
 
-		mapValueReference(input.Value)
-		mapValueReference(input.Variable.Value)
+		if params["WFInput"] != nil {
+			var wfInput WFInput
+			mapToStruct(params["WFInput"], &wfInput)
+			mapValueReference(wfInput.Value)
+			mapValueReference(wfInput.Variable.Value)
+		}
 
 		var valueInput map[string]interface{}
 		switch {
@@ -74,6 +82,8 @@ func mapIdentifiers() {
 			valueInput = params["WFInput"].(map[string]interface{})
 		case params["WFInputText"] != nil:
 			valueInput = params["WFInputText"].(map[string]interface{})
+		case params["Input"] != nil:
+			valueInput = params["Input"].(map[string]interface{})
 		}
 
 		if valueInput == nil || valueInput["Value"] == nil {
