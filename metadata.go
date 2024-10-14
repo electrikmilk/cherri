@@ -87,14 +87,15 @@ func makeWorkflowTypes() {
 /* Versions */
 
 var versions map[string]string
-var minVersion = "2106.0.3"
-var iosVersion = 17.0
+var clientVersion = "3036.0.4.2"
+var iosVersion = 18.0
 
 func makeVersions() {
 	if len(versions) != 0 {
 		return
 	}
 	versions = map[string]string{
+		"18":     "3036.0.4.2",
 		"17":     "2106.0.3",
 		"16.5":   "900",
 		"16.4":   "900",

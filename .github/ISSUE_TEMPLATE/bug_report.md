@@ -18,7 +18,7 @@ The code to reproduce your issue if applicable:
 ```
 
 **Debug output**
-Please use the `--debug` flag and copy the output.
+Please use the `--debug` flag and copy the relevant output.
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
@@ -27,6 +27,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Version Information (please complete the following information):**
+ - Cherri version (run `cherri -v`): 
  - macOS version (run `uname -a`): 
  - Golang version (run `go version`):
 

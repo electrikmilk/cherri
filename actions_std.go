@@ -4093,7 +4093,7 @@ var actions = map[string]*actionDefinition{
 			},
 			{
 				name:      "value",
-				validType: String,
+				validType: Variable,
 				key:       "WFDictionaryValue",
 			},
 		},
@@ -5904,6 +5904,11 @@ var actions = map[string]*actionDefinition{
 				enum:      []string{"Folder", "Icon", "Action Count", "File Size", "File Extension Creation Date", "File Path", "Last Modified Date", "Name"},
 			},
 		},
+	},
+	"getApps": {
+		identifier: "filter.apps",
+		mac:        true,
+		minVersion: 18,
 	},
 }
 

@@ -309,16 +309,26 @@ func realVariableValue(identifier string, lastValueType tokenType) (varValue var
 		if lastValueType == Variable {
 			parserError("Passed variable value that evaluates to variable")
 		}
-		varValue = realVariableValue(value.(string), argValueType)
+		if value != nil {
+			varValue = realVariableValue(value.(string), argValueType)
+		}
 	} else {
 		varValue = variables[front]
 	}
 	return
 }
 
+func checkTypeTransform(valueType tokenType) tokenType {
+	if valueType == Expression {
+		valueType = Integer
+	}
+
+	return valueType
+}
+
 // typeCheck is used to check the types of arguments given for actions.
 func typeCheck(param *parameterDefinition, argument *actionArgument) {
-	var argValueType = argument.valueType
+	var argValueType = checkTypeTransform(argument.valueType)
 	var argVal = argument.value
 	switch {
 	case argValueType == Action:
@@ -327,7 +337,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 	case argValueType == Variable:
 		var identifier = argVal.(string)
 		var getVar = realVariableValue(identifier, String)
-		argValueType = getVar.valueType
+		argValueType = checkTypeTransform(getVar.valueType)
 		argVal = getVar.value
 		if argValueType == Action {
 			validActionOutput(param.name, param.validType, argVal)
@@ -364,19 +374,20 @@ func validActionOutput(field string, validType tokenType, value any) {
 	var actionIdent = value.(action).ident
 	if action, found := actions[actionIdent]; found {
 		var actionOutputType = action.outputType
-		if actionOutputType != "" {
-			if actionOutputType != validType {
-				parserError(
-					fmt.Sprintf(
-						"Invalid variable value of action '%v' that outputs type '%s' for argument '%s' of type '%s' in '%s()'",
-						actionIdent+"()",
-						actionOutputType,
-						field,
-						validType,
-						currentActionIdentifier,
-					),
-				)
-			}
+		if actionOutputType == "" {
+			return
+		}
+		if actionOutputType != validType {
+			parserError(
+				fmt.Sprintf(
+					"Invalid variable value of action '%v' that outputs type '%s' for argument '%s' of type '%s' in '%s()'",
+					actionIdent+"()",
+					actionOutputType,
+					field,
+					validType,
+					currentActionIdentifier,
+				),
+			)
 		}
 	}
 }
@@ -386,6 +397,9 @@ func validActionOutput(field string, validType tokenType, value any) {
 func getArgValue(argument actionArgument) any {
 	if argument.valueType != Variable {
 		return argument.value
+	}
+	if argument.value == nil {
+		return nil
 	}
 	var identifier = argument.value.(string)
 	if _, found := variables[identifier]; !found {

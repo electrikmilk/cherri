@@ -944,71 +944,79 @@ func dictionaryValue(key string, value any) plistData {
 			},
 		},
 	}
-	switch reflect.TypeOf(value).String() {
-	case stringType:
-		if strings.ContainsAny(value.(string), "{}") {
-			wfValue = paramValue("Value", actionArgument{
-				valueType: String,
-				value:     value,
-			}, String, Text)
-			if reflect.TypeOf(wfValue.value).String() == "[]main.plistData" {
-				for _, val := range wfValue.value.([]plistData) {
-					wfValue = val
-					break
+
+	if value != nil {
+		switch reflect.TypeOf(value).String() {
+		case stringType:
+			if strings.ContainsAny(value.(string), "{}") {
+				wfValue = paramValue("Value", actionArgument{
+					valueType: String,
+					value:     value,
+				}, String, Text)
+				if reflect.TypeOf(wfValue.value).String() == "[]main.plistData" {
+					for _, val := range wfValue.value.([]plistData) {
+						wfValue = val
+						break
+					}
 				}
 			}
-		}
-		itemType = itemTypeText
-		serializedType = "WFTextTokenString"
-	case intType:
-		itemType = itemTypeNumber
-		serializedType = "WFTextTokenString"
-	case arrayType:
-		itemType = itemTypeArray
-		serializedType = "WFArrayParameterState"
-		var arrayValue []plistData
-		for _, item := range value.([]interface{}) {
-			arrayValue = append(arrayValue, dictionaryValue("", item))
-		}
-		wfValue = plistData{
-			key:      "Value",
-			dataType: Array,
-			value:    arrayValue,
-		}
-	case dictType:
-		itemType = itemTypeDict
-		serializedType = "WFDictionaryFieldValue"
-		wfValue = plistData{
-			key:      "Value",
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "Value",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "WFDictionaryFieldValueItems",
-							dataType: Array,
-							value:    makeDictionary(value),
+			itemType = itemTypeText
+			serializedType = "WFTextTokenString"
+		case intType:
+			itemType = itemTypeNumber
+			serializedType = "WFTextTokenString"
+		case arrayType:
+			itemType = itemTypeArray
+			serializedType = "WFArrayParameterState"
+			var arrayValue []plistData
+			for _, item := range value.([]interface{}) {
+				arrayValue = append(arrayValue, dictionaryValue("", item))
+			}
+			wfValue = plistData{
+				key:      "Value",
+				dataType: Array,
+				value:    arrayValue,
+			}
+		case dictType:
+			itemType = itemTypeDict
+			serializedType = "WFDictionaryFieldValue"
+			wfValue = plistData{
+				key:      "Value",
+				dataType: Dictionary,
+				value: []plistData{
+					{
+						key:      "Value",
+						dataType: Dictionary,
+						value: []plistData{
+							{
+								key:      "WFDictionaryFieldValueItems",
+								dataType: Array,
+								value:    makeDictionary(value),
+							},
 						},
 					},
+					{
+						key:      "WFSerializationType",
+						dataType: Text,
+						value:    "WFDictionaryFieldValue",
+					},
 				},
-				{
-					key:      "WFSerializationType",
-					dataType: Text,
-					value:    "WFDictionaryFieldValue",
-				},
-			},
+			}
+		case boolType:
+			itemType = itemTypeBool
+			serializedType = "WFNumberSubstitutableState"
+			wfValue = plistData{
+				key:      "Value",
+				dataType: Boolean,
+				value:    value,
+			}
 		}
-	case boolType:
-		itemType = itemTypeBool
-		serializedType = "WFNumberSubstitutableState"
-		wfValue = plistData{
-			key:      "Value",
-			dataType: Boolean,
-			value:    value,
-		}
+	} else {
+		itemType = itemTypeText
+		serializedType = "WFTextTokenString"
+		wfValue = plistData{}
 	}
+
 	return dictionaryPlistValue(key, itemType, serializedType, wfValue)
 }
 
