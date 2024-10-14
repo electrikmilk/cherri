@@ -144,7 +144,7 @@ func printParsingDebug() {
 	} else {
 		fmt.Println("macOS Only: false")
 	}
-	fmt.Printf("Mininum Version: %s\n", minVersion)
+	fmt.Printf("Client Version: %s\n", clientVersion)
 	fmt.Printf("iOS Version: %.1f\n", iosVersion)
 	fmt.Print("\n")
 
@@ -651,7 +651,7 @@ func collectDefinition() {
 		var collectVersion = collectUntil('\n')
 		makeVersions()
 		if version, found := versions[collectVersion]; found {
-			minVersion = version
+			clientVersion = version
 			iosVersion, _ = strconv.ParseFloat(collectVersion, 32)
 		} else {
 			var list = makeKeyList("Available versions:", versions, collectVersion)
