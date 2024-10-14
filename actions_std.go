@@ -5898,6 +5898,11 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"getApps": {
+		identifier: "filter.apps",
+		mac:        true,
+		minVersion: 18,
+	},
 }
 
 func rawAction() {
