@@ -49,7 +49,7 @@ func importShortcut() (shortcutBytes []byte) {
 	}
 
 	if hasSignedBytes(shortcutBytes) {
-		exit("import: Signed Shortcuts are currently not supported :(")
+		exit("import: Signed Shortcuts are currently not supported :(\nYou can use an iCloud link instead by sharing the Shortcut and selecting \"Copy iCloud Link\".")
 	}
 
 	return
