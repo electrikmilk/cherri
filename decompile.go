@@ -642,16 +642,12 @@ func decompValue(value any) string {
 }
 
 func escapeString(value string) string {
-	var escapedString strings.Builder
-	var escapedRunes = []rune{'\n', '\t', '\r', '\\', '"'}
-	for _, ch := range value {
-		if slices.Contains(escapedRunes, ch) {
-			escapedString.WriteRune('\\')
-		}
-		escapedString.WriteRune(ch)
+	var escape = []string{"\\n", "\\t", "\\r", "\\", "\""}
+	for _, e := range escape {
+		value = strings.ReplaceAll(value, e, fmt.Sprintf("\\%s", e))
 	}
 
-	return escapedString.String()
+	return value
 }
 
 func decompValueObject(value map[string]interface{}) string {
