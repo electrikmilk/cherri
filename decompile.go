@@ -788,11 +788,8 @@ func decompAction(action *ShortcutAction) {
 	if action.WFWorkflowActionParameters["CustomOutputName"] != nil {
 		var customOutputName = strings.ReplaceAll(action.WFWorkflowActionParameters["CustomOutputName"].(string), " ", "")
 		if ref, foundVar := variables[customOutputName]; foundVar {
-			if ref.constant {
-				isConstant = true
-			} else {
-				isVariableValue = true
-			}
+			isConstant = ref.constant
+			isVariableValue = !ref.constant
 		}
 	}
 
