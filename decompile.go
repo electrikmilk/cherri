@@ -445,12 +445,13 @@ func decompMenu(action *ShortcutAction) {
 		code.WriteString(" {\n")
 		tabLevel++
 	case statementPart:
+		tabLevel--
 		newCodeLine("item ")
 		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFMenuItemAttributedTitle"]))
 		code.WriteString(":\n")
 		tabLevel++
 	case endStatement:
-		tabLevel -= 2
+		tabLevel--
 		newCodeLine("}\n")
 	}
 }
