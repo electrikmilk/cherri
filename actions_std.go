@@ -5916,6 +5916,7 @@ func rawAction() {
 			},
 			{
 				name:      "parameters",
+				optional:  true,
 				validType: Arr,
 			},
 		},
