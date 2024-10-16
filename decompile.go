@@ -858,7 +858,7 @@ func decompAction(action *ShortcutAction) {
 }
 
 func makeRawAction(actionCode *strings.Builder, action *ShortcutAction) {
-	actionCode.WriteString(fmt.Sprintf("rawAction(\"%s\"", action.WFWorkflowActionIdentifier))
+	actionCode.WriteString(tabbedLine(fmt.Sprintf("rawAction(\"%s\"", action.WFWorkflowActionIdentifier)))
 
 	if len(action.WFWorkflowActionParameters) > 1 && action.WFWorkflowActionParameters["UUID"] != nil {
 		tabLevel++
@@ -890,9 +890,10 @@ func makeRawAction(actionCode *strings.Builder, action *ShortcutAction) {
 
 		actionCode.WriteString(tabbedLine("}\n"))
 		tabLevel--
-		actionCode.WriteRune(']')
+		actionCode.WriteString(tabbedLine("])"))
+	} else {
+		actionCode.WriteRune(')')
 	}
-	actionCode.WriteString(tabbedLine(")\n"))
 }
 
 func matchAction(action *ShortcutAction) (name string, definition actionDefinition) {
