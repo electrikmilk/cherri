@@ -835,6 +835,11 @@ func decompAction(action *ShortcutAction) {
 			}
 		}
 
+		if matchedAction.make != nil {
+			fmt.Println("TODO: make:", matchedAction.identifier)
+			decompMakeAction(&actionCallCode, &matchedAction, action)
+		}
+
 		actionCallCode.WriteString(")")
 	}
 
@@ -984,6 +989,40 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 	var matchedAction = matches[0]
 	*identifier = matchedAction.action.identifier
 	*definition = *matchedAction.action.definition
+}
+
+func decompMakeAction(actionCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
+	var identifier = matchedAction.identifier
+	if matchedAction.appIdentifier != "" {
+		identifier = matchedAction.appIdentifier
+	}
+	switch identifier {
+	case actions["splitText"].identifier:
+		fallthrough
+	case actions["joinText"].identifier:
+		actionCode.WriteString(decompValue(action.WFWorkflowActionParameters["text"]))
+		if action.WFWorkflowActionParameters["WFTextSeparator"] != nil {
+			var glue = action.WFWorkflowActionParameters["WFTextSeparator"].(string)
+			if glue == "New Lines" {
+				break
+			}
+			actionCode.WriteString(fmt.Sprintf("\"%s\"", glueToChar(glue)))
+		}
+	}
+	fmt.Println(actionCode.String())
+}
+
+func glueToChar(glue string) string {
+	switch glue {
+	case "New Lines":
+		return "\n"
+	case "Spaces":
+		return " "
+	case "Every Character":
+		return ""
+	default:
+		return glue
+	}
 }
 
 func hasRequiredParams(parameters map[string]any, definitions *[]parameterDefinition) bool {
