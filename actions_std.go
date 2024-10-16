@@ -4721,6 +4721,7 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
+		defaultAction: true,
 	},
 	"getListItems": {
 		identifier: "getitemfromlist",
