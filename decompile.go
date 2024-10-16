@@ -864,7 +864,11 @@ func makeRawAction(actionCode *strings.Builder, action *ShortcutAction) {
 		tabLevel++
 		actionCode.WriteString(", [\n")
 		actionCode.WriteString(tabbedLine("{\n"))
+		var index = 0
+		var paramsSize = len(action.WFWorkflowActionParameters)
 		for key, param := range action.WFWorkflowActionParameters {
+			index++
+
 			if key == UUID {
 				continue
 			}
@@ -876,8 +880,11 @@ func makeRawAction(actionCode *strings.Builder, action *ShortcutAction) {
 			if !strings.Contains(value, "\"") {
 				value = fmt.Sprintf("\"{%s}\"", value)
 			}
-
 			actionCode.WriteString(value)
+
+			if index < paramsSize {
+				actionCode.WriteRune(',')
+			}
 			actionCode.WriteRune('\n')
 		}
 
