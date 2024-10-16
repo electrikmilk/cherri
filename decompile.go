@@ -210,6 +210,19 @@ func newCodeLine(s string) {
 	code.WriteString(s)
 }
 
+func tabbedLine(s string) string {
+	if tabLevel < 1 {
+		return s
+	}
+	var str strings.Builder
+	for i := 0; i < tabLevel; i++ {
+		str.WriteRune('\t')
+	}
+	str.WriteString(s)
+
+	return str.String()
+}
+
 func decompileIcon() {
 	var hasDefinitions bool
 	var icon = shortcut.WFWorkflowIcon
@@ -766,10 +779,12 @@ func decompAggrandizements(reference *string, aggrs []Aggrandizement) {
 var macDefinition bool
 
 func decompAction(action *ShortcutAction) {
+	var isVariableValue = false
+	var isConstant = false
+	var actionCallCode strings.Builder
 	var matchedIdentifier, matchedAction = matchAction(action)
 	if matchedIdentifier == "" {
-		makeRawAction(action)
-		return
+		makeRawAction(&actionCallCode, action)
 	}
 
 	if matchedAction.mac && !macDefinition {
@@ -779,9 +794,6 @@ func decompAction(action *ShortcutAction) {
 		macDefinition = true
 	}
 
-	var isVariableValue = false
-	var isConstant = false
-	var actionCallCode strings.Builder
 	if action.WFWorkflowActionParameters["CustomOutputName"] != nil {
 		var customOutputName = strings.ReplaceAll(action.WFWorkflowActionParameters["CustomOutputName"].(string), " ", "")
 		if ref, foundVar := variables[customOutputName]; foundVar {
@@ -798,28 +810,33 @@ func decompAction(action *ShortcutAction) {
 		}
 	}
 
-	var actionCallStart = fmt.Sprintf("%s(", matchedIdentifier)
-	if !isConstant && !isVariableValue {
-		newCodeLine(actionCallStart)
-	} else {
-		actionCallCode.WriteString(actionCallStart)
-	}
-
-	var matchedParamsSize = len(matchedAction.parameters)
-	for i, param := range matchedAction.parameters {
-		if param.key == "" {
-			continue
+	if matchedIdentifier != "" {
+		var actionCallStart = fmt.Sprintf("%s(", matchedIdentifier)
+		if !isConstant && !isVariableValue {
+			newCodeLine(actionCallStart)
+		} else {
+			actionCallCode.WriteString(actionCallStart)
 		}
-		if value, found := action.WFWorkflowActionParameters[param.key]; found {
-			if i != 0 && matchedParamsSize != 1 && matchedParamsSize > i {
-				actionCallCode.WriteString(", ")
+
+		var matchedParamsSize = len(matchedAction.parameters)
+		if matchedParamsSize > 0 {
+			for i, param := range matchedAction.parameters {
+				if param.key == "" {
+					continue
+				}
+				if value, found := action.WFWorkflowActionParameters[param.key]; found {
+					if i != 0 && matchedParamsSize != 1 && matchedParamsSize > i {
+						actionCallCode.WriteString(", ")
+					}
+
+					var dValue = decompValue(value)
+					actionCallCode.WriteString(dValue)
+				}
 			}
-
-			var dValue = decompValue(value)
-			actionCallCode.WriteString(dValue)
 		}
+
+		actionCallCode.WriteString(")")
 	}
-	actionCallCode.WriteString(")")
 
 	if isVariableValue {
 		currentVariableValue = actionCallCode.String()
@@ -830,31 +847,31 @@ func decompAction(action *ShortcutAction) {
 	}
 }
 
-func makeRawAction(action *ShortcutAction) {
-	newCodeLine(fmt.Sprintf("rawAction(\"%s\", [\n", action.WFWorkflowActionIdentifier))
+func makeRawAction(actionCode *strings.Builder, action *ShortcutAction) {
+	actionCode.WriteString(fmt.Sprintf("rawAction(\"%s\", [\n", action.WFWorkflowActionIdentifier))
 	tabLevel++
-	newCodeLine("{\n")
+	actionCode.WriteString(tabbedLine("{\n"))
 
 	for key, param := range action.WFWorkflowActionParameters {
 		if key == UUID {
 			continue
 		}
 
-		code.WriteString(strings.Repeat("\t", tabLevel+1))
-		code.WriteString(fmt.Sprintf("\"%s\": ", key))
+		actionCode.WriteString(strings.Repeat("\t", tabLevel+1))
+		actionCode.WriteString(fmt.Sprintf("\"%s\": ", key))
 
 		var value = decompValue(param)
 		if !strings.Contains(value, "\"") {
 			value = fmt.Sprintf("\"{%s}\"", value)
 		}
 
-		code.WriteString(value)
-		code.WriteRune('\n')
+		actionCode.WriteString(value)
+		actionCode.WriteRune('\n')
 	}
 
-	newCodeLine("}\n")
+	actionCode.WriteString(tabbedLine("}\n"))
 	tabLevel--
-	newCodeLine("])\n")
+	actionCode.WriteString(tabbedLine("])\n"))
 }
 
 func matchAction(action *ShortcutAction) (name string, definition actionDefinition) {
