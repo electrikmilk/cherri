@@ -853,30 +853,34 @@ func decompAction(action *ShortcutAction) {
 }
 
 func makeRawAction(actionCode *strings.Builder, action *ShortcutAction) {
-	actionCode.WriteString(fmt.Sprintf("rawAction(\"%s\", [\n", action.WFWorkflowActionIdentifier))
-	tabLevel++
-	actionCode.WriteString(tabbedLine("{\n"))
+	actionCode.WriteString(fmt.Sprintf("rawAction(\"%s\"", action.WFWorkflowActionIdentifier))
 
-	for key, param := range action.WFWorkflowActionParameters {
-		if key == UUID {
-			continue
+	if len(action.WFWorkflowActionParameters) > 1 && action.WFWorkflowActionParameters["UUID"] != nil {
+		tabLevel++
+		actionCode.WriteString(", [\n")
+		actionCode.WriteString(tabbedLine("{\n"))
+		for key, param := range action.WFWorkflowActionParameters {
+			if key == UUID {
+				continue
+			}
+
+			actionCode.WriteString(strings.Repeat("\t", tabLevel+1))
+			actionCode.WriteString(fmt.Sprintf("\"%s\": ", key))
+
+			var value = decompValue(param)
+			if !strings.Contains(value, "\"") {
+				value = fmt.Sprintf("\"{%s}\"", value)
+			}
+
+			actionCode.WriteString(value)
+			actionCode.WriteRune('\n')
 		}
 
-		actionCode.WriteString(strings.Repeat("\t", tabLevel+1))
-		actionCode.WriteString(fmt.Sprintf("\"%s\": ", key))
-
-		var value = decompValue(param)
-		if !strings.Contains(value, "\"") {
-			value = fmt.Sprintf("\"{%s}\"", value)
-		}
-
-		actionCode.WriteString(value)
-		actionCode.WriteRune('\n')
+		actionCode.WriteString(tabbedLine("}\n"))
+		tabLevel--
+		actionCode.WriteRune(']')
 	}
-
-	actionCode.WriteString(tabbedLine("}\n"))
-	tabLevel--
-	actionCode.WriteString(tabbedLine("])\n"))
+	actionCode.WriteString(tabbedLine(")\n"))
 }
 
 func matchAction(action *ShortcutAction) (name string, definition actionDefinition) {
