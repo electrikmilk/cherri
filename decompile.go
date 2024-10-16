@@ -656,9 +656,14 @@ func decompValue(value any) string {
 }
 
 func escapeString(value string) string {
-	var escape = []string{"\\n", "\\t", "\\r", "\\", "\""}
-	for _, e := range escape {
-		value = strings.ReplaceAll(value, e, fmt.Sprintf("\\%s", e))
+	var escapes = map[string]string{
+		"\n": "\\n",
+		"\t": "\\t",
+		"\r": "\\r",
+		"\"": "\\\"",
+	}
+	for chr, e := range escapes {
+		value = strings.ReplaceAll(value, chr, e)
 	}
 
 	return value
