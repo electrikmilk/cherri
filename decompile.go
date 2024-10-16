@@ -62,24 +62,18 @@ func mapIdentifiers() {
 			mapUUID(params["UUID"].(string), params["CustomOutputName"].(string))
 		}
 
-		if params["Input"] != nil {
-			var input WFInput
-			mapToStruct(params["Input"], &input)
-			mapValueReference(input.Value)
-			mapValueReference(input.Variable.Value)
-		}
-
-		if params["WFInput"] != nil {
-			var wfInput WFInput
-			mapToStruct(params["WFInput"], &wfInput)
-			mapValueReference(wfInput.Value)
-			mapValueReference(wfInput.Variable.Value)
+		for _, inputKey := range []string{"Input", "WFInput", "WFOutput", "text"} {
+			if params[inputKey] != nil {
+				mapInputValue(params[inputKey])
+			}
 		}
 
 		var valueInput map[string]interface{}
 		switch {
 		case params["WFInput"] != nil:
 			valueInput = params["WFInput"].(map[string]interface{})
+		case params["WFOutput"] != nil:
+			valueInput = params["WFOutput"].(map[string]interface{})
 		case params["WFInputText"] != nil:
 			valueInput = params["WFInputText"].(map[string]interface{})
 		case params["Input"] != nil:
@@ -102,6 +96,13 @@ func mapIdentifiers() {
 			mapValueReference(attachmentValue)
 		}
 	}
+}
+
+func mapInputValue(data any) {
+	var wfInput WFInput
+	mapToStruct(data, &wfInput)
+	mapValueReference(wfInput.Value)
+	mapValueReference(wfInput.Variable.Value)
 }
 
 func mapValueReference(value Value) {
