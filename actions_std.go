@@ -2167,8 +2167,9 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 			{
-				name:      "separator",
-				validType: String,
+				name:         "separator",
+				validType:    String,
+				defaultValue: "\n",
 			},
 		},
 		make: textParts,
@@ -2181,8 +2182,9 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 			{
-				name:      "glue",
-				validType: String,
+				name:         "glue",
+				validType:    String,
+				defaultValue: "\n",
 			},
 		},
 		make: textParts,
@@ -5923,6 +5925,7 @@ func rawAction() {
 			},
 			{
 				name:      "parameters",
+				optional:  true,
 				validType: Arr,
 			},
 		},
