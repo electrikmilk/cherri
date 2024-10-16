@@ -3528,6 +3528,7 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
+		defaultAction: true,
 		make: func(args []actionArgument) []plistData {
 			return countParams("Items", args)
 		},
