@@ -4645,7 +4645,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getFirstItem": {
-		identifier: "getitemfromlist",
+		identifier:    "getitemfromlist",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "list",
@@ -4724,7 +4725,6 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
-		defaultAction: true,
 	},
 	"getListItems": {
 		identifier: "getitemfromlist",
