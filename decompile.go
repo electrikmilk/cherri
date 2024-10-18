@@ -1018,27 +1018,33 @@ func decompMakeAction(actionCode *strings.Builder, matchedAction *actionDefiniti
 	if matchedAction.appIdentifier != "" {
 		identifier = matchedAction.appIdentifier
 	}
+	var arguments []string
 	switch identifier {
 	case actions["splitText"].identifier:
 		fallthrough
 	case actions["joinText"].identifier:
-		actionCode.WriteString(decompValue(action.WFWorkflowActionParameters["text"]))
+		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["text"]))
 		if action.WFWorkflowActionParameters["WFTextSeparator"] != nil {
 			var glue = action.WFWorkflowActionParameters["WFTextSeparator"].(string)
 			if glue == "New Lines" {
 				break
 			}
-			actionCode.WriteString(fmt.Sprintf("\"%s\"", glueToChar(glue)))
+			arguments = append(arguments, fmt.Sprintf("\"%s\"", glueToChar(glue)))
 		}
 	case actions["run"].identifier:
 		var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]any)
 		if workflow["isSelf"].(bool) {
-			actionCode.WriteString(decompValue(workflow["workflowName"]))
+			arguments = append(arguments, decompValue(workflow["workflowName"]))
 		}
-		actionCode.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
+		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFInput"]))
 	default:
 		fmt.Println("TODO: make:", matchedAction.identifier)
 	}
+
+	if len(arguments) == 0 {
+		return
+	}
+	actionCode.WriteString(strings.Join(arguments, ", "))
 }
 
 func glueToChar(glue string) string {
