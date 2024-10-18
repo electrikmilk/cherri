@@ -969,7 +969,7 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 			}
 		}
 
-		if !hasRequiredParams(parameters, &splitActionParams) {
+		if !paramsMatchDefs(parameters, &splitActionParams) {
 			continue
 		}
 
@@ -1069,9 +1069,9 @@ func glueToChar(glue string) string {
 	}
 }
 
-func hasRequiredParams(parameters map[string]any, definitions *[]parameterDefinition) bool {
+func paramsMatchDefs(parameters map[string]any, definitions *[]parameterDefinition) bool {
 	for _, def := range *definitions {
-		if def.optional || def.key == "" {
+		if def.key == "" {
 			continue
 		}
 		if _, found := parameters[def.key]; !found {
