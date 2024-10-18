@@ -57,7 +57,8 @@ func mapIdentifiers() {
 	for _, action := range shortcut.WFWorkflowActions {
 		var params = action.WFWorkflowActionParameters
 		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
-			var varName = strings.ReplaceAll(params["WFVariableName"].(string), " ", "")
+			var varName = params["WFVariableName"].(string)
+			sanitizeIdentifier(&varName)
 			if _, found := variables[varName]; !found {
 				variables[varName] = variableValue{}
 			}
@@ -120,8 +121,8 @@ func mapValueReference(value Value) {
 func mapUUID(uuid string, varName string) {
 	var outputName string
 	if _, found := uuids[uuid]; !found {
-		outputName = strings.ReplaceAll(varName, "-", "_")
-		outputName = specialCharsRegex.ReplaceAllString(outputName, "")
+		outputName = varName
+		sanitizeIdentifier(&outputName)
 		uuids[uuid] = checkDuplicateOutputName(outputName)
 	}
 	if outputName == "" {
@@ -130,6 +131,12 @@ func mapUUID(uuid string, varName string) {
 	if _, found := variables[outputName]; found {
 		variables[outputName] = variableValue{}
 	}
+}
+
+// sanitizeIdentifier strips special characters and replaces dashes with underscores.
+func sanitizeIdentifier(identifier *string) {
+	*identifier = strings.ReplaceAll(*identifier, "-", "_")
+	*identifier = specialCharsRegex.ReplaceAllString(*identifier, "")
 }
 
 var currentOutputName string
@@ -297,7 +304,8 @@ func decompileActions() {
 
 func checkConstantLiteral(action *ShortcutAction) {
 	if _, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
-		var customOutputName = strings.ReplaceAll(action.WFWorkflowActionParameters["CustomOutputName"].(string), " ", "")
+		var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
+		sanitizeIdentifier(&customOutputName)
 		if _, found := variables[customOutputName]; !found {
 			newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
 			code.WriteString(currentVariableValue)
@@ -332,7 +340,8 @@ func decompTextValue(action *ShortcutAction) {
 }
 
 func decompNumberValue(action *ShortcutAction) {
-	var customOutputName = strings.ReplaceAll(action.WFWorkflowActionParameters["CustomOutputName"].(string), " ", "")
+	var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
+	sanitizeIdentifier(&customOutputName)
 	if _, found := variables[customOutputName]; !found {
 		decompAction(action)
 		return
@@ -370,7 +379,8 @@ func decompExpression(action *ShortcutAction) {
 
 func decompVariable(action *ShortcutAction) {
 	var variableName = action.WFWorkflowActionParameters["WFVariableName"].(string)
-	newCodeLine(fmt.Sprintf("@%s", strings.ReplaceAll(variableName, " ", "")))
+	sanitizeIdentifier(&variableName)
+	newCodeLine(fmt.Sprintf("@%s", variableName))
 
 	if currentVariableValue != "" {
 		code.WriteRune(' ')
@@ -687,15 +697,19 @@ func decompValueObject(value map[string]interface{}) string {
 	case "Variable":
 		if _, found := value["VariableName"]; found {
 			var variableName = value["VariableName"].(string)
+			sanitizeIdentifier(&variableName)
 
-			return strings.ReplaceAll(variableName, " ", "")
+			return variableName
 		}
 
 		var variableValue = value["Variable"].(map[string]interface{})
 		return decompValue(variableValue["Value"])
 	case "ActionOutput":
 		if _, found := value["OutputUUID"]; found {
-			return strings.ReplaceAll(uuids[value["OutputUUID"].(string)], " ", "")
+			var outputName = uuids[value["OutputUUID"].(string)]
+			sanitizeIdentifier(&outputName)
+
+			return outputName
 		}
 	case globals[ShortcutInput].variableType:
 		return ShortcutInput
@@ -737,7 +751,7 @@ func decompObjectValue(valueObj any) string {
 				if attachment.OutputName != "" {
 					variableName = attachment.OutputName
 				}
-				variableName = strings.ReplaceAll(variableName, " ", "")
+				sanitizeIdentifier(&variableName)
 				if variableName == "" && attachment.Type == globals[ShortcutInput].variableType {
 					variableName = ShortcutInput
 				}
@@ -810,7 +824,8 @@ func decompAction(action *ShortcutAction) {
 	}
 
 	if action.WFWorkflowActionParameters["CustomOutputName"] != nil {
-		var customOutputName = strings.ReplaceAll(action.WFWorkflowActionParameters["CustomOutputName"].(string), " ", "")
+		var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
+		sanitizeIdentifier(&customOutputName)
 		if ref, foundVar := variables[customOutputName]; foundVar {
 			isConstant = ref.constant
 			isVariableValue = !ref.constant
