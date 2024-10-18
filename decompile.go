@@ -90,13 +90,12 @@ func mapIdentifiers() {
 			continue
 		}
 
-		var value Value
-		mapToStruct(valueInput["Value"].(map[string]interface{}), value)
-		if value.AttachmentsByRange == nil {
+		var value = valueInput["Value"].(map[string]interface{})
+		if value["attachmentsByRange"] == nil {
 			continue
 		}
 
-		for _, attachment := range value.AttachmentsByRange {
+		for _, attachment := range value["attachmentsByRange"].(map[string]interface{}) {
 			var attachmentValue Value
 			mapToStruct(attachment, &attachmentValue)
 			mapValueReference(attachmentValue)
