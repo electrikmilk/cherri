@@ -918,18 +918,19 @@ func matchAction(action *ShortcutAction) (name string, definition actionDefiniti
 
 			if splitActions, found := identifierMap[identifier]; found {
 				matchSplitAction(&splitActions, action.WFWorkflowActionParameters, &name, &definition)
-				if name == "run" || name == "runSelf" {
-					var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]interface{})
-					if _, isSelf := workflow["isSelf"]; isSelf {
-						if workflow["isSelf"].(bool) {
-							name = "runSelf"
-						} else {
-							name = "run"
-						}
-					}
+				if name != "run" && name != "runSelf" {
+					break
+				}
+				var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]interface{})
+				if _, isSelf := workflow["isSelf"]; !isSelf {
+					break
 				}
 
-				break
+				if workflow["isSelf"].(bool) {
+					name = "runSelf"
+				} else {
+					name = "run"
+				}
 			}
 			break
 		}
