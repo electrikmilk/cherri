@@ -19,10 +19,10 @@ type variableValue struct {
 }
 
 var globals = map[string]variableValue{
-	"ShortcutInput": {
+	ShortcutInput: {
 		variableType: "ExtensionInput",
 		valueType:    String,
-		value:        "ShortcutInput",
+		value:        ShortcutInput,
 	},
 	"CurrentDate": {
 		variableType: "CurrentDate",

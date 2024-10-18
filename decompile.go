@@ -19,7 +19,10 @@ import (
 	"strings"
 )
 
-const UUID = "UUID"
+const (
+	UUID          = "UUID"
+	ShortcutInput = "ShortcutInput"
+)
 
 var shortcut Shortcut
 var genericShortcut GenericShortcut
@@ -694,8 +697,8 @@ func decompValueObject(value map[string]interface{}) string {
 		if _, found := value["OutputUUID"]; found {
 			return strings.ReplaceAll(uuids[value["OutputUUID"].(string)], " ", "")
 		}
-	case "ExtensionInput":
-		return "ShortcutInput"
+	case globals[ShortcutInput].variableType:
+		return ShortcutInput
 	}
 
 	return decompObjectValue(value)
@@ -735,8 +738,8 @@ func decompObjectValue(valueObj any) string {
 					variableName = attachment.OutputName
 				}
 				variableName = strings.ReplaceAll(variableName, " ", "")
-				if variableName == "" && attachment.Type == globals["ShortcutInput"].variableType {
-					variableName = "ShortcutInput"
+				if variableName == "" && attachment.Type == globals[ShortcutInput].variableType {
+					variableName = ShortcutInput
 				}
 
 				if len(attachment.Aggrandizements) != 0 {

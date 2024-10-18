@@ -901,7 +901,7 @@ func wrapVariableReference(s *string) {
 
 // isInputVariable checks if identifier is the ShortcutInput global to set the global boolean in the final plist.
 func isInputVariable(identifier string) {
-	hasShortcutInputVariables = identifier == "ShortcutInput"
+	hasShortcutInputVariables = identifier == ShortcutInput
 }
 
 const (
