@@ -24,6 +24,7 @@ const UUID = "UUID"
 var shortcut Shortcut
 var genericShortcut GenericShortcut
 var code strings.Builder
+var specialCharsRegex *regexp.Regexp
 
 func decompile(b []byte) {
 	var _, marshalIndexedErr = plists.Unmarshal(b, &shortcut)
@@ -47,6 +48,7 @@ func decompile(b []byte) {
 
 // mapIdentifiers creates a map of variable identifiers and UUIDs that are assigned throughout the Shortcut.
 func mapIdentifiers() {
+	specialCharsRegex = regexp.MustCompile("[^a-zA-Z0-9_]+")
 	variables = make(map[string]variableValue)
 	uuids = make(map[string]string)
 	for _, action := range shortcut.WFWorkflowActions {
@@ -115,7 +117,8 @@ func mapValueReference(value Value) {
 func mapUUID(uuid string, varName string) {
 	var outputName string
 	if _, found := uuids[uuid]; !found {
-		outputName = strings.ReplaceAll(varName, " ", "")
+		outputName = strings.ReplaceAll(varName, "-", "_")
+		outputName = specialCharsRegex.ReplaceAllString(outputName, "")
 		uuids[uuid] = checkDuplicateOutputName(outputName)
 	}
 	if outputName == "" {
