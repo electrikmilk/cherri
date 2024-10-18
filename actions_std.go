@@ -1995,39 +1995,46 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "find",
+				key:       "WFReplaceTextFind",
 				validType: String,
 			},
 			{
 				name:      "replacement",
+				key:       "WFReplaceTextReplace",
 				validType: String,
 			},
 			{
 				name:      "subject",
+				key:       "WFInput",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return replaceText(true, false, args)
+		addParams: func(_ []actionArgument) []plistData {
+			return replaceText(true, false)
 		},
+		defaultAction: true,
 	},
 	"iReplaceText": {
 		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
 				name:      "find",
+				key:       "WFReplaceTextFind",
 				validType: String,
 			},
 			{
 				name:      "replacement",
+				key:       "WFReplaceTextReplace",
 				validType: String,
 			},
 			{
 				name:      "subject",
+				key:       "WFInput",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return replaceText(false, false, args)
+		addParams: func(_ []actionArgument) []plistData {
+			return replaceText(false, false)
 		},
 	},
 	"regReplaceText": {
@@ -2035,19 +2042,22 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "expression",
+				key:       "WFReplaceTextFind",
 				validType: String,
 			},
 			{
 				name:      "replacement",
+				key:       "WFReplaceTextReplace",
 				validType: String,
 			},
 			{
 				name:      "subject",
+				key:       "WFInput",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return replaceText(true, true, args)
+		addParams: func(_ []actionArgument) []plistData {
+			return replaceText(true, true)
 		},
 	},
 	"iRegReplaceText": {
@@ -2055,19 +2065,22 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "expression",
+				key:       "WFReplaceTextFind",
 				validType: String,
 			},
 			{
 				name:      "replacement",
+				key:       "WFReplaceTextReplace",
 				validType: String,
 			},
 			{
 				name:      "subject",
+				key:       "WFInput",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return replaceText(false, true, args)
+		addParams: func(_ []actionArgument) []plistData {
+			return replaceText(false, true)
 		},
 	},
 	"uppercase": {
@@ -6177,7 +6190,7 @@ func textParts(args []actionArgument) []plistData {
 	return data
 }
 
-func replaceText(caseSensitive bool, regExp bool, args []actionArgument) []plistData {
+func replaceText(caseSensitive bool, regExp bool) []plistData {
 	return []plistData{
 		{
 			key:      "WFReplaceTextCaseSensitive",
@@ -6189,9 +6202,6 @@ func replaceText(caseSensitive bool, regExp bool, args []actionArgument) []plist
 			dataType: Boolean,
 			value:    regExp,
 		},
-		argumentValue("WFReplaceTextFind", args, 0),
-		argumentValue("WFReplaceTextReplace", args, 1),
-		argumentValue("WFInput", args, 2),
 	}
 }
 
