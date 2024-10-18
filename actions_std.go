@@ -58,10 +58,12 @@ var httpMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE"}
 var httpParams = []parameterDefinition{
 	{
 		name:      "url",
+		key:       "WFURL",
 		validType: String,
 	},
 	{
 		name:         "method",
+		key:          "WFHTTPMethod",
 		validType:    String,
 		optional:     true,
 		enum:         httpMethods,
@@ -74,6 +76,7 @@ var httpParams = []parameterDefinition{
 	},
 	{
 		name:      "headers",
+		key:       "WFHTTPHeaders",
 		validType: Dict,
 		optional:  true,
 	},
@@ -5487,21 +5490,21 @@ var actions = map[string]*actionDefinition{
 	"formRequest": {
 		identifier: "downloadurl",
 		parameters: httpParams,
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return httpRequest("Form", "WFFormValues", args)
 		},
 	},
 	"jsonRequest": {
 		identifier: "downloadurl",
 		parameters: httpParams,
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return httpRequest("JSON", "WFJSONValues", args)
 		},
 	},
 	"fileRequest": {
 		identifier: "downloadurl",
 		parameters: httpParams,
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return httpRequest("File", "WFRequestVariable", args)
 		},
 	},
@@ -6303,16 +6306,16 @@ func replaceAppIDs(args []actionArgument, _ *actionDefinition) {
 	}
 }
 
-func httpRequest(bodyType string, valuesKey string, args []actionArgument) []plistData {
-	return []plistData{
+func httpRequest(bodyType string, valuesKey string, args []actionArgument) (params []plistData) {
+	params = []plistData{
 		{
 			key:      "WFHTTPBodyType",
 			dataType: Text,
 			value:    bodyType,
 		},
-		argumentValue("WFURL", args, 0),
-		argumentValue("WFHTTPMethod", args, 1),
-		argumentValue(valuesKey, args, 2),
-		argumentValue("WFHTTPHeaders", args, 3),
 	}
+	if len(args) > 0 {
+		params = append(params, argumentValue(valuesKey, args, 2))
+	}
+	return
 }
