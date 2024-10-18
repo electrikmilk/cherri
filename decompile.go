@@ -1024,6 +1024,12 @@ func decompMakeAction(actionCode *strings.Builder, matchedAction *actionDefiniti
 			}
 			actionCode.WriteString(fmt.Sprintf("\"%s\"", glueToChar(glue)))
 		}
+	case actions["run"].identifier:
+		var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]any)
+		if workflow["isSelf"].(bool) {
+			actionCode.WriteString(decompValue(workflow["workflowName"]))
+		}
+		actionCode.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
 	default:
 		fmt.Println("TODO: make:", matchedAction.identifier)
 	}
