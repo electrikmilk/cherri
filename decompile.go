@@ -747,8 +747,8 @@ func decompObjectValue(valueObj any) string {
 				mapToStruct(a, &attachment)
 
 				var variableName = attachment.VariableName
-				if attachment.OutputName != "" {
-					variableName = attachment.OutputName
+				if _, uuid := uuids[attachment.OutputUUID]; uuid {
+					variableName = uuids[attachment.OutputUUID]
 				}
 				sanitizeIdentifier(&variableName)
 				if variableName == "" && attachment.Type == globals[ShortcutInput].variableType {
