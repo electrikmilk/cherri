@@ -1514,6 +1514,7 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
+		defaultAction: true,
 	},
 	"getFileFromFolder": {
 		identifier: "documentpicker.open",
@@ -3781,6 +3782,7 @@ var actions = map[string]*actionDefinition{
 				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
+		defaultAction: true,
 	},
 	"base64Decode": {
 		identifier: "base64encode",
@@ -3819,6 +3821,7 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
+		defaultAction: true,
 	},
 	"urlDecode": {
 		identifier: "urlencode",
