@@ -2093,8 +2093,9 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
-			return changeCase("UPPERCASE", args)
+			return changeCase("UPPERCASE")
 		},
+		defaultAction: true,
 	},
 	"lowercase": {
 		identifier: "text.changecase",
@@ -2106,7 +2107,7 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
-			return changeCase("lowercase", args)
+			return changeCase("lowercase")
 		},
 	},
 	"titleCase": {
@@ -2119,7 +2120,7 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
-			return changeCase("Capitalize with Title Case", args)
+			return changeCase("Capitalize with Title Case")
 		},
 	},
 	"capitalize": {
@@ -2132,7 +2133,7 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
-			return changeCase("Capitalize with sentence case", args)
+			return changeCase("Capitalize with sentence case")
 		},
 	},
 	"capitalizeAll": {
@@ -2145,7 +2146,7 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
-			return changeCase("Capitalize Every Word", args)
+			return changeCase("Capitalize Every Word")
 		},
 	},
 	"alternateCase": {
@@ -2158,7 +2159,7 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) []plistData {
-			return changeCase("cApItAlIzE wItH aLtErNaTiNg cAsE", args)
+			return changeCase("cApItAlIzE wItH aLtErNaTiNg cAsE")
 		},
 	},
 	"correctSpelling": {
@@ -6130,7 +6131,7 @@ func magnitudeValue(unit string, args []actionArgument, index int) plistData {
 	}
 }
 
-func changeCase(textCase string, args []actionArgument) []plistData {
+func changeCase(textCase string) []plistData {
 	return []plistData{
 		{
 			key:      "Show-text",
