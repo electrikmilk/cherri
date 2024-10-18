@@ -240,8 +240,8 @@ func decompileIcon() {
 			}
 
 			newCodeLine(fmt.Sprintf("#define color %s\n", name))
+			hasDefinitions = true
 		}
-		hasDefinitions = true
 	}
 
 	if icon.WFWorkflowIconGlyphNumber != iconGlyph {
@@ -251,8 +251,8 @@ func decompileIcon() {
 			}
 
 			newCodeLine(fmt.Sprintf("#define glyph %s\n", name))
+			hasDefinitions = true
 		}
-		hasDefinitions = true
 	}
 
 	if hasDefinitions {
