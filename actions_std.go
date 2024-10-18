@@ -4918,6 +4918,10 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) (xCallbackParams []plistData) {
+			if len(args) == 0 {
+				return
+			}
+
 			if args[1].value.(string) != "" || args[2].value.(string) != "" || args[3].value.(string) != "" {
 				xCallbackParams = append(xCallbackParams, plistData{
 					key:      "WFXCallbackCustomCallbackEnabled",
