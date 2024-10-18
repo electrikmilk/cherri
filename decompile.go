@@ -918,15 +918,18 @@ func matchAction(action *ShortcutAction) (name string, definition actionDefiniti
 
 			if splitActions, found := identifierMap[identifier]; found {
 				matchSplitAction(&splitActions, action.WFWorkflowActionParameters, &name, &definition)
-				break
-			}
-			if name == "run" {
-				var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]bool)
-				if _, isSelf := workflow["isSelf"]; isSelf {
-					if workflow["isSelf"] {
-						name = "runSelf"
+				if name == "run" || name == "runSelf" {
+					var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]interface{})
+					if _, isSelf := workflow["isSelf"]; isSelf {
+						if workflow["isSelf"].(bool) {
+							name = "runSelf"
+						} else {
+							name = "run"
+						}
 					}
 				}
+
+				break
 			}
 			break
 		}
@@ -1036,7 +1039,7 @@ func decompMakeAction(actionCode *strings.Builder, matchedAction *actionDefiniti
 		}
 	case actions["run"].identifier:
 		var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]any)
-		if workflow["isSelf"].(bool) {
+		if !workflow["isSelf"].(bool) {
 			arguments = append(arguments, decompValue(workflow["workflowName"]))
 		}
 		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFInput"]))
