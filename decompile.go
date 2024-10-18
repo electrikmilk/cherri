@@ -917,10 +917,6 @@ func matchAction(action *ShortcutAction) (name string, definition actionDefiniti
 			if name == "run" {
 				if _, isSelf := action.WFWorkflowActionParameters["isSelf"]; isSelf {
 					name = "runSelf"
-				} else if wfName, foundName := action.WFWorkflowActionParameters["workflowName"]; foundName {
-					if wfName == basename {
-						name = "runSelf"
-					}
 				}
 			}
 			break
