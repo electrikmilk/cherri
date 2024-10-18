@@ -1046,11 +1046,17 @@ func decompMakeAction(actionCode *strings.Builder, matchedAction *actionDefiniti
 		fallthrough
 	case actions["joinText"].identifier:
 		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["text"]))
+		var glue string
 		if action.WFWorkflowActionParameters["WFTextSeparator"] != nil {
-			var glue = action.WFWorkflowActionParameters["WFTextSeparator"].(string)
+			glue = action.WFWorkflowActionParameters["WFTextSeparator"].(string)
 			if glue == "New Lines" {
 				break
 			}
+		}
+		if action.WFWorkflowActionParameters["WFTextCustomSeparator"] != nil {
+			glue = action.WFWorkflowActionParameters["WFTextCustomSeparator"].(string)
+		}
+		if glue != "" {
 			arguments = append(arguments, fmt.Sprintf("\"%s\"", glueToChar(glue)))
 		}
 	case actions["run"].identifier:
