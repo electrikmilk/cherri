@@ -842,7 +842,6 @@ func decompAction(action *ShortcutAction) {
 		}
 
 		if matchedAction.make != nil {
-			fmt.Println("TODO: make:", matchedAction.identifier)
 			decompMakeAction(&actionCallCode, &matchedAction, action)
 		}
 
@@ -1026,8 +1025,9 @@ func decompMakeAction(actionCode *strings.Builder, matchedAction *actionDefiniti
 			}
 			actionCode.WriteString(fmt.Sprintf("\"%s\"", glueToChar(glue)))
 		}
+	default:
+		fmt.Println("TODO: make:", matchedAction.identifier)
 	}
-	fmt.Println(actionCode.String())
 }
 
 func glueToChar(glue string) string {
