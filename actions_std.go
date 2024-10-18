@@ -2075,10 +2075,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return changeCase("UPPERCASE", args)
 		},
 	},
@@ -2087,10 +2088,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return changeCase("lowercase", args)
 		},
 	},
@@ -2099,10 +2101,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return changeCase("Capitalize with Title Case", args)
 		},
 	},
@@ -2111,10 +2114,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return changeCase("Capitalize with sentence case", args)
 		},
 	},
@@ -2123,10 +2127,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return changeCase("Capitalize Every Word", args)
 		},
 	},
@@ -2135,10 +2140,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return changeCase("cApItAlIzE wItH aLtErNaTiNg cAsE", args)
 		},
 	},
@@ -6123,7 +6129,6 @@ func changeCase(textCase string, args []actionArgument) []plistData {
 			dataType: Text,
 			value:    textCase,
 		},
-		argumentValue("text", args, 0),
 	}
 }
 
