@@ -735,6 +735,9 @@ func decompObjectValue(valueObj any) string {
 					variableName = attachment.OutputName
 				}
 				variableName = strings.ReplaceAll(variableName, " ", "")
+				if variableName == "" && attachment.Type == globals["ShortcutInput"].variableType {
+					variableName = "ShortcutInput"
+				}
 
 				if len(attachment.Aggrandizements) != 0 {
 					decompAggrandizements(&variableName, attachment.Aggrandizements)
