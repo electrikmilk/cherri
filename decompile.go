@@ -1043,7 +1043,9 @@ func decompMakeAction(actionCode *strings.Builder, matchedAction *actionDefiniti
 		if !workflow["isSelf"].(bool) {
 			arguments = append(arguments, decompValue(workflow["workflowName"]))
 		}
-		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFInput"]))
+		if action.WFWorkflowActionParameters["WFInput"] != nil {
+			arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFInput"]))
+		}
 	default:
 		fmt.Println("TODO: make:", matchedAction.identifier)
 	}
