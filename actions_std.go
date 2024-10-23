@@ -172,7 +172,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addSeconds": {
-		identifier: "adjustdate",
+		identifier:    "adjustdate",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
