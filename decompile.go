@@ -990,16 +990,20 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 		var matchedParams float64
 		var matchedValues float64
 		for _, param := range splitActionParams {
-			if param.key == "" || param.defaultValue == nil {
+			if param.key == "" {
 				continue
 			}
 			if value, found := parameters[param.key]; found {
 				matchedParams++
-
-				var defaultValue = fmt.Sprintf("%v", param.defaultValue)
-				var rawValue = strings.Trim(decompValue(value), "\"")
-				if defaultValue == rawValue && defaultValue != "" && rawValue != "" {
+				if len(param.enum) > 0 && slices.Contains(param.enum, fmt.Sprintf("%s", value)) {
 					matchedValues++
+				}
+				if param.defaultValue != nil {
+					var defaultValue = fmt.Sprintf("%v", param.defaultValue)
+					var rawValue = strings.Trim(decompValue(value), "\"")
+					if defaultValue == rawValue && defaultValue != "" && rawValue != "" {
+						matchedValues++
+					}
 				}
 			}
 		}
