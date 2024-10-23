@@ -68,7 +68,7 @@ func mapIdentifiers() {
 			mapUUID(params["UUID"].(string), params["CustomOutputName"].(string))
 		}
 
-		for _, inputKey := range []string{"Input", "WFInput", "WFOutput", "text"} {
+		for _, inputKey := range []string{"Input", "WFInput", "WFOutput", "WFURL", "text"} {
 			if params[inputKey] != nil {
 				mapInputValue(params[inputKey])
 			}
@@ -84,6 +84,8 @@ func mapIdentifiers() {
 			valueInput = params["WFInputText"].(map[string]interface{})
 		case params["Input"] != nil:
 			valueInput = params["Input"].(map[string]interface{})
+		case params["WFURL"] != nil:
+			valueInput = params["WFURL"].(map[string]interface{})
 		}
 
 		if valueInput == nil || valueInput["Value"] == nil {
@@ -429,24 +431,23 @@ func decompURL(action *ShortcutAction) {
 	var urlValueType = reflect.TypeOf(action.WFWorkflowActionParameters["WFURLActionURL"]).String()
 	if urlValueType == dictType || urlValueType == "string" {
 		currentVariableValue = fmt.Sprintf("url(%s)", decompValue(action.WFWorkflowActionParameters["WFURLActionURL"]))
-		return
-	}
+	} else {
+		var urlAction strings.Builder
+		var urls = action.WFWorkflowActionParameters["WFURLActionURL"].([]interface{})
+		var urlsSize = len(urls)
+		urlAction.WriteString("url(")
+		for i, url := range urls {
+			urlAction.WriteString(decompValue(url))
 
-	var urlAction strings.Builder
-	var urls = action.WFWorkflowActionParameters["WFURLActionURL"].([]interface{})
-	var urlsSize = len(urls)
-	urlAction.WriteString("url(")
-	for i, url := range urls {
-		urlAction.WriteString(decompValue(url))
-
-		if i < urlsSize-1 {
-			urlAction.WriteRune(',')
+			if i < urlsSize-1 {
+				urlAction.WriteRune(',')
+			}
 		}
-	}
 
-	urlAction.WriteRune(')')
-	currentVariableValue = urlAction.String()
-	urlAction.Reset()
+		urlAction.WriteRune(')')
+		currentVariableValue = urlAction.String()
+		urlAction.Reset()
+	}
 
 	checkConstantLiteral(action)
 }
