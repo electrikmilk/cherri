@@ -3793,17 +3793,17 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "encodeInput",
+				key:       "WFInput",
 				validType: Variable,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "input",
 					dataType: Text,
 					value:    "Encode",
 				},
-				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 		defaultAction: true,
@@ -3813,17 +3813,17 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFEncodeMode",
 					dataType: Text,
 					value:    "Decode",
 				},
-				variableInput("WFInput", args[0].value.(string)),
 			}
 		},
 	},
