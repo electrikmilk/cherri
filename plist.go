@@ -849,6 +849,23 @@ func convertTypeToken(tokenType tokenType) plistDataType {
 	}
 }
 
+func convertPlistTypeToken(plistType plistDataType) tokenType {
+	switch plistType {
+	case Text:
+		return String
+	case Number:
+		return Integer
+	case Array:
+		return Arr
+	case Dictionary:
+		return Dict
+	case Boolean:
+		return Bool
+	default:
+		return ""
+	}
+}
+
 func argumentValue(key string, args []actionArgument, idx int) plistData {
 	var actionParameter parameterDefinition
 	if len(currentAction.parameters) <= idx {

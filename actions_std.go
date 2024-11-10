@@ -5926,23 +5926,24 @@ func rawAction() {
 		make: func(args []actionArgument) (params []plistData) {
 			for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
 				var paramKey string
-				var paramType string
-				var paramValue any
+				var paramType plistDataType
+				var rawValue any
 				for key, value := range parameterDefinitions.(map[string]interface{}) {
 					switch key {
 					case "key":
 						paramKey = value.(string)
 					case "type":
-						paramType = value.(string)
+						paramType = plistDataType(value.(string))
 					case "value":
-						paramValue = value
+						rawValue = value
 					}
 				}
-				params = append(params, plistData{
-					key:      paramKey,
-					dataType: plistDataType(paramType),
-					value:    paramValue,
-				})
+
+				var tokenType = convertPlistTypeToken(paramType)
+				params = append(params, paramValue(paramKey, actionArgument{
+					valueType: tokenType,
+					value:     rawValue,
+				}, tokenType, paramType))
 			}
 			return
 		},
