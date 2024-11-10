@@ -646,7 +646,8 @@ func collectDefinition() {
 		advance()
 		collectNoInputDefinition()
 	case tokenAhead(Mac):
-		collectMacDefinition()
+		advance()
+		collectBooleanDefinition("mac")
 	case tokenAhead(Version):
 		var collectVersion = collectUntil('\n')
 		makeVersions()
@@ -771,15 +772,14 @@ func collectContentItemTypes() (contentItemTypes []string) {
 	return
 }
 
-func collectMacDefinition() {
-	var defValue = collectUntil('\n')
-	switch defValue {
-	case "true":
-		definitions["mac"] = true
-	case "false":
-		definitions["mac"] = false
+func collectBooleanDefinition(key string) {
+	switch {
+	case tokenAhead(True):
+		definitions[key] = true
+	case tokenAhead(False):
+		definitions[key] = false
 	default:
-		parserError(fmt.Sprintf("Invalid value of '%s' for boolean definition 'mac'", defValue))
+		parserError(fmt.Sprintf("Invalid value for boolean definition '%s'", key))
 	}
 }
 
