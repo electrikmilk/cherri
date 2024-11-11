@@ -3959,6 +3959,13 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				optional:  true,
 			},
+			{
+				name:         "multiline",
+				validType:    String,
+				key:          "WFAllowsMultilineText",
+				optional:     true,
+				defaultValue: true,
+			},
 		},
 		addParams: func(args []actionArgument) []plistData {
 			if len(args) < 3 {
