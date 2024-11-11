@@ -344,13 +344,6 @@ func decompTextValue(action *ShortcutAction) {
 }
 
 func decompNumberValue(action *ShortcutAction) {
-	var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
-	sanitizeIdentifier(&customOutputName)
-	if _, found := variables[customOutputName]; !found {
-		decompAction(action)
-		return
-	}
-
 	var value = action.WFWorkflowActionParameters["WFNumberActionNumber"]
 	if reflect.TypeOf(value).String() == dictType {
 		var mapValue = value.(map[string]interface{})
@@ -370,6 +363,7 @@ func decompNumberValue(action *ShortcutAction) {
 		handle(convErr)
 	}
 	currentVariableValue = decompValue(number)
+	checkConstantLiteral(action)
 }
 
 func decompExpression(action *ShortcutAction) {
