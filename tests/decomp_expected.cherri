@@ -2,20 +2,23 @@
 #define glyph apple
 
 const hello = prompt("Hello?")
-
 @confirm = prompt("What do you want?", "Number")
-
 @urls = url("https://google.com","https://apple.com","https://cherrilang.org")
-
 @bool = true
 @bool = false
 @int = 42
-@dict = {"key": 5, "key2": "value", "key3": false, "key4": "{int}", "key5": {"key6": 7}, "key7": [5,6]}
+@dict = {
+    "key": 5,
+    "key2": "value",
+    "key3": false,
+    "key4": "{int}",
+    "key5": {"key6": 7},
+    "key7": [5,6]
+}
 @str = "me"
 @str = 'me'
 @str += 'me'
 @var = "5 {str}"
-
 if int == 0 {
     alert("Title","Message")
 } else {
@@ -24,8 +27,8 @@ if int == 0 {
         nothing()
     }
 }
-
 @list = list("Item 1", "Item 2")
+
 for item in list {
     alert("{item}")
 }
@@ -33,20 +36,15 @@ for item in list {
 repeat i for int {
     nothing()
 }
-
 if str == "me" {
     nothing()
 }
-
 if var == str {
 
 }
-
 menu "Prompt" {
-    item "Item 1":
-        nothing()
+item "Item 1":
+	nothing()
 }
-
 alert("Title", "Message")
-
 show("{var}")
