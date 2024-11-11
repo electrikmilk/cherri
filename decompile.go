@@ -337,6 +337,9 @@ func decompComment(action *ShortcutAction) {
 
 func decompTextValue(action *ShortcutAction) {
 	currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
+	if currentVariableValue == "" {
+		currentVariableValue = "\"\""
+	}
 	checkConstantLiteral(action)
 }
 
