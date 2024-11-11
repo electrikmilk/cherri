@@ -1072,7 +1072,7 @@ func decompMakeAction(actionCode *strings.Builder, matchedAction *actionDefiniti
 			arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFInput"]))
 		}
 	default:
-		fmt.Println("TODO: make:", matchedAction.identifier)
+		fmt.Println("TODO: make:", identifier)
 	}
 
 	if len(arguments) == 0 {
