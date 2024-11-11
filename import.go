@@ -83,6 +83,11 @@ func downloadShortcut() []byte {
 	var b, readErr = io.ReadAll(response.Body)
 	handle(readErr)
 
+	if args.Using("debug") {
+		writeErr := os.WriteFile(basename+"_decompile.plist", b, 0600)
+		handle(writeErr)
+	}
+
 	return b
 }
 
