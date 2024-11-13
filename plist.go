@@ -28,13 +28,13 @@ type plistData struct {
 	value    any
 }
 
-type dictDataType string
+type dictDataType int
 
-const itemTypeText dictDataType = "0"
-const itemTypeNumber dictDataType = "3"
-const itemTypeArray dictDataType = "2"
-const itemTypeDict dictDataType = "1"
-const itemTypeBool dictDataType = "4"
+const itemTypeText dictDataType = 0
+const itemTypeNumber dictDataType = 3
+const itemTypeArray dictDataType = 2
+const itemTypeDict dictDataType = 1
+const itemTypeBool dictDataType = 4
 
 type noInputParams struct {
 	name   string
@@ -1025,7 +1025,7 @@ func dictionaryPlistValue(key string, itemType dictDataType, serializedType stri
 		{
 			key:      "WFItemType",
 			dataType: Number,
-			value:    string(itemType),
+			value:    itemType,
 		},
 		{
 			key:      "WFValue",

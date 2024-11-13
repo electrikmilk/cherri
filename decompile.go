@@ -587,7 +587,7 @@ func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary map[s
 	for _, item := range items {
 		var itemKey = decompValue(item.WFKey)
 		var itemStringValue = decompValue(item.WFValue.Value)
-		var itemValueType = fmt.Sprintf("%d", item.WFItemType)
+		var itemValueType = item.WFItemType
 		var itemValue any
 		switch dictDataType(itemValueType) {
 		case itemTypeNumber:
