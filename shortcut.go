@@ -45,10 +45,11 @@ type GenericActionParameters struct {
 }
 
 type WFInput struct {
-	Value      Value
-	Variable   VariableValue
-	OutputName string
-	OutputUUID string
+	Value               Value
+	Variable            VariableValue
+	OutputName          string
+	OutputUUID          string
+	WFSerializationType string
 }
 
 type VariableValue struct {
@@ -83,11 +84,7 @@ type WFDictionaryFieldValueItem struct {
 }
 
 type WFValue struct {
-	Value  any
-	String string
-}
-
-type ArrayValue struct {
-	WFValue    any
-	WFItemType int
+	Value               any
+	String              string
+	WFSerializationType string
 }
