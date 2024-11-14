@@ -451,9 +451,18 @@ func decompURL(action *ShortcutAction) {
 }
 
 func decompMenu(action *ShortcutAction) {
+	if len(menus) == 0 {
+		menus = make(map[string][]variableValue)
+	}
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
+	var groupingUUID = action.WFWorkflowActionParameters["GroupingIdentifier"].(string)
 	switch controlFlowMode {
 	case startStatement:
+		menus[groupingUUID] = []variableValue{}
+		var items = action.WFWorkflowActionParameters["WFMenuItems"]
+		for _, item := range items.([]interface{}) {
+			menus[groupingUUID] = append(menus[groupingUUID], variableValue{value: item})
+		}
 		newCodeLine("menu ")
 		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFMenuPrompt"]))
 		code.WriteString(" {\n")
@@ -461,7 +470,14 @@ func decompMenu(action *ShortcutAction) {
 	case statementPart:
 		tabLevel--
 		newCodeLine("item ")
-		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFMenuItemAttributedTitle"]))
+		if _, found := action.WFWorkflowActionParameters["WFMenuItemAttributedTitle"]; found {
+			code.WriteString(decompValue(action.WFWorkflowActionParameters["WFMenuItemAttributedTitle"]))
+		} else if menus[groupingUUID] != nil {
+			var menuItem = menus[groupingUUID][0]
+			code.WriteString(decompValue(menuItem.value))
+			var menu = menus[groupingUUID]
+			menus[groupingUUID] = append(menu[:0], menu[1:]...)
+		}
 		code.WriteString(":\n")
 		tabLevel++
 	case endStatement:
