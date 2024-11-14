@@ -882,13 +882,16 @@ func decompAction(action *ShortcutAction) {
 				if param.key == "" {
 					continue
 				}
-				if value, found := action.WFWorkflowActionParameters[param.key]; found {
-					if i != 0 && matchedParamsSize != 1 && matchedParamsSize > i {
-						actionCallCode.WriteString(", ")
-					}
 
+				if i != 0 && matchedParamsSize != 1 && matchedParamsSize > i {
+					actionCallCode.WriteString(", ")
+				}
+
+				if value, found := action.WFWorkflowActionParameters[param.key]; found {
 					var dValue = decompValue(value)
 					actionCallCode.WriteString(dValue)
+				} else {
+					actionCallCode.WriteString(makeDefaultValue(param))
 				}
 			}
 		}
@@ -907,6 +910,31 @@ func decompAction(action *ShortcutAction) {
 		code.WriteRune('\n')
 		currentVariableValue = ""
 	}
+}
+
+func makeDefaultValue(param parameterDefinition) string {
+	if param.defaultValue != nil {
+		if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
+			return fmt.Sprintf("\"%s\"", param.defaultValue)
+		}
+
+		return fmt.Sprintf("%v\n", param.defaultValue)
+	}
+
+	switch param.validType {
+	case Integer:
+		return "0"
+	case String:
+		return "\"\""
+	case Arr:
+		return "[]"
+	case Dict:
+		return "{}"
+	case Bool:
+		return "false"
+	}
+
+	return "nil"
 }
 
 func makeRawAction(actionCode *strings.Builder, action *ShortcutAction) {
