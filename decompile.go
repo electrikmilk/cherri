@@ -68,12 +68,6 @@ func mapIdentifiers() {
 			mapUUID(params["UUID"].(string), params["CustomOutputName"].(string))
 		}
 
-		for _, inputKey := range []string{"Input", "WFInput", "WFOutput", "WFURL", "text"} {
-			if params[inputKey] != nil {
-				mapInputValue(params[inputKey])
-			}
-		}
-
 		checkParamIdentifiers(params)
 	}
 }
@@ -87,9 +81,9 @@ func checkParamIdentifiers(params map[string]interface{}) {
 		var paramValues = value.(map[string]interface{})
 		checkParamValueAttachments(paramValues)
 
-		if _, found := params["Variable"]; found {
-			var paramValue = params["Variable"].(map[string]interface{})
-			checkParamValueAttachments(paramValue)
+		if _, found := paramValues["Variable"]; found {
+			var paramVariable = paramValues["Variable"].(map[string]interface{})
+			checkParamValueAttachments(paramVariable)
 		}
 	}
 }
@@ -97,6 +91,11 @@ func checkParamIdentifiers(params map[string]interface{}) {
 func checkParamValueAttachments(params map[string]interface{}) {
 	if params["Value"] != nil {
 		var paramValue = params["Value"].(map[string]interface{})
+
+		var inputValue Value
+		mapToStruct(paramValue, &inputValue)
+		mapValueReference(inputValue)
+
 		if paramValue["attachmentsByRange"] != nil {
 			mapAttachmentIdentifiers(paramValue["attachmentsByRange"].(map[string]interface{}))
 		}
@@ -109,13 +108,6 @@ func mapAttachmentIdentifiers(attachments map[string]interface{}) {
 		mapToStruct(attachment, &attachmentValue)
 		mapValueReference(attachmentValue)
 	}
-}
-
-func mapInputValue(data any) {
-	var wfInput WFInput
-	mapToStruct(data, &wfInput)
-	mapValueReference(wfInput.Value)
-	mapValueReference(wfInput.Variable.Value)
 }
 
 func mapValueReference(value Value) {
