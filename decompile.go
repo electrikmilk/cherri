@@ -127,9 +127,7 @@ func mapUUID(uuid string, varName string) {
 	if outputName == "" {
 		return
 	}
-	if _, found := variables[outputName]; found {
-		variables[outputName] = variableValue{}
-	}
+	variables[outputName] = variableValue{}
 }
 
 // sanitizeIdentifier strips special characters and replaces dashes with underscores.
