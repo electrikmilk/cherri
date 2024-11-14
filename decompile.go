@@ -124,10 +124,6 @@ func mapUUID(uuid string, varName string) {
 		sanitizeIdentifier(&outputName)
 		uuids[uuid] = checkDuplicateOutputName(outputName)
 	}
-	if outputName == "" {
-		return
-	}
-	variables[outputName] = variableValue{}
 }
 
 // sanitizeIdentifier strips special characters and replaces dashes with underscores.
