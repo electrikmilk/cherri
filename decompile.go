@@ -321,6 +321,24 @@ func checkConstantLiteral(action *ShortcutAction) {
 			return
 		}
 	}
+	if _, found := action.WFWorkflowActionParameters[UUID]; found {
+		var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
+		if _, found := uuids[actionUUID]; !found {
+			return
+		}
+		for uuid, varName := range uuids {
+			if uuid != actionUUID {
+				continue
+			}
+			if _, found := variables[varName]; found {
+				return
+			}
+			newCodeLine(fmt.Sprintf("const %s = ", uuids[actionUUID]))
+			code.WriteString(currentVariableValue)
+			code.WriteRune('\n')
+			currentVariableValue = ""
+		}
+	}
 }
 
 func decompComment(action *ShortcutAction) {
