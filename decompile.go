@@ -883,15 +883,22 @@ func decompAction(action *ShortcutAction) {
 					continue
 				}
 
-				if i != 0 && matchedParamsSize != 1 && matchedParamsSize > i {
-					actionCallCode.WriteString(", ")
+				var argValue string
+				if value, found := action.WFWorkflowActionParameters[param.key]; found {
+					argValue = decompValue(value)
+				} else {
+					if i == matchedParamsSize-1 && param.optional {
+						continue
+					}
+					argValue = makeDefaultValue(param)
 				}
 
-				if value, found := action.WFWorkflowActionParameters[param.key]; found {
-					var dValue = decompValue(value)
-					actionCallCode.WriteString(dValue)
-				} else {
-					actionCallCode.WriteString(makeDefaultValue(param))
+				if argValue != "" && matchedParamsSize != 1 && matchedParamsSize > i {
+					if i == 0 {
+						actionCallCode.WriteString(argValue)
+					} else {
+						actionCallCode.WriteString(fmt.Sprintf(", %s", argValue))
+					}
 				}
 			}
 		}
@@ -918,7 +925,7 @@ func makeDefaultValue(param parameterDefinition) string {
 			return fmt.Sprintf("\"%s\"", param.defaultValue)
 		}
 
-		return fmt.Sprintf("%v\n", param.defaultValue)
+		return fmt.Sprintf("%v", param.defaultValue)
 	}
 
 	switch param.validType {
