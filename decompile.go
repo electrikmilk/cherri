@@ -74,34 +74,40 @@ func mapIdentifiers() {
 			}
 		}
 
-		var valueInput map[string]interface{}
-		switch {
-		case params["WFInput"] != nil:
-			valueInput = params["WFInput"].(map[string]interface{})
-		case params["WFOutput"] != nil:
-			valueInput = params["WFOutput"].(map[string]interface{})
-		case params["WFInputText"] != nil:
-			valueInput = params["WFInputText"].(map[string]interface{})
-		case params["Input"] != nil:
-			valueInput = params["Input"].(map[string]interface{})
-		case params["WFURL"] != nil:
-			valueInput = params["WFURL"].(map[string]interface{})
-		}
+		checkParamIdentifiers(params)
+	}
+}
 
-		if valueInput == nil || valueInput["Value"] == nil {
+func checkParamIdentifiers(params map[string]interface{}) {
+	for _, value := range params {
+		if value == nil || reflect.TypeOf(value).String() != "map[string]interface {}" {
 			continue
 		}
 
-		var value = valueInput["Value"].(map[string]interface{})
-		if value["attachmentsByRange"] == nil {
-			continue
-		}
+		var paramValues = value.(map[string]interface{})
+		checkParamValueAttachments(paramValues)
 
-		for _, attachment := range value["attachmentsByRange"].(map[string]interface{}) {
-			var attachmentValue Value
-			mapToStruct(attachment, &attachmentValue)
-			mapValueReference(attachmentValue)
+		if _, found := params["Variable"]; found {
+			var paramValue = params["Variable"].(map[string]interface{})
+			checkParamValueAttachments(paramValue)
 		}
+	}
+}
+
+func checkParamValueAttachments(params map[string]interface{}) {
+	if params["Value"] != nil {
+		var paramValue = params["Value"].(map[string]interface{})
+		if paramValue["attachmentsByRange"] != nil {
+			mapAttachmentIdentifiers(paramValue["attachmentsByRange"].(map[string]interface{}))
+		}
+	}
+}
+
+func mapAttachmentIdentifiers(attachments map[string]interface{}) {
+	for _, attachment := range attachments {
+		var attachmentValue Value
+		mapToStruct(attachment, &attachmentValue)
+		mapValueReference(attachmentValue)
 	}
 }
 
