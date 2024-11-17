@@ -2163,8 +2163,9 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 			{
-				name:      "separator",
-				validType: String,
+				name:         "separator",
+				validType:    String,
+				defaultValue: "\n",
 			},
 		},
 		make: textParts,
@@ -2177,8 +2178,9 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 			{
-				name:      "glue",
-				validType: String,
+				name:         "glue",
+				validType:    String,
+				defaultValue: "\n",
 			},
 		},
 		make: textParts,
@@ -3957,6 +3959,13 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				optional:  true,
 			},
+			{
+				name:         "multiline",
+				validType:    String,
+				key:          "WFAllowsMultilineText",
+				optional:     true,
+				defaultValue: true,
+			},
 		},
 		addParams: func(args []actionArgument) []plistData {
 			if len(args) < 3 {
@@ -4088,7 +4097,7 @@ var actions = map[string]*actionDefinition{
 			},
 			{
 				name:      "value",
-				validType: String,
+				validType: Variable,
 				key:       "WFDictionaryValue",
 			},
 		},
@@ -5898,6 +5907,11 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"getApps": {
+		identifier: "filter.apps",
+		mac:        true,
+		minVersion: 18,
+	},
 }
 
 func rawAction() {
@@ -5909,6 +5923,7 @@ func rawAction() {
 			},
 			{
 				name:      "parameters",
+				optional:  true,
 				validType: Arr,
 			},
 		},
@@ -5918,23 +5933,24 @@ func rawAction() {
 		make: func(args []actionArgument) (params []plistData) {
 			for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
 				var paramKey string
-				var paramType string
-				var paramValue string
+				var paramType plistDataType
+				var rawValue any
 				for key, value := range parameterDefinitions.(map[string]interface{}) {
 					switch key {
 					case "key":
 						paramKey = value.(string)
 					case "type":
-						paramType = value.(string)
+						paramType = plistDataType(value.(string))
 					case "value":
-						paramValue = value.(string)
+						rawValue = value
 					}
 				}
-				params = append(params, plistData{
-					key:      paramKey,
-					dataType: plistDataType(paramType),
-					value:    paramValue,
-				})
+
+				var tokenType = convertPlistTypeToken(paramType)
+				params = append(params, paramValue(paramKey, actionArgument{
+					valueType: tokenType,
+					value:     rawValue,
+				}, tokenType, paramType))
 			}
 			return
 		},
