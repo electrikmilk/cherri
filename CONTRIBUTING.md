@@ -13,7 +13,7 @@ Before submitting an issue please confirm the following:
 - You can reproduce the issue consistently.
 - You have searched for your issue.
 - You are using the latest version.
-- You are describing your issue to the absolute best of your ability. Include any and all relevant information.
+- You are describing your issue to the absolute best of your ability. Include all relevant information.
 - Your issue is one-to-one. No multiple bug issues.
 - You are including version info:
   - **If you compiled the compiler:** You are including the version of the Go programming language compiler
@@ -44,10 +44,10 @@ reproduce it and what environment it may be isolated to are clearly communicated
 - Use capitalized case for tokens (e.g. `LeftBrace`).
 - Only put comments in code to explain _why_ something does something, not what it is doing. Your code should be
   readable enough that it is obvious to anyone reading it.
-- No moving code around without a good reason. Only organize code when absolutely necessary.
+- No moving code around without a good reason. Only organize code when necessary.
 - Keep any additions to Cherri syntax consistent with the existing style (e.g. camelCase, scripting-language-like, only
   capitalize globals, minimal parenthesis, concise keywords).
-- Set the default for action parameter to the default in Shortcuts or best option for the user's privacy. For example, if it's a record audio action, default to recording when the user taps the record button.
+- Set the default for action parameter to the default in Shortcuts or the best option for the user's privacy. For example, if it's a record audio action, default to start recording when the user taps the record button.
 - In action names, `detail` is preferred over `component`, and `make` is preferred over `generate` or `create`.
 
 ### Code submission policy
@@ -58,7 +58,7 @@ reproduce it and what environment it may be isolated to are clearly communicated
 - Don't over-explain but don't be vague, briefly but clearly state your changes.
 - If you change how a feature works, modify the existing feature or add a new feature, add or update a related file in the tests folder to add to the commit checks.
 - Test your feature or bug fix by writing a Cherri file and checking that it compiles to a valid Shortcut. If you are on
-  a non-macOS platform, the Shortcut will compile but not try to sign, so the format may be invalid. Use an XML linter or validator on the debug plist file you can generate using `--debug`.
+  a non-macOS platform, ensure you use the `--hubsign` option to test the Shortcut signs successfully.
 - Squash commits when doing fixups so that if you remove something, you don't have a commit where you created it
   and then another commit where you remove it, and squash them together so that whatever ended up not being needed is also
   removed from the commit history.
@@ -72,26 +72,6 @@ reproduce it and what environment it may be isolated to are clearly communicated
 - No periods at the end of commit message titles
 - Only capitalize the first word of a commit message title.
 - Optionally, add your copyright to the top of files you have changed or added in the same style as the rest of the project.
-
-## Cross-platform development policy
-
-#### It is not encouraged to make major contributions to this project if you do not have access to a Mac.
-
-Troubleshooting why your contribution does not work will be cumbersome. If you prefer to develop on another platform,
-that's fine, but it is preferred that you have access to a Mac. For Shortcut debugging, you must use a Mac to validate
-that Shortcuts still successfully sign with your changes applied.
-
-This is mainly because although the generated plist may be valid XML, it may be an invalid Shortcut format, which the
-`shortcuts` binary on Mac validates when it signs the Shortcut.
-
-If you do not have access to a Mac, you must still make sure that a Cherri file that demonstrates your feature or bug
-fix successfully compiles to a valid plist. Use an XML linter or validator to check this and a member of the project
-upon reviewing your PR will check if the Shortcut signs successfully.
-
-Please thoroughly debug the issues with your contribution, not repeatedly asking the reviewer to check if a Shortcut signs
-with your latest change.
-
-#### Making major contributions without access to a Mac _will_ be frustrating.
 
 ---
 
@@ -120,6 +100,6 @@ encouraged to take breaks from the project from time to time.
 
 ## No political, religious, or other ideological changes
 
-This is a technical project only. We do not make changes or decisions based on our personal religious, political,
+This is a technical project only. We do not make changes or decisions based on our personal, religious, political,
 or other ideological beliefs. We make changes based on technology and technical standards. Any contributions or issues
 that appear to be of this nature will be rejected.
