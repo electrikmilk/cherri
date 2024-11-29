@@ -137,8 +137,10 @@ func makeCustomActionsHeader() {
 	var outputActionRegex = regexp.MustCompile(`(?:must)?[o|O]utput(?:OrClipboard)?\((.*?)\)`)
 	var customActionsHeader strings.Builder
 	customActionsHeader.WriteString("if ShortcutInput {\n")
+	customActionsHeader.WriteString("    @_cherri_empty_dictionary: dictionary\n")
+	customActionsHeader.WriteString("    const _cherri_dictionary_type_name = typeOf(_cherri_empty_dictionary)\n")
 	customActionsHeader.WriteString("    const _cherri_inputType = typeOf(ShortcutInput)\n")
-	customActionsHeader.WriteString("    if _cherri_inputType == \"Dictionary\" {\n")
+	customActionsHeader.WriteString("    if _cherri_inputType == _cherri_dictionary_type_name {\n")
 	customActionsHeader.WriteString("        const _cherri_input = getDictionary(ShortcutInput)\n")
 	customActionsHeader.WriteString("        const _cherri_identifier = getValue(_cherri_input, \"cherri_functions\")\n")
 	customActionsHeader.WriteString("        const _cherri_valid = number(_cherri_identifier)\n")
