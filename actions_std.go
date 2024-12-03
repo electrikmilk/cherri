@@ -5059,6 +5059,60 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
+	"toggleNightShift": {
+		identifier: "nightshift.set",
+		make: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "OnValue",
+					dataType: Boolean,
+					value:    false,
+				},
+				{
+					key:      "operation",
+					dataType: Text,
+					value:    "toggle",
+				},
+			}
+		},
+	},
+	"setNightShift": {
+		identifier: "nightshift.set",
+		parameters: []parameterDefinition{
+			{
+				name:      "status",
+				validType: Bool,
+				key:       "OnValue",
+			},
+		},
+	},
+	"toggleTrueTone": {
+		identifier: "truetone.set",
+		make: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "OnValue",
+					dataType: Boolean,
+					value:    false,
+				},
+				{
+					key:      "operation",
+					dataType: Text,
+					value:    "toggle",
+				},
+			}
+		},
+	},
+	"setTrueTone": {
+		identifier: "truetone.set",
+		parameters: []parameterDefinition{
+			{
+				name:      "status",
+				validType: Bool,
+				key:       "OnValue",
+			},
+		},
+	},
 	"playSound": {
 		parameters: []parameterDefinition{
 			{
