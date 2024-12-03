@@ -2636,14 +2636,9 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "volume",
-				validType: String,
+				validType: Float,
 				key:       "WFVolume",
 			},
-		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			if args[0].valueType != Variable {
-				args[0].value = fmt.Sprintf("0.%s", args[0].value)
-			}
 		},
 	},
 	"addToMusic": {
@@ -3476,14 +3471,9 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "brightness",
-				validType: String,
+				validType: Float,
 				key:       "WFBrightness",
 			},
-		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			if args[0].valueType != Variable {
-				args[0].value = fmt.Sprintf("0.%s", args[0].value)
-			}
 		},
 	},
 	"getName": {
