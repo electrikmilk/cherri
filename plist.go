@@ -176,7 +176,7 @@ func makeVariableAction(token *token, varUUID *string) {
 
 func makeVariableValue(outputName *plistData, uuid *plistData, valueType tokenType, value *any) {
 	switch valueType {
-	case Integer:
+	case Integer, Float:
 		makeIntValue(outputName, uuid, value)
 	case Bool:
 		makeBoolValue(outputName, uuid, value)

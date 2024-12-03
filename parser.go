@@ -587,6 +587,9 @@ func collectType(valueType *tokenType, value *any) {
 	case tokenAhead(Integer):
 		*valueType = Integer
 		*value = "0"
+	case tokenAhead(Float):
+		*valueType = Float
+		*value = "0.0"
 	case tokenAhead(Bool):
 		*valueType = Bool
 		*value = false
