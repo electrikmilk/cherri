@@ -304,6 +304,10 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	}
 	switch {
 	case intChar():
+		*valueType = Integer
+		if strings.Contains(ahead, ".") {
+			*valueType = Float
+		}
 		collectIntegerValue(valueType, value, &until)
 	case char == '"':
 		collectStringValue(valueType, value)
@@ -1131,7 +1135,6 @@ func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 	var ahead = lookAheadUntil(*until)
 	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
 		var integer = collectInteger()
-		*valueType = Integer
 		*value = integer
 		advance()
 		return

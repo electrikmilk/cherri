@@ -18,6 +18,7 @@ type plistDataType string
 
 const Text plistDataType = "string"
 const Number plistDataType = "integer"
+const Real plistDataType = "real"
 const Dictionary plistDataType = "dictionary"
 const Array plistDataType = "array"
 const Boolean plistDataType = "boolean"
@@ -906,6 +907,12 @@ func paramValue(key string, arg actionArgument, handleAs tokenType, outputType p
 			key:      key,
 			dataType: Dictionary,
 			value:    makeDictionaryValue(&arg.value),
+		}
+	case Float:
+		return plistData{
+			key:      key,
+			dataType: Real,
+			value:    arg.value,
 		}
 	default:
 		return attachmentValues(key, arg.value.(string), outputType)
