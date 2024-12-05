@@ -802,7 +802,7 @@ var actions = map[string]*actionDefinition{
 				{
 					key:      "operation",
 					dataType: Text,
-					value:    "toggle",
+					value:    "Toggle",
 				},
 			}
 		},
@@ -3574,7 +3574,7 @@ var actions = map[string]*actionDefinition{
 				{
 					key:      "operation",
 					dataType: Text,
-					value:    "toggle",
+					value:    "Toggle",
 				},
 			}
 		},
@@ -5025,17 +5025,12 @@ var actions = map[string]*actionDefinition{
 	},
 	"toggleBluetooth": {
 		identifier: "bluetooth.set",
-		make: func(_ []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
-				{
-					key:      "OnValue",
-					dataType: Boolean,
-					value:    false,
-				},
 				{
 					key:      "operation",
 					dataType: Text,
-					value:    "toggle",
+					value:    "Toggle",
 				},
 			}
 		},
@@ -5054,24 +5049,19 @@ var actions = map[string]*actionDefinition{
 				{
 					key:      "operation",
 					dataType: Text,
-					value:    "set",
+					value:    "Set",
 				},
 			}
 		},
 	},
 	"toggleNightShift": {
 		identifier: "nightshift.set",
-		make: func(_ []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
-				{
-					key:      "OnValue",
-					dataType: Boolean,
-					value:    false,
-				},
 				{
 					key:      "operation",
 					dataType: Text,
-					value:    "toggle",
+					value:    "Toggle",
 				},
 			}
 		},
@@ -5088,13 +5078,8 @@ var actions = map[string]*actionDefinition{
 	},
 	"toggleTrueTone": {
 		identifier: "truetone.set",
-		make: func(_ []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
-				{
-					key:      "OnValue",
-					dataType: Boolean,
-					value:    false,
-				},
 				{
 					key:      "operation",
 					dataType: Text,
