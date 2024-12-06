@@ -3568,18 +3568,6 @@ var actions = map[string]*actionDefinition{
 			return countParams("Lines", args)
 		},
 	},
-	"toggleAppearance": {
-		identifier: "appearance",
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "Toggle",
-				},
-			}
-		},
-	},
 	"lightMode": {
 		identifier: "appearance",
 		make: func(_ []actionArgument) []plistData {
@@ -5003,133 +4991,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"setWifi": {
-		identifier: "wifi.set",
-		parameters: []parameterDefinition{
-			{
-				name:      "status",
-				key:       "OnValue",
-				validType: Bool,
-			},
-		},
-	},
-	"setCellularData": {
-		identifier: "cellulardata.set",
-		parameters: []parameterDefinition{
-			{
-				name:         "status",
-				key:          "OnValue",
-				validType:    Bool,
-				defaultValue: true,
-			},
-		},
-	},
-	"toggleBluetooth": {
-		identifier: "bluetooth.set",
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "Toggle",
-				},
-			}
-		},
-	},
-	"setBluetooth": {
-		identifier: "bluetooth.set",
-		parameters: []parameterDefinition{
-			{
-				name:      "status",
-				validType: Bool,
-				key:       "OnValue",
-			},
-		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "Set",
-				},
-			}
-		},
-	},
-	"toggleNightShift": {
-		identifier: "nightshift.set",
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "Toggle",
-				},
-			}
-		},
-	},
-	"setNightShift": {
-		identifier: "nightshift.set",
-		parameters: []parameterDefinition{
-			{
-				name:      "status",
-				validType: Bool,
-				key:       "OnValue",
-			},
-		},
-	},
-	"toggleTrueTone": {
-		identifier: "truetone.set",
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "toggle",
-				},
-			}
-		},
-	},
-	"setTrueTone": {
-		identifier: "truetone.set",
-		parameters: []parameterDefinition{
-			{
-				name:      "status",
-				validType: Bool,
-				key:       "OnValue",
-			},
-		},
-	},
-	"setAutoAnswerCalls": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleAutoAnswerCallsIntent",
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "OnValue",
-					dataType: Boolean,
-					value:    false,
-				},
-			}
-		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "Toggle",
-				},
-			}
-		},
-	},
-	"toggleAutoAnswerCalls": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleAutoAnswerCallsIntent",
-		parameters: []parameterDefinition{
-			{
-				name:      "status",
-				validType: Bool,
-				key:       "OnValue",
-			},
-		},
-	},
 	"setBackgroundSound": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundIntent",
 		parameters: []parameterDefinition{
@@ -6386,5 +6247,73 @@ func httpRequest(bodyType string, valuesKey string, args []actionArgument) []pli
 		argumentValue("WFHTTPMethod", args, 1),
 		argumentValue(valuesKey, args, 2),
 		argumentValue("WFHTTPHeaders", args, 3),
+	}
+}
+
+// toggleSetActions are actions which all are state based and so can either be toggled or set in the same format.
+var toggleSetActions = map[string]actionDefinition{
+	"BackgroundSounds": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleBackgroundSoundsIntent",
+	},
+	"MediaBackgroundSounds": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleBackgroundSoundsIntent",
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "setting",
+					dataType: Text,
+					value:    "whenMediaIsPlaying",
+				},
+			}
+		},
+	},
+	"AutoAnswerCalls": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleAutoAnswerCallsIntent",
+	},
+	"Appearance": {
+		identifier: "appearance",
+	},
+	"Bluetooth": {
+		identifier: "bluetooth.set",
+	},
+	"Wifi": {
+		identifier: "wifi.set",
+	},
+	"CellularData": {
+		identifier: "cellulardata.set",
+	},
+	"NightShift": {
+		identifier: "nightshift.set",
+	},
+	"TrueTone": {
+		identifier: "truetone.set",
+	},
+}
+
+// ToggleSetActions automates the creation of actions which simply toggle and set a state in the same format.
+func ToggleSetActions() {
+	for name, def := range toggleSetActions {
+		var setName = fmt.Sprintf("set%s", name)
+		var toggleName = fmt.Sprintf("toggle%s", name)
+		def.parameters = append(def.parameters, parameterDefinition{
+			name:      "status",
+			validType: Bool,
+			key:       "OnValue",
+		})
+		var setDef = def
+		actions[setName] = &setDef
+
+		def.parameters = nil
+		def.addParams = func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "operation",
+					dataType: Text,
+					value:    "Toggle",
+				},
+			}
+		}
+		var toggleDef = def
+		actions[toggleName] = &toggleDef
 	}
 }
