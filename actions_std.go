@@ -6263,35 +6263,83 @@ var toggleSetActions = map[string]actionDefinition{
 	},
 	"Bluetooth": {
 		identifier: "bluetooth.set",
+		setKey:     "OnValue",
 	},
 	"Wifi": {
 		identifier: "wifi.set",
+		setKey:     "OnValue",
 	},
 	"CellularData": {
 		identifier: "cellulardata.set",
+		setKey:     "OnValue",
 	},
 	"NightShift": {
 		identifier: "nightshift.set",
+		setKey:     "OnValue",
 	},
 	"TrueTone": {
 		identifier: "truetone.set",
+		setKey:     "OnValue",
+	},
+	"ClassicInvert": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleClassicInvertIntent",
+	},
+	"ClosedCaptionsSDH": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleCaptionsIntent",
+	},
+	"ColorFilters": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleColorFiltersIntent",
+	},
+	"Contrast": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleContrastIntent",
+	},
+	"LEDFlash": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleLEDFlashIntent",
+	},
+	"LeftRightBalance": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetLeftRightBalanceIntent",
+		parameters: []parameterDefinition{
+			{
+				name:      "value",
+				validType: Integer,
+				key:       "value",
+				optional:  true,
+			},
+		},
+	},
+	"LiveCaptions": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleLiveCaptionsIntent",
+	},
+	"MonoAudio": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleMonoAudioIntent",
+	},
+	"ReduceMotion": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleReduceMotionIntent",
+	},
+	"ReduceTransparency": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleTransparencyIntent",
+	},
+	"SmartInvert": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSmartInvertIntent",
+	},
+	"SwitchControl": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSwitchControlIntent",
+	},
+	"VoiceControl": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleVoiceControlIntent",
+	},
+	"WhitePoint": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleWhitePointIntent",
+	},
+	"Zoom": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleZoomIntent",
 	},
 }
 
 // ToggleSetActions automates the creation of actions which simply toggle and set a state in the same format.
 func ToggleSetActions() {
 	for name, def := range toggleSetActions {
-		var setName = fmt.Sprintf("set%s", name)
 		var toggleName = fmt.Sprintf("toggle%s", name)
-		def.parameters = append(def.parameters, parameterDefinition{
-			name:      "status",
-			validType: Bool,
-			key:       "OnValue",
-		})
-		var setDef = def
-		actions[setName] = &setDef
-
-		def.parameters = nil
 		def.addParams = func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -6302,7 +6350,28 @@ func ToggleSetActions() {
 			}
 		}
 		var toggleDef = def
+		toggleDef.parameters = nil
 		actions[toggleName] = &toggleDef
+
+		if name == "Appearance" {
+			continue
+		}
+
+		var setName = fmt.Sprintf("set%s", name)
+		def.addParams = nil
+		var setKey = "state"
+		if def.setKey != "" {
+			setKey = def.setKey
+		}
+		def.parameters = append([]parameterDefinition{
+			{
+				name:      "status",
+				validType: Bool,
+				key:       setKey,
+			},
+		}, def.parameters...)
+		var setDef = def
+		actions[setName] = &setDef
 	}
 	toggleSetActions = nil
 }

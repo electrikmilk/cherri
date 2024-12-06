@@ -72,6 +72,7 @@ type actionDefinition struct {
 	mac           bool
 	minVersion    float64
 	maxVersion    float64
+	setKey        string
 }
 
 // libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
