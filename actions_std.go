@@ -626,7 +626,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"createAlarm": {
-		appIdentifier: "com.apple.mobiletimer-framework.MobileTimerIntents.MTCreateAlarmIntent",
+		appIdentifier: "com.apple.mobiletimer-framework",
+		identifier:    "MobileTimerIntents.MTCreateAlarmIntent",
 		parameters: []parameterDefinition{
 			{
 				name:      "name",
@@ -729,7 +730,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"deleteAlarm": {
-		appIdentifier: "com.apple.clock.DeleteAlarmIntent",
+		appIdentifier: "com.apple.clock",
+		identifier:    "DeleteAlarmIntent",
 		appIntent: appIntent{
 			name:                "Clock",
 			bundleIdentifier:    "com.apple.clock",
@@ -744,7 +746,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"turnOnAlarm": {
-		appIdentifier: "com.apple.mobiletimer-framework.MobileTimerIntents.MTToggleAlarmIntent",
+		appIdentifier: "com.apple.mobiletimer-framework",
+		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
 		appIntent:     toggleAlarmIntent,
 		parameters: []parameterDefinition{
 			{
@@ -771,7 +774,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"turnOffAlarm": {
-		appIdentifier: "com.apple.mobiletimer-framework.MobileTimerIntents.MTToggleAlarmIntent",
+		appIdentifier: "com.apple.mobiletimer-framework",
+		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
 		appIntent:     toggleAlarmIntent,
 		parameters: []parameterDefinition{
 			{
@@ -824,7 +828,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getAlarms": {
-		appIdentifier: "com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent",
+		appIdentifier: "com.apple.mobiletimer-framework",
+		identifier:    "MobileTimerIntents.MTGetAlarmsIntent",
 	},
 	"filterContacts": {
 		identifier: "filter.contacts",
@@ -953,7 +958,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"call": {
-		appIdentifier: "com.apple.mobilephone.call",
+		appIdentifier: "com.apple.mobilephone",
+		identifier:    "call",
 		parameters: []parameterDefinition{
 			{
 				name:      "contact",
@@ -1019,7 +1025,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"facetimeCall": {
-		appIdentifier: "com.apple.facetime.facetime",
+		appIdentifier: "com.apple.facetime",
+		identifier:    "facetime",
 		parameters: []parameterDefinition{
 			{
 				name:      "contact",
@@ -1832,7 +1839,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addToBooks": {
-		appIdentifier: "com.apple.iBooksX.openin",
+		appIdentifier: "com.apple.iBooksX",
+		identifier:    "openin",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2330,7 +2338,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"transcribeText": {
-		appIdentifier: "com.apple.ShortcutsActions.TranscribeAudioAction",
+		appIdentifier: "com.apple.ShortcutsActions",
+		identifier:    "TranscribeAudioAction",
 		parameters: []parameterDefinition{
 			{
 				name:      "audioFile",
@@ -5007,7 +5016,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setBackgroundSound": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities",
+		identifier:    "AXSettingsShortcuts.AXSetBackgroundSoundIntent",
 		parameters: []parameterDefinition{
 			{
 				name:         "sound",
@@ -5020,7 +5030,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setBackgroundSoundsVolume": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundVolumeIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities",
+		identifier:    "AXSettingsShortcuts.AXSetBackgroundSoundVolumeIntent",
 		parameters: []parameterDefinition{
 			{
 				name:      "volume",
@@ -5112,7 +5123,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"makeShortcut": {
-		appIdentifier: "com.apple.shortcuts.CreateWorkflowAction",
+		appIdentifier: "com.apple.shortcuts",
+		identifier:    "CreateWorkflowAction",
 		parameters: []parameterDefinition{
 			{
 				name:      "name",
@@ -5130,7 +5142,8 @@ var actions = map[string]*actionDefinition{
 		minVersion: 16.4,
 	},
 	"searchShortcuts": {
-		appIdentifier: "com.apple.shortcuts.SearchShortcutsAction",
+		appIdentifier: "com.apple.shortcuts",
+		identifier:    "SearchShortcutsAction",
 		parameters: []parameterDefinition{
 			{
 				name:      "query",
@@ -5873,7 +5886,8 @@ var actions = map[string]*actionDefinition{
 		minVersion: 18,
 	},
 	"setSoundRecognition": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities",
+		identifier:    "AXSettingsShortcuts.AXToggleSoundDetectionIntent",
 		parameters: []parameterDefinition{
 			{
 				name:         "operation",
@@ -5886,7 +5900,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setTextSize": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetLargeTextIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities",
+		identifier:    "AXSettingsShortcuts.AXSetLargeTextIntent",
 		parameters: []parameterDefinition{
 			{
 				name:      "size",
@@ -5912,7 +5927,7 @@ func rawAction() {
 			},
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
-			actions["rawAction"].appIdentifier = getArgValue(args[0]).(string)
+			actions["rawAction"].overrideIdentifier = getArgValue(args[0]).(string)
 		},
 		make: func(args []actionArgument) (params []plistData) {
 			for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
@@ -6280,10 +6295,12 @@ func httpRequest(bodyType string, valuesKey string, args []actionArgument) []pli
 // toggleSetActions are actions which all are state based and so can either be toggled or set in the same format.
 var toggleSetActions = map[string]actionDefinition{
 	"BackgroundSounds": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleBackgroundSoundsIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleBackgroundSoundsIntent",
 	},
 	"MediaBackgroundSounds": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleBackgroundSoundsIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleBackgroundSoundsIntent",
 		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -6295,7 +6312,8 @@ var toggleSetActions = map[string]actionDefinition{
 		},
 	},
 	"AutoAnswerCalls": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleAutoAnswerCallsIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleAutoAnswerCallsIntent",
 	},
 	"Appearance": {
 		identifier: "appearance",
@@ -6321,22 +6339,28 @@ var toggleSetActions = map[string]actionDefinition{
 		setKey:     "OnValue",
 	},
 	"ClassicInvert": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleClassicInvertIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleClassicInvertIntent",
 	},
 	"ClosedCaptionsSDH": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleCaptionsIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleCaptionsIntent",
 	},
 	"ColorFilters": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleColorFiltersIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleColorFiltersIntent",
 	},
 	"Contrast": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleContrastIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleContrastIntent",
 	},
 	"LEDFlash": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleLEDFlashIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleLEDFlashIntent",
 	},
 	"LeftRightBalance": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetLeftRightBalanceIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXSetLeftRightBalanceIntent",
 		parameters: []parameterDefinition{
 			{
 				name:      "value",
@@ -6347,31 +6371,40 @@ var toggleSetActions = map[string]actionDefinition{
 		},
 	},
 	"LiveCaptions": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleLiveCaptionsIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleLiveCaptionsIntent",
 	},
 	"MonoAudio": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleMonoAudioIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleMonoAudioIntent",
 	},
 	"ReduceMotion": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleReduceMotionIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleReduceMotionIntent",
 	},
 	"ReduceTransparency": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleTransparencyIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleTransparencyIntent",
 	},
 	"SmartInvert": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSmartInvertIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleSmartInvertIntent",
 	},
 	"SwitchControl": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSwitchControlIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleSwitchControlIntent",
 	},
 	"VoiceControl": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleVoiceControlIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleVoiceControlIntent",
 	},
 	"WhitePoint": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleWhitePointIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleWhitePointIntent",
 	},
 	"Zoom": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleZoomIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleZoomIntent",
 	},
 }
 
