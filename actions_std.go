@@ -115,6 +115,7 @@ var filesSortBy = []string{"File Size", "File Extension", "Creation Date", "File
 var pdfMergeBehaviors = []string{"Append", "Shuffle"}
 var cameras = []string{"Front", "Back"}
 var cameraQualities = []string{"Low", "Medium", "High"}
+var backgroundSounds = []string{"BalancedNoise", "BrightNoise", "DarkNoise", "Ocean", "Rain", "Stream"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -5096,6 +5097,72 @@ var actions = map[string]*actionDefinition{
 				validType: Bool,
 				key:       "OnValue",
 			},
+		},
+	},
+	"setAutoAnswerCalls": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleAutoAnswerCallsIntent",
+		make: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "OnValue",
+					dataType: Boolean,
+					value:    false,
+				},
+			}
+		},
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "operation",
+					dataType: Text,
+					value:    "Toggle",
+				},
+			}
+		},
+	},
+	"toggleAutoAnswerCalls": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleAutoAnswerCallsIntent",
+		parameters: []parameterDefinition{
+			{
+				name:      "status",
+				validType: Bool,
+				key:       "OnValue",
+			},
+		},
+	},
+	"setBackgroundSound": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundIntent",
+		parameters: []parameterDefinition{
+			{
+				name:         "sound",
+				validType:    String,
+				key:          "backgroundSound",
+				defaultValue: "Balanced Noise",
+				enum:         backgroundSounds,
+				optional:     true,
+			},
+		},
+	},
+	"setBackgroundSounds": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleBackgroundSoundsIntent",
+		parameters: []parameterDefinition{
+			{
+				name:      "status",
+				validType: Bool,
+				key:       "OnValue",
+			},
+		},
+	},
+	"toggleBackgroundSounds": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleBackgroundSoundsIntent",
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "operation",
+					dataType: Text,
+					value:    "Toggle",
+				},
+			}
 		},
 	},
 	"playSound": {
