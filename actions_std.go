@@ -6304,4 +6304,5 @@ func ToggleSetActions() {
 		var toggleDef = def
 		actions[toggleName] = &toggleDef
 	}
+	toggleSetActions = nil
 }
