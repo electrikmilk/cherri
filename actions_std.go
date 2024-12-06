@@ -5873,7 +5873,7 @@ var actions = map[string]*actionDefinition{
 		minVersion: 18,
 	},
 	"setSoundRecognition": {
-		identifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent",
 		parameters: []parameterDefinition{
 			{
 				name:         "operation",
@@ -5886,7 +5886,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setTextSize": {
-		identifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetLargeTextIntent",
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetLargeTextIntent",
 		parameters: []parameterDefinition{
 			{
 				name:      "size",
