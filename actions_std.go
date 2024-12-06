@@ -116,6 +116,21 @@ var pdfMergeBehaviors = []string{"Append", "Shuffle"}
 var cameras = []string{"Front", "Back"}
 var cameraQualities = []string{"Low", "Medium", "High"}
 var backgroundSounds = []string{"BalancedNoise", "BrightNoise", "DarkNoise", "Ocean", "Rain", "Stream"}
+var soundRecognitionOperations = []string{"pause", "activate", "toggle"}
+var textSizes = []string{
+	"Accessibility Extra Extra Extra Large",
+	"Accessibility Extra Extra Large",
+	"Accessibility Extra Large",
+	"Accessibility Large",
+	"Accessibility Medium",
+	"Extra Extra Extra Large",
+	"Extra Extra Large",
+	"Extra Large",
+	"Default",
+	"Medium",
+	"Small",
+	"Extra Small",
+}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -5856,6 +5871,30 @@ var actions = map[string]*actionDefinition{
 		identifier: "filter.apps",
 		mac:        true,
 		minVersion: 18,
+	},
+	"setSoundRecognition": {
+		identifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent",
+		parameters: []parameterDefinition{
+			{
+				name:         "operation",
+				validType:    String,
+				key:          "operation",
+				defaultValue: "activate",
+				enum:         soundRecognitionOperations,
+				optional:     true,
+			},
+		},
+	},
+	"setTextSize": {
+		identifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetLargeTextIntent",
+		parameters: []parameterDefinition{
+			{
+				name:      "size",
+				validType: String,
+				key:       "textSize",
+				enum:      textSizes,
+			},
+		},
 	},
 }
 
