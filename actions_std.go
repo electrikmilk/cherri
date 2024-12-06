@@ -5004,26 +5004,14 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"setBackgroundSounds": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleBackgroundSoundsIntent",
+	"setBackgroundSoundsVolume": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundVolumeIntent",
 		parameters: []parameterDefinition{
 			{
-				name:      "status",
-				validType: Bool,
-				key:       "OnValue",
+				name:      "volume",
+				validType: Float,
+				key:       "volumeValue",
 			},
-		},
-	},
-	"toggleBackgroundSounds": {
-		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleBackgroundSoundsIntent",
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "Toggle",
-				},
-			}
 		},
 	},
 	"playSound": {
