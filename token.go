@@ -65,6 +65,7 @@ const (
 	String       tokenType = "text"
 	RawString    tokenType = "rawtext"
 	Integer      tokenType = "number"
+	Float        tokenType = "float"
 	Dict         tokenType = "dictionary"
 	Arr          tokenType = "array"
 	Bool         tokenType = "bool"

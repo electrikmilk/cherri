@@ -58,6 +58,7 @@ func initParse() {
 	preParsing = true
 
 	rawAction()
+	ToggleSetActions()
 	handleIncludes()
 	parseCopyPastes()
 	parseCustomActions()
@@ -305,6 +306,10 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	}
 	switch {
 	case intChar():
+		*valueType = Integer
+		if strings.Contains(ahead, ".") {
+			*valueType = Float
+		}
 		collectIntegerValue(valueType, value, &until)
 	case char == '"':
 		collectStringValue(valueType, value)
@@ -584,6 +589,9 @@ func collectType(valueType *tokenType, value *any) {
 	case tokenAhead(Integer):
 		*valueType = Integer
 		*value = "0"
+	case tokenAhead(Float):
+		*valueType = Float
+		*value = "0.0"
 	case tokenAhead(Bool):
 		*valueType = Bool
 		*value = false
@@ -1132,7 +1140,6 @@ func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 	var ahead = lookAheadUntil(*until)
 	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
 		var integer = collectInteger()
-		*valueType = Integer
 		*value = integer
 		advance()
 		return

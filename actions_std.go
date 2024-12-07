@@ -115,6 +115,22 @@ var filesSortBy = []string{"File Size", "File Extension", "Creation Date", "File
 var pdfMergeBehaviors = []string{"Append", "Shuffle"}
 var cameras = []string{"Front", "Back"}
 var cameraQualities = []string{"Low", "Medium", "High"}
+var backgroundSounds = []string{"BalancedNoise", "BrightNoise", "DarkNoise", "Ocean", "Rain", "Stream"}
+var soundRecognitionOperations = []string{"pause", "activate", "toggle"}
+var textSizes = []string{
+	"Accessibility Extra Extra Extra Large",
+	"Accessibility Extra Extra Large",
+	"Accessibility Extra Large",
+	"Accessibility Large",
+	"Accessibility Medium",
+	"Extra Extra Extra Large",
+	"Extra Extra Large",
+	"Extra Large",
+	"Default",
+	"Medium",
+	"Small",
+	"Extra Small",
+}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -610,7 +626,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"createAlarm": {
-		appIdentifier: "com.apple.mobiletimer-framework.MobileTimerIntents.MTCreateAlarmIntent",
+		appIdentifier: "com.apple.mobiletimer-framework",
+		identifier:    "MobileTimerIntents.MTCreateAlarmIntent",
 		parameters: []parameterDefinition{
 			{
 				name:      "name",
@@ -713,7 +730,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"deleteAlarm": {
-		appIdentifier: "com.apple.clock.DeleteAlarmIntent",
+		appIdentifier: "com.apple.clock",
+		identifier:    "DeleteAlarmIntent",
 		appIntent: appIntent{
 			name:                "Clock",
 			bundleIdentifier:    "com.apple.clock",
@@ -728,7 +746,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"turnOnAlarm": {
-		appIdentifier: "com.apple.mobiletimer-framework.MobileTimerIntents.MTToggleAlarmIntent",
+		appIdentifier: "com.apple.mobiletimer-framework",
+		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
 		appIntent:     toggleAlarmIntent,
 		parameters: []parameterDefinition{
 			{
@@ -755,7 +774,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"turnOffAlarm": {
-		appIdentifier: "com.apple.mobiletimer-framework.MobileTimerIntents.MTToggleAlarmIntent",
+		appIdentifier: "com.apple.mobiletimer-framework",
+		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
 		appIntent:     toggleAlarmIntent,
 		parameters: []parameterDefinition{
 			{
@@ -802,13 +822,14 @@ var actions = map[string]*actionDefinition{
 				{
 					key:      "operation",
 					dataType: Text,
-					value:    "toggle",
+					value:    "Toggle",
 				},
 			}
 		},
 	},
 	"getAlarms": {
-		appIdentifier: "com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent",
+		appIdentifier: "com.apple.mobiletimer-framework",
+		identifier:    "MobileTimerIntents.MTGetAlarmsIntent",
 	},
 	"filterContacts": {
 		identifier: "filter.contacts",
@@ -937,7 +958,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"call": {
-		appIdentifier: "com.apple.mobilephone.call",
+		appIdentifier: "com.apple.mobilephone",
+		identifier:    "call",
 		parameters: []parameterDefinition{
 			{
 				name:      "contact",
@@ -1003,7 +1025,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"facetimeCall": {
-		appIdentifier: "com.apple.facetime.facetime",
+		appIdentifier: "com.apple.facetime",
+		identifier:    "facetime",
 		parameters: []parameterDefinition{
 			{
 				name:      "contact",
@@ -1816,7 +1839,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addToBooks": {
-		appIdentifier: "com.apple.iBooksX.openin",
+		appIdentifier: "com.apple.iBooksX",
+		identifier:    "openin",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2314,7 +2338,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"transcribeText": {
-		appIdentifier: "com.apple.ShortcutsActions.TranscribeAudioAction",
+		appIdentifier: "com.apple.ShortcutsActions",
+		identifier:    "TranscribeAudioAction",
 		parameters: []parameterDefinition{
 			{
 				name:      "audioFile",
@@ -2636,14 +2661,9 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "volume",
-				validType: String,
+				validType: Float,
 				key:       "WFVolume",
 			},
-		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			if args[0].valueType != Variable {
-				args[0].value = fmt.Sprintf("0.%s", args[0].value)
-			}
 		},
 	},
 	"addToMusic": {
@@ -3476,14 +3496,9 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "brightness",
-				validType: String,
+				validType: Float,
 				key:       "WFBrightness",
 			},
-		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			if args[0].valueType != Variable {
-				args[0].value = fmt.Sprintf("0.%s", args[0].value)
-			}
 		},
 	},
 	"getName": {
@@ -3575,18 +3590,6 @@ var actions = map[string]*actionDefinition{
 		},
 		make: func(args []actionArgument) []plistData {
 			return countParams("Lines", args)
-		},
-	},
-	"toggleAppearance": {
-		identifier: "appearance",
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "toggle",
-				},
-			}
 		},
 	},
 	"lightMode": {
@@ -5012,61 +5015,29 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"setWifi": {
-		identifier: "wifi.set",
+	"setBackgroundSound": {
+		appIdentifier: "com.apple.AccessibilityUtilities",
+		identifier:    "AXSettingsShortcuts.AXSetBackgroundSoundIntent",
 		parameters: []parameterDefinition{
 			{
-				name:      "status",
-				key:       "OnValue",
-				validType: Bool,
+				name:         "sound",
+				validType:    String,
+				key:          "backgroundSound",
+				defaultValue: "Balanced Noise",
+				enum:         backgroundSounds,
+				optional:     true,
 			},
 		},
 	},
-	"setCellularData": {
-		identifier: "cellulardata.set",
+	"setBackgroundSoundsVolume": {
+		appIdentifier: "com.apple.AccessibilityUtilities",
+		identifier:    "AXSettingsShortcuts.AXSetBackgroundSoundVolumeIntent",
 		parameters: []parameterDefinition{
 			{
-				name:         "status",
-				key:          "OnValue",
-				validType:    Bool,
-				defaultValue: true,
+				name:      "volume",
+				validType: Float,
+				key:       "volumeValue",
 			},
-		},
-	},
-	"toggleBluetooth": {
-		identifier: "bluetooth.set",
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "OnValue",
-					dataType: Boolean,
-					value:    false,
-				},
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "toggle",
-				},
-			}
-		},
-	},
-	"setBluetooth": {
-		identifier: "bluetooth.set",
-		parameters: []parameterDefinition{
-			{
-				name:      "status",
-				validType: Bool,
-				key:       "OnValue",
-			},
-		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "set",
-				},
-			}
 		},
 	},
 	"playSound": {
@@ -5152,7 +5123,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"makeShortcut": {
-		appIdentifier: "com.apple.shortcuts.CreateWorkflowAction",
+		appIdentifier: "com.apple.shortcuts",
+		identifier:    "CreateWorkflowAction",
 		parameters: []parameterDefinition{
 			{
 				name:      "name",
@@ -5170,7 +5142,8 @@ var actions = map[string]*actionDefinition{
 		minVersion: 16.4,
 	},
 	"searchShortcuts": {
-		appIdentifier: "com.apple.shortcuts.SearchShortcutsAction",
+		appIdentifier: "com.apple.shortcuts",
+		identifier:    "SearchShortcutsAction",
 		parameters: []parameterDefinition{
 			{
 				name:      "query",
@@ -5912,6 +5885,32 @@ var actions = map[string]*actionDefinition{
 		mac:        true,
 		minVersion: 18,
 	},
+	"setSoundRecognition": {
+		appIdentifier: "com.apple.AccessibilityUtilities",
+		identifier:    "AXSettingsShortcuts.AXToggleSoundDetectionIntent",
+		parameters: []parameterDefinition{
+			{
+				name:         "operation",
+				validType:    String,
+				key:          "operation",
+				defaultValue: "activate",
+				enum:         soundRecognitionOperations,
+				optional:     true,
+			},
+		},
+	},
+	"setTextSize": {
+		appIdentifier: "com.apple.AccessibilityUtilities",
+		identifier:    "AXSettingsShortcuts.AXSetLargeTextIntent",
+		parameters: []parameterDefinition{
+			{
+				name:      "size",
+				validType: String,
+				key:       "textSize",
+				enum:      textSizes,
+			},
+		},
+	},
 }
 
 func rawAction() {
@@ -5928,7 +5927,7 @@ func rawAction() {
 			},
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
-			actions["rawAction"].appIdentifier = getArgValue(args[0]).(string)
+			actions["rawAction"].overrideIdentifier = getArgValue(args[0]).(string)
 		},
 		make: func(args []actionArgument) (params []plistData) {
 			for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
@@ -6291,4 +6290,160 @@ func httpRequest(bodyType string, valuesKey string, args []actionArgument) []pli
 		argumentValue(valuesKey, args, 2),
 		argumentValue("WFHTTPHeaders", args, 3),
 	}
+}
+
+// toggleSetActions are actions which all are state based and so can either be toggled or set in the same format.
+var toggleSetActions = map[string]actionDefinition{
+	"BackgroundSounds": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleBackgroundSoundsIntent",
+	},
+	"MediaBackgroundSounds": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleBackgroundSoundsIntent",
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "setting",
+					dataType: Text,
+					value:    "whenMediaIsPlaying",
+				},
+			}
+		},
+	},
+	"AutoAnswerCalls": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleAutoAnswerCallsIntent",
+	},
+	"Appearance": {
+		identifier: "appearance",
+	},
+	"Bluetooth": {
+		identifier: "bluetooth.set",
+		setKey:     "OnValue",
+	},
+	"Wifi": {
+		identifier: "wifi.set",
+		setKey:     "OnValue",
+	},
+	"CellularData": {
+		identifier: "cellulardata.set",
+		setKey:     "OnValue",
+	},
+	"NightShift": {
+		identifier: "nightshift.set",
+		setKey:     "OnValue",
+	},
+	"TrueTone": {
+		identifier: "truetone.set",
+		setKey:     "OnValue",
+	},
+	"ClassicInvert": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleClassicInvertIntent",
+	},
+	"ClosedCaptionsSDH": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleCaptionsIntent",
+	},
+	"ColorFilters": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleColorFiltersIntent",
+	},
+	"Contrast": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleContrastIntent",
+	},
+	"LEDFlash": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleLEDFlashIntent",
+	},
+	"LeftRightBalance": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXSetLeftRightBalanceIntent",
+		parameters: []parameterDefinition{
+			{
+				name:      "value",
+				validType: Integer,
+				key:       "value",
+				optional:  true,
+			},
+		},
+	},
+	"LiveCaptions": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleLiveCaptionsIntent",
+	},
+	"MonoAudio": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleMonoAudioIntent",
+	},
+	"ReduceMotion": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleReduceMotionIntent",
+	},
+	"ReduceTransparency": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleTransparencyIntent",
+	},
+	"SmartInvert": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleSmartInvertIntent",
+	},
+	"SwitchControl": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleSwitchControlIntent",
+	},
+	"VoiceControl": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleVoiceControlIntent",
+	},
+	"WhitePoint": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleWhitePointIntent",
+	},
+	"Zoom": {
+		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
+		identifier:    "AXToggleZoomIntent",
+	},
+}
+
+// ToggleSetActions automates the creation of actions which simply toggle and set a state in the same format.
+func ToggleSetActions() {
+	for name, def := range toggleSetActions {
+		var toggleName = fmt.Sprintf("toggle%s", name)
+		def.addParams = func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "operation",
+					dataType: Text,
+					value:    "Toggle",
+				},
+			}
+		}
+		var toggleDef = def
+		toggleDef.parameters = nil
+		actions[toggleName] = &toggleDef
+
+		if name == "Appearance" {
+			continue
+		}
+
+		var setName = fmt.Sprintf("set%s", name)
+		def.addParams = nil
+		var setKey = "state"
+		if def.setKey != "" {
+			setKey = def.setKey
+		}
+		def.parameters = append([]parameterDefinition{
+			{
+				name:      "status",
+				validType: Bool,
+				key:       setKey,
+			},
+		}, def.parameters...)
+		var setDef = def
+		actions[setName] = &setDef
+	}
+	toggleSetActions = nil
 }

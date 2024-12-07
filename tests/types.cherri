@@ -4,3 +4,4 @@
 @dict: dictionary
 @collection: array
 @ref: var
+@real: float
