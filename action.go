@@ -75,6 +75,7 @@ type actionDefinition struct {
 	maxVersion         float64
 	setKey             string
 	category           DocCategory
+	doc                ActionDoc
 }
 
 // libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
@@ -474,6 +475,12 @@ func makeMeasurementUnits() {
 
 func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) string {
 	var definition strings.Builder
+	definition.WriteString(fmt.Sprintf("### %s\n", currentAction.doc.title))
+	definition.WriteRune('\n')
+	if currentAction.doc.description != "" {
+		definition.WriteString(fmt.Sprintf("%s\n\n", currentAction.doc.description))
+	}
+	definition.WriteString("```\n")
 	definition.WriteString(fmt.Sprintf("%s(", currentActionIdentifier))
 	var arguments []string
 	for _, param := range currentAction.parameters {
@@ -485,6 +492,12 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 	}
 	definition.WriteString(strings.Join(arguments, ", "))
 	definition.WriteRune(')')
+	definition.WriteString("\n```")
+
+	if currentAction.doc.example != "" {
+		definition.WriteString(fmt.Sprintf("\n\n```\n%s\n```\n", currentAction.doc.example))
+	}
+
 	if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
 		definition.WriteString(generateActionRestrictions())
 	}

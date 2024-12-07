@@ -155,6 +155,12 @@ var categories = map[DocCategory][]DocCategory{
 	},
 }
 
+type ActionDoc struct {
+	title       string
+	description string
+	example     string
+}
+
 func generateDocs() {
 	ToggleSetActions()
 	rawAction()
