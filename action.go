@@ -74,6 +74,7 @@ type actionDefinition struct {
 	minVersion         float64
 	maxVersion         float64
 	setKey             string
+	category           DocCategory
 }
 
 // libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
