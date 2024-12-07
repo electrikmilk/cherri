@@ -4,7 +4,9 @@
 
 package main
 
-import "github.com/electrikmilk/args-parser"
+import (
+	"github.com/electrikmilk/args-parser"
+)
 
 func init() {
 	args.CustomUsage = "[FILE]"
@@ -69,5 +71,15 @@ func init() {
 		Description:  "Search glyphs in the compiler.",
 		DefaultValue: "",
 		ExpectsValue: true,
+	})
+	var actionCategories []string
+	for actionCat := range categories {
+		actionCategories = append(actionCategories, string(actionCat))
+	}
+	args.Register(args.Argument{
+		Name:         "docs",
+		Description:  "Generate action documentation, optionally by category.",
+		DefaultValue: "",
+		Values:       actionCategories,
 	})
 }

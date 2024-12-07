@@ -4,6 +4,11 @@
 
 package main
 
+import (
+	"fmt"
+	"github.com/electrikmilk/args-parser"
+)
+
 type DocCategory string
 
 const (
@@ -148,4 +153,41 @@ var categories = map[DocCategory][]DocCategory{
 		Articles,
 		RSS,
 	},
+}
+
+func generateDocs() {
+	ToggleSetActions()
+	rawAction()
+	var cat = args.Value("docs")
+	for category, subcategories := range categories {
+		if cat != "" && cat != string(category) {
+			continue
+		}
+
+		generateCategory(category)
+
+		for _, subcat := range subcategories {
+			fmt.Print("\n## ", subcat, "\n\n")
+
+			generateCategory(subcat)
+		}
+	}
+}
+
+func generateCategory(category DocCategory) {
+	var i = 0
+	for name, def := range actions {
+		if def.category != category {
+			continue
+		}
+		if i != 0 {
+			fmt.Print("\n---\n\n")
+		}
+
+		currentAction = *def
+		currentActionIdentifier = name
+
+		fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
+		i++
+	}
 }

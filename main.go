@@ -35,6 +35,11 @@ func main() {
 		os.Exit(0)
 	}
 
+	if args.Using("docs") {
+		generateDocs()
+		os.Exit(0)
+	}
+
 	if args.Using("action") {
 		if args.Value("action") == "" {
 			for identifier, definition := range actions {
