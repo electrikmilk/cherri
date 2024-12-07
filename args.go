@@ -80,6 +80,7 @@ func init() {
 		Name:         "docs",
 		Description:  "Generate action documentation, optionally by category.",
 		DefaultValue: "",
+		ExpectsValue: true,
 		Values:       actionCategories,
 	})
 }
