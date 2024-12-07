@@ -61,18 +61,20 @@ type appIntent struct {
 
 // actionDefinition defines an action, what it expects and has functions for checking the arguments and creating the parameters.
 type actionDefinition struct {
-	identifier    string
-	appIdentifier string
-	parameters    []parameterDefinition
-	check         checkFunc
-	make          paramsFunc
-	addParams     paramsFunc
-	appIntent     appIntent
-	outputType    tokenType
-	defaultAction bool // Default action for this identifier during decompilation.
-	mac           bool
-	minVersion    float64
-	maxVersion    float64
+	identifier         string
+	appIdentifier      string
+	overrideIdentifier string
+	parameters         []parameterDefinition
+	check              checkFunc
+	make               paramsFunc
+	addParams          paramsFunc
+	appIntent          appIntent
+	outputType         tokenType
+	defaultAction      bool // Default action for this identifier during decompilation.
+	mac                bool
+	minVersion         float64
+	maxVersion         float64
+	setKey             string
 }
 
 // libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
@@ -111,15 +113,18 @@ func plistAction(arguments []actionArgument, outputName *plistData, actionUUID *
 
 // actionIdentifier determines the identifier of currentAction.
 func actionIdentifier() (ident string) {
+	if currentAction.overrideIdentifier != "" {
+		return currentAction.overrideIdentifier
+	}
+
+	ident = "is.workflow.actions"
 	if currentAction.appIdentifier != "" {
 		ident = currentAction.appIdentifier
+	}
+	if currentAction.identifier != "" {
+		ident = fmt.Sprintf("%s.%s", ident, currentAction.identifier)
 	} else {
-		if currentAction.identifier != "" {
-			ident = currentAction.identifier
-		} else {
-			ident = strings.ToLower(currentActionIdentifier)
-		}
-		ident = "is.workflow.actions." + ident
+		ident = fmt.Sprintf("%s.%s", ident, strings.ToLower(currentActionIdentifier))
 	}
 	return
 }

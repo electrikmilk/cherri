@@ -57,6 +57,7 @@ func initParse() {
 	preParsing = true
 
 	rawAction()
+	ToggleSetActions()
 	handleIncludes()
 	parseCopyPastes()
 	parseCustomActions()
@@ -304,6 +305,10 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	}
 	switch {
 	case intChar():
+		*valueType = Integer
+		if strings.Contains(ahead, ".") {
+			*valueType = Float
+		}
 		collectIntegerValue(valueType, value, &until)
 	case char == '"':
 		collectStringValue(valueType, value)
@@ -583,6 +588,9 @@ func collectType(valueType *tokenType, value *any) {
 	case tokenAhead(Integer):
 		*valueType = Integer
 		*value = "0"
+	case tokenAhead(Float):
+		*valueType = Float
+		*value = "0.0"
 	case tokenAhead(Bool):
 		*valueType = Bool
 		*value = false
@@ -646,7 +654,8 @@ func collectDefinition() {
 		advance()
 		collectNoInputDefinition()
 	case tokenAhead(Mac):
-		collectMacDefinition()
+		advance()
+		collectBooleanDefinition("mac")
 	case tokenAhead(Version):
 		var collectVersion = collectUntil('\n')
 		makeVersions()
@@ -769,15 +778,14 @@ func collectContentItemTypes() (contentItemTypes []string) {
 	return
 }
 
-func collectMacDefinition() {
-	var defValue = collectUntil('\n')
-	switch defValue {
-	case "true":
-		definitions["mac"] = true
-	case "false":
-		definitions["mac"] = false
+func collectBooleanDefinition(key string) {
+	switch {
+	case tokenAhead(True):
+		definitions[key] = true
+	case tokenAhead(False):
+		definitions[key] = false
 	default:
-		parserError(fmt.Sprintf("Invalid value of '%s' for boolean definition 'mac'", defValue))
+		parserError(fmt.Sprintf("Invalid value for boolean definition '%s'", key))
 	}
 }
 
@@ -1129,7 +1137,6 @@ func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 	var ahead = lookAheadUntil(*until)
 	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
 		var integer = collectInteger()
-		*valueType = Integer
 		*value = integer
 		advance()
 		return

@@ -18,6 +18,7 @@ type plistDataType string
 
 const Text plistDataType = "string"
 const Number plistDataType = "integer"
+const Real plistDataType = "real"
 const Dictionary plistDataType = "dictionary"
 const Array plistDataType = "array"
 const Boolean plistDataType = "boolean"
@@ -175,7 +176,7 @@ func makeVariableAction(token *token, varUUID *string) {
 
 func makeVariableValue(outputName *plistData, uuid *plistData, valueType tokenType, value *any) {
 	switch valueType {
-	case Integer:
+	case Integer, Float:
 		makeIntValue(outputName, uuid, value)
 	case Bool:
 		makeBoolValue(outputName, uuid, value)
@@ -381,7 +382,7 @@ func inputValue(key string, name string, varUUID string) plistData {
 	var value []plistData
 	if varUUID != "" {
 		var variable = variables[name]
-		if !variable.repeatItem && ((variable.constant && variable.valueType == Variable) || variable.valueType != Variable) {
+		if !variable.repeatItem && ((variable.constant && variable.valueType == Variable) || (variable.valueType != Variable && variable.valueType != Arr)) {
 			value = []plistData{
 				{
 					key:      "OutputName",
@@ -847,6 +848,23 @@ func convertTypeToken(tokenType tokenType) plistDataType {
 	}
 }
 
+func convertPlistTypeToken(plistType plistDataType) tokenType {
+	switch plistType {
+	case Text:
+		return String
+	case Number:
+		return Integer
+	case Array:
+		return Arr
+	case Dictionary:
+		return Dict
+	case Boolean:
+		return Bool
+	default:
+		return ""
+	}
+}
+
 func argumentValue(key string, args []actionArgument, idx int) plistData {
 	var actionParameter parameterDefinition
 	if len(currentAction.parameters) <= idx {
@@ -887,6 +905,12 @@ func paramValue(key string, arg actionArgument, handleAs tokenType, outputType p
 			key:      key,
 			dataType: Dictionary,
 			value:    makeDictionaryValue(&arg.value),
+		}
+	case Float:
+		return plistData{
+			key:      key,
+			dataType: Real,
+			value:    arg.value,
 		}
 	default:
 		return attachmentValues(key, arg.value.(string), outputType)

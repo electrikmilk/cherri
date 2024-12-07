@@ -989,8 +989,12 @@ func matchAction(action *ShortcutAction) (name string, definition actionDefiniti
 		if def.identifier != "" {
 			identifier = def.identifier
 		}
-		var shortcutsIdentifier = fmt.Sprintf("is.workflow.actions.%s", identifier)
-		if shortcutsIdentifier == action.WFWorkflowActionIdentifier || definition.appIdentifier == action.WFWorkflowActionIdentifier {
+		var appIdentifier = "is.workflow.actions"
+		if def.appIdentifier != "" {
+			appIdentifier = def.appIdentifier
+		}
+		var actionIdentifier = fmt.Sprintf("%s.%s", appIdentifier, identifier)
+		if actionIdentifier == action.WFWorkflowActionIdentifier || definition.overrideIdentifier == action.WFWorkflowActionIdentifier {
 			definition = *def
 			name = call
 
