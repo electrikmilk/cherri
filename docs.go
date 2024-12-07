@@ -163,6 +163,9 @@ func generateDocs() {
 		if cat != "" && cat != string(category) {
 			continue
 		}
+		if cat == "" {
+			fmt.Print("\n# ", category, "\n\n")
+		}
 
 		generateCategory(category)
 
