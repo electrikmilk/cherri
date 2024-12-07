@@ -25,7 +25,6 @@ const (
 	Stores        DocCategory = "Stores"
 	QRCodes       DocCategory = "QR Codes"
 	Scripting     DocCategory = "Scripting"
-	Alarms        DocCategory = "Alarms"
 	Dates         DocCategory = "Dates"
 	Images        DocCategory = "Images"
 	GIFs          DocCategory = "GIFs"
@@ -66,6 +65,7 @@ const (
 	Shell         DocCategory = "Shell"
 	Scripts       DocCategory = "Scripts"
 	System        DocCategory = "System"
+	Speech        DocCategory = "Speech"
 	Windows       DocCategory = "Windows"
 	URLs          DocCategory = "URLs"
 	Web           DocCategory = "Web"
@@ -78,7 +78,6 @@ const (
 var categories = map[DocCategory][]DocCategory{
 	Calendars: {
 		Reminders,
-		Alarms,
 		Clock,
 		Dates,
 	},
@@ -105,6 +104,7 @@ var categories = map[DocCategory][]DocCategory{
 	Media: {
 		Stores,
 		Audio,
+		Speech,
 		Camera,
 		GIFs,
 		Images,

@@ -142,6 +142,7 @@ var toggleAlarmIntent = appIntent{
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
 	"date": {
+		category: Dates,
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -160,6 +161,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"currentDate": {
+		category:   Dates,
 		identifier: "date",
 		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
@@ -172,6 +174,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addCalendar": {
+		category:   Calendars,
 		identifier: "addnewcalendar",
 		parameters: []parameterDefinition{
 			{
@@ -182,6 +185,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addSeconds": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -198,6 +202,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addMinutes": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -214,6 +219,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addHours": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -230,6 +236,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addDays": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -246,6 +253,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addWeeks": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -262,6 +270,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addMonths": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -278,6 +287,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addYears": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -294,6 +304,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"subtractSeconds": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -310,6 +321,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"subtractMinutes": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -326,6 +338,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"subtractHours": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -342,6 +355,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"subtractDays": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -358,6 +372,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"subtractWeeks": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -374,6 +389,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"subtractMonths": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -390,6 +406,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"subtractYears": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -406,6 +423,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getStartMinute": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -418,6 +436,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getStartHour": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -430,6 +449,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getStartWeek": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -442,6 +462,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getStartMonth": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -454,6 +475,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getStartYear": {
+		category:   Dates,
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
@@ -466,6 +488,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"editEvent": {
+		category:   Calendars,
 		identifier: "setters.calendarevents",
 		parameters: []parameterDefinition{
 			{
@@ -487,6 +510,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"formatTime": {
+		category:   Dates,
 		identifier: "format.date",
 		parameters: []parameterDefinition{
 			{
@@ -514,6 +538,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"formatDate": {
+		category:   Dates,
 		identifier: "format.date",
 		parameters: []parameterDefinition{
 			{
@@ -541,6 +566,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"formatTimestamp": {
+		category:   Dates,
 		identifier: "format.date",
 		parameters: []parameterDefinition{
 			{
@@ -567,6 +593,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"removeEvents": {
+		category: Calendars,
 		parameters: []parameterDefinition{
 			{
 				name:      "events",
@@ -583,6 +610,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"removeReminders": {
+		category: Reminders,
 		parameters: []parameterDefinition{
 			{
 				name:      "reminders",
@@ -592,6 +620,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"showInCalendar": {
+		category: Calendars,
 		parameters: []parameterDefinition{
 			{
 				name:      "event",
@@ -601,6 +630,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openRemindersList": {
+		category:   Reminders,
 		identifier: "showlist",
 		parameters: []parameterDefinition{
 			{
@@ -611,6 +641,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"startTimer": {
+		category:   Clock,
 		identifier: "timer.start",
 		parameters: []parameterDefinition{
 			{
@@ -626,6 +657,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"createAlarm": {
+		category:      Clock,
 		appIdentifier: "com.apple.mobiletimer-framework",
 		identifier:    "MobileTimerIntents.MTCreateAlarmIntent",
 		parameters: []parameterDefinition{
@@ -730,6 +762,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"deleteAlarm": {
+		category:      Clock,
 		appIdentifier: "com.apple.clock",
 		identifier:    "DeleteAlarmIntent",
 		appIntent: appIntent{
@@ -746,6 +779,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"turnOnAlarm": {
+		category:      Clock,
 		appIdentifier: "com.apple.mobiletimer-framework",
 		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
 		appIntent:     toggleAlarmIntent,
@@ -774,6 +808,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"turnOffAlarm": {
+		category:      Clock,
 		appIdentifier: "com.apple.mobiletimer-framework",
 		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
 		appIntent:     toggleAlarmIntent,
@@ -802,6 +837,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"toggleAlarm": {
+		category: Clock,
 		parameters: []parameterDefinition{
 			{
 				name:      "alarm",
@@ -828,10 +864,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getAlarms": {
+		category:      Clock,
 		appIdentifier: "com.apple.mobiletimer-framework",
 		identifier:    "MobileTimerIntents.MTGetAlarmsIntent",
 	},
 	"filterContacts": {
+		category:   Contacts,
 		identifier: "filter.contacts",
 		parameters: []parameterDefinition{
 			{
@@ -875,6 +913,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"emailAddress": {
+		category:   Email,
 		identifier: "email",
 		parameters: []parameterDefinition{
 			{
@@ -901,6 +940,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"phoneNumber": {
+		category: Phone,
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
@@ -925,6 +965,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"selectContact": {
+		category:   Contacts,
 		identifier: "selectcontacts",
 		parameters: []parameterDefinition{
 			{
@@ -936,12 +977,15 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"selectEmailAddress": {
+		category:   Email,
 		identifier: "selectemail",
 	},
 	"selectPhoneNumber": {
+		category:   Phone,
 		identifier: "selectphone",
 	},
 	"getContactDetail": {
+		category:   Contacts,
 		identifier: "properties.contacts",
 		parameters: []parameterDefinition{
 			{
@@ -958,6 +1002,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"call": {
+		category:      Phone,
 		appIdentifier: "com.apple.mobilephone",
 		identifier:    "call",
 		parameters: []parameterDefinition{
@@ -969,6 +1014,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"sendEmail": {
+		category: Email,
 		parameters: []parameterDefinition{
 			{
 				name:      "contact",
@@ -1005,6 +1051,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"sendMessage": {
+		category: Messaging,
 		parameters: []parameterDefinition{
 			{
 				name:      "contact",
@@ -1025,6 +1072,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"facetimeCall": {
+		category:      Phone,
 		appIdentifier: "com.apple.facetime",
 		identifier:    "facetime",
 		parameters: []parameterDefinition{
@@ -1053,6 +1101,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"newContact": {
+		category:   Contacts,
 		identifier: "addnewcontact",
 		parameters: []parameterDefinition{
 			{
@@ -1112,6 +1161,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"removeContactDetail": {
+		category:   Contacts,
 		identifier: "setters.contacts",
 		parameters: []parameterDefinition{
 			{
@@ -1159,6 +1209,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"listen": {
+		category:   Speech,
 		identifier: "dictatetext",
 		check: func(args []actionArgument, _ *actionDefinition) {
 			if len(args) != 2 {
@@ -1184,6 +1235,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"prependToFile": {
+		category:   Files,
 		identifier: "file.append",
 		parameters: []parameterDefinition{
 			{
@@ -1208,6 +1260,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"appendToFile": {
+		category:   Files,
 		identifier: "file.append",
 		parameters: []parameterDefinition{
 			{
@@ -1232,6 +1285,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"labelFile": {
+		category:   Files,
 		identifier: "file.label",
 		parameters: []parameterDefinition{
 			{
@@ -1259,6 +1313,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"filterFiles": {
+		category:   Files,
 		identifier: "filter.files",
 		parameters: []parameterDefinition{
 			{
@@ -1295,6 +1350,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"optimizePDF": {
+		category:   Documents,
 		identifier: "compresspdf",
 		parameters: []parameterDefinition{
 			{
@@ -1305,6 +1361,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getPDFText": {
+		category:   Documents,
 		identifier: "gettextfrompdf",
 		parameters: []parameterDefinition{
 			{
@@ -1362,6 +1419,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"makePDF": {
+		category: Documents,
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1386,6 +1444,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"makeSpokenAudio": {
+		category:   Speech,
 		identifier: "makespokenaudiofromtext",
 		parameters: []parameterDefinition{
 			{
@@ -1408,6 +1467,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"createFolder": { // TODO: Writing to locations other than the Shortcuts folder.
+		category:   Files,
 		identifier: "file.createfolder",
 		parameters: []parameterDefinition{
 			{
@@ -1435,6 +1495,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"containsText": {
+		category:   TextEditing,
 		identifier: "text.match",
 		parameters: []parameterDefinition{
 			{
@@ -1471,6 +1532,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"matchText": {
+		category:   TextEditing,
 		identifier: "text.match",
 		parameters: []parameterDefinition{
 			{
@@ -1493,6 +1555,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getMatchGroups": {
+		category:   TextEditing,
 		identifier: "text.match.getgroup",
 		parameters: []parameterDefinition{
 			{
@@ -1512,6 +1575,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getMatchGroup": {
+		category:   TextEditing,
 		identifier: "text.match.getgroup",
 		parameters: []parameterDefinition{
 			{
@@ -1536,6 +1600,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getFileFromFolder": {
+		category:   Files,
 		identifier: "documentpicker.open",
 		parameters: []parameterDefinition{
 			{
@@ -1558,6 +1623,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getFile": {
+		category:   Files,
 		identifier: "documentpicker.open",
 		parameters: []parameterDefinition{
 			{
@@ -1575,6 +1641,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"markup": {
+		category:   Documents,
 		identifier: "avairyeditphoto",
 		parameters: []parameterDefinition{
 			{
@@ -1585,6 +1652,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"rename": {
+		category:   Files,
 		identifier: "file.rename",
 		parameters: []parameterDefinition{
 			{
@@ -1600,6 +1668,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"reveal": {
+		category:   Files,
 		identifier: "file.reveal",
 		parameters: []parameterDefinition{
 			{
@@ -1610,6 +1679,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"define": {
+		category:   Documents,
 		identifier: "showdefinition",
 		parameters: []parameterDefinition{
 			{
@@ -1620,6 +1690,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"makeQRCode": {
+		category:   QRCodes,
 		identifier: "generatebarcode",
 		parameters: []parameterDefinition{
 			{
@@ -1638,6 +1709,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openNote": {
+		category:   Notes,
 		identifier: "shownote",
 		parameters: []parameterDefinition{
 			{
@@ -1648,6 +1720,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"splitPDF": {
+		category: Documents,
 		parameters: []parameterDefinition{
 			{
 				name:      "pdf",
@@ -1657,6 +1730,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"makeHTML": {
+		category:   Documents,
 		identifier: "gethtmlfromrichtext",
 		parameters: []parameterDefinition{
 			{
@@ -1674,6 +1748,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"makeMarkdown": {
+		category:   Documents,
 		identifier: "getmarkdownfromrichtext",
 		parameters: []parameterDefinition{
 			{
@@ -1684,6 +1759,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getRichTextFromHTML": {
+		category: TextEditing,
 		parameters: []parameterDefinition{
 			{
 				name:      "html",
@@ -1693,6 +1769,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getRichTextFromMarkdown": {
+		category: TextEditing,
 		parameters: []parameterDefinition{
 			{
 				name:      "markdown",
@@ -1702,6 +1779,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"print": {
+		category: Printing,
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1711,6 +1789,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"selectFile": {
+		category:   Files,
 		identifier: "file.select",
 		parameters: []parameterDefinition{
 			{
@@ -1723,6 +1802,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"selectFolder": {
+		category:   Files,
 		identifier: "file.select",
 		parameters: []parameterDefinition{
 			{
@@ -1744,6 +1824,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getFileLink": {
+		category:   Files,
 		identifier: "file.getlink",
 		parameters: []parameterDefinition{
 			{
@@ -1754,6 +1835,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getParentDirectory": {
+		category: Files,
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -1763,6 +1845,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getEmojiName": {
+		category:   Scripting,
 		identifier: "getnameofemoji",
 		parameters: []parameterDefinition{
 			{
@@ -1773,6 +1856,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getFileDetail": {
+		category:   Files,
 		identifier: "properties.files",
 		parameters: []parameterDefinition{
 			{
@@ -1788,6 +1872,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"deleteFiles": {
+		category:   Files,
 		identifier: "file.delete",
 		parameters: []parameterDefinition{
 			{
@@ -1805,6 +1890,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getTextFromImage": {
+		category:   Images,
 		identifier: "extracttextfromimage",
 		parameters: []parameterDefinition{
 			{
@@ -1815,6 +1901,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"connectToServer": {
+		category:   Network,
 		identifier: "connecttoservers",
 		parameters: []parameterDefinition{
 			{
@@ -1825,6 +1912,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"appendNote": {
+		category: Notes,
 		parameters: []parameterDefinition{
 			{
 				name:      "note",
@@ -1839,6 +1927,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addToBooks": {
+		category:      Books,
 		appIdentifier: "com.apple.iBooksX",
 		identifier:    "openin",
 		parameters: []parameterDefinition{
@@ -1850,6 +1939,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"saveFile": {
+		category:   Files,
 		identifier: "documentpicker.save",
 		parameters: []parameterDefinition{
 			{
@@ -1881,6 +1971,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"saveFilePrompt": {
+		category:   Files,
 		identifier: "documentpicker.save",
 		parameters: []parameterDefinition{
 			{
@@ -1897,8 +1988,12 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"getSelectedFiles": {identifier: "finder.getselectedfiles"},
+	"getSelectedFiles": {
+		category:   Files,
+		identifier: "finder.getselectedfiles",
+	},
 	"extractArchive": {
+		category:   Archives,
 		identifier: "unzip",
 		parameters: []parameterDefinition{
 			{
@@ -1909,6 +2004,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"makeArchive": {
+		category:   Archives,
 		identifier: "makezip",
 		parameters: []parameterDefinition{
 			{
@@ -1933,6 +2029,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"quicklook": {
+		category:   Previewing,
 		identifier: "previewdocument",
 		parameters: []parameterDefinition{
 			{
@@ -1943,6 +2040,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"translateFrom": {
+		category:   Translation,
 		identifier: "text.translate",
 		parameters: []parameterDefinition{
 			{
@@ -1967,6 +2065,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"translate": {
+		category:   Translation,
 		identifier: "text.translate",
 		parameters: []parameterDefinition{
 			{
@@ -2001,6 +2100,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"detectLanguage": {
+		category: Translation,
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -2010,6 +2110,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"replaceText": {
+		category:   TextEditing,
 		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
@@ -2030,6 +2131,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"iReplaceText": {
+		category:   TextEditing,
 		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
@@ -2050,6 +2152,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"regReplaceText": {
+		category:   TextEditing,
 		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
@@ -2070,6 +2173,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"iRegReplaceText": {
+		category:   TextEditing,
 		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
@@ -2090,6 +2194,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"uppercase": {
+		category:   TextEditing,
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
@@ -2102,6 +2207,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"lowercase": {
+		category:   TextEditing,
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
@@ -2114,6 +2220,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"titleCase": {
+		category:   TextEditing,
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
@@ -2126,6 +2233,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"capitalize": {
+		category:   TextEditing,
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
@@ -2138,6 +2246,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"capitalizeAll": {
+		category:   TextEditing,
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
@@ -2150,6 +2259,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"alternateCase": {
+		category:   TextEditing,
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
@@ -2162,6 +2272,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"correctSpelling": {
+		category: TextEditing,
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -2180,6 +2291,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"splitText": {
+		category:   TextEditing,
 		identifier: "text.split",
 		parameters: []parameterDefinition{
 			{
@@ -2195,6 +2307,7 @@ var actions = map[string]*actionDefinition{
 		make: textParts,
 	},
 	"joinText": {
+		category:   TextEditing,
 		identifier: "text.combine",
 		parameters: []parameterDefinition{
 			{
@@ -2210,6 +2323,7 @@ var actions = map[string]*actionDefinition{
 		make: textParts,
 	},
 	"makeDiskImage": {
+		category: Disk,
 		parameters: []parameterDefinition{
 			{
 				name:      "name",
@@ -2242,6 +2356,7 @@ var actions = map[string]*actionDefinition{
 		minVersion: 15,
 	},
 	"makeSizedDiskImage": {
+		category:   Disk,
 		identifier: "makediskimage",
 		parameters: []parameterDefinition{
 			{
@@ -2321,6 +2436,7 @@ var actions = map[string]*actionDefinition{
 		minVersion: 15,
 	},
 	"openFile": {
+		category:   Files,
 		identifier: "openin",
 		parameters: []parameterDefinition{
 			{
@@ -2338,6 +2454,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"transcribeText": {
+		category:      Speech,
 		appIdentifier: "com.apple.ShortcutsActions",
 		identifier:    "TranscribeAudioAction",
 		parameters: []parameterDefinition{
@@ -2350,6 +2467,7 @@ var actions = map[string]*actionDefinition{
 		minVersion: 17,
 	},
 	"getCurrentLocation": {
+		category:   Location,
 		identifier: "location",
 		make: func(_ []actionArgument) []plistData {
 			return []plistData{
@@ -2368,6 +2486,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getAddresses": {
+		category:   Maps,
 		identifier: "detect.address",
 		parameters: []parameterDefinition{
 			{
@@ -2378,6 +2497,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getCurrentWeather": {
+		category:   Weather,
 		identifier: "weather.currentconditions",
 		parameters: []parameterDefinition{
 			{
@@ -2390,6 +2510,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openInMaps": {
+		category:   Maps,
 		identifier: "searchmaps",
 		parameters: []parameterDefinition{
 			{
@@ -2400,6 +2521,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"streetAddress": {
+		category:   Location,
 		identifier: "address",
 		parameters: []parameterDefinition{
 			{
@@ -2435,6 +2557,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getWeatherDetail": {
+		category:   Weather,
 		identifier: "properties.weather.conditions",
 		parameters: []parameterDefinition{
 			{
@@ -2451,6 +2574,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getWeatherForecast": {
+		category:   Weather,
 		identifier: "weather.forecast",
 		parameters: []parameterDefinition{
 			{
@@ -2471,6 +2595,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getLocationDetail": {
+		category:   Location,
 		identifier: "properties.locations",
 		parameters: []parameterDefinition{
 			{
@@ -2487,7 +2612,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getMapsLink": {
-		identifier: "",
+		category: Maps,
 		parameters: []parameterDefinition{
 			{
 				name:      "location",
@@ -2497,6 +2622,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getHalfwayPoint": {
+		category: Maps,
 		parameters: []parameterDefinition{
 			{
 				name:      "firstLocation",
@@ -2511,6 +2637,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"removeBackground": {
+		category:   Images,
 		identifier: "image.removebackground",
 		parameters: []parameterDefinition{
 			{
@@ -2527,10 +2654,14 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"clearUpNext":    {},
-	"getCurrentSong": {},
-	"getLastImport":  {identifier: "getlatestphotoimport"},
+	"clearUpNext":    {category: Music},
+	"getCurrentSong": {category: Music},
+	"getLastImport": {
+		category:   Photos,
+		identifier: "getlatestphotoimport",
+	},
 	"getLatestBursts": {
+		category:   Photos,
 		identifier: "getlatestbursts",
 		parameters: []parameterDefinition{
 			{
@@ -2541,6 +2672,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getLatestLivePhotos": {
+		category:   Photos,
 		identifier: "getlatestlivephotos",
 		parameters: []parameterDefinition{
 			{
@@ -2551,6 +2683,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getLatestScreenshots": {
+		category:   Photos,
 		identifier: "getlastscreenshot",
 		parameters: []parameterDefinition{
 			{
@@ -2561,6 +2694,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getLatestVideos": {
+		category:   Photos,
 		identifier: "getlastvideo",
 		parameters: []parameterDefinition{
 			{
@@ -2571,6 +2705,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getLatestPhotos": {
+		category:   Photos,
 		identifier: "getlastphoto",
 		parameters: []parameterDefinition{
 			{
@@ -2588,6 +2723,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getImages": {
+		category:   Images,
 		identifier: "detect.images",
 		parameters: []parameterDefinition{
 			{
@@ -2598,6 +2734,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"takePhoto": {
+		category: Camera,
 		parameters: []parameterDefinition{
 			{
 				name:         "count",
@@ -2624,6 +2761,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"trimVideo": {
+		category: Video,
 		parameters: []parameterDefinition{
 			{
 				name:      "video",
@@ -2633,6 +2771,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"takeVideo": {
+		category: Video,
 		parameters: []parameterDefinition{
 			{
 				name:         "camera",
@@ -2658,6 +2797,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setVolume": {
+		category: Audio,
 		parameters: []parameterDefinition{
 			{
 				name:      "volume",
@@ -2667,6 +2807,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addToMusic": {
+		category:   Music,
 		identifier: "addtoplaylist",
 		parameters: []parameterDefinition{
 			{
@@ -2677,6 +2818,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addToPlaylist": {
+		category: Music,
 		parameters: []parameterDefinition{
 			{
 				name:      "playlistName",
@@ -2691,6 +2833,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"playNext": {
+		category:   Music,
 		identifier: "addmusictoupnext",
 		parameters: []parameterDefinition{
 			{
@@ -2710,6 +2853,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"playLater": {
+		category:   Music,
 		identifier: "addmusictoupnext",
 		parameters: []parameterDefinition{
 			{
@@ -2729,6 +2873,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"createPlaylist": {
+		category: Music,
 		parameters: []parameterDefinition{
 			{
 				name:      "title",
@@ -2756,6 +2901,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addToGIF": {
+		category:   GIFs,
 		identifier: "addframetogif",
 		parameters: []parameterDefinition{
 			{
@@ -2797,6 +2943,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"convertToJPEG": {
+		category:   Images,
 		identifier: "image.convert",
 		parameters: []parameterDefinition{
 			{
@@ -2829,6 +2976,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"combineImages": {
+		category:   Images,
 		identifier: "image.combine",
 		parameters: []parameterDefinition{
 			{
@@ -2862,6 +3010,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"rotateImage": {
+		category:   Images,
 		identifier: "image.rotate",
 		parameters: []parameterDefinition{
 			{
@@ -2877,6 +3026,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"selectPhotos": {
+		category:   Photos,
 		identifier: "selectphoto",
 		parameters: []parameterDefinition{
 			{
@@ -2889,6 +3039,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"createAlbum": {
+		category:   Photos,
 		identifier: "photos.createalbum",
 		parameters: []parameterDefinition{
 			{
@@ -2905,6 +3056,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"cropImage": {
+		category:   Images,
 		identifier: "image.crop",
 		parameters: []parameterDefinition{
 			{
@@ -2937,6 +3089,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"deletePhotos": {
+		category: Photos,
 		parameters: []parameterDefinition{
 			{
 				name:      "photos",
@@ -2946,6 +3099,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"removeFromAlbum": {
+		category:   Photos,
 		identifier: "removefromalbum",
 		parameters: []parameterDefinition{
 			{
@@ -2961,6 +3115,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"selectMusic": {
+		category:   Music,
 		identifier: "exportsong",
 		parameters: []parameterDefinition{
 			{
@@ -2973,6 +3128,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"skipBack": {
+		category: Music,
 		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -2984,9 +3140,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"skipFwd": {
+		category:   Music,
 		identifier: "skipforward",
 	},
 	"searchAppStore": {
+		category: Stores,
 		parameters: []parameterDefinition{
 			{
 				name:      "query",
@@ -2996,6 +3154,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"searchPodcasts": {
+		category: Podcasts,
 		parameters: []parameterDefinition{
 			{
 				name:      "query",
@@ -3005,9 +3164,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getPodcasts": {
+		category:   Podcasts,
 		identifier: "getpodcastsfromlibrary",
 	},
 	"playPodcast": {
+		category: Podcasts,
 		parameters: []parameterDefinition{
 			{
 				name:      "podcast",
@@ -3017,6 +3178,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getPodcastDetail": {
+		category:   Podcasts,
 		identifier: "properties.podcastshow",
 		parameters: []parameterDefinition{
 			{
@@ -3033,6 +3195,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"makeVideoFromGIF": {
+		category: GIFs,
 		parameters: []parameterDefinition{
 			{
 				name:      "gif",
@@ -3049,6 +3212,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"flipImage": {
+		category:   Images,
 		identifier: "image.flip",
 		parameters: []parameterDefinition{
 			{
@@ -3065,6 +3229,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"recordAudio": {
+		category: Audio,
 		parameters: []parameterDefinition{
 			{
 				name:         "quality",
@@ -3085,6 +3250,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"convertImage": {
+		category:   Images,
 		identifier: "image.convert",
 		parameters: []parameterDefinition{
 			{
@@ -3108,6 +3274,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"encodeVideo": {
+		category:   Video,
 		identifier: "encodemedia",
 		parameters: []parameterDefinition{
 			{
@@ -3141,6 +3308,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"encodeAudio": {
+		category:   Audio,
 		identifier: "encodemedia",
 		parameters: []parameterDefinition{
 			{
@@ -3177,6 +3345,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setMetadata": {
+		category:   Media,
 		identifier: "encodemedia",
 		parameters: []parameterDefinition{
 			{
@@ -3232,6 +3401,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"stripMediaMetadata": {
+		category:   Media,
 		identifier: "encodemedia",
 		parameters: []parameterDefinition{
 			{
@@ -3251,6 +3421,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"stripImageMetadata": {
+		category:   Images,
 		identifier: "image.convert",
 		parameters: []parameterDefinition{
 			{
@@ -3275,6 +3446,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"savePhoto": {
+		category:   Photos,
 		identifier: "savetocameraroll",
 		parameters: []parameterDefinition{
 			{
@@ -3292,6 +3464,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"play": {
+		category:   Music,
 		identifier: "pausemusic",
 		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
@@ -3304,6 +3477,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"pause": {
+		category:   Music,
 		identifier: "pausemusic",
 		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
@@ -3316,6 +3490,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"togglePlayPause": {
+		category:   Music,
 		identifier: "pausemusic",
 		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
@@ -3328,6 +3503,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"startShazam": {
+		category:   Music,
 		identifier: "shazamMedia",
 		parameters: []parameterDefinition{
 			{
@@ -3347,6 +3523,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"showIniTunes": {
+		category:   Stores,
 		identifier: "showinstore",
 		parameters: []parameterDefinition{
 			{
@@ -3357,6 +3534,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"takeScreenshot": {
+		category: Device,
 		parameters: []parameterDefinition{
 			{
 				name:         "mainMonitorOnly",
@@ -3378,6 +3556,7 @@ var actions = map[string]*actionDefinition{
 		mac: true,
 	},
 	"takeInteractiveScreenshot": {
+		category:   Device,
 		identifier: "takescreenshot",
 		parameters: []parameterDefinition{
 			{
@@ -3401,10 +3580,12 @@ var actions = map[string]*actionDefinition{
 		mac: true,
 	},
 	"shutdown": {
+		category:   Device,
 		identifier: "reboot",
 		minVersion: 17,
 	},
 	"reboot": {
+		category:   Device,
 		minVersion: 17,
 		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
@@ -3417,21 +3598,26 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"sleep": {
+		category:   Device,
 		minVersion: 17,
 		mac:        true,
 	},
 	"displaySleep": {
+		category:   Device,
 		minVersion: 17,
 		mac:        true,
 	},
 	"logout": {
+		category:   Device,
 		minVersion: 17,
 		mac:        true,
 	},
 	"lockScreen": {
+		category:   Device,
 		minVersion: 17,
 	},
 	"number": {
+		category: Numbers,
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
@@ -3441,6 +3627,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getObjectOfClass": {
+		category:   Scripting,
 		identifier: "getclassaction",
 		parameters: []parameterDefinition{
 			{
@@ -3455,8 +3642,9 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"getOnScreenContent": {},
+	"getOnScreenContent": {category: Device},
 	"fileSize": {
+		category:   Files,
 		identifier: "format.filesize",
 		parameters: []parameterDefinition{
 			{
@@ -3482,6 +3670,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getDeviceDetail": {
+		category:   Device,
 		identifier: "getdevicedetails",
 		parameters: []parameterDefinition{
 			{
@@ -3493,6 +3682,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setBrightness": {
+		category: Device,
 		parameters: []parameterDefinition{
 			{
 				name:      "brightness",
@@ -3502,6 +3692,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getName": {
+		category:   Scripting,
 		identifier: "getitemname",
 		parameters: []parameterDefinition{
 			{
@@ -3512,6 +3703,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setName": {
+		category:   Scripting,
 		identifier: "setitemname",
 		parameters: []parameterDefinition{
 			{
@@ -3534,6 +3726,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"count": {
+		category: Scripting,
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -3545,6 +3738,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"countChars": {
+		category:   Scripting,
 		identifier: "count",
 		parameters: []parameterDefinition{
 			{
@@ -3557,6 +3751,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"countWords": {
+		category:   Scripting,
 		identifier: "count",
 		parameters: []parameterDefinition{
 			{
@@ -3569,6 +3764,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"countSentences": {
+		category:   Scripting,
 		identifier: "count",
 		parameters: []parameterDefinition{
 			{
@@ -3581,6 +3777,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"countLines": {
+		category:   Scripting,
 		identifier: "count",
 		parameters: []parameterDefinition{
 			{
@@ -3593,6 +3790,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"lightMode": {
+		category:   Device,
 		identifier: "appearance",
 		make: func(_ []actionArgument) []plistData {
 			return []plistData{
@@ -3610,6 +3808,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"darkMode": {
+		category:   Device,
 		identifier: "appearance",
 		make: func(_ []actionArgument) []plistData {
 			return []plistData{
@@ -3626,8 +3825,11 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"getBatteryLevel": {},
+	"getBatteryLevel": {
+		category: Device,
+	},
 	"isCharging": {
+		category:   Device,
 		identifier: "getbatterylevel",
 		minVersion: 16.2,
 		make: func(_ []actionArgument) []plistData {
@@ -3641,6 +3843,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"connectedToCharger": {
+		category:   Device,
 		identifier: "getbatterylevel",
 		minVersion: 16.2,
 		make: func(_ []actionArgument) []plistData {
@@ -3654,9 +3857,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getShortcuts": {
+		category:   Shortcuts,
 		identifier: "getmyworkflows",
 	},
 	"url": {
+		category: URLs,
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -3684,6 +3889,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addToReadingList": {
+		category:   Safari,
 		identifier: "readinglist",
 		parameters: []parameterDefinition{
 			{
@@ -3712,6 +3918,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"hash": {
+		category: Crypto,
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -3729,6 +3936,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"formatNumber": {
+		category:   Numbers,
 		identifier: "format.number",
 		parameters: []parameterDefinition{
 			{
@@ -3746,6 +3954,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"randomNumber": {
+		category:   Numbers,
 		identifier: "number.random",
 		parameters: []parameterDefinition{
 			{
@@ -3761,6 +3970,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"base64Encode": {
+		category:   Crypto,
 		identifier: "base64encode",
 		parameters: []parameterDefinition{
 			{
@@ -3780,6 +3990,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"base64Decode": {
+		category:   Crypto,
 		identifier: "base64encode",
 		parameters: []parameterDefinition{
 			{
@@ -3799,6 +4010,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"urlEncode": {
+		category:   URLs,
 		identifier: "urlencode",
 		parameters: []parameterDefinition{
 			{
@@ -3818,6 +4030,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"urlDecode": {
+		category:   URLs,
 		identifier: "urlencode",
 		parameters: []parameterDefinition{
 			{
@@ -3837,6 +4050,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"show": {
+		category:   Previewing,
 		identifier: "showresult",
 		parameters: []parameterDefinition{
 			{
@@ -3846,8 +4060,9 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"waitToReturn": {},
+	"waitToReturn": {category: ControlFlow},
 	"notification": {
+		category:   Notifications,
 		identifier: "notification",
 		parameters: []parameterDefinition{
 			{
@@ -3870,9 +4085,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"stop": {
+		category:   ControlFlow,
 		identifier: "exit",
 	},
 	"comment": {
+		category: Noonce,
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -3881,8 +4098,9 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"nothing": {},
+	"nothing": {category: Noonce},
 	"wait": {
+		category:   ControlFlow,
 		identifier: "delay",
 		parameters: []parameterDefinition{
 			{
@@ -3893,6 +4111,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"alert": {
+		category: Dialogs,
 		parameters: []parameterDefinition{
 			{
 				name:      "alert",
@@ -3917,6 +4136,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"confirm": {
+		category:   Dialogs,
 		identifier: "alert",
 		parameters: []parameterDefinition{
 			{
@@ -3942,6 +4162,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"prompt": {
+		category:   Dialogs,
 		identifier: "ask",
 		parameters: []parameterDefinition{
 			{
@@ -3985,6 +4206,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"chooseFromList": {
+		category: Lists,
 		parameters: []parameterDefinition{
 			{
 				name:      "list",
@@ -4014,6 +4236,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"typeOf": {
+		category:   Scripting,
 		identifier: "getitemtype",
 		parameters: []parameterDefinition{
 			{
@@ -4024,6 +4247,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getKeys": {
+		category:   Dictionaries,
 		identifier: "getvalueforkey",
 		parameters: []parameterDefinition{
 			{
@@ -4043,6 +4267,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getValues": {
+		category:   Dictionaries,
 		identifier: "getvalueforkey",
 		parameters: []parameterDefinition{
 			{
@@ -4062,6 +4287,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getValue": {
+		category:   Dictionaries,
 		identifier: "getvalueforkey",
 		parameters: []parameterDefinition{
 			{
@@ -4086,6 +4312,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setValue": {
+		category:   Dictionaries,
 		identifier: "setvalueforkey",
 		parameters: []parameterDefinition{
 			{
@@ -4106,6 +4333,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openApp": {
+		category: Apps,
 		parameters: []parameterDefinition{
 			{
 				name:      "appID",
@@ -4136,6 +4364,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"hideApp": {
+		category:   Apps,
 		identifier: "hide.app",
 		parameters: []parameterDefinition{
 			{
@@ -4165,6 +4394,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"hideAllApps": {
+		category:   Apps,
 		identifier: "hide.app",
 		parameters: []parameterDefinition{
 			{
@@ -4198,6 +4428,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"quitApp": {
+		category:   Apps,
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
 			{
@@ -4227,6 +4458,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"quitAllApps": {
+		category:   Apps,
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
 			{
@@ -4260,6 +4492,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"killApp": {
+		category:   Apps,
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
 			{
@@ -4297,6 +4530,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"killAllApps": {
+		category:   Apps,
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
 			{
@@ -4335,6 +4569,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"splitApps": {
+		category:   Apps,
 		identifier: "splitscreen",
 		parameters: []parameterDefinition{
 			{
@@ -4405,6 +4640,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openShortcut": {
+		category:   Shortcuts,
 		identifier: "openworkflow",
 		parameters: []parameterDefinition{
 			{
@@ -4435,6 +4671,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"runSelf": {
+		category:   Shortcuts,
 		identifier: "runworkflow",
 		parameters: []parameterDefinition{
 			{
@@ -4470,6 +4707,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"run": {
+		category:   Shortcuts,
 		identifier: "runworkflow",
 		parameters: []parameterDefinition{
 			{
@@ -4506,6 +4744,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"list": {
+		category: Lists,
 		parameters: []parameterDefinition{
 			{
 				name:      "listItem",
@@ -4539,6 +4778,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"calculate": {
+		category:   Math,
 		identifier: "math",
 		parameters: []parameterDefinition{
 			{
@@ -4570,6 +4810,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"statistic": {
+		category:   Math,
 		identifier: "statistics",
 		parameters: []parameterDefinition{
 			{
@@ -4585,8 +4826,9 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"dismissSiri": {},
+	"dismissSiri": {category: System},
 	"isOnline": {
+		category:   Network,
 		identifier: "getipaddress",
 		make: func(_ []actionArgument) []plistData {
 			return []plistData{
@@ -4604,6 +4846,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getLocalIP": {
+		category:   Network,
 		identifier: "getipaddress",
 		parameters: []parameterDefinition{
 			{
@@ -4626,6 +4869,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getExternalIP": {
+		category:   Network,
 		identifier: "getipaddress",
 		parameters: []parameterDefinition{
 			{
@@ -4648,6 +4892,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getFirstItem": {
+		category:   Lists,
 		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
@@ -4667,6 +4912,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getLastItem": {
+		category:   Lists,
 		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
@@ -4686,6 +4932,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getRandomItem": {
+		category:   Lists,
 		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
@@ -4705,6 +4952,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getListItem": {
+		category:   Lists,
 		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
@@ -4729,6 +4977,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getListItems": {
+		category:   Lists,
 		identifier: "getitemfromlist",
 		parameters: []parameterDefinition{
 			{
@@ -4758,6 +5007,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getNumbers": {
+		category:   Numbers,
 		identifier: "detect.number",
 		parameters: []parameterDefinition{
 			{
@@ -4768,6 +5018,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getDictionary": {
+		category:   Dictionaries,
 		identifier: "detect.dictionary",
 		parameters: []parameterDefinition{
 			{
@@ -4788,6 +5039,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getContacts": {
+		category:   Contacts,
 		identifier: "detect.contacts",
 		parameters: []parameterDefinition{
 			{
@@ -4798,6 +5050,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getDates": {
+		category:   Dates,
 		identifier: "detect.date",
 		parameters: []parameterDefinition{
 			{
@@ -4808,6 +5061,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getEmails": {
+		category:   Email,
 		identifier: "detect.emailaddress",
 		parameters: []parameterDefinition{
 			{
@@ -4818,6 +5072,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getPhoneNumbers": {
+		category:   Phone,
 		identifier: "detect.phonenumber",
 		parameters: []parameterDefinition{
 			{
@@ -4828,6 +5083,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getURLs": {
+		category:   URLs,
 		identifier: "detect.link",
 		parameters: []parameterDefinition{
 			{
@@ -4838,10 +5094,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getAllWallpapers": {
+		category:   System,
 		identifier: "posters.get",
 		minVersion: 16.2,
 	},
 	"getWallpaper": {
+		category:   System,
 		identifier: "posters.get",
 		minVersion: 16.2,
 		make: func(_ []actionArgument) []plistData {
@@ -4855,6 +5113,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setWallpaper": {
+		category:   System,
 		identifier: "wallpaper.set",
 		parameters: []parameterDefinition{
 			{
@@ -4864,8 +5123,12 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"startScreensaver": {mac: true},
+	"startScreensaver": {
+		category: System,
+		mac:      true,
+	},
 	"contentGraph": {
+		category:   Previewing,
 		identifier: "viewresult",
 		parameters: []parameterDefinition{
 			{
@@ -4876,6 +5139,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openXCallbackURL": {
+		category:   XCallback,
 		identifier: "openxcallbackurl",
 		parameters: []parameterDefinition{
 			{
@@ -4887,6 +5151,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openCustomXCallbackURL": {
+		category:   XCallback,
 		identifier: "openxcallbackurl",
 		parameters: []parameterDefinition{
 			{
@@ -4938,6 +5203,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"output": {
+		category: ControlFlow,
 		parameters: []parameterDefinition{
 			{
 				name:      "output",
@@ -4947,6 +5213,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"mustOutput": {
+		category:   ControlFlow,
 		identifier: "output",
 		parameters: []parameterDefinition{
 			{
@@ -4971,6 +5238,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"outputOrClipboard": {
+		category:   ControlFlow,
 		identifier: "output",
 		parameters: []parameterDefinition{
 			{
@@ -4990,6 +5258,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"DNDOn": {
+		category:   Settings,
 		identifier: "dnd.set",
 		make: func(_ []actionArgument) []plistData {
 			return []plistData{
@@ -5003,6 +5272,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"DNDOff": {
+		category:   Settings,
 		identifier: "dnd.set",
 		make: func(_ []actionArgument) []plistData {
 			return []plistData{
@@ -5016,6 +5286,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setBackgroundSound": {
+		category:      Settings,
 		appIdentifier: "com.apple.AccessibilityUtilities",
 		identifier:    "AXSettingsShortcuts.AXSetBackgroundSoundIntent",
 		parameters: []parameterDefinition{
@@ -5030,6 +5301,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setBackgroundSoundsVolume": {
+		category:      Settings,
 		appIdentifier: "com.apple.AccessibilityUtilities",
 		identifier:    "AXSettingsShortcuts.AXSetBackgroundSoundVolumeIntent",
 		parameters: []parameterDefinition{
@@ -5041,6 +5313,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"playSound": {
+		category: Audio,
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -5050,6 +5323,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"round": {
+		category: Math,
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
@@ -5065,6 +5339,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"ceil": {
+		category:   Math,
 		identifier: "round",
 		parameters: []parameterDefinition{
 			{
@@ -5081,6 +5356,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"floor": {
+		category:   Math,
 		identifier: "round",
 		parameters: []parameterDefinition{
 			{
@@ -5097,6 +5373,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"runShellScript": {
+		category: Scripts,
 		parameters: []parameterDefinition{
 			{
 				name:      "script",
@@ -5123,6 +5400,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"makeShortcut": {
+		category:      Shortcuts,
 		appIdentifier: "com.apple.shortcuts",
 		identifier:    "CreateWorkflowAction",
 		parameters: []parameterDefinition{
@@ -5142,6 +5420,7 @@ var actions = map[string]*actionDefinition{
 		minVersion: 16.4,
 	},
 	"searchShortcuts": {
+		category:      Shortcuts,
 		appIdentifier: "com.apple.shortcuts",
 		identifier:    "SearchShortcutsAction",
 		parameters: []parameterDefinition{
@@ -5154,6 +5433,7 @@ var actions = map[string]*actionDefinition{
 		minVersion: 16.4,
 	},
 	"airdrop": {
+		category:   Sharing,
 		identifier: "airdropdocument",
 		parameters: []parameterDefinition{
 			{
@@ -5164,6 +5444,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"share": {
+		category: Sharing,
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -5173,6 +5454,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"copyToClipboard": {
+		category:   Clipboard,
 		identifier: "setclipboard",
 		parameters: []parameterDefinition{
 			{
@@ -5195,8 +5477,11 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"getClipboard": {},
+	"getClipboard": {
+		category: Clipboard,
+	},
 	"getURLHeaders": {
+		category:   URLs,
 		identifier: "url.getheaders",
 		parameters: []parameterDefinition{
 			{
@@ -5207,6 +5492,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openURL": {
+		category: URLs,
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -5225,6 +5511,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"runJavaScriptOnWebpage": {
+		category: Scripts,
 		parameters: []parameterDefinition{
 			{
 				name:      "javascript",
@@ -5234,6 +5521,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"searchWeb": {
+		category: Web,
 		parameters: []parameterDefinition{
 			{
 				name:      "engine",
@@ -5249,6 +5537,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"showWebpage": {
+		category: Safari,
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -5264,6 +5553,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getRSSFeeds": {
+		category:   RSS,
 		identifier: "rss.extract",
 		parameters: []parameterDefinition{
 			{
@@ -5274,6 +5564,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getRSS": {
+		category:   RSS,
 		identifier: "rss",
 		parameters: []parameterDefinition{
 			{
@@ -5289,6 +5580,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getWebPageDetail": {
+		category:   Safari,
 		identifier: "properties.safariwebpage",
 		parameters: []parameterDefinition{
 			{
@@ -5305,6 +5597,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getArticleDetail": {
+		category:   Articles,
 		identifier: "properties.articles",
 		parameters: []parameterDefinition{
 			{
@@ -5320,9 +5613,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getCurrentURL": {
+		category:   URLs,
 		identifier: "safari.geturl",
 	},
 	"getWebpageContents": {
+		category:   Safari,
 		identifier: "getwebpagecontents",
 		parameters: []parameterDefinition{
 			{
@@ -5333,6 +5628,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"searchGiphy": {
+		category:   Giphy,
 		identifier: "giphy",
 		parameters: []parameterDefinition{
 			{
@@ -5343,6 +5639,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getGifs": {
+		category:   Giphy,
 		identifier: "giphy",
 		parameters: []parameterDefinition{
 			{
@@ -5369,6 +5666,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getArticle": {
+		category:   Articles,
 		identifier: "getarticle",
 		parameters: []parameterDefinition{
 			{
@@ -5379,6 +5677,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"expandURL": {
+		category:   URLs,
 		identifier: "url.expand",
 		parameters: []parameterDefinition{
 			{
@@ -5389,6 +5688,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getURLDetail": {
+		category:   URLs,
 		identifier: "geturlcomponent",
 		parameters: []parameterDefinition{
 			{
@@ -5405,6 +5705,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"downloadURL": {
+		category: HTTP,
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -5429,6 +5730,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"formRequest": {
+		category:   HTTP,
 		identifier: "downloadurl",
 		parameters: httpParams,
 		make: func(args []actionArgument) []plistData {
@@ -5436,6 +5738,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"jsonRequest": {
+		category:   HTTP,
 		identifier: "downloadurl",
 		parameters: httpParams,
 		make: func(args []actionArgument) []plistData {
@@ -5443,6 +5746,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"fileRequest": {
+		category:   HTTP,
 		identifier: "downloadurl",
 		parameters: httpParams,
 		make: func(args []actionArgument) []plistData {
@@ -5450,6 +5754,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"runAppleScript": {
+		category: Scripts,
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -5465,6 +5770,7 @@ var actions = map[string]*actionDefinition{
 		mac: true,
 	},
 	"runJSAutomation": {
+		category:   Scripts,
 		identifier: "runjavascriptforautomation",
 		parameters: []parameterDefinition{
 			{
@@ -5481,6 +5787,7 @@ var actions = map[string]*actionDefinition{
 		mac: true,
 	},
 	"getWindows": {
+		category:   Windows,
 		identifier: "filter.windows",
 		parameters: []parameterDefinition{
 			{
@@ -5542,6 +5849,7 @@ var actions = map[string]*actionDefinition{
 		mac: true,
 	},
 	"moveWindow": {
+		category: Windows,
 		parameters: []parameterDefinition{
 			{
 				name:      "window",
@@ -5565,6 +5873,7 @@ var actions = map[string]*actionDefinition{
 		mac: true,
 	},
 	"resizeWindow": {
+		category: Windows,
 		parameters: []parameterDefinition{
 			{
 				name:      "window",
@@ -5583,6 +5892,7 @@ var actions = map[string]*actionDefinition{
 		mac: true,
 	},
 	"convertMeasurement": {
+		category:   Measurements,
 		identifier: "measurement.convert",
 		parameters: []parameterDefinition{
 			{
@@ -5629,6 +5939,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"measurement": {
+		category:   Measurements,
 		identifier: "measurement.create",
 		parameters: []parameterDefinition{
 			{
@@ -5685,6 +5996,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"makeVCard": {
+		category:   BuiltIn,
 		identifier: "gettext",
 		parameters: []parameterDefinition{
 			{
@@ -5750,6 +6062,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"base64File": {
+		category:   BuiltIn,
 		identifier: "gettext",
 		parameters: []parameterDefinition{
 			{
@@ -5782,6 +6095,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"updateContact": {
+		category:   Contacts,
 		identifier: "setters.contacts",
 		parameters: []parameterDefinition{
 			{
@@ -5816,6 +6130,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getShazamDetail": {
+		category:   Music,
 		identifier: "properties.shazam",
 		parameters: []parameterDefinition{
 			{
@@ -5832,6 +6147,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"springBoard": {
+		category:   Apps,
 		identifier: "openapp",
 		make: func(_ []actionArgument) []plistData {
 			return []plistData{
@@ -5865,6 +6181,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getShortcutDetail": {
+		category:   Shortcuts,
 		identifier: "properties.workflow",
 		parameters: []parameterDefinition{
 			{
@@ -5881,11 +6198,13 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getApps": {
+		category:   Apps,
 		identifier: "filter.apps",
 		mac:        true,
 		minVersion: 18,
 	},
 	"setSoundRecognition": {
+		category:      Settings,
 		appIdentifier: "com.apple.AccessibilityUtilities",
 		identifier:    "AXSettingsShortcuts.AXToggleSoundDetectionIntent",
 		parameters: []parameterDefinition{
@@ -5900,6 +6219,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setTextSize": {
+		category:      Settings,
 		appIdentifier: "com.apple.AccessibilityUtilities",
 		identifier:    "AXSettingsShortcuts.AXSetLargeTextIntent",
 		parameters: []parameterDefinition{
