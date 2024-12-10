@@ -159,6 +159,11 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
+		doc: ActionDoc{
+			title:       "Date",
+			description: "Create date value from `date`.",
+			example:     "date(\"October 5, 2022\")",
+		},
 	},
 	"currentDate": {
 		category:   Dates,
@@ -6623,6 +6628,9 @@ var toggleSetActions = map[string]actionDefinition{
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleBackgroundSoundsIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "Background Sounds",
+		},
 	},
 	"MediaBackgroundSounds": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
@@ -6637,11 +6645,17 @@ var toggleSetActions = map[string]actionDefinition{
 			}
 		},
 		category: Settings,
+		doc: ActionDoc{
+			title: "Background Sounds (while media is playing)",
+		},
 	},
 	"AutoAnswerCalls": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleAutoAnswerCallsIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "Auto Answer Calls",
+		},
 	},
 	"Appearance": {
 		identifier: "appearance",
@@ -6661,31 +6675,49 @@ var toggleSetActions = map[string]actionDefinition{
 		identifier: "cellulardata.set",
 		setKey:     "OnValue",
 		category:   Settings,
+		doc: ActionDoc{
+			title: "Cellular Data",
+		},
 	},
 	"NightShift": {
 		identifier: "nightshift.set",
 		setKey:     "OnValue",
 		category:   Settings,
+		doc: ActionDoc{
+			title: "Night Shift",
+		},
 	},
 	"TrueTone": {
 		identifier: "truetone.set",
 		setKey:     "OnValue",
 		category:   Settings,
+		doc: ActionDoc{
+			title: "True Tone",
+		},
 	},
 	"ClassicInvert": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleClassicInvertIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "Classic Invert",
+		},
 	},
 	"ClosedCaptionsSDH": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleCaptionsIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "Closed Captions SDH",
+		},
 	},
 	"ColorFilters": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleColorFiltersIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "Color Filters",
+		},
 	},
 	"Contrast": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
@@ -6696,6 +6728,9 @@ var toggleSetActions = map[string]actionDefinition{
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleLEDFlashIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "LED Flash",
+		},
 	},
 	"LeftRightBalance": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
@@ -6709,46 +6744,73 @@ var toggleSetActions = map[string]actionDefinition{
 			},
 		},
 		category: Settings,
+		doc: ActionDoc{
+			title: "Left Right Balance",
+		},
 	},
 	"LiveCaptions": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleLiveCaptionsIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "Live Captions",
+		},
 	},
 	"MonoAudio": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleMonoAudioIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "Mono Audio",
+		},
 	},
 	"ReduceMotion": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleReduceMotionIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "Reduce Motion",
+		},
 	},
 	"ReduceTransparency": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleTransparencyIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "Reduce Transparency",
+		},
 	},
 	"SmartInvert": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleSmartInvertIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "Smart Invert",
+		},
 	},
 	"SwitchControl": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleSwitchControlIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "Switch Control",
+		},
 	},
 	"VoiceControl": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleVoiceControlIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "Voice Control",
+		},
 	},
 	"WhitePoint": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleWhitePointIntent",
 		category:      Settings,
+		doc: ActionDoc{
+			title: "White Point",
+		},
 	},
 	"Zoom": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
@@ -6759,9 +6821,19 @@ var toggleSetActions = map[string]actionDefinition{
 
 // ToggleSetActions automates the creation of actions which simply toggle and set a state in the same format.
 func makeToggleSetActions() {
+	var emptyDoc ActionDoc
 	for name, def := range toggleSetActions {
+		var docTitle string
+		if def.doc == emptyDoc {
+			def.doc = ActionDoc{title: name}
+			docTitle = name
+		} else {
+			docTitle = def.doc.title
+		}
+
 		var toggleName = fmt.Sprintf("toggle%s", name)
-		def.addParams = func(_ []actionArgument) []plistData {
+		var toggleDef = def
+		toggleDef.addParams = func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "operation",
@@ -6770,28 +6842,36 @@ func makeToggleSetActions() {
 				},
 			}
 		}
-		var toggleDef = def
 		toggleDef.parameters = nil
+
+		toggleDef.doc.title = fmt.Sprintf("Toggle %s", docTitle)
+		toggleDef.doc.description = fmt.Sprintf("Toggles %s on or off depending on its current state.", docTitle)
+
 		actions[toggleName] = &toggleDef
 
 		if name == "Appearance" {
 			continue
 		}
 
+		var setDef = def
 		var setName = fmt.Sprintf("set%s", name)
-		def.addParams = nil
+		setDef.addParams = nil
 		var setKey = "state"
 		if def.setKey != "" {
 			setKey = def.setKey
 		}
-		def.parameters = append([]parameterDefinition{
+		setDef.parameters = append([]parameterDefinition{
 			{
 				name:      "status",
 				validType: Bool,
 				key:       setKey,
 			},
 		}, def.parameters...)
-		var setDef = def
+
+		setDef.doc.title = fmt.Sprintf("Set %s", docTitle)
+		setDef.doc.description = fmt.Sprintf("Set %s on or off.", docTitle)
+		setDef.doc.example = fmt.Sprintf("set%s(true)\nset%s(false)", name, name)
+
 		actions[setName] = &setDef
 	}
 	toggleSetActions = nil
