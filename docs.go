@@ -135,6 +135,7 @@ var categories = map[DocCategory][]DocCategory{
 		Shell,
 		Scripts,
 		Shortcuts,
+		Settings,
 		System,
 		Windows,
 		URLs,
