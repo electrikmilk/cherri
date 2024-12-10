@@ -6273,6 +6273,11 @@ func rawAction() {
 			}
 			return
 		},
+		doc: ActionDoc{
+			title:       "Raw Action",
+			description: "write a raw definition of an action not defined inside of Cherri, in Cherri.",
+			example:     "rawAction(\"is.workflow.actions.gettext\", [\n\t{\n\t\t\"key\": \"WFTextActionText\",\n\t\t\"type\": \"string\",\n\t\t\"value\": \"Hello, world!\"\n\t}\n])",
+		},
 	}
 }
 
