@@ -6622,6 +6622,7 @@ var toggleSetActions = map[string]actionDefinition{
 	"BackgroundSounds": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleBackgroundSoundsIntent",
+		category:      Settings,
 	},
 	"MediaBackgroundSounds": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
@@ -6635,53 +6636,66 @@ var toggleSetActions = map[string]actionDefinition{
 				},
 			}
 		},
+		category: Settings,
 	},
 	"AutoAnswerCalls": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleAutoAnswerCallsIntent",
+		category:      Settings,
 	},
 	"Appearance": {
 		identifier: "appearance",
+		category:   Settings,
 	},
 	"Bluetooth": {
 		identifier: "bluetooth.set",
 		setKey:     "OnValue",
+		category:   Settings,
 	},
 	"Wifi": {
 		identifier: "wifi.set",
 		setKey:     "OnValue",
+		category:   Settings,
 	},
 	"CellularData": {
 		identifier: "cellulardata.set",
 		setKey:     "OnValue",
+		category:   Settings,
 	},
 	"NightShift": {
 		identifier: "nightshift.set",
 		setKey:     "OnValue",
+		category:   Settings,
 	},
 	"TrueTone": {
 		identifier: "truetone.set",
 		setKey:     "OnValue",
+		category:   Settings,
 	},
 	"ClassicInvert": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleClassicInvertIntent",
+		category:      Settings,
 	},
 	"ClosedCaptionsSDH": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleCaptionsIntent",
+		category:      Settings,
 	},
 	"ColorFilters": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleColorFiltersIntent",
+		category:      Settings,
 	},
 	"Contrast": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleContrastIntent",
+		category:      Settings,
 	},
 	"LEDFlash": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleLEDFlashIntent",
+		category:      Settings,
 	},
 	"LeftRightBalance": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
@@ -6694,42 +6708,52 @@ var toggleSetActions = map[string]actionDefinition{
 				optional:  true,
 			},
 		},
+		category: Settings,
 	},
 	"LiveCaptions": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleLiveCaptionsIntent",
+		category:      Settings,
 	},
 	"MonoAudio": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleMonoAudioIntent",
+		category:      Settings,
 	},
 	"ReduceMotion": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleReduceMotionIntent",
+		category:      Settings,
 	},
 	"ReduceTransparency": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleTransparencyIntent",
+		category:      Settings,
 	},
 	"SmartInvert": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleSmartInvertIntent",
+		category:      Settings,
 	},
 	"SwitchControl": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleSwitchControlIntent",
+		category:      Settings,
 	},
 	"VoiceControl": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleVoiceControlIntent",
+		category:      Settings,
 	},
 	"WhitePoint": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleWhitePointIntent",
+		category:      Settings,
 	},
 	"Zoom": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleZoomIntent",
+		category:      Settings,
 	},
 }
 
