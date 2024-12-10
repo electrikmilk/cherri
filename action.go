@@ -475,7 +475,11 @@ func makeMeasurementUnits() {
 
 func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) string {
 	var definition strings.Builder
-	definition.WriteString(fmt.Sprintf("### %s\n", currentAction.doc.title))
+	var docTitle = currentAction.doc.title
+	if currentAction.doc.title == "" {
+		docTitle = fmt.Sprintf("%s()", currentActionIdentifier)
+	}
+	definition.WriteString(fmt.Sprintf("### %s\n", docTitle))
 	definition.WriteRune('\n')
 	if currentAction.doc.description != "" {
 		definition.WriteString(fmt.Sprintf("%s\n\n", currentAction.doc.description))
