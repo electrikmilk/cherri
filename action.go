@@ -499,7 +499,7 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 	definition.WriteString("\n```")
 
 	if currentAction.doc.example != "" {
-		definition.WriteString(fmt.Sprintf("\n\n**Example Usage:**\n```\n%s\n```\n", currentAction.doc.example))
+		definition.WriteString(fmt.Sprintf("\n\n**Example Usage:**\n```ruby\n%s\n```\n", currentAction.doc.example))
 	}
 
 	if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
