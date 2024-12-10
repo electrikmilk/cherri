@@ -162,7 +162,7 @@ type ActionDoc struct {
 }
 
 func generateDocs() {
-	ToggleSetActions()
+	makeToggleSetActions()
 	rawAction()
 	var cat = args.Value("docs")
 	for category, subcategories := range categories {

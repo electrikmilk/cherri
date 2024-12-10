@@ -57,7 +57,7 @@ func initParse() {
 	preParsing = true
 
 	rawAction()
-	ToggleSetActions()
+	makeToggleSetActions()
 	handleIncludes()
 	parseCopyPastes()
 	parseCustomActions()

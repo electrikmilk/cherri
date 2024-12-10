@@ -6734,7 +6734,7 @@ var toggleSetActions = map[string]actionDefinition{
 }
 
 // ToggleSetActions automates the creation of actions which simply toggle and set a state in the same format.
-func ToggleSetActions() {
+func makeToggleSetActions() {
 	for name, def := range toggleSetActions {
 		var toggleName = fmt.Sprintf("toggle%s", name)
 		def.addParams = func(_ []actionArgument) []plistData {
