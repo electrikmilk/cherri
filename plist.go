@@ -321,7 +321,7 @@ func makeDictionaryValue(value *any) []plistData {
 	}
 }
 
-func variableValueModifier(token *token, outputName *plistData, UUID *plistData) {
+func variableValueModifier(token *token, outputName *plistData, uuid *plistData) {
 	var valueType = token.valueType
 	if valueType == Variable {
 		valueType = variables[token.value.(string)].valueType
@@ -342,7 +342,7 @@ func variableValueModifier(token *token, outputName *plistData, UUID *plistData)
 		var tokenType = convertTypeToken(token.valueType)
 		appendPlist(makeStdAction("math", []plistData{
 			*outputName,
-			*UUID,
+			*uuid,
 			paramValue("WFMathOperand", actionArgument{
 				valueType: token.valueType,
 				value:     token.value,
@@ -362,7 +362,7 @@ func variableValueModifier(token *token, outputName *plistData, UUID *plistData)
 		wrapVariableReference(&varInput)
 		appendPlist(makeStdAction("gettext", []plistData{
 			*outputName,
-			*UUID,
+			*uuid,
 			paramValue("WFTextActionText", actionArgument{
 				valueType: String,
 				value:     fmt.Sprintf("{%s}%s", token.ident, varInput),
