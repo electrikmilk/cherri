@@ -132,50 +132,6 @@ func sanitizeIdentifier(identifier *string) {
 	*identifier = specialCharsRegex.ReplaceAllString(*identifier, "")
 }
 
-var currentOutputName string
-var duplicateDelta int
-
-func checkDuplicateOutputName(name string) string {
-	if name != currentOutputName {
-		currentOutputName = name
-		duplicateDelta = 0
-	}
-	for _, outputName := range uuids {
-		if outputName == currentOutputName {
-			return checkDuplicateOutputName(duplicateOutputName())
-		}
-	}
-	return currentOutputName
-}
-
-func duplicateOutputName() string {
-	duplicateDelta++
-
-	var revChars = []rune(currentOutputName)
-	slices.Reverse(revChars)
-	var numChars []rune
-	for _, rc := range revChars {
-		if rc >= '0' && rc <= '9' {
-			numChars = append(numChars, rc)
-		}
-	}
-
-	if len(numChars) != 0 {
-		slices.Reverse(numChars)
-		var num = string(numChars)
-		var endingDelta, numErr = strconv.Atoi(num)
-		handle(numErr)
-		endingDelta++
-
-		currentOutputName, _ = strings.CutSuffix(currentOutputName, num)
-		duplicateDelta = endingDelta
-	}
-
-	currentOutputName = fmt.Sprintf("%s%d", currentOutputName, duplicateDelta)
-
-	return currentOutputName
-}
-
 type actionValue struct {
 	identifier string
 	definition *actionDefinition

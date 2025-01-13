@@ -152,7 +152,7 @@ func conditionalParameterVariable(conditionalParams *[]plistData, value any) {
 	}
 }
 
-func makeVariableAction(token *token, varUUID *string) {
+func makeVariableAction(token *token, customOutputName *string, varUUID *string) {
 	var UUID = plistData{
 		key:      "UUID",
 		dataType: Text,
@@ -161,7 +161,7 @@ func makeVariableAction(token *token, varUUID *string) {
 	var outputName = plistData{
 		key:      "CustomOutputName",
 		dataType: Text,
-		value:    token.ident,
+		value:    *customOutputName,
 	}
 	if token.typeof != Var &&
 		(token.typeof == AddTo || token.typeof == SubFrom || token.typeof == MultiplyBy || token.typeof == DivideBy) &&

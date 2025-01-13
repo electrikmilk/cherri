@@ -216,13 +216,14 @@ func plistVariable(t *token) {
 
 	if t.value != nil {
 		var varUUID = uuid.New().String()
-		makeVariableAction(t, &varUUID)
-		uuids[t.ident] = varUUID
+		var outputName = makeOutputName(t)
+		makeVariableAction(t, &outputName, &varUUID)
+		uuids[outputName] = varUUID
 		if t.valueType != Arr {
 			if t.valueType == Variable {
-				setVariableParams = append(setVariableParams, variablePlistValue("WFInput", t.value.(string), t.ident))
+				setVariableParams = append(setVariableParams, variablePlistValue("WFInput", outputName, t.ident))
 			} else {
-				setVariableParams = append(setVariableParams, inputValue("WFInput", t.ident, varUUID))
+				setVariableParams = append(setVariableParams, inputValue("WFInput", outputName, varUUID))
 			}
 			setVariableParams = append(setVariableParams, plistData{
 				key:      "WFSerializationType",
@@ -254,6 +255,28 @@ func plistVariable(t *token) {
 	}
 }
 
+func makeOutputName(token *token) string {
+	if variable, found := variables[token.ident]; found {
+		if variable.constant {
+			return token.ident
+		}
+	}
+	if token.valueType == Var {
+		if _, found := variables[token.value.(string)]; found {
+			return token.value.(string)
+		}
+		if _, found := globals[token.value.(string)]; found {
+			return token.value.(string)
+		}
+	}
+	var customOutputName = fmt.Sprintf("%sValue", string(token.valueType))
+	if customOutputName == "action" {
+		customOutputName = token.value.(action).ident
+	}
+
+	return checkDuplicateOutputName(customOutputName)
+}
+
 func plistArrayVariable(t *token) {
 	if t.value == nil {
 		return
@@ -282,7 +305,7 @@ func plistArrayVariable(t *token) {
 			ident:     itemIdent,
 			valueType: valueType,
 			value:     value,
-		}, &UUID)
+		}, &itemIdent, &UUID)
 		addToVariableParams = append(addToVariableParams,
 			inputValue("WFInput", itemIdent, UUID),
 			plistData{

@@ -4,7 +4,12 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+	"strconv"
+	"strings"
+)
 
 var variables map[string]variableValue
 
@@ -94,4 +99,47 @@ func getVariableValue(identifier string) (*variableValue, bool) {
 	}
 
 	return nil, false
+}
+
+var currentOutputName string
+var duplicateDelta int
+
+func checkDuplicateOutputName(name string) string {
+	if name != currentOutputName {
+		currentOutputName = name
+		duplicateDelta = 0
+	}
+	if _, found := uuids[name]; found {
+		return checkDuplicateOutputName(duplicateOutputName())
+	}
+
+	return currentOutputName
+}
+
+func duplicateOutputName() string {
+	duplicateDelta++
+
+	var revChars = []rune(currentOutputName)
+	slices.Reverse(revChars)
+	var numChars []rune
+	for _, rc := range revChars {
+		if rc >= '0' && rc <= '9' {
+			numChars = append(numChars, rc)
+		}
+	}
+
+	if len(numChars) != 0 {
+		slices.Reverse(numChars)
+		var num = string(numChars)
+		var endingDelta, numErr = strconv.Atoi(num)
+		handle(numErr)
+		endingDelta++
+
+		currentOutputName, _ = strings.CutSuffix(currentOutputName, num)
+		duplicateDelta = endingDelta
+	}
+
+	currentOutputName = fmt.Sprintf("%s%d", currentOutputName, duplicateDelta)
+
+	return currentOutputName
 }
