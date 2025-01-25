@@ -7,14 +7,15 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/electrikmilk/args-parser"
-	"github.com/google/uuid"
 	"os"
 	"regexp"
 	"slices"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/electrikmilk/args-parser"
+	"github.com/google/uuid"
 )
 
 var idx int
@@ -634,7 +635,9 @@ func collectDefinition() {
 		if strings.Trim(workflowName, " \n\t") == "" {
 			parserError("Expected name")
 		}
-		outputPath = relativePath + workflowName + ".shortcut"
+		if !args.Using("output") {
+			outputPath = relativePath + workflowName + ".shortcut"
+		}
 	case tokenAhead(Color):
 		advance()
 		collectColorDefinition()
