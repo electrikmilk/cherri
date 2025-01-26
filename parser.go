@@ -1309,19 +1309,19 @@ func collectAction(identifier *string) (value action) {
 
 // advance advances the character cursor.
 func advance() {
-	idx++
-	if len(chars) <= idx {
-		char = -1
-		return
-	}
-
-	char = chars[idx]
 	if char == '\n' {
 		lineCharIdx = 0
 		lineIdx++
 	} else {
 		lineCharIdx++
 	}
+
+	idx++
+	if len(chars) <= idx {
+		char = -1
+		return
+	}
+	char = chars[idx]
 }
 
 // advanceTimes advances the character cursor by `times`.
