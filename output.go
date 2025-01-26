@@ -6,9 +6,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"os"
 	"os/exec"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 // writeFile writes plist in bytes to filename.
@@ -70,7 +71,7 @@ func printChar(ch rune) {
 	default:
 		currentChar = string(ch)
 	}
-	fmt.Printf("%s %d:%d\n", currentChar, lineIdx+1, lineCharIdx)
+	fmt.Printf("%s %d:%d\n", currentChar, lineIdx+1, lineCharIdx+1)
 }
 
 type outputType int

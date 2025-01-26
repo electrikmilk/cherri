@@ -76,7 +76,7 @@ func initParse() {
 	char = -1
 	idx = -1
 	lineIdx = 0
-	lineCharIdx = 0
+	lineCharIdx = -1
 	chars = []rune{}
 	lines = []string{}
 	groupingUUIDs = map[int]string{}
@@ -1422,7 +1422,7 @@ func getChar(atIndex int) rune {
 
 func firstChar() {
 	lineIdx = 0
-	lineCharIdx = 0
+	lineCharIdx = -1
 	idx = -1
 	advance()
 }
