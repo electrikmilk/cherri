@@ -57,7 +57,7 @@ func openShortcut() {
 	handle(importErr)
 }
 
-func printChar(ch rune) {
+func printChar(ch rune, chLineIdx int, chLineCharIdx int) {
 	var currentChar string
 	switch ch {
 	case ' ':
@@ -71,7 +71,7 @@ func printChar(ch rune) {
 	default:
 		currentChar = string(ch)
 	}
-	fmt.Printf("%s %d:%d\n", currentChar, lineIdx+1, lineCharIdx+1)
+	fmt.Printf("%s %d:%d\n", currentChar, chLineIdx+1, chLineCharIdx+1)
 }
 
 type outputType int
