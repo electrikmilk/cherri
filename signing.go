@@ -8,12 +8,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"time"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 var signFailed = false
@@ -131,7 +132,7 @@ func removeUnsigned() {
 	}
 
 	if args.Using("debug") {
-		fmt.Printf("Removing %s_unsigned.shortcut...", workflowName)
+		fmt.Printf("Removing %s%s...", workflowName, unsignedEnd)
 	}
 
 	removeErr := os.Remove(inputPath)

@@ -643,7 +643,9 @@ func collectDefinition() {
 		if strings.Trim(workflowName, " \n\t") == "" {
 			parserError("Expected name")
 		}
-		outputPath = relativePath + workflowName + ".shortcut"
+		if !args.Using("output") {
+			outputPath = relativePath + workflowName + ".shortcut"
+		}
 	case tokenAhead(Color):
 		advance()
 		collectColorDefinition()
