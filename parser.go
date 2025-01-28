@@ -7,14 +7,15 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/electrikmilk/args-parser"
-	"github.com/google/uuid"
 	"os"
 	"regexp"
 	"slices"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/electrikmilk/args-parser"
+	"github.com/google/uuid"
 )
 
 var idx int
@@ -281,7 +282,6 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any, coerc
 	collectValue(valueType, value, '\n')
 
 	if constant && (*valueType == Arr || *valueType == Variable) {
-		lineIdx--
 		parserError(fmt.Sprintf("Type %v values cannot be constants.", *valueType))
 	}
 	if *valueType == Question {
@@ -564,7 +564,6 @@ func collectVariable(constant bool) {
 		skipWhitespace()
 		collectType(&valueType, &value)
 	case constant:
-		lineIdx--
 		parserError("Constants must be initialized with a value.")
 	}
 

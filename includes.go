@@ -6,10 +6,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"os"
 	"slices"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 // include is a data structure to track include statements.
@@ -78,7 +79,6 @@ func parseInclude() {
 	advance()
 
 	var includePath = collectRawString()
-	lineIdx--
 
 	if slices.Contains(included, includePath) {
 		parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
