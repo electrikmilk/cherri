@@ -16,7 +16,6 @@ type token struct {
 var tokens []token
 
 /* Keywords */
-
 const (
 	Var            tokenType = "variable"
 	Constant       tokenType = "const"
@@ -38,7 +37,6 @@ const (
 )
 
 /* Definitions */
-
 const (
 	Name    tokenType = "name"
 	Color   tokenType = "color"
@@ -52,7 +50,6 @@ const (
 )
 
 /* No Inputs */
-
 const (
 	StopWith     tokenType = "stopwith"
 	AskFor       tokenType = "askfor"
@@ -60,7 +57,6 @@ const (
 )
 
 /* Types */
-
 const (
 	String       tokenType = "text"
 	RawString    tokenType = "rawtext"
@@ -81,7 +77,6 @@ const (
 )
 
 /* Operators */
-
 const (
 	Set            tokenType = "="
 	AddTo          tokenType = "+="
