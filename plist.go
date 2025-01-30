@@ -163,8 +163,7 @@ func makeVariableAction(token *token, varUUID *string) {
 		dataType: Text,
 		value:    token.ident,
 	}
-	if token.typeof != Var &&
-		(token.typeof == AddTo || token.typeof == SubFrom || token.typeof == MultiplyBy || token.typeof == DivideBy) &&
+	if (token.typeof == AddTo || token.typeof == SubFrom || token.typeof == MultiplyBy || token.typeof == DivideBy) &&
 		token.valueType != Arr &&
 		variables[token.ident].valueType != Arr {
 		variableValueModifier(token, &outputName, &UUID)
