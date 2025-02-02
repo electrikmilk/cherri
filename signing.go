@@ -8,12 +8,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"time"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 var signFailed = false
@@ -77,7 +78,8 @@ func hubSign() {
 
 	if !args.Using("no-ansi") {
 		fmt.Println(ansi("Signing using HubSign service...", green))
-		fmt.Println(ansi("Shortcut Signing Powered By RoutineHub", dim))
+		fmt.Print("Shortcut Signing Powered By ")
+		fmt.Println(ansi("RoutineHub", red))
 	}
 
 	var payload = map[string]string{
@@ -131,7 +133,7 @@ func removeUnsigned() {
 	}
 
 	if args.Using("debug") {
-		fmt.Printf("Removing %s_unsigned.shortcut...", workflowName)
+		fmt.Printf("Removing %s%s...", workflowName, unsignedEnd)
 	}
 
 	removeErr := os.Remove(inputPath)

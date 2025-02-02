@@ -32,9 +32,11 @@ func init() {
 		Description: "Create plist file, print debug and stack traces.",
 	})
 	args.Register(args.Argument{
-		Name:        "output",
-		Short:       "o",
-		Description: "Set custom output file path.",
+		Name:         "output",
+		Short:        "o",
+		Description:  "Set custom output file path.",
+		DefaultValue: "",
+		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
 		Name:        "comments",

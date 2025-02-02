@@ -7,14 +7,15 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/electrikmilk/args-parser"
-	"github.com/google/uuid"
 	"os"
 	"regexp"
 	"slices"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/electrikmilk/args-parser"
+	"github.com/google/uuid"
 )
 
 var idx int
@@ -76,7 +77,7 @@ func initParse() {
 	char = -1
 	idx = -1
 	lineIdx = 0
-	lineCharIdx = 0
+	lineCharIdx = -1
 	chars = []rune{}
 	lines = []string{}
 	groupingUUIDs = map[int]string{}
@@ -111,16 +112,26 @@ func printParsingDebug() {
 
 	if idx != 0 {
 		fmt.Println("Previous Character:")
-		printChar(prev(1))
+		var prevChar = prev(1)
+		if prevChar != '\n' {
+			printChar(prevChar, lineIdx, lineCharIdx-1)
+		} else {
+			printChar(prevChar, lineIdx-1, len(lines[lineIdx-1]))
+		}
 	}
 
 	fmt.Println("\nCurrent Character:")
-	printChar(char)
+	printChar(char, lineIdx, lineCharIdx)
 	fmt.Print("\n")
 
 	if len(contents) > idx+1 {
 		fmt.Println("Next Character:")
-		printChar(next(1))
+		var nextChar = next(1)
+		if char != '\n' {
+			printChar(nextChar, lineIdx, lineCharIdx+1)
+		} else {
+			printChar(nextChar, lineIdx+1, 0)
+		}
 		fmt.Print("\n")
 	}
 
@@ -271,7 +282,6 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any, coerc
 	collectValue(valueType, value, '\n')
 
 	if constant && (*valueType == Arr || *valueType == Variable) {
-		lineIdx--
 		parserError(fmt.Sprintf("Type %v values cannot be constants.", *valueType))
 	}
 	if *valueType == Question {
@@ -554,7 +564,6 @@ func collectVariable(constant bool) {
 		skipWhitespace()
 		collectType(&valueType, &value)
 	case constant:
-		lineIdx--
 		parserError("Constants must be initialized with a value.")
 	}
 
@@ -634,7 +643,9 @@ func collectDefinition() {
 		if strings.Trim(workflowName, " \n\t") == "" {
 			parserError("Expected name")
 		}
-		outputPath = relativePath + workflowName + ".shortcut"
+		if !args.Using("output") {
+			outputPath = relativePath + workflowName + ".shortcut"
+		}
 	case tokenAhead(Color):
 		advance()
 		collectColorDefinition()
@@ -1307,19 +1318,19 @@ func collectAction(identifier *string) (value action) {
 
 // advance advances the character cursor.
 func advance() {
-	idx++
-	if len(chars) <= idx {
-		char = -1
-		return
-	}
-
-	char = chars[idx]
 	if char == '\n' {
 		lineCharIdx = 0
 		lineIdx++
 	} else {
 		lineCharIdx++
 	}
+
+	idx++
+	if len(chars) <= idx {
+		char = -1
+		return
+	}
+	char = chars[idx]
 }
 
 // advanceTimes advances the character cursor by `times`.
@@ -1420,7 +1431,7 @@ func getChar(atIndex int) rune {
 
 func firstChar() {
 	lineIdx = 0
-	lineCharIdx = 0
+	lineCharIdx = -1
 	idx = -1
 	advance()
 }
