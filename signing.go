@@ -78,7 +78,8 @@ func hubSign() {
 
 	if !args.Using("no-ansi") {
 		fmt.Println(ansi("Signing using HubSign service...", green))
-		fmt.Println(ansi("Shortcut Signing Powered By RoutineHub", dim))
+		fmt.Print("Shortcut Signing Powered By ")
+		fmt.Println(ansi("RoutineHub", red))
 	}
 
 	var payload = map[string]string{
