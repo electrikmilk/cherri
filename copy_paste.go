@@ -6,9 +6,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"regexp"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 var pasteables map[string]string
@@ -63,11 +64,6 @@ func collectCopy() {
 
 func pasteCopy() {
 	var identifier = collectIdentifier()
-	if char == '\n' {
-		idx--
-		lineIdx--
-		lineCharIdx = len(lines[lineIdx])
-	}
 	if contents, found := pasteables[identifier]; found {
 		lines[lineIdx] = contents
 	} else {
