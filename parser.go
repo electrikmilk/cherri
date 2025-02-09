@@ -1301,6 +1301,8 @@ func collectAction(identifier *string) (value action) {
 	advance()
 	setCurrentAction(*identifier, actions[*identifier])
 
+	skipWhitespace()
+
 	var arguments = collectArguments()
 	currentArguments = arguments
 	currentArgumentsSize = len(currentArguments)
