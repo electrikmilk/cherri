@@ -541,15 +541,15 @@ func collectVariable(constant bool) {
 	case strings.Contains(lookAheadUntil('\n'), "="):
 		advance()
 		switch {
-		case tokensAhead(AddTo):
+		case tokenAhead(AddTo):
 			varType = AddTo
-		case tokensAhead(SubFrom):
+		case tokenAhead(SubFrom):
 			varType = SubFrom
-		case tokensAhead(MultiplyBy):
+		case tokenAhead(MultiplyBy):
 			varType = MultiplyBy
-		case tokensAhead(DivideBy):
+		case tokenAhead(DivideBy):
 			varType = DivideBy
-		case tokensAhead(Set):
+		case tokenAhead(Set):
 		}
 		if varType != Var && constant {
 			parserError("Constants cannot be added to.")
