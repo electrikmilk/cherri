@@ -326,7 +326,6 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		advance()
 		*valueType = RawString
 		*value = collectRawString()
-		advance()
 	case char == '[':
 		advance()
 		*valueType = Arr
@@ -439,7 +438,6 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 
 	*valueType = Variable
 	*value = reference
-	advance()
 }
 
 func collectArguments() (arguments []actionArgument) {
@@ -448,7 +446,7 @@ func collectArguments() (arguments []actionArgument) {
 	var argIndex = 0
 	var param parameterDefinition
 	for {
-		if char == ')' || char == '\n' || char == -1 {
+		if char == ')' || char == -1 {
 			break
 		}
 		if argIndex < paramsSize {
@@ -472,6 +470,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 		advance()
 	}
 	skipWhitespace()
+
 	var valueType tokenType
 	var value any
 	if strings.Contains(lookAheadUntil('\n'), ",") {
@@ -479,6 +478,9 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	} else {
 		collectValue(&valueType, &value, ')')
 	}
+
+	skipWhitespace()
+
 	argument = actionArgument{
 		valueType: valueType,
 		value:     value,
@@ -929,8 +931,7 @@ func collectRepeatEach() {
 	var iterableType tokenType
 	var iterableValue any
 	collectValue(&iterableType, &iterableValue, '{')
-
-	advance()
+	advanceTimes(2)
 
 	tokens = append(tokens,
 		token{
@@ -977,6 +978,8 @@ func collectConditional() {
 	var variableThreeType tokenType
 	var variableThreeValue any
 	collectValue(&variableOneType, &variableOneValue, ' ')
+
+	skipWhitespace()
 
 	if !isChar('{') {
 		var collectConditional = collectUntil(' ')
@@ -1151,7 +1154,6 @@ func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
 		var integer = collectInteger()
 		*value = integer
-		advance()
 		return
 	}
 	*valueType = Expression
@@ -1186,6 +1188,7 @@ func collectString() string {
 		advance()
 	}
 	advance()
+
 	return collection.String()
 }
 
@@ -1238,7 +1241,6 @@ func collectDictionary() (dictionary interface{}) {
 	if err := json.Unmarshal([]byte(rawJSON), &dictionary); err != nil {
 		parserError(fmt.Sprintf("JSON error: %s", err))
 	}
-	advance()
 	return
 }
 
@@ -1269,6 +1271,8 @@ func collectObject() string {
 		jsonStr.WriteRune(char)
 		advance()
 	}
+	advance()
+
 	return jsonStr.String()
 }
 
@@ -1301,8 +1305,6 @@ func collectAction(identifier *string) (value action) {
 	advance()
 	setCurrentAction(*identifier, actions[*identifier])
 
-	skipWhitespace()
-
 	var arguments = collectArguments()
 	currentArguments = arguments
 	currentArgumentsSize = len(currentArguments)
@@ -1314,9 +1316,7 @@ func collectAction(identifier *string) (value action) {
 		args:  arguments,
 	}
 
-	if char == ')' {
-		advance()
-	}
+	advance()
 	return
 }
 
