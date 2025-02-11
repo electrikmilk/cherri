@@ -67,7 +67,6 @@ func main() {
 
 	filePath = fileArg()
 	if len(os.Args) == 1 || filePath == "" {
-		printLogo()
 		printVersion()
 		if !darwin {
 			fmt.Println(ansi("\nWarning:", yellow, bold), "Shortcuts compiled on this platform will not run on iOS 15+ or macOS 12+.")
@@ -110,16 +109,7 @@ func printVersion() {
 	} else {
 		color = green
 	}
-	fmt.Printf("Cherri Compiler " + ansi(version, color) + "\n")
-}
-
-func printLogo() {
-	fmt.Print(ansi("\n                       $$$\n                     $$$$$\n                 $$$$$$$$$\n            $$$$$$$$  $$$$\n        $$$$      $$  $$$$\n      $$$     $$$$$$  $ $$\n     $    $$$$$$$$$  $  $$              \n   $$   $$$$$$$$$   $   $$              \n  $$  $$$$$$$$$$   $    $$              \n  $$$$$$$$$$$     $$     $$    ", green))
-	fmt.Print(ansi("$$$$$$   \n", red))
-	fmt.Print(ansi("$$$$$$$$$       $$       $$ ", green))
-	fmt.Print(ansi("$$$$$$$$$$\n         $$$$$  ", red))
-	fmt.Print(ansi("$$$    $$  $  ", green))
-	fmt.Print(ansi("$$$$$$$$$\n      $$$$$$$$$ $$$$$$$$$$$$$$$$$$$$$$$$\n     $$$$$$$$$$$$  $$$$$  $$$$$$$$$$$$$$\n    $$$  $$$$$$$$$$$$$$$$  $$$$$$$$$  $$\n    $$   $$$$$$$$$$$$$$$$$ $$$$$$$$$  $$\n    $$  $$$$$$$$$$$$$$$$$$ $$$$$$$$$ $$ \n    $$$ $$$$$$$$$$$$$$$$$$ $$$$$$$$$$$  \n    $$$  $$$$$$$$$$$$$$$$ $$$$$$$$$$$   \n     $$$$$$$$$$$$$$$$$$$  $$$$$$$$$     \n     $$$$$$$$$$$$$$$$$$$                \n       $$$$$$$$$$$$$$$                  \n          $$$$$$$$$$                    \n\n", red))
+	fmt.Println("🍒 Cherri Compiler", ansi(version, color))
 }
 
 func fileArg() string {
@@ -184,6 +174,22 @@ func startsWith(s string, substr string) bool {
 		}
 	}
 	return true
+}
+
+func lineReport(label string) {
+	fmt.Printf("--- %s ---\n", label)
+	fmt.Println("Line:", lines[lineIdx])
+	fmt.Print("  ")
+	printChar(prev(2), 0, 0)
+	fmt.Print("  ")
+	printChar(prev(1), 0, 0)
+	fmt.Print(ansi("> ", dim))
+	printChar(char, lineIdx, lineCharIdx)
+	fmt.Print("  ")
+	printChar(next(1), 0, 0)
+	fmt.Print("  ")
+	printChar(next(2), 0, 0)
+	fmt.Println("---")
 }
 
 func panicDebug(err error) {

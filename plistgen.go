@@ -6,10 +6,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/electrikmilk/args-parser"
-	"github.com/google/uuid"
 	"reflect"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
+	"github.com/google/uuid"
 )
 
 const header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n"
@@ -220,8 +221,8 @@ func plistVariable(t *token) {
 		makeVariableAction(t, &outputName, &varUUID)
 		uuids[outputName] = varUUID
 		if t.valueType != Arr {
-			if t.valueType == Variable {
-				setVariableParams = append(setVariableParams, variablePlistValue("WFInput", outputName, t.ident))
+			if t.typeof == Var && t.valueType == Variable {
+				setVariableParams = append(setVariableParams, variablePlistValue("WFInput", t.value.(string), t.ident))
 			} else {
 				setVariableParams = append(setVariableParams, inputValue("WFInput", outputName, varUUID))
 			}

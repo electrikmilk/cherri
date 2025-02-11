@@ -66,13 +66,13 @@ func init() {
 	})
 	args.Register(args.Argument{
 		Name:         "action",
-		Description:  "Print action definition. Empty prints all definitions.",
+		Description:  "Search for available actions. Empty prints all definitions.",
 		DefaultValue: "",
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
 		Name:         "glyph",
-		Description:  "Search glyphs in the compiler.",
+		Description:  "Search for available glyphs.",
 		DefaultValue: "",
 		ExpectsValue: true,
 	})
