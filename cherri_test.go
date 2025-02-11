@@ -7,11 +7,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 var currentTest string
@@ -91,7 +92,7 @@ func resetParser() {
 	char = -1
 	idx = 0
 	lineIdx = 0
-	lineCharIdx = 0
+	lineCharIdx = -1
 	groupingUUIDs = map[int]string{}
 	groupingTypes = map[int]tokenType{}
 	groupingIdx = 0

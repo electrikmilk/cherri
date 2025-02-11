@@ -7,14 +7,15 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/electrikmilk/args-parser"
-	"github.com/google/uuid"
 	"os"
 	"regexp"
 	"slices"
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/electrikmilk/args-parser"
+	"github.com/google/uuid"
 )
 
 var idx int
@@ -76,7 +77,7 @@ func initParse() {
 	char = -1
 	idx = -1
 	lineIdx = 0
-	lineCharIdx = 0
+	lineCharIdx = -1
 	chars = []rune{}
 	lines = []string{}
 	groupingUUIDs = map[int]string{}
@@ -111,16 +112,26 @@ func printParsingDebug() {
 
 	if idx != 0 {
 		fmt.Println("Previous Character:")
-		printChar(prev(1))
+		var prevChar = prev(1)
+		if prevChar != '\n' {
+			printChar(prevChar, lineIdx, lineCharIdx-1)
+		} else {
+			printChar(prevChar, lineIdx-1, len(lines[lineIdx-1]))
+		}
 	}
 
 	fmt.Println("\nCurrent Character:")
-	printChar(char)
+	printChar(char, lineIdx, lineCharIdx)
 	fmt.Print("\n")
 
 	if len(contents) > idx+1 {
 		fmt.Println("Next Character:")
-		printChar(next(1))
+		var nextChar = next(1)
+		if char != '\n' {
+			printChar(nextChar, lineIdx, lineCharIdx+1)
+		} else {
+			printChar(nextChar, lineIdx+1, 0)
+		}
 		fmt.Print("\n")
 	}
 
@@ -271,7 +282,6 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any, coerc
 	collectValue(valueType, value, '\n')
 
 	if constant && (*valueType == Arr || *valueType == Variable) {
-		lineIdx--
 		parserError(fmt.Sprintf("Type %v values cannot be constants.", *valueType))
 	}
 	if *valueType == Question {
@@ -316,7 +326,6 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		advance()
 		*valueType = RawString
 		*value = collectRawString()
-		advance()
 	case char == '[':
 		advance()
 		*valueType = Arr
@@ -429,7 +438,6 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 
 	*valueType = Variable
 	*value = reference
-	advance()
 }
 
 func collectArguments() (arguments []actionArgument) {
@@ -438,7 +446,7 @@ func collectArguments() (arguments []actionArgument) {
 	var argIndex = 0
 	var param parameterDefinition
 	for {
-		if char == ')' || char == '\n' || char == -1 {
+		if char == ')' || char == -1 {
 			break
 		}
 		if argIndex < paramsSize {
@@ -462,6 +470,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 		advance()
 	}
 	skipWhitespace()
+
 	var valueType tokenType
 	var value any
 	if strings.Contains(lookAheadUntil('\n'), ",") {
@@ -469,6 +478,9 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	} else {
 		collectValue(&valueType, &value, ')')
 	}
+
+	skipWhitespace()
+
 	argument = actionArgument{
 		valueType: valueType,
 		value:     value,
@@ -531,15 +543,15 @@ func collectVariable(constant bool) {
 	case strings.Contains(lookAheadUntil('\n'), "="):
 		advance()
 		switch {
-		case tokensAhead(AddTo):
+		case tokenAhead(AddTo):
 			varType = AddTo
-		case tokensAhead(SubFrom):
+		case tokenAhead(SubFrom):
 			varType = SubFrom
-		case tokensAhead(MultiplyBy):
+		case tokenAhead(MultiplyBy):
 			varType = MultiplyBy
-		case tokensAhead(DivideBy):
+		case tokenAhead(DivideBy):
 			varType = DivideBy
-		case tokensAhead(Set):
+		case tokenAhead(Set):
 		}
 		if varType != Var && constant {
 			parserError("Constants cannot be added to.")
@@ -554,7 +566,6 @@ func collectVariable(constant bool) {
 		skipWhitespace()
 		collectType(&valueType, &value)
 	case constant:
-		lineIdx--
 		parserError("Constants must be initialized with a value.")
 	}
 
@@ -634,7 +645,9 @@ func collectDefinition() {
 		if strings.Trim(workflowName, " \n\t") == "" {
 			parserError("Expected name")
 		}
-		outputPath = relativePath + workflowName + ".shortcut"
+		if !args.Using("output") {
+			outputPath = relativePath + workflowName + ".shortcut"
+		}
 	case tokenAhead(Color):
 		advance()
 		collectColorDefinition()
@@ -918,8 +931,7 @@ func collectRepeatEach() {
 	var iterableType tokenType
 	var iterableValue any
 	collectValue(&iterableType, &iterableValue, '{')
-
-	advance()
+	advanceTimes(2)
 
 	tokens = append(tokens,
 		token{
@@ -966,6 +978,8 @@ func collectConditional() {
 	var variableThreeType tokenType
 	var variableThreeValue any
 	collectValue(&variableOneType, &variableOneValue, ' ')
+
+	skipWhitespace()
 
 	if !isChar('{') {
 		var collectConditional = collectUntil(' ')
@@ -1140,7 +1154,6 @@ func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
 		var integer = collectInteger()
 		*value = integer
-		advance()
 		return
 	}
 	*valueType = Expression
@@ -1175,6 +1188,7 @@ func collectString() string {
 		advance()
 	}
 	advance()
+
 	return collection.String()
 }
 
@@ -1227,7 +1241,6 @@ func collectDictionary() (dictionary interface{}) {
 	if err := json.Unmarshal([]byte(rawJSON), &dictionary); err != nil {
 		parserError(fmt.Sprintf("JSON error: %s", err))
 	}
-	advance()
 	return
 }
 
@@ -1258,6 +1271,8 @@ func collectObject() string {
 		jsonStr.WriteRune(char)
 		advance()
 	}
+	advance()
+
 	return jsonStr.String()
 }
 
@@ -1301,27 +1316,25 @@ func collectAction(identifier *string) (value action) {
 		args:  arguments,
 	}
 
-	if char == ')' {
-		advance()
-	}
+	advance()
 	return
 }
 
 // advance advances the character cursor.
 func advance() {
-	idx++
-	if len(chars) <= idx {
-		char = -1
-		return
-	}
-
-	char = chars[idx]
 	if char == '\n' {
 		lineCharIdx = 0
 		lineIdx++
 	} else {
 		lineCharIdx++
 	}
+
+	idx++
+	if len(chars) <= idx {
+		char = -1
+		return
+	}
+	char = chars[idx]
 }
 
 // advanceTimes advances the character cursor by `times`.
@@ -1422,7 +1435,7 @@ func getChar(atIndex int) rune {
 
 func firstChar() {
 	lineIdx = 0
-	lineCharIdx = 0
+	lineCharIdx = -1
 	idx = -1
 	advance()
 }
