@@ -6,9 +6,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"regexp"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 var pasteables map[string]string
@@ -66,7 +67,6 @@ func pasteCopy() {
 	if isEOL() || char == -1 {
 		reverse()
 	}
-
 	if contents, found := pasteables[identifier]; found {
 		lines[lineIdx] = contents
 	} else {
