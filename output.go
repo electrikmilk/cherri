@@ -45,10 +45,10 @@ func createShortcut() {
 		}
 
 		removeUnsigned()
-	}
 
-	if args.Using("import") {
-		openShortcut()
+		if args.Using("import") {
+			openShortcut()
+		}
 	}
 }
 
