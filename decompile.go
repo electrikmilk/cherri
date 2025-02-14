@@ -849,7 +849,7 @@ func decompAction(action *ShortcutAction) {
 					argValue = makeDefaultValue(param)
 				}
 
-				if argValue != "" && matchedParamsSize != 1 && matchedParamsSize > i {
+				if argValue != "" {
 					if i == 0 {
 						actionCallCode.WriteString(argValue)
 					} else {
