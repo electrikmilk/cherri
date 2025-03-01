@@ -74,7 +74,7 @@ func init() {
 		DefaultValue: "",
 		ExpectsValue: true,
 	})
-	var actionCategories []string
+
 	for actionCat := range categories {
 		actionCategories = append(actionCategories, string(actionCat))
 	}

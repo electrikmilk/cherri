@@ -157,6 +157,8 @@ var categories = map[DocCategory][]DocCategory{
 	},
 }
 
+var actionCategories []string
+
 type ActionDoc struct {
 	title       string
 	description string
