@@ -671,7 +671,6 @@ func collectDefinition() {
 		collectBooleanDefinition("mac")
 	case tokenAhead(Version):
 		var collectVersion = collectUntil('\n')
-		makeVersions()
 		if version, found := versions[collectVersion]; found {
 			clientVersion = version
 			iosVersion, _ = strconv.ParseFloat(collectVersion, 32)
@@ -698,7 +697,6 @@ func collectColorDefinition() {
 }
 
 func collectWorkflowType() {
-	makeWorkflowTypes()
 	var collectWorkflowTypes = collectUntil('\n')
 	if collectWorkflowTypes != "" {
 		var definedWorkflowTypes = strings.Split(collectWorkflowTypes, ",")
@@ -748,7 +746,6 @@ func collectNoInputDefinition() {
 	case tokenAhead(AskFor):
 		advance()
 		var workflowType = collectUntil('\n')
-		makeContentItems()
 		if wtype, found := contentItems[workflowType]; found {
 			noInput = noInputParams{
 				name: "WFWorkflowNoInputBehaviorAskForInput",
@@ -773,7 +770,6 @@ func collectNoInputDefinition() {
 }
 
 func collectContentItemTypes() (contentItemTypes []string) {
-	makeContentItems()
 	var collectedItemTypes = collectUntil('\n')
 	if collectedItemTypes == "" {
 		parserError("Expected content item types")
@@ -960,7 +956,6 @@ func collectRepeatEach() {
 func collectConditional() {
 	reachable()
 	advance()
-	makeConditions()
 
 	var groupingUUID = groupStatement(Conditional)
 
