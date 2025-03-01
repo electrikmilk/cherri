@@ -2054,13 +2054,13 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInputText",
 			},
 			{
-				name:      "from",
+				name:      "fromLanguage",
 				validType: String,
 				key:       "WFSelectedFromLanguage",
 				enum:      languagesList,
 			},
 			{
-				name:      "to",
+				name:      "toLanguage",
 				validType: String,
 				key:       "WFSelectedLanguage",
 				enum:      languagesList,
@@ -2081,7 +2081,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInputText",
 			},
 			{
-				name:      "to",
+				name:      "language",
 				validType: String,
 				key:       "WFSelectedLanguage",
 				optional:  true,
