@@ -6,9 +6,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"os"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 func actionsSearch() {
