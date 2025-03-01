@@ -6185,7 +6185,6 @@ func replaceText(caseSensitive bool, regExp bool, args []actionArgument) []plist
 }
 
 func languageCode(language string) string {
-	makeLanguages()
 	if lang, found := languages[language]; found {
 		return lang
 	}
