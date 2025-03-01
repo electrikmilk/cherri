@@ -514,7 +514,6 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 			}
 		}
 		if coerce != "" {
-			makeContentItems()
 			if contentItem, found := contentItems[coerce]; found {
 				aggrandizements = append(aggrandizements, plistData{
 					dataType: Dictionary,
@@ -748,7 +747,6 @@ func makeAttachmentValues() {
 			}
 		}
 		if stringVar.coerce != "" {
-			makeContentItems()
 			if contentItem, found := contentItems[stringVar.coerce]; found {
 				aggr = append(aggr, plistData{
 					dataType: Dictionary,
