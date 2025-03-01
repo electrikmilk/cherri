@@ -11,6 +11,8 @@ import (
 	"reflect"
 	"slices"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 //go:embed stdlib.cherri
