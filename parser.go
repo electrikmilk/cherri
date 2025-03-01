@@ -683,7 +683,6 @@ func collectDefinition() {
 
 func collectColorDefinition() {
 	var collectColor = collectUntil('\n')
-	makeColors()
 	collectColor = strings.ToLower(collectColor)
 	if color, found := colors[collectColor]; found {
 		iconColor = color
