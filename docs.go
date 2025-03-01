@@ -166,6 +166,7 @@ type ActionDoc struct {
 func generateDocs() {
 	makeToggleSetActions()
 	rawAction()
+	args.Args["no-ansi"] = ""
 	var cat = args.Value("docs")
 	for category, subcategories := range categories {
 		if cat != "" && cat != string(category) {

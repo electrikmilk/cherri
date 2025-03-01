@@ -479,7 +479,7 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 	var definition strings.Builder
 	var docTitle = currentAction.doc.title
 	if currentAction.doc.title == "" {
-		docTitle = fmt.Sprintf("%s()", currentActionIdentifier)
+		docTitle = fmt.Sprintf("`%s()`", currentActionIdentifier)
 	}
 	definition.WriteString(fmt.Sprintf("### %s\n", docTitle))
 	definition.WriteRune('\n')
@@ -500,7 +500,7 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 	definition.WriteRune(')')
 	definition.WriteString("\n```")
 
-	if currentAction.doc.example != "" {
+	if currentAction.doc.example != "" && args.Using("docs") {
 		definition.WriteString(fmt.Sprintf("\n\n**Example Usage:**\n```ruby\n%s\n```\n", currentAction.doc.example))
 	}
 
@@ -516,7 +516,11 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 
 func generateActionRestrictions() string {
 	var definition strings.Builder
-	definition.WriteString("\nRestrictions: ")
+	definition.WriteRune('\n')
+	if args.Using("docs") {
+		definition.WriteString("**")
+	}
+	definition.WriteString("Restrictions: ")
 	var restrictions []string
 	if currentAction.minVersion != 0 {
 		restrictions = append(restrictions, fmt.Sprintf("iOS %1.f+", currentAction.minVersion))
@@ -529,6 +533,9 @@ func generateActionRestrictions() string {
 	}
 	if len(restrictions) > 0 {
 		definition.WriteString(strings.Join(restrictions, ", "))
+	}
+	if args.Using("docs") {
+		definition.WriteString("**")
 	}
 
 	return ansi(definition.String(), red, bold)
@@ -545,8 +552,12 @@ func generateActionParamEnums(focus parameterDefinition) string {
 			continue
 		}
 		definition.WriteRune('\n')
+		definition.WriteRune('\n')
 		hasEnum = true
-		definition.WriteString(ansi(fmt.Sprintf("\nAvailable %ss:\n", param.name), yellow))
+		if args.Using("docs") {
+			definition.WriteString("#### ")
+		}
+		definition.WriteString(ansi(fmt.Sprintf("Available %ss:\n", param.name), yellow))
 		for _, e := range param.enum {
 			definition.WriteString(fmt.Sprintf("- %s\n", e))
 		}
