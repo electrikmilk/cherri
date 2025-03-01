@@ -6,11 +6,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"os"
 	"runtime"
 	"strings"
 	"unicode"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 var filePath string
