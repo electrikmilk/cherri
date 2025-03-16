@@ -7,8 +7,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/electrikmilk/args-parser"
-	plists "howett.net/plist"
 	"math"
 	"os"
 	"reflect"
@@ -17,6 +15,9 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
+	plists "howett.net/plist"
 )
 
 const (
