@@ -190,7 +190,6 @@ func decompileIcon() {
 	var hasDefinitions bool
 	var icon = shortcut.WFWorkflowIcon
 	if icon.WFWorkflowIconStartColor != iconColor {
-		makeColors()
 		for name, i := range colors {
 			if icon.WFWorkflowIconStartColor != i {
 				continue
@@ -491,8 +490,6 @@ func decompConditional(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		makeConditions()
-
 		var conditionInt = int(action.WFWorkflowActionParameters["WFCondition"].(uint64))
 		var conditionString = strconv.Itoa(conditionInt)
 		var conditionalOperator string
