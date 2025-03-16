@@ -671,7 +671,6 @@ func collectDefinition() {
 		collectBooleanDefinition("mac")
 	case tokenAhead(Version):
 		var collectVersion = collectUntil('\n')
-		makeVersions()
 		if version, found := versions[collectVersion]; found {
 			clientVersion = version
 			iosVersion, _ = strconv.ParseFloat(collectVersion, 32)
@@ -684,7 +683,6 @@ func collectDefinition() {
 
 func collectColorDefinition() {
 	var collectColor = collectUntil('\n')
-	makeColors()
 	collectColor = strings.ToLower(collectColor)
 	if color, found := colors[collectColor]; found {
 		iconColor = color
@@ -698,7 +696,6 @@ func collectColorDefinition() {
 }
 
 func collectWorkflowType() {
-	makeWorkflowTypes()
 	var collectWorkflowTypes = collectUntil('\n')
 	if collectWorkflowTypes != "" {
 		var definedWorkflowTypes = strings.Split(collectWorkflowTypes, ",")
@@ -958,7 +955,6 @@ func collectRepeatEach() {
 func collectConditional() {
 	reachable()
 	advance()
-	makeConditions()
 
 	var groupingUUID = groupStatement(Conditional)
 

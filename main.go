@@ -7,11 +7,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"os"
 	"runtime"
 	"strings"
 	"unicode"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 var filePath string
@@ -67,6 +68,7 @@ func main() {
 
 	filePath = fileArg()
 	if len(os.Args) == 1 || filePath == "" {
+		printLogo()
 		printVersion()
 		if !darwin {
 			fmt.Println(ansi("\nWarning:", yellow, bold), "Shortcuts compiled on this platform will not run on iOS 15+ or macOS 12+.")
@@ -102,6 +104,12 @@ func handle(err error) {
 	}
 }
 
+func printLogo() {
+	fmt.Print(ansi("\n           %############                      \n           %#################                 \n           %############*######               \n            ## #############**#*              \n            ##    ############****            \n            ##%     %#%                       \n", green))
+	fmt.Print(ansi("             #####", red))
+	fmt.Print(ansi("    %##    ####             \n         ###****######  #############         \n        ##**######################***#        \n       ############################*+*#       \n      #############################***#       \n       #############################*##       \n       ################################       \n        ##############  ##############        \n           #########      #########           \n\n", red))
+}
+
 func printVersion() {
 	var color outputType
 	if strings.Contains(version, "beta") {
@@ -109,7 +117,7 @@ func printVersion() {
 	} else {
 		color = green
 	}
-	fmt.Println("🍒 Cherri Compiler", ansi(version, color))
+	fmt.Println("Cherri Compiler", ansi(version, color))
 }
 
 func fileArg() string {

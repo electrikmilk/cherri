@@ -1963,11 +1963,13 @@ var actions = map[string]*actionDefinition{
 				name:      "from",
 				validType: String,
 				key:       "WFSelectedFromLanguage",
+				enum:      languagesList,
 			},
 			{
 				name:      "to",
 				validType: String,
 				key:       "WFSelectedLanguage",
+				enum:      languagesList,
 			},
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
@@ -1988,6 +1990,7 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				key:       "WFSelectedLanguage",
 				optional:  true,
+				enum:      languagesList,
 			},
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
@@ -6218,7 +6221,6 @@ func replaceText(caseSensitive bool, regExp bool) []plistData {
 }
 
 func languageCode(language string) string {
-	makeLanguages()
 	if lang, found := languages[language]; found {
 		return lang
 	}
