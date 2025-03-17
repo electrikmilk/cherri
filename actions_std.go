@@ -2240,6 +2240,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 			{
@@ -2248,13 +2249,14 @@ var actions = map[string]*actionDefinition{
 				defaultValue: "\n",
 			},
 		},
-		make: textParts,
+		addParams: textParts,
 	},
 	"joinText": {
 		identifier: "text.combine",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: Variable,
 			},
 			{
@@ -2263,7 +2265,7 @@ var actions = map[string]*actionDefinition{
 				defaultValue: "\n",
 			},
 		},
-		make: textParts,
+		addParams: textParts,
 	},
 	"makeDiskImage": {
 		parameters: []parameterDefinition{
@@ -6227,8 +6229,6 @@ func textParts(args []actionArgument) []plistData {
 			dataType: Boolean,
 			value:    true,
 		},
-
-		argumentValue("text", args, 0),
 	}
 
 	var separator = getArgValue(args[1])
