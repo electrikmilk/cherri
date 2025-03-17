@@ -85,7 +85,7 @@ func validReference(identifier string) bool {
 	return false
 }
 
-func getVariableValue(identifier string) (*variableValue, bool) {
+func getVariableValue(identifier string) (variableValue *variableValue, found bool) {
 	if value, found := globals[identifier]; found {
 		return &value, true
 	}
