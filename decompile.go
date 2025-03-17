@@ -128,6 +128,10 @@ func mapUUID(uuid string, varName string) {
 
 // sanitizeIdentifier strips special characters and replaces dashes with underscores.
 func sanitizeIdentifier(identifier *string) {
+	if strings.Contains(*identifier, "IfResult") {
+		decompWarning("Usage of result of If action detected, this feature is not compatible with Cherri.")
+	}
+
 	*identifier = strings.ReplaceAll(*identifier, "-", "_")
 	*identifier = specialCharsRegex.ReplaceAllString(*identifier, "")
 }
