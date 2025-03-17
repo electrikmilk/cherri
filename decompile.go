@@ -903,6 +903,10 @@ func makeDefaultValue(param parameterDefinition) string {
 func makeRawAction(actionCode *strings.Builder, action *ShortcutAction) {
 	actionCode.WriteString(tabbedLine(fmt.Sprintf("rawAction(\"%s\"", action.WFWorkflowActionIdentifier)))
 
+	if action.WFWorkflowActionIdentifier == "is.workflow.actions.getvariable" {
+		fmt.Println(ansi("Warning:", yellow, bold), fmt.Sprintf("The Get Variable action is not supported in imports, you will need to manually assign these to variables. (Line: %d)", currentCodeLine))
+	}
+
 	if len(action.WFWorkflowActionParameters) != 0 {
 		tabLevel++
 		actionCode.WriteString(", [\n")
