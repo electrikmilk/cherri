@@ -9,6 +9,8 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 var variables map[string]variableValue
@@ -111,6 +113,12 @@ func checkDuplicateOutputName(name string) string {
 	}
 	if _, found := uuids[name]; found {
 		return checkDuplicateOutputName(duplicateOutputName())
+	} else if args.Using("import") {
+		for _, outputName := range uuids {
+			if outputName == currentOutputName {
+				return checkDuplicateOutputName(duplicateOutputName())
+			}
+		}
 	}
 
 	return currentOutputName
