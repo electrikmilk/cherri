@@ -2409,7 +2409,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"getCurrentLocation": {
 		identifier: "location",
-		make: func(_ []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFLocation",
@@ -3690,7 +3690,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"lightMode": {
 		identifier: "appearance",
-		make: func(_ []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "operation",
@@ -3707,7 +3707,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"darkMode": {
 		identifier: "appearance",
-		make: func(_ []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "operation",
@@ -3726,7 +3726,7 @@ var actions = map[string]*actionDefinition{
 	"isCharging": {
 		identifier: "getbatterylevel",
 		minVersion: 16.2,
-		make: func(_ []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "Subject",
@@ -3739,7 +3739,7 @@ var actions = map[string]*actionDefinition{
 	"connectedToCharger": {
 		identifier: "getbatterylevel",
 		minVersion: 16.2,
-		make: func(_ []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "Subject",
@@ -4379,20 +4379,16 @@ var actions = map[string]*actionDefinition{
 			}
 
 			if args[0].valueType == Variable {
-				return []plistData{
-					argumentValue("WFApp", args, 0),
-				}
+				return append(params, argumentValue("WFApp", args, 0))
 			}
 
-			return []plistData{
-				{
-					key:      "WFApp",
-					dataType: Dictionary,
-					value: []plistData{
-						argumentValue("BundleIdentifier", args, 0),
-					},
+			return append(params, plistData{
+				key:      "WFApp",
+				dataType: Dictionary,
+				value: []plistData{
+					argumentValue("BundleIdentifier", args, 0),
 				},
-			}
+			})
 		},
 	},
 	"killAllApps": {
