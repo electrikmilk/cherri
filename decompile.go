@@ -130,7 +130,7 @@ func mapUUID(uuid string, varName string) {
 // sanitizeIdentifier strips special characters and replaces dashes with underscores.
 func sanitizeIdentifier(identifier *string) {
 	if strings.Contains(*identifier, "IfResult") {
-		decompWarning("Usage of result of If action detected, this feature is not compatible with Cherri.")
+		decompWarning("Usage of result of If action detected, this feature is not compatible with Cherri. This can be manually corrected by assigning a variable within the if statement branches and then using that variable instead.")
 	}
 
 	*identifier = strings.ReplaceAll(*identifier, "-", "_")
@@ -1194,7 +1194,7 @@ func printDecompDebug() {
 func decompWarning(message string) {
 	var linesLen = strings.Count(code.String(), "\n")
 	var filePath = relativePath + basename + "_decompiled.cherri"
-	fmt.Println(ansi("Warning:", yellow, bold), fmt.Sprintf("%s (%s:%d:0)", message, filePath, linesLen+1))
+	fmt.Println(ansi("Warning:", yellow, bold), fmt.Sprintf("%s (%s:%d:0)\n", message, filePath, linesLen+1))
 }
 
 func decompError(message string, action *ShortcutAction) {
