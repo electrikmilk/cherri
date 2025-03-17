@@ -801,6 +801,10 @@ func decompAggrandizements(reference *string, aggrs []Aggrandizement) {
 var macDefinition bool
 
 func decompAction(action *ShortcutAction) {
+	if action.WFWorkflowActionIdentifier == "is.workflow.actions.getvariable" {
+		return
+	}
+
 	var isVariableValue = false
 	var isConstant = false
 	var actionCallCode strings.Builder
@@ -916,10 +920,6 @@ func makeDefaultValue(param parameterDefinition) string {
 func makeRawAction(action *ShortcutAction) string {
 	var rawActionCode strings.Builder
 	rawActionCode.WriteString(fmt.Sprintf("rawAction(\"%s\"", action.WFWorkflowActionIdentifier))
-
-	if action.WFWorkflowActionIdentifier == "is.workflow.actions.getvariable" {
-		decompWarning("The Get Variable action is not supported, you will need to manually assign these to variables.")
-	}
 
 	if len(action.WFWorkflowActionParameters) != 0 {
 		tabLevel++
