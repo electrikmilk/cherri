@@ -2147,7 +2147,7 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return changeCase("UPPERCASE")
 		},
 		defaultAction: true,
@@ -2161,7 +2161,7 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return changeCase("lowercase")
 		},
 	},
@@ -2174,7 +2174,7 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return changeCase("Capitalize with Title Case")
 		},
 	},
@@ -2187,7 +2187,7 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return changeCase("Capitalize with sentence case")
 		},
 	},
@@ -2200,7 +2200,7 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return changeCase("Capitalize Every Word")
 		},
 	},
@@ -2213,7 +2213,7 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return changeCase("cApItAlIzE wItH aLtErNaTiNg cAsE")
 		},
 	},
