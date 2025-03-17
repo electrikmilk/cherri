@@ -28,34 +28,6 @@ type ShortcutAction struct {
 	WFWorkflowActionParameters map[string]any
 }
 
-type GenericShortcut struct {
-	WFWorkflowActions []GenericShortcutAction
-}
-
-type GenericShortcutAction struct {
-	WFWorkflowActionIdentifier string
-	WFWorkflowActionParameters GenericActionParameters
-}
-
-type GenericActionParameters struct {
-	WFVariableName   string
-	CustomOutputName string
-	UUID             string
-	WFInput          WFInput
-}
-
-type WFInput struct {
-	Value               Value
-	Variable            VariableValue
-	OutputName          string
-	OutputUUID          string
-	WFSerializationType string
-}
-
-type VariableValue struct {
-	Value Value
-}
-
 type Value struct {
 	Type                        string
 	VariableName                string

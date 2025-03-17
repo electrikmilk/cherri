@@ -25,16 +25,12 @@ const (
 )
 
 var shortcut Shortcut
-var genericShortcut GenericShortcut
 var code strings.Builder
 var specialCharsRegex *regexp.Regexp
 
 func decompile(b []byte) {
 	var _, marshalIndexedErr = plists.Unmarshal(b, &shortcut)
 	handle(marshalIndexedErr)
-
-	var _, marshalErr = plists.Unmarshal(b, &genericShortcut)
-	handle(marshalErr)
 
 	mapIdentifiers()
 	mapSplitActions()
