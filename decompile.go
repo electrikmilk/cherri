@@ -806,7 +806,7 @@ func decompAction(action *ShortcutAction) {
 	var actionCallCode strings.Builder
 	var matchedIdentifier, matchedAction = matchAction(action)
 	if matchedIdentifier == "" {
-		makeRawAction(&actionCallCode, action)
+		actionCallCode.WriteString(makeRawAction(action))
 	}
 
 	if matchedAction.mac && !macDefinition {
@@ -873,6 +873,10 @@ func decompAction(action *ShortcutAction) {
 		}
 
 		actionCallCode.WriteString(")")
+	} else if !isConstant && !isVariableValue {
+		var saveCode = tabbedLine(actionCallCode.String())
+		actionCallCode.Reset()
+		actionCallCode.WriteString(saveCode)
 	}
 
 	if isVariableValue {
@@ -909,17 +913,18 @@ func makeDefaultValue(param parameterDefinition) string {
 	return "nil"
 }
 
-func makeRawAction(actionCode *strings.Builder, action *ShortcutAction) {
-	actionCode.WriteString(tabbedLine(fmt.Sprintf("rawAction(\"%s\"", action.WFWorkflowActionIdentifier)))
+func makeRawAction(action *ShortcutAction) string {
+	var rawActionCode strings.Builder
+	rawActionCode.WriteString(fmt.Sprintf("rawAction(\"%s\"", action.WFWorkflowActionIdentifier))
 
 	if action.WFWorkflowActionIdentifier == "is.workflow.actions.getvariable" {
-		fmt.Println(ansi("Warning:", yellow, bold), fmt.Sprintf("The Get Variable action is not supported in imports, you will need to manually assign these to variables. (Line: %d)", currentCodeLine))
+		decompWarning("The Get Variable action is not supported, you will need to manually assign these to variables.")
 	}
 
 	if len(action.WFWorkflowActionParameters) != 0 {
 		tabLevel++
-		actionCode.WriteString(", [\n")
-		actionCode.WriteString(tabbedLine("{\n"))
+		rawActionCode.WriteString(", [\n")
+		rawActionCode.WriteString(tabbedLine("{\n"))
 		var index = 0
 		var paramsSize = len(action.WFWorkflowActionParameters)
 		for key, param := range action.WFWorkflowActionParameters {
@@ -929,27 +934,29 @@ func makeRawAction(actionCode *strings.Builder, action *ShortcutAction) {
 				continue
 			}
 
-			actionCode.WriteString(strings.Repeat("\t", tabLevel+1))
-			actionCode.WriteString(fmt.Sprintf("\"%s\": ", key))
+			rawActionCode.WriteString(strings.Repeat("\t", tabLevel+1))
+			rawActionCode.WriteString(fmt.Sprintf("\"%s\": ", key))
 
 			var value = decompValue(param)
 			if !strings.Contains(value, "\"") {
 				value = fmt.Sprintf("\"{%s}\"", value)
 			}
-			actionCode.WriteString(value)
+			rawActionCode.WriteString(value)
 
 			if index < paramsSize {
-				actionCode.WriteRune(',')
+				rawActionCode.WriteRune(',')
 			}
-			actionCode.WriteRune('\n')
+			rawActionCode.WriteRune('\n')
 		}
 
-		actionCode.WriteString(tabbedLine("}\n"))
+		rawActionCode.WriteString(tabbedLine("}\n"))
 		tabLevel--
-		actionCode.WriteString(tabbedLine("])"))
+		rawActionCode.WriteString(tabbedLine("])"))
 	} else {
-		actionCode.WriteRune(')')
+		rawActionCode.WriteRune(')')
 	}
+
+	return rawActionCode.String()
 }
 
 func matchAction(action *ShortcutAction) (name string, definition actionDefinition) {
