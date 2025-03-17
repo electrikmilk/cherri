@@ -7,7 +7,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"os"
 	"reflect"
 	"regexp"
@@ -983,31 +982,23 @@ type actionMatch struct {
 var matches []actionMatch
 
 func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, identifier *string, definition *actionDefinition) {
+	if args.Using("debug") {
+		fmt.Println("## MATCHING SPLIT ACTIONS ##")
+		fmt.Println("parameters", parameters)
+	}
 	matches = []actionMatch{}
 
 	var defaultAction, hasDefaultAction = getDefaultAction(splitActions)
 	if hasDefaultAction {
 		*identifier = defaultAction.identifier
 		*definition = *defaultAction.definition
+		if args.Using("debug") {
+			fmt.Println("has default action", defaultAction.identifier)
+		}
 	}
 
 	for _, splitAction := range *splitActions {
 		var splitActionParams = splitAction.definition.parameters
-		if splitAction.definition.addParams != nil {
-			for _, addParam := range splitAction.definition.addParams([]actionArgument{}) {
-				if addParam.key == "CustomOutputName" || addParam.key == UUID {
-					continue
-				}
-				splitActionParams = append(splitActionParams, parameterDefinition{
-					key:          addParam.key,
-					defaultValue: addParam.value,
-				})
-			}
-		}
-
-		if !paramsMatchDefs(parameters, &splitActionParams) {
-			continue
-		}
 
 		var matchedParams float64
 		var matchedValues float64
@@ -1030,15 +1021,31 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 			}
 		}
 
+		var splitActionAddParams []parameterDefinition
+		if splitAction.definition.addParams != nil {
+			for _, addParam := range splitAction.definition.addParams([]actionArgument{}) {
+				splitActionAddParams = append(splitActionAddParams, parameterDefinition{
+					key:          addParam.key,
+					defaultValue: addParam.value,
+				})
+			}
+		}
+
+		for _, param := range splitActionAddParams {
+			if param.key == "" {
+				continue
+			}
+			if value, found := parameters[param.key]; found {
+				matchedParams++
+
+				if param.defaultValue == value {
+					matchedValues++
+				}
+			}
+		}
+
 		if matchedParams == 0 {
 			continue
-		}
-		var splitActionParamsSize = float64(len(splitActionParams))
-		if matchedParams > 0 {
-			matchedParams = math.Max(splitActionParamsSize-matchedParams, 0)
-		}
-		if matchedValues > 0 {
-			matchedValues = math.Max(splitActionParamsSize-matchedValues, 0)
 		}
 
 		matches = append(matches, actionMatch{
@@ -1046,6 +1053,10 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 			values: matchedValues,
 			action: splitAction,
 		})
+		if args.Using("debug") {
+			fmt.Println("Matches", matches)
+			fmt.Print("\n\n")
+		}
 	}
 	if len(matches) < 1 {
 		return
@@ -1113,40 +1124,6 @@ func glueToChar(glue string) string {
 	default:
 		return glue
 	}
-}
-
-func paramsMatchDefs(parameters map[string]any, definitions *[]parameterDefinition) bool {
-	for _, def := range *definitions {
-		if def.key == "" {
-			continue
-		}
-		if _, found := parameters[def.key]; !found {
-			return false
-		}
-	}
-
-	for key := range parameters {
-		if key == "CustomOutputName" || key == UUID {
-			continue
-		}
-		if isKeyDefined(definitions, &key) {
-			continue
-		}
-
-		return false
-	}
-
-	return true
-}
-
-func isKeyDefined(definitions *[]parameterDefinition, key *string) bool {
-	for _, def := range *definitions {
-		if def.key == *key {
-			return true
-		}
-	}
-
-	return false
 }
 
 // Get default action from a slice of split actions for an identifier.
