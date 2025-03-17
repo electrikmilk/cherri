@@ -6,12 +6,13 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/electrikmilk/args-parser"
 	"io"
 	"net/http"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 type iCloudRecord struct {
