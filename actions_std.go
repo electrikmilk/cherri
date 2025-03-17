@@ -1461,7 +1461,7 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		check: func(args []actionArgument, _ *actionDefinition) {
 			var textArg = args[1]
 			if textArg.valueType == Var {
 				args[1] = actionArgument{
@@ -1470,6 +1470,11 @@ var actions = map[string]*actionDefinition{
 				}
 			} else {
 				args[1].value = fmt.Sprintf("^%s", textArg.value)
+			}
+		},
+		addParams: func(args []actionArgument) []plistData {
+			if len(args) == 0 {
+				return []plistData{}
 			}
 
 			return []plistData{

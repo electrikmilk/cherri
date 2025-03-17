@@ -314,9 +314,13 @@ func decompNumberValue(action *ShortcutAction) {
 
 	var number int
 	if value != "" {
-		var convErr error
-		number, convErr = strconv.Atoi(value.(string))
-		handle(convErr)
+		if reflect.TypeOf(value).String() == stringType {
+			var convErr error
+			number, convErr = strconv.Atoi(value.(string))
+			handle(convErr)
+		} else {
+			number = int(value.(float64))
+		}
 	}
 	currentVariableValue = decompValue(number)
 	checkConstantLiteral(action)
@@ -519,9 +523,13 @@ func decompConditional(action *ShortcutAction) {
 				if numberType == reflect.Uint64 {
 					code.WriteString(decompValue(action.WFWorkflowActionParameters["WFNumberValue"]))
 				} else {
-					var numberValue, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberValue"].(string))
-					handle(convErr)
-					code.WriteString(decompValue(numberValue))
+					if reflect.TypeOf(action.WFWorkflowActionParameters["WFNumberValue"]).String() == stringType {
+						var numberValue, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberValue"].(string))
+						handle(convErr)
+						code.WriteString(decompValue(numberValue))
+					} else {
+						code.WriteString(decompValue(action.WFWorkflowActionParameters["WFNumberValue"]))
+					}
 				}
 			} else if _, foundStr := action.WFWorkflowActionParameters["WFConditionalActionString"]; foundStr {
 				code.WriteString(decompValue(action.WFWorkflowActionParameters["WFConditionalActionString"]))
