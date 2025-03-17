@@ -163,8 +163,6 @@ func mapSplitActions() {
 	}
 }
 
-var currentCodeLine = 1
-
 func newCodeLine(s string) {
 	if tabLevel > 0 {
 		for i := 0; i < tabLevel; i++ {
@@ -172,7 +170,6 @@ func newCodeLine(s string) {
 		}
 	}
 	code.WriteString(s)
-	currentCodeLine++
 }
 
 func tabbedLine(s string) string {
@@ -1175,6 +1172,12 @@ func printDecompDebug() {
 		fmt.Printf("%s | %s\n", uuid, name)
 	}
 	fmt.Print("\n")
+}
+
+func decompWarning(message string) {
+	var linesLen = strings.Count(code.String(), "\n")
+	var filePath = relativePath + basename + "_decompiled.cherri"
+	fmt.Println(ansi("Warning:", yellow, bold), fmt.Sprintf("%s (%s:%d:0)", message, filePath, linesLen+1))
 }
 
 func decompError(message string, action *ShortcutAction) {
