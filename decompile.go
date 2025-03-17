@@ -163,6 +163,8 @@ func mapSplitActions() {
 	}
 }
 
+var currentCodeLine = 1
+
 func newCodeLine(s string) {
 	if tabLevel > 0 {
 		for i := 0; i < tabLevel; i++ {
@@ -170,6 +172,7 @@ func newCodeLine(s string) {
 		}
 	}
 	code.WriteString(s)
+	currentCodeLine++
 }
 
 func tabbedLine(s string) string {
@@ -285,9 +288,9 @@ func checkConstantLiteral(action *ShortcutAction) {
 func decompComment(action *ShortcutAction) {
 	var commentText = action.WFWorkflowActionParameters["WFCommentActionText"].(string)
 	if strings.Contains(commentText, "\n") {
-		code.WriteString(fmt.Sprintf("/*\n%s\n*/\n\n", commentText))
+		newCodeLine(fmt.Sprintf("/*\n%s\n*/\n\n", commentText))
 	} else {
-		code.WriteString(fmt.Sprintf("// %s\n\n", commentText))
+		newCodeLine(fmt.Sprintf("// %s\n\n", commentText))
 	}
 }
 
