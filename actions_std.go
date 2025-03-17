@@ -3953,7 +3953,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"confirm": {
-		identifier: "alert",
+		identifier:    "alert",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "alert",
