@@ -900,7 +900,7 @@ func makeDefaultValue(param parameterDefinition) string {
 func makeRawAction(actionCode *strings.Builder, action *ShortcutAction) {
 	actionCode.WriteString(tabbedLine(fmt.Sprintf("rawAction(\"%s\"", action.WFWorkflowActionIdentifier)))
 
-	if len(action.WFWorkflowActionParameters) > 1 && action.WFWorkflowActionParameters["UUID"] != nil {
+	if len(action.WFWorkflowActionParameters) != 0 {
 		tabLevel++
 		actionCode.WriteString(", [\n")
 		actionCode.WriteString(tabbedLine("{\n"))
