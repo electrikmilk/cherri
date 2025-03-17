@@ -1095,33 +1095,9 @@ func decompMakeAction(actionCode *strings.Builder, matchedAction *actionDefiniti
 		identifier = matchedAction.appIdentifier
 	}
 	var arguments []string
-	switch identifier {
-	case actions["splitText"].identifier:
-		fallthrough
-	case actions["joinText"].identifier:
-		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["text"]))
-		var glue string
-		if action.WFWorkflowActionParameters["WFTextSeparator"] != nil {
-			glue = action.WFWorkflowActionParameters["WFTextSeparator"].(string)
-			if glue == "New Lines" {
-				break
-			}
-		}
-		if action.WFWorkflowActionParameters["WFTextCustomSeparator"] != nil {
-			glue = action.WFWorkflowActionParameters["WFTextCustomSeparator"].(string)
-		}
-		if glue != "" {
-			arguments = append(arguments, fmt.Sprintf("\"%s\"", glueToChar(glue)))
-		}
-	case actions["run"].identifier:
-		var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]any)
-		if !workflow["isSelf"].(bool) {
-			arguments = append(arguments, decompValue(workflow["workflowName"]))
-		}
-		if action.WFWorkflowActionParameters["WFInput"] != nil {
-			arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFInput"]))
-		}
-	default:
+	if matchedAction.decomp != nil {
+		arguments = matchedAction.decomp(action)
+	} else {
 		fmt.Println("TODO: make:", identifier)
 	}
 

@@ -2250,6 +2250,7 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: textParts,
+		decomp:    decompTextParts,
 	},
 	"joinText": {
 		identifier: "text.combine",
@@ -2266,6 +2267,7 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: textParts,
+		decomp:    decompTextParts,
 	},
 	"makeDiskImage": {
 		parameters: []parameterDefinition{
@@ -4599,6 +4601,17 @@ var actions = map[string]*actionDefinition{
 				argumentValue("WFInput", args, 1),
 			}
 		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]any)
+			if !workflow["isSelf"].(bool) {
+				arguments = append(arguments, decompValue(workflow["workflowName"]))
+			}
+			if action.WFWorkflowActionParameters["WFInput"] != nil {
+				arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFInput"]))
+			}
+
+			return
+		},
 	},
 	"list": {
 		parameters: []parameterDefinition{
@@ -6259,6 +6272,25 @@ func textParts(args []actionArgument) []plistData {
 	}
 
 	return data
+}
+
+func decompTextParts(action *ShortcutAction) (arguments []string) {
+	arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["text"]))
+	var glue string
+	if action.WFWorkflowActionParameters["WFTextSeparator"] != nil {
+		glue = action.WFWorkflowActionParameters["WFTextSeparator"].(string)
+		if glue == "New Lines" {
+			return
+		}
+	}
+	if action.WFWorkflowActionParameters["WFTextCustomSeparator"] != nil {
+		glue = action.WFWorkflowActionParameters["WFTextCustomSeparator"].(string)
+	}
+	if glue != "" {
+		arguments = append(arguments, fmt.Sprintf("\"%s\"", glueToChar(glue)))
+	}
+
+	return
 }
 
 func replaceText(caseSensitive bool, regExp bool) []plistData {

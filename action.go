@@ -67,6 +67,7 @@ type actionDefinition struct {
 	parameters         []parameterDefinition
 	check              checkFunc
 	make               paramsFunc
+	decomp             func(action *ShortcutAction) (arguments []string)
 	addParams          paramsFunc
 	appIntent          appIntent
 	outputType         tokenType
