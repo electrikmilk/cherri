@@ -264,7 +264,7 @@ func checkConstantLiteral(action *ShortcutAction) {
 	}
 	if _, found := action.WFWorkflowActionParameters[UUID]; found {
 		var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
-		if _, found := uuids[actionUUID]; !found {
+		if _, found := uuids[actionUUID]; found {
 			return
 		}
 		for uuid, varName := range uuids {
