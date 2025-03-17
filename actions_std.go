@@ -3575,12 +3575,19 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "Input",
 				validType: Variable,
 			},
 		},
 		defaultAction: true,
-		make: func(args []actionArgument) []plistData {
-			return countParams("Items", args)
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFCountType",
+					dataType: Text,
+					value:    "Items",
+				},
+			}
 		},
 	},
 	"countChars": {
@@ -3588,11 +3595,18 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: Variable,
+				key:       "Input",
+				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return countParams("Characters", args)
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFCountType",
+					dataType: Text,
+					value:    "Characters",
+				},
+			}
 		},
 	},
 	"countWords": {
@@ -3600,11 +3614,18 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: Variable,
+				key:       "Input",
+				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return countParams("Words", args)
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFCountType",
+					dataType: Text,
+					value:    "Words",
+				},
+			}
 		},
 	},
 	"countSentences": {
@@ -3612,11 +3633,18 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: Variable,
+				key:       "Input",
+				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return countParams("Sentences", args)
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFCountType",
+					dataType: Text,
+					value:    "Sentences",
+				},
+			}
 		},
 	},
 	"countLines": {
@@ -3624,11 +3652,19 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: Variable,
+				key:       "Input",
+				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return countParams("Lines", args)
+
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFCountType",
+					dataType: Text,
+					value:    "Lines",
+				},
+			}
 		},
 	},
 	"lightMode": {
@@ -6233,17 +6269,6 @@ func languageCode(language string) string {
 
 	parserError(fmt.Sprintf("Unknown language '%s'", language))
 	return ""
-}
-
-func countParams(countType string, args []actionArgument) []plistData {
-	return []plistData{
-		{
-			key:      "WFCountType",
-			dataType: Text,
-			value:    countType,
-		},
-		argumentValue("Input", args, 0),
-	}
 }
 
 var appIds map[string]string
