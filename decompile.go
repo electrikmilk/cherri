@@ -51,6 +51,7 @@ func mapIdentifiers() {
 	variables = make(map[string]variableValue)
 	uuids = make(map[string]string)
 	for _, action := range shortcut.WFWorkflowActions {
+		currentActionIdentifier = action.WFWorkflowActionIdentifier
 		var params = action.WFWorkflowActionParameters
 		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
 			var varName = params["WFVariableName"].(string)
@@ -119,6 +120,10 @@ func mapUUID(uuid string, varName string) {
 		outputName = varName
 		sanitizeIdentifier(&outputName)
 		uuids[uuid] = checkDuplicateOutputName(outputName)
+
+		if currentActionIdentifier == SetVariableIdentifier || currentActionIdentifier == AppendVariableIdentifier {
+			varUUIDs = append(varUUIDs, uuid)
+		}
 	}
 }
 
@@ -250,6 +255,8 @@ func decompileActions() {
 	}
 }
 
+var varUUIDs []string
+
 func checkConstantLiteral(action *ShortcutAction) {
 	if _, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
 		var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
@@ -264,17 +271,12 @@ func checkConstantLiteral(action *ShortcutAction) {
 	}
 	if _, found := action.WFWorkflowActionParameters[UUID]; found {
 		var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
-		if _, found := uuids[actionUUID]; found {
-			return
-		}
-		for uuid, varName := range uuids {
-			if uuid != actionUUID {
-				continue
-			}
-			if _, found := variables[varName]; found {
+		if outputName, found := uuids[actionUUID]; found {
+			if slices.Contains(varUUIDs, actionUUID) {
 				return
 			}
-			newCodeLine(fmt.Sprintf("const %s = ", uuids[actionUUID]))
+
+			newCodeLine(fmt.Sprintf("const %s = ", outputName))
 			code.WriteString(currentVariableValue)
 			code.WriteRune('\n')
 			currentVariableValue = ""
