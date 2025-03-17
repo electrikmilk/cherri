@@ -193,6 +193,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -200,7 +201,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Add", "sec", args)
 		},
 	},
@@ -209,6 +210,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -216,7 +218,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Add", "min", args)
 		},
 	},
@@ -225,6 +227,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -232,7 +235,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Add", "hr", args)
 		},
 	},
@@ -241,6 +244,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -248,7 +252,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Add", "days", args)
 		},
 	},
@@ -257,6 +261,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -264,7 +269,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Add", "weeks", args)
 		},
 	},
@@ -273,6 +278,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -280,7 +286,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Add", "months", args)
 		},
 	},
@@ -289,6 +295,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -296,7 +303,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Add", "yr", args)
 		},
 	},
@@ -305,6 +312,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -312,7 +320,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Subtract", "sec", args)
 		},
 	},
@@ -321,6 +329,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -328,7 +337,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Subtract", "min", args)
 		},
 	},
@@ -337,6 +346,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -344,7 +354,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Subtract", "hr", args)
 		},
 	},
@@ -353,6 +363,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -360,7 +371,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Subtract", "days", args)
 		},
 	},
@@ -369,6 +380,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -376,7 +388,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Subtract", "weeks", args)
 		},
 	},
@@ -385,6 +397,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -392,7 +405,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Subtract", "months", args)
 		},
 	},
@@ -400,15 +413,16 @@ var actions = map[string]*actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
+				name:      "date",
+				key:       "WFDate",
+				validType: String,
+			},
+			{
 				name:      "magnitude",
 				validType: Integer,
 			},
-			{
-				name:      "date",
-				validType: String,
-			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Subtract", "yr", args)
 		},
 	},
@@ -417,10 +431,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Get Start of Minute", "", args)
 		},
 	},
@@ -429,10 +444,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Get Start of Hour", "", args)
 		},
 	},
@@ -441,10 +457,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Get Start of Week", "", args)
 		},
 	},
@@ -453,10 +470,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Get Start of Month", "", args)
 		},
 	},
@@ -465,10 +483,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return adjustDate("Get Start of Year", "", args)
 		},
 	},
@@ -6143,7 +6162,6 @@ func adjustDate(operation string, unit string, args []actionArgument) (adjustDat
 			dataType: Text,
 			value:    operation,
 		},
-		argumentValue("WFDate", args, 0),
 	}
 	if unit == "" {
 		return adjustDateParams
