@@ -49,7 +49,7 @@ func init() {
 	})
 	args.Register(args.Argument{
 		Name:         "import",
-		Description:  "Import Shortcut and convert into Cherri.",
+		Description:  "[BETA] Import Shortcut from local file path or iCloud link and output Cherri file.",
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
