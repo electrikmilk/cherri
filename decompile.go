@@ -853,10 +853,7 @@ func decompAction(action *ShortcutAction) {
 				var argValue string
 				if value, found := action.WFWorkflowActionParameters[param.key]; found {
 					argValue = decompValue(value)
-				} else {
-					if i == matchedParamsSize-1 && param.optional {
-						continue
-					}
+				} else if !param.optional {
 					argValue = makeDefaultValue(param)
 				}
 
