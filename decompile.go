@@ -80,6 +80,10 @@ func mapIdentifiers() {
 	}
 }
 
+func peekActions(peek int) ShortcutAction {
+	return shortcut.WFWorkflowActions[actionIndex+peek]
+}
+
 func checkParamIdentifiers(params map[string]interface{}) {
 	for _, value := range params {
 		if value == nil || reflect.TypeOf(value).String() != dictType {
@@ -845,7 +849,18 @@ func decompAction(action *ShortcutAction) {
 		code.WriteRune('\n')
 
 		decompWarning(fmt.Sprintf("Get variable '%s' is not supported. Set a variable to that value instead if something was depending on it's output.", varName))
+
+		actionIndex++
 		return
+	}
+	if action.WFWorkflowActionIdentifier == "is.workflow.actions.nothing" {
+		var nextAction = peekActions(1)
+		if nextAction.WFWorkflowActionIdentifier == "is.workflow.actions.conditional" {
+			var controlFlowMode = int(nextAction.WFWorkflowActionParameters["WFControlFlowMode"].(uint64))
+			if controlFlowMode == endStatement || controlFlowMode == statementPart {
+				return
+			}
+		}
 	}
 
 	var isVariableValue = false
@@ -914,6 +929,7 @@ func decompAction(action *ShortcutAction) {
 		code.WriteRune('\n')
 		currentVariableValue = ""
 	}
+	actionIndex++
 }
 
 func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
