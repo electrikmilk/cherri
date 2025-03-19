@@ -901,7 +901,7 @@ func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actio
 			if i == 0 {
 				actionCallCode.WriteString(argValue)
 			} else {
-				actionCallCode.WriteString(fmt.Sprintf(", %s", argValue))
+				actionCallCode.WriteString(fmt.Sprintf(",%s", argValue))
 			}
 		}
 	}
@@ -1127,7 +1127,7 @@ func decompActionCustom(actionCode *strings.Builder, matchedAction *actionDefini
 	if len(arguments) == 0 {
 		return
 	}
-	actionCode.WriteString(strings.Join(arguments, ", "))
+	actionCode.WriteString(strings.Join(arguments, ","))
 }
 
 func glueToChar(glue string) string {
