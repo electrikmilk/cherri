@@ -148,6 +148,7 @@ var toggleAlarmIntent = appIntent{
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
 	"date": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -540,7 +541,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"formatDate": {
-		identifier: "format.date",
+		identifier:    "format.date",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -772,6 +774,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"turnOnAlarm": {
+		defaultAction: true,
 		appIdentifier: "com.apple.mobiletimer-framework",
 		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
 		appIntent:     toggleAlarmIntent,
@@ -1234,7 +1237,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"appendToFile": {
-		identifier: "file.append",
+		identifier:    "file.append",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "filePath",
@@ -1502,7 +1506,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"matchText": {
-		identifier: "text.match",
+		identifier:    "text.match",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "regexPattern",
@@ -1744,7 +1749,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"selectFile": {
-		identifier: "file.select",
+		identifier:    "file.select",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:         "selectMultiple",
@@ -1914,7 +1920,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"saveFilePrompt": {
-		identifier: "documentpicker.save",
+		identifier:    "documentpicker.save",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "file",
@@ -2002,7 +2009,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"translate": {
-		identifier: "text.translate",
+		identifier:    "text.translate",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -2302,7 +2310,8 @@ var actions = map[string]*actionDefinition{
 		minVersion: 15,
 	},
 	"makeSizedDiskImage": {
-		identifier: "makediskimage",
+		identifier:    "makediskimage",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "name",
@@ -2737,6 +2746,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addToPlaylist": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "playlistName",
@@ -2751,7 +2761,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"playNext": {
-		identifier: "addmusictoupnext",
+		identifier:    "addmusictoupnext",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "music",
@@ -3145,7 +3156,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"convertImage": {
-		identifier: "image.convert",
+		identifier:    "image.convert",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "image",
@@ -3168,7 +3180,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"encodeVideo": {
-		identifier: "encodemedia",
+		identifier:    "encodemedia",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "video",
@@ -3376,7 +3389,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"togglePlayPause": {
-		identifier: "pausemusic",
+		identifier:    "pausemusic",
+		defaultAction: true,
 		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -3417,6 +3431,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"takeScreenshot": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:         "mainMonitorOnly",
@@ -3614,7 +3629,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"countChars": {
-		identifier: "count",
+		identifier:    "count",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
@@ -3622,7 +3638,7 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFCountType",
@@ -3708,7 +3724,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"darkMode": {
-		identifier: "appearance",
+		identifier:    "appearance",
+		defaultAction: true,
 		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
@@ -3724,7 +3741,7 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"getBatteryLevel": {},
+	"getBatteryLevel": {defaultAction: true},
 	"isCharging": {
 		identifier: "getbatterylevel",
 		minVersion: 16.2,
@@ -4163,7 +4180,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getValue": {
-		identifier: "getvalueforkey",
+		identifier:    "getvalueforkey",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "dictionary",
@@ -4207,6 +4225,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openApp": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "appID",
@@ -4237,7 +4256,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"hideApp": {
-		identifier: "hide.app",
+		identifier:    "hide.app",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "appID",
@@ -4299,7 +4319,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"quitApp": {
-		identifier: "quit.app",
+		identifier:    "quit.app",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "appID",
@@ -4567,7 +4588,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"run": {
-		identifier: "runworkflow",
+		identifier:    "runworkflow",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "shortcutName",
@@ -4948,8 +4970,9 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getAllWallpapers": {
-		identifier: "posters.get",
-		minVersion: 16.2,
+		identifier:    "posters.get",
+		minVersion:    16.2,
+		defaultAction: true,
 	},
 	"getWallpaper": {
 		identifier: "posters.get",
@@ -4986,7 +5009,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openXCallbackURL": {
-		identifier: "openxcallbackurl",
+		identifier:    "openxcallbackurl",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -5118,7 +5142,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"DNDOff": {
-		identifier: "dnd.set",
+		identifier:    "dnd.set",
+		defaultAction: true,
 		make: func(_ []actionArgument) []plistData {
 			return []plistData{
 				focusModes,
@@ -5165,6 +5190,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"round": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
@@ -5458,7 +5484,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getGifs": {
-		identifier: "giphy",
+		identifier:    "giphy",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "query",
@@ -5520,6 +5547,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"downloadURL": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -5897,7 +5925,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"updateContact": {
-		identifier: "setters.contacts",
+		identifier:    "setters.contacts",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "contact",
