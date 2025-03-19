@@ -30,6 +30,7 @@ The main goal is to make it trivial and practical to create large Shortcut proje
 - ❓ Define import questions
 - 📇 Generate VCards for menus
 - 📄 Embed files in base64
+- 🔀 Convert Shortcuts from an iCloud link with the `--import=` option
 - 🔢 Type system and type inference
 
 ### Resources
