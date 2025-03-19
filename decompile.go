@@ -251,12 +251,6 @@ func decompileActions() {
 			decompNumberValue(&action)
 		case "is.workflow.actions.dictionary":
 			decompDictionary(&action)
-		case "is.workflow.actions.list":
-			decompList(&action)
-		case "is.workflow.actions.url":
-			fallthrough
-		case "is.workflow.actions.readinglist":
-			decompURL(&action)
 		case "is.workflow.actions.calculateexpression":
 			decompExpression(&action)
 		case SetVariableIdentifier, AppendVariableIdentifier:
@@ -369,55 +363,6 @@ func decompVariable(action *ShortcutAction) {
 
 	currentVariableValue = ""
 	code.WriteRune('\n')
-}
-
-func decompList(action *ShortcutAction) {
-	var list strings.Builder
-	var listItems = action.WFWorkflowActionParameters["WFItems"].([]interface{})
-	var listSize = len(listItems)
-	list.WriteString("list(")
-	for i, item := range listItems {
-		var itemValue = item
-		if reflect.TypeOf(item).String() != "string" {
-			itemValue = item.(map[string]interface{})["WFValue"]
-		}
-		list.WriteString(decompValue(itemValue))
-
-		if i < listSize-1 {
-			list.WriteRune(',')
-		}
-	}
-
-	list.WriteRune(')')
-	currentVariableValue = list.String()
-	list.Reset()
-
-	checkConstantLiteral(action)
-}
-
-func decompURL(action *ShortcutAction) {
-	var urlValueType = reflect.TypeOf(action.WFWorkflowActionParameters["WFURLActionURL"]).String()
-	if urlValueType == dictType || urlValueType == "string" {
-		currentVariableValue = fmt.Sprintf("url(%s)", decompValue(action.WFWorkflowActionParameters["WFURLActionURL"]))
-	} else {
-		var urlAction strings.Builder
-		var urls = action.WFWorkflowActionParameters["WFURLActionURL"].([]interface{})
-		var urlsSize = len(urls)
-		urlAction.WriteString("url(")
-		for i, url := range urls {
-			urlAction.WriteString(decompValue(url))
-
-			if i < urlsSize-1 {
-				urlAction.WriteRune(',')
-			}
-		}
-
-		urlAction.WriteRune(')')
-		currentVariableValue = urlAction.String()
-		urlAction.Reset()
-	}
-
-	checkConstantLiteral(action)
 }
 
 var controlFlowUUIDs []string

@@ -3828,6 +3828,7 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
+		decomp: decompInfiniteURLAction,
 	},
 	"addToReadingList": {
 		identifier: "readinglist",
@@ -3856,6 +3857,7 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
+		decomp: decompInfiniteURLAction,
 	},
 	"hash": {
 		parameters: []parameterDefinition{
@@ -4703,6 +4705,17 @@ var actions = map[string]*actionDefinition{
 					value:    listItems,
 				},
 			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var listItems = action.WFWorkflowActionParameters["WFItems"].([]interface{})
+			for _, item := range listItems {
+				var itemValue = item
+				if reflect.TypeOf(item).String() != "string" {
+					itemValue = item.(map[string]interface{})["WFValue"]
+				}
+				arguments = append(arguments, decompValue(itemValue))
+			}
+			return
 		},
 	},
 	"calculate": {
@@ -6496,6 +6509,20 @@ func httpRequest(bodyType string, valuesKey string, args []actionArgument) (para
 	if len(args) > 0 {
 		params = append(params, argumentValue(valuesKey, args, 2))
 	}
+	return
+}
+
+func decompInfiniteURLAction(action *ShortcutAction) (arguments []string) {
+	var urlValueType = reflect.TypeOf(action.WFWorkflowActionParameters["WFURLActionURL"]).String()
+	if urlValueType == dictType || urlValueType == "string" {
+		return append(arguments, decompValue(action.WFWorkflowActionParameters["WFURLActionURL"]))
+	}
+
+	var urls = action.WFWorkflowActionParameters["WFURLActionURL"].([]interface{})
+	for _, url := range urls {
+		arguments = append(arguments, decompValue(url))
+	}
+
 	return
 }
 
