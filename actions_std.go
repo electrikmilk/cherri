@@ -3102,6 +3102,12 @@ var actions = map[string]*actionDefinition{
 				enum:      imageFormats,
 			},
 			{
+				name:      "quality",
+				key:       "WFImageCompressionQuality",
+				validType: Float,
+				optional:  true,
+			},
+			{
 				name:         "preserveMetadata",
 				validType:    Bool,
 				key:          "WFImagePreserveMetadata",
