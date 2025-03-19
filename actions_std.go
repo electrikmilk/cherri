@@ -4518,6 +4518,7 @@ var actions = map[string]*actionDefinition{
 			},
 			{
 				name:         "ratio",
+				key:          "WFAppRatio",
 				validType:    String,
 				optional:     true,
 				enum:         appSplitRatios,
@@ -4543,11 +4544,7 @@ var actions = map[string]*actionDefinition{
 				}
 			}
 		},
-		make: func(args []actionArgument) (params []plistData) {
-			params = []plistData{
-				argumentValue("WFAppRatio", args, 2),
-			}
-
+		addParams: func(args []actionArgument) (params []plistData) {
 			if args[0].valueType == Variable {
 				params = append(params, argumentValue("WFPrimaryAppIdentifier", args, 0))
 			} else {
@@ -4571,6 +4568,23 @@ var actions = map[string]*actionDefinition{
 					},
 				})
 			}
+
+			return
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var splitRatio = decompValue(action.WFWorkflowActionParameters["WFAppRatio"])
+
+			var ratio = "half"
+			switch splitRatio {
+			case "½ + ½":
+				ratio = "half"
+			case "⅓ + ⅔":
+				ratio = "thirdByTwo"
+			}
+
+			arguments = append(arguments, fmt.Sprintf("\"%s\"", ratio))
+			arguments = append(arguments, decompAppAction("WFPrimaryAppIdentifier", action)...)
+			arguments = append(arguments, decompAppAction("WFSecondaryAppIdentifier", action)...)
 
 			return
 		},
