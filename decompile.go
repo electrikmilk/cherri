@@ -744,6 +744,7 @@ func decompObjectValue(valueObj any) string {
 		var value = valueObj.(map[string]interface{})
 
 		var attachmentString string
+		var originalString string
 		if value["value"] != nil {
 			if reflect.TypeOf(value["value"]).String() != "map[string]interface {}" {
 				return fmt.Sprintf("%v", valueObj)
@@ -753,6 +754,7 @@ func decompObjectValue(valueObj any) string {
 
 		if _, found := value["string"]; found {
 			attachmentString = value["string"].(string)
+			originalString = attachmentString
 		}
 
 		var attachmentChars = strings.Split(attachmentString, "")
@@ -782,7 +784,13 @@ func decompObjectValue(valueObj any) string {
 				attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
 			}
 
-			attachmentString = fmt.Sprintf("\"%s\"", escapeString(strings.Join(attachmentChars, "")))
+			attachmentString = escapeString(strings.Join(attachmentChars, ""))
+
+			if originalString == ObjectReplaceCharStr && len(attachments.(map[string]interface{})) == 1 {
+				attachmentString = strings.Trim(attachmentString, "{}")
+			} else {
+				attachmentString = fmt.Sprintf("\"%s\"", attachmentString)
+			}
 		}
 
 		return attachmentString
