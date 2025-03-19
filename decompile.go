@@ -840,6 +840,11 @@ var macDefinition bool
 
 func decompAction(action *ShortcutAction) {
 	if action.WFWorkflowActionIdentifier == "is.workflow.actions.getvariable" {
+		var varName = decompValue(action.WFWorkflowActionParameters["WFVariable"])
+		newCodeLine(fmt.Sprintf("// TODO: Get Variable not supported: Assign variable here to '%s'.", varName))
+		code.WriteRune('\n')
+
+		decompWarning(fmt.Sprintf("Get variable '%s' is not supported. Set a variable to that value instead if something was depending on it's output.", varName))
 		return
 	}
 
