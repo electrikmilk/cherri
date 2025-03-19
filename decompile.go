@@ -64,6 +64,12 @@ func mapIdentifiers() {
 			if _, found := variables[varName]; !found {
 				variables[varName] = variableValue{}
 			}
+
+			if action.WFWorkflowActionParameters["WFInput"] != nil {
+				var wfInput WFInput
+				mapToStruct(action.WFWorkflowActionParameters["WFInput"], &wfInput)
+				varUUIDs = append(varUUIDs, wfInput.Value.OutputUUID)
+			}
 		}
 
 		if params["UUID"] != nil && params["CustomOutputName"] != nil {
@@ -125,10 +131,6 @@ func mapUUID(uuid string, varName string) {
 		outputName = varName
 		sanitizeIdentifier(&outputName)
 		uuids[uuid] = checkDuplicateOutputName(outputName)
-
-		if currentActionIdentifier == SetVariableIdentifier || currentActionIdentifier == AppendVariableIdentifier {
-			varUUIDs = append(varUUIDs, uuid)
-		}
 	}
 }
 
@@ -265,17 +267,6 @@ func decompileActions() {
 var varUUIDs []string
 
 func checkConstantLiteral(action *ShortcutAction) {
-	if _, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
-		var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
-		sanitizeIdentifier(&customOutputName)
-		if _, found := variables[customOutputName]; !found {
-			newCodeLine(fmt.Sprintf("const %s = ", customOutputName))
-			code.WriteString(currentVariableValue)
-			code.WriteRune('\n')
-			currentVariableValue = ""
-			return
-		}
-	}
 	if _, found := action.WFWorkflowActionParameters[UUID]; found {
 		var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
 		if outputName, found := uuids[actionUUID]; found {
@@ -875,8 +866,11 @@ func decompAction(action *ShortcutAction) {
 	if action.WFWorkflowActionParameters[UUID] != nil && !isVariableValue {
 		var uuid = action.WFWorkflowActionParameters[UUID].(string)
 		if _, found := uuids[uuid]; found {
-			newCodeLine(fmt.Sprintf("const %s = ", uuids[uuid]))
-			isConstant = true
+			isConstant = !slices.Contains(varUUIDs, uuid)
+			isVariableValue = slices.Contains(varUUIDs, uuid)
+			if isConstant {
+				newCodeLine(fmt.Sprintf("const %s = ", uuids[uuid]))
+			}
 		}
 	}
 
@@ -1188,25 +1182,12 @@ func getDefaultAction(splitActions *[]actionValue) (action actionValue, found bo
 func printDecompDebug() {
 	fmt.Println(ansi("##### DEBUG #####\n", red))
 
-	fmt.Println("### ACTIONS ###")
-	for _, action := range shortcut.WFWorkflowActions {
-		fmt.Println(action.WFWorkflowActionIdentifier)
-		var maxKeySize int
-		for key := range action.WFWorkflowActionParameters {
-			var keySize = len(key)
-			if keySize > maxKeySize {
-				maxKeySize = keySize
-			}
-		}
-		for key, value := range action.WFWorkflowActionParameters {
-			fmt.Println("\t", key, strings.Repeat(" ", maxKeySize-len(key)), value)
-		}
-		fmt.Print("\n")
-	}
-	fmt.Print("\n")
-
 	fmt.Println("### VARIABLES ###")
 	printVariables()
+	fmt.Print("\n")
+
+	fmt.Println("### VARIABLE UUIDs ###")
+	fmt.Println(varUUIDs)
 	fmt.Print("\n")
 
 	fmt.Println("### UUIDS ###")

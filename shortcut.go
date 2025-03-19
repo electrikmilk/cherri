@@ -60,3 +60,7 @@ type WFValue struct {
 	String              string
 	WFSerializationType string
 }
+
+type WFInput struct {
+	Value Value
+}
