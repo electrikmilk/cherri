@@ -138,14 +138,19 @@ func handleFile() {
 	basename = nameParts[0]
 	workflowName = basename
 
-	outputPath = relativePath + workflowName + ".shortcut"
-	if args.Using("output") {
-		outputPath = args.Value("output")
-	}
+	outputPath = getOutputPath(relativePath + workflowName + ".shortcut")
 
 	var fileBytes, readErr = os.ReadFile(filePath)
 	handle(readErr)
 	contents = string(fileBytes)
+}
+
+func getOutputPath(defaultPath string) string {
+	if args.Using("output") {
+		return args.Value("output")
+	}
+
+	return defaultPath
 }
 
 // checkFile checks if the file exists and is a .cherri file.

@@ -34,14 +34,19 @@ func decompile(b []byte) {
 
 	mapIdentifiers()
 	mapSplitActions()
+
+	defineName()
 	decompileIcon()
+
 	decompileActions()
 
 	if args.Using("debug") {
 		printDecompDebug()
 	}
 
-	var writeErr = os.WriteFile(relativePath+basename+"_decompiled.cherri", []byte(code.String()), 0600)
+	outputPath = getOutputPath(fmt.Sprintf("%s%s.cherri", relativePath, strings.ReplaceAll(basename, " ", "_")))
+
+	var writeErr = os.WriteFile(outputPath, []byte(code.String()), 0600)
 	handle(writeErr)
 }
 
@@ -188,6 +193,12 @@ func tabbedLine(s string) string {
 	str.WriteString(s)
 
 	return str.String()
+}
+
+func defineName() {
+	if strings.Contains(basename, " ") {
+		newCodeLine(fmt.Sprintf("#define name %s\n", basename))
+	}
 }
 
 func decompileIcon() {
