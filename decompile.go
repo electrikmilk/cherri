@@ -601,7 +601,7 @@ func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary map[s
 		var itemValue any
 		switch dictDataType(itemValueType) {
 		case itemTypeNumber:
-			itemStringValue = item.WFValue.String
+			itemStringValue = item.WFValue.Value.(map[string]interface{})["string"].(string)
 			if itemStringValue != "" {
 				var convErr error
 				itemValue, convErr = strconv.Atoi(itemStringValue)
@@ -615,7 +615,8 @@ func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary map[s
 			itemValue = decompArray(item.WFValue.Value.([]interface{}))
 		case itemTypeDict:
 			var dictionaryItems []WFDictionaryFieldValueItem
-			mapToStruct(item.WFValue.Value.(map[string]interface{}), dictionaryItems)
+			var value = item.WFValue.Value.(map[string]interface{})
+			mapToStruct(value["Value"].(map[string]interface{})["WFDictionaryFieldValueItems"], &dictionaryItems)
 			itemValue = decompDictionaryItems(dictionaryItems)
 		default:
 			itemValue = itemStringValue
