@@ -237,11 +237,11 @@ func checkAction() {
 	if isMac, found := definitions["mac"]; found {
 		if !isMac.(bool) && currentAction.mac {
 			parserError(
-				fmt.Sprintf("You've defined your Shortcut as a non-macOS Shortcut. Action '%s()' is a macOS only action", currentActionIdentifier),
+				fmt.Sprintf("macOS action '%s()' in non-macOS Shortcut.", currentActionIdentifier),
 			)
 		} else if isMac.(bool) && !currentAction.mac {
 			parserError(
-				fmt.Sprintf("You've defined your Shortcut as a macOS shortcut. Action '%s()' is a macOS only action", currentActionIdentifier),
+				fmt.Sprintf("Non-macOS action '%s()' in macOS-only Shortcut.", currentActionIdentifier),
 			)
 		}
 	}
