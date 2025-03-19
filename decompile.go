@@ -1027,51 +1027,7 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 	}
 
 	for _, splitAction := range *splitActions {
-		var splitActionParams = splitAction.definition.parameters
-
-		var matchedParams float64
-		var matchedValues float64
-		for _, param := range splitActionParams {
-			if param.key == "" {
-				continue
-			}
-			if value, found := parameters[param.key]; found {
-				matchedParams++
-				if len(param.enum) > 0 && slices.Contains(param.enum, fmt.Sprintf("%s", value)) {
-					matchedValues++
-				}
-				if param.defaultValue != nil {
-					var defaultValue = fmt.Sprintf("%v", param.defaultValue)
-					var rawValue = strings.Trim(decompValue(value), "\"")
-					if defaultValue == rawValue && defaultValue != "" && rawValue != "" {
-						matchedValues++
-					}
-				}
-			}
-		}
-
-		var splitActionAddParams []parameterDefinition
-		if splitAction.definition.addParams != nil {
-			for _, addParam := range splitAction.definition.addParams([]actionArgument{}) {
-				splitActionAddParams = append(splitActionAddParams, parameterDefinition{
-					key:          addParam.key,
-					defaultValue: addParam.value,
-				})
-			}
-		}
-
-		for _, param := range splitActionAddParams {
-			if param.key == "" {
-				continue
-			}
-			if value, found := parameters[param.key]; found {
-				matchedParams++
-
-				if param.defaultValue == value {
-					matchedValues++
-				}
-			}
-		}
+		var matchedParams, matchedValues = scoreActionMatch(splitAction, splitAction.definition.parameters, parameters)
 
 		if matchedParams == 0 {
 			continue
@@ -1098,6 +1054,52 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 	var matchedAction = matches[0]
 	*identifier = matchedAction.action.identifier
 	*definition = *matchedAction.action.definition
+}
+
+func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefinition, parameters map[string]any) (matchedParams float64, matchedValues float64) {
+	for _, param := range splitActionParams {
+		if param.key == "" {
+			continue
+		}
+		if value, found := parameters[param.key]; found {
+			matchedParams++
+			if len(param.enum) > 0 && slices.Contains(param.enum, fmt.Sprintf("%s", value)) {
+				matchedValues++
+			}
+			if param.defaultValue != nil {
+				var defaultValue = fmt.Sprintf("%v", param.defaultValue)
+				var rawValue = strings.Trim(decompValue(value), "\"")
+				if defaultValue == rawValue && defaultValue != "" && rawValue != "" {
+					matchedValues++
+				}
+			}
+		}
+	}
+
+	var splitActionAddParams []parameterDefinition
+	if splitAction.definition.addParams != nil {
+		for _, addParam := range splitAction.definition.addParams([]actionArgument{}) {
+			splitActionAddParams = append(splitActionAddParams, parameterDefinition{
+				key:          addParam.key,
+				defaultValue: addParam.value,
+			})
+		}
+	}
+
+	for _, param := range splitActionAddParams {
+		if param.key == "" {
+			continue
+		}
+		if value, found := parameters[param.key]; found {
+			matchedParams++
+
+			if param.defaultValue == value {
+				matchedValues++
+			}
+		}
+	}
+
+	return
 }
 
 func decompMakeAction(actionCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
