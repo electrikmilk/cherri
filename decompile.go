@@ -254,6 +254,7 @@ func decompileActions() {
 		case "is.workflow.actions.list":
 			decompList(&action)
 		case "is.workflow.actions.url":
+			fallthrough
 		case "is.workflow.actions.readinglist":
 			decompURL(&action)
 		case "is.workflow.actions.calculateexpression":
