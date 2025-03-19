@@ -4586,6 +4586,12 @@ var actions = map[string]*actionDefinition{
 				argumentValue("WFInput", args, 0),
 			}
 		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			if action.WFWorkflowActionParameters["WFInput"] != nil {
+				arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFInput"]))
+			}
+			return
+		},
 	},
 	"run": {
 		identifier:    "runworkflow",

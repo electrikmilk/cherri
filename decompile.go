@@ -1022,8 +1022,9 @@ func matchAction(action *ShortcutAction) (name string, definition actionDefiniti
 					break
 				}
 
-				if workflow["isSelf"].(bool) {
+				if workflow["isSelf"].(bool) || action.WFWorkflowActionParameters["WFWorkflowName"] == basename {
 					name = "runSelf"
+					definition = *actions["runSelf"]
 				} else {
 					name = "run"
 				}
