@@ -4984,7 +4984,7 @@ var actions = map[string]*actionDefinition{
 	"getWallpaper": {
 		identifier: "posters.get",
 		minVersion: 16.2,
-		make: func(_ []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFPosterType",
@@ -5137,7 +5137,7 @@ var actions = map[string]*actionDefinition{
 	},
 	"DNDOn": {
 		identifier: "dnd.set",
-		make: func(_ []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				focusModes,
 				{
@@ -5151,7 +5151,7 @@ var actions = map[string]*actionDefinition{
 	"DNDOff": {
 		identifier:    "dnd.set",
 		defaultAction: true,
-		make: func(_ []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				focusModes,
 				{
