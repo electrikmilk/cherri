@@ -76,7 +76,7 @@ func mapIdentifiers() {
 
 func checkParamIdentifiers(params map[string]interface{}) {
 	for _, value := range params {
-		if value == nil || reflect.TypeOf(value).String() != "map[string]interface {}" {
+		if value == nil || reflect.TypeOf(value).String() != dictType {
 			continue
 		}
 
