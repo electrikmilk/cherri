@@ -134,10 +134,6 @@ func mapUUID(uuid string, varName string) {
 
 // sanitizeIdentifier strips special characters and replaces dashes with underscores.
 func sanitizeIdentifier(identifier *string) {
-	if strings.Contains(*identifier, "IfResult") {
-		decompWarning("Usage of result of If action detected, this feature is not compatible with Cherri. This can be manually corrected by assigning a variable within the if statement branches and then using that variable instead.")
-	}
-
 	*identifier = strings.ReplaceAll(*identifier, "-", "_")
 	*identifier = specialCharsRegex.ReplaceAllString(*identifier, "")
 }
@@ -422,6 +418,15 @@ func decompURL(action *ShortcutAction) {
 	checkConstantLiteral(action)
 }
 
+var controlFlowUUIDs []string
+
+func collectControlFlowUUID(action *ShortcutAction) {
+	if action.WFWorkflowActionParameters["UUID"] != nil {
+		var uuid = action.WFWorkflowActionParameters["UUID"].(string)
+		controlFlowUUIDs = append(controlFlowUUIDs, uuid)
+	}
+}
+
 func decompMenu(action *ShortcutAction) {
 	if len(menus) == 0 {
 		menus = make(map[string][]variableValue)
@@ -453,6 +458,7 @@ func decompMenu(action *ShortcutAction) {
 		code.WriteString(":\n")
 		tabLevel++
 	case endStatement:
+		collectControlFlowUUID(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -475,6 +481,7 @@ func decompRepeat(action *ShortcutAction) {
 		code.WriteString(" {\n")
 		tabLevel++
 	case endStatement:
+		collectControlFlowUUID(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -497,6 +504,7 @@ func decompFor(action *ShortcutAction) {
 		code.WriteString(" {\n")
 		tabLevel++
 	case endStatement:
+		collectControlFlowUUID(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -556,6 +564,7 @@ func decompConditional(action *ShortcutAction) {
 		newCodeLine("} else {\n")
 		tabLevel++
 	case endStatement:
+		collectControlFlowUUID(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -711,6 +720,10 @@ func decompValueObject(value map[string]interface{}) string {
 			var outputName = uuids[value["OutputUUID"].(string)]
 			sanitizeIdentifier(&outputName)
 
+			if isControlFlowUUID(value["OutputUUID"].(string)) {
+				decompWarning("Usage of control flow action output detected. This feature is not supported in Cherri. This can be manually corrected by assigning a variable within the control flow branches and then using that variable instead.")
+			}
+
 			return outputName
 		}
 	case globals[ShortcutInput].variableType:
@@ -718,6 +731,10 @@ func decompValueObject(value map[string]interface{}) string {
 	}
 
 	return decompObjectValue(value)
+}
+
+func isControlFlowUUID(uuid string) bool {
+	return slices.Contains(controlFlowUUIDs, uuid)
 }
 
 func decompObjectValue(valueObj any) string {
