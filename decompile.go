@@ -578,7 +578,11 @@ type WFItems struct {
 	Value Value
 }
 
+var decompilingDictinary = false
+
 func decompDictionary(action *ShortcutAction) {
+	decompilingDictinary = true
+
 	var params DictionaryActionParameters
 	mapToStruct(action.WFWorkflowActionParameters, &params)
 
@@ -589,6 +593,8 @@ func decompDictionary(action *ShortcutAction) {
 	currentVariableValue = string(jsonBytes)
 
 	checkConstantLiteral(action)
+
+	decompilingDictinary = false
 }
 
 func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary map[string]interface{}) {
@@ -795,7 +801,7 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 
 	*attachmentString = escapeString(strings.Join(attachmentChars, ""))
 
-	if originalString == ObjectReplaceCharStr && len(attachments) == 1 {
+	if !decompilingDictinary && originalString == ObjectReplaceCharStr && len(attachments) == 1 {
 		*attachmentString = strings.Trim(*attachmentString, "{}")
 	} else {
 		*attachmentString = fmt.Sprintf("\"%s\"", *attachmentString)
