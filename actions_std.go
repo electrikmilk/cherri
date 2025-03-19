@@ -4263,16 +4263,13 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "appID",
 				validType: String,
+				key:       "WFAppIdentifier",
 			},
 		},
 		check: func(args []actionArgument, definition *actionDefinition) {
 			replaceAppIDs(args, definition)
 		},
-		make: func(args []actionArgument) (params []plistData) {
-			params = []plistData{
-				argumentValue("WFAppIdentifier", args, 0),
-			}
-
+		addParams: func(args []actionArgument) (params []plistData) {
 			if args[0].valueType == Variable {
 				params = append(params, argumentValue("WFSelectedApp", args, 0))
 			} else {
@@ -4286,6 +4283,9 @@ var actions = map[string]*actionDefinition{
 			}
 
 			return
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFAppIdentifier", action)
 		},
 	},
 	"hideApp": {
@@ -4317,6 +4317,9 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFApp", action)
+		},
 	},
 	"hideAllApps": {
 		identifier: "hide.app",
@@ -4330,14 +4333,6 @@ var actions = map[string]*actionDefinition{
 		},
 		check: replaceAppIDs,
 		make: func(args []actionArgument) (params []plistData) {
-			params = []plistData{
-				{
-					key:      "WFHideAppMode",
-					dataType: Text,
-					value:    "All Apps",
-				},
-			}
-
 			if args[0].valueType != Variable {
 				params = append(params, plistData{
 					key:      "WFAppsExcept",
@@ -4349,6 +4344,18 @@ var actions = map[string]*actionDefinition{
 			}
 
 			return
+		},
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFHideAppMode",
+					dataType: Text,
+					value:    "All Apps",
+				},
+			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFAppsExcept", action)
 		},
 	},
 	"quitApp": {
@@ -4368,17 +4375,20 @@ var actions = map[string]*actionDefinition{
 				return []plistData{
 					argumentValue("WFApp", args, 0),
 				}
-			} else {
-				return []plistData{
-					{
-						key:      "WFApp",
-						dataType: Dictionary,
-						value: []plistData{
-							argumentValue("BundleIdentifier", args, 0),
-						},
-					},
-				}
 			}
+
+			return []plistData{
+				{
+					key:      "WFApp",
+					dataType: Dictionary,
+					value: []plistData{
+						argumentValue("BundleIdentifier", args, 0),
+					},
+				},
+			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFApp", action)
 		},
 	},
 	"quitAllApps": {
@@ -4393,14 +4403,6 @@ var actions = map[string]*actionDefinition{
 		},
 		check: replaceAppIDs,
 		make: func(args []actionArgument) (params []plistData) {
-			params = []plistData{
-				{
-					key:      "WFQuitAppMode",
-					dataType: Text,
-					value:    "All Apps",
-				},
-			}
-
 			if args[0].valueType != Variable {
 				params = append(params, plistData{
 					key:      "WFAppsExcept",
@@ -4412,6 +4414,18 @@ var actions = map[string]*actionDefinition{
 			}
 
 			return
+		},
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFQuitAppMode",
+					dataType: Text,
+					value:    "All Apps",
+				},
+			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFAppsExcept", action)
 		},
 	},
 	"killApp": {
@@ -4445,6 +4459,9 @@ var actions = map[string]*actionDefinition{
 					argumentValue("BundleIdentifier", args, 0),
 				},
 			})
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFApp", action)
 		},
 	},
 	"killAllApps": {
@@ -4483,6 +4500,9 @@ var actions = map[string]*actionDefinition{
 			}
 
 			return
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFAppsExcept", action)
 		},
 	},
 	"splitApps": {
@@ -6509,6 +6529,30 @@ func httpRequest(bodyType string, valuesKey string, args []actionArgument) (para
 	if len(args) > 0 {
 		params = append(params, argumentValue(valuesKey, args, 2))
 	}
+	return
+}
+
+func decompAppAction(key string, action *ShortcutAction) (arguments []string) {
+	if action.WFWorkflowActionParameters[key] != nil {
+		var appsType = reflect.TypeOf(action.WFWorkflowActionParameters[key])
+		if appsType.Kind() == reflect.String {
+			return append(arguments, decompValue(action.WFWorkflowActionParameters[key]))
+		}
+
+		if appsType.String() == dictType {
+			for key, bundle := range action.WFWorkflowActionParameters[key].(map[string]interface{}) {
+				if key == "BundleIdentifier" {
+					arguments = append(arguments, fmt.Sprintf("\"%s\"", bundle))
+				}
+			}
+		} else if appsType.String() == "[]interface {}" {
+			for _, app := range action.WFWorkflowActionParameters[key].([]interface{}) {
+				var bundleIdentifer = app.(map[string]interface{})["BundleIdentifier"]
+				arguments = append(arguments, fmt.Sprintf("\"%s\"", bundleIdentifer))
+			}
+		}
+	}
+
 	return
 }
 
