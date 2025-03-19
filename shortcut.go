@@ -64,3 +64,8 @@ type WFValue struct {
 type WFInput struct {
 	Value Value
 }
+
+type WFContactFieldValue struct {
+	EntryType       int
+	SerializedEntry map[string]interface{}
+}

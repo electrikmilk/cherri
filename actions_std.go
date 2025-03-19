@@ -929,6 +929,9 @@ var actions = map[string]*actionDefinition{
 				contactValue("WFEmailAddress", emailAddress, args),
 			}
 		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompContactValue(action, "WFEmailAddress", emailAddress)
+		},
 	},
 	"phoneNumber": {
 		parameters: []parameterDefinition{
@@ -952,6 +955,9 @@ var actions = map[string]*actionDefinition{
 			return []plistData{
 				contactValue("WFPhoneNumber", phoneNumber, args),
 			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompContactValue(action, "WFPhoneNumber", phoneNumber)
 		},
 	},
 	"selectContact": {
@@ -6201,6 +6207,31 @@ func contactValue(key string, contentKit contentKit, args []actionArgument) plis
 			},
 		},
 	}
+}
+
+func decompContactValue(action *ShortcutAction, key string, contentKit contentKit) (arguments []string) {
+	if action.WFWorkflowActionParameters[key] == nil {
+		return
+	}
+
+	var wfValue WFValue
+	mapToStruct(action.WFWorkflowActionParameters[key], &wfValue)
+
+	if wfValue.WFSerializationType == "WFTextTokenString" {
+		return []string{decompValue(action.WFWorkflowActionParameters[key])}
+	}
+
+	var value = wfValue.Value.(map[string]interface{})
+	var contactFieldValues []WFContactFieldValue
+	mapToStruct(value["WFContactFieldValues"].([]interface{}), &contactFieldValues)
+
+	for _, contactFieldValue := range contactFieldValues {
+		var serializedKey = fmt.Sprintf("link.contentkit.%s", contentKit)
+		var email = contactFieldValue.SerializedEntry[serializedKey]
+		arguments = append(arguments, fmt.Sprintf("\"%s\"", email.(string)))
+	}
+
+	return
 }
 
 func adjustDate(operation string, unit string, args []actionArgument) (adjustDateParams []plistData) {
