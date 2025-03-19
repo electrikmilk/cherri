@@ -75,10 +75,15 @@ type WFContactFieldValue struct {
 }
 
 type ImageSize struct {
-	Value ImageSizeValue
+	Value SizeValue
 }
 
-type ImageSizeValue struct {
+type SizeValue struct {
 	Unit      string
 	Magnitude string
+}
+
+type WFMeasurementUnit struct {
+	WFNSUnitSymbol any
+	Value          SizeValue
 }

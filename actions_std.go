@@ -2356,7 +2356,7 @@ var actions = map[string]*actionDefinition{
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			var imageSize = ImageSize{
-				Value: ImageSizeValue{
+				Value: SizeValue{
 					Unit:      "GB",
 					Magnitude: "1",
 				},
@@ -5839,10 +5839,12 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "measurement",
 				validType: Variable,
+				key:       "WFInput",
 			},
 			{
 				name:      "unitType",
 				validType: String,
+				key:       "WFMeasurementUnitType",
 				enum:      measurementUnitTypes,
 			},
 			{
@@ -5864,19 +5866,32 @@ var actions = map[string]*actionDefinition{
 				enum: units[unitType],
 			}, &args[2])
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
-				argumentValue("WFInput", args, 0),
 				{
 					key:      "WFMeasurementUnit",
 					dataType: Dictionary,
 					value: []plistData{
-						argumentValue("WFNSUnitSymbol", args, 2),
 						argumentValue("WFNSUnitType", args, 1),
+						argumentValue("WFNSUnitSymbol", args, 2),
 					},
 				},
-				argumentValue("WFMeasurementUnitType", args, 1),
 			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			arguments = append(arguments,
+				decompValue(action.WFWorkflowActionParameters["WFInput"]),
+				decompValue(action.WFWorkflowActionParameters["WFMeasurementUnitType"]),
+			)
+
+			if action.WFWorkflowActionParameters["WFMeasurementUnit"] != nil {
+				var measurementUnit WFMeasurementUnit
+				mapToStruct(action.WFWorkflowActionParameters["WFMeasurementUnit"].(map[string]interface{}), &measurementUnit)
+
+				arguments = append(arguments, decompValue(measurementUnit.WFNSUnitSymbol))
+			}
+
+			return
 		},
 	},
 	"measurement": {
@@ -5889,6 +5904,7 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "unitType",
 				validType: String,
+				key:       "WFMeasurementUnitType",
 				enum:      measurementUnitTypes,
 			},
 			{
@@ -5910,7 +5926,7 @@ var actions = map[string]*actionDefinition{
 				enum: units[unitType],
 			}, &args[2])
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFMeasurementUnit",
@@ -5931,8 +5947,21 @@ var actions = map[string]*actionDefinition{
 						},
 					},
 				},
-				argumentValue("WFMeasurementUnitType", args, 1),
 			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			if action.WFWorkflowActionParameters["WFMeasurementUnit"] != nil {
+				var measurementUnit WFMeasurementUnit
+				mapToStruct(action.WFWorkflowActionParameters["WFMeasurementUnit"].(map[string]interface{}), &measurementUnit)
+
+				arguments = append(arguments,
+					decompValue(measurementUnit.Value.Magnitude),
+					decompValue(action.WFWorkflowActionParameters["WFMeasurementUnitType"]),
+					decompValue(measurementUnit.Value.Unit),
+				)
+			}
+
+			return
 		},
 	},
 	"makeVCard": {
