@@ -4,6 +4,10 @@
 
 package main
 
+/*
+ Shortcut File Format Data Structures
+*/
+
 type ShortcutIcon struct {
 	WFWorkflowIconGlyphNumber int64
 	WFWorkflowIconStartColor  int
