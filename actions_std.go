@@ -4849,10 +4849,12 @@ var actions = map[string]*actionDefinition{
 	"getAllWallpapers": {
 		identifier: "posters.get",
 		minVersion: 16.2,
+		mac:        false,
 	},
 	"getWallpaper": {
 		identifier: "posters.get",
 		minVersion: 16.2,
+		mac:        false,
 		make: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
