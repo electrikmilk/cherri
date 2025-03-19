@@ -787,6 +787,10 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 			decompAggrandizements(&variableName, attachment.Aggrandizements)
 		}
 
+		if isControlFlowUUID(attachment.OutputUUID) {
+			decompWarning("Usage of control flow action output detected. This feature is not supported in Cherri. This can be manually corrected by assigning a variable within the control flow branches and then using that variable instead.")
+		}
+
 		attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
 	}
 
@@ -1199,7 +1203,7 @@ func printDecompDebug() {
 
 func decompWarning(message string) {
 	var linesLen = strings.Count(code.String(), "\n")
-	var filePath = relativePath + basename + "_decompiled.cherri"
+	var filePath = getOutputPath(relativePath + basename + ".cherri")
 	fmt.Println(ansi("Warning:", yellow, bold), fmt.Sprintf("%s (%s:%d:0)\n", message, filePath, linesLen+1))
 }
 
