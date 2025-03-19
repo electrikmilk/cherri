@@ -29,13 +29,13 @@ type plistData struct {
 	value    any
 }
 
-type dictDataType string
+type dictDataType int
 
-const itemTypeText dictDataType = "0"
-const itemTypeNumber dictDataType = "3"
-const itemTypeArray dictDataType = "2"
-const itemTypeDict dictDataType = "1"
-const itemTypeBool dictDataType = "4"
+const itemTypeText dictDataType = 0
+const itemTypeNumber dictDataType = 3
+const itemTypeArray dictDataType = 2
+const itemTypeDict dictDataType = 1
+const itemTypeBool dictDataType = 4
 
 type noInputParams struct {
 	name   string
@@ -152,7 +152,7 @@ func conditionalParameterVariable(conditionalParams *[]plistData, value any) {
 	}
 }
 
-func makeVariableAction(token *token, varUUID *string) {
+func makeVariableAction(token *token, customOutputName *string, varUUID *string) {
 	var UUID = plistData{
 		key:      "UUID",
 		dataType: Text,
@@ -161,7 +161,7 @@ func makeVariableAction(token *token, varUUID *string) {
 	var outputName = plistData{
 		key:      "CustomOutputName",
 		dataType: Text,
-		value:    token.ident,
+		value:    *customOutputName,
 	}
 	if (token.typeof == AddTo || token.typeof == SubFrom || token.typeof == MultiplyBy || token.typeof == DivideBy) &&
 		token.valueType != Arr &&
@@ -356,7 +356,7 @@ func variableValueModifier(token *token, outputName *plistData, uuid *plistData)
 				value:    operation,
 			},
 		}))
-	case String:
+	case String, RawString:
 		var varInput = token.value.(string)
 		wrapVariableReference(&varInput)
 		appendPlist(makeStdAction("gettext", []plistData{
@@ -924,7 +924,7 @@ func wrapVariableReference(s *string) {
 
 // isInputVariable checks if identifier is the ShortcutInput global to set the global boolean in the final plist.
 func isInputVariable(identifier string) {
-	hasShortcutInputVariables = identifier == "ShortcutInput"
+	hasShortcutInputVariables = identifier == ShortcutInput
 }
 
 const (
@@ -951,6 +951,9 @@ func makeDictionary(value interface{}) (dictItems []plistData) {
 
 // dictionaryValue creates an inner dictionary value.
 func dictionaryValue(key string, value any) plistData {
+	if value == nil {
+		value = ""
+	}
 	var itemType dictDataType
 	var serializedType string
 	var wfValue = plistData{
@@ -1045,7 +1048,7 @@ func dictionaryPlistValue(key string, itemType dictDataType, serializedType stri
 		{
 			key:      "WFItemType",
 			dataType: Number,
-			value:    string(itemType),
+			value:    itemType,
 		},
 		{
 			key:      "WFValue",

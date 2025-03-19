@@ -1,0 +1,46 @@
+#define color red
+#define glyph apple
+
+const hello = prompt("Hello?")
+@confirm = prompt("What do you want?","Number")
+@urls = url("https://google.com","https://apple.com","https://cherrilang.org")
+@int = 42
+@dict = {
+	"key": "",
+	"key2": "value",
+	"key3": false,
+	"key4": "{int}",
+	"key5": {
+		"key": "test",
+		"key1": 5
+	},
+	"key7": [
+		5,
+		6
+	]
+}
+@str = "me"
+@var = "5 {str}"
+if int == 0 {
+	alert("Title","Message")
+	nothing()
+} else {
+	nothing()
+	if int == 1 {
+		nothing()
+	}
+	nothing()
+}
+@list = list("Item 1","Item 2")
+if str == "me" {
+	nothing()
+}
+if var == str {
+	nothing()
+}
+menu "Prompt" {
+item "Item 1":
+	nothing()
+}
+alert("Title","Message")
+show(var)

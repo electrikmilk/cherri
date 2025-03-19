@@ -63,6 +63,24 @@ func TestSingleFile(_ *testing.T) {
 	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
 }
 
+func TestDecomp(t *testing.T) {
+	fmt.Println("Decompiling...")
+	args.Args["import"] = "tests/decomp_me.plist"
+	decompile(importShortcut())
+
+	fmt.Println("Comparing to expected...")
+	var bytes, readErr = os.ReadFile("tests/decomp_expected.cherri")
+	handle(readErr)
+
+	if code.String() != string(bytes) {
+		fmt.Println(ansi("Does not match expected!", red, bold))
+		t.Fail()
+		return
+	}
+
+	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
+}
+
 func TestActionList(_ *testing.T) {
 	for identifier := range actions {
 		fmt.Println("{label: '" + identifier + "', type: 'function', detail: 'action'},")

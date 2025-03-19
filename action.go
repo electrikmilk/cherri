@@ -67,9 +67,11 @@ type actionDefinition struct {
 	parameters         []parameterDefinition
 	check              checkFunc
 	make               paramsFunc
+	decomp             func(action *ShortcutAction) (arguments []string)
 	addParams          paramsFunc
 	appIntent          appIntent
 	outputType         tokenType
+	defaultAction      bool // Default action for this identifier during decompilation.
 	mac                bool
 	minVersion         float64
 	maxVersion         float64
@@ -125,7 +127,6 @@ func actionIdentifier() (ident string) {
 	} else {
 		ident = fmt.Sprintf("%s.%s", ident, strings.ToLower(currentActionIdentifier))
 	}
-
 	return
 }
 

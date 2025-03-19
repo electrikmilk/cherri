@@ -39,14 +39,18 @@ func init() {
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
-		Name:        "import",
-		Short:       "i",
-		Description: "Import compiled Shortcut (ignored if unsigned).",
-	})
-	args.Register(args.Argument{
 		Name:        "comments",
 		Short:       "c",
 		Description: "Create comment actions for text comments (e.g. //, /**/)",
+	})
+	args.Register(args.Argument{
+		Name:        "open",
+		Description: "Open compiled Shortcut (ignored if unsigned).",
+	})
+	args.Register(args.Argument{
+		Name:         "import",
+		Description:  "[BETA] Import Shortcut from local file path or iCloud link and output Cherri file.",
+		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
 		Name:        "hubsign",

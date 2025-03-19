@@ -49,9 +49,11 @@ var contentItems = map[string]string{
 	"richtext":    "WFRichTextContentItem",
 	"webpage":     "WFSafariWebPageContentItem",
 	"text":        "WFStringContentItem",
+	"dictionary":  "WFDictionaryContentItem",
 	"number":      "WFNumberContentItem",
 	"url":         "WFURLContentItem",
 }
+
 var inputs []string
 var outputs []string
 
