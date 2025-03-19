@@ -739,63 +739,66 @@ func isControlFlowUUID(uuid string) bool {
 
 func decompObjectValue(valueObj any) string {
 	var valueType = reflect.TypeOf(valueObj).String()
-	switch valueType {
-	case "map[string]interface {}":
-		var value = valueObj.(map[string]interface{})
-
-		var attachmentString string
-		var originalString string
-		if value["value"] != nil {
-			if reflect.TypeOf(value["value"]).String() != "map[string]interface {}" {
-				return fmt.Sprintf("%v", valueObj)
-			}
-			value = value["value"].(map[string]interface{})
-		}
-
-		if _, found := value["string"]; found {
-			attachmentString = value["string"].(string)
-			originalString = attachmentString
-		}
-
-		var attachmentChars = strings.Split(attachmentString, "")
-		if attachments, found := value["attachmentsByRange"]; found {
-			for attachmentRange, a := range attachments.(map[string]interface{}) {
-				var attachmentRanges = strings.Split(attachmentRange, ",")
-				var attachmentPosition = strings.TrimPrefix(attachmentRanges[0], "{")
-				var position, convErr = strconv.Atoi(attachmentPosition)
-				handle(convErr)
-
-				var attachment Value
-				mapToStruct(a, &attachment)
-
-				var variableName = attachment.VariableName
-				if _, uuid := uuids[attachment.OutputUUID]; uuid {
-					variableName = uuids[attachment.OutputUUID]
-				}
-				sanitizeIdentifier(&variableName)
-				if variableName == "" && attachment.Type == globals[ShortcutInput].variableType {
-					variableName = ShortcutInput
-				}
-
-				if len(attachment.Aggrandizements) != 0 {
-					decompAggrandizements(&variableName, attachment.Aggrandizements)
-				}
-
-				attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
-			}
-
-			attachmentString = escapeString(strings.Join(attachmentChars, ""))
-
-			if originalString == ObjectReplaceCharStr && len(attachments.(map[string]interface{})) == 1 {
-				attachmentString = strings.Trim(attachmentString, "{}")
-			} else {
-				attachmentString = fmt.Sprintf("\"%s\"", attachmentString)
-			}
-		}
-
-		return attachmentString
-	default:
+	if valueType != "map[string]interface {}" {
 		return fmt.Sprintf("%v", valueObj)
+	}
+
+	var value = valueObj.(map[string]interface{})
+
+	var attachmentString string
+	if value["value"] != nil {
+		if reflect.TypeOf(value["value"]).String() != "map[string]interface {}" {
+			return fmt.Sprintf("%v", valueObj)
+		}
+		value = value["value"].(map[string]interface{})
+	}
+
+	if _, found := value["string"]; found {
+		attachmentString = value["string"].(string)
+	}
+
+	if attachments, found := value["attachmentsByRange"]; found {
+		decompAttachmentString(&attachmentString, attachments.(map[string]interface{}))
+	}
+
+	return attachmentString
+}
+
+func decompAttachmentString(attachmentString *string, attachments map[string]interface{}) {
+	var originalString = *attachmentString
+	var attachmentChars = strings.Split(*attachmentString, "")
+
+	for attachmentRange, a := range attachments {
+		var attachmentRanges = strings.Split(attachmentRange, ",")
+		var attachmentPosition = strings.TrimPrefix(attachmentRanges[0], "{")
+		var position, convErr = strconv.Atoi(attachmentPosition)
+		handle(convErr)
+
+		var attachment Value
+		mapToStruct(a, &attachment)
+
+		var variableName = attachment.VariableName
+		if _, uuid := uuids[attachment.OutputUUID]; uuid {
+			variableName = uuids[attachment.OutputUUID]
+		}
+		sanitizeIdentifier(&variableName)
+		if variableName == "" && attachment.Type == globals[ShortcutInput].variableType {
+			variableName = ShortcutInput
+		}
+
+		if len(attachment.Aggrandizements) != 0 {
+			decompAggrandizements(&variableName, attachment.Aggrandizements)
+		}
+
+		attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
+	}
+
+	*attachmentString = escapeString(strings.Join(attachmentChars, ""))
+
+	if originalString == ObjectReplaceCharStr && len(attachments) == 1 {
+		*attachmentString = strings.Trim(*attachmentString, "{}")
+	} else {
+		*attachmentString = fmt.Sprintf("\"%s\"", *attachmentString)
 	}
 }
 
@@ -881,26 +884,7 @@ func decompAction(action *ShortcutAction) {
 
 		var matchedParamsSize = len(matchedAction.parameters)
 		if matchedParamsSize > 0 {
-			for i, param := range matchedAction.parameters {
-				if param.key == "" {
-					continue
-				}
-
-				var argValue string
-				if value, found := action.WFWorkflowActionParameters[param.key]; found {
-					argValue = decompValue(value)
-				} else if !param.optional {
-					argValue = makeDefaultValue(param)
-				}
-
-				if argValue != "" {
-					if i == 0 {
-						actionCallCode.WriteString(argValue)
-					} else {
-						actionCallCode.WriteString(fmt.Sprintf(", %s", argValue))
-					}
-				}
-			}
+			decompActionArguments(&actionCallCode, &matchedAction, action)
 		}
 
 		if matchedAction.make != nil {
@@ -920,6 +904,29 @@ func decompAction(action *ShortcutAction) {
 		code.WriteString(actionCallCode.String())
 		code.WriteRune('\n')
 		currentVariableValue = ""
+	}
+}
+
+func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
+	for i, param := range matchedAction.parameters {
+		if param.key == "" {
+			continue
+		}
+
+		var argValue string
+		if value, found := action.WFWorkflowActionParameters[param.key]; found {
+			argValue = decompValue(value)
+		} else if !param.optional {
+			argValue = makeDefaultValue(param)
+		}
+
+		if argValue != "" {
+			if i == 0 {
+				actionCallCode.WriteString(argValue)
+			} else {
+				actionCallCode.WriteString(fmt.Sprintf(", %s", argValue))
+			}
+		}
 	}
 }
 
