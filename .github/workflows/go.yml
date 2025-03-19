@@ -26,6 +26,9 @@ jobs:
     - name: Test
       run: go test -run TestCherri -v ./...
 
+    - name: Decompilation Test
+      run: go test -run TestDecomp -v ./...
+
   build-macos:
     runs-on: macos-13
     steps:
