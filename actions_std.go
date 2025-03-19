@@ -4576,33 +4576,38 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openShortcut": {
-		identifier: "openworkflow",
+		appIdentifier: "com.apple.shortcuts",
+		identifier:    "OpenWorkflowAction",
 		parameters: []parameterDefinition{
 			{
 				name:      "shortcutName",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) []plistData {
 			return []plistData{
 				{
-					key:      "WFWorkflow",
+					key:      "target",
 					dataType: Dictionary,
 					value: []plistData{
 						{
-							key:      "workflowIdentifier",
+							key:      "title",
 							dataType: Text,
-							value:    uuid.New().String(),
+							value: []plistData{
+								argumentValue("key", args, 0),
+							},
 						},
-						{
-							key:      "isSelf",
-							dataType: Boolean,
-							value:    false,
-						},
-						argumentValue("workflowName", args, 0),
 					},
 				},
 			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			if action.WFWorkflowActionParameters["target"] != nil {
+				var workflow = action.WFWorkflowActionParameters["target"].(map[string]interface{})
+				var title = workflow["title"].(map[string]interface{})
+				arguments = append(arguments, decompValue(title["key"]))
+			}
+			return
 		},
 	},
 	"runSelf": {
@@ -4610,10 +4615,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "output",
+				key:       "WFInput",
 				validType: Variable,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(_ []actionArgument) []plistData {
 			return []plistData{
 				{
 					key:      "WFWorkflow",
@@ -4636,7 +4642,6 @@ var actions = map[string]*actionDefinition{
 						},
 					},
 				},
-				argumentValue("WFInput", args, 0),
 			}
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
