@@ -137,6 +137,7 @@ var textSizes = []string{
 	"Small",
 	"Extra Small",
 }
+var roundings = []string{"Ones Place", "Tens Place", "Hundreds Place", "Thousands", "Ten Thousands", "Hundred Thousands", "Millions"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -5201,14 +5202,25 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "number",
 				validType: Integer,
+				key:       "WFInput",
 			},
 			{
-				name:      "roundTo",
-				validType: String,
+				name:         "roundTo",
+				validType:    String,
+				key:          "WFRoundTo",
+				enum:         roundings,
+				optional:     true,
+				defaultValue: "Ones Place",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return roundingValue("Normal", args)
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFRoundMode",
+					dataType: Text,
+					value:    "Normal",
+				},
+			}
 		},
 	},
 	"ceil": {
@@ -5217,14 +5229,25 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "number",
 				validType: Integer,
+				key:       "WFInput",
 			},
 			{
-				name:      "roundTo",
-				validType: String,
+				name:         "roundTo",
+				validType:    String,
+				key:          "WFRoundTo",
+				enum:         roundings,
+				optional:     true,
+				defaultValue: "Ones Place",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return roundingValue("Always Round Up", args)
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFRoundMode",
+					dataType: Text,
+					value:    "Always Round Up",
+				},
+			}
 		},
 	},
 	"floor": {
@@ -5233,14 +5256,25 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "number",
 				validType: Integer,
+				key:       "WFInput",
 			},
 			{
-				name:      "roundTo",
-				validType: String,
+				name:         "roundTo",
+				validType:    String,
+				key:          "WFRoundTo",
+				enum:         roundings,
+				optional:     true,
+				defaultValue: "Ones Place",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return roundingValue("Always Round Down", args)
+		addParams: func(_ []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFRoundMode",
+					dataType: Text,
+					value:    "Always Round Down",
+				},
+			}
 		},
 	},
 	"runShellScript": {
@@ -6165,38 +6199,6 @@ func contactValue(key string, contentKit contentKit, args []actionArgument) plis
 				dataType: Text,
 				value:    "WFContactFieldValue",
 			},
-		},
-	}
-}
-
-func roundingValue(mode string, args []actionArgument) []plistData {
-	switch args[1].value {
-	case "1":
-		args[1].value = "Ones Place"
-	case "10":
-		args[1].value = "Tens Place"
-	case "100":
-		args[1].value = "Hundreds Place"
-	case "1000":
-		args[1].value = "Thousands"
-	case "10000":
-		args[1].value = "Ten Thousands"
-	case "100000":
-		args[1].value = "Hundred Thousands"
-	case "1000000":
-		args[1].value = "Millions"
-	}
-	return []plistData{
-		{
-			key:      "WFRoundMode",
-			dataType: Text,
-			value:    mode,
-		},
-		argumentValue("WFInput", args, 0),
-		{
-			key:      "WFRoundTo",
-			dataType: Text,
-			value:    args[1].value,
 		},
 	}
 }
