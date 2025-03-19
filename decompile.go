@@ -722,7 +722,7 @@ func decompValueObject(value map[string]interface{}) string {
 			sanitizeIdentifier(&outputName)
 
 			if isControlFlowUUID(value["OutputUUID"].(string)) {
-				decompWarning("Usage of control flow action output detected. This feature is not supported in Cherri. This can be manually corrected by assigning a variable within the control flow branches and then using that variable instead.")
+				decompWarning("Usage of control flow action output is not supported. This can be manually corrected by assigning a variable within the control flow branches and then using that variable instead.")
 			}
 
 			return outputName
@@ -792,7 +792,7 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 		}
 
 		if isControlFlowUUID(attachment.OutputUUID) {
-			decompWarning("Usage of control flow action output detected. This feature is not supported in Cherri. This can be manually corrected by assigning a variable within the control flow branches and then using that variable instead.")
+			decompWarning("Usage of control flow action output is not supported. This can be manually corrected by assigning a variable within the control flow branches and then using that variable instead.")
 		}
 
 		attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
