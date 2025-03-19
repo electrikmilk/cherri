@@ -679,7 +679,7 @@ func decompArray(items []interface{}) (array []interface{}) {
 
 func decompValue(value any) string {
 	if value == nil {
-		return ""
+		return "nil"
 	}
 	var valueType = reflect.TypeOf(value).String()
 	switch valueType {
