@@ -2337,6 +2337,7 @@ var actions = map[string]*actionDefinition{
 			},
 			{
 				name:         "encrypt",
+				key:          "EncryptImage",
 				validType:    Bool,
 				defaultValue: false,
 				optional:     true,
@@ -2353,45 +2354,68 @@ var actions = map[string]*actionDefinition{
 				enum: storageUnits,
 			}, &storageUnitArg)
 		},
-		make: func(args []actionArgument) []plistData {
-			var size = strings.Split(getArgValue(args[2]).(string), " ")
-			return []plistData{
-				argumentValue("VolumeName", args, 0),
-				variableInput("WFInput", args[1].value.(string)),
-				{
-					key:      "ImageSize",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "Value",
-							dataType: Dictionary,
-							value: []plistData{
-								{
-									key:      "Unit",
-									dataType: Text,
-									value:    size[0],
-								},
-								{
-									key:      "Magnitude",
-									dataType: Text,
-									value:    size[1],
-								},
-							},
-						},
-						{
-							key:      "WFSerializationType",
-							dataType: Text,
-							value:    "WFQuantityFieldValue",
-						},
-					},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var imageSize = ImageSize{
+				Value: ImageSizeValue{
+					Unit:      "GB",
+					Magnitude: "1",
 				},
-				argumentValue("EncryptImage", args, 3),
+			}
+			mapToStruct(action.WFWorkflowActionParameters["ImageSize"], &imageSize)
+			var size = fmt.Sprintf("\"%s %s\"", imageSize.Value.Magnitude, imageSize.Value.Unit)
+
+			return []string{
+				decompValue(action.WFWorkflowActionParameters["VolumeName"]),
+				decompValue(action.WFWorkflowActionParameters["WFInput"]),
+				size,
+				decompValue(action.WFWorkflowActionParameters["EncryptImage"]),
+			}
+		},
+		addParams: func(args []actionArgument) []plistData {
+			var data = []plistData{
 				{
 					key:      "SizeToFit",
 					dataType: Boolean,
 					value:    false,
 				},
 			}
+
+			if len(args) == 0 {
+				return append(data, plistData{
+					key:      "ImageSize",
+					dataType: Dictionary,
+					value:    []plistData{},
+				})
+			}
+
+			var size = strings.Split(getArgValue(args[2]).(string), " ")
+			return append(data, plistData{
+				key:      "ImageSize",
+				dataType: Dictionary,
+				value: []plistData{
+					{
+						key:      "Value",
+						dataType: Dictionary,
+						value: []plistData{
+							{
+								key:      "Unit",
+								dataType: Text,
+								value:    size[0],
+							},
+							{
+								key:      "Magnitude",
+								dataType: Text,
+								value:    size[1],
+							},
+						},
+					},
+					{
+						key:      "WFSerializationType",
+						dataType: Text,
+						value:    "WFQuantityFieldValue",
+					},
+				},
+			})
 		},
 		mac:        true,
 		minVersion: 15,

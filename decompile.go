@@ -254,6 +254,7 @@ func decompileActions() {
 		case "is.workflow.actions.list":
 			decompList(&action)
 		case "is.workflow.actions.url":
+		case "is.workflow.actions.readinglist":
 			decompURL(&action)
 		case "is.workflow.actions.calculateexpression":
 			decompExpression(&action)
@@ -911,13 +912,13 @@ func decompAction(action *ShortcutAction) {
 			actionCallCode.WriteString(actionCallStart)
 		}
 
-		var matchedParamsSize = len(matchedAction.parameters)
-		if matchedParamsSize > 0 {
-			decompActionArguments(&actionCallCode, &matchedAction, action)
-		}
-
-		if matchedAction.make != nil {
-			decompMakeAction(&actionCallCode, &matchedAction, action)
+		if matchedAction.make != nil || matchedAction.decomp != nil {
+			decompActionCustom(&actionCallCode, &matchedAction, action)
+		} else {
+			var matchedParamsSize = len(matchedAction.parameters)
+			if matchedParamsSize > 0 {
+				decompActionArguments(&actionCallCode, &matchedAction, action)
+			}
 		}
 
 		actionCallCode.WriteString(")")
@@ -1165,7 +1166,7 @@ func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefi
 	return
 }
 
-func decompMakeAction(actionCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
+func decompActionCustom(actionCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
 	var identifier = matchedAction.identifier
 	if matchedAction.appIdentifier != "" {
 		identifier = matchedAction.appIdentifier
