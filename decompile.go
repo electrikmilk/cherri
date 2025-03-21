@@ -885,7 +885,8 @@ func skipDecompAction(action *ShortcutAction) bool {
 
 	if action.WFWorkflowActionIdentifier == "is.workflow.actions.nothing" {
 		var nextAction = peekActions(1)
-		if nextAction.WFWorkflowActionIdentifier == "is.workflow.actions.conditional" {
+		var controlflowActionIdentifiers = []string{"is.workflow.actions.conditional", "is.workflow.actions.repeat.each", "is.workflow.actions.repeat.count", "is.workflow.acitons.choosefrommenu"}
+		if slices.Contains(controlflowActionIdentifiers, nextAction.WFWorkflowActionIdentifier) {
 			var controlFlowMode = nextAction.WFWorkflowActionParameters["WFControlFlowMode"]
 			if controlFlowMode == endStatement || controlFlowMode == statementPart {
 				return true
