@@ -928,9 +928,9 @@ func isInputVariable(identifier string) {
 }
 
 const (
-	startStatement = 0
-	statementPart  = 1
-	endStatement   = 2
+	startStatement uint64 = 0
+	statementPart  uint64 = 1
+	endStatement   uint64 = 2
 )
 
 const (

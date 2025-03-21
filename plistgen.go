@@ -320,7 +320,7 @@ func plistArrayVariable(t *token) {
 }
 
 func plistConditional(t *token) {
-	var controlFlowMode int
+	var controlFlowMode uint64
 	var conditionalParams = []plistData{
 		{
 			key:      "GroupingIdentifier",

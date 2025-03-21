@@ -461,8 +461,8 @@ func decompConditional(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		var conditionInt = int(action.WFWorkflowActionParameters["WFCondition"].(uint64))
-		var conditionString = strconv.Itoa(conditionInt)
+		var conditionInt = action.WFWorkflowActionParameters["WFCondition"].(uint64)
+		var conditionString = strconv.FormatUint(conditionInt, 10)
 		var conditionalOperator string
 		for operator, cond := range conditions {
 			if cond == conditionString {
@@ -808,7 +808,7 @@ func decompAction(action *ShortcutAction) {
 	if action.WFWorkflowActionIdentifier == "is.workflow.actions.nothing" {
 		var nextAction = peekActions(1)
 		if nextAction.WFWorkflowActionIdentifier == "is.workflow.actions.conditional" {
-			var controlFlowMode = int(nextAction.WFWorkflowActionParameters["WFControlFlowMode"].(uint64))
+			var controlFlowMode = nextAction.WFWorkflowActionParameters["WFControlFlowMode"]
 			if controlFlowMode == endStatement || controlFlowMode == statementPart {
 				return
 			}
