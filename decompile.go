@@ -1026,8 +1026,8 @@ func matchAction(action *ShortcutAction) (name string, definition actionDefiniti
 }
 
 type actionMatch struct {
-	params float64
-	values float64
+	params uint
+	values uint
 	action actionValue
 }
 
@@ -1079,7 +1079,7 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 	*definition = *matchedAction.action.definition
 }
 
-func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefinition, parameters map[string]any) (matchedParams float64, matchedValues float64) {
+func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
 	for _, param := range splitActionParams {
 		if param.key == "" {
 			continue
