@@ -84,7 +84,7 @@ func peekActions(peek int) ShortcutAction {
 	return shortcut.WFWorkflowActions[actionIndex+peek]
 }
 
-// insertCodeComment
+// insertCodeComment creates a comment in the decompiled code.
 func insertCodeComment(comment string) {
 	newCodeLine(fmt.Sprintf("// %s\n", comment))
 }
