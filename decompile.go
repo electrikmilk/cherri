@@ -796,27 +796,10 @@ func decompAggrandizements(reference *string, aggrs []Aggrandizement) {
 var macDefinition bool
 
 func decompAction(action *ShortcutAction) {
-	if action.WFWorkflowActionIdentifier == "is.workflow.actions.getvariable" {
-		var varName = decompValue(action.WFWorkflowActionParameters["WFVariable"])
-
-		insertCodeComment(fmt.Sprintf("TODO: Get Variable not supported: Assign variable here to '%s'.", varName))
-		decompWarning(fmt.Sprintf("Get variable '%s' is not supported. Set a variable to that value instead if something was depending on it's output.", varName))
-
-		actionIndex++
+	if skipDecompAction(action) {
 		return
 	}
-	if action.WFWorkflowActionIdentifier == "is.workflow.actions.nothing" {
-		var nextAction = peekActions(1)
-		if nextAction.WFWorkflowActionIdentifier == "is.workflow.actions.conditional" {
-			var controlFlowMode = nextAction.WFWorkflowActionParameters["WFControlFlowMode"]
-			if controlFlowMode == endStatement || controlFlowMode == statementPart {
-				return
-			}
-		}
-	}
 
-	var isVariableValue = false
-	var isConstant = false
 	var actionCallCode strings.Builder
 	var matchedIdentifier, matchedAction = matchAction(action)
 	if matchedIdentifier == "" {
@@ -830,25 +813,7 @@ func decompAction(action *ShortcutAction) {
 		macDefinition = true
 	}
 
-	if action.WFWorkflowActionParameters["CustomOutputName"] != nil {
-		var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
-		sanitizeIdentifier(&customOutputName)
-		if ref, foundVar := variables[customOutputName]; foundVar {
-			isConstant = ref.constant
-			isVariableValue = !ref.constant
-		}
-	}
-
-	if action.WFWorkflowActionParameters[UUID] != nil && !isVariableValue {
-		var uuid = action.WFWorkflowActionParameters[UUID].(string)
-		if _, found := uuids[uuid]; found {
-			isConstant = !slices.Contains(varUUIDs, uuid)
-			isVariableValue = slices.Contains(varUUIDs, uuid)
-			if isConstant {
-				newCodeLine(fmt.Sprintf("const %s = ", uuids[uuid]))
-			}
-		}
-	}
+	var isConstant, isVariableValue = checkOutputType(action)
 
 	if matchedIdentifier != "" {
 		var actionCallStart = fmt.Sprintf("%s(", matchedIdentifier)
@@ -882,6 +847,53 @@ func decompAction(action *ShortcutAction) {
 		currentVariableValue = ""
 	}
 	actionIndex++
+}
+
+func checkOutputType(action *ShortcutAction) (isConstant bool, isVariableValue bool) {
+	if action.WFWorkflowActionParameters["CustomOutputName"] != nil {
+		var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
+		sanitizeIdentifier(&customOutputName)
+		if ref, foundVar := variables[customOutputName]; foundVar {
+			isConstant = ref.constant
+			isVariableValue = !ref.constant
+		}
+	}
+
+	if action.WFWorkflowActionParameters[UUID] != nil && !isVariableValue {
+		var uuid = action.WFWorkflowActionParameters[UUID].(string)
+		if _, found := uuids[uuid]; found {
+			isConstant = !slices.Contains(varUUIDs, uuid)
+			isVariableValue = slices.Contains(varUUIDs, uuid)
+			if isConstant {
+				newCodeLine(fmt.Sprintf("const %s = ", uuids[uuid]))
+			}
+		}
+	}
+	return
+}
+
+func skipDecompAction(action *ShortcutAction) bool {
+	if action.WFWorkflowActionIdentifier == "is.workflow.actions.getvariable" {
+		var varName = decompValue(action.WFWorkflowActionParameters["WFVariable"])
+
+		insertCodeComment(fmt.Sprintf("TODO: Get Variable not supported: Assign variable here to '%s'.", varName))
+		decompWarning(fmt.Sprintf("Get variable '%s' is not supported. Set a variable to that value instead if something was depending on it's output.", varName))
+
+		actionIndex++
+		return true
+	}
+
+	if action.WFWorkflowActionIdentifier == "is.workflow.actions.nothing" {
+		var nextAction = peekActions(1)
+		if nextAction.WFWorkflowActionIdentifier == "is.workflow.actions.conditional" {
+			var controlFlowMode = nextAction.WFWorkflowActionParameters["WFControlFlowMode"]
+			if controlFlowMode == endStatement || controlFlowMode == statementPart {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
