@@ -1189,7 +1189,14 @@ func printDecompDebug() {
 
 func decompWarning(message string) {
 	var linesLen = strings.Count(code.String(), "\n")
-	var filePath = getOutputPath(relativePath + basename + ".cherri")
+
+	var filePath string
+	if args.Using("no-ansi") {
+		filePath = basename + ".cherri"
+	} else {
+		filePath = getOutputPath(relativePath + basename + ".cherri")
+	}
+
 	fmt.Println(ansi("Warning:", yellow, bold), fmt.Sprintf("%s (%s:%d:0)\n", message, filePath, linesLen+1))
 }
 
