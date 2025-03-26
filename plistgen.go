@@ -7,10 +7,12 @@ package main
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/electrikmilk/args-parser"
 	"github.com/google/uuid"
+	plists "howett.net/plist"
 )
 
 const header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n"
@@ -19,139 +21,74 @@ const footer = "</dict>\n</plist>\n"
 var plist strings.Builder
 var compiled string
 
-func makePlist() {
+var longEmptyArraySyntax = regexp.MustCompile(`<array>\n(.*?)</array>`)
+
+func marshalPlist() {
+	// type sparseBundleHeader struct {
+	// 	InfoDictionaryVersion string `plist:"CFBundleInfoDictionaryVersion"`
+	// 	BandSize              uint64 `plist:"band-size"`
+	// 	BackingStoreVersion   int    `plist:"bundle-backingstore-version"`
+	// 	DiskImageBundleType   string `plist:"diskimage-bundle-type"`
+	// 	Size                  uint64 `plist:"size"`
+	// }
+	// data := &sparseBundleHeader{
+	// 	InfoDictionaryVersion: "6.0",
+	// 	BandSize:              8388608,
+	// 	Size:                  4 * 1048576 * 1024 * 1024,
+	// 	DiskImageBundleType:   "com.apple.diskimage.sparsebundle",
+	// 	BackingStoreVersion:   1,
+	// }
+
+	generateShortcut()
+
+	var plist, plistErr = plists.MarshalIndent(shortcut, plists.XMLFormat, "\t")
+	handle(plistErr)
+
+	compiled = longEmptyArraySyntax.ReplaceAllString(string(plist), "<array/>")
+
+	resetPlistGen()
+}
+
+func generateShortcut() {
 	if args.Using("debug") {
-		fmt.Print("Generating plist...")
+		fmt.Print("Generating plist data...")
 	}
-
-	tabLevel = 0
-	uuids = make(map[string]string)
-	plist.WriteString(header)
-
-	appendPlist([]plistData{
-		{
-			key:      "WFQuickActionSurfaces",
-			dataType: Array,
+	shortcut = Shortcut{
+		WFWorkflowIcon: ShortcutIcon{
+			iconGlyph,
+			iconColor,
 		},
-	})
-
-	plistActions()
-
-	appendPlist([]plistData{
-		{
-			key:      "WFWorkflowClientVersion",
-			dataType: Text,
-			value:    clientVersion,
-		},
-		{
-			key:      "WFWorkflowHasOutputFallback",
-			dataType: Boolean,
-			value:    false,
-		},
-		{
-			key:      "WFWorkflowHasShortcutInputVariables",
-			dataType: Boolean,
-			value:    hasShortcutInputVariables,
-		},
-		{
-			key:      "WFWorkflowIcon",
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "WFWorkflowIconGlyphNumber",
-					dataType: Number,
-					value:    iconGlyph,
-				},
-				{
-					key:      "WFWorkflowIconStartColor",
-					dataType: Number,
-					value:    iconColor,
-				},
-			},
-		},
-		{
-			key:      "WFWorkflowImportQuestions",
-			dataType: Array,
-			value:    plistImportQuestions(),
-		},
-		{
-			key:      "WFWorkflowInputContentItemClasses",
-			dataType: Array,
-			value:    plistInputContentItems(),
-		},
-		{
-			key:      "WFWorkflowMinimumClientVersion",
-			dataType: Number,
-			value:    "900",
-		},
-		{
-			key:      "WFWorkflowMinimumClientVersionString",
-			dataType: Text,
-			value:    "900",
-		},
-		{
-			key:      "WFWorkflowOutputContentItemClasses",
-			dataType: Array,
-			value:    plistOutputContentItems(),
-		},
-		{
-			key:      "WFWorkflowTypes",
-			dataType: Array,
-			value:    plistWorkflowTypes(),
-		},
-	})
-
-	if noInput.name != "" {
-		appendPlist([]plistData{
-			{
-				key:      "WFWorkflowNoInputBehavior",
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "Name",
-						dataType: Text,
-						value:    noInput.name,
-					},
-					{
-						key:      "Parameters",
-						dataType: Dictionary,
-						value:    noInput.params,
-					},
-				},
-			},
-		})
+		WFWorkflowClientVersion:              clientVersion,
+		WFWorkflowHasShortcutInputVariables:  hasShortcutInputVariables,
+		WFWorkflowImportQuestions:            plistImportQuestions(),
+		WFWorkflowInputContentItemClasses:    plistInputContentItems(),
+		WFWorkflowOutputContentItemClasses:   plistOutputContentItems(),
+		WFWorkflowMinimumClientVersion:       900,
+		WFWorkflowMinimumClientVersionString: "900",
+		WFWorkflowTypes:                      plistWorkflowTypes(),
+		WFWorkflowNoInputBehavior:            noInput,
 	}
 
 	if workflowName != "" {
-		appendPlist([]plistData{
-			{
-				key:      "WFWorkflowName",
-				dataType: Text,
-				value:    workflowName,
-			},
-		})
+		shortcut.WFWorkflowName = workflowName
 	}
 
-	plist.WriteString(footer)
+	generatePlistActions()
 
 	if args.Using("debug") {
 		printPlistGenDebug()
 		fmt.Println(ansi("Done.\n", green))
 	}
-
-	resetPlistGen()
 }
 
 func resetPlistGen() {
-	compiled = plist.String()
-	plist.Reset()
 	tabLevel = 0
 	tokens = []token{}
 	menus = map[string][]variableValue{}
 	uuids = map[string]string{}
 	variables = map[string]variableValue{}
 	questions = map[string]*question{}
-	noInput = noInputParams{}
+	noInput = WFWorkflowNoInputBehavior{}
 	types = []string{}
 	inputs = []string{}
 	outputs = []string{}
@@ -166,10 +103,8 @@ func printPlistGenDebug() {
 	fmt.Print("\n")
 }
 
-func plistActions() {
-	tabLevel++
-	var tabs = strings.Repeat("\t", tabLevel)
-	plist.WriteString(tabs + "<key>WFWorkflowActions</key>\n" + tabs + "<array>\n")
+func generatePlistActions() {
+	uuids = make(map[string]string)
 	for _, t := range tokens {
 		switch t.typeof {
 		case Var, AddTo, SubFrom, MultiplyBy, DivideBy:
@@ -192,8 +127,6 @@ func plistActions() {
 			plistConditional(&t)
 		}
 	}
-	plist.WriteString(strings.Repeat("\t", tabLevel) + "</array>\n")
-	tabLevel--
 }
 
 func plistComment(comment string) {
@@ -548,49 +481,37 @@ func plistImportQuestions() (importQuestions []plistData) {
 	return
 }
 
-func plistWorkflowTypes() (wfWorkflowTypes []plistData) {
+func plistWorkflowTypes() (wfWorkflowTypes []string) {
 	if len(types) == 0 {
-		return []plistData{}
+		return
 	}
 
 	for _, workflowType := range types {
-		wfWorkflowTypes = append(wfWorkflowTypes, plistData{
-			dataType: Text,
-			value:    workflowType,
-		})
+		wfWorkflowTypes = append(wfWorkflowTypes, workflowType)
 	}
 	return
 }
 
-func plistInputContentItems() (inputContentItems []plistData) {
+func plistInputContentItems() (inputContentItems []string) {
 	if len(inputs) == 0 {
 		for _, input := range contentItems {
-			inputContentItems = append(inputContentItems, plistData{
-				dataType: Text,
-				value:    input,
-			})
+			inputContentItems = append(inputContentItems, input)
 		}
 		return
 	}
 
 	for _, input := range inputs {
-		inputContentItems = append(inputContentItems, plistData{
-			dataType: Text,
-			value:    input,
-		})
+		inputContentItems = append(inputContentItems, input)
 	}
 	return
 }
 
-func plistOutputContentItems() (outputContentItems []plistData) {
+func plistOutputContentItems() (outputContentItems []string) {
 	if len(outputs) == 0 {
 		return
 	}
 	for _, output := range outputs {
-		outputContentItems = append(outputContentItems, plistData{
-			dataType: Text,
-			value:    output,
-		})
+		outputContentItems = append(outputContentItems, output)
 	}
 
 	return

@@ -24,7 +24,6 @@ const (
 	ShortcutInput = "ShortcutInput"
 )
 
-var shortcut Shortcut
 var code strings.Builder
 var specialCharsRegex *regexp.Regexp
 

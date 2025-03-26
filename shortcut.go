@@ -14,22 +14,32 @@ type ShortcutIcon struct {
 }
 
 type Shortcut struct {
-	WFWorkflowIcon                      ShortcutIcon
-	WFWorkflowActions                   []ShortcutAction
-	WFQuickActionSurfaces               []string
-	WFWorkflowInputContentItemClasses   []string
-	WFWorkflowClientVersion             string
-	WFWorkflowMinimumClientVersion      int
-	WFWorkflowImportQuestions           interface{}
-	WFWorkflowTypes                     []string
-	WFWorkflowOutputContentItemClasses  []string
-	WFWorkflowHasShortcutInputVariables bool
-	WFWorkflowHasOutputFallback         bool
+	WFWorkflowIcon                       ShortcutIcon
+	WFWorkflowActions                    []ShortcutAction
+	WFQuickActionSurfaces                []string
+	WFWorkflowInputContentItemClasses    []string
+	WFWorkflowClientVersion              string
+	WFWorkflowMinimumClientVersion       int
+	WFWorkflowMinimumClientVersionString string
+	WFWorkflowImportQuestions            interface{}
+	WFWorkflowTypes                      []string
+	WFWorkflowOutputContentItemClasses   []string
+	WFWorkflowHasShortcutInputVariables  bool
+	WFWorkflowHasOutputFallback          bool
+	WFWorkflowNoInputBehavior            WFWorkflowNoInputBehavior
+	WFWorkflowName                       string
 }
+
+var shortcut Shortcut
 
 type ShortcutAction struct {
 	WFWorkflowActionIdentifier string
 	WFWorkflowActionParameters map[string]any
+}
+
+type WFWorkflowNoInputBehavior struct {
+	Name       string
+	Parameters map[string]string
 }
 
 type Value struct {

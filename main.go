@@ -84,7 +84,7 @@ func main() {
 
 	initParse()
 
-	makePlist()
+	marshalPlist()
 
 	createShortcut()
 }

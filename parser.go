@@ -732,28 +732,20 @@ func collectNoInputDefinition() {
 	case tokenAhead(StopWith):
 		advanceTimes(2)
 		var stopWithError = collectString()
-		noInput = noInputParams{
-			name: "WFWorkflowNoInputBehaviorShowError",
-			params: []plistData{
-				{
-					key:      "Error",
-					dataType: Text,
-					value:    stopWithError,
-				},
+		noInput = WFWorkflowNoInputBehavior{
+			Name: "WFWorkflowNoInputBehaviorShowError",
+			Parameters: map[string]string{
+				"Error": stopWithError,
 			},
 		}
 	case tokenAhead(AskFor):
 		advance()
 		var workflowType = collectUntil('\n')
 		if wtype, found := contentItems[workflowType]; found {
-			noInput = noInputParams{
-				name: "WFWorkflowNoInputBehaviorAskForInput",
-				params: []plistData{
-					{
-						key:      "ItemClass",
-						dataType: Text,
-						value:    wtype,
-					},
+			noInput = WFWorkflowNoInputBehavior{
+				Name: "WFWorkflowNoInputBehaviorAskForInput",
+				Parameters: map[string]string{
+					"ItemClass": wtype,
 				},
 			}
 		} else {
@@ -761,9 +753,8 @@ func collectNoInputDefinition() {
 			parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
 		}
 	case tokenAhead(GetClipboard):
-		noInput = noInputParams{
-			name:   "WFWorkflowNoInputBehaviorGetClipboard",
-			params: []plistData{},
+		noInput = WFWorkflowNoInputBehavior{
+			Name: "WFWorkflowNoInputBehaviorGetClipboard",
 		}
 	}
 }

@@ -42,7 +42,7 @@ type noInputParams struct {
 	params []plistData
 }
 
-var noInput noInputParams
+var noInput WFWorkflowNoInputBehavior
 
 var hasShortcutInputVariables = false
 
