@@ -2078,79 +2078,20 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 				validType: String,
 			},
-		},
-		addParams: func(_ []actionArgument) []plistData {
-			return replaceText(true, false)
-		},
-		defaultAction: true,
-	},
-	"iReplaceText": {
-		identifier: "text.replace",
-		parameters: []parameterDefinition{
 			{
-				name:      "find",
-				key:       "WFReplaceTextFind",
-				validType: String,
+				name:         "caseSensitive",
+				key:          "WFReplaceTextCaseSensitive",
+				validType:    Bool,
+				defaultValue: true,
+				optional:     true,
 			},
 			{
-				name:      "replacement",
-				key:       "WFReplaceTextReplace",
-				validType: String,
+				name:         "regExp",
+				key:          "WFReplaceTextRegularExpression",
+				validType:    Bool,
+				defaultValue: false,
+				optional:     true,
 			},
-			{
-				name:      "subject",
-				key:       "WFInput",
-				validType: String,
-			},
-		},
-		addParams: func(_ []actionArgument) []plistData {
-			return replaceText(false, false)
-		},
-	},
-	"regReplaceText": {
-		identifier: "text.replace",
-		parameters: []parameterDefinition{
-			{
-				name:      "expression",
-				key:       "WFReplaceTextFind",
-				validType: String,
-			},
-			{
-				name:      "replacement",
-				key:       "WFReplaceTextReplace",
-				validType: String,
-			},
-			{
-				name:      "subject",
-				key:       "WFInput",
-				validType: String,
-			},
-		},
-		addParams: func(_ []actionArgument) []plistData {
-			return replaceText(true, true)
-		},
-	},
-	"iRegReplaceText": {
-		identifier: "text.replace",
-		parameters: []parameterDefinition{
-			{
-				name:      "expression",
-				key:       "WFReplaceTextFind",
-				validType: String,
-			},
-			{
-				name:      "replacement",
-				key:       "WFReplaceTextReplace",
-				validType: String,
-			},
-			{
-				name:      "subject",
-				key:       "WFInput",
-				validType: String,
-			},
-		},
-		addParams: func(_ []actionArgument) []plistData {
-			return replaceText(false, true)
 		},
 	},
 	"uppercase": {
@@ -6472,21 +6413,6 @@ func decompTextParts(action *ShortcutAction) (arguments []string) {
 	}
 
 	return
-}
-
-func replaceText(caseSensitive bool, regExp bool) []plistData {
-	return []plistData{
-		{
-			key:      "WFReplaceTextCaseSensitive",
-			dataType: Boolean,
-			value:    caseSensitive,
-		},
-		{
-			key:      "WFReplaceTextRegularExpression",
-			dataType: Boolean,
-			value:    regExp,
-		},
-	}
 }
 
 func languageCode(language string) string {
