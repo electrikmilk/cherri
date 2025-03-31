@@ -114,7 +114,7 @@ func generatePlistActions() {
 		case Action:
 			var tokenAction = t.value.(action)
 			setCurrentAction(tokenAction.ident, actions[tokenAction.ident])
-			plistAction(tokenAction.args, &plistData{}, &plistData{})
+			plistAction(tokenAction.args, &map[string]any{})
 		case Repeat:
 			plistRepeat(&t)
 		case RepeatWithEach:
@@ -130,22 +130,14 @@ func generatePlistActions() {
 }
 
 func plistComment(comment string) {
-	appendPlist(makeStdAction("comment", []plistData{
-		{
-			key:      "WFCommentActionText",
-			dataType: Text,
-			value:    comment,
-		},
-	}))
+	buildStdAction("comment", map[string]any{
+		"WFCommentActionText": comment,
+	})
 }
 
 func plistVariable(t *token) {
-	var setVariableParams = []plistData{
-		{
-			key:      "WFVariableName",
-			dataType: Text,
-			value:    t.ident,
-		},
+	var setVariableParams = map[string]any{
+		"WFVariableName": t.ident,
 	}
 
 	if t.value != nil {
@@ -155,25 +147,22 @@ func plistVariable(t *token) {
 		uuids[outputName] = varUUID
 		if t.valueType != Arr {
 			if t.typeof == Var && t.valueType == Variable {
-				setVariableParams = append(setVariableParams, variablePlistValue("WFInput", t.value.(string), t.ident))
+				setVariableParams["WFInput"] = variablePlistValue(t.value.(string), t.ident)
 			} else {
-				setVariableParams = append(setVariableParams, inputValue("WFInput", outputName, varUUID))
+				setVariableParams["WFInput"] = inputValue(outputName, varUUID)
 			}
-			setVariableParams = append(setVariableParams, plistData{
-				key:      "WFSerializationType",
-				dataType: Text,
-				value:    "WFTextTokenAttachment",
-			})
+
+			setVariableParams["WFSerializationType"] = "WFTextTokenAttachment"
 		}
 	}
 
 	if t.typeof != Var {
 		if variables[t.ident].valueType != Arr {
-			appendPlist(makeStdAction("setvariable", setVariableParams))
+			buildStdAction("setvariable", setVariableParams)
 			return
 		}
 
-		appendPlist(makeStdAction("appendvariable", setVariableParams))
+		buildStdAction("appendvariable", setVariableParams)
 		return
 	}
 
@@ -182,7 +171,7 @@ func plistVariable(t *token) {
 			return
 		}
 	}
-	appendPlist(makeStdAction("setvariable", setVariableParams))
+	buildStdAction("setvariable", setVariableParams)
 
 	if t.valueType == Arr {
 		plistArrayVariable(t)
@@ -221,7 +210,6 @@ func plistArrayVariable(t *token) {
 		}
 		var UUID = uuid.New().String()
 		var valueType tokenType
-		var addToVariableParams []plistData
 		var itemIdent string
 		switch reflect.TypeOf(value).String() {
 		case stringType:
@@ -240,144 +228,92 @@ func plistArrayVariable(t *token) {
 			valueType: valueType,
 			value:     value,
 		}, &itemIdent, &UUID)
-		addToVariableParams = append(addToVariableParams,
-			inputValue("WFInput", itemIdent, UUID),
-			plistData{
-				key:      "WFVariableName",
-				dataType: Text,
-				value:    t.ident,
-			},
-		)
-		appendPlist(makeStdAction("appendvariable", addToVariableParams))
+
+		buildStdAction("appendvariable", map[string]any{
+			"WFInput":        inputValue(itemIdent, UUID),
+			"WFVariableName": t.ident,
+		})
 	}
 }
 
 func plistConditional(t *token) {
-	var controlFlowMode uint64
-	var conditionalParams = []plistData{
-		{
-			key:      "GroupingIdentifier",
-			dataType: Text,
-			value:    t.ident,
-		},
-		{
-			key:      "UUID",
-			dataType: Text,
-			value:    uuid.New().String(),
-		},
+	var conditionalParams = map[string]any{
+		"GroupingIdentifier": t.ident,
+		"UUID":               uuid.New().String(),
 	}
 	switch t.valueType {
 	case If:
 		var cond = t.value.(condition)
-		conditionalParams = append(conditionalParams, plistData{
-			key:      "WFInput",
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "Type",
-					dataType: Text,
-					value:    "Variable",
-				},
-				variablePlistValue("Variable", cond.variableOneValue.(string), t.ident),
+		conditionalParams = map[string]any{
+			"WFInput": map[string]any{
+				"Type":     "Variable",
+				"Variable": variablePlistValue(cond.variableOneValue.(string), t.ident),
 			},
-		})
+		}
 		if cond.variableTwoValue != nil {
-			conditionalParameter("", &conditionalParams, &cond.variableTwoType, cond.variableTwoValue)
+			conditionalParameter("", conditionalParams, &cond.variableTwoType, cond.variableTwoValue)
 		}
 		if cond.variableThreeValue != nil {
-			conditionalParameter("WFAnotherNumber", &conditionalParams, &cond.variableThreeType, cond.variableThreeValue)
+			conditionalParameter("WFAnotherNumber", conditionalParams, &cond.variableThreeType, cond.variableThreeValue)
 		}
-		conditionalParams = append(conditionalParams, plistData{
-			key:      "WFCondition",
-			dataType: Number,
-			value:    cond.condition,
-		})
-		controlFlowMode = startStatement
+		conditionalParams["WFCondition"] = cond.condition
+		conditionalParams["WFControlFlowMode"] = startStatement
 	case Else:
-		controlFlowMode = statementPart
+		conditionalParams["WFControlFlowMode"] = statementPart
 	case EndClosure:
-		controlFlowMode = endStatement
+		conditionalParams["WFControlFlowMode"] = endStatement
 	}
-	conditionalParams = append(conditionalParams, plistData{
-		key:      "WFControlFlowMode",
-		dataType: Number,
-		value:    controlFlowMode,
-	})
-	appendPlist(makeStdAction("conditional", conditionalParams))
+
+	buildStdAction("conditional", conditionalParams)
 }
 
 func plistMenu(t *token) {
-	var controlFlow = startStatement
+	var controlFlowMode = startStatement
 	if t.valueType == EndClosure {
-		controlFlow = endStatement
+		controlFlowMode = endStatement
 	}
-	var menuParams = []plistData{
-		{
-			key:      "GroupingIdentifier",
-			dataType: Text,
-			value:    t.ident,
-		},
-		{
-			key:      "WFControlFlowMode",
-			dataType: Number,
-			value:    controlFlow,
-		},
+	var menuParams = map[string]any{
+		"GroupingIdentifier": t.ident,
+		"WFControlFlowMode":  controlFlowMode,
 	}
 	if t.valueType != EndClosure {
 		if t.valueType != Nil {
-			menuParams = append(menuParams, paramValue("WFMenuPrompt", actionArgument{
+			menuParams["WFMenuPrompt"] = paramValue(actionArgument{
 				valueType: t.valueType,
 				value:     t.value,
-			}, String, Text))
+			}, String)
 		}
 		var menuItemParams = menus[t.ident]
-		var menuItems []plistData
+		var menuItems []map[string]any
 		for _, item := range menuItemParams {
-			menuItems = append(menuItems, plistData{
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "WFItemType",
-						dataType: Number,
-						value:    0,
-					},
-					paramValue("WFValue", actionArgument{
-						valueType: item.valueType,
-						value:     item.value,
-					}, String, Text),
-				},
+			menuItems = append(menuItems, map[string]any{
+				"WFItemType": 0,
+				"WFValue": paramValue(actionArgument{
+					valueType: item.valueType,
+					value:     item.value,
+				}, String),
 			})
 		}
-		menuParams = append(menuParams, plistData{
-			key:      "WFMenuItems",
-			dataType: Array,
-			value:    menuItems,
-		})
+
+		menuParams["WFMenuItems"] = menuItems
 	}
-	appendPlist(makeStdAction("choosefrommenu", menuParams))
+
+	buildStdAction("choosefrommenu", menuParams)
 }
 
 func plistMenuItem(t *token) {
-	appendPlist(makeStdAction("choosefrommenu", []plistData{
-		{
-			key:      "GroupingIdentifier",
-			dataType: Text,
-			value:    t.ident,
-		},
-		{
-			key:      "WFControlFlowMode",
-			dataType: Number,
-			value:    statementPart,
-		},
-		paramValue("WFMenuItemAttributedTitle", actionArgument{
+	buildStdAction("choosefrommenu", map[string]any{
+		"GroupingIdentifier": t.ident,
+		"WFControlFlowMode":  statementPart,
+		"WFMenuItemAttributedTitle": paramValue(actionArgument{
 			valueType: t.valueType,
 			value:     t.value,
-		}, String, Text),
-		paramValue("WFMenuItemTitle", actionArgument{
+		}, String),
+		"WFMenuItemTitle": paramValue(actionArgument{
 			valueType: t.valueType,
 			value:     t.value,
-		}, String, Text),
-	}))
+		}, String),
+	})
 }
 
 func plistRepeat(t *token) {
@@ -385,30 +321,19 @@ func plistRepeat(t *token) {
 	if t.valueType == EndClosure {
 		controlFlowMode = endStatement
 	}
-	var repeatData = []plistData{
-		{
-			key:      "WFControlFlowMode",
-			dataType: Number,
-			value:    controlFlowMode,
-		},
-		{
-			key:      "GroupingIdentifier",
-			dataType: Text,
-			value:    t.ident,
-		},
-		{
-			key:      "UUID",
-			dataType: Text,
-			value:    uuid.New().String(),
-		},
+	var repeatParams = map[string]any{
+		"WFControlFlowMode":  controlFlowMode,
+		"GroupingIdentifier": t.ident,
+		"UUID":               uuid.New().String(),
 	}
 	if controlFlowMode == startStatement {
-		repeatData = append(repeatData, paramValue("WFRepeatCount", actionArgument{
+		repeatParams["WFRepeatCount"] = paramValue(actionArgument{
 			valueType: t.valueType,
 			value:     t.value,
-		}, Integer, Number))
+		}, Integer)
 	}
-	appendPlist(makeStdAction("repeat.count", repeatData))
+
+	buildStdAction("repeat.count", repeatParams)
 }
 
 func plistRepeatEach(t *token) {
@@ -416,66 +341,33 @@ func plistRepeatEach(t *token) {
 	if t.valueType == EndClosure {
 		controlFlowMode = endStatement
 	}
-	var repeatData = []plistData{
-		{
-			key:      "WFControlFlowMode",
-			dataType: Number,
-			value:    controlFlowMode,
-		},
-		{
-			key:      "GroupingIdentifier",
-			dataType: Text,
-			value:    t.ident,
-		},
-		{
-			key:      "UUID",
-			dataType: Text,
-			value:    uuid.New().String(),
-		},
+	var repeatEachParams = map[string]any{
+		"WFControlFlowMode":  controlFlowMode,
+		"GroupingIdentifier": t.ident,
+		"UUID":               uuid.New().String(),
 	}
 	if controlFlowMode == startStatement {
-		repeatData = append(repeatData, paramValue("WFInput", actionArgument{
+		repeatEachParams["WFInput"] = paramValue(actionArgument{
 			valueType: t.valueType,
 			value:     t.value,
-		}, Variable, Text))
+		}, Variable)
 	}
-	appendPlist(makeStdAction("repeat.each", repeatData))
+
+	buildStdAction("repeat.each", repeatEachParams)
 }
 
-func plistImportQuestions() (importQuestions []plistData) {
+func plistImportQuestions() (importQuestions []map[string]any) {
 	if len(questions) == 0 {
 		return
 	}
+
 	for _, q := range questions {
-		importQuestions = append(importQuestions, plistData{
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "ParameterKey",
-					dataType: Text,
-					value:    q.parameter,
-				},
-				{
-					key:      "Category",
-					dataType: Text,
-					value:    "Parameter",
-				},
-				{
-					key:      "ActionIndex",
-					dataType: Number,
-					value:    q.actionIndex,
-				},
-				{
-					key:      "Text",
-					dataType: Text,
-					value:    q.text,
-				},
-				{
-					key:      "DefaultValue",
-					dataType: Text,
-					value:    q.defaultValue,
-				},
-			},
+		importQuestions = append(importQuestions, map[string]any{
+			"ParameterKey": q.parameter,
+			"Category":     "Parameter",
+			"ActionIndex":  q.actionIndex,
+			"Text":         q.text,
+			"DefaultValue": q.defaultValue,
 		})
 	}
 	return

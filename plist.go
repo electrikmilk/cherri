@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"html"
+	"maps"
 	"reflect"
 	"regexp"
 	"strings"
@@ -105,7 +106,7 @@ func appendPlist(data []plistData) {
 	plist.WriteString(xmlStr)
 }
 
-func conditionalParameter(key string, conditionalParams *[]plistData, typeOf *tokenType, value any) {
+func conditionalParameter(key string, conditionalParams map[string]any, typeOf *tokenType, value any) {
 	if key == "" {
 		if *typeOf == String {
 			key = "WFConditionalActionString"
@@ -115,145 +116,112 @@ func conditionalParameter(key string, conditionalParams *[]plistData, typeOf *to
 	}
 	switch *typeOf {
 	case String:
-		*conditionalParams = append(*conditionalParams, paramValue(key, actionArgument{
+		conditionalParams[key] = paramValue(actionArgument{
 			valueType: *typeOf,
 			value:     value,
-		}, String, Text))
+		}, String)
 	case Integer:
-		*conditionalParams = append(*conditionalParams, paramValue(key, actionArgument{
+		conditionalParams[key] = paramValue(actionArgument{
 			valueType: *typeOf,
 			value:     value,
-		}, String, Text))
+		}, String)
 	case Bool:
+		var boolNumber = "0"
 		if value == true {
-			*conditionalParams = append(*conditionalParams, paramValue(key, actionArgument{
-				valueType: Integer,
-				value:     "1",
-			}, Integer, Text))
-		} else {
-			*conditionalParams = append(*conditionalParams, paramValue(key, actionArgument{
-				valueType: Integer,
-				value:     "0",
-			}, Integer, Text))
+			boolNumber = "1"
 		}
+		conditionalParams[key] = paramValue(actionArgument{
+			valueType: Integer,
+			value:     boolNumber,
+		}, Integer)
 	case Variable:
 		conditionalParameterVariable(conditionalParams, value)
 	}
 }
 
-func conditionalParameterVariable(conditionalParams *[]plistData, value any) {
+func conditionalParameterVariable(conditionalParams map[string]any, value any) {
 	var stringValue = value.(string)
 	var variable = variables[stringValue]
 	switch variable.valueType {
 	case Integer:
-		*conditionalParams = append(*conditionalParams, variablePlistValue("WFNumberValue", stringValue, uuids[stringValue]))
+		conditionalParams["WFNumberValue"] = stringValue
 	default:
-		*conditionalParams = append(*conditionalParams, attachmentValues("WFConditionalActionString", fmt.Sprintf("{%s}", stringValue), Text))
+		conditionalParams["WFConditionalActionString"] = fmt.Sprintf("{%s}", stringValue)
 	}
 }
 
 func makeVariableAction(token *token, customOutputName *string, varUUID *string) {
-	var UUID = plistData{
-		key:      "UUID",
-		dataType: Text,
-		value:    *varUUID,
+	var reference = map[string]any{
+		"CustomOutputName": *customOutputName,
+		"UUID":             *varUUID,
 	}
-	var outputName = plistData{
-		key:      "CustomOutputName",
-		dataType: Text,
-		value:    *customOutputName,
-	}
+
 	if (token.typeof == AddTo || token.typeof == SubFrom || token.typeof == MultiplyBy || token.typeof == DivideBy) &&
 		token.valueType != Arr &&
 		variables[token.ident].valueType != Arr {
-		variableValueModifier(token, &outputName, &UUID)
+		variableValueModifier(token, &reference)
 		return
 	}
 
-	makeVariableValue(&outputName, &UUID, token.valueType, &token.value)
+	makeVariableValue(&reference, token.valueType, &token.value)
 }
 
-func makeVariableValue(outputName *plistData, uuid *plistData, valueType tokenType, value *any) {
+func makeVariableValue(reference *map[string]any, valueType tokenType, value *any) {
 	switch valueType {
 	case Integer, Float:
-		makeIntValue(outputName, uuid, value)
+		makeIntValue(reference, value)
 	case Bool:
-		makeBoolValue(outputName, uuid, value)
+		makeBoolValue(reference, value)
 	case String:
-		makeStringValue(outputName, uuid, value)
+		makeStringValue(reference, value)
 	case RawString:
-		makeRawStringValue(outputName, uuid, value)
+		makeRawStringValue(reference, value)
 	case Expression:
-		makeExpressionValue(outputName, uuid, value)
+		makeExpressionValue(reference, value)
 	case Action:
 		var valuePtr = *value
 		var action = valuePtr.(action)
 		setCurrentAction(action.ident, actions[action.ident])
-		plistAction(action.args, outputName, uuid)
+		plistAction(action.args, reference)
 	case Dict:
-		appendPlist(makeStdAction("dictionary", []plistData{
-			*outputName,
-			*uuid,
-			{
-				key:      "WFItems",
-				dataType: Dictionary,
-				value:    makeDictionaryValue(value),
-			},
-		}))
+		buildStdAction("dictionary", attachReferenceParams(&map[string]any{
+			"WFItems": makeDictionaryValue(value),
+		}, reference))
 	}
 }
 
-func makeIntValue(outputName *plistData, uuid *plistData, value *any) {
-	appendPlist(makeStdAction("number", []plistData{
-		*outputName,
-		*uuid,
-		{
-			key:      "WFNumberActionNumber",
-			dataType: Text,
-			value:    *value,
-		},
-	}))
+func makeIntValue(reference *map[string]any, value *any) {
+	buildStdAction("number", attachReferenceParams(&map[string]any{
+		"WFNumberActionNumber": *value,
+	}, reference))
 }
 
-func makeStringValue(outputName *plistData, uuid *plistData, value *any) {
-	appendPlist(makeStdAction("gettext", []plistData{
-		*outputName,
-		*uuid,
-		attachmentValues("WFTextActionText", fmt.Sprintf("%s", *value), Text),
-	}))
+func makeStringValue(reference *map[string]any, value *any) {
+	buildStdAction("gettext", attachReferenceParams(&map[string]any{
+		"WFTextActionText": attachmentValues(fmt.Sprintf("%s", *value)),
+	}, reference))
 }
 
-func makeRawStringValue(outputName *plistData, uuid *plistData, value *any) {
-	appendPlist(makeStdAction("gettext", []plistData{
-		*outputName,
-		*uuid,
-		{
-			key:      "WFTextActionText",
-			dataType: Text,
-			value:    fmt.Sprintf("%s", *value),
-		},
-	}))
+func makeRawStringValue(reference *map[string]any, value *any) {
+	buildStdAction("gettext", attachReferenceParams(&map[string]any{
+		"WFTextActionText": fmt.Sprintf("%s", *value),
+	}, reference))
 }
 
-func makeBoolValue(outputName *plistData, uuid *plistData, value *any) {
+func makeBoolValue(reference *map[string]any, value *any) {
 	var boolValue = "0"
 	if *value == true {
 		boolValue = "1"
 	}
-	appendPlist(makeStdAction("number", []plistData{
-		*outputName,
-		*uuid,
-		{
-			key:      "WFNumberActionNumber",
-			dataType: Text,
-			value:    boolValue,
-		},
-	}))
+
+	buildStdAction("number", attachReferenceParams(&map[string]any{
+		"WFNumberActionNumber": boolValue,
+	}, reference))
 }
 
 var formattedExpression []string
 
-func makeExpressionValue(outputName *plistData, uuid *plistData, value *any) {
+func makeExpressionValue(reference *map[string]any, value *any) {
 	formattedExpression = []string{}
 	var expression = fmt.Sprintf("%s", *value)
 	var expressionParts []string
@@ -261,27 +229,25 @@ func makeExpressionValue(outputName *plistData, uuid *plistData, value *any) {
 	if containsTokens(&expression, Plus, Minus, Multiply, Divide, Modulus) {
 		var operandOne string
 		var operandTwo string
-		var operation string
 		var expressionParts = strings.Split(expression, " ")
-		if len(expressionParts) == 3 {
-			operation = ""
-		}
-		if operation != "" {
-			expressionParts = strings.Split(expression, operation)
-			operandOne = strings.Trim(expressionParts[0], " ")
-			operandTwo = strings.Trim(expressionParts[1], " ")
-			wrapVariableReference(&operandOne)
-			wrapVariableReference(&operandTwo)
-
-			appendPlist(makeStdAction("math", []plistData{
-				*outputName,
-				*uuid,
-				attachmentValues("WFScientificMathOperation", operation, Text),
-				attachmentValues("WFInput", operandOne, Number),
-				attachmentValues("WFMathOperand", operandTwo, Number),
-			}))
+		if len(expressionParts) > 2 {
 			return
 		}
+
+		var operation = expressionParts[1]
+		expressionParts = strings.Split(expression, operation)
+		operandOne = strings.Trim(expressionParts[0], " ")
+		operandTwo = strings.Trim(expressionParts[1], " ")
+		wrapVariableReference(&operandOne)
+		wrapVariableReference(&operandTwo)
+
+		buildStdAction("math", attachReferenceParams(&map[string]any{
+			"WFScientificMathOperation": operation,
+			"WFInput":                   operandOne,
+			"WFMathOperand":             operandTwo,
+		}, reference))
+
+		return
 	}
 
 	expressionParts = strings.Split(expression, " ")
@@ -292,35 +258,22 @@ func makeExpressionValue(outputName *plistData, uuid *plistData, value *any) {
 	}
 
 	expression = strings.Join(formattedExpression, " ")
-	appendPlist(makeStdAction("calculateexpression", []plistData{
-		*outputName,
-		attachmentValues("Input", expression, Text),
-		*uuid,
-	}))
+
+	buildStdAction("calculateexpression", attachReferenceParams(&map[string]any{
+		"Input": attachmentValues(expression),
+	}, reference))
 }
 
-func makeDictionaryValue(value *any) []plistData {
-	return []plistData{
-		{
-			key:      "Value",
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "WFDictionaryFieldValueItems",
-					dataType: Array,
-					value:    makeDictionary(*value),
-				},
-			},
+func makeDictionaryValue(value *any) map[string]any {
+	return map[string]any{
+		"Value": map[string]any{
+			"WFDictionaryFieldValueItems": makeDictionary(*value),
 		},
-		{
-			key:      "WFSerializationType",
-			dataType: Text,
-			value:    "WFDictionaryFieldValue",
-		},
+		"WFSerializationType": "WFDictionaryFieldValue",
 	}
 }
 
-func variableValueModifier(token *token, outputName *plistData, uuid *plistData) {
+func variableValueModifier(token *token, reference *map[string]any) {
 	var valueType = token.valueType
 	if valueType == Variable {
 		valueType = variables[token.value.(string)].valueType
@@ -338,126 +291,81 @@ func variableValueModifier(token *token, outputName *plistData, uuid *plistData)
 		case DivideBy:
 			operation = "÷"
 		}
-		var tokenType = convertTypeToken(token.valueType)
-		appendPlist(makeStdAction("math", []plistData{
-			*outputName,
-			*uuid,
-			paramValue("WFMathOperand", actionArgument{
+		buildStdAction("math", attachReferenceParams(&map[string]any{
+			"WFMathOperand": paramValue(actionArgument{
 				valueType: token.valueType,
 				value:     token.value,
-			}, token.valueType, tokenType),
-			paramValue("WFInput", actionArgument{
+			}, token.valueType),
+			"WFInput": paramValue(actionArgument{
 				valueType: Var,
 				value:     token.ident,
-			}, token.valueType, tokenType),
-			{
-				key:      "WFMathOperation",
-				dataType: Text,
-				value:    operation,
-			},
-		}))
+			}, token.valueType),
+			"WFMathOperation": operation,
+		}, reference))
 	case String, RawString:
 		var varInput = token.value.(string)
 		wrapVariableReference(&varInput)
-		appendPlist(makeStdAction("gettext", []plistData{
-			*outputName,
-			*uuid,
-			paramValue("WFTextActionText", actionArgument{
+
+		buildStdAction("gettext", attachReferenceParams(&map[string]any{
+			"WFTextActionText": paramValue(actionArgument{
 				valueType: String,
 				value:     fmt.Sprintf("{%s}%s", token.ident, varInput),
-			}, token.valueType, convertTypeToken(valueType)),
-		}))
+			}, token.valueType),
+		}, reference))
 	}
 }
 
-func variableInput(key string, name string) plistData {
+func attachReferenceParams(params *map[string]any, reference *map[string]any) map[string]any {
+	maps.Copy(*params, *reference)
+
+	return *params
+}
+
+func variableInput(name string) map[string]any {
 	if uuid, found := uuids[name]; found {
-		return inputValue(key, name, uuid)
+		return inputValue(name, uuid)
 	}
-	return inputValue(key, name, "")
+	return inputValue(name, "")
 }
 
-func inputValue(key string, name string, varUUID string) plistData {
-	var value []plistData
+func inputValue(name string, varUUID string) map[string]any {
+	var value map[string]string
 	if varUUID != "" {
 		var variable = variables[name]
 		if !variable.repeatItem && ((variable.constant && variable.valueType == Variable) || variable.valueType != Variable) {
-			value = []plistData{
-				{
-					key:      "OutputName",
-					dataType: Text,
-					value:    name,
-				},
-				{
-					key:      "OutputUUID",
-					dataType: Text,
-					value:    varUUID,
-				},
-				{
-					key:      "Type",
-					dataType: Text,
-					value:    "ActionOutput",
-				},
+			value = map[string]string{
+				"OutputName": name,
+				"OutputUUID": varUUID,
+				"Type":       "ActionOutput",
 			}
 		} else {
-			value = []plistData{
-				{
-					key:      "VariableName",
-					dataType: Text,
-					value:    name,
-				},
-				{
-					key:      "Type",
-					dataType: Text,
-					value:    "Variable",
-				},
+			value = map[string]string{
+				"VariableName": name,
+				"Type":         "Variable",
 			}
 		}
 	} else if global, found := globals[name]; found {
-		value = []plistData{
-			{
-				key:      "Type",
-				dataType: Text,
-				value:    global.variableType,
-			},
+		value = map[string]string{
+			"Type": global.variableType,
 		}
 	} else {
-		value = []plistData{
-			{
-				key:      "OutputName",
-				dataType: Text,
-				value:    name,
-			},
-			{
-				key:      "Type",
-				dataType: Text,
-				value:    "ActionOutput",
-			},
+		value = map[string]string{
+			"OutputName": name,
+			"Type":       "ActionOutput",
 		}
 	}
-	return plistData{
-		key:      key,
-		dataType: Dictionary,
-		value: []plistData{
-			{
-				key:      "Value",
-				dataType: Dictionary,
-				value:    value,
-			},
-			{
-				key:      "WFSerializationType",
-				dataType: Text,
-				value:    "WFTextTokenAttachment",
-			},
-		},
+
+	return map[string]any{
+		"Value":               value,
+		"WFSerializationType": "WFTextTokenAttachment",
 	}
 }
 
-func variablePlistValue(key string, identifier string, ident string) plistData {
+func variablePlistValue(identifier string, ident string) map[string]any {
 	var variable variableValue
 	var getAs string
 	var coerce string
-	var aggrandizements []plistData
+	var aggrandizements []map[string]any
 	if global, found := globals[identifier]; found {
 		variable = global
 		identifier = variable.value.(string)
@@ -475,60 +383,23 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 				}
 			}
 			if refValueType == Dict {
-				aggrandizements = append(aggrandizements, plistData{
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "Type",
-							dataType: Text,
-							value:    "WFDictionaryValueVariableAggrandizement",
-						},
-						{
-							key:      "DictionaryKey",
-							dataType: Text,
-							value:    getAs,
-						},
-					},
+				aggrandizements = append(aggrandizements, map[string]any{
+					"Type":          "WFDictionaryValueVariableAggrandizement",
+					"DictionaryKey": getAs,
 				})
 			} else {
-				aggrandizements = append(aggrandizements, plistData{
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "PropertyUserInfo",
-							dataType: Number,
-							value:    0,
-						},
-						{
-							key:      "Type",
-							dataType: Text,
-							value:    "WFPropertyVariableAggrandizement",
-						},
-						{
-							key:      "PropertyName",
-							dataType: Text,
-							value:    getAs,
-						},
-					},
+				aggrandizements = append(aggrandizements, map[string]any{
+					"PropertyUserInfo": 0,
+					"Type":             "WFPropertyVariableAggrandizement",
+					"PropertyName":     getAs,
 				})
 			}
 		}
 		if coerce != "" {
 			if contentItem, found := contentItems[coerce]; found {
-				aggrandizements = append(aggrandizements, plistData{
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "Type",
-							dataType: Text,
-							value:    "WFCoercionVariableAggrandizement",
-						},
-						{
-							key:      "CoercionItemClass",
-							dataType: Text,
-							value:    contentItem,
-						},
-					},
+				aggrandizements = append(aggrandizements, map[string]any{
+					"Type":              "WFCoercionVariableAggrandizement",
+					"CoercionItemClass": contentItem,
 				})
 			}
 		}
@@ -537,63 +408,27 @@ func variablePlistValue(key string, identifier string, ident string) plistData {
 	if variable.variableType != "" {
 		varType = variable.variableType
 	}
-	var varValue []plistData
+	var varValue map[string]any
 	if variable.constant {
 		var varUUID = uuids[identifier]
-		varValue = []plistData{
-			{
-				key:      "OutputName",
-				dataType: Text,
-				value:    identifier,
-			},
-			{
-				key:      "OutputUUID",
-				dataType: Text,
-				value:    varUUID,
-			},
-			{
-				key:      "Type",
-				dataType: Text,
-				value:    "ActionOutput",
-			},
+		varValue = map[string]any{
+			"OutputName": identifier,
+			"OutputUUID": varUUID,
+			"Type":       "ActionOutput",
 		}
 	} else {
-		varValue = []plistData{
-			{
-				key:      "VariableName",
-				dataType: Text,
-				value:    identifier,
-			},
-			{
-				key:      "Type",
-				dataType: Text,
-				value:    varType,
-			},
+		varValue = map[string]any{
+			"VariableName": identifier,
+			"Type":         varType,
 		}
 	}
 	if len(aggrandizements) > 0 {
-		varValue = append(varValue, plistData{
-			key:      "Aggrandizements",
-			dataType: Array,
-			value:    aggrandizements,
-		})
+		varValue["Aggrandizements"] = aggrandizements
 	}
 
-	return plistData{
-		key:      key,
-		dataType: Dictionary,
-		value: []plistData{
-			{
-				key:      "Value",
-				dataType: Dictionary,
-				value:    varValue,
-			},
-			{
-				key:      "WFSerializationType",
-				dataType: Text,
-				value:    "WFTextTokenAttachment",
-			},
-		},
+	return map[string]any{
+		"Value":               varValue,
+		"WFSerializationType": "WFTextTokenAttachment",
 	}
 }
 
@@ -610,52 +445,28 @@ type attachmentVariable struct {
 	coerce     string
 }
 
-var varPositions []plistData
+var varPositions map[string]any
 var inlineVars []inlineVar
 var varIndex []attachmentVariable
 
-func attachmentValues(key string, str string, outputType plistDataType) plistData {
+func attachmentValues(str string) any {
 	if !strings.ContainsAny(str, "{}") {
-		return plistData{
-			key:      key,
-			dataType: outputType,
-			value:    str,
-		}
+		return str
 	}
 
-	varPositions = []plistData{}
+	varPositions = make(map[string]any)
 	inlineVars = []inlineVar{}
 	varIndex = []attachmentVariable{}
 
 	var noVarString = collectInlineVariables(&str)
 	makeAttachmentValues()
 
-	return plistData{
-		key:      key,
-		dataType: Dictionary,
-		value: []plistData{
-			{
-				key:      "Value",
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "attachmentsByRange",
-						dataType: Dictionary,
-						value:    varPositions,
-					},
-					{
-						key:      "string",
-						dataType: Text,
-						value:    noVarString,
-					},
-				},
-			},
-			{
-				key:      "WFSerializationType",
-				dataType: Text,
-				value:    "WFTextTokenString",
-			},
+	return map[string]any{
+		"Value": map[string]any{
+			"attachmentsByRange": varPositions,
+			"string":             noVarString,
 		},
+		"WFSerializationType": "WFTextTokenString",
 	}
 }
 
@@ -672,114 +483,51 @@ func makeAttachmentValues() {
 		}
 		var variable = variables[stringVar.identifier]
 		var varUUID = uuids[stringVar.identifier]
-		var varValue []plistData
+		var varValue map[string]any
 		var varType = "Variable"
-		var aggr []plistData
+		var aggr map[string]string
 		if storedVar.variableType != "" {
 			varType = storedVar.variableType
 		}
 		if !variable.constant {
-			varValue = []plistData{
-				{
-					key:      "VariableName",
-					dataType: Text,
-					value:    stringVar.identifier,
-				},
-				{
-					key:      "Type",
-					dataType: Text,
-					value:    varType,
-				},
+			varValue = map[string]any{
+				"VariableName": stringVar.identifier,
+				"Type":         varType,
 			}
 		} else {
-			varValue = []plistData{
-				{
-					key:      "OutputName",
-					dataType: Text,
-					value:    stringVar.identifier,
-				},
-				{
-					key:      "OutputUUID",
-					dataType: Text,
-					value:    varUUID,
-				},
-				{
-					key:      "Type",
-					dataType: Text,
-					value:    "ActionOutput",
-				},
+			varValue = map[string]any{
+				"OutputName": stringVar.identifier,
+				"OutputUUID": varUUID,
+				"Type":       "ActionOutput",
 			}
 		}
 		if stringVar.getAs != "" {
 			var refValueType = variable.valueType
 			if refValueType == Dict {
-				aggr = append(aggr, plistData{
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "Type",
-							dataType: Text,
-							value:    "WFDictionaryValueVariableAggrandizement",
-						},
-						{
-							key:      "DictionaryKey",
-							dataType: Text,
-							value:    stringVar.getAs,
-						},
-					},
-				})
+				aggr["Type"] = "WFDictionaryValueVariableAggrandizement"
+				aggr["DictionaryKey"] = stringVar.getAs
 			} else {
-				aggr = append(aggr, plistData{
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "Type",
-							dataType: Text,
-							value:    "WFPropertyVariableAggrandizement",
-						},
-						{
-							key:      "PropertyName",
-							dataType: Text,
-							value:    stringVar.getAs,
-						},
-					},
-				})
+				aggr["Type"] = "WFPropertyVariableAggrandizement"
+				aggr["PropertyName"] = stringVar.getAs
 			}
 		}
 		if stringVar.coerce != "" {
 			if contentItem, found := contentItems[stringVar.coerce]; found {
-				aggr = append(aggr, plistData{
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "Type",
-							dataType: Text,
-							value:    "WFCoercionVariableAggrandizement",
-						},
-						{
-							key:      "CoercionItemClass",
-							dataType: Text,
-							value:    contentItem,
-						},
-					},
-				})
+				aggr["Type"] = "WFCoercionVariableAggrandizement"
+				aggr["CoercionItemClass"] = contentItem
 			} else {
 				var list = makeKeyList("Available content item types:", contentItems, stringVar.coerce)
 				parserError(fmt.Sprintf("Invalid content item for type coerce '%s'\n\n%s\n", stringVar.coerce, list))
 			}
 		}
 		if stringVar.getAs != "" || stringVar.coerce != "" {
-			varValue = append(varValue, plistData{
-				key:      "Aggrandizements",
-				dataType: Array,
-				value:    aggr,
-			})
+			varValue = map[string]any{
+				"Aggrandizements": aggr,
+			}
 		}
-		varPositions = append(varPositions, plistData{
-			key:      fmt.Sprintf("{%d, 1}", stringVar.col),
-			dataType: Dictionary,
-			value:    varValue,
-		})
+
+		var positionsKey = fmt.Sprintf("{%d, 1}", stringVar.col)
+		varPositions[positionsKey] = varValue
 	}
 }
 
@@ -864,7 +612,7 @@ func convertPlistTypeToken(plistType plistDataType) tokenType {
 	}
 }
 
-func argumentValue(key string, args []actionArgument, idx int) plistData {
+func argumentValue(args []actionArgument, idx int) any {
 	var actionParameter parameterDefinition
 	if len(currentAction.parameters) <= idx {
 		// First parameter is likely infinite
@@ -880,39 +628,29 @@ func argumentValue(key string, args []actionArgument, idx int) plistData {
 	} else {
 		arg = args[idx]
 	}
-	return paramValue(key, arg, actionParameter.validType, convertTypeToken(actionParameter.validType))
+
+	return paramValue(arg, actionParameter.validType)
 }
 
-func paramValue(key string, arg actionArgument, handleAs tokenType, outputType plistDataType) plistData {
+func paramValue(arg actionArgument, handleAs tokenType) any {
 	if arg.valueType == Nil || arg.value == nil {
 		return plistData{}
 	}
 	switch arg.valueType {
 	case Variable:
 		if handleAs == String {
-			return attachmentValues(key, fmt.Sprintf("{%s}", arg.value), Text)
+			return attachmentValues(fmt.Sprintf("{%s}", arg.value))
 		}
-		return variablePlistValue(key, arg.value.(string), "")
-	case Bool:
-		return plistData{
-			key:      key,
-			dataType: Boolean,
-			value:    arg.value,
-		}
+
+		return variablePlistValue(arg.value.(string), "")
 	case Dict:
-		return plistData{
-			key:      key,
-			dataType: Dictionary,
-			value:    makeDictionaryValue(&arg.value),
-		}
+		return makeDictionaryValue(&arg.value)
+	case Bool:
+		fallthrough
 	case Float:
-		return plistData{
-			key:      key,
-			dataType: Real,
-			value:    arg.value,
-		}
+		return arg.value
 	default:
-		return attachmentValues(key, arg.value.(string), outputType)
+		return attachmentValues(arg.value.(string))
 	}
 }
 
@@ -942,7 +680,7 @@ const (
 )
 
 // makeDictionary creates a Shortcut dictionary value.
-func makeDictionary(value interface{}) (dictItems []plistData) {
+func makeDictionary(value interface{}) (dictItems []map[string]any) {
 	for key, item := range value.(map[string]interface{}) {
 		dictItems = append(dictItems, dictionaryValue(key, item))
 	}
@@ -950,35 +688,29 @@ func makeDictionary(value interface{}) (dictItems []plistData) {
 }
 
 // dictionaryValue creates an inner dictionary value.
-func dictionaryValue(key string, value any) plistData {
+func dictionaryValue(key string, value any) map[string]any {
 	if value == nil {
 		value = ""
 	}
 	var itemType dictDataType
 	var serializedType string
-	var wfValue = plistData{
-		key:      "Value",
-		dataType: Dictionary,
-		value: []plistData{
-			{
-				key:      "string",
-				dataType: Text,
-				value:    value,
-			},
+	var wfValue = map[string]any{
+		"Value": map[string]any{
+			"string": value,
 		},
 	}
 
-	if value != nil {
+	if value != "" {
 		switch reflect.TypeOf(value).String() {
 		case stringType:
 			if strings.ContainsAny(value.(string), "{}") {
-				wfValue = paramValue("Value", actionArgument{
+				wfValue["Value"] = paramValue(actionArgument{
 					valueType: String,
 					value:     value,
-				}, String, Text)
-				if reflect.TypeOf(wfValue.value).String() == "[]main.plistData" {
-					for _, val := range wfValue.value.([]plistData) {
-						wfValue = val
+				}, String)
+				if reflect.TypeOf(wfValue["Value"]).String() == "map[string]any" {
+					for _, val := range wfValue {
+						wfValue = val.(map[string]any)
 						break
 					}
 				}
@@ -991,117 +723,75 @@ func dictionaryValue(key string, value any) plistData {
 		case arrayType:
 			itemType = itemTypeArray
 			serializedType = "WFArrayParameterState"
-			var arrayValue []plistData
+			var arrayValue []map[string]interface{}
 			for _, item := range value.([]interface{}) {
 				arrayValue = append(arrayValue, dictionaryValue("", item))
 			}
-			wfValue = plistData{
-				key:      "Value",
-				dataType: Array,
-				value:    arrayValue,
+			wfValue = map[string]any{
+				"Value": arrayValue,
 			}
 		case dictType:
 			itemType = itemTypeDict
 			serializedType = "WFDictionaryFieldValue"
-			wfValue = plistData{
-				key:      "Value",
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "Value",
-						dataType: Dictionary,
-						value: []plistData{
-							{
-								key:      "WFDictionaryFieldValueItems",
-								dataType: Array,
-								value:    makeDictionary(value),
-							},
-						},
+			wfValue = map[string]any{
+				"Value": map[string]any{
+					"Value": map[string]any{
+						"WFDictionaryFieldValueItems": makeDictionary(value),
 					},
-					{
-						key:      "WFSerializationType",
-						dataType: Text,
-						value:    "WFDictionaryFieldValue",
-					},
+					"WFSerializationType": "WFDictionaryFieldValue",
 				},
 			}
 		case boolType:
 			itemType = itemTypeBool
 			serializedType = "WFNumberSubstitutableState"
-			wfValue = plistData{
-				key:      "Value",
-				dataType: Boolean,
-				value:    value,
+			wfValue = map[string]any{
+				"Value": value,
 			}
 		}
 	} else {
 		itemType = itemTypeText
 		serializedType = "WFTextTokenString"
-		wfValue = plistData{}
+		wfValue = map[string]any{}
 	}
 
 	return dictionaryPlistValue(key, itemType, serializedType, wfValue)
 }
 
-func dictionaryPlistValue(key string, itemType dictDataType, serializedType string, wfValue plistData) plistData {
-	var valueData = []plistData{
-		{
-			key:      "WFItemType",
-			dataType: Number,
-			value:    itemType,
-		},
-		{
-			key:      "WFValue",
-			dataType: Dictionary,
-			value: []plistData{
-				wfValue,
-				{
-					key:      "WFSerializationType",
-					dataType: Text,
-					value:    serializedType,
-				},
-			},
-		},
+func dictionaryPlistValue(key string, itemType dictDataType, serializedType string, wfValue map[string]any) map[string]any {
+	var wfValueParams = map[string]any{
+		"WFSerializationType": serializedType,
 	}
+	maps.Copy(wfValueParams, wfValue)
+	var valueData = map[string]any{
+		"WFItemType": itemType,
+		"WFValue":    wfValueParams,
+	}
+
 	if key != "" {
-		var WFKey = plistData{
-			key:      "Value",
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "string",
-					dataType: Text,
-					value:    key,
-				},
+		var wfKey = map[string]any{
+			"Value": map[string]string{
+				"string": key,
 			},
 		}
 		if strings.ContainsAny(key, "{}") {
-			WFKey = paramValue("Value", actionArgument{
+			wfKey["Value"] = paramValue(actionArgument{
 				valueType: String,
 				value:     key,
-			}, String, Text)
-			if reflect.TypeOf(WFKey.value).String() == "[]main.plistData" {
-				for _, val := range WFKey.value.([]plistData) {
-					WFKey = val
+			}, String)
+			if reflect.TypeOf(wfKey["Value"]).String() == "map[string]any" {
+				for _, val := range wfKey["Value"].(map[string]any) {
+					wfKey = val.(map[string]any)
 					break
 				}
 			}
 		}
-		valueData = append(valueData, plistData{
-			key:      "WFKey",
-			dataType: Dictionary,
-			value: []plistData{
-				WFKey,
-				{
-					key:      "WFSerializationType",
-					dataType: Text,
-					value:    "WFTextTokenString",
-				},
-			},
-		})
+
+		var wfKeyParams = map[string]any{
+			"WFSerializationType": "WFTextTokenString",
+		}
+		maps.Copy(wfKeyParams, wfKey)
+		valueData["WFKey"] = wfValueParams
 	}
-	return plistData{
-		dataType: Dictionary,
-		value:    valueData,
-	}
+
+	return valueData
 }
