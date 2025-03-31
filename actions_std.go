@@ -4117,7 +4117,8 @@ var actions = map[string]*actionDefinition{
 				}
 			}
 		},
-		addParams: func(args []actionArgument) (params map[string]any) {
+		addParams: func(args []actionArgument) map[string]any {
+			var params = make(map[string]any)
 			if args[0].valueType == Variable {
 				params["WFPrimaryAppIdentifier"] = argumentValue(args, 0)
 			} else {
@@ -4134,7 +4135,7 @@ var actions = map[string]*actionDefinition{
 				}
 			}
 
-			return
+			return params
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			var splitRatio = decompValue(action.WFWorkflowActionParameters["WFAppRatio"])
@@ -5602,7 +5603,8 @@ func rawAction() {
 		check: func(args []actionArgument, _ *actionDefinition) {
 			actions["rawAction"].overrideIdentifier = getArgValue(args[0]).(string)
 		},
-		make: func(args []actionArgument) (params map[string]any) {
+		make: func(args []actionArgument) map[string]any {
+			var params = make(map[string]any)
 			for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
 				var paramKey string
 				var paramType plistDataType
@@ -5624,7 +5626,8 @@ func rawAction() {
 					value:     rawValue,
 				}, tokenType)
 			}
-			return
+
+			return params
 		},
 	}
 }
@@ -5855,14 +5858,14 @@ func replaceAppIDs(args []actionArgument, _ *actionDefinition) {
 	}
 }
 
-func httpRequest(bodyType string, valuesKey string, args []actionArgument) (params map[string]any) {
-	params["WFHTTPBodyType"] = bodyType
+func httpRequest(bodyType string, valuesKey string, args []actionArgument) map[string]any {
+	var params = map[string]any{"WFHTTPBodyType": bodyType}
 
 	if len(args) > 0 {
 		params[valuesKey] = argumentValue(args, 2)
 	}
 
-	return
+	return params
 }
 
 func decompAppAction(key string, action *ShortcutAction) (arguments []string) {
