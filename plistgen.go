@@ -24,21 +24,6 @@ var compiled string
 var longEmptyArraySyntax = regexp.MustCompile(`<array>\n(.*?)</array>`)
 
 func marshalPlist() {
-	// type sparseBundleHeader struct {
-	// 	InfoDictionaryVersion string `plist:"CFBundleInfoDictionaryVersion"`
-	// 	BandSize              uint64 `plist:"band-size"`
-	// 	BackingStoreVersion   int    `plist:"bundle-backingstore-version"`
-	// 	DiskImageBundleType   string `plist:"diskimage-bundle-type"`
-	// 	Size                  uint64 `plist:"size"`
-	// }
-	// data := &sparseBundleHeader{
-	// 	InfoDictionaryVersion: "6.0",
-	// 	BandSize:              8388608,
-	// 	Size:                  4 * 1048576 * 1024 * 1024,
-	// 	DiskImageBundleType:   "com.apple.diskimage.sparsebundle",
-	// 	BackingStoreVersion:   1,
-	// }
-
 	generateShortcut()
 
 	var plist, plistErr = plists.MarshalIndent(shortcut, plists.XMLFormat, "\t")
