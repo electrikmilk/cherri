@@ -72,12 +72,14 @@ var httpParams = []parameterDefinition{
 		name:      "body",
 		validType: Dict,
 		optional:  true,
+		literal:   true,
 	},
 	{
 		name:      "headers",
 		key:       "WFHTTPHeaders",
 		validType: Dict,
 		optional:  true,
+		literal:   true,
 	},
 }
 var cropPositions = []string{"Center", "Top Left", "Top Right", "Bottom Left", "Bottom Right", "Custom"}
@@ -5629,6 +5631,7 @@ var actions = map[string]*actionDefinition{
 				validType: Dict,
 				key:       "WFHTTPHeaders",
 				optional:  true,
+				literal:   true,
 			},
 		},
 		addParams: func(_ []actionArgument) []plistData {
