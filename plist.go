@@ -383,28 +383,31 @@ func variableInput(key string, name string) plistData {
 
 func inputValue(key string, name string, varUUID string) plistData {
 	var value []plistData
+
 	if varUUID != "" {
-		var variable = variables[name]
-		if !variable.repeatItem && ((variable.constant && variable.valueType == Variable) || variable.valueType != Variable) {
-			value = []plistData{
+		value = append(value, plistData{
+			key:      "OutputUUID",
+			dataType: Text,
+			value:    varUUID,
+		})
+	}
+
+	if variable, found := variables[name]; found {
+		if !variable.repeatItem && (variable.constant && variable.valueType != Variable) {
+			value = append(value, []plistData{
 				{
 					key:      "OutputName",
 					dataType: Text,
 					value:    name,
 				},
 				{
-					key:      "OutputUUID",
-					dataType: Text,
-					value:    varUUID,
-				},
-				{
 					key:      "Type",
 					dataType: Text,
 					value:    "ActionOutput",
 				},
-			}
+			}...)
 		} else {
-			value = []plistData{
+			value = append(value, []plistData{
 				{
 					key:      "VariableName",
 					dataType: Text,
@@ -415,18 +418,16 @@ func inputValue(key string, name string, varUUID string) plistData {
 					dataType: Text,
 					value:    "Variable",
 				},
-			}
+			}...)
 		}
 	} else if global, found := globals[name]; found {
-		value = []plistData{
-			{
-				key:      "Type",
-				dataType: Text,
-				value:    global.variableType,
-			},
-		}
+		value = append(value, plistData{
+			key:      "Type",
+			dataType: Text,
+			value:    global.variableType,
+		})
 	} else {
-		value = []plistData{
+		value = append(value, []plistData{
 			{
 				key:      "OutputName",
 				dataType: Text,
@@ -437,8 +438,9 @@ func inputValue(key string, name string, varUUID string) plistData {
 				dataType: Text,
 				value:    "ActionOutput",
 			},
-		}
+		}...)
 	}
+
 	return plistData{
 		key:      key,
 		dataType: Dictionary,
