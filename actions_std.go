@@ -62,12 +62,11 @@ var httpParams = []parameterDefinition{
 		validType: String,
 	},
 	{
-		name:         "method",
-		key:          "WFHTTPMethod",
-		validType:    String,
-		optional:     true,
-		enum:         httpMethods,
-		defaultValue: "GET",
+		name:      "method",
+		key:       "WFHTTPMethod",
+		validType: String,
+		optional:  true,
+		enum:      httpMethods,
 	},
 	{
 		name:      "body",
