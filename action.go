@@ -31,6 +31,7 @@ type parameterDefinition struct {
 	enum         []string
 	optional     bool
 	infinite     bool
+	literal      bool
 }
 
 // actionArgument is a variableValue value used to define collected argument values by the parser.
@@ -429,10 +430,17 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 	if argument.valueType == Var && argument.value == "Ask" {
 		return
 	}
+
 	if param.enum != nil {
 		checkEnum(param, argument)
 	}
+
 	typeCheck(param, argument)
+
+	if param.literal {
+		checkLiteralValue(param, argument)
+	}
+
 	var realValue = getArgValue(*argument)
 	var stringDefaultValue = fmt.Sprintf("%s", param.defaultValue)
 	if param.defaultValue != nil && stringDefaultValue == realValue {
@@ -443,6 +451,15 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 				generateActionDefinition(*param, false, false),
 			),
 		)
+	}
+}
+
+func checkLiteralValue(param *parameterDefinition, argument *actionArgument) {
+	if argument.valueType != param.validType {
+		parserError(fmt.Sprintf(
+			"Shortcuts does not allow variables for this argument, use a literal for the argument value.\n%s",
+			generateActionDefinition(*param, false, false),
+		))
 	}
 }
 
