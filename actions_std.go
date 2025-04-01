@@ -6228,6 +6228,8 @@ var actions = map[string]*actionDefinition{
 	},
 }
 
+var plistTypes = map[string]string{"string": "", "integer": "", "boolean": "", "array": "", "dict": "", "real": ""}
+
 func rawAction() {
 	actions["rawAction"] = &actionDefinition{
 		parameters: []parameterDefinition{
@@ -6243,9 +6245,27 @@ func rawAction() {
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			actions["rawAction"].overrideIdentifier = getArgValue(args[0]).(string)
+
+			if len(args) > 1 {
+				for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
+					var definitions = parameterDefinitions.(map[string]interface{})
+					if definitions["type"] != nil {
+						var paramKey = definitions["key"]
+						var paramType = definitions["type"].(string)
+						var paramValue = definitions["value"].(string)
+						if _, found := plistTypes[paramType]; !found {
+							var list = makeKeyList("Available plist types:", plistTypes, paramValue)
+							parserError(fmt.Sprintf("Raw action parameter '%s' type '%s' is not a plist type.\n\n%s", paramKey, paramType, list))
+						}
+					}
+				}
+			}
 		},
 		make: func(args []actionArgument) (params []plistData) {
-			var plistTypes = map[string]string{"string": "", "integer": "", "boolean": "", "array": "", "dict": "", "real": ""}
+			if len(args) == 1 {
+				return
+			}
+
 			for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
 				var paramKey string
 				var paramType plistDataType
@@ -6255,10 +6275,6 @@ func rawAction() {
 					case "key":
 						paramKey = value.(string)
 					case "type":
-						if _, found := plistTypes[value.(string)]; !found {
-							var list = makeKeyList("Available plist types:", plistTypes, value.(string))
-							parserError(fmt.Sprintf("Raw action parameter '%s' type '%s' is not a plist type.\n\n%s", paramKey, value, list))
-						}
 						paramType = plistDataType(value.(string))
 					case "value":
 						rawValue = value
@@ -6271,6 +6287,7 @@ func rawAction() {
 					value:     rawValue,
 				}, tokenType, paramType))
 			}
+
 			return
 		},
 	}
