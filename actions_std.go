@@ -54,7 +54,7 @@ var ipTypes = []string{"IPv4", "IPv6"}
 var engines = []string{"Amazon", "Bing", "DuckDuckGo", "eBay", "Google", "Reddit", "Twitter", "Yahoo!", "YouTube"}
 var webpageDetails = []string{"Page Contents", "Page Selection", "Page URL", "Name"}
 var urlComponents = []string{"Scheme", "User", "Password", "Host", "Port", "Path", "Query", "Fragment"}
-var httpMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE"}
+var httpMethods = []string{"POST", "PUT", "PATCH", "DELETE"}
 var httpParams = []parameterDefinition{
 	{
 		name:      "url",
