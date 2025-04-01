@@ -6176,6 +6176,7 @@ func rawAction() {
 			actions["rawAction"].overrideIdentifier = getArgValue(args[0]).(string)
 		},
 		make: func(args []actionArgument) (params []plistData) {
+			var plistTypes = map[string]string{"string": "", "integer": "", "boolean": "", "array": "", "dict": "", "real": ""}
 			for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
 				var paramKey string
 				var paramType plistDataType
@@ -6185,6 +6186,10 @@ func rawAction() {
 					case "key":
 						paramKey = value.(string)
 					case "type":
+						if _, found := plistTypes[value.(string)]; !found {
+							var list = makeKeyList("Available plist types:", plistTypes, value.(string))
+							parserError(fmt.Sprintf("Raw action parameter '%s' type '%s' is not a plist type.\n\n%s", paramKey, value, list))
+						}
 						paramType = plistDataType(value.(string))
 					case "value":
 						rawValue = value
