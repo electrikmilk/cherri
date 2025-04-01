@@ -70,6 +70,10 @@ func plistKeyValue(key string, dataType plistDataType, value any) string {
 		}
 		pair.WriteString(fmt.Sprintf("<array>\n%s%s</array>\n", plistDictValue(value.([]plistData)), strings.Repeat("\t", tabLevel)))
 	case Dictionary:
+		if value == nil || len(value.([]plistData)) == 0 {
+			pair.WriteString("<dict/>\n")
+			break
+		}
 		pair.WriteString(fmt.Sprintf("<dict>\n%s%s</dict>\n", plistDictValue(value.([]plistData)), strings.Repeat("\t", tabLevel)))
 	default:
 		if value != nil {
