@@ -7,7 +7,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
+	"runtime/pprof"
 	"strings"
 	"testing"
 	"time"
@@ -92,6 +94,18 @@ func TestGlyphList(_ *testing.T) {
 	handle(jsonErr)
 
 	fmt.Println(string(data))
+}
+
+func TestProfile(t *testing.T) {
+	f, err := os.Create("cpu.prof")
+	if err != nil {
+		log.Fatal(err)
+	}
+	var profErr = pprof.StartCPUProfile(f)
+	handle(profErr)
+	defer pprof.StopCPUProfile()
+
+	TestCherriNoSign(t)
 }
 
 func compile() {
