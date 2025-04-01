@@ -1080,7 +1080,29 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 }
 
 func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
-	for _, param := range splitActionParams {
+	var paramMatches, valueMatches = scoreActionParams(&splitActionParams, parameters)
+	matchedParams += paramMatches
+	matchedValues += valueMatches
+
+	var splitActionAddParams []parameterDefinition
+	if splitAction.definition.addParams != nil {
+		for _, addParam := range splitAction.definition.addParams([]actionArgument{}) {
+			splitActionAddParams = append(splitActionAddParams, parameterDefinition{
+				key:          addParam.key,
+				defaultValue: addParam.value,
+			})
+		}
+	}
+
+	var addParamMatches, addValueMatches = scoreActionAddParams(&splitActionAddParams, parameters)
+	matchedParams += addParamMatches
+	matchedValues += addValueMatches
+
+	return
+}
+
+func scoreActionParams(splitActionParams *[]parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
+	for _, param := range *splitActionParams {
 		if param.key == "" {
 			continue
 		}
@@ -1098,18 +1120,11 @@ func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefi
 			}
 		}
 	}
+	return
+}
 
-	var splitActionAddParams []parameterDefinition
-	if splitAction.definition.addParams != nil {
-		for _, addParam := range splitAction.definition.addParams([]actionArgument{}) {
-			splitActionAddParams = append(splitActionAddParams, parameterDefinition{
-				key:          addParam.key,
-				defaultValue: addParam.value,
-			})
-		}
-	}
-
-	for _, param := range splitActionAddParams {
+func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
+	for _, param := range *splitActionAddParams {
 		if param.key == "" {
 			continue
 		}
@@ -1121,7 +1136,6 @@ func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefi
 			}
 		}
 	}
-
 	return
 }
 
