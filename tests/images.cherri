@@ -6,4 +6,8 @@
 
 cropImage(image)
 
+resizeImage(image, "640", "480")
+resizeImageByPercent(image, "50%")
+resizeImageByLongestEdge(image, "280")
+
 show("{combined}")

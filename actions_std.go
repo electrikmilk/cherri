@@ -3128,6 +3128,75 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"resizeImage": {
+		identifier: "image.resize",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFImage",
+			},
+			{
+				name:      "width",
+				key:       "WFImageResizeWidth",
+				validType: String,
+			},
+			{
+				name:      "height",
+				key:       "WFImageResizeHeight",
+				validType: String,
+				optional:  true,
+			},
+		},
+	},
+	"resizeImageByPercent": {
+		identifier: "image.resize",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFImage",
+			},
+			{
+				name:      "percentage",
+				validType: String,
+				key:       "WFImageResizePercentage",
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFImageResizeKey",
+					dataType: Text,
+					value:    "Percentage",
+				},
+			}
+		},
+	},
+	"resizeImageByLongestEdge": {
+		identifier: "image.resize",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFImage",
+			},
+			{
+				name:      "length",
+				validType: String,
+				key:       "WFImageResizeLength",
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFImageResizeKey",
+					dataType: Text,
+					value:    "Longest Edge",
+				},
+			}
+		},
+	},
 	"convertImage": {
 		identifier:    "image.convert",
 		defaultAction: true,
