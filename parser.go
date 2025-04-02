@@ -1125,13 +1125,16 @@ func intChar() bool {
 	return (char >= '0' && char <= '9') || char == '-' || char == '.'
 }
 
-func collectInteger() string {
-	var integer strings.Builder
+func collectInteger() int {
+	var collection strings.Builder
 	for intChar() {
-		integer.WriteRune(char)
+		collection.WriteRune(char)
 		advance()
 	}
-	return integer.String()
+	var integer, convErr = strconv.Atoi(collection.String())
+	handle(convErr)
+
+	return integer
 }
 
 func collectIntegerValue(valueType *tokenType, value *any, until *rune) {

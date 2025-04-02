@@ -609,6 +609,8 @@ func paramValue(arg actionArgument, handleAs tokenType) any {
 		return variablePlistValue(arg.value.(string), "")
 	case Dict:
 		return makeDictionaryValue(&arg.value)
+	case Integer:
+		fallthrough
 	case Bool:
 		fallthrough
 	case Float:
