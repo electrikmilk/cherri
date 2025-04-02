@@ -559,23 +559,6 @@ func collectInlineVariables(str *string) (noVarString string) {
 	return
 }
 
-func convertTypeToken(tokenType tokenType) plistDataType {
-	switch tokenType {
-	case String:
-		return Text
-	case Integer:
-		return Number
-	case Arr:
-		return Array
-	case Dict:
-		return Dictionary
-	case Bool:
-		return Boolean
-	default:
-		return ""
-	}
-}
-
 func convertPlistTypeToken(plistType plistDataType) tokenType {
 	switch plistType {
 	case Text:
