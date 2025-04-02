@@ -105,20 +105,24 @@ func checkParamIdentifiers(params map[string]interface{}) {
 	}
 }
 
-func checkParamValueAttachments(params map[string]interface{}) {
-	if params["Value"] != nil {
-		var paramValue = params["Value"].(map[string]interface{})
+// checkParamValueAttachments checks for attachments on values to map them.
+func checkParamValueAttachments(param map[string]interface{}) {
+	if param["Value"] == nil {
+		return
+	}
 
-		var inputValue Value
-		mapToStruct(paramValue, &inputValue)
-		mapValueReference(inputValue)
+	var paramValue = param["Value"].(map[string]interface{})
 
-		if paramValue["attachmentsByRange"] != nil {
-			mapAttachmentIdentifiers(paramValue["attachmentsByRange"].(map[string]interface{}))
-		}
+	var inputValue Value
+	mapToStruct(paramValue, &inputValue)
+	mapValueReference(inputValue)
+
+	if paramValue["attachmentsByRange"] != nil {
+		mapAttachmentIdentifiers(paramValue["attachmentsByRange"].(map[string]interface{}))
 	}
 }
 
+// mapAttachmentIdentifiers maps the UUID and output name of an attachment value.
 func mapAttachmentIdentifiers(attachments map[string]interface{}) {
 	for _, attachment := range attachments {
 		var attachmentValue Value
@@ -180,6 +184,7 @@ func mapSplitActions() {
 	}
 }
 
+// newCodeLine writes s on a new line in the code.
 func newCodeLine(s string) {
 	if tabLevel > 0 {
 		for i := 0; i < tabLevel; i++ {
@@ -189,6 +194,7 @@ func newCodeLine(s string) {
 	code.WriteString(s)
 }
 
+// tabbedLine returns s prepended with tab characters at the current tabLevel.
 func tabbedLine(s string) string {
 	if tabLevel < 1 {
 		return s
@@ -202,6 +208,7 @@ func tabbedLine(s string) string {
 	return str.String()
 }
 
+// defineName writes the name of the imported Shortcut to code as a name definition if the basename contains a space.
 func defineName() {
 	if strings.Contains(basename, " ") {
 		newCodeLine(fmt.Sprintf("#define name %s\n", basename))
@@ -271,6 +278,8 @@ func decompileActions() {
 
 var varUUIDs []string
 
+// checkConstantLiteral determines if action is a constant literal and if it should be
+// written out on a new line as a constant and clear the current variable value.
 func checkConstantLiteral(action *ShortcutAction) {
 	if _, found := action.WFWorkflowActionParameters[UUID]; !found {
 		return
@@ -849,6 +858,8 @@ func decompAction(action *ShortcutAction) {
 	actionIndex++
 }
 
+// checkOutputType determines if action output is a constant or a variable.
+// If it is a constant we will write a constant statement on a new line to prepend the action.
 func checkOutputType(action *ShortcutAction) (isConstant bool, isVariableValue bool) {
 	if action.WFWorkflowActionParameters["CustomOutputName"] != nil {
 		var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
@@ -872,6 +883,7 @@ func checkOutputType(action *ShortcutAction) (isConstant bool, isVariableValue b
 	return
 }
 
+// skipDecompAction skips actions we don't support or when necessary.
 func skipDecompAction(action *ShortcutAction) bool {
 	if action.WFWorkflowActionIdentifier == "is.workflow.actions.getvariable" {
 		var varName = decompValue(action.WFWorkflowActionParameters["WFVariable"])
@@ -1182,7 +1194,7 @@ func glueToChar(glue string) string {
 	}
 }
 
-// Get default action from a slice of split actions for an identifier.
+// getDefaultAction gets the default action from a slice of split actions.
 func getDefaultAction(splitActions *[]actionValue) (action actionValue, found bool) {
 	for _, splitAction := range *splitActions {
 		if splitAction.definition.defaultAction {
