@@ -1,6 +1,6 @@
 /*
 Cherri Standard Library
-Copyright (c) Brandon Jordan
+Copyright (c) Cherri
 */
 
 action runJS(text _script) {
