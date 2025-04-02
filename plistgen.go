@@ -281,7 +281,7 @@ func makeOutputName(token *token) string {
 		typeOfToken = token.value.(action).ident
 	}
 
-	var customOutputName = fmt.Sprintf("%s%s", strings.ToTitle(string(typeOfToken[0])), typeOfToken[1:])
+	var customOutputName = fmt.Sprintf("%s%sOutput", strings.ToTitle(string(typeOfToken[0])), typeOfToken[1:])
 
 	return checkDuplicateOutputName(customOutputName)
 }
