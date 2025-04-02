@@ -920,6 +920,11 @@ func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actio
 			argValue = makeDefaultValue(param)
 		}
 
+		switch param.validType {
+		case Integer:
+			argValue = strings.Trim(argValue, "\"")
+		}
+
 		if argValue != "" {
 			if i == 0 {
 				actionCallCode.WriteString(argValue)
@@ -958,17 +963,26 @@ func makeDefaultValue(param parameterDefinition) string {
 func makeRawAction(action *ShortcutAction) string {
 	var rawActionCode strings.Builder
 	rawActionCode.WriteString(fmt.Sprintf("rawAction(\"%s\"", action.WFWorkflowActionIdentifier))
-
-	if len(action.WFWorkflowActionParameters) != 0 {
+	var paramsSize = len(action.WFWorkflowActionParameters)
+	var onlyUUIDParam = false
+	var onlyOutputNameParam = false
+	if paramsSize > 1 {
+		if _, found := action.WFWorkflowActionParameters[UUID]; found {
+			onlyUUIDParam = found
+		}
+		if _, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
+			onlyOutputNameParam = found
+		}
+	}
+	if paramsSize > 1 && (!onlyUUIDParam && !onlyOutputNameParam) {
 		tabLevel++
 		rawActionCode.WriteString(", [\n")
 		rawActionCode.WriteString(tabbedLine("{\n"))
 		var index = 0
-		var paramsSize = len(action.WFWorkflowActionParameters)
 		for key, param := range action.WFWorkflowActionParameters {
 			index++
 
-			if key == UUID {
+			if key == UUID || key == "CustomOutputName" {
 				continue
 			}
 
