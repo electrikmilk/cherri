@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"reflect"
 	"regexp"
@@ -1179,7 +1180,13 @@ func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameter
 		if value, found := parameters[param.key]; found {
 			matchedParams++
 
-			if param.defaultValue == value {
+			var defaultValueType = reflect.TypeOf(param.defaultValue).String()
+			var valueType = reflect.TypeOf(value).String()
+			if defaultValueType == dictType && valueType == dictType {
+				if maps.Equal(param.defaultValue.(map[string]interface{}), value.(map[string]interface{})) {
+					matchedValues++
+				}
+			} else if param.defaultValue == value {
 				matchedValues++
 			}
 		}
