@@ -137,9 +137,9 @@ func conditionalParameterVariable(conditionalParams map[string]any, value any) {
 	var variable = variables[stringValue]
 	switch variable.valueType {
 	case Integer:
-		conditionalParams["WFNumberValue"] = stringValue
+		conditionalParams["WFNumberValue"] = variablePlistValue(stringValue, uuids[stringValue])
 	default:
-		conditionalParams["WFConditionalActionString"] = fmt.Sprintf("{%s}", stringValue)
+		conditionalParams["WFConditionalActionString"] = attachmentValues(fmt.Sprintf("{%s}", stringValue))
 	}
 }
 
