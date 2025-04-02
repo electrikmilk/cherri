@@ -87,6 +87,16 @@ func TestActionList(_ *testing.T) {
 	}
 }
 
+func TestActionSearch(_ *testing.T) {
+	args.Args["action"] = "replaceText"
+	actionsSearch()
+}
+
+func TestGlyphSearch(_ *testing.T) {
+	args.Args["glyph"] = "robot"
+	glyphsSearch()
+}
+
 func TestGlyphList(_ *testing.T) {
 	var data, jsonErr = json.Marshal(glyphs)
 	handle(jsonErr)
