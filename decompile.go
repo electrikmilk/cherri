@@ -16,7 +16,7 @@ import (
 	"strings"
 
 	"github.com/electrikmilk/args-parser"
-	plists "howett.net/plist"
+	"howett.net/plist"
 )
 
 const (
@@ -30,7 +30,7 @@ var code strings.Builder
 var specialCharsRegex *regexp.Regexp
 
 func decompile(b []byte) {
-	var _, marshalIndexedErr = plists.Unmarshal(b, &shortcut)
+	var _, marshalIndexedErr = plist.Unmarshal(b, &shortcut)
 	handle(marshalIndexedErr)
 
 	mapIdentifiers()

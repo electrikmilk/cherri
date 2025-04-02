@@ -52,7 +52,7 @@ type action struct {
 // checkFunc is a function that can be passed a collected actions arguments as a slice of actionArgument and the current action's definition.
 type checkFunc func(args []actionArgument, definition *actionDefinition)
 
-// paramsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument that must return a slice of plistData as a result.
+// paramsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument that must return action params as a result.
 type paramsFunc func(args []actionArgument) map[string]any
 
 type appIntent struct {
@@ -95,8 +95,8 @@ func setCurrentAction(identifier string, definition *actionDefinition) {
 	currentAction = *definition
 }
 
-// plistAction builds an action based on its actionDefinition and adds it to the plist.
-func plistAction(arguments []actionArgument, reference *map[string]any) {
+// makeAction builds an action based on its actionDefinition and adds it to the shortcut.
+func makeAction(arguments []actionArgument, reference *map[string]any) {
 	actionIndex++
 	// Check for question arguments
 	questionArgs(arguments)
@@ -105,7 +105,7 @@ func plistAction(arguments []actionArgument, reference *map[string]any) {
 	// Determine parameters
 	var params = actionParameters(arguments)
 	// Additionally add the output name and UUID of this action if provided
-	buildAction(ident, attachReferenceParams(&params, reference))
+	addAction(ident, attachReferenceParams(&params, reference))
 }
 
 // actionIdentifier determines the identifier of currentAction.
@@ -181,26 +181,13 @@ func questionArgs(arguments []actionArgument) {
 	}
 }
 
-// buildStdAction is an alias of makeAction that simply prepends the shortcuts bundle identifier to ident.
+// buildStdAction is an alias of addAction that simply prepends the shortcuts bundle identifier to ident.
 func buildStdAction(ident string, params map[string]any) {
-	buildAction(fmt.Sprintf("is.workflow.actions.%s", ident), params)
+	addAction(fmt.Sprintf("is.workflow.actions.%s", ident), params)
 }
 
-func createDefinedAction(action *actionDefinition, params map[string]any) {
-	var identifier string
-	if action.overrideIdentifier != "" {
-		identifier = action.overrideIdentifier
-	} else {
-		if action.appIdentifier == "" {
-			action.appIdentifier = "is.workflow.actions"
-		}
-		identifier = fmt.Sprintf("%s.%s", action.appIdentifier, action.identifier)
-	}
-
-	buildAction(identifier, params)
-}
-
-func buildAction(identifier string, params map[string]any) {
+// addAction adds an action to the shortcut.
+func addAction(identifier string, params map[string]any) {
 	shortcut.WFWorkflowActions = append(shortcut.WFWorkflowActions,
 		ShortcutAction{
 			WFWorkflowActionIdentifier: identifier,

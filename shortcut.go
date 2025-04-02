@@ -217,7 +217,7 @@ func makeVariableValue(reference *map[string]any, valueType tokenType, value *an
 		var valuePtr = *value
 		var action = valuePtr.(action)
 		setCurrentAction(action.ident, actions[action.ident])
-		plistAction(action.args, reference)
+		makeAction(action.args, reference)
 	case Dict:
 		buildStdAction("dictionary", attachReferenceParams(&map[string]any{
 			"WFItems": makeDictionaryValue(value),
@@ -601,7 +601,7 @@ func collectInlineVariables(str *string) (noVarString string) {
 	return
 }
 
-func convertPlistTypeToken(dataType dataType) tokenType {
+func convertDataTypeToTokenType(dataType dataType) tokenType {
 	switch dataType {
 	case Text:
 		return String

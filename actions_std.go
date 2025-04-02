@@ -5914,7 +5914,7 @@ func rawAction() {
 					}
 				}
 
-				var tokenType = convertPlistTypeToken(paramType)
+				var tokenType = convertDataTypeToTokenType(paramType)
 				params[paramKey] = paramValue(actionArgument{
 					valueType: tokenType,
 					value:     rawValue,

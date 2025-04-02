@@ -98,7 +98,7 @@ func generateActions() {
 		case Action:
 			var tokenAction = t.value.(action)
 			setCurrentAction(tokenAction.ident, actions[tokenAction.ident])
-			plistAction(tokenAction.args, &map[string]any{})
+			makeAction(tokenAction.args, &map[string]any{})
 		case Repeat:
 			shortcutRepeat(&t)
 		case RepeatWithEach:
