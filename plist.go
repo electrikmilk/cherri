@@ -696,7 +696,7 @@ func dictionaryValue(key string, value any) map[string]any {
 					valueType: String,
 					value:     value,
 				}, String)
-				if reflect.TypeOf(wfValue["Value"]).String() == "map[string]any" {
+				if reflect.TypeOf(wfValue["Value"]).String() == "map[string]interface {}" {
 					for _, val := range wfValue {
 						wfValue = val.(map[string]any)
 						break
@@ -708,6 +708,11 @@ func dictionaryValue(key string, value any) map[string]any {
 		case intType:
 			itemType = itemTypeNumber
 			serializedType = "WFTextTokenString"
+			wfValue = map[string]any{
+				"Value": map[string]any{
+					"string": fmt.Sprintf("%v", value),
+				},
+			}
 		case arrayType:
 			itemType = itemTypeArray
 			serializedType = "WFArrayParameterState"
@@ -778,7 +783,7 @@ func dictionaryPlistValue(key string, itemType dictDataType, serializedType stri
 			"WFSerializationType": "WFTextTokenString",
 		}
 		maps.Copy(wfKeyParams, wfKey)
-		valueData["WFKey"] = wfValueParams
+		valueData["WFKey"] = wfKeyParams
 	}
 
 	return valueData

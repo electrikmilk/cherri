@@ -22,6 +22,7 @@ var plist strings.Builder
 var compiled string
 
 var longEmptyArraySyntax = regexp.MustCompile(`<array>\n(.*?)</array>`)
+var longEmptyDictSyntax = regexp.MustCompile(`<dict>\n(.*?)</dict>`)
 
 func marshalPlist() {
 	generateShortcut()
@@ -30,6 +31,7 @@ func marshalPlist() {
 	handle(plistErr)
 
 	compiled = longEmptyArraySyntax.ReplaceAllString(string(plist), "<array/>")
+	compiled = longEmptyDictSyntax.ReplaceAllString(compiled, "<dict/>")
 
 	resetPlistGen()
 }
