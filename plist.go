@@ -327,7 +327,7 @@ func variableInput(name string) map[string]any {
 }
 
 func inputValue(name string, varUUID string) map[string]any {
-	var value map[string]any
+	var value = make(map[string]any)
 
 	if varUUID != "" {
 		value["OutputUUID"] = varUUID
