@@ -504,9 +504,7 @@ func makeAttachmentValues() {
 			}
 		}
 		if stringVar.getAs != "" || stringVar.coerce != "" {
-			varValue = map[string]any{
-				"Aggrandizements": aggr,
-			}
+			varValue["Aggrandizements"] = aggr
 		}
 
 		var positionsKey = fmt.Sprintf("{%d, 1}", stringVar.col)
