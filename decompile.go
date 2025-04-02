@@ -967,12 +967,16 @@ func makeRawAction(action *ShortcutAction) string {
 	rawActionCode.WriteString(fmt.Sprintf("rawAction(\"%s\"", action.WFWorkflowActionIdentifier))
 	var paramsSize = len(action.WFWorkflowActionParameters)
 	var onlyUUIDParam = false
-	if paramsSize == 1 {
+	var onlyOutputNameParam = false
+	if paramsSize > 1 {
 		if _, found := action.WFWorkflowActionParameters[UUID]; found {
 			onlyUUIDParam = found
 		}
+		if _, found := action.WFWorkflowActionParameters["CustomOutputName"]; found {
+			onlyOutputNameParam = found
+		}
 	}
-	if paramsSize != 0 && !onlyUUIDParam {
+	if paramsSize > 1 && (!onlyUUIDParam && !onlyOutputNameParam) {
 		tabLevel++
 		rawActionCode.WriteString(", [\n")
 		rawActionCode.WriteString(tabbedLine("{\n"))
@@ -980,7 +984,7 @@ func makeRawAction(action *ShortcutAction) string {
 		for key, param := range action.WFWorkflowActionParameters {
 			index++
 
-			if key == UUID {
+			if key == UUID || key == "CustomOutputName" {
 				continue
 			}
 
