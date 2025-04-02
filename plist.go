@@ -38,11 +38,6 @@ const itemTypeArray dictDataType = 2
 const itemTypeDict dictDataType = 1
 const itemTypeBool dictDataType = 4
 
-type noInputParams struct {
-	name   string
-	params []plistData
-}
-
 var noInput WFWorkflowNoInputBehavior
 
 var hasShortcutInputVariables = false
