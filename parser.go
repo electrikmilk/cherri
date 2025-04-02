@@ -1125,23 +1125,32 @@ func intChar() bool {
 	return (char >= '0' && char <= '9') || char == '-' || char == '.'
 }
 
-func collectInteger() int {
+func collectInteger() string {
 	var collection strings.Builder
 	for intChar() {
 		collection.WriteRune(char)
 		advance()
 	}
-	var integer, convErr = strconv.Atoi(collection.String())
-	handle(convErr)
 
-	return integer
+	return collection.String()
 }
 
 func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 	var ahead = lookAheadUntil(*until)
 	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
-		var integer = collectInteger()
-		*value = integer
+		var integerString = collectInteger()
+
+		if *valueType == Integer {
+			var integer, convErr = strconv.Atoi(integerString)
+			handle(convErr)
+
+			*value = integer
+		} else {
+			var float, floatErr = strconv.ParseFloat(integerString, 64)
+			handle(floatErr)
+
+			*value = float
+		}
 		return
 	}
 	*valueType = Expression
