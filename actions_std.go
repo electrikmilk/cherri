@@ -6094,23 +6094,12 @@ func makeAppIds() {
 	}
 }
 
-func apps(args []actionArgument) (apps []plistData) {
+func apps(args []actionArgument) (apps []map[string]any) {
 	for _, arg := range args {
 		if arg.valueType != Variable {
-			apps = append(apps, plistData{
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "BundleIdentifier",
-						dataType: Text,
-						value:    arg.value,
-					},
-					{
-						key:      "TeamIdentifier",
-						dataType: Text,
-						value:    "0000000000",
-					},
-				},
+			apps = append(apps, map[string]any{
+				"BundleIdentifier": arg.value,
+				"TeamIdentifier":   "0000000000",
 			})
 		}
 	}
