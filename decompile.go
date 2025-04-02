@@ -1162,17 +1162,7 @@ func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameter
 }
 
 func decompActionCustom(actionCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
-	var identifier = matchedAction.identifier
-	if matchedAction.appIdentifier != "" {
-		identifier = matchedAction.appIdentifier
-	}
-	var arguments []string
-	if matchedAction.decomp != nil {
-		arguments = matchedAction.decomp(action)
-	} else {
-		fmt.Println("TODO: make:", identifier)
-	}
-
+	var arguments = matchedAction.decomp(action)
 	if len(arguments) == 0 {
 		return
 	}
