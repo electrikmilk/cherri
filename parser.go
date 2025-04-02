@@ -949,7 +949,7 @@ func collectConditional() {
 
 	var groupingUUID = groupStatement(Conditional)
 
-	var conditionType string
+	var conditionType int
 	if isChar('!') {
 		conditionType = conditions[Empty]
 	} else {

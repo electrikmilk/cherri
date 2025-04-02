@@ -470,15 +470,14 @@ func decompConditional(action *ShortcutAction) {
 	switch controlFlowMode {
 	case startStatement:
 		var conditionInt = action.WFWorkflowActionParameters["WFCondition"].(uint64)
-		var conditionString = strconv.FormatUint(conditionInt, 10)
 		var conditionalOperator string
 		for operator, cond := range conditions {
-			if cond == conditionString {
+			if cond == int(conditionInt) {
 				conditionalOperator = string(operator)
 			}
 		}
 		if conditionalOperator == "" {
-			decompError(fmt.Sprintf("Invalid conditional %s", conditionString), action)
+			decompError(fmt.Sprintf("Invalid conditional %v", conditionInt), action)
 		}
 
 		newCodeLine("if ")

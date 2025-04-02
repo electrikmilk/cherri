@@ -140,27 +140,27 @@ var languagesList = []string{
 type condition struct {
 	variableOneType    tokenType
 	variableOneValue   any
-	condition          string
+	condition          int
 	variableTwoType    tokenType
 	variableTwoValue   any
 	variableThreeType  tokenType
 	variableThreeValue any
 }
 
-var conditions = map[tokenType]string{
-	Is:             "4",
-	Not:            "5",
-	Any:            "100",
-	Empty:          "101",
-	Contains:       "99",
-	DoesNotContain: "999",
-	BeginsWith:     "8",
-	EndsWith:       "9",
-	GreaterThan:    "2",
-	GreaterOrEqual: "3",
-	LessThan:       "0",
-	LessOrEqual:    "1",
-	Between:        "1003",
+var conditions = map[tokenType]int{
+	Is:             4,
+	Not:            5,
+	Any:            100,
+	Empty:          101,
+	Contains:       99,
+	DoesNotContain: 999,
+	BeginsWith:     8,
+	EndsWith:       9,
+	GreaterThan:    2,
+	GreaterOrEqual: 3,
+	LessThan:       0,
+	LessOrEqual:    1,
+	Between:        1003,
 }
 
 /* Menus */

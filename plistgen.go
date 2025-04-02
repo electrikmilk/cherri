@@ -234,11 +234,9 @@ func plistConditional(t *token) {
 	switch t.valueType {
 	case If:
 		var cond = t.value.(condition)
-		conditionalParams = map[string]any{
-			"WFInput": map[string]any{
-				"Type":     "Variable",
-				"Variable": variablePlistValue(cond.variableOneValue.(string), t.ident),
-			},
+		conditionalParams["WFInput"] = map[string]any{
+			"Type":     "Variable",
+			"Variable": variablePlistValue(cond.variableOneValue.(string), t.ident),
 		}
 		if cond.variableTwoValue != nil {
 			conditionalParameter("", conditionalParams, &cond.variableTwoType, cond.variableTwoValue)
