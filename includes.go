@@ -69,6 +69,20 @@ func parseIncludes() {
 	}
 }
 
+func collectIncludePath() string {
+	var collection strings.Builder
+	for char != -1 {
+		if char == '\'' {
+			break
+		}
+
+		collection.WriteRune(char)
+		advance()
+	}
+
+	return collection.String()
+}
+
 func parseInclude() {
 	if char == '"' {
 		parserError("Use raw string (') for include file paths")
@@ -78,11 +92,7 @@ func parseInclude() {
 	}
 	advance()
 
-	var includePath = collectRawString()
-	if lineIdx != 0 && char == '\n' {
-		lineIdx--
-		lineCharIdx = 0
-	}
+	var includePath = collectIncludePath()
 
 	if slices.Contains(included, includePath) {
 		parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
