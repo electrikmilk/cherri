@@ -79,6 +79,10 @@ func parseInclude() {
 	advance()
 
 	var includePath = collectRawString()
+	if lineIdx != 0 && char == '\n' {
+		lineIdx--
+		lineCharIdx = 0
+	}
 
 	if slices.Contains(included, includePath) {
 		parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
