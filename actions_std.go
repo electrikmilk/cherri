@@ -3677,8 +3677,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"countChars": {
-		identifier:    "count",
-		defaultAction: true,
+		identifier: "count",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
