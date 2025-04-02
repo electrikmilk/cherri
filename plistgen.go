@@ -340,7 +340,7 @@ func plistRepeatEach(t *token) {
 		repeatEachParams["WFInput"] = paramValue(actionArgument{
 			valueType: t.valueType,
 			value:     t.value,
-		}, Variable)
+		}, Integer)
 	}
 
 	buildStdAction("repeat.each", repeatEachParams)
