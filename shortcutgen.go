@@ -32,9 +32,9 @@ func generateShortcut() {
 		},
 		WFWorkflowClientVersion:              clientVersion,
 		WFWorkflowHasShortcutInputVariables:  hasShortcutInputVariables,
-		WFWorkflowImportQuestions:            shortcutImportQuestions(),
-		WFWorkflowInputContentItemClasses:    inputContentItems(),
-		WFWorkflowOutputContentItemClasses:   outputContentItems(),
+		WFWorkflowImportQuestions:            generateImportQuestions(),
+		WFWorkflowInputContentItemClasses:    generateInputContentItems(),
+		WFWorkflowOutputContentItemClasses:   generateOutputContentItems(),
 		WFWorkflowMinimumClientVersion:       900,
 		WFWorkflowMinimumClientVersionString: "900",
 		WFWorkflowTypes:                      types,
@@ -346,7 +346,7 @@ func makeRepeatEachAction(t *token) {
 	buildStdAction("repeat.each", repeatEachParams)
 }
 
-func shortcutImportQuestions() (importQuestions []map[string]any) {
+func generateImportQuestions() (importQuestions []map[string]any) {
 	if len(questions) == 0 {
 		return
 	}
@@ -363,7 +363,7 @@ func shortcutImportQuestions() (importQuestions []map[string]any) {
 	return
 }
 
-func inputContentItems() (inputContentItems []string) {
+func generateInputContentItems() (inputContentItems []string) {
 	if len(inputs) == 0 {
 		for _, input := range contentItems {
 			inputContentItems = append(inputContentItems, input)
@@ -377,7 +377,7 @@ func inputContentItems() (inputContentItems []string) {
 	return
 }
 
-func outputContentItems() (outputContentItems []string) {
+func generateOutputContentItems() (outputContentItems []string) {
 	if len(outputs) == 0 {
 		return
 	}
