@@ -47,9 +47,7 @@ func generateShortcut() {
 
 	generateActions()
 
-	compiled = marshalPlist()
-	compiled = longEmptyArraySyntax.ReplaceAllString(compiled, "<array/>")
-	compiled = longEmptyDictSyntax.ReplaceAllString(compiled, "<dict/>")
+	marshalPlist()
 
 	if args.Using("debug") {
 		printShortcutGenDebug()
@@ -59,11 +57,13 @@ func generateShortcut() {
 	resetShortcutGen()
 }
 
-func marshalPlist() string {
+func marshalPlist() {
 	var marshaledPlist, plistErr = plist.MarshalIndent(shortcut, plist.XMLFormat, "\t")
 	handle(plistErr)
 
-	return string(marshaledPlist)
+	compiled = string(marshaledPlist)
+	compiled = longEmptyArraySyntax.ReplaceAllString(compiled, "<array/>")
+	compiled = longEmptyDictSyntax.ReplaceAllString(compiled, "<dict/>")
 }
 
 func resetShortcutGen() {
