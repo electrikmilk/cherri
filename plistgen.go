@@ -126,10 +126,16 @@ func plistVariable(t *token) {
 	}
 
 	if t.value != nil {
-		var varUUID = uuid.New().String()
 		var outputName = makeOutputName(t)
+		var varUUID string
+		if uuids[outputName] == "" {
+			varUUID = uuid.New().String()
+			uuids[outputName] = varUUID
+		} else {
+			varUUID = uuids[outputName]
+		}
+
 		makeVariableAction(t, &outputName, &varUUID)
-		uuids[outputName] = varUUID
 		if t.valueType != Arr {
 			if t.typeof == Var && t.valueType == Variable {
 				setVariableParams["WFInput"] = variablePlistValue(t.value.(string), t.ident)

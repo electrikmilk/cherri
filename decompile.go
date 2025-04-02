@@ -104,20 +104,24 @@ func checkParamIdentifiers(params map[string]interface{}) {
 	}
 }
 
-func checkParamValueAttachments(params map[string]interface{}) {
-	if params["Value"] != nil {
-		var paramValue = params["Value"].(map[string]interface{})
+// checkParamValueAttachments checks for attachments on values to map them.
+func checkParamValueAttachments(param map[string]interface{}) {
+	if param["Value"] == nil {
+		return
+	}
 
-		var inputValue Value
-		mapToStruct(paramValue, &inputValue)
-		mapValueReference(inputValue)
+	var paramValue = param["Value"].(map[string]interface{})
 
-		if paramValue["attachmentsByRange"] != nil {
-			mapAttachmentIdentifiers(paramValue["attachmentsByRange"].(map[string]interface{}))
-		}
+	var inputValue Value
+	mapToStruct(paramValue, &inputValue)
+	mapValueReference(inputValue)
+
+	if paramValue["attachmentsByRange"] != nil {
+		mapAttachmentIdentifiers(paramValue["attachmentsByRange"].(map[string]interface{}))
 	}
 }
 
+// mapAttachmentIdentifiers maps the UUID and output name of an attachment value.
 func mapAttachmentIdentifiers(attachments map[string]interface{}) {
 	for _, attachment := range attachments {
 		var attachmentValue Value
@@ -179,6 +183,7 @@ func mapSplitActions() {
 	}
 }
 
+// newCodeLine writes s on a new line in the code.
 func newCodeLine(s string) {
 	if tabLevel > 0 {
 		for i := 0; i < tabLevel; i++ {
@@ -188,6 +193,7 @@ func newCodeLine(s string) {
 	code.WriteString(s)
 }
 
+// tabbedLine returns s prepended with tab characters at the current tabLevel.
 func tabbedLine(s string) string {
 	if tabLevel < 1 {
 		return s
@@ -201,6 +207,7 @@ func tabbedLine(s string) string {
 	return str.String()
 }
 
+// defineName writes the name of the imported Shortcut to code as a name definition if the basename contains a space.
 func defineName() {
 	if strings.Contains(basename, " ") {
 		newCodeLine(fmt.Sprintf("#define name %s\n", basename))
@@ -270,19 +277,21 @@ func decompileActions() {
 
 var varUUIDs []string
 
+// checkConstantLiteral determines if action is a constant literal and if it should be
+// written out on a new line as a constant and clear the current variable value.
 func checkConstantLiteral(action *ShortcutAction) {
-	if _, found := action.WFWorkflowActionParameters[UUID]; found {
-		var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
-		if outputName, found := uuids[actionUUID]; found {
-			if slices.Contains(varUUIDs, actionUUID) {
-				return
-			}
-
-			newCodeLine(fmt.Sprintf("const %s = ", outputName))
-			code.WriteString(currentVariableValue)
-			code.WriteRune('\n')
-			currentVariableValue = ""
-		}
+	if _, found := action.WFWorkflowActionParameters[UUID]; !found {
+		return
+	}
+	var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
+	if slices.Contains(varUUIDs, actionUUID) {
+		return
+	}
+	if outputName, found := uuids[actionUUID]; found {
+		newCodeLine(fmt.Sprintf("const %s = ", outputName))
+		code.WriteString(currentVariableValue)
+		code.WriteRune('\n')
+		currentVariableValue = ""
 	}
 }
 
@@ -848,6 +857,8 @@ func decompAction(action *ShortcutAction) {
 	actionIndex++
 }
 
+// checkOutputType determines if action output is a constant or a variable.
+// If it is a constant we will write a constant statement on a new line to prepend the action.
 func checkOutputType(action *ShortcutAction) (isConstant bool, isVariableValue bool) {
 	if action.WFWorkflowActionParameters["CustomOutputName"] != nil {
 		var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
@@ -871,6 +882,7 @@ func checkOutputType(action *ShortcutAction) (isConstant bool, isVariableValue b
 	return
 }
 
+// skipDecompAction skips actions we don't support or when necessary.
 func skipDecompAction(action *ShortcutAction) bool {
 	if action.WFWorkflowActionIdentifier == "is.workflow.actions.getvariable" {
 		var varName = decompValue(action.WFWorkflowActionParameters["WFVariable"])
@@ -1060,26 +1072,70 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 			values: matchedValues,
 			action: splitAction,
 		})
-		if args.Using("debug") {
-			fmt.Println("Matches", matches)
-			fmt.Print("\n\n")
-		}
 	}
-	if len(matches) < 1 {
+
+	if len(matches) == 0 {
 		return
 	}
 
 	sort.SliceStable(matches, func(i, j int) bool {
-		return matches[i].params > matches[j].params || matches[i].values > matches[j].values
+		return matches[i].values > matches[j].values
 	})
+
+	if args.Using("debug") {
+		for _, match := range matches[0:2] {
+			fmt.Printf("%s()\n", match.action.identifier)
+			fmt.Println("params:", match.params, ", values:", match.values)
+			fmt.Println("---")
+		}
+		fmt.Print("\n\n")
+	}
+
+	if !competingMatches(matches) {
+		return
+	}
 
 	var matchedAction = matches[0]
 	*identifier = matchedAction.action.identifier
 	*definition = *matchedAction.action.definition
 }
 
+// competingMatches determines if the matches for this identifier have more values than 1 matching this action.
+func competingMatches(matches []actionMatch) bool {
+	var matchedValues int
+	for _, match := range matches {
+		if match.values > 0 {
+			matchedValues++
+		}
+	}
+
+	return matchedValues > 0
+}
+
 func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
-	for _, param := range splitActionParams {
+	var paramMatches, valueMatches = scoreActionParams(&splitActionParams, parameters)
+	matchedParams += paramMatches
+	matchedValues += valueMatches
+
+	var splitActionAddParams []parameterDefinition
+	if splitAction.definition.addParams != nil {
+		for key, value := range splitAction.definition.addParams([]actionArgument{}) {
+			splitActionAddParams = append(splitActionAddParams, parameterDefinition{
+				key:          key,
+				defaultValue: value,
+			})
+		}
+	}
+
+	var addParamMatches, addValueMatches = scoreActionAddParams(&splitActionAddParams, parameters)
+	matchedParams += addParamMatches
+	matchedValues += addValueMatches
+
+	return
+}
+
+func scoreActionParams(splitActionParams *[]parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
+	for _, param := range *splitActionParams {
 		if param.key == "" {
 			continue
 		}
@@ -1097,18 +1153,11 @@ func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefi
 			}
 		}
 	}
+	return
+}
 
-	var splitActionAddParams []parameterDefinition
-	if splitAction.definition.addParams != nil {
-		for key, value := range splitAction.definition.addParams([]actionArgument{}) {
-			splitActionAddParams = append(splitActionAddParams, parameterDefinition{
-				key:          key,
-				defaultValue: value,
-			})
-		}
-	}
-
-	for _, param := range splitActionAddParams {
+func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
+	for _, param := range *splitActionAddParams {
 		if param.key == "" {
 			continue
 		}
@@ -1120,22 +1169,11 @@ func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefi
 			}
 		}
 	}
-
 	return
 }
 
 func decompActionCustom(actionCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
-	var identifier = matchedAction.identifier
-	if matchedAction.appIdentifier != "" {
-		identifier = matchedAction.appIdentifier
-	}
-	var arguments []string
-	if matchedAction.decomp != nil {
-		arguments = matchedAction.decomp(action)
-	} else {
-		fmt.Println("TODO: make:", identifier)
-	}
-
+	var arguments = matchedAction.decomp(action)
 	if len(arguments) == 0 {
 		return
 	}
@@ -1155,7 +1193,7 @@ func glueToChar(glue string) string {
 	}
 }
 
-// Get default action from a slice of split actions for an identifier.
+// getDefaultAction gets the default action from a slice of split actions.
 func getDefaultAction(splitActions *[]actionValue) (action actionValue, found bool) {
 	for _, splitAction := range *splitActions {
 		if splitAction.definition.defaultAction {

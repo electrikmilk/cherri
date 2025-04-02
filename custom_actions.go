@@ -34,7 +34,7 @@ func parseCustomActions() {
 		switch {
 		case isChar('/'):
 			collectComment()
-		case tokenAhead(Action):
+		case lineCharIdx == 0 && tokenAhead(Action):
 			advance()
 			collectActionDefinition()
 			continue
@@ -224,14 +224,15 @@ func handleCustomActionRef(identifier *string) action {
 
 	var customActionCall = makeCustomActionCall(identifier, &arguments)
 
+	var variableIdentifier = fmt.Sprintf("_%s_cherri_call", *identifier)
 	tokens = append(tokens, token{
 		typeof:    Var,
-		ident:     fmt.Sprintf("_%s_cherri_call", *identifier),
+		ident:     variableIdentifier,
 		valueType: Dict,
 		value:     customActionCall,
 	})
 
-	variables[*identifier] = variableValue{
+	variables[variableIdentifier] = variableValue{
 		variableType: "Variable",
 		valueType:    Dict,
 		value:        customActionCall,

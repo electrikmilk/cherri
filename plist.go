@@ -71,6 +71,10 @@ func plistKeyValue(key string, dataType plistDataType, value any) string {
 		}
 		pair.WriteString(fmt.Sprintf("<array>\n%s%s</array>\n", plistDictValue(value.([]plistData)), strings.Repeat("\t", tabLevel)))
 	case Dictionary:
+		if value == nil || len(value.([]plistData)) == 0 {
+			pair.WriteString("<dict/>\n")
+			break
+		}
 		pair.WriteString(fmt.Sprintf("<dict>\n%s%s</dict>\n", plistDictValue(value.([]plistData)), strings.Repeat("\t", tabLevel)))
 	default:
 		if value != nil {
@@ -98,12 +102,6 @@ func plistDictValue(value []plistData) string {
 	}
 	tabLevel--
 	return pair.String()
-}
-
-// appendPlist grows and writes to the plist string builder.
-func appendPlist(data []plistData) {
-	var xmlStr = plistDictValue(data)
-	plist.WriteString(xmlStr)
 }
 
 func conditionalParameter(key string, conditionalParams map[string]any, typeOf *tokenType, value any) {
@@ -329,30 +327,25 @@ func variableInput(name string) map[string]any {
 }
 
 func inputValue(name string, varUUID string) map[string]any {
-	var value map[string]string
+	var value map[string]any
+
 	if varUUID != "" {
-		var variable = variables[name]
-		if !variable.repeatItem && ((variable.constant && variable.valueType == Variable) || variable.valueType != Variable) {
-			value = map[string]string{
-				"OutputName": name,
-				"OutputUUID": varUUID,
-				"Type":       "ActionOutput",
-			}
+		value["OutputUUID"] = varUUID
+	}
+
+	if variable, found := variables[name]; found {
+		if !variable.repeatItem && (variable.constant && variable.valueType != Variable) {
+			value["OutputName"] = name
+			value["Type"] = "ActionOutput"
 		} else {
-			value = map[string]string{
-				"VariableName": name,
-				"Type":         "Variable",
-			}
+			value["VariableName"] = name
+			value["Type"] = "Variable"
 		}
 	} else if global, found := globals[name]; found {
-		value = map[string]string{
-			"Type": global.variableType,
-		}
+		value["Type"] = global.variableType
 	} else {
-		value = map[string]string{
-			"OutputName": name,
-			"Type":       "ActionOutput",
-		}
+		value["OutputName"] = name
+		value["Type"] = "ActionOutput"
 	}
 
 	return map[string]any{
