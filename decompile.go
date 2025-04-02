@@ -1061,22 +1061,44 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 			values: matchedValues,
 			action: splitAction,
 		})
-		if args.Using("debug") {
-			fmt.Println("Matches", matches)
-			fmt.Print("\n\n")
-		}
 	}
-	if len(matches) < 1 {
+
+	if len(matches) == 0 {
 		return
 	}
 
 	sort.SliceStable(matches, func(i, j int) bool {
-		return matches[i].params > matches[j].params || matches[i].values > matches[j].values
+		return matches[i].values > matches[j].values
 	})
+
+	if args.Using("debug") {
+		for _, match := range matches[0:2] {
+			fmt.Printf("%s()\n", match.action.identifier)
+			fmt.Println("params:", match.params, ", values:", match.values)
+			fmt.Println("---")
+		}
+		fmt.Print("\n\n")
+	}
+
+	if !competingMatches(matches) {
+		return
+	}
 
 	var matchedAction = matches[0]
 	*identifier = matchedAction.action.identifier
 	*definition = *matchedAction.action.definition
+}
+
+// competingMatches determines if the matches for this identifier have more values than 1 matching this action.
+func competingMatches(matches []actionMatch) bool {
+	var matchedValues int
+	for _, match := range matches {
+		if match.values > 0 {
+			matchedValues++
+		}
+	}
+
+	return matchedValues > 0
 }
 
 func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
