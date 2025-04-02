@@ -222,15 +222,10 @@ var formattedExpression []string
 func makeExpressionValue(reference *map[string]any, value *any) {
 	formattedExpression = []string{}
 	var expression = fmt.Sprintf("%s", *value)
-	var expressionParts []string
-
-	if containsTokens(&expression, Plus, Minus, Multiply, Divide, Modulus) {
+	var expressionParts = strings.Split(expression, " ")
+	if len(expressionParts) == 3 && containsTokens(&expression, Plus, Minus, Multiply, Divide) {
 		var operandOne string
 		var operandTwo string
-		var expressionParts = strings.Split(expression, " ")
-		if len(expressionParts) > 2 {
-			return
-		}
 
 		var operation = expressionParts[1]
 		expressionParts = strings.Split(expression, operation)
