@@ -82,7 +82,7 @@ var httpParams = []parameterDefinition{
 		literal:   true,
 	},
 }
-var cropPositions = []string{"Center", "Top Left", "Top Right", "Bottom Left", "Bottom Right", "Custom"}
+var imageEditingPositions = []string{"Center", "Top Left", "Top Right", "Bottom Left", "Bottom Right", "Custom"}
 var sortOrders = []string{"asc", "desc"}
 var windowSortings = []string{"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"}
 var windowPositions = []string{"Top Left", "Top Center", "Top Right", "Middle Left", "Center", "Middle Right", "Bottom Left", "Bottom Center", "Bottom Right", "Coordinates"}
@@ -139,6 +139,9 @@ var textSizes = []string{
 	"Extra Small",
 }
 var roundings = []string{"Ones Place", "Tens Place", "Hundreds Place", "Thousands", "Ten Thousands", "Hundred Thousands", "Millions"}
+var imageMaskTypes = []string{"Rounded Rectangle", "Ellipse", "Icon"}
+var imageDetails = []string{"Album", "Width", "Height", "Date Taken", "Media Type", "Photo Type", "Is a Screenshot", "Is a Screen Recording", "Location", "Duration", "Frame Rate", "Orientation", "Camera Make", "Camera Model", "Metadata Dictionary", "Is Favorite", "File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name"}
+var colorSpaces = []string{"RGB", "Gray"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -2629,6 +2632,121 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"maskImage": {
+		identifier: "image.mask",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "type",
+				validType: String,
+				enum:      imageMaskTypes,
+				key:       "WFMaskType",
+			},
+			{
+				name:      "radius",
+				validType: String,
+				key:       "WFMaskCornerRadius",
+				optional:  true,
+			},
+		},
+	},
+	"customImageMask": {
+		identifier: "image.mask",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "customMaskImage",
+				validType: Variable,
+				key:       "WFCustomMaskImage",
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFMaskType",
+					dataType: Text,
+					value:    "Custom Image",
+				},
+			}
+		},
+	},
+	"getImageDetail": {
+		identifier: "properties.images",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "detail",
+				validType: String,
+				enum:      imageDetails,
+				key:       "WFContentItemPropertyName",
+			},
+		},
+	},
+	"extractImageText": {
+		identifier: "extracttextfromimage",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFImage",
+			},
+		},
+	},
+	"makeImageFromPDFPage": {
+		parameters: []parameterDefinition{
+			{
+				name:      "pdf",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:         "colorSpace",
+				validType:    String,
+				enum:         colorSpaces,
+				key:          "WFMakeImageFromPDFPageColorspace",
+				optional:     true,
+				defaultValue: "RGB",
+			},
+			{
+				name:         "pageResolution",
+				validType:    String,
+				key:          "WFMakeImageFromPDFPageResolution",
+				optional:     true,
+				defaultValue: "300",
+			},
+		},
+	},
+	"makeImageFromRichText": {
+		parameters: []parameterDefinition{
+			{
+				name:      "pdf",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "width",
+				validType: String,
+				key:       "WFWidth",
+			},
+			{
+				name:      "height",
+				validType: String,
+				key:       "WFHeight",
+			},
+		},
+	},
 	"getImages": {
 		identifier: "detect.images",
 		parameters: []parameterDefinition{
@@ -2637,6 +2755,100 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 				validType: Variable,
 			},
+		},
+	},
+	"overlayImage": {
+		identifier: "overlayimageonimage",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				key:       "WFInput",
+				validType: Variable,
+			},
+			{
+				name:      "overlayImage",
+				key:       "WFImage",
+				validType: Variable,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFShouldShowImageEditor",
+					dataType: Boolean,
+					value:    true,
+				},
+			}
+		},
+	},
+	"customImageOverlay": {
+		identifier: "overlayimageonimage",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "overlayImage",
+				validType: Variable,
+				key:       "WFImage",
+			},
+			{
+				name:      "width",
+				validType: String,
+				key:       "WFImageWidth",
+				optional:  true,
+			},
+			{
+				name:      "height",
+				validType: String,
+				key:       "WFImageHeight",
+				optional:  true,
+			},
+			{
+				name:         "rotation",
+				validType:    String,
+				key:          "WFRotation",
+				optional:     true,
+				defaultValue: "0",
+			},
+			{
+				name:         "opacity",
+				validType:    String,
+				key:          "WFOverlayImageOpacity",
+				defaultValue: "100",
+				optional:     true,
+			},
+			{
+				name:         "position",
+				validType:    String,
+				key:          "WFImagePosition",
+				enum:         imageEditingPositions,
+				defaultValue: "Center",
+				optional:     true,
+			},
+			{
+				name:      "customPositionX",
+				validType: String,
+				key:       "WFImageX",
+				optional:  true,
+			},
+			{
+				name:      "customPositionY",
+				validType: String,
+				key:       "WFImageY",
+				optional:  true,
+			},
+		},
+		addParams: func(args []actionArgument) []plistData {
+			return []plistData{
+				{
+					key:      "WFShouldShowImageEditor",
+					dataType: Boolean,
+					value:    false,
+				},
+			}
 		},
 	},
 	"takePhoto": {
@@ -2957,14 +3169,6 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 			{
-				name:         "position",
-				validType:    String,
-				key:          "WFImageCropPosition",
-				enum:         cropPositions,
-				optional:     true,
-				defaultValue: "Center",
-			},
-			{
 				name:         "width",
 				validType:    String,
 				key:          "WFImageCropWidth",
@@ -2977,6 +3181,26 @@ var actions = map[string]*actionDefinition{
 				key:          "WFImageCropHeight",
 				optional:     true,
 				defaultValue: "100",
+			},
+			{
+				name:         "position",
+				validType:    String,
+				key:          "WFImageCropPosition",
+				enum:         imageEditingPositions,
+				optional:     true,
+				defaultValue: "Center",
+			},
+			{
+				name:      "customPositionX",
+				validType: String,
+				key:       "WFImageCropX",
+				optional:  true,
+			},
+			{
+				name:      "customPositionY",
+				validType: String,
+				key:       "WFImageCropY",
+				optional:  true,
 			},
 		},
 	},
