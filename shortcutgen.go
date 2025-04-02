@@ -92,34 +92,34 @@ func generateActions() {
 	for _, t := range tokens {
 		switch t.typeof {
 		case Var, AddTo, SubFrom, MultiplyBy, DivideBy:
-			shortcutVariable(&t)
+			makeVariableAction(&t)
 		case Comment:
-			shortcutComment(t.value.(string))
+			makeCommentAction(t.value.(string))
 		case Action:
 			var tokenAction = t.value.(action)
 			setCurrentAction(tokenAction.ident, actions[tokenAction.ident])
 			makeAction(tokenAction.args, &map[string]any{})
 		case Repeat:
-			shortcutRepeat(&t)
+			makeRepeatAction(&t)
 		case RepeatWithEach:
-			shortcutRepeatEach(&t)
+			makeRepeatEachAction(&t)
 		case Menu:
-			shortcutMenu(&t)
+			makeMenuAction(&t)
 		case Item:
-			shortcutMenuItem(&t)
+			makeMenuItemAction(&t)
 		case Conditional:
-			shortcutConditional(&t)
+			makeConditionalAction(&t)
 		}
 	}
 }
 
-func shortcutComment(comment string) {
+func makeCommentAction(comment string) {
 	buildStdAction("comment", map[string]any{
 		"WFCommentActionText": comment,
 	})
 }
 
-func shortcutVariable(t *token) {
+func makeVariableAction(t *token) {
 	var setVariableParams = map[string]any{
 		"WFVariableName": t.ident,
 	}
@@ -134,7 +134,7 @@ func shortcutVariable(t *token) {
 			varUUID = uuids[outputName]
 		}
 
-		makeVariableAction(t, &outputName, &varUUID)
+		makeVariableValueAction(t, &outputName, &varUUID)
 		if t.valueType != Arr {
 			if t.typeof == Var && t.valueType == Variable {
 				setVariableParams["WFInput"] = variableValue(t.value.(string), t.ident)
@@ -214,7 +214,7 @@ func shortcutArrayVariable(t *token) {
 			valueType = Dict
 			itemIdent = "Dictionary"
 		}
-		makeVariableAction(&token{
+		makeVariableValueAction(&token{
 			typeof:    valueType,
 			ident:     itemIdent,
 			valueType: valueType,
@@ -228,7 +228,7 @@ func shortcutArrayVariable(t *token) {
 	}
 }
 
-func shortcutConditional(t *token) {
+func makeConditionalAction(t *token) {
 	var conditionalParams = map[string]any{
 		"GroupingIdentifier": t.ident,
 		"UUID":               uuid.New().String(),
@@ -257,7 +257,7 @@ func shortcutConditional(t *token) {
 	buildStdAction("conditional", conditionalParams)
 }
 
-func shortcutMenu(t *token) {
+func makeMenuAction(t *token) {
 	var controlFlowMode = startStatement
 	if t.valueType == EndClosure {
 		controlFlowMode = endStatement
@@ -291,7 +291,7 @@ func shortcutMenu(t *token) {
 	buildStdAction("choosefrommenu", menuParams)
 }
 
-func shortcutMenuItem(t *token) {
+func makeMenuItemAction(t *token) {
 	buildStdAction("choosefrommenu", map[string]any{
 		"GroupingIdentifier": t.ident,
 		"WFControlFlowMode":  statementPart,
@@ -306,7 +306,7 @@ func shortcutMenuItem(t *token) {
 	})
 }
 
-func shortcutRepeat(t *token) {
+func makeRepeatAction(t *token) {
 	var controlFlowMode = startStatement
 	if t.valueType == EndClosure {
 		controlFlowMode = endStatement
@@ -326,7 +326,7 @@ func shortcutRepeat(t *token) {
 	buildStdAction("repeat.count", repeatParams)
 }
 
-func shortcutRepeatEach(t *token) {
+func makeRepeatEachAction(t *token) {
 	var controlFlowMode = startStatement
 	if t.valueType == EndClosure {
 		controlFlowMode = endStatement

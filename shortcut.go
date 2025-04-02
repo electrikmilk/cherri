@@ -185,7 +185,7 @@ func conditionalParameterVariable(conditionalParams map[string]any, value any) {
 	}
 }
 
-func makeVariableAction(token *token, customOutputName *string, varUUID *string) {
+func makeVariableValueAction(token *token, customOutputName *string, varUUID *string) {
 	var reference = map[string]any{
 		"CustomOutputName": *customOutputName,
 		"UUID":             *varUUID,
