@@ -922,6 +922,11 @@ func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actio
 			argValue = makeDefaultValue(param)
 		}
 
+		switch param.validType {
+		case Integer:
+			argValue = strings.Trim(argValue, "\"")
+		}
+
 		if argValue != "" {
 			if i == 0 {
 				actionCallCode.WriteString(argValue)
