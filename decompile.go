@@ -960,13 +960,18 @@ func makeDefaultValue(param parameterDefinition) string {
 func makeRawAction(action *ShortcutAction) string {
 	var rawActionCode strings.Builder
 	rawActionCode.WriteString(fmt.Sprintf("rawAction(\"%s\"", action.WFWorkflowActionIdentifier))
-
-	if len(action.WFWorkflowActionParameters) != 0 {
+	var paramsSize = len(action.WFWorkflowActionParameters)
+	var onlyUUIDParam = false
+	if paramsSize == 1 {
+		if _, found := action.WFWorkflowActionParameters[UUID]; found {
+			onlyUUIDParam = found
+		}
+	}
+	if paramsSize != 0 && !onlyUUIDParam {
 		tabLevel++
 		rawActionCode.WriteString(", [\n")
 		rawActionCode.WriteString(tabbedLine("{\n"))
 		var index = 0
-		var paramsSize = len(action.WFWorkflowActionParameters)
 		for key, param := range action.WFWorkflowActionParameters {
 			index++
 
