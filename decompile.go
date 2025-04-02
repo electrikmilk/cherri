@@ -702,7 +702,7 @@ func isControlFlowUUID(uuid string) bool {
 
 func decompObjectValue(valueObj any) string {
 	var valueType = reflect.TypeOf(valueObj).String()
-	if valueType != "map[string]interface {}" {
+	if valueType != dictType {
 		return fmt.Sprintf("%v", valueObj)
 	}
 
@@ -710,7 +710,7 @@ func decompObjectValue(valueObj any) string {
 
 	var attachmentString string
 	if value["value"] != nil {
-		if reflect.TypeOf(value["value"]).String() != "map[string]interface {}" {
+		if reflect.TypeOf(value["value"]).String() != dictType {
 			return fmt.Sprintf("%v", valueObj)
 		}
 		value = value["value"].(map[string]interface{})
