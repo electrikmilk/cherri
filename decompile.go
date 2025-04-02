@@ -272,18 +272,18 @@ func decompileActions() {
 var varUUIDs []string
 
 func checkConstantLiteral(action *ShortcutAction) {
-	if _, found := action.WFWorkflowActionParameters[UUID]; found {
-		var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
-		if outputName, found := uuids[actionUUID]; found {
-			if slices.Contains(varUUIDs, actionUUID) {
-				return
-			}
-
-			newCodeLine(fmt.Sprintf("const %s = ", outputName))
-			code.WriteString(currentVariableValue)
-			code.WriteRune('\n')
-			currentVariableValue = ""
-		}
+	if _, found := action.WFWorkflowActionParameters[UUID]; !found {
+		return
+	}
+	var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
+	if slices.Contains(varUUIDs, actionUUID) {
+		return
+	}
+	if outputName, found := uuids[actionUUID]; found {
+		newCodeLine(fmt.Sprintf("const %s = ", outputName))
+		code.WriteString(currentVariableValue)
+		code.WriteRune('\n')
+		currentVariableValue = ""
 	}
 }
 
