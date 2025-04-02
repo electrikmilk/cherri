@@ -46,7 +46,7 @@ func initParse() {
 	if args.Using("debug") {
 		fmt.Printf("Parsing %s...\n", filename)
 	}
-	variables = make(map[string]variableValue)
+	variables = make(map[string]varValue)
 	questions = make(map[string]*question)
 	groupingUUIDs = make(map[int]string)
 	groupingTypes = make(map[int]tokenType)
@@ -580,7 +580,7 @@ func collectVariable(constant bool) {
 		return
 	}
 	if _, found := variables[identifier]; !found {
-		variables[identifier] = variableValue{
+		variables[identifier] = varValue{
 			variableType: "Variable",
 			valueType:    valueType,
 			value:        value,
@@ -886,7 +886,7 @@ func collectRepeat() {
 		},
 	)
 
-	variables[repeatIndexIdentifier] = variableValue{
+	variables[repeatIndexIdentifier] = varValue{
 		variableType: "Variable",
 		valueType:    Integer,
 		value:        repeatIndexIdentifier,
@@ -933,7 +933,7 @@ func collectRepeatEach() {
 		},
 	)
 
-	variables[repeatItemIdentifier] = variableValue{
+	variables[repeatItemIdentifier] = varValue{
 		variableType: "Variable",
 		valueType:    String,
 		value:        repeatItemIdentifier,
@@ -1002,7 +1002,7 @@ func collectConditional() {
 
 func collectMenu() {
 	if len(menus) == 0 {
-		menus = make(map[string][]variableValue)
+		menus = make(map[string][]varValue)
 	}
 
 	reachable()
@@ -1015,7 +1015,7 @@ func collectMenu() {
 	advanceUntil('{')
 	advance()
 
-	menus[groupingUUID] = []variableValue{}
+	menus[groupingUUID] = []varValue{}
 	tokens = append(tokens, token{
 		typeof:    Menu,
 		ident:     groupingUUID,
@@ -1041,7 +1041,7 @@ func collectMenuItem() {
 		addNothing()
 	}
 
-	menus[groupingUUID] = append(menus[groupingUUID], variableValue{
+	menus[groupingUUID] = append(menus[groupingUUID], varValue{
 		valueType: itemType,
 		value:     itemValue,
 	})

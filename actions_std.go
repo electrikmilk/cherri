@@ -5901,14 +5901,14 @@ func rawAction() {
 			}
 			for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
 				var paramKey string
-				var paramType plistDataType
+				var paramType dataType
 				var rawValue any
 				for key, value := range parameterDefinitions.(map[string]interface{}) {
 					switch key {
 					case "key":
 						paramKey = value.(string)
 					case "type":
-						paramType = plistDataType(value.(string))
+						paramType = dataType(value.(string))
 					case "value":
 						rawValue = value
 					}

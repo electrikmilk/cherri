@@ -165,4 +165,4 @@ var conditions = map[tokenType]int{
 
 /* Menus */
 
-var menus map[string][]variableValue
+var menus map[string][]varValue

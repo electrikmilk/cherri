@@ -24,6 +24,8 @@ const (
 	ShortcutInput = "ShortcutInput"
 )
 
+var tabLevel int
+
 var code strings.Builder
 var specialCharsRegex *regexp.Regexp
 
@@ -52,7 +54,7 @@ func decompile(b []byte) {
 // mapIdentifiers creates a map of variable identifiers and UUIDs that are assigned throughout the Shortcut.
 func mapIdentifiers() {
 	specialCharsRegex = regexp.MustCompile("[^a-zA-Z0-9_]+")
-	variables = make(map[string]variableValue)
+	variables = make(map[string]varValue)
 	uuids = make(map[string]string)
 	for _, action := range shortcut.WFWorkflowActions {
 		currentActionIdentifier = action.WFWorkflowActionIdentifier
@@ -61,7 +63,7 @@ func mapIdentifiers() {
 			var varName = params["WFVariableName"].(string)
 			sanitizeIdentifier(&varName)
 			if _, found := variables[varName]; !found {
-				variables[varName] = variableValue{}
+				variables[varName] = varValue{}
 			}
 
 			if action.WFWorkflowActionParameters["WFInput"] != nil {
@@ -384,16 +386,16 @@ func collectControlFlowUUID(action *ShortcutAction) {
 
 func decompMenu(action *ShortcutAction) {
 	if len(menus) == 0 {
-		menus = make(map[string][]variableValue)
+		menus = make(map[string][]varValue)
 	}
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	var groupingUUID = action.WFWorkflowActionParameters["GroupingIdentifier"].(string)
 	switch controlFlowMode {
 	case startStatement:
-		menus[groupingUUID] = []variableValue{}
+		menus[groupingUUID] = []varValue{}
 		var items = action.WFWorkflowActionParameters["WFMenuItems"]
 		for _, item := range items.([]interface{}) {
-			menus[groupingUUID] = append(menus[groupingUUID], variableValue{value: item})
+			menus[groupingUUID] = append(menus[groupingUUID], varValue{value: item})
 		}
 		newCodeLine("menu ")
 		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFMenuPrompt"]))

@@ -12,31 +12,19 @@ import (
 
 	"github.com/electrikmilk/args-parser"
 	"github.com/google/uuid"
-	plists "howett.net/plist"
+	"howett.net/plist"
 )
 
-var plist strings.Builder
 var compiled string
 
 var longEmptyArraySyntax = regexp.MustCompile(`<array>\n(.*?)</array>`)
 var longEmptyDictSyntax = regexp.MustCompile(`<dict>\n(.*?)</dict>`)
 
-func marshalPlist() {
-	generateShortcut()
-
-	var plist, plistErr = plists.MarshalIndent(shortcut, plists.XMLFormat, "\t")
-	handle(plistErr)
-
-	compiled = longEmptyArraySyntax.ReplaceAllString(string(plist), "<array/>")
-	compiled = longEmptyDictSyntax.ReplaceAllString(compiled, "<dict/>")
-
-	resetPlistGen()
-}
-
 func generateShortcut() {
 	if args.Using("debug") {
-		fmt.Print("Generating plist data...")
+		fmt.Print("Generating Shortcut data...")
 	}
+
 	shortcut = Shortcut{
 		WFWorkflowIcon: ShortcutIcon{
 			iconGlyph,
@@ -44,12 +32,12 @@ func generateShortcut() {
 		},
 		WFWorkflowClientVersion:              clientVersion,
 		WFWorkflowHasShortcutInputVariables:  hasShortcutInputVariables,
-		WFWorkflowImportQuestions:            plistImportQuestions(),
-		WFWorkflowInputContentItemClasses:    plistInputContentItems(),
-		WFWorkflowOutputContentItemClasses:   plistOutputContentItems(),
+		WFWorkflowImportQuestions:            shortcutImportQuestions(),
+		WFWorkflowInputContentItemClasses:    inputContentItems(),
+		WFWorkflowOutputContentItemClasses:   outputContentItems(),
 		WFWorkflowMinimumClientVersion:       900,
 		WFWorkflowMinimumClientVersionString: "900",
-		WFWorkflowTypes:                      plistWorkflowTypes(),
+		WFWorkflowTypes:                      types,
 		WFWorkflowNoInputBehavior:            noInput,
 	}
 
@@ -57,20 +45,32 @@ func generateShortcut() {
 		shortcut.WFWorkflowName = workflowName
 	}
 
-	generatePlistActions()
+	generateActions()
+
+	compiled = marshalPlist()
+	compiled = longEmptyArraySyntax.ReplaceAllString(compiled, "<array/>")
+	compiled = longEmptyDictSyntax.ReplaceAllString(compiled, "<dict/>")
 
 	if args.Using("debug") {
-		printPlistGenDebug()
+		printShortcutGenDebug()
 		fmt.Println(ansi("Done.\n", green))
 	}
+
+	resetShortcutGen()
 }
 
-func resetPlistGen() {
-	tabLevel = 0
+func marshalPlist() string {
+	var marshaledPlist, plistErr = plist.MarshalIndent(shortcut, plist.XMLFormat, "\t")
+	handle(plistErr)
+
+	return string(marshaledPlist)
+}
+
+func resetShortcutGen() {
 	tokens = []token{}
-	menus = map[string][]variableValue{}
+	menus = map[string][]varValue{}
 	uuids = map[string]string{}
-	variables = map[string]variableValue{}
+	variables = map[string]varValue{}
 	questions = map[string]*question{}
 	noInput = WFWorkflowNoInputBehavior{}
 	types = []string{}
@@ -78,8 +78,8 @@ func resetPlistGen() {
 	outputs = []string{}
 }
 
-func printPlistGenDebug() {
-	fmt.Println(ansi("### PLIST GEN ###", bold) + "\n")
+func printShortcutGenDebug() {
+	fmt.Println(ansi("### SHORTCUT GEN ###", bold) + "\n")
 
 	fmt.Println(ansi("## UUIDS ##", bold))
 	fmt.Println(uuids)
@@ -87,39 +87,39 @@ func printPlistGenDebug() {
 	fmt.Print("\n")
 }
 
-func generatePlistActions() {
+func generateActions() {
 	uuids = make(map[string]string)
 	for _, t := range tokens {
 		switch t.typeof {
 		case Var, AddTo, SubFrom, MultiplyBy, DivideBy:
-			plistVariable(&t)
+			shortcutVariable(&t)
 		case Comment:
-			plistComment(t.value.(string))
+			shortcutComment(t.value.(string))
 		case Action:
 			var tokenAction = t.value.(action)
 			setCurrentAction(tokenAction.ident, actions[tokenAction.ident])
 			plistAction(tokenAction.args, &map[string]any{})
 		case Repeat:
-			plistRepeat(&t)
+			shortcutRepeat(&t)
 		case RepeatWithEach:
-			plistRepeatEach(&t)
+			shortcutRepeatEach(&t)
 		case Menu:
-			plistMenu(&t)
+			shortcutMenu(&t)
 		case Item:
-			plistMenuItem(&t)
+			shortcutMenuItem(&t)
 		case Conditional:
-			plistConditional(&t)
+			shortcutConditional(&t)
 		}
 	}
 }
 
-func plistComment(comment string) {
+func shortcutComment(comment string) {
 	buildStdAction("comment", map[string]any{
 		"WFCommentActionText": comment,
 	})
 }
 
-func plistVariable(t *token) {
+func shortcutVariable(t *token) {
 	var setVariableParams = map[string]any{
 		"WFVariableName": t.ident,
 	}
@@ -137,7 +137,7 @@ func plistVariable(t *token) {
 		makeVariableAction(t, &outputName, &varUUID)
 		if t.valueType != Arr {
 			if t.typeof == Var && t.valueType == Variable {
-				setVariableParams["WFInput"] = variablePlistValue(t.value.(string), t.ident)
+				setVariableParams["WFInput"] = variableValue(t.value.(string), t.ident)
 			} else {
 				setVariableParams["WFInput"] = inputValue(outputName, varUUID)
 			}
@@ -164,7 +164,7 @@ func plistVariable(t *token) {
 	buildStdAction("setvariable", setVariableParams)
 
 	if t.valueType == Arr {
-		plistArrayVariable(t)
+		shortcutArrayVariable(t)
 	}
 }
 
@@ -192,7 +192,7 @@ func makeOutputName(token *token) string {
 	return checkDuplicateOutputName(customOutputName)
 }
 
-func plistArrayVariable(t *token) {
+func shortcutArrayVariable(t *token) {
 	if t.value == nil {
 		return
 	}
@@ -228,7 +228,7 @@ func plistArrayVariable(t *token) {
 	}
 }
 
-func plistConditional(t *token) {
+func shortcutConditional(t *token) {
 	var conditionalParams = map[string]any{
 		"GroupingIdentifier": t.ident,
 		"UUID":               uuid.New().String(),
@@ -238,7 +238,7 @@ func plistConditional(t *token) {
 		var cond = t.value.(condition)
 		conditionalParams["WFInput"] = map[string]any{
 			"Type":     "Variable",
-			"Variable": variablePlistValue(cond.variableOneValue.(string), t.ident),
+			"Variable": variableValue(cond.variableOneValue.(string), t.ident),
 		}
 		if cond.variableTwoValue != nil {
 			conditionalParameter("", conditionalParams, &cond.variableTwoType, cond.variableTwoValue)
@@ -257,7 +257,7 @@ func plistConditional(t *token) {
 	buildStdAction("conditional", conditionalParams)
 }
 
-func plistMenu(t *token) {
+func shortcutMenu(t *token) {
 	var controlFlowMode = startStatement
 	if t.valueType == EndClosure {
 		controlFlowMode = endStatement
@@ -291,7 +291,7 @@ func plistMenu(t *token) {
 	buildStdAction("choosefrommenu", menuParams)
 }
 
-func plistMenuItem(t *token) {
+func shortcutMenuItem(t *token) {
 	buildStdAction("choosefrommenu", map[string]any{
 		"GroupingIdentifier": t.ident,
 		"WFControlFlowMode":  statementPart,
@@ -306,7 +306,7 @@ func plistMenuItem(t *token) {
 	})
 }
 
-func plistRepeat(t *token) {
+func shortcutRepeat(t *token) {
 	var controlFlowMode = startStatement
 	if t.valueType == EndClosure {
 		controlFlowMode = endStatement
@@ -326,7 +326,7 @@ func plistRepeat(t *token) {
 	buildStdAction("repeat.count", repeatParams)
 }
 
-func plistRepeatEach(t *token) {
+func shortcutRepeatEach(t *token) {
 	var controlFlowMode = startStatement
 	if t.valueType == EndClosure {
 		controlFlowMode = endStatement
@@ -346,7 +346,7 @@ func plistRepeatEach(t *token) {
 	buildStdAction("repeat.each", repeatEachParams)
 }
 
-func plistImportQuestions() (importQuestions []map[string]any) {
+func shortcutImportQuestions() (importQuestions []map[string]any) {
 	if len(questions) == 0 {
 		return
 	}
@@ -363,18 +363,7 @@ func plistImportQuestions() (importQuestions []map[string]any) {
 	return
 }
 
-func plistWorkflowTypes() (wfWorkflowTypes []string) {
-	if len(types) == 0 {
-		return
-	}
-
-	for _, workflowType := range types {
-		wfWorkflowTypes = append(wfWorkflowTypes, workflowType)
-	}
-	return
-}
-
-func plistInputContentItems() (inputContentItems []string) {
+func inputContentItems() (inputContentItems []string) {
 	if len(inputs) == 0 {
 		for _, input := range contentItems {
 			inputContentItems = append(inputContentItems, input)
@@ -388,7 +377,7 @@ func plistInputContentItems() (inputContentItems []string) {
 	return
 }
 
-func plistOutputContentItems() (outputContentItems []string) {
+func outputContentItems() (outputContentItems []string) {
 	if len(outputs) == 0 {
 		return
 	}

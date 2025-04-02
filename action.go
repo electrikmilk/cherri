@@ -35,13 +35,13 @@ type parameterDefinition struct {
 	literal      bool
 }
 
-// actionArgument is a variableValue value used to define collected argument values by the parser.
+// actionArgument is a varValue value used to define collected argument values by the parser.
 type actionArgument struct {
 	valueType tokenType
 	value     any
 }
 
-// action is a variableValue value that represents a collected action and arguments.
+// action is a varValue value that represents a collected action and arguments.
 type action struct {
 	// ident is the identifier of the action collected (e.g. identifier(...)).
 	ident string
@@ -302,7 +302,7 @@ func checkEnum(param *parameterDefinition, argument *actionArgument) {
 }
 
 // realVariableValue recurses to get the real value of a variable given its name.
-func realVariableValue(identifier string, lastValueType tokenType) (varValue variableValue) {
+func realVariableValue(identifier string, lastValueType tokenType) (varValue varValue) {
 	if _, global := globals[identifier]; global {
 		varValue = globals[identifier]
 		return
