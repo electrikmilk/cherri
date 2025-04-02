@@ -791,7 +791,7 @@ func dictionaryValue(key string, itemType dictDataType, serializedType string, w
 				valueType: String,
 				value:     key,
 			}, String)
-			if reflect.TypeOf(wfKey["Value"]).String() == "map[string]any" {
+			if reflect.TypeOf(wfKey["Value"]).String() == "map[string]interface {}" {
 				for _, val := range wfKey["Value"].(map[string]any) {
 					wfKey = val.(map[string]any)
 					break
