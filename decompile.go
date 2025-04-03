@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"reflect"
 	"regexp"
@@ -256,7 +257,10 @@ func decompileActions() {
 		case "is.workflow.actions.gettext":
 			decompTextValue(&action)
 		case "is.workflow.actions.number":
-			decompNumberValue(&action)
+			var isLiteral = decompNumberValue(&action)
+			if !isLiteral {
+				decompAction(&action)
+			}
 		case "is.workflow.actions.dictionary":
 			decompDictionary(&action)
 		case "is.workflow.actions.calculateexpression":
@@ -314,12 +318,18 @@ func decompTextValue(action *ShortcutAction) {
 	checkConstantLiteral(action)
 }
 
-func decompNumberValue(action *ShortcutAction) {
+func decompNumberValue(action *ShortcutAction) (literal bool) {
 	var value = action.WFWorkflowActionParameters["WFNumberActionNumber"]
 	if reflect.TypeOf(value).String() == dictType {
 		var mapValue = value.(map[string]interface{})
 		var Value = mapValue["Value"].(map[string]interface{})
 		value = decompValue(value)
+
+		match, _ := regexp.MatchString("^[0-9]+$", value.(string))
+		if match {
+			literal = true
+			return
+		}
 
 		if Value["Type"] == "ActionOutput" {
 			currentVariableValue = value.(string)
@@ -339,6 +349,7 @@ func decompNumberValue(action *ShortcutAction) {
 	}
 	currentVariableValue = decompValue(number)
 	checkConstantLiteral(action)
+	return
 }
 
 func decompExpression(action *ShortcutAction) {
@@ -702,7 +713,7 @@ func isControlFlowUUID(uuid string) bool {
 
 func decompObjectValue(valueObj any) string {
 	var valueType = reflect.TypeOf(valueObj).String()
-	if valueType != "map[string]interface {}" {
+	if valueType != dictType {
 		return fmt.Sprintf("%v", valueObj)
 	}
 
@@ -710,7 +721,7 @@ func decompObjectValue(valueObj any) string {
 
 	var attachmentString string
 	if value["value"] != nil {
-		if reflect.TypeOf(value["value"]).String() != "map[string]interface {}" {
+		if reflect.TypeOf(value["value"]).String() != dictType {
 			return fmt.Sprintf("%v", valueObj)
 		}
 		value = value["value"].(map[string]interface{})
@@ -1098,7 +1109,7 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 	})
 
 	if args.Using("debug") {
-		for _, match := range matches[0:2] {
+		for _, match := range matches[1:] {
 			fmt.Printf("%s()\n", match.action.identifier)
 			fmt.Println("params:", match.params, ", values:", match.values)
 			fmt.Println("---")
@@ -1179,7 +1190,13 @@ func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameter
 		if value, found := parameters[param.key]; found {
 			matchedParams++
 
-			if param.defaultValue == value {
+			var defaultValueType = reflect.TypeOf(param.defaultValue).String()
+			var valueType = reflect.TypeOf(value).String()
+			if defaultValueType == dictType && valueType == dictType {
+				if maps.Equal(param.defaultValue.(map[string]interface{}), value.(map[string]interface{})) {
+					matchedValues++
+				}
+			} else if param.defaultValue == value {
 				matchedValues++
 			}
 		}

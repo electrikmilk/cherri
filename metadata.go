@@ -73,6 +73,7 @@ var types []string
 /* Versions */
 
 var versions = map[string]string{
+	"18.4":   "3218.0.4.100",
 	"18":     "3036.0.4.2",
 	"17":     "2106.0.3",
 	"16.5":   "900",
@@ -86,8 +87,8 @@ var versions = map[string]string{
 	"13":     "600",
 	"12":     "500",
 }
-var clientVersion = "3036.0.4.2"
-var iosVersion = 18.0
+var clientVersion = "3218.0.4.100"
+var iosVersion = 18.4
 
 /* Languages */
 
