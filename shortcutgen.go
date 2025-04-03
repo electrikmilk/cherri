@@ -164,7 +164,7 @@ func makeVariableAction(t *token) {
 	buildStdAction("setvariable", setVariableParams)
 
 	if t.valueType == Arr {
-		shortcutArrayVariable(t)
+		makeArrayVariable(t)
 	}
 }
 
@@ -192,7 +192,7 @@ func makeOutputName(token *token) string {
 	return checkDuplicateOutputName(customOutputName)
 }
 
-func shortcutArrayVariable(t *token) {
+func makeArrayVariable(t *token) {
 	if t.value == nil {
 		return
 	}
