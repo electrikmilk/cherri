@@ -92,7 +92,8 @@ var focusModes = map[string]any{
 	"Identifier":    "com.apple.donotdisturb.mode.default",
 	"DisplayString": "Do Not Disturb",
 }
-var eventDetails = []string{"Start Date", "End Date", "Is All Day", "Location", "Duration", "My Status", "Attendees", "URL", "Title", "Notes", "Attachments"}
+var editEventDetails = []string{"Start Date", "End Date", "Is All Day", "Location", "Duration", "My Status", "Attendees", "URL", "Title", "Notes", "Attachments"}
+var eventDetails = []string{"Start Date", "End Date", "Is All Day", "Calendar", "Location", "Has Alarms", "Duration", "Is Canceled", "My Status", "Organizer", "Organizer Is Me", "Attendees", "Number of Attendees", "URL", "Title", "Notes", "Attachments", "File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name"}
 var dateFormats = []string{"None", "Short", "Medium", "Long", "Relative", "RFC 2822", "ISO 8601", "Custom"}
 var timeFormats = []string{"None", "Short", "Medium", "Long", "Relative"}
 var timerDurations = []string{"hr", "min", "sec"}
@@ -131,6 +132,9 @@ var roundings = []string{"Ones Place", "Tens Place", "Hundreds Place", "Thousand
 var imageMaskTypes = []string{"Rounded Rectangle", "Ellipse", "Icon"}
 var imageDetails = []string{"Album", "Width", "Height", "Date Taken", "Media Type", "Photo Type", "Is a Screenshot", "Is a Screen Recording", "Location", "Duration", "Frame Rate", "Orientation", "Camera Make", "Camera Model", "Metadata Dictionary", "Is Favorite", "File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name"}
 var colorSpaces = []string{"RGB", "Gray"}
+var shuffleOptions = []string{"Off", "Songs"}
+var repeatOptions = []string{"None", "One", "All"}
+var musicDetails = []string{"Title", "Album", "Artist", "Album Artist", "Genre", "Composer", "Date Added", "Media Kind", "Duration", "Play Count", "Track Number", "Disc Number", "Album Artwork", "Is Explicit", "Lyrics", "Release Date", "Comments", "Is Cloud Item", "Skip Count", "Last Played Date", "Rating", "File Path", "Name"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -518,12 +522,28 @@ var actions = map[string]*actionDefinition{
 				name:      "detail",
 				validType: String,
 				key:       "WFContentItemPropertyName",
-				enum:      eventDetails,
+				enum:      editEventDetails,
 			},
 			{
 				name:      "newValue",
 				validType: String,
 				key:       "WFCalendarEventContentItemStartDate",
+			},
+		},
+	},
+	"getEventDetail": {
+		identifier: "properties.calendarevents",
+		parameters: []parameterDefinition{
+			{
+				name:      "event",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+				enum:      eventDetails,
 			},
 		},
 	},
@@ -2875,6 +2895,22 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"getMusicDetail": {
+		identifier: "properties.music",
+		parameters: []parameterDefinition{
+			{
+				name:      "music",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+				enum:      musicDetails,
+			},
+		},
+	},
 	"addToMusic": {
 		category:   Music,
 		identifier: "addtoplaylist",
@@ -3005,6 +3041,88 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"getImageFrames": {
+		identifier: "getframesfromimage",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFImage",
+			},
+		},
+	},
+	"getPlaylistSongs": {
+		identifier: "get.playlist",
+		parameters: []parameterDefinition{
+			{
+				name:      "playlistName",
+				validType: Variable,
+				key:       "WFPlaylistName",
+			},
+		},
+	},
+	"playMusic": {
+		parameters: []parameterDefinition{
+			{
+				name: "music",
+				key:  "WFMediaItems",
+			},
+			{
+				name:     "shuffle",
+				key:      "WFPlayMusicActionShuffle",
+				enum:     shuffleOptions,
+				optional: true,
+			},
+			{
+				name:     "repeat",
+				key:      "WFPlayMusicActionRepeat",
+				enum:     repeatOptions,
+				optional: true,
+			},
+		},
+	},
+	"makeGIF": {
+		parameters: []parameterDefinition{
+			{
+				name:      "input",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:         "delay",
+				validType:    String,
+				key:          "WFMakeGIFActionDelayTime",
+				defaultValue: "0.3",
+				optional:     true,
+			},
+			{
+				name:      "loops",
+				validType: Integer,
+				key:       "WFMakeGIFActionLoopCount",
+				optional:  true,
+			},
+			{
+				name:      "width",
+				validType: String,
+				key:       "WFMakeGIFActionManualSizeWidth",
+				optional:  true,
+			},
+			{
+				name:      "height",
+				validType: String,
+				key:       "WFMakeGIFActionManualSizeHeight",
+				optional:  true,
+			},
+		},
+		addParams: func(args []actionArgument) map[string]any {
+			var params = make(map[string]any)
+			var argsLen = len(args)
+			params["WFMakeGIFActionLoopEnabled"] = !(argsLen > 2)
+			params["WFMakeGIFActionAutoSize"] = !(argsLen > 3)
+
+			return params
+		},
+	},
 	"convertToJPEG": {
 		category:   Images,
 		identifier: "image.convert",
@@ -3068,7 +3186,7 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"rotateImage": {
+	"rotateMedia": {
 		category:   Images,
 		identifier: "image.rotate",
 		parameters: []parameterDefinition{
