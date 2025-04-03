@@ -2900,6 +2900,48 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"makeGIF": {
+		parameters: []parameterDefinition{
+			{
+				name:      "input",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:         "delay",
+				validType:    String,
+				key:          "WFMakeGIFActionDelayTime",
+				defaultValue: "0.3",
+				optional:     true,
+			},
+			{
+				name:      "loops",
+				validType: Integer,
+				key:       "WFMakeGIFActionLoopCount",
+				optional:  true,
+			},
+			{
+				name:      "width",
+				validType: String,
+				key:       "WFMakeGIFActionManualSizeWidth",
+				optional:  true,
+			},
+			{
+				name:      "height",
+				validType: String,
+				key:       "WFMakeGIFActionManualSizeHeight",
+				optional:  true,
+			},
+		},
+		addParams: func(args []actionArgument) map[string]any {
+			var params = make(map[string]any)
+			var argsLen = len(args)
+			params["WFMakeGIFActionLoopEnabled"] = !(argsLen > 2)
+			params["WFMakeGIFActionAutoSize"] = !(argsLen > 3)
+
+			return params
+		},
+	},
 	"convertToJPEG": {
 		identifier: "image.convert",
 		parameters: []parameterDefinition{
