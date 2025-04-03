@@ -4061,7 +4061,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
-				validType: String,
+				validType: RawString,
 				key:       "WFCommentActionText",
 			},
 		},
