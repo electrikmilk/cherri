@@ -256,7 +256,10 @@ func decompileActions() {
 		case "is.workflow.actions.gettext":
 			decompTextValue(&action)
 		case "is.workflow.actions.number":
-			decompNumberValue(&action)
+			var isLiteral = decompNumberValue(&action)
+			if !isLiteral {
+				decompAction(&action)
+			}
 		case "is.workflow.actions.dictionary":
 			decompDictionary(&action)
 		case "is.workflow.actions.calculateexpression":
@@ -314,12 +317,18 @@ func decompTextValue(action *ShortcutAction) {
 	checkConstantLiteral(action)
 }
 
-func decompNumberValue(action *ShortcutAction) {
+func decompNumberValue(action *ShortcutAction) (literal bool) {
 	var value = action.WFWorkflowActionParameters["WFNumberActionNumber"]
 	if reflect.TypeOf(value).String() == dictType {
 		var mapValue = value.(map[string]interface{})
 		var Value = mapValue["Value"].(map[string]interface{})
 		value = decompValue(value)
+
+		match, _ := regexp.MatchString("^[0-9]+$", value.(string))
+		if match {
+			literal = true
+			return
+		}
 
 		if Value["Type"] == "ActionOutput" {
 			currentVariableValue = value.(string)
@@ -339,6 +348,7 @@ func decompNumberValue(action *ShortcutAction) {
 	}
 	currentVariableValue = decompValue(number)
 	checkConstantLiteral(action)
+	return
 }
 
 func decompExpression(action *ShortcutAction) {
