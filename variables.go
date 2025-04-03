@@ -13,9 +13,9 @@ import (
 	"github.com/electrikmilk/args-parser"
 )
 
-var variables map[string]variableValue
+var variables map[string]varValue
 
-type variableValue struct {
+type varValue struct {
 	variableType string
 	valueType    tokenType
 	value        any
@@ -25,7 +25,7 @@ type variableValue struct {
 	repeatItem   bool
 }
 
-var globals = map[string]variableValue{
+var globals = map[string]varValue{
 	ShortcutInput: {
 		variableType: "ExtensionInput",
 		valueType:    String,
@@ -92,7 +92,7 @@ func validReference(identifier string) bool {
 	return false
 }
 
-func getVariableValue(identifier string) (variableValue *variableValue, found bool) {
+func getVariableValue(identifier string) (variableValue *varValue, found bool) {
 	if value, found := globals[identifier]; found {
 		return &value, true
 	}

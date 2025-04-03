@@ -2,7 +2,7 @@
 
 @intVar = 42
 @intVar2 = 52
-@floatVar = 1.0
+@floatVar = 1.5
 const immutable = 5
 @stringVar = "text {intVar} {intVar2} {immutable}"
 number(immutable)

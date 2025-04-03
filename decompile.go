@@ -17,7 +17,7 @@ import (
 	"strings"
 
 	"github.com/electrikmilk/args-parser"
-	plists "howett.net/plist"
+	"howett.net/plist"
 )
 
 const (
@@ -25,12 +25,13 @@ const (
 	ShortcutInput = "ShortcutInput"
 )
 
-var shortcut Shortcut
+var tabLevel int
+
 var code strings.Builder
 var specialCharsRegex *regexp.Regexp
 
 func decompile(b []byte) {
-	var _, marshalIndexedErr = plists.Unmarshal(b, &shortcut)
+	var _, marshalIndexedErr = plist.Unmarshal(b, &shortcut)
 	handle(marshalIndexedErr)
 
 	mapIdentifiers()
@@ -54,7 +55,7 @@ func decompile(b []byte) {
 // mapIdentifiers creates a map of variable identifiers and UUIDs that are assigned throughout the Shortcut.
 func mapIdentifiers() {
 	specialCharsRegex = regexp.MustCompile("[^a-zA-Z0-9_]+")
-	variables = make(map[string]variableValue)
+	variables = make(map[string]varValue)
 	uuids = make(map[string]string)
 	for _, action := range shortcut.WFWorkflowActions {
 		currentActionIdentifier = action.WFWorkflowActionIdentifier
@@ -63,7 +64,7 @@ func mapIdentifiers() {
 			var varName = params["WFVariableName"].(string)
 			sanitizeIdentifier(&varName)
 			if _, found := variables[varName]; !found {
-				variables[varName] = variableValue{}
+				variables[varName] = varValue{}
 			}
 
 			if action.WFWorkflowActionParameters["WFInput"] != nil {
@@ -396,16 +397,16 @@ func collectControlFlowUUID(action *ShortcutAction) {
 
 func decompMenu(action *ShortcutAction) {
 	if len(menus) == 0 {
-		menus = make(map[string][]variableValue)
+		menus = make(map[string][]varValue)
 	}
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	var groupingUUID = action.WFWorkflowActionParameters["GroupingIdentifier"].(string)
 	switch controlFlowMode {
 	case startStatement:
-		menus[groupingUUID] = []variableValue{}
+		menus[groupingUUID] = []varValue{}
 		var items = action.WFWorkflowActionParameters["WFMenuItems"]
 		for _, item := range items.([]interface{}) {
-			menus[groupingUUID] = append(menus[groupingUUID], variableValue{value: item})
+			menus[groupingUUID] = append(menus[groupingUUID], varValue{value: item})
 		}
 		newCodeLine("menu ")
 		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFMenuPrompt"]))
@@ -482,15 +483,14 @@ func decompConditional(action *ShortcutAction) {
 	switch controlFlowMode {
 	case startStatement:
 		var conditionInt = action.WFWorkflowActionParameters["WFCondition"].(uint64)
-		var conditionString = strconv.FormatUint(conditionInt, 10)
 		var conditionalOperator string
 		for operator, cond := range conditions {
-			if cond == conditionString {
+			if cond == int(conditionInt) {
 				conditionalOperator = string(operator)
 			}
 		}
 		if conditionalOperator == "" {
-			decompError(fmt.Sprintf("Invalid conditional %s", conditionString), action)
+			decompError(fmt.Sprintf("Invalid conditional %v", conditionInt), action)
 		}
 
 		newCodeLine("if ")
@@ -1145,10 +1145,10 @@ func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefi
 
 	var splitActionAddParams []parameterDefinition
 	if splitAction.definition.addParams != nil {
-		for _, addParam := range splitAction.definition.addParams([]actionArgument{}) {
+		for key, value := range splitAction.definition.addParams([]actionArgument{}) {
 			splitActionAddParams = append(splitActionAddParams, parameterDefinition{
-				key:          addParam.key,
-				defaultValue: addParam.value,
+				key:          key,
+				defaultValue: value,
 			})
 		}
 	}

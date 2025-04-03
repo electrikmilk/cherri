@@ -3,8 +3,9 @@ You can enter a standard JSON object
 as the value of a dictionary
 */
 
+const test = "text"
 @dictVar = {
-    "key1": "value",
+    "key1": "value {test}",
     "key2": 5,
     "key3": true,
     "key4": [

@@ -84,7 +84,7 @@ func main() {
 
 	initParse()
 
-	makePlist()
+	generateShortcut()
 
 	createShortcut()
 }
@@ -208,7 +208,7 @@ func lineReport(label string) {
 func panicDebug(err error) {
 	fmt.Println(ansi("###################\n#   DEBUG PANIC   #\n###################\n", bold, red))
 	printParsingDebug()
-	printPlistGenDebug()
+	printShortcutGenDebug()
 	printCustomActionsDebug()
 	printIncludesDebug()
 	fmt.Println(ansi("#############################################################\n", bold, red))

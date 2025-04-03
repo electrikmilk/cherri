@@ -46,7 +46,7 @@ func initParse() {
 	if args.Using("debug") {
 		fmt.Printf("Parsing %s...\n", filename)
 	}
-	variables = make(map[string]variableValue)
+	variables = make(map[string]varValue)
 	questions = make(map[string]*question)
 	groupingUUIDs = make(map[int]string)
 	groupingTypes = make(map[int]tokenType)
@@ -580,7 +580,7 @@ func collectVariable(constant bool) {
 		return
 	}
 	if _, found := variables[identifier]; !found {
-		variables[identifier] = variableValue{
+		variables[identifier] = varValue{
 			variableType: "Variable",
 			valueType:    valueType,
 			value:        value,
@@ -732,28 +732,20 @@ func collectNoInputDefinition() {
 	case tokenAhead(StopWith):
 		advanceTimes(2)
 		var stopWithError = collectString()
-		noInput = noInputParams{
-			name: "WFWorkflowNoInputBehaviorShowError",
-			params: []plistData{
-				{
-					key:      "Error",
-					dataType: Text,
-					value:    stopWithError,
-				},
+		noInput = WFWorkflowNoInputBehavior{
+			Name: "WFWorkflowNoInputBehaviorShowError",
+			Parameters: map[string]string{
+				"Error": stopWithError,
 			},
 		}
 	case tokenAhead(AskFor):
 		advance()
 		var workflowType = collectUntil('\n')
 		if wtype, found := contentItems[workflowType]; found {
-			noInput = noInputParams{
-				name: "WFWorkflowNoInputBehaviorAskForInput",
-				params: []plistData{
-					{
-						key:      "ItemClass",
-						dataType: Text,
-						value:    wtype,
-					},
+			noInput = WFWorkflowNoInputBehavior{
+				Name: "WFWorkflowNoInputBehaviorAskForInput",
+				Parameters: map[string]string{
+					"ItemClass": wtype,
 				},
 			}
 		} else {
@@ -761,9 +753,8 @@ func collectNoInputDefinition() {
 			parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
 		}
 	case tokenAhead(GetClipboard):
-		noInput = noInputParams{
-			name:   "WFWorkflowNoInputBehaviorGetClipboard",
-			params: []plistData{},
+		noInput = WFWorkflowNoInputBehavior{
+			Name: "WFWorkflowNoInputBehaviorGetClipboard",
 		}
 	}
 }
@@ -895,7 +886,7 @@ func collectRepeat() {
 		},
 	)
 
-	variables[repeatIndexIdentifier] = variableValue{
+	variables[repeatIndexIdentifier] = varValue{
 		variableType: "Variable",
 		valueType:    Integer,
 		value:        repeatIndexIdentifier,
@@ -942,7 +933,7 @@ func collectRepeatEach() {
 		},
 	)
 
-	variables[repeatItemIdentifier] = variableValue{
+	variables[repeatItemIdentifier] = varValue{
 		variableType: "Variable",
 		valueType:    String,
 		value:        repeatItemIdentifier,
@@ -958,7 +949,7 @@ func collectConditional() {
 
 	var groupingUUID = groupStatement(Conditional)
 
-	var conditionType string
+	var conditionType int
 	if isChar('!') {
 		conditionType = conditions[Empty]
 	} else {
@@ -1011,7 +1002,7 @@ func collectConditional() {
 
 func collectMenu() {
 	if len(menus) == 0 {
-		menus = make(map[string][]variableValue)
+		menus = make(map[string][]varValue)
 	}
 
 	reachable()
@@ -1024,7 +1015,7 @@ func collectMenu() {
 	advanceUntil('{')
 	advance()
 
-	menus[groupingUUID] = []variableValue{}
+	menus[groupingUUID] = []varValue{}
 	tokens = append(tokens, token{
 		typeof:    Menu,
 		ident:     groupingUUID,
@@ -1050,7 +1041,7 @@ func collectMenuItem() {
 		addNothing()
 	}
 
-	menus[groupingUUID] = append(menus[groupingUUID], variableValue{
+	menus[groupingUUID] = append(menus[groupingUUID], varValue{
 		valueType: itemType,
 		value:     itemValue,
 	})
@@ -1135,19 +1126,31 @@ func intChar() bool {
 }
 
 func collectInteger() string {
-	var integer strings.Builder
+	var collection strings.Builder
 	for intChar() {
-		integer.WriteRune(char)
+		collection.WriteRune(char)
 		advance()
 	}
-	return integer.String()
+
+	return collection.String()
 }
 
 func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 	var ahead = lookAheadUntil(*until)
 	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
-		var integer = collectInteger()
-		*value = integer
+		var integerString = collectInteger()
+
+		if *valueType == Integer {
+			var integer, convErr = strconv.Atoi(integerString)
+			handle(convErr)
+
+			*value = integer
+		} else {
+			var float, floatErr = strconv.ParseFloat(integerString, 64)
+			handle(floatErr)
+
+			*value = float
+		}
 		return
 	}
 	*valueType = Expression

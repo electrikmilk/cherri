@@ -232,7 +232,7 @@ func handleCustomActionRef(identifier *string) action {
 		value:     customActionCall,
 	})
 
-	variables[variableIdentifier] = variableValue{
+	variables[variableIdentifier] = varValue{
 		variableType: "Variable",
 		valueType:    Dict,
 		value:        customActionCall,
