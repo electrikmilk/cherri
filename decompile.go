@@ -257,8 +257,8 @@ func decompileActions() {
 		case "is.workflow.actions.gettext":
 			decompTextValue(&action)
 		case "is.workflow.actions.number":
-			var isLiteral = decompNumberValue(&action)
-			if !isLiteral {
+			var nonLiteral = decompNumberValue(&action)
+			if nonLiteral {
 				decompAction(&action)
 			}
 		case "is.workflow.actions.dictionary":
@@ -318,16 +318,16 @@ func decompTextValue(action *ShortcutAction) {
 	checkConstantLiteral(action)
 }
 
-func decompNumberValue(action *ShortcutAction) (literal bool) {
+func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 	var value = action.WFWorkflowActionParameters["WFNumberActionNumber"]
 	if reflect.TypeOf(value).String() == dictType {
 		var mapValue = value.(map[string]interface{})
 		var Value = mapValue["Value"].(map[string]interface{})
 		value = decompValue(value)
 
-		match, _ := regexp.MatchString("^[0-9]+$", value.(string))
-		if match {
-			literal = true
+		match, _ := regexp.MatchString("[0-9.]", value.(string))
+		if !match {
+			nonLiteral = true
 			return
 		}
 
