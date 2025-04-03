@@ -131,6 +131,8 @@ var roundings = []string{"Ones Place", "Tens Place", "Hundreds Place", "Thousand
 var imageMaskTypes = []string{"Rounded Rectangle", "Ellipse", "Icon"}
 var imageDetails = []string{"Album", "Width", "Height", "Date Taken", "Media Type", "Photo Type", "Is a Screenshot", "Is a Screen Recording", "Location", "Duration", "Frame Rate", "Orientation", "Camera Make", "Camera Model", "Metadata Dictionary", "Is Favorite", "File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name"}
 var colorSpaces = []string{"RGB", "Gray"}
+var shuffleOptions = []string{"Off", "Songs"}
+var repeatOptions = []string{"None", "One", "All"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -2855,6 +2857,46 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				key:       "WFGIFManualSizeHeight",
 				optional:  true,
+			},
+		},
+	},
+	"getImageFrames": {
+		identifier: "getframesfromimage",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFImage",
+			},
+		},
+	},
+	"getPlaylistSongs": {
+		identifier: "get.playlist",
+		parameters: []parameterDefinition{
+			{
+				name:      "playlistName",
+				validType: Variable,
+				key:       "WFPlaylistName",
+			},
+		},
+	},
+	"playMusic": {
+		parameters: []parameterDefinition{
+			{
+				name: "music",
+				key:  "WFMediaItems",
+			},
+			{
+				name:     "shuffle",
+				key:      "WFPlayMusicActionShuffle",
+				enum:     shuffleOptions,
+				optional: true,
+			},
+			{
+				name:     "repeat",
+				key:      "WFPlayMusicActionRepeat",
+				enum:     repeatOptions,
+				optional: true,
 			},
 		},
 	},
