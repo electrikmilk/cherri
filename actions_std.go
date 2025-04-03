@@ -1075,6 +1075,7 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) (params map[string]any) {
+			params = make(map[string]any)
 			if len(args) >= 3 {
 				if args[2].valueType == Variable {
 					params["WFContactPhoneNumbers"] = argumentValue(args, 2)
@@ -1219,6 +1220,10 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			var color = strings.ToLower(getArgValue(args[1]).(string))
 
 			return map[string]any{
@@ -1249,6 +1254,10 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) (params map[string]any) {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			if len(args) != 1 {
 				return map[string]any{
 					"WFContentItemLimitEnabled": true,
@@ -1303,7 +1312,11 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
-			if len(args) != 1 {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
+			if len(args) > 1 {
 				var richText = getArgValue(args[1]).(bool)
 				if richText {
 					return map[string]any{
@@ -2196,17 +2209,14 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		addParams: func(args []actionArgument) map[string]any {
-			var data = map[string]any{
-				"SizeToFit": false,
-			}
-
 			if len(args) == 0 {
-				data["ImageSize"] = map[string]any{}
+				return map[string]any{}
 			}
 
 			var size = strings.Split(getArgValue(args[2]).(string), " ")
 
 			return map[string]any{
+				"SizeToFit": false,
 				"ImageSize": map[string]any{
 					"Value": map[string]any{
 						"Unit":      size[0],
@@ -4275,6 +4285,10 @@ var actions = map[string]*actionDefinition{
 			replaceAppIDs(args, definition)
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			if args[0].valueType == Variable {
 				return map[string]any{
 					"WFSelectedApp": argumentValue(args, 0),
@@ -4394,6 +4408,7 @@ var actions = map[string]*actionDefinition{
 		},
 		check: replaceAppIDs,
 		make: func(args []actionArgument) (params map[string]any) {
+			params = make(map[string]any)
 			if args[0].valueType != Variable {
 				params["WFAppsExcept"] = apps(args)
 			} else {
@@ -4423,6 +4438,8 @@ var actions = map[string]*actionDefinition{
 			replaceAppIDs(args, definition)
 		},
 		make: func(args []actionArgument) (params map[string]any) {
+			params = make(map[string]any)
+
 			params["WFAskToSaveChanges"] = false
 
 			if args[0].valueType == Variable {
@@ -4509,6 +4526,10 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			var params = make(map[string]any)
 			if args[0].valueType == Variable {
 				params["WFPrimaryAppIdentifier"] = argumentValue(args, 0)
@@ -4556,6 +4577,10 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			return map[string]any{
 				"target": map[string]any{
 					"title": argumentValue(args, 0),
@@ -4580,7 +4605,13 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
-		addParams: func(_ []actionArgument) map[string]any {
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{
+					"isSelf": true,
+				}
+			}
+
 			return map[string]any{
 				"WFWorkflow": map[string]any{
 					"workflowIdentifier": uuid.New().String(),
@@ -4612,6 +4643,12 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{
+					"isSelf": false,
+				}
+			}
+
 			return map[string]any{
 				"WFWorkflow": map[string]any{
 					"workflowIdentifier": uuid.New().String(),
@@ -5012,6 +5049,7 @@ var actions = map[string]*actionDefinition{
 			if len(args) == 0 {
 				return
 			}
+			xCallbackParams = make(map[string]any)
 			if args[1].value.(string) != "" || args[2].value.(string) != "" || args[3].value.(string) != "" {
 				xCallbackParams["WFXCallbackCustomCallbackEnabled"] = true
 			}
@@ -5589,8 +5627,14 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) (params map[string]any) {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			if args[2].value != nil {
-				params["WFContentItemLimitEnabled"] = true
+				params = map[string]any{
+					"WFContentItemLimitEnabled": true,
+				}
 			}
 			return
 		},
@@ -5696,6 +5740,12 @@ var actions = map[string]*actionDefinition{
 			}, &args[2])
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{
+					"isSelf": false,
+				}
+			}
+
 			return map[string]any{
 				"WFMeasurementUnit": map[string]any{
 					"WFNSUnitType":   argumentValue(args, 1),
@@ -5752,6 +5802,10 @@ var actions = map[string]*actionDefinition{
 			}, &args[2])
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			return map[string]any{
 				"WFMeasurementUnit": map[string]any{
 					"Value": map[string]any{
@@ -6101,6 +6155,10 @@ func decompContactValue(action *ShortcutAction, key string, contentKit contentKi
 }
 
 func adjustDate(operation string, unit string, args []actionArgument) (adjustDateParams map[string]any) {
+	if len(args) == 0 {
+		return map[string]any{}
+	}
+
 	maps.Copy(adjustDateParams, map[string]any{
 		"WFAdjustOperation": operation,
 	})
@@ -6139,6 +6197,10 @@ func changeCase(textCase string) map[string]any {
 }
 
 func textParts(args []actionArgument) map[string]any {
+	if len(args) == 0 {
+		return map[string]any{}
+	}
+
 	var data = map[string]any{
 		"Show-text": true,
 	}
