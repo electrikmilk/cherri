@@ -318,12 +318,18 @@ func decompComment(action *ShortcutAction) {
 	}
 }
 
+var decompilingText = false
+
 func decompTextValue(action *ShortcutAction) {
+	decompilingText = true
 	currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 	if currentVariableValue == "" {
 		currentVariableValue = "\"\""
+	} else if currentVariableValue[0] != '"' {
+		currentVariableValue = fmt.Sprintf("\"%s\"", currentVariableValue)
 	}
 	checkConstantLiteral(action)
+	decompilingText = false
 }
 
 func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
@@ -781,7 +787,7 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 
 	*attachmentString = escapeString(strings.Join(attachmentChars, ""))
 
-	if !decompilingDictinary && originalString == ObjectReplaceCharStr && len(attachments) == 1 {
+	if (!decompilingDictinary && !decompilingText) && len(attachments) == 1 && originalString == ObjectReplaceCharStr {
 		*attachmentString = strings.Trim(*attachmentString, "{}")
 	} else {
 		*attachmentString = fmt.Sprintf("\"%s\"", *attachmentString)
