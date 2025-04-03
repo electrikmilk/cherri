@@ -3037,7 +3037,7 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"rotateImage": {
+	"rotateMedia": {
 		identifier: "image.rotate",
 		parameters: []parameterDefinition{
 			{
