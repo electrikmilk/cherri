@@ -18,13 +18,16 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.22
+        go-version: 1.24
 
     - name: Build
       run: go build -v ./...
 
     - name: Test
       run: go test -run TestCherri -v ./...
+
+    - name: Decompilation Test
+      run: go test -run TestDecomp -v ./...
 
   build-macos:
     runs-on: macos-13

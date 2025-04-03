@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"runtime"
@@ -38,6 +39,12 @@ func main() {
 
 	if args.Using("docs") {
 		generateDocs()
+		os.Exit(0)
+	}
+
+	if args.Using("import") && args.Value("import") != "" {
+		var shortcutBytes = importShortcut()
+		decompile(shortcutBytes)
 		os.Exit(0)
 	}
 
@@ -81,7 +88,7 @@ func main() {
 
 	initParse()
 
-	makePlist()
+	generateShortcut()
 
 	createShortcut()
 }
@@ -135,14 +142,19 @@ func handleFile() {
 	basename = nameParts[0]
 	workflowName = basename
 
-	outputPath = relativePath + workflowName + ".shortcut"
-	if args.Using("output") {
-		outputPath = args.Value("output")
-	}
+	outputPath = getOutputPath(relativePath + workflowName + ".shortcut")
 
 	var fileBytes, readErr = os.ReadFile(filePath)
 	handle(readErr)
 	contents = string(fileBytes)
+}
+
+func getOutputPath(defaultPath string) string {
+	if args.Using("output") {
+		return args.Value("output")
+	}
+
+	return defaultPath
 }
 
 // checkFile checks if the file exists and is a .cherri file.
@@ -200,7 +212,7 @@ func lineReport(label string) {
 func panicDebug(err error) {
 	fmt.Println(ansi("###################\n#   DEBUG PANIC   #\n###################\n", bold, red))
 	printParsingDebug()
-	printPlistGenDebug()
+	printShortcutGenDebug()
 	printCustomActionsDebug()
 	printIncludesDebug()
 	fmt.Println(ansi("#############################################################\n", bold, red))
@@ -210,4 +222,13 @@ func panicDebug(err error) {
 	}
 
 	panic("debug")
+}
+
+// Converts a map[string]interface{} to a matching struct data type.
+func mapToStruct(data any, structure any) {
+	var jsonStr, marshalErr = json.Marshal(data)
+	handle(marshalErr)
+
+	var jsonErr = json.Unmarshal(jsonStr, &structure)
+	handle(jsonErr)
 }

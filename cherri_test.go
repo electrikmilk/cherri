@@ -63,10 +63,38 @@ func TestSingleFile(_ *testing.T) {
 	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
 }
 
+func TestDecomp(t *testing.T) {
+	fmt.Println("Decompiling...")
+	args.Args["import"] = "tests/decomp_me.plist"
+	decompile(importShortcut())
+
+	fmt.Println("Comparing to expected...")
+	var bytes, readErr = os.ReadFile("tests/decomp_expected.cherri")
+	handle(readErr)
+
+	if code.String() != string(bytes) {
+		fmt.Println(ansi("Does not match expected!", red, bold))
+		t.Fail()
+		return
+	}
+
+	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
+}
+
 func TestActionList(_ *testing.T) {
 	for identifier := range actions {
 		fmt.Println("{label: '" + identifier + "', type: 'function', detail: 'action'},")
 	}
+}
+
+func TestActionSearch(_ *testing.T) {
+	args.Args["action"] = "replaceText"
+	actionsSearch()
+}
+
+func TestGlyphSearch(_ *testing.T) {
+	args.Args["glyph"] = "robot"
+	glyphsSearch()
 }
 
 func TestGlyphList(_ *testing.T) {
@@ -96,7 +124,7 @@ func resetParser() {
 	groupingUUIDs = map[int]string{}
 	groupingTypes = map[int]tokenType{}
 	groupingIdx = 0
-	variables = map[string]variableValue{}
+	variables = map[string]varValue{}
 	iconColor = -1263359489
 	iconGlyph = 61440
 	clientVersion = "900"
@@ -107,13 +135,12 @@ func resetParser() {
 	types = []string{}
 	inputs = []string{}
 	outputs = []string{}
-	noInput = noInputParams{}
+	noInput = WFWorkflowNoInputBehavior{}
 	tokens = []token{}
 	included = []string{}
 	includes = []include{}
 	workflowName = ""
-	plist.Reset()
-	menus = map[string][]variableValue{}
+	menus = map[string][]varValue{}
 	uuids = map[string]string{}
 	customActions = map[string]*customAction{}
 }

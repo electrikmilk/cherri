@@ -7,6 +7,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"maps"
 	"math"
 	"reflect"
 	"slices"
@@ -33,15 +34,16 @@ type parameterDefinition struct {
 	enum         []string
 	optional     bool
 	infinite     bool
+	literal      bool
 }
 
-// actionArgument is a variableValue value used to define collected argument values by the parser.
+// actionArgument is a varValue value used to define collected argument values by the parser.
 type actionArgument struct {
 	valueType tokenType
 	value     any
 }
 
-// action is a variableValue value that represents a collected action and arguments.
+// action is a varValue value that represents a collected action and arguments.
 type action struct {
 	// ident is the identifier of the action collected (e.g. identifier(...)).
 	ident string
@@ -52,8 +54,8 @@ type action struct {
 // checkFunc is a function that can be passed a collected actions arguments as a slice of actionArgument and the current action's definition.
 type checkFunc func(args []actionArgument, definition *actionDefinition)
 
-// paramsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument that must return a slice of plistData as a result.
-type paramsFunc func(args []actionArgument) []plistData
+// paramsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument that must return action params as a result.
+type paramsFunc func(args []actionArgument) map[string]any
 
 type appIntent struct {
 	name                string
@@ -69,9 +71,11 @@ type actionDefinition struct {
 	parameters         []parameterDefinition
 	check              checkFunc
 	make               paramsFunc
+	decomp             func(action *ShortcutAction) (arguments []string)
 	addParams          paramsFunc
 	appIntent          appIntent
 	outputType         tokenType
+	defaultAction      bool // Default action for this identifier during decompilation.
 	mac                bool
 	minVersion         float64
 	maxVersion         float64
@@ -95,8 +99,8 @@ func setCurrentAction(identifier string, definition *actionDefinition) {
 	currentAction = *definition
 }
 
-// plistAction builds an action based on its actionDefinition and adds it to the plist.
-func plistAction(arguments []actionArgument, outputName *plistData, actionUUID *plistData) {
+// makeAction builds an action based on its actionDefinition and adds it to the shortcut.
+func makeAction(arguments []actionArgument, reference *map[string]any) {
 	actionIndex++
 	// Check for question arguments
 	questionArgs(arguments)
@@ -105,13 +109,7 @@ func plistAction(arguments []actionArgument, outputName *plistData, actionUUID *
 	// Determine parameters
 	var params = actionParameters(arguments)
 	// Additionally add the output name and UUID of this action if provided
-	if outputName.value != nil {
-		params = append(params, *outputName)
-	}
-	if actionUUID.value != nil {
-		params = append(params, *actionUUID)
-	}
-	appendPlist(makeAction(ident, params))
+	addAction(ident, attachReferenceParams(&params, reference))
 }
 
 // actionIdentifier determines the identifier of currentAction.
@@ -129,45 +127,45 @@ func actionIdentifier() (ident string) {
 	} else {
 		ident = fmt.Sprintf("%s.%s", ident, strings.ToLower(currentActionIdentifier))
 	}
-
 	return
 }
 
 var emptyAppIntent = appIntent{}
 
 // actionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
-func actionParameters(arguments []actionArgument) (params []plistData) {
+func actionParameters(arguments []actionArgument) map[string]any {
+	var params = make(map[string]any)
 	if currentAction.addParams != nil {
-		params = append(params, currentAction.addParams(arguments)...)
+		maps.Copy(params, currentAction.addParams(arguments))
 	}
 	if currentAction.appIntent != emptyAppIntent {
-		params = append(params, appIntentDescriptor(currentAction.appIntent))
+		maps.Copy(params, appIntentDescriptor(currentAction.appIntent))
 	}
 	if currentAction.make != nil {
-		params = currentAction.make(arguments)
-		return
+		return currentAction.make(arguments)
 	}
 	if currentAction.parameters != nil {
 		var argumentsSize = len(arguments)
 		if argumentsSize == 0 {
-			return
+			return params
 		}
 		for i, a := range currentAction.parameters {
 			if argumentsSize <= i {
-				return
+				return params
 			}
 			if arguments[i].valueType == Nil || a.key == "" {
 				continue
 			}
 			if a.validType == Variable {
-				params = append(params, variableInput(a.key, arguments[i].value.(string)))
+				params[a.key] = variableInput(arguments[i].value.(string))
 				continue
 			}
 
-			params = append(params, argumentValue(a.key, arguments, i))
+			params[a.key] = argumentValue(arguments, i)
 		}
 	}
-	return
+
+	return params
 }
 
 // questionArgs updates questions to target the action parameter
@@ -187,31 +185,19 @@ func questionArgs(arguments []actionArgument) {
 	}
 }
 
-// makeAction constructs the action for the plist using ident and params.
-func makeAction(ident string, params []plistData) []plistData {
-	return []plistData{
-		{
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "WFWorkflowActionIdentifier",
-					dataType: Text,
-					value:    ident,
-				},
-				{
-					key:      "WFWorkflowActionParameters",
-					dataType: Dictionary,
-					value:    params,
-				},
-			},
-		},
-	}
+// buildStdAction is an alias of addAction that simply prepends the shortcuts bundle identifier to ident.
+func buildStdAction(ident string, params map[string]any) {
+	addAction(fmt.Sprintf("is.workflow.actions.%s", ident), params)
 }
 
-// makeStdAction is an alias of makeAction that simply prepends the shortcuts bundle identifier to ident.
-func makeStdAction(ident string, params []plistData) []plistData {
-	ident = "is.workflow.actions." + ident
-	return makeAction(ident, params)
+// addAction adds an action to the shortcut.
+func addAction(identifier string, params map[string]any) {
+	shortcut.WFWorkflowActions = append(shortcut.WFWorkflowActions,
+		ShortcutAction{
+			WFWorkflowActionIdentifier: identifier,
+			WFWorkflowActionParameters: params,
+		},
+	)
 }
 
 // checkAction checks the parsed arguments provided for an action and if it can be used based on definitions set.
@@ -241,7 +227,11 @@ func checkAction() {
 	if isMac, found := definitions["mac"]; found {
 		if !isMac.(bool) && currentAction.mac {
 			parserError(
-				fmt.Sprintf("You've set your Shortcut as non-Mac. Action '%s()' is a Mac only action", currentActionIdentifier),
+				fmt.Sprintf("macOS action '%s()' in non-macOS Shortcut.", currentActionIdentifier),
+			)
+		} else if isMac.(bool) && !currentAction.mac {
+			parserError(
+				fmt.Sprintf("Non-macOS action '%s()' in macOS-only Shortcut.", currentActionIdentifier),
 			)
 		}
 	}
@@ -303,7 +293,7 @@ func checkEnum(param *parameterDefinition, argument *actionArgument) {
 }
 
 // realVariableValue recurses to get the real value of a variable given its name.
-func realVariableValue(identifier string, lastValueType tokenType) (varValue variableValue) {
+func realVariableValue(identifier string, lastValueType tokenType) (varValue varValue) {
 	if _, global := globals[identifier]; global {
 		varValue = globals[identifier]
 		return
@@ -428,10 +418,17 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 	if argument.valueType == Var && argument.value == "Ask" {
 		return
 	}
+
 	if param.enum != nil {
 		checkEnum(param, argument)
 	}
+
 	typeCheck(param, argument)
+
+	if param.literal {
+		checkLiteralValue(param, argument)
+	}
+
 	var realValue = getArgValue(*argument)
 	var stringDefaultValue = fmt.Sprintf("%s", param.defaultValue)
 	if param.defaultValue != nil && stringDefaultValue == realValue {
@@ -442,6 +439,15 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 				generateActionDefinition(*param, false, false),
 			),
 		)
+	}
+}
+
+func checkLiteralValue(param *parameterDefinition, argument *actionArgument) {
+	if argument.valueType != param.validType {
+		parserError(fmt.Sprintf(
+			"Shortcuts does not allow variables for this argument, use a literal for the argument value.\n%s",
+			generateActionDefinition(*param, false, false),
+		))
 	}
 }
 
@@ -599,31 +605,13 @@ func makeLibraries() {
 	libraries = make(map[string]libraryDefinition)
 }
 
-func appIntentDescriptor(intent appIntent) plistData {
-	return plistData{
-		key:      "AppIntentDescriptor",
-		dataType: Dictionary,
-		value: []plistData{
-			{
-				key:      "TeamIdentifier",
-				dataType: Text,
-				value:    "0000000000",
-			},
-			{
-				key:      "BundleIdentifier",
-				dataType: Text,
-				value:    intent.bundleIdentifier,
-			},
-			{
-				key:      "Name",
-				dataType: Text,
-				value:    intent.name,
-			},
-			{
-				key:      "AppIntentIdentifier",
-				dataType: Text,
-				value:    intent.appIntentIdentifier,
-			},
+func appIntentDescriptor(intent appIntent) map[string]any {
+	return map[string]any{
+		"AppIntentDescriptor": map[string]string{
+			"TeamIdentifier":      "0000000000",
+			"BundleIdentifier":    intent.bundleIdentifier,
+			"Name":                intent.name,
+			"AppIntentIdentifier": intent.appIntentIdentifier,
 		},
 	}
 }

@@ -49,9 +49,11 @@ var contentItems = map[string]string{
 	"richtext":    "WFRichTextContentItem",
 	"webpage":     "WFSafariWebPageContentItem",
 	"text":        "WFStringContentItem",
+	"dictionary":  "WFDictionaryContentItem",
 	"number":      "WFNumberContentItem",
 	"url":         "WFURLContentItem",
 }
+
 var inputs []string
 var outputs []string
 
@@ -71,6 +73,7 @@ var types []string
 /* Versions */
 
 var versions = map[string]string{
+	"18.4":   "3218.0.4.100",
 	"18":     "3036.0.4.2",
 	"17":     "2106.0.3",
 	"16.5":   "900",
@@ -84,8 +87,8 @@ var versions = map[string]string{
 	"13":     "600",
 	"12":     "500",
 }
-var clientVersion = "3036.0.4.2"
-var iosVersion = 18.0
+var clientVersion = "3218.0.4.100"
+var iosVersion = 18.4
 
 /* Languages */
 
@@ -138,29 +141,29 @@ var languagesList = []string{
 type condition struct {
 	variableOneType    tokenType
 	variableOneValue   any
-	condition          string
+	condition          int
 	variableTwoType    tokenType
 	variableTwoValue   any
 	variableThreeType  tokenType
 	variableThreeValue any
 }
 
-var conditions = map[tokenType]string{
-	Is:             "4",
-	Not:            "5",
-	Any:            "100",
-	Empty:          "101",
-	Contains:       "99",
-	DoesNotContain: "999",
-	BeginsWith:     "8",
-	EndsWith:       "9",
-	GreaterThan:    "2",
-	GreaterOrEqual: "3",
-	LessThan:       "0",
-	LessOrEqual:    "1",
-	Between:        "1003",
+var conditions = map[tokenType]int{
+	Is:             4,
+	Not:            5,
+	Any:            100,
+	Empty:          101,
+	Contains:       99,
+	DoesNotContain: 999,
+	BeginsWith:     8,
+	EndsWith:       9,
+	GreaterThan:    2,
+	GreaterOrEqual: 3,
+	LessThan:       0,
+	LessOrEqual:    1,
+	Between:        1003,
 }
 
 /* Menus */
 
-var menus map[string][]variableValue
+var menus map[string][]varValue

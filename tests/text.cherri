@@ -5,10 +5,10 @@ Easily edit text...
 @textVar = "test"
 
 @textVar = correctSpelling(textVar)
-@textVar = replaceText("S","A",textVar)
-@textVar = iReplaceText("s","a",textVar)
-@textVar = regReplaceText("[0-9a-zA-Z]","a",textVar)
-@textVar = iRegReplaceText("[0-9a-z]","a",textVar)
+@textVar = replaceText("s","a",textVar)
+@textVar = replaceText("s","a",textVar, false)
+@textVar = replaceText("[0-9a-zA-Z]","a",textVar, true, true)
+@textVar = replaceText("[0-9a-z]","a",textVar, false, true)
 @textVar = splitText(textVar,",")
 @textVar = joinText(textVar,",")
 @textVar = uppercase(textVar)
