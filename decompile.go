@@ -303,10 +303,18 @@ func checkConstantLiteral(action *ShortcutAction) {
 
 func decompComment(action *ShortcutAction) {
 	var commentText = action.WFWorkflowActionParameters["WFCommentActionText"].(string)
-	if strings.Contains(commentText, "\n") {
-		newCodeLine(fmt.Sprintf("/*\n%s\n*/\n\n", commentText))
+	if args.Using("comments") {
+		if strings.Contains(commentText, "\n") {
+			newCodeLine(fmt.Sprintf("comment('\n%s\n')\n\n", commentText))
+		} else {
+			newCodeLine(fmt.Sprintf("comment('%s')\n", commentText))
+		}
 	} else {
-		newCodeLine(fmt.Sprintf("// %s\n\n", commentText))
+		if strings.Contains(commentText, "\n") {
+			newCodeLine(fmt.Sprintf("/*\n%s\n*/\n\n", commentText))
+		} else {
+			newCodeLine(fmt.Sprintf("// %s\n\n", commentText))
+		}
 	}
 }
 

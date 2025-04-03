@@ -41,7 +41,7 @@ func init() {
 	args.Register(args.Argument{
 		Name:        "comments",
 		Short:       "c",
-		Description: "Create comment actions for text comments (e.g. //, /**/)",
+		Description: "Include comment actions in compiled Shortcut or import.",
 	})
 	args.Register(args.Argument{
 		Name:        "open",
