@@ -92,7 +92,8 @@ var focusModes = map[string]any{
 	"Identifier":    "com.apple.donotdisturb.mode.default",
 	"DisplayString": "Do Not Disturb",
 }
-var eventDetails = []string{"Start Date", "End Date", "Is All Day", "Location", "Duration", "My Status", "Attendees", "URL", "Title", "Notes", "Attachments"}
+var editEventDetails = []string{"Start Date", "End Date", "Is All Day", "Location", "Duration", "My Status", "Attendees", "URL", "Title", "Notes", "Attachments"}
+var eventDetails = []string{"Start Date", "End Date", "Is All Day", "Calendar", "Location", "Has Alarms", "Duration", "Is Canceled", "My Status", "Organizer", "Organizer Is Me", "Attendees", "Number of Attendees", "URL", "Title", "Notes", "Attachments", "File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name"}
 var dateFormats = []string{"None", "Short", "Medium", "Long", "Relative", "RFC 2822", "ISO 8601", "Custom"}
 var timeFormats = []string{"None", "Short", "Medium", "Long", "Relative"}
 var timerDurations = []string{"hr", "min", "sec"}
@@ -133,6 +134,7 @@ var imageDetails = []string{"Album", "Width", "Height", "Date Taken", "Media Typ
 var colorSpaces = []string{"RGB", "Gray"}
 var shuffleOptions = []string{"Off", "Songs"}
 var repeatOptions = []string{"None", "One", "All"}
+var musicDetails = []string{"Title", "Album", "Artist", "Album Artist", "Genre", "Composer", "Date Added", "Media Kind", "Duration", "Play Count", "Track Number", "Disc Number", "Album Artwork", "Is Explicit", "Lyrics", "Release Date", "Comments", "Is Cloud Item", "Skip Count", "Last Played Date", "Rating", "File Path", "Name"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -492,12 +494,28 @@ var actions = map[string]*actionDefinition{
 				name:      "detail",
 				validType: String,
 				key:       "WFContentItemPropertyName",
-				enum:      eventDetails,
+				enum:      editEventDetails,
 			},
 			{
 				name:      "newValue",
 				validType: String,
 				key:       "WFCalendarEventContentItemStartDate",
+			},
+		},
+	},
+	"getEventDetail": {
+		identifier: "properties.calendarevents",
+		parameters: []parameterDefinition{
+			{
+				name:      "event",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+				enum:      eventDetails,
 			},
 		},
 	},
@@ -2733,6 +2751,22 @@ var actions = map[string]*actionDefinition{
 				name:      "volume",
 				validType: Float,
 				key:       "WFVolume",
+			},
+		},
+	},
+	"getMusicDetail": {
+		identifier: "properties.music",
+		parameters: []parameterDefinition{
+			{
+				name:      "music",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+				enum:      musicDetails,
 			},
 		},
 	},
