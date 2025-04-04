@@ -1284,15 +1284,9 @@ func decompWarning(message string) {
 }
 
 func decompError(message string, action *ShortcutAction) {
-	fmt.Print(ansi("[Decompilation Error]\n\n", red, bold))
+	fmt.Println(ansi(fmt.Sprintf("Error: %s\n\n", message), red, bold))
 
-	fmt.Println(ansi(fmt.Sprintf("%s\n", message), red))
-
-	var identifier = strings.Replace(action.WFWorkflowActionIdentifier, "is.workflow.actions.", "", 1)
-
-	fmt.Println("Action identifier:", identifier)
-	fmt.Println("Full action identifier:", action.WFWorkflowActionIdentifier)
-
+	fmt.Println("Action identifier:", action.WFWorkflowActionIdentifier)
 	lines = strings.Split(code.String(), "\n")
 	var linesLen = len(lines)
 	var lastWrittenLine = lines[linesLen-1]
