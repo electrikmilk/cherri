@@ -1140,12 +1140,6 @@ var actions = map[string]*actionDefinition{
 	},
 	"listen": {
 		identifier: "dictatetext",
-		check: func(args []actionArgument, _ *actionDefinition) {
-			if len(args) != 2 {
-				return
-			}
-			args[1].value = languageCode(getArgValue(args[1]).(string))
-		},
 		parameters: []parameterDefinition{
 			{
 				name:         "stopListening",
@@ -1160,6 +1154,7 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				key:       "WFSpeechLanguage",
 				optional:  true,
+				enum:      languages,
 			},
 		},
 	},
@@ -1909,18 +1904,14 @@ var actions = map[string]*actionDefinition{
 				name:      "from",
 				validType: String,
 				key:       "WFSelectedFromLanguage",
-				enum:      languagesList,
+				enum:      languages,
 			},
 			{
 				name:      "to",
 				validType: String,
 				key:       "WFSelectedLanguage",
-				enum:      languagesList,
+				enum:      languages,
 			},
-		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			args[1].value = languageCode(args[1].value.(string))
-			args[2].value = languageCode(args[2].value.(string))
 		},
 	},
 	"translate": {
@@ -1937,17 +1928,8 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				key:       "WFSelectedLanguage",
 				optional:  true,
-				enum:      languagesList,
+				enum:      languages,
 			},
-		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			if len(args) < 2 {
-				return
-			}
-
-			if args[1].valueType != Variable {
-				args[1].value = languageCode(getArgValue(args[1]).(string))
-			}
 		},
 		addParams: func(_ []actionArgument) map[string]any {
 			return map[string]any{
@@ -6238,15 +6220,6 @@ func decompTextParts(action *ShortcutAction) (arguments []string) {
 	}
 
 	return
-}
-
-func languageCode(language string) string {
-	if lang, found := languages[language]; found {
-		return lang
-	}
-
-	parserError(fmt.Sprintf("Unknown language '%s'", language))
-	return ""
 }
 
 var appIds map[string]string
