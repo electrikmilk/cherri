@@ -6203,18 +6203,25 @@ func textParts(args []actionArgument) map[string]any {
 	return data
 }
 
+func decompReferenceValue(paramValue any) string {
+	if isReferenceValue(paramValue) {
+		return decompValue(paramValue)
+	}
+
+	return paramValue.(string)
+}
+
 func decompTextParts(action *ShortcutAction) (arguments []string) {
 	arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["text"]))
+
 	var glue string
 	if action.WFWorkflowActionParameters["WFTextSeparator"] != nil {
-		glue = action.WFWorkflowActionParameters["WFTextSeparator"].(string)
-		if glue == "New Lines" {
-			return
-		}
+		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextSeparator"])
 	}
 	if action.WFWorkflowActionParameters["WFTextCustomSeparator"] != nil {
-		glue = action.WFWorkflowActionParameters["WFTextCustomSeparator"].(string)
+		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextCustomSeparator"])
 	}
+
 	if glue != "" {
 		arguments = append(arguments, fmt.Sprintf("\"%s\"", glueToChar(glue)))
 	}

@@ -74,7 +74,7 @@ type Aggrandizement struct {
 type WFDictionaryFieldValueItem struct {
 	WFKey      any
 	WFItemType int
-	WFValue    WFValue
+	WFValue    any
 }
 
 type WFValue struct {
