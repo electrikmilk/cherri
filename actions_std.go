@@ -5825,29 +5825,17 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 			{
-				name:      "imagePath",
+				name:      "base64Image",
 				validType: String,
 				optional:  true,
 			},
-		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			if len(args) != 3 {
-				return
-			}
-
-			var image = getArgValue(args[2])
-			if reflect.TypeOf(image).String() == stringType {
-				var iconFile = getArgValue(args[2]).(string)
-				if _, err := os.Stat(iconFile); os.IsNotExist(err) {
-					parserError(fmt.Sprintf("File '%s' does not exist!", iconFile))
-				}
-			}
 		},
 		make: func(args []actionArgument) map[string]any {
 			var title = args[0].value.(string)
 			var subtitle = args[1].value.(string)
 			wrapVariableReference(&title)
 			wrapVariableReference(&subtitle)
+
 			var vcard strings.Builder
 			vcard.WriteString(fmt.Sprintf("BEGIN:VCARD\nVERSION:3.0\nN;CHARSET=utf-8:%s\nORG:%s\n", title, subtitle))
 
@@ -5857,10 +5845,7 @@ var actions = map[string]*actionDefinition{
 				if reflect.TypeOf(image).String() != stringType && args[2].valueType == Variable {
 					photo = fmt.Sprintf("{%s}", args[2].value)
 				} else {
-					var iconFile = getArgValue(args[2]).(string)
-					var bytes, readErr = os.ReadFile(iconFile)
-					handle(readErr)
-					photo = base64.StdEncoding.EncodeToString(bytes)
+					photo = getArgValue(args[2]).(string)
 				}
 
 				if photo != "" {
@@ -5873,6 +5858,7 @@ var actions = map[string]*actionDefinition{
 				valueType: String,
 				value:     vcard.String(),
 			}
+
 			return map[string]any{
 				"WFTextActionText": argumentValue(args, 0),
 			}
