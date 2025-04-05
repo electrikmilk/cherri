@@ -273,6 +273,7 @@ func makeExpressionValue(reference *map[string]any, value *any) {
 
 		buildStdAction("math", attachReferenceParams(&map[string]any{
 			"WFScientificMathOperation": attachmentValues(operation),
+			"WFMathOperation":           attachmentValues(operation),
 			"WFInput":                   attachmentValues(operandOne),
 			"WFMathOperand":             attachmentValues(operandTwo),
 		}, reference))
