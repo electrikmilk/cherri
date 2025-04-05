@@ -351,12 +351,16 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 		return
 	}
 
-	var number int
+	var number any
 	if value != "" {
+		var convErr error
 		if reflect.TypeOf(value).String() == stringType {
-			var convErr error
-			number, convErr = strconv.Atoi(value.(string))
-			handle(convErr)
+			if strings.Contains(value.(string), ".") {
+				number, convErr = strconv.ParseFloat(value.(string), 64)
+			} else {
+				number, convErr = strconv.Atoi(value.(string))
+				handle(convErr)
+			}
 		} else {
 			number = int(value.(uint64))
 		}
