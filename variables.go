@@ -133,6 +133,8 @@ func duplicateOutputName() string {
 	for _, rc := range revChars {
 		if rc >= '0' && rc <= '9' {
 			numChars = append(numChars, rc)
+		} else {
+			break
 		}
 	}
 
