@@ -510,7 +510,7 @@ func makeAttachmentValues() {
 		var varUUID = uuids[stringVar.identifier]
 		var varValue = make(map[string]any)
 		var varType = "Variable"
-		var aggr = make(map[string]string)
+		var aggr = []map[string]string{}
 		if storedVar.variableType != "" {
 			varType = storedVar.variableType
 		}
@@ -529,17 +529,23 @@ func makeAttachmentValues() {
 		if stringVar.getAs != "" {
 			var refValueType = variable.valueType
 			if refValueType == Dict {
-				aggr["Type"] = "WFDictionaryValueVariableAggrandizement"
-				aggr["DictionaryKey"] = stringVar.getAs
+				aggr = append(aggr, map[string]string{
+					"Type":          "WFDictionaryValueVariableAggrandizement",
+					"DictionaryKey": stringVar.getAs,
+				})
 			} else {
-				aggr["Type"] = "WFPropertyVariableAggrandizement"
-				aggr["PropertyName"] = stringVar.getAs
+				aggr = append(aggr, map[string]string{
+					"Type":         "WFPropertyVariableAggrandizement",
+					"PropertyName": stringVar.getAs,
+				})
 			}
 		}
 		if stringVar.coerce != "" {
 			if contentItem, found := contentItems[stringVar.coerce]; found {
-				aggr["Type"] = "WFCoercionVariableAggrandizement"
-				aggr["CoercionItemClass"] = contentItem
+				aggr = append(aggr, map[string]string{
+					"Type":              "WFCoercionVariableAggrandizement",
+					"CoercionItemClass": contentItem,
+				})
 			} else {
 				var list = makeKeyList("Available content item types:", contentItems, stringVar.coerce)
 				parserError(fmt.Sprintf("Invalid content item for type coerce '%s'\n\n%s\n", stringVar.coerce, list))
