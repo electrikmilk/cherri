@@ -645,47 +645,6 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 func decompArray(items []WFDictionaryFieldValueItem) (array []interface{}) {
 	for _, item := range items {
 		array = append(array, decompDictionaryItem(item))
-		continue
-
-		var itemType = dictDataType(item.WFItemType)
-		var itemValue interface{}
-		switch itemType {
-		case itemTypeText:
-			itemValue = decompValue(item.WFValue.(map[string]interface{}))
-		case itemTypeNumber:
-			var convErr error
-			itemValue, convErr = strconv.ParseInt(decompValue(item.WFValue.(map[string]interface{})), 10, 64)
-			handle(convErr)
-		case itemTypeArray:
-			var arrayItems []WFDictionaryFieldValueItem
-			var wfValue = item.WFValue.(map[string]interface{})
-			mapToStruct(wfValue["Value"], &arrayItems)
-			array = append(array, decompArray(arrayItems))
-		case itemTypeDict:
-			var dictionaryItems []WFDictionaryFieldValueItem
-			var wfValue = item.WFValue.(map[string]interface{})
-			var rootValue = wfValue["Value"].(map[string]interface{})
-			var value = rootValue["Value"].(map[string]interface{})
-			for _, item := range value["WFDictionaryFieldValueItems"].([]interface{}) {
-				var dictionaryItem = item.(map[string]interface{})
-				var itemValue = dictionaryItem["WFValue"].(map[string]interface{})
-				var value = itemValue["Value"].(map[string]interface{})
-				dictionaryItems = append(dictionaryItems, WFDictionaryFieldValueItem{
-					WFKey:      dictionaryItem["WFKey"],
-					WFItemType: int(dictionaryItem["WFItemType"].(float64)),
-					WFValue: WFValue{
-						String: value["string"].(string),
-					},
-				})
-			}
-			itemValue = decompDictionaryItems(dictionaryItems)
-		case itemTypeBool:
-			var wfValue = item.WFValue.(map[string]interface{})
-			itemValue = wfValue["Value"].(bool)
-		}
-		if itemValue != nil {
-			array = append(array, itemValue)
-		}
 	}
 	return
 }
