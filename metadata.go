@@ -90,50 +90,27 @@ var versions = map[string]string{
 var clientVersion = "3218.0.4.100"
 var iosVersion = 18.4
 
-/* Languages */
-
-var languages = map[string]string{
-	"Arabic":                      "ar_AE",
-	"Mandarin Chinese (Mainland)": "zh_CN",
-	"Mandarin Chinese (Taiwan)":   "zh_TW",
-	"Dutch":                       "nl_NL",
-	"English (UK)":                "en_GB",
-	"English (US)":                "en_US",
-	"French":                      "fr_FR",
-	"German":                      "de_DE",
-	"Indonesian":                  "id_ID",
-	"Italian":                     "it_IT",
-	"Japanese":                    "jp_JP",
-	"Korean":                      "ko_KR",
-	"Polish":                      "pl_PL",
-	"Portuguese (Brazil)":         "pt_BR",
-	"Russian":                     "ru_RU",
-	"Spanish (Spain)":             "es_ES",
-	"Thai":                        "th_TH",
-	"Turkish":                     "tr_TR",
-	"Vietnamese":                  "vn_VN",
-}
-
-var languagesList = []string{
-	"Arabic",
-	"Mandarin Chinese (Mainland)",
-	"Mandarin Chinese (Taiwan)",
-	"Dutch",
-	"English (UK)",
-	"English (US)",
-	"French",
-	"German",
-	"Indonesian",
-	"Italian",
-	"Japanese",
-	"Korean",
-	"Polish",
-	"Portuguese (Brazil)",
-	"Russian",
-	"Spanish (Spain)",
-	"Thai",
-	"Turkish",
-	"Vietnamese",
+/* Language Codes */
+var languages = []string{
+	"ar_AE",
+	"zh_CN",
+	"zh_TW",
+	"nl_NL",
+	"en_GB",
+	"en_US",
+	"fr_FR",
+	"de_DE",
+	"id_ID",
+	"it_IT",
+	"jp_JP",
+	"ko_KR",
+	"pl_PL",
+	"pt_BR",
+	"ru_RU",
+	"es_ES",
+	"th_TH",
+	"tr_TR",
+	"vn_VN",
 }
 
 /* Conditionals */

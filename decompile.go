@@ -303,19 +303,33 @@ func checkConstantLiteral(action *ShortcutAction) {
 
 func decompComment(action *ShortcutAction) {
 	var commentText = action.WFWorkflowActionParameters["WFCommentActionText"].(string)
-	if strings.Contains(commentText, "\n") {
-		newCodeLine(fmt.Sprintf("/*\n%s\n*/\n\n", commentText))
+	if args.Using("comments") {
+		if strings.Contains(commentText, "\n") {
+			newCodeLine(fmt.Sprintf("comment('\n%s\n')\n\n", commentText))
+		} else {
+			newCodeLine(fmt.Sprintf("comment('%s')\n", commentText))
+		}
 	} else {
-		newCodeLine(fmt.Sprintf("// %s\n\n", commentText))
+		if strings.Contains(commentText, "\n") {
+			newCodeLine(fmt.Sprintf("/*\n%s\n*/\n\n", commentText))
+		} else {
+			newCodeLine(fmt.Sprintf("// %s\n\n", commentText))
+		}
 	}
 }
 
+var decompilingText = false
+
 func decompTextValue(action *ShortcutAction) {
+	decompilingText = true
 	currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 	if currentVariableValue == "" {
 		currentVariableValue = "\"\""
+	} else if currentVariableValue[0] != '"' {
+		currentVariableValue = fmt.Sprintf("\"%s\"", currentVariableValue)
 	}
 	checkConstantLiteral(action)
+	decompilingText = false
 }
 
 func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
@@ -344,7 +358,7 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 			number, convErr = strconv.Atoi(value.(string))
 			handle(convErr)
 		} else {
-			number = int(value.(float64))
+			number = int(value.(uint64))
 		}
 	}
 	currentVariableValue = decompValue(number)
@@ -564,58 +578,88 @@ func decompDictionary(action *ShortcutAction) {
 	decompilingDictinary = false
 }
 
+func isReferenceValue(value any) bool {
+	if value == nil {
+		return false
+	}
+	if reflect.TypeOf(value).Kind() == reflect.Map {
+		var mapValue = value.(map[string]interface{})
+		if mapValue["Value"] != nil && mapValue["WFSerializationType"] == "WFTextTokenAttachment" {
+			return true
+		}
+	}
+
+	return false
+}
+
 func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary map[string]interface{}) {
 	dictionary = make(map[string]interface{})
 	for _, item := range items {
 		var itemKey = decompValue(item.WFKey)
-		var itemStringValue = decompValue(item.WFValue.Value)
-		var itemValueType = item.WFItemType
-		var itemValue any
-		switch dictDataType(itemValueType) {
-		case itemTypeNumber:
-			itemStringValue = item.WFValue.Value.(map[string]interface{})["string"].(string)
-			if itemStringValue != "" {
-				var convErr error
-				itemValue, convErr = strconv.Atoi(itemStringValue)
-				handle(convErr)
-			}
-		case itemTypeBool:
-			itemValue = item.WFValue.Value
-		case itemTypeText:
-			itemValue = strings.Trim(itemStringValue, "\"")
-		case itemTypeArray:
-			itemValue = decompArray(item.WFValue.Value.([]interface{}))
-		case itemTypeDict:
-			var dictionaryItems []WFDictionaryFieldValueItem
-			var value = item.WFValue.Value.(map[string]interface{})
-			mapToStruct(value["Value"].(map[string]interface{})["WFDictionaryFieldValueItems"], &dictionaryItems)
-			itemValue = decompDictionaryItems(dictionaryItems)
-		default:
-			itemValue = itemStringValue
-		}
-		dictionary[itemKey] = itemValue
+		dictionary[itemKey] = decompDictionaryItem(item)
 	}
 	return
 }
 
-func decompArray(items []interface{}) (array []interface{}) {
+func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
+	var itemStringValue = decompValue(item.WFValue)
+	var itemValueType = item.WFItemType
+	var itemValueMap = item.WFValue.(map[string]interface{})
+	var itemValue any
+
+	if isReferenceValue(itemValueMap["Value"]) {
+		return fmt.Sprintf("{%s}", itemStringValue)
+	}
+
+	switch dictDataType(itemValueType) {
+	case itemTypeNumber:
+		var convErr error
+		itemValue, convErr = strconv.ParseInt(decompValue(item.WFValue.(map[string]interface{})), 10, 64)
+		handle(convErr)
+	case itemTypeBool:
+		var wfValue = item.WFValue.(map[string]interface{})
+		itemValue = wfValue["Value"].(bool)
+	case itemTypeText:
+		itemValue = strings.Trim(itemStringValue, "\"")
+	case itemTypeArray:
+		var arrayItems []WFDictionaryFieldValueItem
+		var value = itemValueMap["Value"].([]interface{})
+		mapToStruct(value, &arrayItems)
+		itemValue = decompArray(arrayItems)
+	case itemTypeDict:
+		var dictionaryItems []WFDictionaryFieldValueItem
+		var value = itemValueMap["Value"].(map[string]interface{})
+		mapToStruct(value["Value"].(map[string]interface{})["WFDictionaryFieldValueItems"], &dictionaryItems)
+		itemValue = decompDictionaryItems(dictionaryItems)
+	default:
+		itemValue = itemStringValue
+	}
+
+	return itemValue
+}
+
+func decompArray(items []WFDictionaryFieldValueItem) (array []interface{}) {
 	for _, item := range items {
-		var arrayItem = item.(map[string]interface{})
-		var itemType = dictDataType(int(arrayItem["WFItemType"].(float64)))
+		array = append(array, decompDictionaryItem(item))
+		continue
+
+		var itemType = dictDataType(item.WFItemType)
 		var itemValue interface{}
 		switch itemType {
 		case itemTypeText:
-			itemValue = decompValue(arrayItem["WFValue"].(map[string]interface{}))
+			itemValue = decompValue(item.WFValue.(map[string]interface{}))
 		case itemTypeNumber:
 			var convErr error
-			itemValue, convErr = strconv.ParseInt(decompValue(arrayItem["WFValue"].(map[string]interface{})), 10, 64)
+			itemValue, convErr = strconv.ParseInt(decompValue(item.WFValue.(map[string]interface{})), 10, 64)
 			handle(convErr)
 		case itemTypeArray:
-			var wfValue = arrayItem["WFValue"].(map[string]interface{})
-			array = append(array, decompArray(wfValue["Value"].([]interface{})))
+			var arrayItems []WFDictionaryFieldValueItem
+			var wfValue = item.WFValue.(map[string]interface{})
+			mapToStruct(wfValue["Value"], &arrayItems)
+			array = append(array, decompArray(arrayItems))
 		case itemTypeDict:
 			var dictionaryItems []WFDictionaryFieldValueItem
-			var wfValue = arrayItem["WFValue"].(map[string]interface{})
+			var wfValue = item.WFValue.(map[string]interface{})
 			var rootValue = wfValue["Value"].(map[string]interface{})
 			var value = rootValue["Value"].(map[string]interface{})
 			for _, item := range value["WFDictionaryFieldValueItems"].([]interface{}) {
@@ -632,7 +676,7 @@ func decompArray(items []interface{}) (array []interface{}) {
 			}
 			itemValue = decompDictionaryItems(dictionaryItems)
 		case itemTypeBool:
-			var wfValue = arrayItem["WFValue"].(map[string]interface{})
+			var wfValue = item.WFValue.(map[string]interface{})
 			itemValue = wfValue["Value"].(bool)
 		}
 		if itemValue != nil {
@@ -773,7 +817,7 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 
 	*attachmentString = escapeString(strings.Join(attachmentChars, ""))
 
-	if !decompilingDictinary && originalString == ObjectReplaceCharStr && len(attachments) == 1 {
+	if (!decompilingDictinary && !decompilingText) && len(attachments) == 1 && originalString == ObjectReplaceCharStr {
 		*attachmentString = strings.Trim(*attachmentString, "{}")
 	} else {
 		*attachmentString = fmt.Sprintf("\"%s\"", *attachmentString)
@@ -1270,15 +1314,9 @@ func decompWarning(message string) {
 }
 
 func decompError(message string, action *ShortcutAction) {
-	fmt.Print(ansi("[Decompilation Error]\n\n", red, bold))
+	fmt.Println(ansi(fmt.Sprintf("Error: %s\n\n", message), red, bold))
 
-	fmt.Println(ansi(fmt.Sprintf("%s\n", message), red))
-
-	var identifier = strings.Replace(action.WFWorkflowActionIdentifier, "is.workflow.actions.", "", 1)
-
-	fmt.Println("Action identifier:", identifier)
-	fmt.Println("Full action identifier:", action.WFWorkflowActionIdentifier)
-
+	fmt.Println("Action identifier:", action.WFWorkflowActionIdentifier)
 	lines = strings.Split(code.String(), "\n")
 	var linesLen = len(lines)
 	var lastWrittenLine = lines[linesLen-1]

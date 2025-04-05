@@ -1129,6 +1129,7 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) (params map[string]any) {
+			params = make(map[string]any)
 			if len(args) >= 3 {
 				if args[2].valueType == Variable {
 					params["WFContactPhoneNumbers"] = argumentValue(args, 2)
@@ -1195,12 +1196,6 @@ var actions = map[string]*actionDefinition{
 	"listen": {
 		category:   Speech,
 		identifier: "dictatetext",
-		check: func(args []actionArgument, _ *actionDefinition) {
-			if len(args) != 2 {
-				return
-			}
-			args[1].value = languageCode(getArgValue(args[1]).(string))
-		},
 		parameters: []parameterDefinition{
 			{
 				name:         "stopListening",
@@ -1215,6 +1210,7 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				key:       "WFSpeechLanguage",
 				optional:  true,
+				enum:      languages,
 			},
 		},
 	},
@@ -1278,6 +1274,10 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			var color = strings.ToLower(getArgValue(args[1]).(string))
 
 			return map[string]any{
@@ -1309,6 +1309,10 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) (params map[string]any) {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			if len(args) != 1 {
 				return map[string]any{
 					"WFContentItemLimitEnabled": true,
@@ -1365,7 +1369,11 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
-			if len(args) != 1 {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
+			if len(args) > 1 {
 				var richText = getArgValue(args[1]).(bool)
 				if richText {
 					return map[string]any{
@@ -1999,18 +2007,14 @@ var actions = map[string]*actionDefinition{
 				name:      "fromLanguage",
 				validType: String,
 				key:       "WFSelectedFromLanguage",
-				enum:      languagesList,
+				enum:      languages,
 			},
 			{
 				name:      "toLanguage",
 				validType: String,
 				key:       "WFSelectedLanguage",
-				enum:      languagesList,
+				enum:      languages,
 			},
-		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			args[1].value = languageCode(args[1].value.(string))
-			args[2].value = languageCode(args[2].value.(string))
 		},
 	},
 	"translate": {
@@ -2028,17 +2032,8 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				key:       "WFSelectedLanguage",
 				optional:  true,
-				enum:      languagesList,
+				enum:      languages,
 			},
-		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			if len(args) < 2 {
-				return
-			}
-
-			if args[1].valueType != Variable {
-				args[1].value = languageCode(getArgValue(args[1]).(string))
-			}
 		},
 		addParams: func(_ []actionArgument) map[string]any {
 			return map[string]any{
@@ -2312,17 +2307,14 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		addParams: func(args []actionArgument) map[string]any {
-			var data = map[string]any{
-				"SizeToFit": false,
-			}
-
 			if len(args) == 0 {
-				data["ImageSize"] = map[string]any{}
+				return map[string]any{}
 			}
 
 			var size = strings.Split(getArgValue(args[2]).(string), " ")
 
 			return map[string]any{
+				"SizeToFit": false,
 				"ImageSize": map[string]any{
 					"Value": map[string]any{
 						"Unit":      size[0],
@@ -4270,7 +4262,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
-				validType: String,
+				validType: RawString,
 				key:       "WFCommentActionText",
 			},
 		},
@@ -4504,6 +4496,10 @@ var actions = map[string]*actionDefinition{
 			replaceAppIDs(args, definition)
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			if args[0].valueType == Variable {
 				return map[string]any{
 					"WFSelectedApp": argumentValue(args, 0),
@@ -4627,6 +4623,7 @@ var actions = map[string]*actionDefinition{
 		},
 		check: replaceAppIDs,
 		make: func(args []actionArgument) (params map[string]any) {
+			params = make(map[string]any)
 			if args[0].valueType != Variable {
 				params["WFAppsExcept"] = apps(args)
 			} else {
@@ -4657,6 +4654,8 @@ var actions = map[string]*actionDefinition{
 			replaceAppIDs(args, definition)
 		},
 		make: func(args []actionArgument) (params map[string]any) {
+			params = make(map[string]any)
+
 			params["WFAskToSaveChanges"] = false
 
 			if args[0].valueType == Variable {
@@ -4745,6 +4744,10 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			var params = make(map[string]any)
 			if args[0].valueType == Variable {
 				params["WFPrimaryAppIdentifier"] = argumentValue(args, 0)
@@ -4793,6 +4796,10 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			return map[string]any{
 				"target": map[string]any{
 					"title": argumentValue(args, 0),
@@ -4818,7 +4825,13 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
-		addParams: func(_ []actionArgument) map[string]any {
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{
+					"isSelf": true,
+				}
+			}
+
 			return map[string]any{
 				"WFWorkflow": map[string]any{
 					"workflowIdentifier": uuid.New().String(),
@@ -4851,6 +4864,12 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{
+					"isSelf": false,
+				}
+			}
+
 			return map[string]any{
 				"WFWorkflow": map[string]any{
 					"workflowIdentifier": uuid.New().String(),
@@ -5278,6 +5297,7 @@ var actions = map[string]*actionDefinition{
 			if len(args) == 0 {
 				return
 			}
+			xCallbackParams = make(map[string]any)
 			if args[1].value.(string) != "" || args[2].value.(string) != "" || args[3].value.(string) != "" {
 				xCallbackParams["WFXCallbackCustomCallbackEnabled"] = true
 			}
@@ -5897,8 +5917,14 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) (params map[string]any) {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			if args[2].value != nil {
-				params["WFContentItemLimitEnabled"] = true
+				params = map[string]any{
+					"WFContentItemLimitEnabled": true,
+				}
 			}
 			return
 		},
@@ -6007,6 +6033,12 @@ var actions = map[string]*actionDefinition{
 			}, &args[2])
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{
+					"isSelf": false,
+				}
+			}
+
 			return map[string]any{
 				"WFMeasurementUnit": map[string]any{
 					"WFNSUnitType":   argumentValue(args, 1),
@@ -6064,6 +6096,10 @@ var actions = map[string]*actionDefinition{
 			}, &args[2])
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			return map[string]any{
 				"WFMeasurementUnit": map[string]any{
 					"Value": map[string]any{
@@ -6102,29 +6138,17 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 			{
-				name:      "imagePath",
+				name:      "base64Image",
 				validType: String,
 				optional:  true,
 			},
-		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			if len(args) != 3 {
-				return
-			}
-
-			var image = getArgValue(args[2])
-			if reflect.TypeOf(image).String() == stringType {
-				var iconFile = getArgValue(args[2]).(string)
-				if _, err := os.Stat(iconFile); os.IsNotExist(err) {
-					parserError(fmt.Sprintf("File '%s' does not exist!", iconFile))
-				}
-			}
 		},
 		make: func(args []actionArgument) map[string]any {
 			var title = args[0].value.(string)
 			var subtitle = args[1].value.(string)
 			wrapVariableReference(&title)
 			wrapVariableReference(&subtitle)
+
 			var vcard strings.Builder
 			vcard.WriteString(fmt.Sprintf("BEGIN:VCARD\nVERSION:3.0\nN;CHARSET=utf-8:%s\nORG:%s\n", title, subtitle))
 
@@ -6134,10 +6158,7 @@ var actions = map[string]*actionDefinition{
 				if reflect.TypeOf(image).String() != stringType && args[2].valueType == Variable {
 					photo = fmt.Sprintf("{%s}", args[2].value)
 				} else {
-					var iconFile = getArgValue(args[2]).(string)
-					var bytes, readErr = os.ReadFile(iconFile)
-					handle(readErr)
-					photo = base64.StdEncoding.EncodeToString(bytes)
+					photo = getArgValue(args[2]).(string)
 				}
 
 				if photo != "" {
@@ -6150,6 +6171,7 @@ var actions = map[string]*actionDefinition{
 				valueType: String,
 				value:     vcard.String(),
 			}
+
 			return map[string]any{
 				"WFTextActionText": argumentValue(args, 0),
 			}
@@ -6427,6 +6449,10 @@ func decompContactValue(action *ShortcutAction, key string, contentKit contentKi
 }
 
 func adjustDate(operation string, unit string, args []actionArgument) (adjustDateParams map[string]any) {
+	if len(args) == 0 {
+		return map[string]any{}
+	}
+
 	maps.Copy(adjustDateParams, map[string]any{
 		"WFAdjustOperation": operation,
 	})
@@ -6465,6 +6491,10 @@ func changeCase(textCase string) map[string]any {
 }
 
 func textParts(args []actionArgument) map[string]any {
+	if len(args) == 0 {
+		return map[string]any{}
+	}
+
 	var data = map[string]any{
 		"Show-text": true,
 	}
@@ -6485,32 +6515,30 @@ func textParts(args []actionArgument) map[string]any {
 	return data
 }
 
+func decompReferenceValue(paramValue any) string {
+	if isReferenceValue(paramValue) {
+		return decompValue(paramValue)
+	}
+
+	return paramValue.(string)
+}
+
 func decompTextParts(action *ShortcutAction) (arguments []string) {
 	arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["text"]))
+
 	var glue string
 	if action.WFWorkflowActionParameters["WFTextSeparator"] != nil {
-		glue = action.WFWorkflowActionParameters["WFTextSeparator"].(string)
-		if glue == "New Lines" {
-			return
-		}
+		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextSeparator"])
 	}
 	if action.WFWorkflowActionParameters["WFTextCustomSeparator"] != nil {
-		glue = action.WFWorkflowActionParameters["WFTextCustomSeparator"].(string)
+		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextCustomSeparator"])
 	}
+
 	if glue != "" {
 		arguments = append(arguments, fmt.Sprintf("\"%s\"", glueToChar(glue)))
 	}
 
 	return
-}
-
-func languageCode(language string) string {
-	if lang, found := languages[language]; found {
-		return lang
-	}
-
-	parserError(fmt.Sprintf("Unknown language '%s'", language))
-	return ""
 }
 
 var appIds map[string]string

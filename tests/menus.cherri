@@ -2,9 +2,11 @@
 
 #include 'stdlib'
 
+const cherri_icon = base64File("assets/cherri_icon.png")
+
 @items = []
 repeat i for 3 {
-    @items += makeVCard("Title {i}", "Subtitle {i}","assets/cherri_icon.png")
+    @items += makeVCard("Title {i}", "Subtitle {i}", cherri_icon)
 }
 @menuItems = "{items}"
 @vcf = setName(menuItems, "menu.vcf")

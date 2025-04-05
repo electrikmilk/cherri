@@ -43,7 +43,7 @@ func init() {
 	args.Register(args.Argument{
 		Name:        "comments",
 		Short:       "c",
-		Description: "Create comment actions for text comments (e.g. //, /**/)",
+		Description: "Include comment actions in compiled Shortcut or import.",
 	})
 	args.Register(args.Argument{
 		Name:        "open",
@@ -51,7 +51,7 @@ func init() {
 	})
 	args.Register(args.Argument{
 		Name:         "import",
-		Description:  "[BETA] Import Shortcut from local file path or iCloud link and output Cherri file.",
+		Description:  "[BETA] Import Shortcut from an iCloud link or file path and convert to Cherri.",
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
