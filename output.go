@@ -38,9 +38,15 @@ func createShortcut() {
 	inputPath = fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd)
 
 	if !args.Using("skip-sign") {
-		if args.Using("hubsign") {
+		switch {
+		case args.Using("signing-server"):
+			useSigningService(&signingService{
+				name: "Custom Signing Server",
+				url:  args.Value("signing-server"),
+			})
+		case args.Using("hubsign"):
 			hubSign()
-		} else {
+		default:
 			sign()
 		}
 

@@ -63,12 +63,16 @@ func sign() {
 	}
 }
 
-const HubSignURL = "https://hubsign.routinehub.services/sign"
+type signingService struct {
+	name  string
+	url   string
+	start func()
+}
 
-// Sign the Shortcut using RoutineHub's signing service.
-func hubSign() {
+// Sign the Shortcut using a signing service.
+func useSigningService(service *signingService) {
 	if hubSignFailed {
-		fmt.Println(ansi("Backing off from HubSign", red))
+		fmt.Println(ansi(fmt.Sprintf("Backing off from %s", service.name), red))
 		for i := 5; i > 0; i-- {
 			fmt.Printf("%d seconds...\r", i)
 			time.Sleep(1 * time.Second)
@@ -77,9 +81,8 @@ func hubSign() {
 	}
 
 	if !args.Using("no-ansi") {
-		fmt.Println(ansi("Signing using HubSign service...", green))
-		fmt.Print("Shortcut Signing Powered By ")
-		fmt.Println(ansi("RoutineHub", red))
+		fmt.Println(ansi(fmt.Sprintf("Signing using %s service...", service.name), green))
+		service.start()
 	}
 
 	var payload = map[string]string{
@@ -89,7 +92,7 @@ func hubSign() {
 	var jsonPayload, jsonErr = json.Marshal(payload)
 	handle(jsonErr)
 
-	var request, httpErr = http.NewRequest("POST", HubSignURL, bytes.NewReader(jsonPayload))
+	var request, httpErr = http.NewRequest("POST", service.url, bytes.NewReader(jsonPayload))
 	handle(httpErr)
 	request.Header.Set("Content-Type", "application/json")
 
@@ -142,4 +145,17 @@ func removeUnsigned() {
 	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green))
 	}
+}
+
+// Sign the Shortcut using RoutineHub's signing service.
+func hubSign() {
+	var hubSignService = signingService{
+		name: "HubSign",
+		url:  "https://hubsign.routinehub.services/sign",
+		start: func() {
+			fmt.Print("Shortcut Signing Powered By ")
+			fmt.Println(ansi("RoutineHub", red))
+		},
+	}
+	useSigningService(&hubSignService)
 }
