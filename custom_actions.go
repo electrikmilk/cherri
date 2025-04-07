@@ -294,6 +294,9 @@ func makeCustomActionCall(identifier *string, arguments *[]actionArgument) (cust
 	customActionCallJSON.WriteString("]}")
 
 	if err := json.Unmarshal([]byte(customActionCallJSON.String()), &customActionCall); err != nil {
+		if args.Using("debug") {
+			fmt.Println(customActionCallJSON.String())
+		}
 		parserError(fmt.Sprintf("Custom action JSON error: %s", err))
 	}
 
