@@ -98,8 +98,6 @@ func setCurrentAction(identifier string, definition *actionDefinition) {
 // makeAction builds an action based on its actionDefinition and adds it to the shortcut.
 func makeAction(arguments []actionArgument, reference *map[string]any) {
 	actionIndex++
-	// Check for question arguments
-	questionArgs(arguments)
 	// Determine identifier
 	var ident = actionIdentifier()
 	// Determine parameters
@@ -162,23 +160,6 @@ func actionParameters(arguments []actionArgument) map[string]any {
 	}
 
 	return params
-}
-
-// questionArgs updates questions to target the action parameter
-// that it's identifier matches the arguments value.
-func questionArgs(arguments []actionArgument) {
-	for i, a := range arguments {
-		if a.valueType != Question {
-			continue
-		}
-		var identifier = a.value.(string)
-		if question, found := questions[identifier]; found {
-			var parameter = currentAction.parameters[i]
-			question.parameter = parameter.key
-			question.actionIndex = actionIndex - 1
-			arguments[i].value = ""
-		}
-	}
 }
 
 // buildStdAction is an alias of addAction that simply prepends the shortcuts bundle identifier to ident.
@@ -418,6 +399,8 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 
 	typeCheck(param, argument)
 
+	questionArg(param, argument)
+
 	if param.literal {
 		checkLiteralValue(param, argument)
 	}
@@ -432,6 +415,20 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 				generateActionDefinition(*param, false, false),
 			),
 		)
+	}
+}
+
+// questionArgs updates questions to target the action parameter
+// that it's identifier matches the arguments value.
+func questionArg(param *parameterDefinition, argument *actionArgument) {
+	if argument.valueType != Question {
+		return
+	}
+	var identifier = argument.value.(string)
+	if question, found := questions[identifier]; found {
+		question.parameter = param.key
+		question.actionIndex = actionIndex - 1
+		argument.value = ""
 	}
 }
 
