@@ -82,7 +82,9 @@ func useSigningService(service *signingService) {
 
 	if !args.Using("no-ansi") {
 		fmt.Println(ansi(fmt.Sprintf("Signing using %s service...", service.name), green))
-		service.start()
+		if service.start != nil {
+			service.start()
+		}
 	}
 
 	var payload = map[string]string{
