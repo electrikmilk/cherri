@@ -171,11 +171,11 @@ func questionArgs(arguments []actionArgument) {
 		if a.valueType != Question {
 			continue
 		}
-		var lowerIdentifier = strings.ToLower(a.value.(string))
-		if question, found := questions[lowerIdentifier]; found {
+		var identifier = a.value.(string)
+		if question, found := questions[identifier]; found {
 			var parameter = currentAction.parameters[i]
 			question.parameter = parameter.key
-			question.actionIndex = actionIndex
+			question.actionIndex = actionIndex - 1
 			arguments[i].value = ""
 		}
 	}

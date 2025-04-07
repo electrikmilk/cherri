@@ -32,7 +32,6 @@ func generateShortcut() {
 		},
 		WFWorkflowClientVersion:              clientVersion,
 		WFWorkflowHasShortcutInputVariables:  hasShortcutInputVariables,
-		WFWorkflowImportQuestions:            generateImportQuestions(),
 		WFWorkflowInputContentItemClasses:    generateInputContentItems(),
 		WFWorkflowOutputContentItemClasses:   generateOutputContentItems(),
 		WFWorkflowMinimumClientVersion:       900,
@@ -46,6 +45,8 @@ func generateShortcut() {
 	}
 
 	generateActions()
+
+	shortcut.WFWorkflowImportQuestions = generateImportQuestions()
 
 	marshalPlist()
 
