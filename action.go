@@ -483,6 +483,11 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 	}
 	definition.WriteString(strings.Join(arguments, ", "))
 	definition.WriteRune(')')
+
+	if currentAction.outputType != "" {
+		definition.WriteString(fmt.Sprintf(": %s ", currentAction.outputType))
+	}
+
 	if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
 		definition.WriteString(generateActionRestrictions())
 	}

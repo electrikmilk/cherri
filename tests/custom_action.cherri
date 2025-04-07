@@ -2,14 +2,15 @@ action doSomething() {
     nothing()
 }
 
-action add(number op1, number op2) {
+action add(number op1, number op2): number {
     const result = op1 + op2
     output("{result}")
 }
 
 doSomething()
 
-add(2,2)
+@sum = add(2,2)
+show(sum)
 
 action fibonacci(number n) {
     if n <= 1 {

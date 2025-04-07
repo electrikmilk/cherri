@@ -78,6 +78,13 @@ func collectActionDefinition() {
 		advanceTimes(2)
 	}
 
+	var outputType tokenType
+	if tokenAhead(Colon) {
+		skipWhitespace()
+		var value any
+		collectType(&outputType, &value)
+	}
+
 	advanceUntilExpect('{', 3)
 	advance()
 
@@ -90,6 +97,7 @@ func collectActionDefinition() {
 	customActions[identifier] = &customAction{
 		definition: actionDefinition{
 			parameters: arguments,
+			outputType: outputType,
 		},
 		body: body,
 	}
@@ -308,6 +316,7 @@ func printCustomActionsDebug() {
 	for identifier, customAction := range customActions {
 		fmt.Println("identifier:", identifier+"()")
 		fmt.Println("used:", customAction.used)
+		fmt.Println("output type:", customAction.definition.outputType)
 		fmt.Println("parameters:")
 		fmt.Println(customAction.definition.parameters)
 		fmt.Println("body:")
