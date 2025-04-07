@@ -327,7 +327,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 	var argVal = argument.value
 	switch {
 	case argValueType == Action:
-		validActionOutput(param.name, param.validType, argVal)
+		validActionOutput(param, argVal)
 		return
 	case argValueType == Variable:
 		var identifier = argVal.(string)
@@ -335,7 +335,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		argValueType = checkTypeTransform(getVar.valueType)
 		argVal = getVar.value
 		if argValueType == Action {
-			validActionOutput(param.name, param.validType, argVal)
+			validActionOutput(param, argVal)
 			return
 		}
 		if argValueType != param.validType && param.validType != Variable && getVar.variableType != "Ask" {
@@ -365,24 +365,21 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 }
 
 // validActionOutput checks the output of an action in the case that the output has been assigned to a variable.
-func validActionOutput(field string, validType tokenType, value any) {
+func validActionOutput(param *parameterDefinition, value any) {
 	var actionIdent = value.(action).ident
 	if action, found := actions[actionIdent]; found {
 		var actionOutputType = action.outputType
 		if actionOutputType == "" {
 			return
 		}
-		if actionOutputType != validType {
-			parserError(
-				fmt.Sprintf(
-					"Invalid variable value of action '%v' that outputs type '%s' for argument '%s' of type '%s' in '%s()'",
-					actionIdent+"()",
-					actionOutputType,
-					field,
-					validType,
-					currentActionIdentifier,
-				),
-			)
+		if actionOutputType != param.validType {
+			parserError(fmt.Sprintf("Invalid variable value of action '%v' (%s) for argument '%s' (%s).\n%s",
+				actionIdent+"()",
+				actionOutputType,
+				param.name,
+				param.validType,
+				generateActionDefinition(*param, false, false),
+			))
 		}
 	}
 }
