@@ -359,8 +359,8 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 				number, convErr = strconv.ParseFloat(value.(string), 64)
 			} else {
 				number, convErr = strconv.Atoi(value.(string))
-				handle(convErr)
 			}
+			handle(convErr)
 		} else {
 			number = int(value.(uint64))
 		}
