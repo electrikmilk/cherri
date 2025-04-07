@@ -4710,6 +4710,7 @@ var actions = map[string]*actionDefinition{
 				"WFMathOperation": "...",
 			}
 		},
+		outputType: Integer,
 	},
 	"statistic": {
 		identifier: "statistics",
@@ -4754,6 +4755,7 @@ var actions = map[string]*actionDefinition{
 				"WFIPAddressSourceOption": "Local",
 			}
 		},
+		outputType: String,
 	},
 	"getExternalIP": {
 		identifier:    "getipaddress",
@@ -4773,6 +4775,7 @@ var actions = map[string]*actionDefinition{
 				"WFIPAddressSourceOption": "External",
 			}
 		},
+		outputType: String,
 	},
 	"getFirstItem": {
 		identifier:    "getitemfromlist",
@@ -4789,6 +4792,7 @@ var actions = map[string]*actionDefinition{
 				"WFItemSpecifier": "First Item",
 			}
 		},
+		outputType: String,
 	},
 	"getLastItem": {
 		identifier: "getitemfromlist",
@@ -4804,6 +4808,7 @@ var actions = map[string]*actionDefinition{
 				"WFItemSpecifier": "Last Item",
 			}
 		},
+		outputType: String,
 	},
 	"getRandomItem": {
 		identifier: "getitemfromlist",
@@ -4819,6 +4824,7 @@ var actions = map[string]*actionDefinition{
 				"WFItemSpecifier": "Random Item",
 			}
 		},
+		outputType: String,
 	},
 	"getListItem": {
 		identifier: "getitemfromlist",
@@ -4839,6 +4845,7 @@ var actions = map[string]*actionDefinition{
 				"WFItemSpecifier": "Item At Index",
 			}
 		},
+		outputType: String,
 	},
 	"getListItems": {
 		identifier: "getitemfromlist",
@@ -4864,6 +4871,7 @@ var actions = map[string]*actionDefinition{
 				"WFItemSpecifier": "Items in Range",
 			}
 		},
+		outputType: Arr,
 	},
 	"getNumbers": {
 		identifier: "detect.number",
@@ -4874,6 +4882,7 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
+		outputType: Integer,
 	},
 	"getDictionary": {
 		identifier: "detect.dictionary",
@@ -4884,6 +4893,7 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
+		outputType: Dict,
 	},
 	"getText": {
 		identifier: "detect.text",
@@ -4894,6 +4904,7 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
+		outputType: String,
 	},
 	"getContacts": {
 		identifier: "detect.contacts",
@@ -4904,6 +4915,7 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
+		outputType: Arr,
 	},
 	"getDates": {
 		identifier: "detect.date",
@@ -4914,6 +4926,7 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
+		outputType: Arr,
 	},
 	"getEmails": {
 		identifier: "detect.emailaddress",
@@ -4924,6 +4937,7 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 		},
+		outputType: Arr,
 	},
 	"getPhoneNumbers": {
 		identifier: "detect.phonenumber",
@@ -4934,6 +4948,7 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
+		outputType: Arr,
 	},
 	"getURLs": {
 		identifier: "detect.link",
@@ -4944,12 +4959,14 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
+		outputType: Arr,
 	},
 	"getAllWallpapers": {
 		identifier:    "posters.get",
 		minVersion:    16.2,
 		mac:           false,
 		defaultAction: true,
+		outputType:    Arr,
 	},
 	"getWallpaper": {
 		identifier: "posters.get",
@@ -4960,6 +4977,7 @@ var actions = map[string]*actionDefinition{
 				"WFPosterType": "Current",
 			}
 		},
+		outputType: Variable,
 	},
 	"setWallpaper": {
 		identifier: "wallpaper.set",
