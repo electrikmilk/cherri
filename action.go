@@ -553,7 +553,7 @@ func generateActionParamDefinition(param parameterDefinition) string {
 	definition.WriteString(param.name)
 	if param.defaultValue != nil {
 		if reflect.TypeOf(param.defaultValue).String() == stringType {
-			definition.WriteString(fmt.Sprintf(" = \"%v\"", param.defaultValue))
+			definition.WriteString(fmt.Sprintf(" = \"%v\"", strings.Replace(param.defaultValue.(string), "\n", "\\n", 1)))
 		} else {
 			definition.WriteString(fmt.Sprintf(" = %v", param.defaultValue))
 		}
