@@ -1382,16 +1382,6 @@ func tokenAhead(token tokenType) bool {
 	return true
 }
 
-// tokensAhead returns a boolean based on if any of `tokens` is ahead.
-func tokensAhead(tokens ...tokenType) bool {
-	for _, t := range tokens {
-		if tokenAhead(t) {
-			return true
-		}
-	}
-	return false
-}
-
 func containsTokens(str *string, v ...tokenType) bool {
 	for _, aheadToken := range v {
 		if strings.Contains(*str, string(aheadToken)) {
