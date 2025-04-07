@@ -402,7 +402,7 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 
 	if q, found := questions[reference]; found {
 		if q.used {
-			parserError(fmt.Sprintf("Duplicate usage of import question reference '%s', can only be used once.", reference))
+			parserError(fmt.Sprintf("Duplicate usage of import question '%s'. Import questions can only be used in one action argument.", reference))
 		}
 
 		*valueType = Question
