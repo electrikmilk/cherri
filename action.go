@@ -372,7 +372,7 @@ func validActionOutput(param *parameterDefinition, value any) {
 		if actionOutputType == "" {
 			return
 		}
-		if actionOutputType != param.validType && param.validType != Variable && actionOutputType != Variable {
+		if actionOutputType != param.validType && param.validType != Variable {
 			parserError(fmt.Sprintf("Invalid variable value of action '%v' (%s) for argument '%s' (%s).\n%s",
 				actionIdent+"()",
 				actionOutputType,
