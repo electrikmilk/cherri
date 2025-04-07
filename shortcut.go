@@ -511,7 +511,7 @@ func makeAttachmentValues() {
 		var varUUID = uuids[stringVar.identifier]
 		var varValue = map[string]any{}
 		var varType = "Variable"
-		var aggr = []map[string]string{}
+		var aggr []map[string]string
 		if storedVar.variableType != "" {
 			varType = storedVar.variableType
 		}
