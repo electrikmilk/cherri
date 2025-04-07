@@ -418,8 +418,7 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 	}
 }
 
-// questionArgs updates questions to target the action parameter
-// that it's identifier matches the arguments value.
+// questionArg checks if the argument references a question so that it can update the question to point to the current action's argument.
 func questionArg(param *parameterDefinition, argument *actionArgument) {
 	if argument.valueType != Question {
 		return
