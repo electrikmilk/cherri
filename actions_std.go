@@ -1913,6 +1913,7 @@ var actions = map[string]*actionDefinition{
 				enum:      languages,
 			},
 		},
+		outputType: String,
 	},
 	"translate": {
 		identifier:    "text.translate",
@@ -1936,6 +1937,7 @@ var actions = map[string]*actionDefinition{
 				"WFSelectedFromLanguage": "Detect Language",
 			}
 		},
+		outputType: String,
 	},
 	"detectLanguage": {
 		parameters: []parameterDefinition{
@@ -1945,6 +1947,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
+		outputType: String,
 	},
 	"replaceText": {
 		identifier: "text.replace",
@@ -1979,6 +1982,7 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
+		outputType: String,
 	},
 	"uppercase": {
 		identifier: "text.changecase",
@@ -2019,6 +2023,7 @@ var actions = map[string]*actionDefinition{
 		addParams: func(_ []actionArgument) map[string]any {
 			return changeCase("Capitalize with Title Case")
 		},
+		outputType: String,
 	},
 	"capitalize": {
 		identifier: "text.changecase",
@@ -2032,6 +2037,7 @@ var actions = map[string]*actionDefinition{
 		addParams: func(_ []actionArgument) map[string]any {
 			return changeCase("Capitalize with sentence case")
 		},
+		outputType: String,
 	},
 	"capitalizeAll": {
 		identifier: "text.changecase",
@@ -2045,6 +2051,7 @@ var actions = map[string]*actionDefinition{
 		addParams: func(_ []actionArgument) map[string]any {
 			return changeCase("Capitalize Every Word")
 		},
+		outputType: String,
 	},
 	"alternateCase": {
 		identifier: "text.changecase",
@@ -2058,6 +2065,7 @@ var actions = map[string]*actionDefinition{
 		addParams: func(_ []actionArgument) map[string]any {
 			return changeCase("cApItAlIzE wItH aLtErNaTiNg cAsE")
 		},
+		outputType: String,
 	},
 	"correctSpelling": {
 		parameters: []parameterDefinition{
@@ -2072,6 +2080,7 @@ var actions = map[string]*actionDefinition{
 				"Show-text": true,
 			}
 		},
+		outputType: String,
 	},
 	"splitText": {
 		identifier: "text.split",
@@ -2087,8 +2096,9 @@ var actions = map[string]*actionDefinition{
 				defaultValue: "\n",
 			},
 		},
-		addParams: textParts,
-		decomp:    decompTextParts,
+		addParams:  textParts,
+		decomp:     decompTextParts,
+		outputType: Arr,
 	},
 	"joinText": {
 		identifier: "text.combine",
@@ -2104,8 +2114,9 @@ var actions = map[string]*actionDefinition{
 				defaultValue: "\n",
 			},
 		},
-		addParams: textParts,
-		decomp:    decompTextParts,
+		addParams:  textParts,
+		decomp:     decompTextParts,
+		outputType: String,
 	},
 	"makeDiskImage": {
 		parameters: []parameterDefinition{
@@ -3642,6 +3653,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFNumberActionNumber",
 			},
 		},
+		outputType: Integer,
 	},
 	"getObjectOfClass": {
 		identifier: "getclassaction",
@@ -3746,6 +3758,7 @@ var actions = map[string]*actionDefinition{
 				"WFCountType": "Items",
 			}
 		},
+		outputType: Integer,
 	},
 	"countChars": {
 		identifier: "count",
@@ -3761,6 +3774,7 @@ var actions = map[string]*actionDefinition{
 				"WFCountType": "Characters",
 			}
 		},
+		outputType: Integer,
 	},
 	"countWords": {
 		identifier: "count",
@@ -3776,6 +3790,7 @@ var actions = map[string]*actionDefinition{
 				"WFCountType": "Words",
 			}
 		},
+		outputType: Integer,
 	},
 	"countSentences": {
 		identifier: "count",
@@ -3791,6 +3806,7 @@ var actions = map[string]*actionDefinition{
 				"WFCountType": "Sentences",
 			}
 		},
+		outputType: Integer,
 	},
 	"countLines": {
 		identifier: "count",
@@ -3807,6 +3823,7 @@ var actions = map[string]*actionDefinition{
 				"WFCountType": "Lines",
 			}
 		},
+		outputType: Integer,
 	},
 	"lightMode": {
 		identifier: "appearance",
@@ -3836,6 +3853,7 @@ var actions = map[string]*actionDefinition{
 				"Subject": "Is Charging",
 			}
 		},
+		outputType: Bool,
 	},
 	"connectedToCharger": {
 		identifier: "getbatterylevel",
@@ -3845,9 +3863,11 @@ var actions = map[string]*actionDefinition{
 				"Subject": "Is Connected to Charger",
 			}
 		},
+		outputType: Bool,
 	},
 	"getShortcuts": {
 		identifier: "getmyworkflows",
+		outputType: Arr,
 	},
 	"url": {
 		parameters: []parameterDefinition{
@@ -3908,6 +3928,7 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
+		outputType: String,
 	},
 	"formatNumber": {
 		identifier: "format.number",
@@ -3925,6 +3946,7 @@ var actions = map[string]*actionDefinition{
 				defaultValue: 2,
 			},
 		},
+		outputType: Integer,
 	},
 	"randomNumber": {
 		identifier: "number.random",
@@ -3940,6 +3962,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
+		outputType: Integer,
 	},
 	"base64Encode": {
 		identifier: "base64encode",
@@ -3956,6 +3979,7 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		defaultAction: true,
+		outputType:    String,
 	},
 	"base64Decode": {
 		identifier: "base64encode",
@@ -3971,6 +3995,7 @@ var actions = map[string]*actionDefinition{
 				"WFEncodeMode": "Decode",
 			}
 		},
+		outputType: String,
 	},
 	"urlEncode": {
 		identifier: "urlencode",
@@ -3987,6 +4012,7 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		defaultAction: true,
+		outputType:    String,
 	},
 	"urlDecode": {
 		identifier: "urlencode",
@@ -4002,6 +4028,7 @@ var actions = map[string]*actionDefinition{
 				"WFEncodeMode": "Decode",
 			}
 		},
+		outputType: String,
 	},
 	"show": {
 		identifier: "showresult",
@@ -4182,6 +4209,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
+		outputType: String,
 	},
 	"getKeys": {
 		identifier: "getvalueforkey",
@@ -4197,6 +4225,7 @@ var actions = map[string]*actionDefinition{
 				"WFGetDictionaryValueType": "All Keys",
 			}
 		},
+		outputType: Arr,
 	},
 	"getValues": {
 		identifier: "getvalueforkey",
@@ -4212,6 +4241,7 @@ var actions = map[string]*actionDefinition{
 				"WFGetDictionaryValueType": "All Values",
 			}
 		},
+		outputType: Arr,
 	},
 	"getValue": {
 		identifier:    "getvalueforkey",
@@ -4792,7 +4822,6 @@ var actions = map[string]*actionDefinition{
 				"WFItemSpecifier": "First Item",
 			}
 		},
-		outputType: String,
 	},
 	"getLastItem": {
 		identifier: "getitemfromlist",
@@ -4808,7 +4837,6 @@ var actions = map[string]*actionDefinition{
 				"WFItemSpecifier": "Last Item",
 			}
 		},
-		outputType: String,
 	},
 	"getRandomItem": {
 		identifier: "getitemfromlist",
@@ -4824,7 +4852,6 @@ var actions = map[string]*actionDefinition{
 				"WFItemSpecifier": "Random Item",
 			}
 		},
-		outputType: String,
 	},
 	"getListItem": {
 		identifier: "getitemfromlist",
@@ -4845,7 +4872,6 @@ var actions = map[string]*actionDefinition{
 				"WFItemSpecifier": "Item At Index",
 			}
 		},
-		outputType: String,
 	},
 	"getListItems": {
 		identifier: "getitemfromlist",
@@ -4977,7 +5003,6 @@ var actions = map[string]*actionDefinition{
 				"WFPosterType": "Current",
 			}
 		},
-		outputType: Variable,
 	},
 	"setWallpaper": {
 		identifier: "wallpaper.set",
