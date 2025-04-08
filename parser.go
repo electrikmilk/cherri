@@ -110,34 +110,7 @@ func writeProcessed() {
 func printParsingDebug() {
 	fmt.Println(ansi("### PARSING ###", bold) + "\n")
 
-	if idx != 0 {
-		fmt.Println("Previous Character:")
-		var prevChar = prev(1)
-		if prevChar != '\n' {
-			printChar(prevChar, lineIdx, lineCharIdx-1)
-		} else {
-			printChar(prevChar, lineIdx-1, len(lines[lineIdx-1]))
-		}
-	}
-
-	fmt.Println("\nCurrent Character:")
-	printChar(char, lineIdx, lineCharIdx)
-	fmt.Print("\n")
-
-	if len(contents) > idx+1 {
-		fmt.Println("Next Character:")
-		var nextChar = next(1)
-		if char != '\n' {
-			printChar(nextChar, lineIdx, lineCharIdx+1)
-		} else {
-			printChar(nextChar, lineIdx+1, 0)
-		}
-		fmt.Print("\n")
-	}
-
-	if len(lines) > lineIdx {
-		fmt.Printf("Current Line:\n%s\n", lines[lineIdx])
-	}
+	lineReport("Current Line")
 
 	fmt.Println(ansi("## TOKENS ##", bold))
 	printTokens(tokens)
