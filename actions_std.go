@@ -6046,7 +6046,7 @@ var actions = map[string]*actionDefinition{
 
 var plistTypes = map[string]string{"string": "", "integer": "", "boolean": "", "array": "", "dict": "", "real": ""}
 
-func rawAction() {
+func defineRawAction() {
 	actions["rawAction"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
@@ -6483,8 +6483,8 @@ var toggleSetActions = map[string]actionDefinition{
 	},
 }
 
-// ToggleSetActions automates the creation of actions which simply toggle and set a state in the same format.
-func ToggleSetActions() {
+// defineToggleSetActions automates the creation of actions which simply toggle and set a state in the same format.
+func defineToggleSetActions() {
 	for name, def := range toggleSetActions {
 		var toggleName = fmt.Sprintf("toggle%s", name)
 		def.addParams = func(_ []actionArgument) map[string]any {

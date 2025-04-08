@@ -32,14 +32,23 @@ func generateShortcut() {
 		},
 		WFWorkflowClientVersion:              clientVersion,
 		WFWorkflowHasShortcutInputVariables:  hasShortcutInputVariables,
-		WFWorkflowInputContentItemClasses:    generateInputContentItems(),
-		WFWorkflowOutputContentItemClasses:   generateOutputContentItems(),
-		WFWorkflowImportQuestions:            generateImportQuestions(),
 		WFWorkflowMinimumClientVersion:       900,
 		WFWorkflowMinimumClientVersionString: "900",
 		WFWorkflowTypes:                      types,
 		WFWorkflowNoInputBehavior:            noInput,
 	}
+
+	waitFor(
+		func() {
+			shortcut.WFWorkflowInputContentItemClasses = generateInputContentItems()
+		},
+		func() {
+			shortcut.WFWorkflowOutputContentItemClasses = generateOutputContentItems()
+		},
+		func() {
+			shortcut.WFWorkflowImportQuestions = generateImportQuestions()
+		},
+	)
 
 	if workflowName != "" {
 		shortcut.WFWorkflowName = workflowName

@@ -10,6 +10,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 	"unicode"
 
 	"github.com/electrikmilk/args-parser"
@@ -243,4 +244,17 @@ func mapToStruct(data any, structure any) {
 
 	var jsonErr = json.Unmarshal(jsonStr, &structure)
 	handle(jsonErr)
+}
+
+// waitFor takes functions and uses a WaitGroup to wait for them all to finish.
+func waitFor(functions ...func()) {
+	var wg sync.WaitGroup
+	wg.Add(len(functions))
+	for _, function := range functions {
+		go func() {
+			defer wg.Done()
+			function()
+		}()
+	}
+	wg.Wait()
 }

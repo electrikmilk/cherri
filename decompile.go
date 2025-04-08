@@ -34,8 +34,10 @@ func decompile(b []byte) {
 	var _, marshalIndexedErr = plist.Unmarshal(b, &shortcut)
 	handle(marshalIndexedErr)
 
-	mapIdentifiers()
-	mapSplitActions()
+	waitFor(
+		mapIdentifiers,
+		mapSplitActions,
+	)
 
 	defineName()
 	decompileIcon()
