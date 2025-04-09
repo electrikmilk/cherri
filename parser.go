@@ -960,6 +960,7 @@ func collectConditional() {
 		var collectConditionalToken = tokenType(collectConditional)
 		if condition, found := conditions[collectConditionalToken]; found {
 			conditionType = condition
+			checkConditionalTypes(&collectConditionalToken, variableOneType, variableOneValue)
 		} else {
 			parserError(fmt.Sprintf("Invalid conditional '%s'", collectConditional))
 		}
@@ -987,6 +988,27 @@ func collectConditional() {
 			variableThreeValue: variableThreeValue,
 		},
 	})
+}
+
+func checkConditionalTypes(conditional *tokenType, variableType tokenType, value any) {
+	if variableType == Variable {
+		var variable = value.(varValue)
+		variableType = variable.valueType
+		var variableValue, found = getVariableValue(variable.value.(string))
+		if found {
+			variableType = variableValue.valueType
+		}
+	}
+
+	if len(allowedConditionalTypes[*conditional]) != 0 && !slices.Contains(allowedConditionalTypes[*conditional], variableType) {
+		parserError(
+			fmt.Sprintf("Invalid type '%s' for conditional '%s'\nAllowed types: %s",
+				variableType,
+				*conditional,
+				allowedConditionalTypes[*conditional],
+			),
+		)
+	}
 }
 
 func collectMenu() {

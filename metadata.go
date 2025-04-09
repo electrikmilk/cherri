@@ -141,6 +141,22 @@ var conditions = map[tokenType]int{
 	Between:        1003,
 }
 
+var allowedConditionalTypes = map[tokenType][]tokenType{
+	Is:             {String, Integer, Bool, Action},
+	Not:            {String, Integer, Bool, Action},
+	Any:            {},
+	Empty:          {},
+	Contains:       {String, Arr},
+	DoesNotContain: {String, Arr},
+	BeginsWith:     {String},
+	EndsWith:       {String},
+	GreaterThan:    {Integer, Float},
+	GreaterOrEqual: {Integer, Float},
+	LessThan:       {Integer, Float},
+	LessOrEqual:    {Integer, Float},
+	Between:        {Integer, Float},
+}
+
 /* Menus */
 
 var menus map[string][]varValue
