@@ -375,6 +375,8 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 	var identifier strings.Builder
 	identifier.WriteString(collectIdentifier())
 	var reference = identifier.String()
+	var getAs string
+	var coerce string
 
 	if q, found := questions[reference]; found {
 		if q.used {
@@ -402,18 +404,23 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		var key = collectRawString()
 		advanceUntil(']')
 		advance()
-		identifier.WriteString(fmt.Sprintf("[%s]", key))
-		reference = identifier.String()
+		getAs = key
 	}
 	if char == '.' {
-		identifier.WriteString(collectUntil(*until))
-		reference = identifier.String()
+		advance()
+		coerce = collectUntil(*until)
 	}
 
 	isInputVariable(reference)
 
 	*valueType = Variable
-	*value = reference
+	*value = varValue{
+		variableType: "Variable",
+		valueType:    Variable,
+		value:        reference,
+		coerce:       coerce,
+		getAs:        getAs,
+	}
 }
 
 func collectArguments() (arguments []actionArgument) {
@@ -858,7 +865,10 @@ func collectRepeat() {
 			typeof:    Variable,
 			ident:     repeatIndexIdentifier,
 			valueType: Variable,
-			value:     fmt.Sprintf("Repeat Index%s", index),
+			value: varValue{
+				valueType: Variable,
+				value:     fmt.Sprintf("Repeat Index%s", index),
+			},
 		},
 	)
 
@@ -905,7 +915,10 @@ func collectRepeatEach() {
 			typeof:    Variable,
 			ident:     repeatItemIdentifier,
 			valueType: Variable,
-			value:     fmt.Sprintf("Repeat Item%s", index),
+			value: varValue{
+				valueType: Variable,
+				value:     fmt.Sprintf("Repeat Item%s", index),
+			},
 		},
 	)
 

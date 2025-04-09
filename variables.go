@@ -103,6 +103,20 @@ func getVariableValue(identifier string) (variableValue *varValue, found bool) {
 	return nil, false
 }
 
+func makeVariableReferenceString(value varValue) string {
+	var identifier strings.Builder
+	identifier.WriteString(value.value.(string))
+
+	if value.getAs != "" {
+		identifier.WriteString(fmt.Sprintf("[%s]", value.getAs))
+	}
+	if value.coerce != "" {
+		identifier.WriteString(fmt.Sprintf(".%s", value.coerce))
+	}
+
+	return identifier.String()
+}
+
 var currentOutputName string
 var duplicateDelta int
 

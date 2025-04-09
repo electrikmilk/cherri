@@ -146,7 +146,7 @@ func makeVariableAction(t *token) {
 		makeVariableValueAction(t, &outputName, &varUUID)
 		if t.valueType != Arr {
 			if t.typeof == Variable && t.valueType == Variable {
-				setVariableParams["WFInput"] = variableValue(t.value.(string), t.ident)
+				setVariableParams["WFInput"] = variableValue(t.value.(varValue))
 			} else {
 				setVariableParams["WFInput"] = inputValue(outputName, varUUID)
 			}
@@ -184,11 +184,9 @@ func makeOutputName(token *token) string {
 		}
 	}
 	if token.valueType == Variable {
-		if _, found := variables[token.value.(string)]; found {
-			return token.value.(string)
-		}
-		if _, found := globals[token.value.(string)]; found {
-			return token.value.(string)
+		var identifer = token.value.(varValue).value.(string)
+		if validReference(identifer) {
+			return identifer
 		}
 	}
 	var typeOfToken = string(token.valueType)
@@ -247,7 +245,7 @@ func makeConditionalAction(t *token) {
 		var cond = t.value.(condition)
 		conditionalParams["WFInput"] = map[string]any{
 			"Type":     "Variable",
-			"Variable": variableValue(cond.variableOneValue.(string), t.ident),
+			"Variable": variableValue(cond.variableOneValue.(varValue)),
 		}
 		if cond.variableTwoValue != nil {
 			conditionalParameter("", conditionalParams, &cond.variableTwoType, cond.variableTwoValue)

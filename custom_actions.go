@@ -254,7 +254,10 @@ func handleCustomActionRef(identifier *string) action {
 		args: []actionArgument{
 			{
 				valueType: Variable,
-				value:     fmt.Sprintf("_%s_cherri_call", *identifier),
+				value: varValue{
+					valueType: Variable,
+					value:     fmt.Sprintf("_%s_cherri_call", *identifier),
+				},
 			},
 		},
 	}
@@ -272,16 +275,17 @@ func makeCustomActionCall(identifier *string, arguments *[]actionArgument) (cust
 			case String:
 				argumentValue = fmt.Sprintf("\"%s\"", argumentValue)
 			case Variable:
-				var variableValue, found = getVariableValue(argumentValue)
+				var identifier = argument.value.(varValue).value.(string)
+				var variableValue, found = getVariableValue(identifier)
 				if !found {
 					parserError(fmt.Sprintf("Undefined reference '%s'", argumentValue))
 				}
 				if variableValue.valueType == Arr {
-					var jsonBytes, jsonErr = json.Marshal(variableValue.value)
+					var jsonBytes, jsonErr = json.Marshal(fmt.Sprintf("{%s}", identifier))
 					handle(jsonErr)
 					argumentValue = fmt.Sprintf("{\"array\":%s}", string(jsonBytes))
 				} else {
-					argumentValue = fmt.Sprintf("\"{%s}\"", argumentValue)
+					argumentValue = fmt.Sprintf("\"{%s}\"", identifier)
 				}
 			case Arr:
 				var jsonBytes, jsonErr = json.Marshal(argument.value)

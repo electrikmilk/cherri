@@ -175,13 +175,13 @@ func conditionalParameter(key string, conditionalParams map[string]any, typeOf *
 }
 
 func conditionalParameterVariable(conditionalParams map[string]any, value any) {
-	var stringValue = value.(string)
-	var variable = variables[stringValue]
+	var condVarValue = value.(varValue)
+	var variable = variables[condVarValue.value.(string)]
 	switch variable.valueType {
 	case Integer:
-		conditionalParams["WFNumberValue"] = variableValue(stringValue, uuids[stringValue])
+		conditionalParams["WFNumberValue"] = variableValue(condVarValue)
 	default:
-		conditionalParams["WFConditionalActionString"] = attachmentValues(fmt.Sprintf("{%s}", stringValue))
+		conditionalParams["WFConditionalActionString"] = attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue)))
 	}
 }
 
@@ -329,7 +329,7 @@ func variableValueModifier(token *token, reference *map[string]any) {
 			}, token.valueType),
 			"WFInput": paramValue(actionArgument{
 				valueType: Variable,
-				value:     token.ident,
+				value:     varValue{value: token.ident},
 			}, token.valueType),
 			"WFMathOperation": operation,
 		}, reference))
@@ -387,47 +387,41 @@ func inputValue(name string, varUUID string) map[string]any {
 	}
 }
 
-func variableValue(identifier string, ident string) map[string]any {
-	var variable varValue
-	var getAs string
-	var coerce string
+func variableValue(variable varValue) map[string]any {
+	var identifier = variable.value.(string)
+	var variableReference varValue
 	var aggrandizements []map[string]any
 	if global, found := globals[identifier]; found {
-		variable = global
-		identifier = variable.value.(string)
+		variable.variableType = global.variableType
 	} else if v, found := variables[identifier]; found {
-		variable = v
+		variableReference = v
+		variable.constant = v.constant
+		variable.repeatItem = v.repeatItem
 	}
-	if v, found := variables[ident]; found {
-		getAs = v.getAs
-		coerce = v.coerce
-		if getAs != "" {
-			var refValueType = v.valueType
-			if v.valueType == Variable {
-				if ref, found := variables[v.value.(string)]; found {
-					refValueType = ref.valueType
-				}
-			}
-			if refValueType == Dict {
-				aggrandizements = append(aggrandizements, map[string]any{
-					"Type":          "WFDictionaryValueVariableAggrandizement",
-					"DictionaryKey": getAs,
-				})
-			} else {
-				aggrandizements = append(aggrandizements, map[string]any{
-					"PropertyUserInfo": 0,
-					"Type":             "WFPropertyVariableAggrandizement",
-					"PropertyName":     getAs,
-				})
-			}
+	if variable.getAs != "" {
+		var refValueType = variable.valueType
+		if variable.valueType == Variable && variableReference.valueType != "" {
+			refValueType = variableReference.valueType
 		}
-		if coerce != "" {
-			if contentItem, found := contentItems[coerce]; found {
-				aggrandizements = append(aggrandizements, map[string]any{
-					"Type":              "WFCoercionVariableAggrandizement",
-					"CoercionItemClass": contentItem,
-				})
-			}
+		if refValueType == Dict {
+			aggrandizements = append(aggrandizements, map[string]any{
+				"Type":          "WFDictionaryValueVariableAggrandizement",
+				"DictionaryKey": variable.getAs,
+			})
+		} else {
+			aggrandizements = append(aggrandizements, map[string]any{
+				"PropertyUserInfo": 0,
+				"Type":             "WFPropertyVariableAggrandizement",
+				"PropertyName":     variable.getAs,
+			})
+		}
+	}
+	if variable.coerce != "" {
+		if contentItem, found := contentItems[variable.coerce]; found {
+			aggrandizements = append(aggrandizements, map[string]any{
+				"Type":              "WFCoercionVariableAggrandizement",
+				"CoercionItemClass": contentItem,
+			})
 		}
 	}
 	var varType = "Variable"
@@ -652,10 +646,11 @@ func paramValue(arg actionArgument, handleAs tokenType) any {
 	switch arg.valueType {
 	case Variable:
 		if handleAs == String {
-			return attachmentValues(fmt.Sprintf("{%s}", arg.value))
+			var refStr = makeVariableReferenceString(arg.value.(varValue))
+			return attachmentValues(fmt.Sprintf("{%s}", refStr))
 		}
 
-		return variableValue(arg.value.(string), "")
+		return variableValue(arg.value.(varValue))
 	case Dict:
 		return makeDictionaryValue(&arg.value)
 	case Integer:

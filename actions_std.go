@@ -4279,7 +4279,7 @@ var actions = map[string]*actionDefinition{
 			},
 			{
 				name:      "value",
-				validType: Variable,
+				validType: String,
 				key:       "WFDictionaryValue",
 			},
 		},
@@ -5886,7 +5886,7 @@ var actions = map[string]*actionDefinition{
 				var photo string
 				var image = getArgValue(args[2])
 				if reflect.TypeOf(image).String() != stringType && args[2].valueType == Variable {
-					photo = fmt.Sprintf("{%s}", args[2].value)
+					photo = fmt.Sprintf("{%s}", makeVariableReferenceString(args[2].value.(varValue)))
 				} else {
 					photo = getArgValue(args[2]).(string)
 				}

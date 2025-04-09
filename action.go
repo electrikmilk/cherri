@@ -151,7 +151,7 @@ func actionParameters(arguments []actionArgument) map[string]any {
 				continue
 			}
 			if a.validType == Variable {
-				params[a.key] = variableInput(arguments[i].value.(string))
+				params[a.key] = variableInput(arguments[i].value.(varValue).value.(string))
 				continue
 			}
 
@@ -270,9 +270,9 @@ func checkEnum(param *parameterDefinition, argument *actionArgument) {
 }
 
 // realVariableValue recurses to get the real value of a variable given its name.
-func realVariableValue(identifier string, lastValueType tokenType) (varValue varValue) {
+func realVariableValue(identifier string, lastValueType tokenType) (variableValue varValue) {
 	if _, global := globals[identifier]; global {
-		varValue = globals[identifier]
+		variableValue = globals[identifier]
 		return
 	}
 	var front = strings.Split(identifier, "[")[0]
@@ -286,10 +286,10 @@ func realVariableValue(identifier string, lastValueType tokenType) (varValue var
 			parserError("Passed variable value that evaluates to variable")
 		}
 		if value != nil {
-			varValue = realVariableValue(value.(string), argValueType)
+			variableValue = realVariableValue(value.(varValue).value.(string), argValueType)
 		}
 	} else {
-		varValue = variables[front]
+		variableValue = variables[front]
 	}
 	return
 }
@@ -311,7 +311,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		validActionOutput(param, argVal)
 		return
 	case argValueType == Variable:
-		var identifier = argVal.(string)
+		var identifier = argVal.(varValue).value.(string)
 		var getVar = realVariableValue(identifier, String)
 		argValueType = checkTypeTransform(getVar.valueType)
 		argVal = getVar.value
@@ -374,7 +374,8 @@ func getArgValue(argument actionArgument) any {
 	if argument.value == nil {
 		return nil
 	}
-	var identifier = argument.value.(string)
+
+	var identifier = argument.value.(varValue).value.(string)
 	if _, found := variables[identifier]; !found {
 		return argument.value
 	}
