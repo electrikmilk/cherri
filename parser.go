@@ -57,8 +57,8 @@ func initParse() {
 
 	preParsing = true
 
+	defineRawAction()
 	waitFor(
-		defineRawAction,
 		defineToggleSetActions,
 		handleIncludes,
 	)
