@@ -17,7 +17,6 @@ var tokens []token
 
 /* Keywords */
 const (
-	Var            tokenType = "variable"
 	Constant       tokenType = "const"
 	If             tokenType = "if"
 	Else           tokenType = "else"

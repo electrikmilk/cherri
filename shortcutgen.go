@@ -100,7 +100,7 @@ func generateActions() {
 	uuids = make(map[string]string)
 	for _, t := range tokens {
 		switch t.typeof {
-		case Var, AddTo, SubFrom, MultiplyBy, DivideBy:
+		case Variable, AddTo, SubFrom, MultiplyBy, DivideBy:
 			makeVariableAction(&t)
 		case Comment:
 			makeCommentAction(t.value.(string))
@@ -145,7 +145,7 @@ func makeVariableAction(t *token) {
 
 		makeVariableValueAction(t, &outputName, &varUUID)
 		if t.valueType != Arr {
-			if t.typeof == Var && t.valueType == Variable {
+			if t.typeof == Variable && t.valueType == Variable {
 				setVariableParams["WFInput"] = variableValue(t.value.(string), t.ident)
 			} else {
 				setVariableParams["WFInput"] = inputValue(outputName, varUUID)
@@ -155,7 +155,7 @@ func makeVariableAction(t *token) {
 		}
 	}
 
-	if t.typeof != Var {
+	if t.typeof != Variable {
 		if variables[t.ident].valueType != Arr {
 			buildStdAction("setvariable", setVariableParams)
 			return
@@ -183,7 +183,7 @@ func makeOutputName(token *token) string {
 			return token.ident
 		}
 	}
-	if token.valueType == Var {
+	if token.valueType == Variable {
 		if _, found := variables[token.value.(string)]; found {
 			return token.value.(string)
 		}

@@ -328,7 +328,7 @@ func variableValueModifier(token *token, reference *map[string]any) {
 				value:     token.value,
 			}, token.valueType),
 			"WFInput": paramValue(actionArgument{
-				valueType: Var,
+				valueType: Variable,
 				value:     token.ident,
 			}, token.valueType),
 			"WFMathOperation": operation,
@@ -403,7 +403,7 @@ func variableValue(identifier string, ident string) map[string]any {
 		coerce = v.coerce
 		if getAs != "" {
 			var refValueType = v.valueType
-			if v.valueType == Var {
+			if v.valueType == Variable {
 				if ref, found := variables[v.value.(string)]; found {
 					refValueType = ref.valueType
 				}

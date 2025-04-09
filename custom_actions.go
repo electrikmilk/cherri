@@ -234,7 +234,7 @@ func handleCustomActionRef(identifier *string) action {
 
 	var variableIdentifier = fmt.Sprintf("_%s_cherri_call", *identifier)
 	tokens = append(tokens, token{
-		typeof:    Var,
+		typeof:    Variable,
 		ident:     variableIdentifier,
 		valueType: Dict,
 		value:     customActionCall,
@@ -253,7 +253,7 @@ func handleCustomActionRef(identifier *string) action {
 		ident: "runSelf",
 		args: []actionArgument{
 			{
-				valueType: Var,
+				valueType: Variable,
 				value:     fmt.Sprintf("_%s_cherri_call", *identifier),
 			},
 		},

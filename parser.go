@@ -514,7 +514,7 @@ func collectVariable(constant bool) {
 	var value any
 	var getAs string
 	var coerce string
-	var varType = Var
+	var varType = Variable
 	switch {
 	case strings.Contains(lookAheadUntil('\n'), "="):
 		advance()
@@ -529,7 +529,7 @@ func collectVariable(constant bool) {
 			varType = DivideBy
 		case tokenAhead(Set):
 		}
-		if varType != Var && constant {
+		if varType != Variable && constant {
 			parserError("Constants cannot be added to.")
 		}
 		advance()
@@ -552,7 +552,7 @@ func collectVariable(constant bool) {
 		value:     value,
 	})
 
-	if varType != Var {
+	if varType != Variable {
 		return
 	}
 	if _, found := variables[identifier]; !found {
@@ -587,7 +587,7 @@ func collectType(valueType *tokenType, value *any) {
 		*valueType = Dict
 		*value = make(map[string]interface{})
 	case tokenAhead(VariableType):
-		*valueType = Var
+		*valueType = Variable
 	default:
 		parserError(fmt.Sprintf("Unknown type '%s'\n\nAvailable types: \n- text\n- number\n- bool\n- array\n- dictionary\n- var", lookAheadUntil('\n')))
 	}
@@ -855,7 +855,7 @@ func collectRepeat() {
 			valueType: timesType,
 			value:     timesValue,
 		}, token{
-			typeof:    Var,
+			typeof:    Variable,
 			ident:     repeatIndexIdentifier,
 			valueType: Variable,
 			value:     fmt.Sprintf("Repeat Index%s", index),
@@ -902,7 +902,7 @@ func collectRepeatEach() {
 			valueType: iterableType,
 			value:     iterableValue,
 		}, token{
-			typeof:    Var,
+			typeof:    Variable,
 			ident:     repeatItemIdentifier,
 			valueType: Variable,
 			value:     fmt.Sprintf("Repeat Item%s", index),

@@ -1204,7 +1204,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "file",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 			{
@@ -1231,7 +1231,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "files",
-				validType: Var,
+				validType: Variable,
 				key:       "WFContentItemInputParameter",
 			},
 			{
@@ -1267,7 +1267,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "pdfFile",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 		},
@@ -1277,7 +1277,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "pdfFile",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 			{
@@ -1329,7 +1329,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 			{
@@ -1421,7 +1421,7 @@ var actions = map[string]*actionDefinition{
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			var textArg = args[1]
-			if textArg.valueType == Var {
+			if textArg.valueType == Variable {
 				args[1] = actionArgument{
 					valueType: String,
 					value:     fmt.Sprintf("^{%s}", textArg.value),
@@ -1459,7 +1459,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "matches",
-				validType: Var,
+				validType: Variable,
 				key:       "matches",
 			},
 		},
@@ -3198,7 +3198,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "podcast",
-				validType: Var,
+				validType: Variable,
 				key:       "WFPodcastShow",
 			},
 		},
@@ -3208,7 +3208,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "podcast",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 			{
@@ -5971,7 +5971,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 			{
@@ -6000,7 +6000,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "shortcut",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 			{
