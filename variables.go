@@ -163,6 +163,10 @@ func duplicateOutputName() string {
 		duplicateDelta = endingDelta
 	}
 
+	if !args.Using("import") && !strings.Contains(currentOutputName, " ") {
+		currentOutputName = fmt.Sprintf("%s ", currentOutputName)
+	}
+
 	currentOutputName = fmt.Sprintf("%s%d", currentOutputName, duplicateDelta)
 
 	return currentOutputName
