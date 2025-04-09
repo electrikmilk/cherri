@@ -1,7 +1,5 @@
 // VCard menu
 
-#include 'stdlib'
-
 const cherri_icon = base64File("assets/cherri_icon.png")
 
 @items = []
