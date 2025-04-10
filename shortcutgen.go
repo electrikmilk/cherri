@@ -242,19 +242,30 @@ func makeConditionalAction(t *token) {
 	}
 	switch t.valueType {
 	case If:
-		var cond = t.value.(condition)
-		conditionalParams["WFInput"] = map[string]any{
-			"Type":     "Variable",
-			"Variable": variableValue(cond.variableOneValue.(varValue)),
-		}
-		if cond.variableTwoValue != nil {
-			conditionalParameter("", conditionalParams, &cond.variableTwoType, cond.variableTwoValue)
-		}
-		if cond.variableThreeValue != nil {
-			conditionalParameter("WFAnotherNumber", conditionalParams, &cond.variableThreeType, cond.variableThreeValue)
-		}
-		conditionalParams["WFCondition"] = cond.condition
 		conditionalParams["WFControlFlowMode"] = startStatement
+
+		if iosVersion < 18 {
+			var cond = t.value.(WFConditions)
+			var firstCondition = cond.conditions[0]
+			var firstArg = firstCondition.arguments[0]
+			conditionalParams["WFInput"] = map[string]any{
+				"Type":     "Variable",
+				"Variable": variableValue(firstArg.value.(varValue)),
+			}
+			if len(firstCondition.arguments) > 1 {
+				var secondArg = firstCondition.arguments[1]
+				conditionalParameter("", conditionalParams, &secondArg.valueType, secondArg.value)
+			}
+			if len(firstCondition.arguments) > 2 {
+				var thirdArg = firstCondition.arguments[2]
+				conditionalParameter("WFAnotherNumber", conditionalParams, &thirdArg.valueType, thirdArg.value)
+			}
+			conditionalParams["WFCondition"] = firstCondition.condition
+			conditionalParams["WFControlFlowMode"] = startStatement
+		} else {
+			var cond = t.value.(WFConditions)
+			conditionalParams["WFConditions"] = makeConditions(&cond)
+		}
 	case Else:
 		conditionalParams["WFControlFlowMode"] = statementPart
 	case EndClosure:
@@ -262,6 +273,38 @@ func makeConditionalAction(t *token) {
 	}
 
 	buildStdAction("conditional", conditionalParams)
+}
+
+func makeConditions(wfConditions *WFConditions) map[string]any {
+	var filterTemplates []map[string]any
+	for _, condition := range wfConditions.conditions {
+		var conditionParams = map[string]any{
+			"WFCondition": condition.condition,
+			"WFInput": map[string]any{
+				"Type":     "Variable",
+				"Variable": variableValue(condition.arguments[0].value.(varValue)),
+			},
+		}
+
+		if len(condition.arguments) > 1 {
+			var argumentTwo = condition.arguments[1]
+			conditionalParameter("", conditionParams, &argumentTwo.valueType, argumentTwo.value)
+		}
+		if len(condition.arguments) > 2 {
+			var argumentThree = condition.arguments[2]
+			conditionalParameter("WFAnotherNumber", conditionParams, &argumentThree.valueType, argumentThree.value)
+		}
+
+		filterTemplates = append(filterTemplates, conditionParams)
+	}
+
+	return map[string]any{
+		"Value": map[string]any{
+			"WFActionParameterFilterPrefix":    wfConditions.WFActionParameterFilterPrefix,
+			"WFActionParameterFilterTemplates": filterTemplates,
+		},
+		"WFSerializationType": "WFContentPredicateTableTemplate",
+	}
 }
 
 func makeMenuAction(t *token) {
