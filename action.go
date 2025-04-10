@@ -7,6 +7,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"maps"
 	"math"
 	"reflect"
 	"slices"
@@ -31,15 +32,16 @@ type parameterDefinition struct {
 	enum         []string
 	optional     bool
 	infinite     bool
+	literal      bool
 }
 
-// actionArgument is a variableValue value used to define collected argument values by the parser.
+// actionArgument is a varValue value used to define collected argument values by the parser.
 type actionArgument struct {
 	valueType tokenType
 	value     any
 }
 
-// action is a variableValue value that represents a collected action and arguments.
+// action is a varValue value that represents a collected action and arguments.
 type action struct {
 	// ident is the identifier of the action collected (e.g. identifier(...)).
 	ident string
@@ -50,8 +52,8 @@ type action struct {
 // checkFunc is a function that can be passed a collected actions arguments as a slice of actionArgument and the current action's definition.
 type checkFunc func(args []actionArgument, definition *actionDefinition)
 
-// paramsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument that must return a slice of plistData as a result.
-type paramsFunc func(args []actionArgument) []plistData
+// paramsFunc is a function that can be passed a collected actions arguments as a slice of actionArgument that must return action params as a result.
+type paramsFunc func(args []actionArgument) map[string]any
 
 type appIntent struct {
 	name                string
@@ -67,9 +69,11 @@ type actionDefinition struct {
 	parameters         []parameterDefinition
 	check              checkFunc
 	make               paramsFunc
+	decomp             func(action *ShortcutAction) (arguments []string)
 	addParams          paramsFunc
 	appIntent          appIntent
 	outputType         tokenType
+	defaultAction      bool // Default action for this identifier during decompilation.
 	mac                bool
 	minVersion         float64
 	maxVersion         float64
@@ -91,23 +95,15 @@ func setCurrentAction(identifier string, definition *actionDefinition) {
 	currentAction = *definition
 }
 
-// plistAction builds an action based on its actionDefinition and adds it to the plist.
-func plistAction(arguments []actionArgument, outputName *plistData, actionUUID *plistData) {
+// makeAction builds an action based on its actionDefinition and adds it to the shortcut.
+func makeAction(arguments []actionArgument, reference *map[string]any) {
 	actionIndex++
-	// Check for question arguments
-	questionArgs(arguments)
 	// Determine identifier
 	var ident = actionIdentifier()
 	// Determine parameters
 	var params = actionParameters(arguments)
 	// Additionally add the output name and UUID of this action if provided
-	if outputName.value != nil {
-		params = append(params, *outputName)
-	}
-	if actionUUID.value != nil {
-		params = append(params, *actionUUID)
-	}
-	appendPlist(makeAction(ident, params))
+	addAction(ident, attachReferenceParams(&params, reference))
 }
 
 // actionIdentifier determines the identifier of currentAction.
@@ -125,89 +121,60 @@ func actionIdentifier() (ident string) {
 	} else {
 		ident = fmt.Sprintf("%s.%s", ident, strings.ToLower(currentActionIdentifier))
 	}
-
 	return
 }
 
 var emptyAppIntent = appIntent{}
 
 // actionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
-func actionParameters(arguments []actionArgument) (params []plistData) {
+func actionParameters(arguments []actionArgument) map[string]any {
+	var params = make(map[string]any)
 	if currentAction.addParams != nil {
-		params = append(params, currentAction.addParams(arguments)...)
+		maps.Copy(params, currentAction.addParams(arguments))
 	}
 	if currentAction.appIntent != emptyAppIntent {
-		params = append(params, appIntentDescriptor(currentAction.appIntent))
+		maps.Copy(params, appIntentDescriptor(currentAction.appIntent))
 	}
 	if currentAction.make != nil {
-		params = currentAction.make(arguments)
-		return
+		return currentAction.make(arguments)
 	}
 	if currentAction.parameters != nil {
 		var argumentsSize = len(arguments)
 		if argumentsSize == 0 {
-			return
+			return params
 		}
 		for i, a := range currentAction.parameters {
 			if argumentsSize <= i {
-				return
+				return params
 			}
 			if arguments[i].valueType == Nil || a.key == "" {
 				continue
 			}
 			if a.validType == Variable {
-				params = append(params, variableInput(a.key, arguments[i].value.(string)))
+				params[a.key] = variableInput(arguments[i].value.(varValue).value.(string))
 				continue
 			}
 
-			params = append(params, argumentValue(a.key, arguments, i))
+			params[a.key] = argumentValue(arguments, i)
 		}
 	}
-	return
+
+	return params
 }
 
-// questionArgs updates questions to target the action parameter
-// that it's identifier matches the arguments value.
-func questionArgs(arguments []actionArgument) {
-	for i, a := range arguments {
-		if a.valueType != Question {
-			continue
-		}
-		var lowerIdentifier = strings.ToLower(a.value.(string))
-		if question, found := questions[lowerIdentifier]; found {
-			var parameter = currentAction.parameters[i]
-			question.parameter = parameter.key
-			question.actionIndex = actionIndex
-			arguments[i].value = ""
-		}
-	}
+// buildStdAction is an alias of addAction that simply prepends the shortcuts bundle identifier to ident.
+func buildStdAction(ident string, params map[string]any) {
+	addAction(fmt.Sprintf("is.workflow.actions.%s", ident), params)
 }
 
-// makeAction constructs the action for the plist using ident and params.
-func makeAction(ident string, params []plistData) []plistData {
-	return []plistData{
-		{
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "WFWorkflowActionIdentifier",
-					dataType: Text,
-					value:    ident,
-				},
-				{
-					key:      "WFWorkflowActionParameters",
-					dataType: Dictionary,
-					value:    params,
-				},
-			},
+// addAction adds an action to the shortcut.
+func addAction(identifier string, params map[string]any) {
+	shortcut.WFWorkflowActions = append(shortcut.WFWorkflowActions,
+		ShortcutAction{
+			WFWorkflowActionIdentifier: identifier,
+			WFWorkflowActionParameters: params,
 		},
-	}
-}
-
-// makeStdAction is an alias of makeAction that simply prepends the shortcuts bundle identifier to ident.
-func makeStdAction(ident string, params []plistData) []plistData {
-	ident = "is.workflow.actions." + ident
-	return makeAction(ident, params)
+	)
 }
 
 // checkAction checks the parsed arguments provided for an action and if it can be used based on definitions set.
@@ -237,7 +204,11 @@ func checkAction() {
 	if isMac, found := definitions["mac"]; found {
 		if !isMac.(bool) && currentAction.mac {
 			parserError(
-				fmt.Sprintf("You've set your Shortcut as non-Mac. Action '%s()' is a Mac only action", currentActionIdentifier),
+				fmt.Sprintf("macOS action '%s()' in non-macOS Shortcut.", currentActionIdentifier),
+			)
+		} else if isMac.(bool) && !currentAction.mac {
+			parserError(
+				fmt.Sprintf("Non-macOS action '%s()' in macOS-only Shortcut.", currentActionIdentifier),
 			)
 		}
 	}
@@ -299,9 +270,9 @@ func checkEnum(param *parameterDefinition, argument *actionArgument) {
 }
 
 // realVariableValue recurses to get the real value of a variable given its name.
-func realVariableValue(identifier string, lastValueType tokenType) (varValue variableValue) {
+func realVariableValue(identifier string, lastValueType tokenType) (variableValue varValue) {
 	if _, global := globals[identifier]; global {
-		varValue = globals[identifier]
+		variableValue = globals[identifier]
 		return
 	}
 	var front = strings.Split(identifier, "[")[0]
@@ -315,10 +286,10 @@ func realVariableValue(identifier string, lastValueType tokenType) (varValue var
 			parserError("Passed variable value that evaluates to variable")
 		}
 		if value != nil {
-			varValue = realVariableValue(value.(string), argValueType)
+			variableValue = realVariableValue(value.(varValue).value.(string), argValueType)
 		}
 	} else {
-		varValue = variables[front]
+		variableValue = variables[front]
 	}
 	return
 }
@@ -337,15 +308,15 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 	var argVal = argument.value
 	switch {
 	case argValueType == Action:
-		validActionOutput(param.name, param.validType, argVal)
+		validActionOutput(param, argVal)
 		return
 	case argValueType == Variable:
-		var identifier = argVal.(string)
+		var identifier = argVal.(varValue).value.(string)
 		var getVar = realVariableValue(identifier, String)
 		argValueType = checkTypeTransform(getVar.valueType)
 		argVal = getVar.value
 		if argValueType == Action {
-			validActionOutput(param.name, param.validType, argVal)
+			validActionOutput(param, argVal)
 			return
 		}
 		if argValueType != param.validType && param.validType != Variable && getVar.variableType != "Ask" {
@@ -360,7 +331,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 	case argValueType == Question:
 	case argValueType == Nil:
 	case param.validType == String && argument.valueType == RawString:
-	case argument.valueType != param.validType:
+	case argValueType != param.validType:
 		if argValueType == String {
 			argVal = "\"" + argVal.(string) + "\""
 		}
@@ -375,24 +346,21 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 }
 
 // validActionOutput checks the output of an action in the case that the output has been assigned to a variable.
-func validActionOutput(field string, validType tokenType, value any) {
+func validActionOutput(param *parameterDefinition, value any) {
 	var actionIdent = value.(action).ident
 	if action, found := actions[actionIdent]; found {
 		var actionOutputType = action.outputType
 		if actionOutputType == "" {
 			return
 		}
-		if actionOutputType != validType {
-			parserError(
-				fmt.Sprintf(
-					"Invalid variable value of action '%v' that outputs type '%s' for argument '%s' of type '%s' in '%s()'",
-					actionIdent+"()",
-					actionOutputType,
-					field,
-					validType,
-					currentActionIdentifier,
-				),
-			)
+		if actionOutputType != param.validType && param.validType != Variable {
+			parserError(fmt.Sprintf("Invalid variable value of action '%v' (%s) for argument '%s' (%s).\n%s",
+				actionIdent+"()",
+				actionOutputType,
+				param.name,
+				param.validType,
+				generateActionDefinition(*param, false, false),
+			))
 		}
 	}
 }
@@ -406,7 +374,8 @@ func getArgValue(argument actionArgument) any {
 	if argument.value == nil {
 		return nil
 	}
-	var identifier = argument.value.(string)
+
+	var identifier = argument.value.(varValue).value.(string)
 	if _, found := variables[identifier]; !found {
 		return argument.value
 	}
@@ -421,13 +390,22 @@ func getArgValue(argument actionArgument) any {
 
 // checkArg checks to ensure the collected argument for the current action is valid.
 func checkArg(param *parameterDefinition, argument *actionArgument) {
-	if argument.valueType == Var && argument.value == "Ask" {
+	if argument.valueType == Variable && argument.value == "Ask" {
 		return
 	}
+
 	if param.enum != nil {
 		checkEnum(param, argument)
 	}
+
 	typeCheck(param, argument)
+
+	questionArg(param, argument)
+
+	if param.literal {
+		checkLiteralValue(param, argument)
+	}
+
 	var realValue = getArgValue(*argument)
 	var stringDefaultValue = fmt.Sprintf("%s", param.defaultValue)
 	if param.defaultValue != nil && stringDefaultValue == realValue {
@@ -438,6 +416,28 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 				generateActionDefinition(*param, false, false),
 			),
 		)
+	}
+}
+
+// questionArg checks if the argument references a question so that it can update the question to point to the current action's argument.
+func questionArg(param *parameterDefinition, argument *actionArgument) {
+	if argument.valueType != Question {
+		return
+	}
+	var identifier = argument.value.(string)
+	if question, found := questions[identifier]; found {
+		question.parameter = param.key
+		question.actionIndex = actionIndex - 1
+		argument.value = ""
+	}
+}
+
+func checkLiteralValue(param *parameterDefinition, argument *actionArgument) {
+	if argument.valueType != param.validType {
+		parserError(fmt.Sprintf(
+			"Shortcuts does not allow variables for this argument, use a literal for the argument value.\n%s",
+			generateActionDefinition(*param, false, false),
+		))
 	}
 }
 
@@ -484,6 +484,11 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 	}
 	definition.WriteString(strings.Join(arguments, ", "))
 	definition.WriteRune(')')
+
+	if currentAction.outputType != "" {
+		definition.WriteString(fmt.Sprintf(": %s ", currentAction.outputType))
+	}
+
 	if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
 		definition.WriteString(generateActionRestrictions())
 	}
@@ -554,7 +559,7 @@ func generateActionParamDefinition(param parameterDefinition) string {
 	definition.WriteString(param.name)
 	if param.defaultValue != nil {
 		if reflect.TypeOf(param.defaultValue).String() == stringType {
-			definition.WriteString(fmt.Sprintf(" = \"%v\"", param.defaultValue))
+			definition.WriteString(fmt.Sprintf(" = \"%v\"", strings.Replace(param.defaultValue.(string), "\n", "\\n", 1)))
 		} else {
 			definition.WriteString(fmt.Sprintf(" = %v", param.defaultValue))
 		}
@@ -568,31 +573,13 @@ func makeLibraries() {
 	libraries = make(map[string]libraryDefinition)
 }
 
-func appIntentDescriptor(intent appIntent) plistData {
-	return plistData{
-		key:      "AppIntentDescriptor",
-		dataType: Dictionary,
-		value: []plistData{
-			{
-				key:      "TeamIdentifier",
-				dataType: Text,
-				value:    "0000000000",
-			},
-			{
-				key:      "BundleIdentifier",
-				dataType: Text,
-				value:    intent.bundleIdentifier,
-			},
-			{
-				key:      "Name",
-				dataType: Text,
-				value:    intent.name,
-			},
-			{
-				key:      "AppIntentIdentifier",
-				dataType: Text,
-				value:    intent.appIntentIdentifier,
-			},
+func appIntentDescriptor(intent appIntent) map[string]any {
+	return map[string]any{
+		"AppIntentDescriptor": map[string]string{
+			"TeamIdentifier":      "0000000000",
+			"BundleIdentifier":    intent.bundleIdentifier,
+			"Name":                intent.name,
+			"AppIntentIdentifier": intent.appIntentIdentifier,
 		},
 	}
 }

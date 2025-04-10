@@ -15,8 +15,9 @@ src/aml
 # Tests
 *.cherri
 !/tests/*.cherri
-!/tests/*_expected.plist
+/tests/*_decompiled.plist
 !stdlib.cherri
+*.prof
 
 # Development
 .DS_Store

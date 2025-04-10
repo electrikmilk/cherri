@@ -39,14 +39,23 @@ func init() {
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
-		Name:        "import",
-		Short:       "i",
-		Description: "Import compiled Shortcut (ignored if unsigned).",
-	})
-	args.Register(args.Argument{
 		Name:        "comments",
 		Short:       "c",
-		Description: "Create comment actions for text comments (e.g. //, /**/)",
+		Description: "Include comment actions in compiled Shortcut or import.",
+	})
+	args.Register(args.Argument{
+		Name:        "open",
+		Description: "Open compiled Shortcut (ignored if unsigned).",
+	})
+	args.Register(args.Argument{
+		Name:         "import",
+		Description:  "[BETA] Import Shortcut from an iCloud link or file path and convert to Cherri.",
+		ExpectsValue: true,
+	})
+	args.Register(args.Argument{
+		Name:         "signing-server",
+		ExpectsValue: true,
+		Description:  "Sign the compiled Shortcut using a remote signing service that runs https://github.com/scaxyz/shortcut-signing-server.",
 	})
 	args.Register(args.Argument{
 		Name:        "hubsign",

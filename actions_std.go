@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"maps"
 	"os"
 	"reflect"
 	"regexp"
@@ -15,6 +16,9 @@ import (
 
 	"github.com/google/uuid"
 )
+
+const SetVariableIdentifier = "is.workflow.actions.setvariable"
+const AppendVariableIdentifier = "is.workflow.actions.appendvariable"
 
 // FIXME: Some of these actions have a value with a set list values for an arguments,
 //  but the argument value is not being checked against its possible values.
@@ -51,52 +55,45 @@ var ipTypes = []string{"IPv4", "IPv6"}
 var engines = []string{"Amazon", "Bing", "DuckDuckGo", "eBay", "Google", "Reddit", "Twitter", "Yahoo!", "YouTube"}
 var webpageDetails = []string{"Page Contents", "Page Selection", "Page URL", "Name"}
 var urlComponents = []string{"Scheme", "User", "Password", "Host", "Port", "Path", "Query", "Fragment"}
-var httpMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE"}
+var httpMethods = []string{"POST", "PUT", "PATCH", "DELETE"}
 var httpParams = []parameterDefinition{
 	{
 		name:      "url",
+		key:       "WFURL",
 		validType: String,
 	},
 	{
-		name:         "method",
-		validType:    String,
-		optional:     true,
-		enum:         httpMethods,
-		defaultValue: "GET",
+		name:      "method",
+		key:       "WFHTTPMethod",
+		validType: String,
+		optional:  true,
+		enum:      httpMethods,
 	},
 	{
 		name:      "body",
 		validType: Dict,
 		optional:  true,
+		literal:   true,
 	},
 	{
 		name:      "headers",
+		key:       "WFHTTPHeaders",
 		validType: Dict,
 		optional:  true,
+		literal:   true,
 	},
 }
-var cropPositions = []string{"Center", "Top Left", "Top Right", "Bottom Left", "Bottom Right", "Custom"}
+var imageEditingPositions = []string{"Center", "Top Left", "Top Right", "Bottom Left", "Bottom Right", "Custom"}
 var sortOrders = []string{"asc", "desc"}
 var windowSortings = []string{"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"}
 var windowPositions = []string{"Top Left", "Top Center", "Top Right", "Middle Left", "Center", "Middle Right", "Bottom Left", "Bottom Center", "Bottom Right", "Coordinates"}
 var windowConfigurations = []string{"Fit Screen", "Top Half", "Bottom Half", "Left Half", "Right Half", "Top Left Quarter", "Top Right Quarter", "Bottom Left Quarter", "Bottom Right Quarter", "Dimensions"}
-var focusModes = plistData{
-	key:      "FocusModes",
-	dataType: Dictionary,
-	value: []plistData{
-		{
-			key:      "Identifier",
-			dataType: Text,
-			value:    "com.apple.donotdisturb.mode.default",
-		},
-		{
-			key:      "DisplayString",
-			dataType: Text,
-			value:    "Do Not Disturb",
-		},
-	},
+var focusModes = map[string]any{
+	"Identifier":    "com.apple.donotdisturb.mode.default",
+	"DisplayString": "Do Not Disturb",
 }
-var eventDetails = []string{"Start Date", "End Date", "Is All Day", "Location", "Duration", "My Status", "Attendees", "URL", "Title", "Notes", "Attachments"}
+var editEventDetails = []string{"Start Date", "End Date", "Is All Day", "Location", "Duration", "My Status", "Attendees", "URL", "Title", "Notes", "Attachments"}
+var eventDetails = []string{"Start Date", "End Date", "Is All Day", "Calendar", "Location", "Has Alarms", "Duration", "Is Canceled", "My Status", "Organizer", "Organizer Is Me", "Attendees", "Number of Attendees", "URL", "Title", "Notes", "Attachments", "File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name"}
 var dateFormats = []string{"None", "Short", "Medium", "Long", "Relative", "RFC 2822", "ISO 8601", "Custom"}
 var timeFormats = []string{"None", "Short", "Medium", "Long", "Relative"}
 var timerDurations = []string{"hr", "min", "sec"}
@@ -131,6 +128,13 @@ var textSizes = []string{
 	"Small",
 	"Extra Small",
 }
+var roundings = []string{"Ones Place", "Tens Place", "Hundreds Place", "Thousands", "Ten Thousands", "Hundred Thousands", "Millions"}
+var imageMaskTypes = []string{"Rounded Rectangle", "Ellipse", "Icon"}
+var imageDetails = []string{"Album", "Width", "Height", "Date Taken", "Media Type", "Photo Type", "Is a Screenshot", "Is a Screen Recording", "Location", "Duration", "Frame Rate", "Orientation", "Camera Make", "Camera Model", "Metadata Dictionary", "Is Favorite", "File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name"}
+var colorSpaces = []string{"RGB", "Gray"}
+var shuffleOptions = []string{"Off", "Songs"}
+var repeatOptions = []string{"None", "One", "All"}
+var musicDetails = []string{"Title", "Album", "Artist", "Album Artist", "Genre", "Composer", "Date Added", "Media Kind", "Duration", "Play Count", "Track Number", "Disc Number", "Album Artwork", "Is Explicit", "Lyrics", "Release Date", "Comments", "Is Cloud Item", "Skip Count", "Last Played Date", "Rating", "File Path", "Name"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -142,6 +146,7 @@ var toggleAlarmIntent = appIntent{
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
 	"date": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -149,25 +154,17 @@ var actions = map[string]*actionDefinition{
 				key:       "WFDateActionDate",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFDateActionMode",
-					dataType: Text,
-					value:    "Specified Date",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFDateActionMode": "Specified Date",
 			}
 		},
 	},
 	"currentDate": {
 		identifier: "date",
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFDateActionMode",
-					dataType: Text,
-					value:    "Current Date",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFDateActionMode": "Current Date",
 			}
 		},
 	},
@@ -182,10 +179,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addSeconds": {
-		identifier: "adjustdate",
+		identifier:    "adjustdate",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -193,7 +192,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Add", "sec", args)
 		},
 	},
@@ -202,6 +201,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -209,7 +209,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Add", "min", args)
 		},
 	},
@@ -218,6 +218,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -225,7 +226,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Add", "hr", args)
 		},
 	},
@@ -234,6 +235,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -241,7 +243,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Add", "days", args)
 		},
 	},
@@ -250,6 +252,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -257,7 +260,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Add", "weeks", args)
 		},
 	},
@@ -266,6 +269,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -273,7 +277,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Add", "months", args)
 		},
 	},
@@ -282,6 +286,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -289,7 +294,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Add", "yr", args)
 		},
 	},
@@ -298,6 +303,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -305,7 +311,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Subtract", "sec", args)
 		},
 	},
@@ -314,6 +320,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -321,7 +328,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Subtract", "min", args)
 		},
 	},
@@ -330,6 +337,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -337,7 +345,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Subtract", "hr", args)
 		},
 	},
@@ -346,6 +354,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -353,7 +362,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Subtract", "days", args)
 		},
 	},
@@ -362,6 +371,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -369,7 +379,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Subtract", "weeks", args)
 		},
 	},
@@ -378,6 +388,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 			{
@@ -385,7 +396,7 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Subtract", "months", args)
 		},
 	},
@@ -393,15 +404,16 @@ var actions = map[string]*actionDefinition{
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
+				name:      "date",
+				key:       "WFDate",
+				validType: String,
+			},
+			{
 				name:      "magnitude",
 				validType: Integer,
 			},
-			{
-				name:      "date",
-				validType: String,
-			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Subtract", "yr", args)
 		},
 	},
@@ -410,10 +422,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Get Start of Minute", "", args)
 		},
 	},
@@ -422,10 +435,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Get Start of Hour", "", args)
 		},
 	},
@@ -434,10 +448,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Get Start of Week", "", args)
 		},
 	},
@@ -446,10 +461,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Get Start of Month", "", args)
 		},
 	},
@@ -458,10 +474,11 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
+				key:       "WFDate",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return adjustDate("Get Start of Year", "", args)
 		},
 	},
@@ -477,12 +494,28 @@ var actions = map[string]*actionDefinition{
 				name:      "detail",
 				validType: String,
 				key:       "WFContentItemPropertyName",
-				enum:      eventDetails,
+				enum:      editEventDetails,
 			},
 			{
 				name:      "newValue",
 				validType: String,
 				key:       "WFCalendarEventContentItemStartDate",
+			},
+		},
+	},
+	"getEventDetail": {
+		identifier: "properties.calendarevents",
+		parameters: []parameterDefinition{
+			{
+				name:      "event",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+				enum:      eventDetails,
 			},
 		},
 	},
@@ -503,18 +536,15 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFDateFormatStyle",
-					dataType: Text,
-					value:    "None",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFDateFormatStyle": "None",
 			}
 		},
 	},
 	"formatDate": {
-		identifier: "format.date",
+		identifier:    "format.date",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
@@ -530,13 +560,9 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFTimeFormatStyle",
-					dataType: Text,
-					value:    "None",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFTimeFormatStyle": "None",
 			}
 		},
 	},
@@ -669,63 +695,32 @@ var actions = map[string]*actionDefinition{
 				}
 			}
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) (params map[string]any) {
 			if len(args) < 4 {
-				return []plistData{}
+				return
 			}
 
 			var repeatDays = getArgValue(args[3])
-			var repeats []plistData
+			var repeats []map[string]any
 			for _, day := range repeatDays.([]interface{}) {
 				var dayStr = day.(string)
 				var dayLower = strings.ToLower(dayStr)
 				var dayCap = capitalize(dayStr)
 
-				repeats = append(repeats, plistData{
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "value",
-							dataType: Text,
-							value:    dayLower,
-						},
-						{
-							key:      "title",
-							dataType: Dictionary,
-							value: []plistData{
-								{
-									key:      "key",
-									dataType: Text,
-									value:    dayCap,
-								},
-							},
-						},
-						{
-							key:      "identifier",
-							dataType: Text,
-							value:    dayLower,
-						},
-						{
-							key:      "subtitle",
-							dataType: Dictionary,
-							value: []plistData{
-								{
-									key:      "key",
-									dataType: Text,
-									value:    dayCap,
-								},
-							},
-						},
+				repeats = append(repeats, map[string]any{
+					"identifier": dayLower,
+					"value":      dayLower,
+					"title": map[string]string{
+						"key": dayCap,
+					},
+					"subtitle": map[string]string{
+						"key": dayCap,
 					},
 				})
 			}
 
-			return []plistData{
-				{
-					key:      "repeats",
-					dataType: Array,
-					value:    repeats,
-				},
+			return map[string]any{
+				"repeats": repeats,
 			}
 		},
 	},
@@ -746,6 +741,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"turnOnAlarm": {
+		defaultAction: true,
 		appIdentifier: "com.apple.mobiletimer-framework",
 		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
 		appIntent:     toggleAlarmIntent,
@@ -763,13 +759,9 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "state",
-					dataType: Number,
-					value:    1,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"state": 1,
 			}
 		},
 	},
@@ -791,13 +783,9 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "state",
-					dataType: Number,
-					value:    0,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"state": 0,
 			}
 		},
 	},
@@ -817,13 +805,9 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		appIntent: toggleAlarmIntent,
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "Toggle",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"operation": "Toggle",
 			}
 		},
 	},
@@ -861,17 +845,13 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) (params map[string]any) {
 			if len(args) == 4 {
-				return []plistData{
-					{
-						key:      "WFContentItemLimitEnabled",
-						dataType: Boolean,
-						value:    true,
-					},
+				return map[string]any{
+					"WFContentItemLimitEnabled": true,
 				}
 			}
-			return []plistData{}
+			return
 		},
 	},
 	"emailAddress": {
@@ -888,16 +868,19 @@ var actions = map[string]*actionDefinition{
 				parserError("Shortcuts only allows one variable for an email address.")
 			}
 		},
-		make: func(args []actionArgument) []plistData {
+		make: func(args []actionArgument) map[string]any {
 			if args[0].valueType == Variable {
-				return []plistData{
-					argumentValue("WFEmailAddress", args, 0),
+				return map[string]any{
+					"WFEmailAddress": argumentValue(args, 0),
 				}
 			}
 
-			return []plistData{
-				contactValue("WFEmailAddress", emailAddress, args),
+			return map[string]any{
+				"WFEmailAddress": contactValue(emailAddress, args),
 			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompContactValue(action, "WFEmailAddress", emailAddress)
 		},
 	},
 	"phoneNumber": {
@@ -913,15 +896,19 @@ var actions = map[string]*actionDefinition{
 				parserError("Shortcuts only allows one variable for a phone number.")
 			}
 		},
-		make: func(args []actionArgument) []plistData {
+		make: func(args []actionArgument) map[string]any {
 			if args[0].valueType == Variable {
-				return []plistData{
-					argumentValue("WFPhoneNumber", args, 0),
+				return map[string]any{
+					"WFPhoneNumber": argumentValue(args, 0),
 				}
 			}
-			return []plistData{
-				contactValue("WFPhoneNumber", phoneNumber, args),
+
+			return map[string]any{
+				"WFPhoneNumber": contactValue(phoneNumber, args),
 			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompContactValue(action, "WFPhoneNumber", phoneNumber)
 		},
 	},
 	"selectContact": {
@@ -1042,13 +1029,9 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFFaceTimeType",
-					dataType: Text,
-					value:    "Video",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFFaceTimeType": "Video",
 			}
 		},
 	},
@@ -1091,20 +1074,21 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(args []actionArgument) (params []plistData) {
+		addParams: func(args []actionArgument) (params map[string]any) {
+			params = make(map[string]any)
 			if len(args) >= 3 {
 				if args[2].valueType == Variable {
-					params = append(params, argumentValue("WFContactPhoneNumbers", args, 2))
+					params["WFContactPhoneNumbers"] = argumentValue(args, 2)
 				} else {
-					params = append(params, contactValue("WFContactPhoneNumbers", phoneNumber, []actionArgument{args[2]}))
+					params["WFContactPhoneNumbers"] = contactValue(phoneNumber, []actionArgument{args[2]})
 				}
 			}
 
 			if len(args) >= 4 {
 				if args[3].valueType == Variable {
-					params = append(params, argumentValue("WFContactEmails", args, 3))
+					params["WFContactEmails"] = argumentValue(args, 3)
 				} else {
-					params = append(params, contactValue("WFContactEmails", emailAddress, []actionArgument{args[3]}))
+					params["WFContactEmails"] = contactValue(emailAddress, []actionArgument{args[3]})
 				}
 			}
 
@@ -1126,13 +1110,9 @@ var actions = map[string]*actionDefinition{
 				enum:      contactDetails,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "Mode",
-					dataType: Text,
-					value:    "Remove",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"Mode": "Remove",
 			}
 		},
 	},
@@ -1160,12 +1140,6 @@ var actions = map[string]*actionDefinition{
 	},
 	"listen": {
 		identifier: "dictatetext",
-		check: func(args []actionArgument, _ *actionDefinition) {
-			if len(args) != 2 {
-				return
-			}
-			args[1].value = languageCode(getArgValue(args[1]).(string))
-		},
 		parameters: []parameterDefinition{
 			{
 				name:         "stopListening",
@@ -1180,6 +1154,7 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				key:       "WFSpeechLanguage",
 				optional:  true,
+				enum:      languages,
 			},
 		},
 	},
@@ -1197,18 +1172,15 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFAppendFileWriteMode",
-					dataType: Boolean,
-					value:    "Prepend",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFAppendFileWriteMode": "Prepend",
 			}
 		},
 	},
 	"appendToFile": {
-		identifier: "file.append",
+		identifier:    "file.append",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "filePath",
@@ -1221,13 +1193,9 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFAppendFileWriteMode",
-					dataType: Boolean,
-					value:    "Append",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFAppendFileWriteMode": "Append",
 			}
 		},
 	},
@@ -1236,7 +1204,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "file",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 			{
@@ -1246,15 +1214,15 @@ var actions = map[string]*actionDefinition{
 				enum:      fileLabels,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			var color = strings.ToLower(getArgValue(args[1]).(string))
 
-			return []plistData{
-				{
-					key:      "WFLabelColorNumber",
-					dataType: Number,
-					value:    fileLabelsMap[color],
-				},
+			return map[string]any{
+				"WFLabelColorNumber": fileLabelsMap[color],
 			}
 		},
 	},
@@ -1263,7 +1231,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "files",
-				validType: Var,
+				validType: Variable,
 				key:       "WFContentItemInputParameter",
 			},
 			{
@@ -1280,18 +1248,18 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) (params map[string]any) {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			if len(args) != 1 {
-				return []plistData{
-					{
-						key:      "WFContentItemLimitEnabled",
-						dataType: Boolean,
-						value:    true,
-					},
+				return map[string]any{
+					"WFContentItemLimitEnabled": true,
 				}
 			}
 
-			return []plistData{}
+			return
 		},
 	},
 	"optimizePDF": {
@@ -1299,7 +1267,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "pdfFile",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 		},
@@ -1309,7 +1277,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "pdfFile",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 			{
@@ -1338,26 +1306,22 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
-			if len(args) != 1 {
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
+			if len(args) > 1 {
 				var richText = getArgValue(args[1]).(bool)
 				if richText {
-					return []plistData{
-						{
-							key:      "WFGetTextFromPDFTextType",
-							dataType: Text,
-							value:    "Rich Text",
-						},
+					return map[string]any{
+						"WFGetTextFromPDFTextType": "Rich Text",
 					}
 				}
 			}
 
-			return []plistData{
-				{
-					key:      "WFGetTextFromPDFTextType",
-					dataType: Text,
-					value:    "Text",
-				},
+			return map[string]any{
+				"WFGetTextFromPDFTextType": "Text",
 			}
 		},
 	},
@@ -1365,7 +1329,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 			{
@@ -1444,6 +1408,7 @@ var actions = map[string]*actionDefinition{
 			},
 			{
 				name:      "text",
+				key:       "WFMatchTextPattern",
 				validType: String,
 			},
 			{
@@ -1454,9 +1419,9 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		check: func(args []actionArgument, _ *actionDefinition) {
 			var textArg = args[1]
-			if textArg.valueType == Var {
+			if textArg.valueType == Variable {
 				args[1] = actionArgument{
 					valueType: String,
 					value:     fmt.Sprintf("^{%s}", textArg.value),
@@ -1464,14 +1429,11 @@ var actions = map[string]*actionDefinition{
 			} else {
 				args[1].value = fmt.Sprintf("^%s", textArg.value)
 			}
-
-			return []plistData{
-				argumentValue("WFMatchTextPattern", args, 1),
-			}
 		},
 	},
 	"matchText": {
-		identifier: "text.match",
+		identifier:    "text.match",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "regexPattern",
@@ -1497,17 +1459,13 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "matches",
-				validType: Var,
+				validType: Variable,
 				key:       "matches",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFGetGroupType",
-					dataType: Text,
-					value:    "All Groups",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFGetGroupType": "All Groups",
 			}
 		},
 	},
@@ -1525,15 +1483,12 @@ var actions = map[string]*actionDefinition{
 				key:       "WFGroupIndex",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFGetGroupType",
-					dataType: Text,
-					value:    "Group At Index",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFGetGroupType": "Group At Index",
 			}
 		},
+		defaultAction: true,
 	},
 	"getFileFromFolder": {
 		identifier: "documentpicker.open",
@@ -1558,7 +1513,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getFile": {
-		identifier: "documentpicker.open",
+		identifier:    "documentpicker.open",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "path",
@@ -1711,7 +1667,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"selectFile": {
-		identifier: "file.select",
+		identifier:    "file.select",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:         "selectMultiple",
@@ -1733,13 +1690,9 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFPickingMode",
-					dataType: Text,
-					value:    "Folders",
-				},
+		addParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFPickingMode": "Folders",
 			}
 		},
 	},
@@ -1870,18 +1823,15 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFAskWhereToSave",
-					dataType: Boolean,
-					value:    false,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFAskWhereToSave": false,
 			}
 		},
 	},
 	"saveFilePrompt": {
-		identifier: "documentpicker.save",
+		identifier:    "documentpicker.save",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "file",
@@ -1954,20 +1904,20 @@ var actions = map[string]*actionDefinition{
 				name:      "from",
 				validType: String,
 				key:       "WFSelectedFromLanguage",
+				enum:      languages,
 			},
 			{
 				name:      "to",
 				validType: String,
 				key:       "WFSelectedLanguage",
+				enum:      languages,
 			},
 		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			args[1].value = languageCode(args[1].value.(string))
-			args[2].value = languageCode(args[2].value.(string))
-		},
+		outputType: String,
 	},
 	"translate": {
-		identifier: "text.translate",
+		identifier:    "text.translate",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
@@ -1979,26 +1929,15 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				key:       "WFSelectedLanguage",
 				optional:  true,
+				enum:      languages,
 			},
 		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			if len(args) < 2 {
-				return
-			}
-
-			if args[1].valueType != Variable {
-				args[1].value = languageCode(getArgValue(args[1]).(string))
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFSelectedFromLanguage": "Detect Language",
 			}
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFSelectedFromLanguage",
-					dataType: Text,
-					value:    "Detect Language",
-				},
-			}
-		},
+		outputType: String,
 	},
 	"detectLanguage": {
 		parameters: []parameterDefinition{
@@ -2008,109 +1947,68 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
+		outputType: String,
 	},
 	"replaceText": {
 		identifier: "text.replace",
 		parameters: []parameterDefinition{
 			{
 				name:      "find",
+				key:       "WFReplaceTextFind",
 				validType: String,
 			},
 			{
 				name:      "replacement",
+				key:       "WFReplaceTextReplace",
 				validType: String,
 			},
 			{
 				name:      "subject",
+				key:       "WFInput",
 				validType: String,
+			},
+			{
+				name:         "caseSensitive",
+				key:          "WFReplaceTextCaseSensitive",
+				validType:    Bool,
+				defaultValue: true,
+				optional:     true,
+			},
+			{
+				name:         "regExp",
+				key:          "WFReplaceTextRegularExpression",
+				validType:    Bool,
+				defaultValue: false,
+				optional:     true,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return replaceText(true, false, args)
-		},
-	},
-	"iReplaceText": {
-		identifier: "text.replace",
-		parameters: []parameterDefinition{
-			{
-				name:      "find",
-				validType: String,
-			},
-			{
-				name:      "replacement",
-				validType: String,
-			},
-			{
-				name:      "subject",
-				validType: String,
-			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return replaceText(false, false, args)
-		},
-	},
-	"regReplaceText": {
-		identifier: "text.replace",
-		parameters: []parameterDefinition{
-			{
-				name:      "expression",
-				validType: String,
-			},
-			{
-				name:      "replacement",
-				validType: String,
-			},
-			{
-				name:      "subject",
-				validType: String,
-			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return replaceText(true, true, args)
-		},
-	},
-	"iRegReplaceText": {
-		identifier: "text.replace",
-		parameters: []parameterDefinition{
-			{
-				name:      "expression",
-				validType: String,
-			},
-			{
-				name:      "replacement",
-				validType: String,
-			},
-			{
-				name:      "subject",
-				validType: String,
-			},
-		},
-		make: func(args []actionArgument) []plistData {
-			return replaceText(false, true, args)
-		},
+		outputType: String,
 	},
 	"uppercase": {
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return changeCase("UPPERCASE", args)
+		addParams: func(_ []actionArgument) map[string]any {
+			return changeCase("UPPERCASE")
 		},
+		defaultAction: true,
 	},
 	"lowercase": {
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return changeCase("lowercase", args)
+		addParams: func(_ []actionArgument) map[string]any {
+			return changeCase("lowercase")
 		},
 	},
 	"titleCase": {
@@ -2118,48 +2016,56 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return changeCase("Capitalize with Title Case", args)
+		addParams: func(_ []actionArgument) map[string]any {
+			return changeCase("Capitalize with Title Case")
 		},
+		outputType: String,
 	},
 	"capitalize": {
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return changeCase("Capitalize with sentence case", args)
+		addParams: func(_ []actionArgument) map[string]any {
+			return changeCase("Capitalize with sentence case")
 		},
+		outputType: String,
 	},
 	"capitalizeAll": {
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return changeCase("Capitalize Every Word", args)
+		addParams: func(_ []actionArgument) map[string]any {
+			return changeCase("Capitalize Every Word")
 		},
+		outputType: String,
 	},
 	"alternateCase": {
 		identifier: "text.changecase",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return changeCase("cApItAlIzE wItH aLtErNaTiNg cAsE", args)
+		addParams: func(_ []actionArgument) map[string]any {
+			return changeCase("cApItAlIzE wItH aLtErNaTiNg cAsE")
 		},
+		outputType: String,
 	},
 	"correctSpelling": {
 		parameters: []parameterDefinition{
@@ -2169,21 +2075,19 @@ var actions = map[string]*actionDefinition{
 				key:       "text",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "Show-text",
-					dataType: Boolean,
-					value:    true,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"Show-text": true,
 			}
 		},
+		outputType: String,
 	},
 	"splitText": {
 		identifier: "text.split",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: String,
 			},
 			{
@@ -2192,13 +2096,16 @@ var actions = map[string]*actionDefinition{
 				defaultValue: "\n",
 			},
 		},
-		make: textParts,
+		addParams:  textParts,
+		decomp:     decompTextParts,
+		outputType: Arr,
 	},
 	"joinText": {
 		identifier: "text.combine",
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
+				key:       "text",
 				validType: Variable,
 			},
 			{
@@ -2207,7 +2114,9 @@ var actions = map[string]*actionDefinition{
 				defaultValue: "\n",
 			},
 		},
-		make: textParts,
+		addParams:  textParts,
+		decomp:     decompTextParts,
+		outputType: String,
 	},
 	"makeDiskImage": {
 		parameters: []parameterDefinition{
@@ -2229,20 +2138,17 @@ var actions = map[string]*actionDefinition{
 				defaultValue: false,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "SizeToFit",
-					dataType: Boolean,
-					value:    true,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"SizeToFit": true,
 			}
 		},
 		mac:        true,
 		minVersion: 15,
 	},
 	"makeSizedDiskImage": {
-		identifier: "makediskimage",
+		identifier:    "makediskimage",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "name",
@@ -2261,6 +2167,7 @@ var actions = map[string]*actionDefinition{
 			},
 			{
 				name:         "encrypt",
+				key:          "EncryptImage",
 				validType:    Bool,
 				defaultValue: false,
 				optional:     true,
@@ -2277,43 +2184,38 @@ var actions = map[string]*actionDefinition{
 				enum: storageUnits,
 			}, &storageUnitArg)
 		},
-		make: func(args []actionArgument) []plistData {
-			var size = strings.Split(getArgValue(args[2]).(string), " ")
-			return []plistData{
-				argumentValue("VolumeName", args, 0),
-				variableInput("WFInput", args[1].value.(string)),
-				{
-					key:      "ImageSize",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "Value",
-							dataType: Dictionary,
-							value: []plistData{
-								{
-									key:      "Unit",
-									dataType: Text,
-									value:    size[0],
-								},
-								{
-									key:      "Magnitude",
-									dataType: Text,
-									value:    size[1],
-								},
-							},
-						},
-						{
-							key:      "WFSerializationType",
-							dataType: Text,
-							value:    "WFQuantityFieldValue",
-						},
-					},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var imageSize = ImageSize{
+				Value: SizeValue{
+					Unit:      "GB",
+					Magnitude: "1",
 				},
-				argumentValue("EncryptImage", args, 3),
-				{
-					key:      "SizeToFit",
-					dataType: Boolean,
-					value:    false,
+			}
+			mapToStruct(action.WFWorkflowActionParameters["ImageSize"], &imageSize)
+			var size = fmt.Sprintf("\"%s %s\"", imageSize.Value.Magnitude, imageSize.Value.Unit)
+
+			return []string{
+				decompValue(action.WFWorkflowActionParameters["VolumeName"]),
+				decompValue(action.WFWorkflowActionParameters["WFInput"]),
+				size,
+				decompValue(action.WFWorkflowActionParameters["EncryptImage"]),
+			}
+		},
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
+			var size = strings.Split(getArgValue(args[2]).(string), " ")
+
+			return map[string]any{
+				"SizeToFit": false,
+				"ImageSize": map[string]any{
+					"Value": map[string]any{
+						"Unit":      size[0],
+						"Magnitude": size[1],
+					},
+					"WFSerializationType": "WFQuantityFieldValue",
 				},
 			}
 		},
@@ -2351,18 +2253,10 @@ var actions = map[string]*actionDefinition{
 	},
 	"getCurrentLocation": {
 		identifier: "location",
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFLocation",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "isCurrentLocation",
-							dataType: Boolean,
-							value:    true,
-						},
-					},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFLocation": map[string]bool{
+					"isCurrentLocation": true,
 				},
 			}
 		},
@@ -2587,6 +2481,117 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"maskImage": {
+		identifier: "image.mask",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "type",
+				validType: String,
+				enum:      imageMaskTypes,
+				key:       "WFMaskType",
+			},
+			{
+				name:      "radius",
+				validType: String,
+				key:       "WFMaskCornerRadius",
+				optional:  true,
+			},
+		},
+	},
+	"customImageMask": {
+		identifier: "image.mask",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "customMaskImage",
+				validType: Variable,
+				key:       "WFCustomMaskImage",
+			},
+		},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFMaskType": "Custom Image",
+			}
+		},
+	},
+	"getImageDetail": {
+		identifier: "properties.images",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "detail",
+				validType: String,
+				enum:      imageDetails,
+				key:       "WFContentItemPropertyName",
+			},
+		},
+	},
+	"extractImageText": {
+		identifier: "extracttextfromimage",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFImage",
+			},
+		},
+	},
+	"makeImageFromPDFPage": {
+		parameters: []parameterDefinition{
+			{
+				name:      "pdf",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:         "colorSpace",
+				validType:    String,
+				enum:         colorSpaces,
+				key:          "WFMakeImageFromPDFPageColorspace",
+				optional:     true,
+				defaultValue: "RGB",
+			},
+			{
+				name:         "pageResolution",
+				validType:    String,
+				key:          "WFMakeImageFromPDFPageResolution",
+				optional:     true,
+				defaultValue: "300",
+			},
+		},
+	},
+	"makeImageFromRichText": {
+		parameters: []parameterDefinition{
+			{
+				name:      "pdf",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "width",
+				validType: String,
+				key:       "WFWidth",
+			},
+			{
+				name:      "height",
+				validType: String,
+				key:       "WFHeight",
+			},
+		},
+	},
 	"getImages": {
 		identifier: "detect.images",
 		parameters: []parameterDefinition{
@@ -2595,6 +2600,92 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 				validType: Variable,
 			},
+		},
+	},
+	"overlayImage": {
+		identifier: "overlayimageonimage",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				key:       "WFInput",
+				validType: Variable,
+			},
+			{
+				name:      "overlayImage",
+				key:       "WFImage",
+				validType: Variable,
+			},
+		},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFShouldShowImageEditor": true,
+			}
+		},
+	},
+	"customImageOverlay": {
+		identifier: "overlayimageonimage",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "overlayImage",
+				validType: Variable,
+				key:       "WFImage",
+			},
+			{
+				name:      "width",
+				validType: String,
+				key:       "WFImageWidth",
+				optional:  true,
+			},
+			{
+				name:      "height",
+				validType: String,
+				key:       "WFImageHeight",
+				optional:  true,
+			},
+			{
+				name:         "rotation",
+				validType:    String,
+				key:          "WFRotation",
+				optional:     true,
+				defaultValue: "0",
+			},
+			{
+				name:         "opacity",
+				validType:    String,
+				key:          "WFOverlayImageOpacity",
+				defaultValue: "100",
+				optional:     true,
+			},
+			{
+				name:         "position",
+				validType:    String,
+				key:          "WFImagePosition",
+				enum:         imageEditingPositions,
+				defaultValue: "Center",
+				optional:     true,
+			},
+			{
+				name:      "customPositionX",
+				validType: String,
+				key:       "WFImageX",
+				optional:  true,
+			},
+			{
+				name:      "customPositionY",
+				validType: String,
+				key:       "WFImageY",
+				optional:  true,
+			},
+		},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFShouldShowImageEditor": false,
+			}
 		},
 	},
 	"takePhoto": {
@@ -2666,6 +2757,22 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"getMusicDetail": {
+		identifier: "properties.music",
+		parameters: []parameterDefinition{
+			{
+				name:      "music",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFContentItemPropertyName",
+				enum:      musicDetails,
+			},
+		},
+	},
 	"addToMusic": {
 		identifier: "addtoplaylist",
 		parameters: []parameterDefinition{
@@ -2677,6 +2784,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"addToPlaylist": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "playlistName",
@@ -2691,7 +2799,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"playNext": {
-		identifier: "addmusictoupnext",
+		identifier:    "addmusictoupnext",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "music",
@@ -2699,13 +2808,9 @@ var actions = map[string]*actionDefinition{
 				key:       "WFMusic",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFWhenToPlay",
-					dataType: Text,
-					value:    "Next",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFWhenToPlay": "Next",
 			}
 		},
 	},
@@ -2718,13 +2823,9 @@ var actions = map[string]*actionDefinition{
 				key:       "WFMusic",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFWhenToPlay",
-					dataType: Text,
-					value:    "Later",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFWhenToPlay": "Later",
 			}
 		},
 	},
@@ -2796,6 +2897,88 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"getImageFrames": {
+		identifier: "getframesfromimage",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFImage",
+			},
+		},
+	},
+	"getPlaylistSongs": {
+		identifier: "get.playlist",
+		parameters: []parameterDefinition{
+			{
+				name:      "playlistName",
+				validType: Variable,
+				key:       "WFPlaylistName",
+			},
+		},
+	},
+	"playMusic": {
+		parameters: []parameterDefinition{
+			{
+				name: "music",
+				key:  "WFMediaItems",
+			},
+			{
+				name:     "shuffle",
+				key:      "WFPlayMusicActionShuffle",
+				enum:     shuffleOptions,
+				optional: true,
+			},
+			{
+				name:     "repeat",
+				key:      "WFPlayMusicActionRepeat",
+				enum:     repeatOptions,
+				optional: true,
+			},
+		},
+	},
+	"makeGIF": {
+		parameters: []parameterDefinition{
+			{
+				name:      "input",
+				validType: Variable,
+				key:       "WFInput",
+			},
+			{
+				name:         "delay",
+				validType:    String,
+				key:          "WFMakeGIFActionDelayTime",
+				defaultValue: "0.3",
+				optional:     true,
+			},
+			{
+				name:      "loops",
+				validType: Integer,
+				key:       "WFMakeGIFActionLoopCount",
+				optional:  true,
+			},
+			{
+				name:      "width",
+				validType: String,
+				key:       "WFMakeGIFActionManualSizeWidth",
+				optional:  true,
+			},
+			{
+				name:      "height",
+				validType: String,
+				key:       "WFMakeGIFActionManualSizeHeight",
+				optional:  true,
+			},
+		},
+		addParams: func(args []actionArgument) map[string]any {
+			var params = make(map[string]any)
+			var argsLen = len(args)
+			params["WFMakeGIFActionLoopEnabled"] = !(argsLen > 2)
+			params["WFMakeGIFActionAutoSize"] = !(argsLen > 3)
+
+			return params
+		},
+	},
 	"convertToJPEG": {
 		identifier: "image.convert",
 		parameters: []parameterDefinition{
@@ -2818,13 +3001,9 @@ var actions = map[string]*actionDefinition{
 				defaultValue: true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFImageFormat",
-					dataType: Text,
-					value:    "JPEG",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFImageFormat": "JPEG",
 			}
 		},
 	},
@@ -2861,7 +3040,7 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"rotateImage": {
+	"rotateMedia": {
 		identifier: "image.rotate",
 		parameters: []parameterDefinition{
 			{
@@ -2913,14 +3092,6 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 			{
-				name:         "position",
-				validType:    String,
-				key:          "WFImageCropPosition",
-				enum:         cropPositions,
-				optional:     true,
-				defaultValue: "Center",
-			},
-			{
 				name:         "width",
 				validType:    String,
 				key:          "WFImageCropWidth",
@@ -2933,6 +3104,26 @@ var actions = map[string]*actionDefinition{
 				key:          "WFImageCropHeight",
 				optional:     true,
 				defaultValue: "100",
+			},
+			{
+				name:         "position",
+				validType:    String,
+				key:          "WFImageCropPosition",
+				enum:         imageEditingPositions,
+				optional:     true,
+				defaultValue: "Center",
+			},
+			{
+				name:      "customPositionX",
+				validType: String,
+				key:       "WFImageCropX",
+				optional:  true,
+			},
+			{
+				name:      "customPositionY",
+				validType: String,
+				key:       "WFImageCropY",
+				optional:  true,
 			},
 		},
 	},
@@ -2973,13 +3164,9 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"skipBack": {
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFSkipBackBehavior",
-					dataType: Text,
-					value:    "Previous Song",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFSkipBackBehavior": "Previous Song",
 			}
 		},
 	},
@@ -3011,7 +3198,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "podcast",
-				validType: Var,
+				validType: Variable,
 				key:       "WFPodcastShow",
 			},
 		},
@@ -3021,7 +3208,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "podcast",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 			{
@@ -3084,8 +3271,70 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"resizeImage": {
+		identifier: "image.resize",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFImage",
+			},
+			{
+				name:      "width",
+				key:       "WFImageResizeWidth",
+				validType: String,
+			},
+			{
+				name:      "height",
+				key:       "WFImageResizeHeight",
+				validType: String,
+				optional:  true,
+			},
+		},
+	},
+	"resizeImageByPercent": {
+		identifier: "image.resize",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFImage",
+			},
+			{
+				name:      "percentage",
+				validType: String,
+				key:       "WFImageResizePercentage",
+			},
+		},
+		addParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFImageResizeKey": "Percentage",
+			}
+		},
+	},
+	"resizeImageByLongestEdge": {
+		identifier: "image.resize",
+		parameters: []parameterDefinition{
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "WFImage",
+			},
+			{
+				name:      "length",
+				validType: String,
+				key:       "WFImageResizeLength",
+			},
+		},
+		addParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFImageResizeKey": "Longest Edge",
+			}
+		},
+	},
 	"convertImage": {
-		identifier: "image.convert",
+		identifier:    "image.convert",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "image",
@@ -3099,6 +3348,12 @@ var actions = map[string]*actionDefinition{
 				enum:      imageFormats,
 			},
 			{
+				name:      "quality",
+				key:       "WFImageCompressionQuality",
+				validType: Float,
+				optional:  true,
+			},
+			{
 				name:         "preserveMetadata",
 				validType:    Bool,
 				key:          "WFImagePreserveMetadata",
@@ -3108,7 +3363,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"encodeVideo": {
-		identifier: "encodemedia",
+		identifier:    "encodemedia",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "video",
@@ -3165,15 +3421,10 @@ var actions = map[string]*actionDefinition{
 				enum:         speeds,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			var params = []plistData{
-				{
-					key:      "WFMediaAudioOnly",
-					dataType: Boolean,
-					value:    true,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFMediaAudioOnly": true,
 			}
-			return params
 		},
 	},
 	"setMetadata": {
@@ -3221,13 +3472,9 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "Metadata",
-					dataType: Boolean,
-					value:    true,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"Metadata": true,
 			}
 		},
 	},
@@ -3240,13 +3487,9 @@ var actions = map[string]*actionDefinition{
 				key:       "WFMedia",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "Metadata",
-					dataType: Boolean,
-					value:    true,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"Metadata": true,
 			}
 		},
 	},
@@ -3259,18 +3502,10 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFImagePreserveMetadata",
-					dataType: Boolean,
-					value:    false,
-				},
-				{
-					key:      "WFImageFormat",
-					dataType: Text,
-					value:    "Match Input",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFImagePreserveMetadata": false,
+				"WFImageFormat":           "Match Input",
 			}
 		},
 	},
@@ -3293,37 +3528,26 @@ var actions = map[string]*actionDefinition{
 	},
 	"play": {
 		identifier: "pausemusic",
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFPlayPauseBehavior",
-					dataType: Text,
-					value:    "Play",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFPlayPauseBehavior": "Play",
 			}
 		},
 	},
 	"pause": {
 		identifier: "pausemusic",
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFPlayPauseBehavior",
-					dataType: Text,
-					value:    "Pause",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFPlayPauseBehavior": "Pause",
 			}
 		},
 	},
 	"togglePlayPause": {
-		identifier: "pausemusic",
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFPlayPauseBehavior",
-					dataType: Text,
-					value:    "Play/Pause",
-				},
+		identifier:    "pausemusic",
+		defaultAction: true,
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFPlayPauseBehavior": "Play/Pause",
 			}
 		},
 	},
@@ -3357,6 +3581,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"takeScreenshot": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:         "mainMonitorOnly",
@@ -3366,13 +3591,9 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFTakeScreenshotScreenshotType",
-					dataType: Text,
-					value:    "Full Screen",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFTakeScreenshotScreenshotType": "Full Screen",
 			}
 		},
 		mac: true,
@@ -3389,30 +3610,23 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFTakeScreenshotScreenshotType",
-					dataType: Text,
-					value:    "Interactive",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFTakeScreenshotScreenshotType": "Interactive",
 			}
 		},
 		mac: true,
 	},
 	"shutdown": {
-		identifier: "reboot",
-		minVersion: 17,
+		defaultAction: true,
+		identifier:    "reboot",
+		minVersion:    17,
 	},
 	"reboot": {
 		minVersion: 17,
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFShutdownMode",
-					dataType: Text,
-					value:    "Restart",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFShutdownMode": "Restart",
 			}
 		},
 	},
@@ -3439,6 +3653,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFNumberActionNumber",
 			},
 		},
+		outputType: Integer,
 	},
 	"getObjectOfClass": {
 		identifier: "getclassaction",
@@ -3471,13 +3686,9 @@ var actions = map[string]*actionDefinition{
 				enum:      fileSizeUnits,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFFileSizeIncludeUnits",
-					dataType: Boolean,
-					value:    false,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFFileSizeIncludeUnits": false,
 			}
 		},
 	},
@@ -3537,124 +3748,126 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "Input",
 				validType: Variable,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return countParams("Items", args)
+		defaultAction: true,
+		addParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFCountType": "Items",
+			}
 		},
+		outputType: Integer,
 	},
 	"countChars": {
 		identifier: "count",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: Variable,
+				key:       "Input",
+				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return countParams("Characters", args)
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFCountType": "Characters",
+			}
 		},
+		outputType: Integer,
 	},
 	"countWords": {
 		identifier: "count",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: Variable,
+				key:       "Input",
+				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return countParams("Words", args)
+		addParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFCountType": "Words",
+			}
 		},
+		outputType: Integer,
 	},
 	"countSentences": {
 		identifier: "count",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: Variable,
+				key:       "Input",
+				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return countParams("Sentences", args)
+		addParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFCountType": "Sentences",
+			}
 		},
+		outputType: Integer,
 	},
 	"countLines": {
 		identifier: "count",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: Variable,
+				key:       "Input",
+				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return countParams("Lines", args)
+
+		addParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFCountType": "Lines",
+			}
 		},
+		outputType: Integer,
 	},
 	"lightMode": {
 		identifier: "appearance",
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "set",
-				},
-				{
-					key:      "style",
-					dataType: Text,
-					value:    "light",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"operation": "set",
+				"style":     "light",
 			}
 		},
 	},
 	"darkMode": {
-		identifier: "appearance",
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "set",
-				},
-				{
-					key:      "style",
-					dataType: Text,
-					value:    "dark",
-				},
+		identifier:    "appearance",
+		defaultAction: true,
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"operation": "set",
+				"style":     "dark",
 			}
 		},
 	},
-	"getBatteryLevel": {},
+	"getBatteryLevel": {defaultAction: true},
 	"isCharging": {
 		identifier: "getbatterylevel",
 		minVersion: 16.2,
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "Subject",
-					dataType: Text,
-					value:    "Is Charging",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"Subject": "Is Charging",
 			}
 		},
+		outputType: Bool,
 	},
 	"connectedToCharger": {
 		identifier: "getbatterylevel",
 		minVersion: 16.2,
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "Subject",
-					dataType: Text,
-					value:    "Is Connected to Charger",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"Subject": "Is Connected to Charger",
 			}
 		},
+		outputType: Bool,
 	},
 	"getShortcuts": {
 		identifier: "getmyworkflows",
+		outputType: Arr,
 	},
 	"url": {
 		parameters: []parameterDefinition{
@@ -3664,24 +3877,18 @@ var actions = map[string]*actionDefinition{
 				infinite:  true,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			var urlItems []plistData
+		make: func(args []actionArgument) map[string]any {
+			var urlItems []any
 			for _, item := range args {
-				urlItems = append(urlItems, paramValue("", item, String, Text))
+				urlItems = append(urlItems, paramValue(item, String))
 			}
-			return []plistData{
-				{
-					key:      "Show-WFURLActionURL",
-					dataType: Boolean,
-					value:    true,
-				},
-				{
-					key:      "WFURLActionURL",
-					dataType: Array,
-					value:    urlItems,
-				},
+
+			return map[string]any{
+				"Show-WFURLActionURL": true,
+				"WFURLActionURL":      urlItems,
 			}
 		},
+		decomp: decompInfiniteURLAction,
 	},
 	"addToReadingList": {
 		identifier: "readinglist",
@@ -3692,24 +3899,18 @@ var actions = map[string]*actionDefinition{
 				infinite:  true,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			var urlItems []plistData
+		make: func(args []actionArgument) map[string]any {
+			var urlItems []any
 			for _, item := range args {
-				urlItems = append(urlItems, paramValue("", item, String, Text))
+				urlItems = append(urlItems, paramValue(item, String))
 			}
-			return []plistData{
-				{
-					key:      "Show-WFURLActionURL",
-					dataType: Boolean,
-					value:    true,
-				},
-				{
-					key:      "WFURL",
-					dataType: Array,
-					value:    urlItems,
-				},
+
+			return map[string]any{
+				"Show-WFURLActionURL": true,
+				"WFURL":               urlItems,
 			}
 		},
+		decomp: decompInfiniteURLAction,
 	},
 	"hash": {
 		parameters: []parameterDefinition{
@@ -3727,6 +3928,7 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
+		outputType: String,
 	},
 	"formatNumber": {
 		identifier: "format.number",
@@ -3744,6 +3946,7 @@ var actions = map[string]*actionDefinition{
 				defaultValue: 2,
 			},
 		},
+		outputType: Integer,
 	},
 	"randomNumber": {
 		identifier: "number.random",
@@ -3759,44 +3962,40 @@ var actions = map[string]*actionDefinition{
 				validType: Integer,
 			},
 		},
+		outputType: Integer,
 	},
 	"base64Encode": {
 		identifier: "base64encode",
 		parameters: []parameterDefinition{
 			{
 				name:      "encodeInput",
+				key:       "WFInput",
 				validType: Variable,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "input",
-					dataType: Text,
-					value:    "Encode",
-				},
-				variableInput("WFInput", args[0].value.(string)),
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"input": "Encode",
 			}
 		},
+		defaultAction: true,
+		outputType:    String,
 	},
 	"base64Decode": {
 		identifier: "base64encode",
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
+				key:       "WFInput",
 				validType: Variable,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFEncodeMode",
-					dataType: Text,
-					value:    "Decode",
-				},
-				variableInput("WFInput", args[0].value.(string)),
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFEncodeMode": "Decode",
 			}
 		},
+		outputType: String,
 	},
 	"urlEncode": {
 		identifier: "urlencode",
@@ -3807,15 +4006,13 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFEncodeMode",
-					dataType: Text,
-					value:    "Encode",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFEncodeMode": "Encode",
 			}
 		},
+		defaultAction: true,
+		outputType:    String,
 	},
 	"urlDecode": {
 		identifier: "urlencode",
@@ -3826,15 +4023,12 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFEncodeMode",
-					dataType: Text,
-					value:    "Decode",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFEncodeMode": "Decode",
 			}
 		},
+		outputType: String,
 	},
 	"show": {
 		identifier: "showresult",
@@ -3876,7 +4070,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "text",
-				validType: String,
+				validType: RawString,
 				key:       "WFCommentActionText",
 			},
 		},
@@ -3906,18 +4100,15 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFAlertActionCancelButtonShown",
-					dataType: Boolean,
-					value:    false,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFAlertActionCancelButtonShown": false,
 			}
 		},
 	},
 	"confirm": {
-		identifier: "alert",
+		identifier:    "alert",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "alert",
@@ -3931,13 +4122,9 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFAlertActionCancelButtonShown",
-					dataType: Boolean,
-					value:    true,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFAlertActionCancelButtonShown": true,
 			}
 		},
 	},
@@ -3970,15 +4157,15 @@ var actions = map[string]*actionDefinition{
 				defaultValue: true,
 			},
 		},
-		addParams: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			if len(args) < 3 {
-				return []plistData{}
+				return map[string]any{}
 			}
-			var defaultAnswer = []plistData{
-				argumentValue("WFAskActionDefaultAnswer", args, 2),
+			var defaultAnswer = map[string]any{
+				"WFAskActionDefaultAnswer": argumentValue(args, 2),
 			}
 			if getArgValue(args[1]) == "Number" {
-				defaultAnswer = append(defaultAnswer, paramValue("WFAskActionDefaultAnswerNumber", args[2], Integer, Number))
+				defaultAnswer["WFAskActionDefaultAnswerNumber"] = paramValue(args[2], Integer)
 			}
 
 			return defaultAnswer
@@ -4022,6 +4209,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
+		outputType: String,
 	},
 	"getKeys": {
 		identifier: "getvalueforkey",
@@ -4032,15 +4220,12 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFGetDictionaryValueType",
-					dataType: Text,
-					value:    "All Keys",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFGetDictionaryValueType": "All Keys",
 			}
 		},
+		outputType: Arr,
 	},
 	"getValues": {
 		identifier: "getvalueforkey",
@@ -4051,18 +4236,16 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFGetDictionaryValueType",
-					dataType: Text,
-					value:    "All Values",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFGetDictionaryValueType": "All Values",
 			}
 		},
+		outputType: Arr,
 	},
 	"getValue": {
-		identifier: "getvalueforkey",
+		identifier:    "getvalueforkey",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "dictionary",
@@ -4075,13 +4258,9 @@ var actions = map[string]*actionDefinition{
 				key:       "WFDictionaryKey",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFGetDictionaryValueType",
-					dataType: Text,
-					value:    "Value",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFGetDictionaryValueType": "Value",
 			}
 		},
 	},
@@ -4100,68 +4279,71 @@ var actions = map[string]*actionDefinition{
 			},
 			{
 				name:      "value",
-				validType: Variable,
+				validType: String,
 				key:       "WFDictionaryValue",
 			},
 		},
 	},
 	"openApp": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "appID",
 				validType: String,
+				key:       "WFAppIdentifier",
 			},
 		},
 		check: func(args []actionArgument, definition *actionDefinition) {
 			replaceAppIDs(args, definition)
 		},
-		make: func(args []actionArgument) (params []plistData) {
-			params = []plistData{
-				argumentValue("WFAppIdentifier", args, 0),
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
 			}
 
 			if args[0].valueType == Variable {
-				params = append(params, argumentValue("WFSelectedApp", args, 0))
-			} else {
-				params = append(params, plistData{
-					key:      "WFSelectedApp",
-					dataType: Dictionary,
-					value: []plistData{
-						argumentValue("BundleIdentifier", args, 0),
-					},
-				})
-			}
-
-			return
-		},
-	},
-	"hideApp": {
-		identifier: "hide.app",
-		parameters: []parameterDefinition{
-			{
-				name:      "appID",
-				validType: String,
-			},
-		},
-		check: func(args []actionArgument, definition *actionDefinition) {
-			replaceAppIDs(args, definition)
-		},
-		make: func(args []actionArgument) []plistData {
-			if args[0].valueType == Variable {
-				return []plistData{
-					argumentValue("WFApp", args, 0),
+				return map[string]any{
+					"WFSelectedApp": argumentValue(args, 0),
 				}
 			}
 
-			return []plistData{
-				{
-					key:      "WFApp",
-					dataType: Dictionary,
-					value: []plistData{
-						argumentValue("BundleIdentifier", args, 0),
-					},
+			return map[string]any{
+				"WFSelectedApp": map[string]any{
+					"BundleIdentifier": argumentValue(args, 0),
 				},
 			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFAppIdentifier", action)
+		},
+	},
+	"hideApp": {
+		identifier:    "hide.app",
+		defaultAction: true,
+		parameters: []parameterDefinition{
+			{
+				name:      "appID",
+				validType: String,
+			},
+		},
+		check: func(args []actionArgument, definition *actionDefinition) {
+			replaceAppIDs(args, definition)
+		},
+		make: func(args []actionArgument) map[string]any {
+			if args[0].valueType == Variable {
+				return map[string]any{
+					"WFApp": argumentValue(args, 0),
+				}
+			}
+
+			return map[string]any{
+				"WFApp": map[string]any{
+					"BundleIdentifier": argumentValue(args, 0),
+				},
+			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFApp", action)
 		},
 	},
 	"hideAllApps": {
@@ -4175,30 +4357,31 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		check: replaceAppIDs,
-		make: func(args []actionArgument) (params []plistData) {
-			params = []plistData{
-				{
-					key:      "WFHideAppMode",
-					dataType: Text,
-					value:    "All Apps",
+		make: func(args []actionArgument) map[string]any {
+			if args[0].valueType != Variable {
+				return map[string]any{
+					"WFApp": argumentValue(args, 0),
+				}
+			}
+
+			return map[string]any{
+				"WFApp": map[string]any{
+					"BundleIdentifier": argumentValue(args, 0),
 				},
 			}
-
-			if args[0].valueType != Variable {
-				params = append(params, plistData{
-					key:      "WFAppsExcept",
-					dataType: Array,
-					value:    apps(args),
-				})
-			} else {
-				params = append(params, argumentValue("WFAppsExcept", args, 0))
+		},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFHideAppMode": "All Apps",
 			}
-
-			return
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFAppsExcept", action)
 		},
 	},
 	"quitApp": {
-		identifier: "quit.app",
+		identifier:    "quit.app",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "appID",
@@ -4208,22 +4391,21 @@ var actions = map[string]*actionDefinition{
 		check: func(args []actionArgument, definition *actionDefinition) {
 			replaceAppIDs(args, definition)
 		},
-		make: func(args []actionArgument) []plistData {
+		make: func(args []actionArgument) map[string]any {
 			if args[0].valueType == Variable {
-				return []plistData{
-					argumentValue("WFApp", args, 0),
-				}
-			} else {
-				return []plistData{
-					{
-						key:      "WFApp",
-						dataType: Dictionary,
-						value: []plistData{
-							argumentValue("BundleIdentifier", args, 0),
-						},
-					},
+				return map[string]any{
+					"WFApp": argumentValue(args, 0),
 				}
 			}
+
+			return map[string]any{
+				"WFApp": map[string]any{
+					"BundleIdentifier": argumentValue(args, 0),
+				},
+			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFApp", action)
 		},
 	},
 	"quitAllApps": {
@@ -4237,26 +4419,23 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		check: replaceAppIDs,
-		make: func(args []actionArgument) (params []plistData) {
-			params = []plistData{
-				{
-					key:      "WFQuitAppMode",
-					dataType: Text,
-					value:    "All Apps",
-				},
-			}
-
+		make: func(args []actionArgument) (params map[string]any) {
+			params = make(map[string]any)
 			if args[0].valueType != Variable {
-				params = append(params, plistData{
-					key:      "WFAppsExcept",
-					dataType: Array,
-					value:    apps(args),
-				})
+				params["WFAppsExcept"] = apps(args)
 			} else {
-				params = append(params, argumentValue("WFAppsExcept", args, 0))
+				params["WFAppsExcept"] = argumentValue(args, 0)
 			}
 
 			return
+		},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFQuitAppMode": "All Apps",
+			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFAppsExcept", action)
 		},
 	},
 	"killApp": {
@@ -4270,30 +4449,24 @@ var actions = map[string]*actionDefinition{
 		check: func(args []actionArgument, definition *actionDefinition) {
 			replaceAppIDs(args, definition)
 		},
-		make: func(args []actionArgument) (params []plistData) {
-			params = []plistData{
-				{
-					key:      "WFAskToSaveChanges",
-					dataType: Boolean,
-					value:    false,
-				},
-			}
+		make: func(args []actionArgument) (params map[string]any) {
+			params = make(map[string]any)
+
+			params["WFAskToSaveChanges"] = false
 
 			if args[0].valueType == Variable {
-				return []plistData{
-					argumentValue("WFApp", args, 0),
-				}
+				params["WFApp"] = argumentValue(args, 0)
+				return
 			}
 
-			return []plistData{
-				{
-					key:      "WFApp",
-					dataType: Dictionary,
-					value: []plistData{
-						argumentValue("BundleIdentifier", args, 0),
-					},
-				},
+			params["WFApp"] = map[string]any{
+				"BundleIdentifier": argumentValue(args, 0),
 			}
+
+			return
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFApp", action)
 		},
 	},
 	"killAllApps": {
@@ -4307,31 +4480,22 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		check: replaceAppIDs,
-		make: func(args []actionArgument) (params []plistData) {
-			params = []plistData{
-				{
-					key:      "WFQuitAppMode",
-					dataType: Text,
-					value:    "All Apps",
-				},
-				{
-					key:      "WFAskToSaveChanges",
-					dataType: Boolean,
-					value:    false,
-				},
+		make: func(args []actionArgument) (params map[string]any) {
+			params = map[string]any{
+				"WFQuitAppMode":      "All Apps",
+				"WFAskToSaveChanges": false,
 			}
 
 			if args[0].valueType != Variable {
-				params = append(params, plistData{
-					key:      "WFAppsExcept",
-					dataType: Array,
-					value:    apps(args),
-				})
+				params["WFAppsExcept"] = apps(args)
 			} else {
-				params = append(params, argumentValue("WFAppsExcept", args, 0))
+				params["WFAppsExcept"] = argumentValue(args, 0)
 			}
 
 			return
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompAppAction("WFAppsExcept", action)
 		},
 	},
 	"splitApps": {
@@ -4347,6 +4511,7 @@ var actions = map[string]*actionDefinition{
 			},
 			{
 				name:         "ratio",
+				key:          "WFAppRatio",
 				validType:    String,
 				optional:     true,
 				enum:         appSplitRatios,
@@ -4372,66 +4537,75 @@ var actions = map[string]*actionDefinition{
 				}
 			}
 		},
-		make: func(args []actionArgument) (params []plistData) {
-			params = []plistData{
-				argumentValue("WFAppRatio", args, 2),
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
+			var params = make(map[string]any)
+			if args[0].valueType == Variable {
+				params["WFPrimaryAppIdentifier"] = argumentValue(args, 0)
+			} else {
+				params["WFPrimaryAppIdentifier"] = map[string]any{
+					"BundleIdentifier": argumentValue(args, 0),
+				}
 			}
 
 			if args[0].valueType == Variable {
-				params = append(params, argumentValue("WFPrimaryAppIdentifier", args, 0))
+				params["WFSecondaryAppIdentifier"] = argumentValue(args, 0)
 			} else {
-				params = append(params, plistData{
-					key:      "WFPrimaryAppIdentifier",
-					dataType: Dictionary,
-					value: []plistData{
-						argumentValue("BundleIdentifier", args, 0),
-					},
-				})
+				params["WFSecondaryAppIdentifier"] = map[string]any{
+					"BundleIdentifier": argumentValue(args, 0),
+				}
 			}
 
-			if args[0].valueType == Variable {
-				params = append(params, argumentValue("WFSecondaryAppIdentifier", args, 0))
-			} else {
-				params = append(params, plistData{
-					key:      "WFSecondaryAppIdentifier",
-					dataType: Dictionary,
-					value: []plistData{
-						argumentValue("BundleIdentifier", args, 0),
-					},
-				})
+			return params
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var splitRatio = decompValue(action.WFWorkflowActionParameters["WFAppRatio"])
+
+			var ratio = "half"
+			switch splitRatio {
+			case "½ + ½":
+				ratio = "half"
+			case "⅓ + ⅔":
+				ratio = "thirdByTwo"
 			}
+
+			arguments = append(arguments, fmt.Sprintf("\"%s\"", ratio))
+			arguments = append(arguments, decompAppAction("WFPrimaryAppIdentifier", action)...)
+			arguments = append(arguments, decompAppAction("WFSecondaryAppIdentifier", action)...)
 
 			return
 		},
 	},
 	"openShortcut": {
-		identifier: "openworkflow",
+		appIdentifier: "com.apple.shortcuts",
+		identifier:    "OpenWorkflowAction",
 		parameters: []parameterDefinition{
 			{
 				name:      "shortcutName",
 				validType: String,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFWorkflow",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "workflowIdentifier",
-							dataType: Text,
-							value:    uuid.New().String(),
-						},
-						{
-							key:      "isSelf",
-							dataType: Boolean,
-							value:    false,
-						},
-						argumentValue("workflowName", args, 0),
-					},
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
+			return map[string]any{
+				"target": map[string]any{
+					"title": argumentValue(args, 0),
 				},
 			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			if action.WFWorkflowActionParameters["target"] != nil {
+				var workflow = action.WFWorkflowActionParameters["target"].(map[string]interface{})
+				var title = workflow["title"].(map[string]interface{})
+				arguments = append(arguments, decompValue(title["key"]))
+			}
+			return
 		},
 	},
 	"runSelf": {
@@ -4439,38 +4613,35 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "output",
+				key:       "WFInput",
 				validType: Variable,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFWorkflow",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "workflowIdentifier",
-							dataType: Text,
-							value:    uuid.New().String(),
-						},
-						{
-							key:      "isSelf",
-							dataType: Boolean,
-							value:    true,
-						},
-						{
-							key:      "workflowName",
-							dataType: Text,
-							value:    workflowName,
-						},
-					},
-				},
-				argumentValue("WFInput", args, 0),
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{
+					"isSelf": true,
+				}
 			}
+
+			return map[string]any{
+				"WFWorkflow": map[string]any{
+					"workflowIdentifier": uuid.New().String(),
+					"isSelf":             true,
+					"workflowName":       workflowName,
+				},
+			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			if action.WFWorkflowActionParameters["WFInput"] != nil {
+				arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFInput"]))
+			}
+			return
 		},
 	},
 	"run": {
-		identifier: "runworkflow",
+		identifier:    "runworkflow",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "shortcutName",
@@ -4479,30 +4650,35 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "output",
 				validType: Variable,
+				key:       "WFInput",
 				optional:  true,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFWorkflow",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "workflowIdentifier",
-							dataType: Text,
-							value:    uuid.New().String(),
-						},
-						{
-							key:      "isSelf",
-							dataType: Boolean,
-							value:    false,
-						},
-						argumentValue("workflowName", args, 0),
-					},
-				},
-				argumentValue("WFInput", args, 1),
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{
+					"isSelf": false,
+				}
 			}
+
+			return map[string]any{
+				"WFWorkflow": map[string]any{
+					"workflowIdentifier": uuid.New().String(),
+					"isSelf":             false,
+					"workflowName":       argumentValue(args, 0),
+				},
+			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]any)
+			if !workflow["isSelf"].(bool) {
+				arguments = append(arguments, decompValue(workflow["workflowName"]))
+			}
+			if action.WFWorkflowActionParameters["WFInput"] != nil {
+				arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFInput"]))
+			}
+
+			return
 		},
 	},
 	"list": {
@@ -4513,29 +4689,29 @@ var actions = map[string]*actionDefinition{
 				infinite:  true,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			var listItems []plistData
+		make: func(args []actionArgument) map[string]any {
+			var listItems []map[string]any
 			for _, item := range args {
-				listItems = append(listItems, plistData{
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "WFItemType",
-							dataType: Number,
-							value:    0,
-						},
-						paramValue("WFValue", item, String, Text),
-					},
+				listItems = append(listItems, map[string]any{
+					"WFItemType": 0,
+					"WFValue":    paramValue(item, String),
 				})
 			}
 
-			return []plistData{
-				{
-					key:      "WFItems",
-					dataType: Array,
-					value:    listItems,
-				},
+			return map[string]any{
+				"WFItems": listItems,
 			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var listItems = action.WFWorkflowActionParameters["WFItems"].([]interface{})
+			for _, item := range listItems {
+				var itemValue = item
+				if reflect.TypeOf(item).String() != "string" {
+					itemValue = item.(map[string]interface{})["WFValue"]
+				}
+				arguments = append(arguments, decompValue(itemValue))
+			}
+			return
 		},
 	},
 	"calculate": {
@@ -4559,15 +4735,12 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFMathOperation",
-					dataType: Text,
-					value:    "...",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFMathOperation": "...",
 			}
 		},
+		outputType: Integer,
 	},
 	"statistic": {
 		identifier: "statistics",
@@ -4588,18 +4761,10 @@ var actions = map[string]*actionDefinition{
 	"dismissSiri": {},
 	"isOnline": {
 		identifier: "getipaddress",
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFIPAddressSourceOption",
-					dataType: Text,
-					value:    "External",
-				},
-				{
-					key:      "WFIPAddressTypeOption",
-					dataType: Text,
-					value:    "IPv4",
-				},
+		make: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFIPAddressSourceOption": "External",
+				"WFIPAddressTypeOption":   "IPv4",
 			}
 		},
 	},
@@ -4615,18 +4780,16 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFIPAddressSourceOption",
-					dataType: Text,
-					value:    "Local",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFIPAddressSourceOption": "Local",
 			}
 		},
+		outputType: String,
 	},
 	"getExternalIP": {
-		identifier: "getipaddress",
+		identifier:    "getipaddress",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:         "type",
@@ -4637,32 +4800,26 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFIPAddressSourceOption",
-					dataType: Text,
-					value:    "External",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFIPAddressSourceOption": "External",
 			}
 		},
+		outputType: String,
 	},
 	"getFirstItem": {
-		identifier: "getitemfromlist",
+		identifier:    "getitemfromlist",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "list",
+				key:       "WFInput",
 				validType: Variable,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-				{
-					key:      "WFItemSpecifier",
-					dataType: Text,
-					value:    "First Item",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFItemSpecifier": "First Item",
 			}
 		},
 	},
@@ -4671,17 +4828,13 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "list",
+				key:       "WFInput",
 				validType: Variable,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-				{
-					key:      "WFItemSpecifier",
-					dataType: Text,
-					value:    "Last Item",
-				},
+		addParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFItemSpecifier": "Last Item",
 			}
 		},
 	},
@@ -4690,17 +4843,13 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "list",
+				key:       "WFInput",
 				validType: Variable,
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				variableInput("WFInput", args[0].value.(string)),
-				{
-					key:      "WFItemSpecifier",
-					dataType: Text,
-					value:    "Random Item",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFItemSpecifier": "Random Item",
 			}
 		},
 	},
@@ -4718,13 +4867,9 @@ var actions = map[string]*actionDefinition{
 				key:       "WFItemIndex",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFItemSpecifier",
-					dataType: Text,
-					value:    "Item At Index",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFItemSpecifier": "Item At Index",
 			}
 		},
 	},
@@ -4747,15 +4892,12 @@ var actions = map[string]*actionDefinition{
 				key:       "WFItemRangeEnd",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFItemSpecifier",
-					dataType: Text,
-					value:    "Items in Range",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFItemSpecifier": "Items in Range",
 			}
 		},
+		outputType: Arr,
 	},
 	"getNumbers": {
 		identifier: "detect.number",
@@ -4766,6 +4908,7 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
+		outputType: Integer,
 	},
 	"getDictionary": {
 		identifier: "detect.dictionary",
@@ -4776,6 +4919,7 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
+		outputType: Dict,
 	},
 	"getText": {
 		identifier: "detect.text",
@@ -4786,6 +4930,7 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
+		outputType: String,
 	},
 	"getContacts": {
 		identifier: "detect.contacts",
@@ -4796,6 +4941,7 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
+		outputType: Arr,
 	},
 	"getDates": {
 		identifier: "detect.date",
@@ -4806,6 +4952,7 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
+		outputType: Arr,
 	},
 	"getEmails": {
 		identifier: "detect.emailaddress",
@@ -4816,6 +4963,7 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 		},
+		outputType: Arr,
 	},
 	"getPhoneNumbers": {
 		identifier: "detect.phonenumber",
@@ -4826,6 +4974,7 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
+		outputType: Arr,
 	},
 	"getURLs": {
 		identifier: "detect.link",
@@ -4836,21 +4985,22 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
+		outputType: Arr,
 	},
 	"getAllWallpapers": {
-		identifier: "posters.get",
-		minVersion: 16.2,
+		identifier:    "posters.get",
+		minVersion:    16.2,
+		mac:           false,
+		defaultAction: true,
+		outputType:    Arr,
 	},
 	"getWallpaper": {
 		identifier: "posters.get",
 		minVersion: 16.2,
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFPosterType",
-					dataType: Text,
-					value:    "Current",
-				},
+		mac:        false,
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFPosterType": "Current",
 			}
 		},
 	},
@@ -4876,7 +5026,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openXCallbackURL": {
-		identifier: "openxcallbackurl",
+		identifier:    "openxcallbackurl",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -4919,25 +5070,23 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(args []actionArgument) (xCallbackParams []plistData) {
+		addParams: func(args []actionArgument) (xCallbackParams map[string]any) {
+			if len(args) == 0 {
+				return
+			}
+			xCallbackParams = make(map[string]any)
 			if args[1].value.(string) != "" || args[2].value.(string) != "" || args[3].value.(string) != "" {
-				xCallbackParams = append(xCallbackParams, plistData{
-					key:      "WFXCallbackCustomCallbackEnabled",
-					dataType: Boolean,
-					value:    true,
-				})
+				xCallbackParams["WFXCallbackCustomCallbackEnabled"] = true
 			}
 			if args[4].value.(string) != "" {
-				xCallbackParams = append(xCallbackParams, plistData{
-					key:      "WFXCallbackCustomSuccessURLEnabled",
-					dataType: Boolean,
-					value:    true,
-				})
+				xCallbackParams["WFXCallbackCustomSuccessURLEnabled"] = true
 			}
+
 			return
 		},
 	},
 	"output": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "output",
@@ -4960,13 +5109,9 @@ var actions = map[string]*actionDefinition{
 				key:       "WFResponse",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFNoOutputSurfaceBehavior",
-					dataType: Text,
-					value:    "Respond",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFNoOutputSurfaceBehavior": "Respond",
 			}
 		},
 	},
@@ -4979,39 +5124,28 @@ var actions = map[string]*actionDefinition{
 				key:       "WFOutput",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFNoOutputSurfaceBehavior",
-					dataType: Text,
-					value:    "Copy to Clipboard",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFNoOutputSurfaceBehavior": "Copy to Clipboard",
 			}
 		},
 	},
 	"DNDOn": {
 		identifier: "dnd.set",
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				focusModes,
-				{
-					key:      "Enabled",
-					dataType: Number,
-					value:    1,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"FocusModes": focusModes,
+				"Enabled":    1,
 			}
 		},
 	},
 	"DNDOff": {
-		identifier: "dnd.set",
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				focusModes,
-				{
-					key:      "Enabled",
-					dataType: Number,
-					value:    0,
-				},
+		identifier:    "dnd.set",
+		defaultAction: true,
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"FocusModes": focusModes,
+				"Enabled":    0,
 			}
 		},
 	},
@@ -5050,18 +5184,26 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"round": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
 				validType: Integer,
+				key:       "WFInput",
 			},
 			{
-				name:      "roundTo",
-				validType: String,
+				name:         "roundTo",
+				validType:    String,
+				key:          "WFRoundTo",
+				enum:         roundings,
+				optional:     true,
+				defaultValue: "Ones Place",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return roundingValue("Normal", args)
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFRoundMode": "Normal",
+			}
 		},
 	},
 	"ceil": {
@@ -5070,14 +5212,21 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "number",
 				validType: Integer,
+				key:       "WFInput",
 			},
 			{
-				name:      "roundTo",
-				validType: String,
+				name:         "roundTo",
+				validType:    String,
+				key:          "WFRoundTo",
+				enum:         roundings,
+				optional:     true,
+				defaultValue: "Ones Place",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return roundingValue("Always Round Up", args)
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFRoundMode": "Always Round Up",
+			}
 		},
 	},
 	"floor": {
@@ -5086,14 +5235,21 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "number",
 				validType: Integer,
+				key:       "WFInput",
 			},
 			{
-				name:      "roundTo",
-				validType: String,
+				name:         "roundTo",
+				validType:    String,
+				key:          "WFRoundTo",
+				enum:         roundings,
+				optional:     true,
+				defaultValue: "Ones Place",
 			},
 		},
-		make: func(args []actionArgument) []plistData {
-			return roundingValue("Always Round Down", args)
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFRoundMode": "Always Round Down",
+			}
 		},
 	},
 	"runShellScript": {
@@ -5214,13 +5370,9 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "Show-WFInput",
-					dataType: Boolean,
-					value:    true,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"Show-WFInput": true,
 			}
 		},
 	},
@@ -5343,7 +5495,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getGifs": {
-		identifier: "giphy",
+		identifier:    "giphy",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "query",
@@ -5358,13 +5511,9 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFGiphyShowPicker",
-					dataType: Boolean,
-					value:    false,
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFGiphyShowPicker": false,
 			}
 		},
 	},
@@ -5405,6 +5554,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"downloadURL": {
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -5416,36 +5566,33 @@ var actions = map[string]*actionDefinition{
 				validType: Dict,
 				key:       "WFHTTPHeaders",
 				optional:  true,
+				literal:   true,
 			},
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFHTTPMethod",
-					dataType: Text,
-					value:    "GET",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFHTTPMethod": "GET",
 			}
 		},
 	},
 	"formRequest": {
 		identifier: "downloadurl",
 		parameters: httpParams,
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return httpRequest("Form", "WFFormValues", args)
 		},
 	},
 	"jsonRequest": {
 		identifier: "downloadurl",
 		parameters: httpParams,
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return httpRequest("JSON", "WFJSONValues", args)
 		},
 	},
 	"fileRequest": {
 		identifier: "downloadurl",
 		parameters: httpParams,
-		make: func(args []actionArgument) []plistData {
+		addParams: func(args []actionArgument) map[string]any {
 			return httpRequest("File", "WFRequestVariable", args)
 		},
 	},
@@ -5504,13 +5651,15 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 		},
-		addParams: func(args []actionArgument) (params []plistData) {
+		addParams: func(args []actionArgument) (params map[string]any) {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			if args[2].value != nil {
-				params = append(params, plistData{
-					key:      "WFContentItemLimitEnabled",
-					dataType: Boolean,
-					value:    true,
-				})
+				params = map[string]any{
+					"WFContentItemLimitEnabled": true,
+				}
 			}
 			return
 		},
@@ -5588,10 +5737,12 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "measurement",
 				validType: Variable,
+				key:       "WFInput",
 			},
 			{
 				name:      "unitType",
 				validType: String,
+				key:       "WFMeasurementUnitType",
 				enum:      measurementUnitTypes,
 			},
 			{
@@ -5613,19 +5764,34 @@ var actions = map[string]*actionDefinition{
 				enum: units[unitType],
 			}, &args[2])
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				argumentValue("WFInput", args, 0),
-				{
-					key:      "WFMeasurementUnit",
-					dataType: Dictionary,
-					value: []plistData{
-						argumentValue("WFNSUnitSymbol", args, 2),
-						argumentValue("WFNSUnitType", args, 1),
-					},
-				},
-				argumentValue("WFMeasurementUnitType", args, 1),
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{
+					"isSelf": false,
+				}
 			}
+
+			return map[string]any{
+				"WFMeasurementUnit": map[string]any{
+					"WFNSUnitType":   argumentValue(args, 1),
+					"WFNSUnitSymbol": argumentValue(args, 2),
+				},
+			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			arguments = append(arguments,
+				decompValue(action.WFWorkflowActionParameters["WFInput"]),
+				decompValue(action.WFWorkflowActionParameters["WFMeasurementUnitType"]),
+			)
+
+			if action.WFWorkflowActionParameters["WFMeasurementUnit"] != nil {
+				var measurementUnit WFMeasurementUnit
+				mapToStruct(action.WFWorkflowActionParameters["WFMeasurementUnit"].(map[string]interface{}), &measurementUnit)
+
+				arguments = append(arguments, decompValue(measurementUnit.WFNSUnitSymbol))
+			}
+
+			return
 		},
 	},
 	"measurement": {
@@ -5638,6 +5804,7 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "unitType",
 				validType: String,
+				key:       "WFMeasurementUnitType",
 				enum:      measurementUnitTypes,
 			},
 			{
@@ -5659,29 +5826,34 @@ var actions = map[string]*actionDefinition{
 				enum: units[unitType],
 			}, &args[2])
 		},
-		make: func(args []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFMeasurementUnit",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "Value",
-							dataType: Dictionary,
-							value: []plistData{
-								argumentValue("Magnitude", args, 0),
-								argumentValue("Unit", args, 2),
-							},
-						},
-						{
-							key:      "WFSerializationType",
-							dataType: Text,
-							value:    "WFQuantityFieldValue",
-						},
-					},
-				},
-				argumentValue("WFMeasurementUnitType", args, 1),
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
 			}
+
+			return map[string]any{
+				"WFMeasurementUnit": map[string]any{
+					"Value": map[string]any{
+						"Magnitude": argumentValue(args, 0),
+						"Unit":      argumentValue(args, 2),
+					},
+					"WFSerializationType": "WFQuantityFieldValue",
+				},
+			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			if action.WFWorkflowActionParameters["WFMeasurementUnit"] != nil {
+				var measurementUnit WFMeasurementUnit
+				mapToStruct(action.WFWorkflowActionParameters["WFMeasurementUnit"].(map[string]interface{}), &measurementUnit)
+
+				arguments = append(arguments,
+					decompValue(measurementUnit.Value.Magnitude),
+					decompValue(action.WFWorkflowActionParameters["WFMeasurementUnitType"]),
+					decompValue(measurementUnit.Value.Unit),
+				)
+			}
+
+			return
 		},
 	},
 	"makeVCard": {
@@ -5696,29 +5868,17 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 			},
 			{
-				name:      "imagePath",
+				name:      "base64Image",
 				validType: String,
 				optional:  true,
 			},
 		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			if len(args) != 3 {
-				return
-			}
-
-			var image = getArgValue(args[2])
-			if reflect.TypeOf(image).String() == stringType {
-				var iconFile = getArgValue(args[2]).(string)
-				if _, err := os.Stat(iconFile); os.IsNotExist(err) {
-					parserError(fmt.Sprintf("File '%s' does not exist!", iconFile))
-				}
-			}
-		},
-		make: func(args []actionArgument) []plistData {
+		make: func(args []actionArgument) map[string]any {
 			var title = args[0].value.(string)
 			var subtitle = args[1].value.(string)
 			wrapVariableReference(&title)
 			wrapVariableReference(&subtitle)
+
 			var vcard strings.Builder
 			vcard.WriteString(fmt.Sprintf("BEGIN:VCARD\nVERSION:3.0\nN;CHARSET=utf-8:%s\nORG:%s\n", title, subtitle))
 
@@ -5726,12 +5886,9 @@ var actions = map[string]*actionDefinition{
 				var photo string
 				var image = getArgValue(args[2])
 				if reflect.TypeOf(image).String() != stringType && args[2].valueType == Variable {
-					photo = fmt.Sprintf("{%s}", args[2].value)
+					photo = fmt.Sprintf("{%s}", makeVariableReferenceString(args[2].value.(varValue)))
 				} else {
-					var iconFile = getArgValue(args[2]).(string)
-					var bytes, readErr = os.ReadFile(iconFile)
-					handle(readErr)
-					photo = base64.StdEncoding.EncodeToString(bytes)
+					photo = getArgValue(args[2]).(string)
 				}
 
 				if photo != "" {
@@ -5744,8 +5901,9 @@ var actions = map[string]*actionDefinition{
 				valueType: String,
 				value:     vcard.String(),
 			}
-			return []plistData{
-				argumentValue("WFTextActionText", args, 0),
+
+			return map[string]any{
+				"WFTextActionText": argumentValue(args, 0),
 			}
 		},
 	},
@@ -5766,23 +5924,20 @@ var actions = map[string]*actionDefinition{
 				parserError(fmt.Sprintf("File '%s' does not exist!", file))
 			}
 		},
-		make: func(args []actionArgument) []plistData {
+		make: func(args []actionArgument) map[string]any {
 			var file = getArgValue(args[0]).(string)
 			var bytes, readErr = os.ReadFile(file)
 			handle(readErr)
 			var encodedFile = base64.StdEncoding.EncodeToString(bytes)
 
-			return []plistData{
-				{
-					key:      "WFTextActionText",
-					dataType: Text,
-					value:    encodedFile,
-				},
+			return map[string]any{
+				"WFTextActionText": encodedFile,
 			}
 		},
 	},
 	"updateContact": {
-		identifier: "setters.contacts",
+		identifier:    "setters.contacts",
+		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
 				name:      "contact",
@@ -5805,13 +5960,9 @@ var actions = map[string]*actionDefinition{
 			var contactDetailKey = strings.ReplaceAll(contactDetail, " ", "")
 			currentAction.parameters[2].key = "WFContactContentItem" + contactDetailKey
 		},
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "Mode",
-					dataType: Text,
-					value:    "Set",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"Mode": "Set",
 			}
 		},
 	},
@@ -5820,7 +5971,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "input",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 			{
@@ -5833,33 +5984,13 @@ var actions = map[string]*actionDefinition{
 	},
 	"springBoard": {
 		identifier: "openapp",
-		make: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "WFAppIdentifier",
-					dataType: Text,
-					value:    "com.apple.springboard",
-				},
-				{
-					key:      "WFSelectedApp",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "BundleIdentifier",
-							dataType: Text,
-							value:    "com.apple.springboard",
-						},
-						{
-							key:      "Name",
-							dataType: Text,
-							value:    "SpringBoard",
-						},
-						{
-							key:      "TeamIdentifier",
-							dataType: Text,
-							value:    "0000000000",
-						},
-					},
+		make: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"WFAppIdentifier": "com.apple.springboard",
+				"WFSelectedApp": map[string]any{
+					"BundleIdentifer": "com.apple.springboard",
+					"Name":            "SpringBoard",
+					"TeamIdentifer":   "0000000000",
 				},
 			}
 		},
@@ -5869,7 +6000,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "shortcut",
-				validType: Var,
+				validType: Variable,
 				key:       "WFInput",
 			},
 			{
@@ -5913,7 +6044,9 @@ var actions = map[string]*actionDefinition{
 	},
 }
 
-func rawAction() {
+var plistTypes = map[string]string{"string": "", "integer": "", "boolean": "", "array": "", "dict": "", "real": ""}
+
+func defineRawAction() {
 	actions["rawAction"] = &actionDefinition{
 		parameters: []parameterDefinition{
 			{
@@ -5928,43 +6061,61 @@ func rawAction() {
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			actions["rawAction"].overrideIdentifier = getArgValue(args[0]).(string)
+
+			if len(args) > 1 {
+				for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
+					var definitions = parameterDefinitions.(map[string]interface{})
+					if definitions["type"] != nil {
+						var paramKey = definitions["key"]
+						var paramType = definitions["type"].(string)
+						var paramValue = definitions["value"].(string)
+						if _, found := plistTypes[paramType]; !found {
+							var list = makeKeyList("Available plist types:", plistTypes, paramValue)
+							parserError(fmt.Sprintf("Raw action parameter '%s' type '%s' is not a plist type.\n\n%s", paramKey, paramType, list))
+						}
+					}
+				}
+			}
 		},
-		make: func(args []actionArgument) (params []plistData) {
+		make: func(args []actionArgument) map[string]any {
+			var params = make(map[string]any)
+			if len(args) == 1 {
+				return params
+			}
 			for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
 				var paramKey string
-				var paramType plistDataType
+				var paramType dataType
 				var rawValue any
 				for key, value := range parameterDefinitions.(map[string]interface{}) {
 					switch key {
 					case "key":
 						paramKey = value.(string)
 					case "type":
-						paramType = plistDataType(value.(string))
+						paramType = dataType(value.(string))
 					case "value":
 						rawValue = value
 					}
 				}
 
-				var tokenType = convertPlistTypeToken(paramType)
-				params = append(params, paramValue(paramKey, actionArgument{
+				var tokenType = convertDataTypeToTokenType(paramType)
+				params[paramKey] = paramValue(actionArgument{
 					valueType: tokenType,
 					value:     rawValue,
-				}, tokenType, paramType))
+				}, tokenType)
 			}
-			return
+
+			return params
 		},
 	}
 }
-
-var contactValues []plistData
 
 type contentKit string
 
 var emailAddress contentKit = "emailaddress"
 var phoneNumber contentKit = "phonenumber"
 
-func contactValue(key string, contentKit contentKit, args []actionArgument) plistData {
-	contactValues = []plistData{}
+func contactValue(contentKit contentKit, args []actionArgument) map[string]any {
+	var contactValues []map[string]any
 	var entryType int
 	switch contentKit {
 	case emailAddress:
@@ -5973,233 +6124,138 @@ func contactValue(key string, contentKit contentKit, args []actionArgument) plis
 		entryType = 1
 	}
 	for _, item := range args {
-		contactValues = append(contactValues, plistData{
-			dataType: Dictionary,
-			value: []plistData{
-				{
-					key:      "EntryType",
-					dataType: Number,
-					value:    entryType,
-				},
-				{
-					key:      "SerializedEntry",
-					dataType: Dictionary,
-					value: []plistData{
-						{
-							key:      "link.contentkit." + string(contentKit),
-							dataType: Text,
-							value:    item.value,
-						},
-					},
-				},
+		contactValues = append(contactValues, map[string]any{
+			"EntryType": entryType,
+			"SerializedEntry": map[string]any{
+				"link.contentkit." + string(contentKit): item.value,
 			},
 		})
 	}
-	return plistData{
-		key:      key,
-		dataType: Dictionary,
-		value: []plistData{
-			{
-				key:      "Value",
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "WFContactFieldValues",
-						dataType: Array,
-						value:    contactValues,
-					},
-				},
-			},
-			{
-				key:      "WFSerializationType",
-				dataType: Text,
-				value:    "WFContactFieldValue",
-			},
+
+	return map[string]any{
+		"Value": map[string]any{
+			"WFContactFieldValues": contactValues,
 		},
+		"WFSerializationType": "WFContactFieldValue",
 	}
 }
 
-func roundingValue(mode string, args []actionArgument) []plistData {
-	switch args[1].value {
-	case "1":
-		args[1].value = "Ones Place"
-	case "10":
-		args[1].value = "Tens Place"
-	case "100":
-		args[1].value = "Hundreds Place"
-	case "1000":
-		args[1].value = "Thousands"
-	case "10000":
-		args[1].value = "Ten Thousands"
-	case "100000":
-		args[1].value = "Hundred Thousands"
-	case "1000000":
-		args[1].value = "Millions"
+func decompContactValue(action *ShortcutAction, key string, contentKit contentKit) (arguments []string) {
+	if action.WFWorkflowActionParameters[key] == nil {
+		return
 	}
-	return []plistData{
-		{
-			key:      "WFRoundMode",
-			dataType: Text,
-			value:    mode,
-		},
-		argumentValue("WFInput", args, 0),
-		{
-			key:      "WFRoundTo",
-			dataType: Text,
-			value:    args[1].value,
-		},
+
+	var wfValue WFValue
+	mapToStruct(action.WFWorkflowActionParameters[key], &wfValue)
+
+	if wfValue.WFSerializationType == "WFTextTokenString" {
+		return []string{decompValue(action.WFWorkflowActionParameters[key])}
 	}
+
+	var value = wfValue.Value.(map[string]interface{})
+	var contactFieldValues []WFContactFieldValue
+	mapToStruct(value["WFContactFieldValues"].([]interface{}), &contactFieldValues)
+
+	for _, contactFieldValue := range contactFieldValues {
+		var serializedKey = fmt.Sprintf("link.contentkit.%s", contentKit)
+		var email = contactFieldValue.SerializedEntry[serializedKey]
+		arguments = append(arguments, fmt.Sprintf("\"%s\"", email.(string)))
+	}
+
+	return
 }
 
-func adjustDate(operation string, unit string, args []actionArgument) (adjustDateParams []plistData) {
-	adjustDateParams = []plistData{
-		{
-			key:      "WFAdjustOperation",
-			dataType: Text,
-			value:    operation,
-		},
-		argumentValue("WFDate", args, 0),
+func adjustDate(operation string, unit string, args []actionArgument) (adjustDateParams map[string]any) {
+	if len(args) == 0 {
+		return map[string]any{}
 	}
+
+	maps.Copy(adjustDateParams, map[string]any{
+		"WFAdjustOperation": operation,
+	})
 	if unit == "" {
 		return adjustDateParams
 	}
 
-	adjustDateParams = append(adjustDateParams, magnitudeValue(unit, args, 1))
+	maps.Copy(adjustDateParams, magnitudeValue(unit, args, 1))
 
-	return adjustDateParams
+	return
 }
 
-func magnitudeValue(unit string, args []actionArgument, index int) plistData {
-	var magnitudeValue = argumentValue("Magnitude", args, index)
-	if magnitudeValue.dataType == Dictionary {
-		var value = magnitudeValue.value.([]plistData)
-		magnitudeValue.dataType = Dictionary
-		magnitudeValue.value = value[0].value
+func magnitudeValue(unit string, args []actionArgument, index int) map[string]any {
+	var magnitudeValue = argumentValue(args, index)
+	if reflect.TypeOf(magnitudeValue).String() == "[]map[string]any" {
+		var value = magnitudeValue.([]map[string]any)
+		magnitudeValue = value[0]
 	}
 
-	return plistData{
-		key:      "WFDuration",
-		dataType: Dictionary,
-		value: []plistData{
-			{
-				key:      "Value",
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "Unit",
-						dataType: Text,
-						value:    unit,
-					},
-					magnitudeValue,
-				},
+	return map[string]any{
+		"WFDuration": map[string]any{
+			"Value": map[string]any{
+				"Unit":      unit,
+				"Magnitude": magnitudeValue,
 			},
-			{
-				key:      "WFSerializationType",
-				dataType: Text,
-				value:    "WFQuantityFieldValue",
-			},
+			"WFSerializationType": "WFQuantityFieldValue",
 		},
 	}
 }
 
-func changeCase(textCase string, args []actionArgument) []plistData {
-	return []plistData{
-		{
-			key:      "Show-text",
-			dataType: Boolean,
-			value:    true,
-		},
-		{
-			key:      "WFCaseType",
-			dataType: Text,
-			value:    textCase,
-		},
-		argumentValue("text", args, 0),
+func changeCase(textCase string) map[string]any {
+	return map[string]any{
+		"Show-text":  true,
+		"WFCaseType": textCase,
 	}
 }
 
-func textParts(args []actionArgument) []plistData {
-	var data = []plistData{
-		{
-			key:      "Show-text",
-			dataType: Boolean,
-			value:    true,
-		},
+func textParts(args []actionArgument) map[string]any {
+	if len(args) == 0 {
+		return map[string]any{}
+	}
 
-		argumentValue("text", args, 0),
+	var data = map[string]any{
+		"Show-text": true,
 	}
 
 	var separator = getArgValue(args[1])
 	switch {
 	case separator == " ":
-		data = append(data, plistData{
-			key:      "WFTextSeparator",
-			dataType: Text,
-			value:    "Spaces",
-		})
+		data["WFTextSeparator"] = "Spaces"
 	case separator == "\n":
-		data = append(data, plistData{
-			key:      "WFTextSeparator",
-			dataType: Text,
-			value:    "New Lines",
-		})
+		data["WFTextSeparator"] = "New Lines"
 	case separator == "" && currentAction.identifier == "splitText":
-		data = append(data, plistData{
-			key:      "WFTextSeparator",
-			dataType: Text,
-			value:    "Every Character",
-		})
+		data["WFTextSeparator"] = "Every Character"
 	default:
-		data = append(data,
-			plistData{
-				key:      "WFTextSeparator",
-				dataType: Text,
-				value:    "Custom",
-			},
-			argumentValue("WFTextCustomSeparator", args, 1),
-		)
+		data["WFTextSeparator"] = "Custom"
+		data["WFTextCustomSeparator"] = argumentValue(args, 1)
 	}
 
 	return data
 }
 
-func replaceText(caseSensitive bool, regExp bool, args []actionArgument) []plistData {
-	return []plistData{
-		{
-			key:      "WFReplaceTextCaseSensitive",
-			dataType: Boolean,
-			value:    caseSensitive,
-		},
-		{
-			key:      "WFReplaceTextRegularExpression",
-			dataType: Boolean,
-			value:    regExp,
-		},
-		argumentValue("WFReplaceTextFind", args, 0),
-		argumentValue("WFReplaceTextReplace", args, 1),
-		argumentValue("WFInput", args, 2),
+func decompReferenceValue(paramValue any) string {
+	if isReferenceValue(paramValue) {
+		return decompValue(paramValue)
 	}
+
+	return paramValue.(string)
 }
 
-func languageCode(language string) string {
-	makeLanguages()
-	if lang, found := languages[language]; found {
-		return lang
+func decompTextParts(action *ShortcutAction) (arguments []string) {
+	arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["text"]))
+
+	var glue string
+	if action.WFWorkflowActionParameters["WFTextSeparator"] != nil {
+		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextSeparator"])
+	}
+	if action.WFWorkflowActionParameters["WFTextCustomSeparator"] != nil {
+		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextCustomSeparator"])
 	}
 
-	parserError(fmt.Sprintf("Unknown language '%s'", language))
-	return ""
-}
-
-func countParams(countType string, args []actionArgument) []plistData {
-	return []plistData{
-		{
-			key:      "WFCountType",
-			dataType: Text,
-			value:    countType,
-		},
-		argumentValue("Input", args, 0),
+	if glue != "" {
+		arguments = append(arguments, fmt.Sprintf("\"%s\"", glueToChar(glue)))
 	}
+
+	return
 }
 
 var appIds map[string]string
@@ -6227,23 +6283,12 @@ func makeAppIds() {
 	}
 }
 
-func apps(args []actionArgument) (apps []plistData) {
+func apps(args []actionArgument) (apps []map[string]any) {
 	for _, arg := range args {
 		if arg.valueType != Variable {
-			apps = append(apps, plistData{
-				dataType: Dictionary,
-				value: []plistData{
-					{
-						key:      "BundleIdentifier",
-						dataType: Text,
-						value:    arg.value,
-					},
-					{
-						key:      "TeamIdentifier",
-						dataType: Text,
-						value:    "0000000000",
-					},
-				},
+			apps = append(apps, map[string]any{
+				"BundleIdentifier": arg.value,
+				"TeamIdentifier":   "0000000000",
 			})
 		}
 	}
@@ -6278,18 +6323,52 @@ func replaceAppIDs(args []actionArgument, _ *actionDefinition) {
 	}
 }
 
-func httpRequest(bodyType string, valuesKey string, args []actionArgument) []plistData {
-	return []plistData{
-		{
-			key:      "WFHTTPBodyType",
-			dataType: Text,
-			value:    bodyType,
-		},
-		argumentValue("WFURL", args, 0),
-		argumentValue("WFHTTPMethod", args, 1),
-		argumentValue(valuesKey, args, 2),
-		argumentValue("WFHTTPHeaders", args, 3),
+func httpRequest(bodyType string, valuesKey string, args []actionArgument) map[string]any {
+	var params = map[string]any{"WFHTTPBodyType": bodyType}
+
+	if len(args) > 0 {
+		params[valuesKey] = argumentValue(args, 2)
 	}
+
+	return params
+}
+
+func decompAppAction(key string, action *ShortcutAction) (arguments []string) {
+	if action.WFWorkflowActionParameters[key] != nil {
+		var appsType = reflect.TypeOf(action.WFWorkflowActionParameters[key])
+		if appsType.Kind() == reflect.String {
+			return append(arguments, decompValue(action.WFWorkflowActionParameters[key]))
+		}
+
+		if appsType.String() == dictType {
+			for key, bundle := range action.WFWorkflowActionParameters[key].(map[string]interface{}) {
+				if key == "BundleIdentifier" {
+					arguments = append(arguments, fmt.Sprintf("\"%s\"", bundle))
+				}
+			}
+		} else if appsType.String() == "[]interface {}" {
+			for _, app := range action.WFWorkflowActionParameters[key].([]interface{}) {
+				var bundleIdentifer = app.(map[string]interface{})["BundleIdentifier"]
+				arguments = append(arguments, fmt.Sprintf("\"%s\"", bundleIdentifer))
+			}
+		}
+	}
+
+	return
+}
+
+func decompInfiniteURLAction(action *ShortcutAction) (arguments []string) {
+	var urlValueType = reflect.TypeOf(action.WFWorkflowActionParameters["WFURLActionURL"]).String()
+	if urlValueType == dictType || urlValueType == "string" {
+		return append(arguments, decompValue(action.WFWorkflowActionParameters["WFURLActionURL"]))
+	}
+
+	var urls = action.WFWorkflowActionParameters["WFURLActionURL"].([]interface{})
+	for _, url := range urls {
+		arguments = append(arguments, decompValue(url))
+	}
+
+	return
 }
 
 // toggleSetActions are actions which all are state based and so can either be toggled or set in the same format.
@@ -6301,13 +6380,9 @@ var toggleSetActions = map[string]actionDefinition{
 	"MediaBackgroundSounds": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleBackgroundSoundsIntent",
-		addParams: func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "setting",
-					dataType: Text,
-					value:    "whenMediaIsPlaying",
-				},
+		addParams: func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"setting": "whenMediaIsPlaying",
 			}
 		},
 	},
@@ -6408,17 +6483,13 @@ var toggleSetActions = map[string]actionDefinition{
 	},
 }
 
-// ToggleSetActions automates the creation of actions which simply toggle and set a state in the same format.
-func ToggleSetActions() {
+// defineToggleSetActions automates the creation of actions which simply toggle and set a state in the same format.
+func defineToggleSetActions() {
 	for name, def := range toggleSetActions {
 		var toggleName = fmt.Sprintf("toggle%s", name)
-		def.addParams = func(_ []actionArgument) []plistData {
-			return []plistData{
-				{
-					key:      "operation",
-					dataType: Text,
-					value:    "Toggle",
-				},
+		def.addParams = func(_ []actionArgument) map[string]any {
+			return map[string]any{
+				"operation": "Toggle",
 			}
 		}
 		var toggleDef = def

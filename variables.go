@@ -4,11 +4,18 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+	"strconv"
+	"strings"
 
-var variables map[string]variableValue
+	"github.com/electrikmilk/args-parser"
+)
 
-type variableValue struct {
+var variables map[string]varValue
+
+type varValue struct {
 	variableType string
 	valueType    tokenType
 	value        any
@@ -18,11 +25,11 @@ type variableValue struct {
 	repeatItem   bool
 }
 
-var globals = map[string]variableValue{
-	"ShortcutInput": {
+var globals = map[string]varValue{
+	ShortcutInput: {
 		variableType: "ExtensionInput",
 		valueType:    String,
-		value:        "ShortcutInput",
+		value:        ShortcutInput,
 	},
 	"CurrentDate": {
 		variableType: "CurrentDate",
@@ -85,7 +92,7 @@ func validReference(identifier string) bool {
 	return false
 }
 
-func getVariableValue(identifier string) (*variableValue, bool) {
+func getVariableValue(identifier string) (variableValue *varValue, found bool) {
 	if value, found := globals[identifier]; found {
 		return &value, true
 	}
@@ -94,4 +101,73 @@ func getVariableValue(identifier string) (*variableValue, bool) {
 	}
 
 	return nil, false
+}
+
+func makeVariableReferenceString(value varValue) string {
+	var identifier strings.Builder
+	identifier.WriteString(value.value.(string))
+
+	if value.getAs != "" {
+		identifier.WriteString(fmt.Sprintf("[%s]", value.getAs))
+	}
+	if value.coerce != "" {
+		identifier.WriteString(fmt.Sprintf(".%s", value.coerce))
+	}
+
+	return identifier.String()
+}
+
+var currentOutputName string
+var duplicateDelta int
+
+func checkDuplicateOutputName(name string) string {
+	if name != currentOutputName {
+		currentOutputName = name
+		duplicateDelta = 0
+	}
+	if _, found := uuids[name]; found {
+		return checkDuplicateOutputName(duplicateOutputName())
+	} else if args.Using("import") {
+		for _, outputName := range uuids {
+			if outputName == currentOutputName {
+				return checkDuplicateOutputName(duplicateOutputName())
+			}
+		}
+	}
+
+	return currentOutputName
+}
+
+func duplicateOutputName() string {
+	duplicateDelta++
+
+	var revChars = []rune(currentOutputName)
+	slices.Reverse(revChars)
+	var numChars []rune
+	for _, rc := range revChars {
+		if rc >= '0' && rc <= '9' {
+			numChars = append(numChars, rc)
+		} else {
+			break
+		}
+	}
+
+	if len(numChars) != 0 {
+		slices.Reverse(numChars)
+		var num = string(numChars)
+		var endingDelta, numErr = strconv.Atoi(num)
+		handle(numErr)
+		endingDelta++
+
+		currentOutputName, _ = strings.CutSuffix(currentOutputName, num)
+		duplicateDelta = endingDelta
+	}
+
+	if !args.Using("import") && !strings.Contains(currentOutputName, " ") {
+		currentOutputName = fmt.Sprintf("%s ", currentOutputName)
+	}
+
+	currentOutputName = fmt.Sprintf("%s%d", currentOutputName, duplicateDelta)
+
+	return currentOutputName
 }

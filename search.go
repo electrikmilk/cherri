@@ -6,14 +6,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"os"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 func actionsSearch() {
-	rawAction()
-	ToggleSetActions()
+	waitFor(
+		defineRawAction,
+		defineToggleSetActions,
+	)
 	var identifier = args.Value("action")
 	if _, found := actions[identifier]; !found {
 		fmt.Println(ansi(fmt.Sprintf("\nAction '%s(...)' does not exist or has not yet been defined.", identifier), red))

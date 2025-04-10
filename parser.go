@@ -47,7 +47,7 @@ func initParse() {
 	if args.Using("debug") {
 		fmt.Printf("Parsing %s...\n", filename)
 	}
-	variables = make(map[string]variableValue)
+	variables = make(map[string]varValue)
 	questions = make(map[string]*question)
 	groupingUUIDs = make(map[int]string)
 	groupingTypes = make(map[int]tokenType)
@@ -58,9 +58,12 @@ func initParse() {
 
 	preParsing = true
 
-	rawAction()
-	ToggleSetActions()
-	handleIncludes()
+	defineRawAction()
+	waitFor(
+		defineToggleSetActions,
+		handleIncludes,
+	)
+
 	parseCopyPastes()
 	parseCustomActions()
 
@@ -111,34 +114,7 @@ func writeProcessed() {
 func printParsingDebug() {
 	fmt.Println(ansi("### PARSING ###", bold) + "\n")
 
-	if idx != 0 {
-		fmt.Println("Previous Character:")
-		var prevChar = prev(1)
-		if prevChar != '\n' {
-			printChar(prevChar, lineIdx, lineCharIdx-1)
-		} else {
-			printChar(prevChar, lineIdx-1, len(lines[lineIdx-1]))
-		}
-	}
-
-	fmt.Println("\nCurrent Character:")
-	printChar(char, lineIdx, lineCharIdx)
-	fmt.Print("\n")
-
-	if len(contents) > idx+1 {
-		fmt.Println("Next Character:")
-		var nextChar = next(1)
-		if char != '\n' {
-			printChar(nextChar, lineIdx, lineCharIdx+1)
-		} else {
-			printChar(nextChar, lineIdx+1, 0)
-		}
-		fmt.Print("\n")
-	}
-
-	if len(lines) > lineIdx {
-		fmt.Printf("Current Line:\n%s\n", lines[lineIdx])
-	}
+	lineReport("Current Line")
 
 	fmt.Println(ansi("## TOKENS ##", bold))
 	printTokens(tokens)
@@ -200,7 +176,7 @@ func parse() {
 	case tokenAhead(Item):
 		collectMenuItem()
 	case tokenAhead(If):
-		collectConditional()
+		collectConditionals()
 	case tokenAhead(RightBrace):
 		collectEndStatement()
 	case strings.Contains(lookAheadUntil(' '), "("):
@@ -400,10 +376,12 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 	var identifier strings.Builder
 	identifier.WriteString(collectIdentifier())
 	var reference = identifier.String()
+	var getAs string
+	var coerce string
 
 	if q, found := questions[reference]; found {
 		if q.used {
-			parserError(fmt.Sprintf("Duplicate usage of import question reference '%s', can only be used once.", reference))
+			parserError(fmt.Sprintf("Duplicate usage of import question '%s'. Import questions can only be used in one action argument.", reference))
 		}
 
 		*valueType = Question
@@ -427,18 +405,23 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		var key = collectRawString()
 		advanceUntil(']')
 		advance()
-		identifier.WriteString(fmt.Sprintf("[%s]", key))
-		reference = identifier.String()
+		getAs = key
 	}
 	if char == '.' {
-		identifier.WriteString(collectUntil(*until))
-		reference = identifier.String()
+		advance()
+		coerce = collectUntil(*until)
 	}
 
 	isInputVariable(reference)
 
 	*valueType = Variable
-	*value = reference
+	*value = varValue{
+		variableType: "Variable",
+		valueType:    Variable,
+		value:        reference,
+		coerce:       coerce,
+		getAs:        getAs,
+	}
 }
 
 func collectArguments() (arguments []actionArgument) {
@@ -539,7 +522,7 @@ func collectVariable(constant bool) {
 	var value any
 	var getAs string
 	var coerce string
-	var varType = Var
+	var varType = Variable
 	switch {
 	case strings.Contains(lookAheadUntil('\n'), "="):
 		advance()
@@ -554,7 +537,7 @@ func collectVariable(constant bool) {
 			varType = DivideBy
 		case tokenAhead(Set):
 		}
-		if varType != Var && constant {
+		if varType != Variable && constant {
 			parserError("Constants cannot be added to.")
 		}
 		advance()
@@ -577,11 +560,11 @@ func collectVariable(constant bool) {
 		value:     value,
 	})
 
-	if varType != Var {
+	if varType != Variable {
 		return
 	}
 	if _, found := variables[identifier]; !found {
-		variables[identifier] = variableValue{
+		variables[identifier] = varValue{
 			variableType: "Variable",
 			valueType:    valueType,
 			value:        value,
@@ -612,7 +595,7 @@ func collectType(valueType *tokenType, value *any) {
 		*valueType = Dict
 		*value = make(map[string]interface{})
 	case tokenAhead(VariableType):
-		*valueType = Var
+		*valueType = Variable
 	default:
 		parserError(fmt.Sprintf("Unknown type '%s'\n\nAvailable types: \n- text\n- number\n- bool\n- array\n- dictionary\n- var", lookAheadUntil('\n')))
 	}
@@ -672,7 +655,6 @@ func collectDefinition() {
 		collectBooleanDefinition("mac")
 	case tokenAhead(Version):
 		var collectVersion = collectUntil('\n')
-		makeVersions()
 		if version, found := versions[collectVersion]; found {
 			clientVersion = version
 			iosVersion, _ = strconv.ParseFloat(collectVersion, 32)
@@ -685,7 +667,6 @@ func collectDefinition() {
 
 func collectColorDefinition() {
 	var collectColor = collectUntil('\n')
-	makeColors()
 	collectColor = strings.ToLower(collectColor)
 	if color, found := colors[collectColor]; found {
 		iconColor = color
@@ -699,7 +680,6 @@ func collectColorDefinition() {
 }
 
 func collectWorkflowType() {
-	makeWorkflowTypes()
 	var collectWorkflowTypes = collectUntil('\n')
 	if collectWorkflowTypes != "" {
 		var definedWorkflowTypes = strings.Split(collectWorkflowTypes, ",")
@@ -736,29 +716,20 @@ func collectNoInputDefinition() {
 	case tokenAhead(StopWith):
 		advanceTimes(2)
 		var stopWithError = collectString()
-		noInput = noInputParams{
-			name: "WFWorkflowNoInputBehaviorShowError",
-			params: []plistData{
-				{
-					key:      "Error",
-					dataType: Text,
-					value:    stopWithError,
-				},
+		noInput = WFWorkflowNoInputBehavior{
+			Name: "WFWorkflowNoInputBehaviorShowError",
+			Parameters: map[string]string{
+				"Error": stopWithError,
 			},
 		}
 	case tokenAhead(AskFor):
 		advance()
 		var workflowType = collectUntil('\n')
-		makeContentItems()
 		if wtype, found := contentItems[workflowType]; found {
-			noInput = noInputParams{
-				name: "WFWorkflowNoInputBehaviorAskForInput",
-				params: []plistData{
-					{
-						key:      "ItemClass",
-						dataType: Text,
-						value:    wtype,
-					},
+			noInput = WFWorkflowNoInputBehavior{
+				Name: "WFWorkflowNoInputBehaviorAskForInput",
+				Parameters: map[string]string{
+					"ItemClass": wtype,
 				},
 			}
 		} else {
@@ -766,15 +737,13 @@ func collectNoInputDefinition() {
 			parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
 		}
 	case tokenAhead(GetClipboard):
-		noInput = noInputParams{
-			name:   "WFWorkflowNoInputBehaviorGetClipboard",
-			params: []plistData{},
+		noInput = WFWorkflowNoInputBehavior{
+			Name: "WFWorkflowNoInputBehaviorGetClipboard",
 		}
 	}
 }
 
 func collectContentItemTypes() (contentItemTypes []string) {
-	makeContentItems()
 	var collectedItemTypes = collectUntil('\n')
 	if collectedItemTypes == "" {
 		parserError("Expected content item types")
@@ -894,14 +863,17 @@ func collectRepeat() {
 			valueType: timesType,
 			value:     timesValue,
 		}, token{
-			typeof:    Var,
+			typeof:    Variable,
 			ident:     repeatIndexIdentifier,
 			valueType: Variable,
-			value:     fmt.Sprintf("Repeat Index%s", index),
+			value: varValue{
+				valueType: Variable,
+				value:     fmt.Sprintf("Repeat Index%s", index),
+			},
 		},
 	)
 
-	variables[repeatIndexIdentifier] = variableValue{
+	variables[repeatIndexIdentifier] = varValue{
 		variableType: "Variable",
 		valueType:    Integer,
 		value:        repeatIndexIdentifier,
@@ -941,14 +913,17 @@ func collectRepeatEach() {
 			valueType: iterableType,
 			value:     iterableValue,
 		}, token{
-			typeof:    Var,
+			typeof:    Variable,
 			ident:     repeatItemIdentifier,
 			valueType: Variable,
-			value:     fmt.Sprintf("Repeat Item%s", index),
+			value: varValue{
+				valueType: Variable,
+				value:     fmt.Sprintf("Repeat Item%s", index),
+			},
 		},
 	)
 
-	variables[repeatItemIdentifier] = variableValue{
+	variables[repeatItemIdentifier] = varValue{
 		variableType: "Variable",
 		valueType:    String,
 		value:        repeatItemIdentifier,
@@ -958,67 +933,148 @@ func collectRepeatEach() {
 	repeatItemIndex++
 }
 
-func collectConditional() {
+func collectConditionals() {
 	reachable()
 	advance()
-	makeConditions()
 
 	var groupingUUID = groupStatement(Conditional)
 
-	var conditionType string
-	if isChar('!') {
-		conditionType = conditions[Empty]
-	} else {
-		conditionType = conditions[Any]
+	var conditions WFConditions
+	conditions.WFActionParameterFilterPrefix = -1
+	for char != 1 && char != '{' {
+		var conditional = collectConditional()
+
+		collectFilterPrefix(&conditions)
+		conditions.conditions = append(conditions.conditions, conditional)
 	}
 
-	var variableOneType tokenType
-	var variableOneValue any
-	var variableTwoType tokenType
-	var variableTwoValue any
-	var variableThreeType tokenType
-	var variableThreeValue any
-	collectValue(&variableOneType, &variableOneValue, ' ')
-
-	skipWhitespace()
-
-	if !isChar('{') {
-		var collectConditional = collectUntil(' ')
-		var collectConditionalToken = tokenType(collectConditional)
-		if condition, found := conditions[collectConditionalToken]; found {
-			conditionType = condition
-		} else {
-			parserError(fmt.Sprintf("Invalid conditional '%s'", collectConditional))
-		}
-		advance()
-		collectValue(&variableTwoType, &variableTwoValue, ' ')
-		skipWhitespace()
-		if !isChar('{') {
-			collectValue(&variableThreeType, &variableThreeValue, '{')
-			advance()
-		}
-	}
-	isChar('{')
+	advance()
 
 	tokens = append(tokens, token{
 		typeof:    Conditional,
 		ident:     groupingUUID,
 		valueType: If,
-		value: condition{
-			variableOneType:    variableOneType,
-			variableOneValue:   variableOneValue,
-			condition:          conditionType,
-			variableTwoType:    variableTwoType,
-			variableTwoValue:   variableTwoValue,
-			variableThreeType:  variableThreeType,
-			variableThreeValue: variableThreeValue,
-		},
+		value:     conditions,
 	})
+}
+
+func collectFilterPrefix(wfConditions *WFConditions) {
+	var ahead = lookAheadUntil(' ')
+	if !containsTokens(&ahead, And, Or) {
+		return
+	}
+
+	var collectedFilterPrefix tokenType
+	switch {
+	case tokenAhead(And):
+		collectedFilterPrefix = And
+	case tokenAhead(Or):
+		collectedFilterPrefix = Or
+	}
+
+	if wfConditions.WFActionParameterFilterPrefix != -1 &&
+		wfConditions.WFActionParameterFilterPrefix != conditionFilterPrefixes[collectedFilterPrefix] {
+		var initLogicOperator string
+		switch wfConditions.WFActionParameterFilterPrefix {
+		case conditionFilterPrefixes[And]:
+			initLogicOperator = "&&"
+		case conditionFilterPrefixes[Or]:
+			initLogicOperator = "||"
+		}
+		parserError(fmt.Sprintf("Due to limitations in Shortcuts, only the initially set logical operator '%s' is allowed for all other comparisons.", initLogicOperator))
+	}
+
+	skipWhitespace()
+
+	if wfConditions.WFActionParameterFilterPrefix == -1 {
+		wfConditions.WFActionParameterFilterPrefix = conditionFilterPrefixes[collectedFilterPrefix]
+	}
+}
+
+func collectConditional() (conditional condition) {
+	if isChar('!') {
+		conditional.condition = conditions[Empty]
+	} else {
+		conditional.condition = conditions[Any]
+	}
+
+	var variableOneType tokenType
+	var variableOneValue any
+	collectValue(&variableOneType, &variableOneValue, ' ')
+	conditional.arguments = append(conditional.arguments, actionArgument{
+		valueType: variableOneType,
+		value:     variableOneValue,
+	})
+
+	skipWhitespace()
+
+	var ahead = lookAheadUntil(' ')
+	if containsTokens(&ahead, And, Or) {
+		return
+	}
+
+	if char != '{' {
+		var collectConditional = collectUntil(' ')
+		var collectConditionalToken = tokenType(collectConditional)
+		if condition, found := conditions[collectConditionalToken]; found {
+			conditional.condition = condition
+			checkConditionalTypes(&collectConditionalToken, variableOneType, variableOneValue)
+		} else {
+			parserError(fmt.Sprintf("Invalid conditional '%s'", collectConditional))
+		}
+
+		skipWhitespace()
+
+		var variableTwoType tokenType
+		var variableTwoValue any
+		collectValue(&variableTwoType, &variableTwoValue, ' ')
+		conditional.arguments = append(conditional.arguments, actionArgument{
+			valueType: variableTwoType,
+			value:     variableTwoValue,
+		})
+
+		skipWhitespace()
+
+		if char != '{' && char != '&' && char != '|' {
+			var variableThreeType tokenType
+			var variableThreeValue any
+
+			collectValue(&variableThreeType, &variableThreeValue, '{')
+			conditional.arguments = append(conditional.arguments, actionArgument{
+				valueType: variableThreeType,
+				value:     variableThreeValue,
+			})
+			skipWhitespace()
+		}
+	}
+
+	return
+}
+
+func checkConditionalTypes(conditional *tokenType, variableType tokenType, value any) {
+	if variableType == Variable {
+		var variable = value.(varValue)
+		variableType = variable.valueType
+		var variableValue, found = getVariableValue(variable.value.(string))
+		if found {
+			variableType = variableValue.valueType
+		}
+	}
+
+	if len(allowedConditionalTypes[*conditional]) != 0 && !slices.Contains(allowedConditionalTypes[*conditional], variableType) {
+		parserError(
+			fmt.Sprintf("Invalid type '%s' for conditional '%s'\nAllowed types: %s",
+				variableType,
+				*conditional,
+				allowedConditionalTypes[*conditional],
+			),
+		)
+	}
 }
 
 func collectMenu() {
 	if len(menus) == 0 {
-		menus = make(map[string][]variableValue)
+		menus = make(map[string][]varValue)
 	}
 
 	reachable()
@@ -1031,7 +1087,7 @@ func collectMenu() {
 	advanceUntil('{')
 	advance()
 
-	menus[groupingUUID] = []variableValue{}
+	menus[groupingUUID] = []varValue{}
 	tokens = append(tokens, token{
 		typeof:    Menu,
 		ident:     groupingUUID,
@@ -1057,7 +1113,7 @@ func collectMenuItem() {
 		addNothing()
 	}
 
-	menus[groupingUUID] = append(menus[groupingUUID], variableValue{
+	menus[groupingUUID] = append(menus[groupingUUID], varValue{
 		valueType: itemType,
 		value:     itemValue,
 	})
@@ -1142,19 +1198,31 @@ func intChar() bool {
 }
 
 func collectInteger() string {
-	var integer strings.Builder
+	var collection strings.Builder
 	for intChar() {
-		integer.WriteRune(char)
+		collection.WriteRune(char)
 		advance()
 	}
-	return integer.String()
+
+	return collection.String()
 }
 
 func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 	var ahead = lookAheadUntil(*until)
 	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
-		var integer = collectInteger()
-		*value = integer
+		var integerString = collectInteger()
+
+		if *valueType == Integer {
+			var integer, convErr = strconv.Atoi(integerString)
+			handle(convErr)
+
+			*value = integer
+		} else {
+			var float, floatErr = strconv.ParseFloat(integerString, 64)
+			handle(floatErr)
+
+			*value = float
+		}
 		return
 	}
 	*valueType = Expression
@@ -1440,16 +1508,6 @@ func tokenAhead(token tokenType) bool {
 
 	advanceTimes(tokenLen)
 	return true
-}
-
-// tokensAhead returns a boolean based on if any of `tokens` is ahead.
-func tokensAhead(tokens ...tokenType) bool {
-	for _, t := range tokens {
-		if tokenAhead(t) {
-			return true
-		}
-	}
-	return false
 }
 
 func containsTokens(str *string, v ...tokenType) bool {

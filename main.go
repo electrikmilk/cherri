@@ -5,12 +5,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/electrikmilk/args-parser"
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 	"unicode"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 var filePath string
@@ -32,6 +35,13 @@ func main() {
 
 	if args.Using("version") {
 		printVersion()
+		os.Exit(0)
+	}
+
+	if args.Using("import") && args.Value("import") != "" {
+		var shortcutBytes = importShortcut()
+		decompile(shortcutBytes)
+
 		os.Exit(0)
 	}
 
@@ -59,6 +69,7 @@ func main() {
 
 	filePath = fileArg()
 	if len(os.Args) == 1 || filePath == "" {
+		printLogo()
 		printVersion()
 		if !darwin {
 			fmt.Println(ansi("\nWarning:", yellow, bold), "Shortcuts compiled on this platform will not run on iOS 15+ or macOS 12+.")
@@ -74,7 +85,7 @@ func main() {
 
 	initParse()
 
-	makePlist()
+	generateShortcut()
 
 	createShortcut()
 }
@@ -94,6 +105,12 @@ func handle(err error) {
 	}
 }
 
+func printLogo() {
+	fmt.Print(ansi("\n           %############                      \n           %#################                 \n           %############*######               \n            ## #############**#*              \n            ##    ############****            \n            ##%     %#%                       \n", green))
+	fmt.Print(ansi("             #####", red))
+	fmt.Print(ansi("    %##    ####             \n         ###****######  #############         \n        ##**######################***#        \n       ############################*+*#       \n      #############################***#       \n       #############################*##       \n       ################################       \n        ##############  ##############        \n           #########      #########           \n\n", red))
+}
+
 func printVersion() {
 	var color outputType
 	if strings.Contains(version, "beta") {
@@ -101,7 +118,7 @@ func printVersion() {
 	} else {
 		color = green
 	}
-	fmt.Println("🍒 Cherri Compiler", ansi(version, color))
+	fmt.Println("Cherri Compiler", ansi(version, color))
 }
 
 func fileArg() string {
@@ -122,14 +139,19 @@ func handleFile() {
 	basename = nameParts[0]
 	workflowName = basename
 
-	outputPath = relativePath + workflowName + ".shortcut"
-	if args.Using("output") {
-		outputPath = args.Value("output")
-	}
+	outputPath = getOutputPath(relativePath + workflowName + ".shortcut")
 
 	var fileBytes, readErr = os.ReadFile(filePath)
 	handle(readErr)
 	contents = string(fileBytes)
+}
+
+func getOutputPath(defaultPath string) string {
+	if args.Using("output") {
+		return args.Value("output")
+	}
+
+	return defaultPath
 }
 
 // checkFile checks if the file exists and is a .cherri file.
@@ -170,24 +192,40 @@ func startsWith(s string, substr string) bool {
 
 func lineReport(label string) {
 	fmt.Printf("--- %s ---\n", label)
-	fmt.Println("Line:", lines[lineIdx])
-	fmt.Print("  ")
-	printChar(prev(2), 0, 0)
-	fmt.Print("  ")
-	printChar(prev(1), 0, 0)
-	fmt.Print(ansi("> ", dim))
+	if idx != 0 {
+		fmt.Println("Previous Character:")
+		var prevChar = prev(1)
+		if prevChar != '\n' {
+			printChar(prevChar, lineIdx, lineCharIdx-1)
+		} else {
+			printChar(prevChar, lineIdx-1, len(lines[lineIdx-1]))
+		}
+	}
+
+	fmt.Println("\nCurrent Character:")
 	printChar(char, lineIdx, lineCharIdx)
-	fmt.Print("  ")
-	printChar(next(1), 0, 0)
-	fmt.Print("  ")
-	printChar(next(2), 0, 0)
-	fmt.Println("---")
+	fmt.Print("\n")
+
+	if len(contents) > idx+1 {
+		fmt.Println("Next Character:")
+		var nextChar = next(1)
+		if char != '\n' {
+			printChar(nextChar, lineIdx, lineCharIdx+1)
+		} else {
+			printChar(nextChar, lineIdx+1, 0)
+		}
+		fmt.Print("\n")
+	}
+
+	if len(lines) > lineIdx {
+		fmt.Printf("Current Line:\n%s\n", lines[lineIdx])
+	}
 }
 
 func panicDebug(err error) {
 	fmt.Println(ansi("###################\n#   DEBUG PANIC   #\n###################\n", bold, red))
 	printParsingDebug()
-	printPlistGenDebug()
+	printShortcutGenDebug()
 	printCustomActionsDebug()
 	printIncludesDebug()
 	fmt.Println(ansi("#############################################################\n", bold, red))
@@ -197,4 +235,26 @@ func panicDebug(err error) {
 	}
 
 	panic("debug")
+}
+
+// Converts a map[string]interface{} to a matching struct data type.
+func mapToStruct(data any, structure any) {
+	var jsonStr, marshalErr = json.Marshal(data)
+	handle(marshalErr)
+
+	var jsonErr = json.Unmarshal(jsonStr, &structure)
+	handle(jsonErr)
+}
+
+// waitFor takes functions and uses a WaitGroup to wait for them all to finish.
+func waitFor(functions ...func()) {
+	var wg sync.WaitGroup
+	wg.Add(len(functions))
+	for _, function := range functions {
+		go func() {
+			defer wg.Done()
+			function()
+		}()
+	}
+	wg.Wait()
 }

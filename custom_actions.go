@@ -34,7 +34,7 @@ func parseCustomActions() {
 		switch {
 		case isChar('/'):
 			collectComment()
-		case tokenAhead(Action):
+		case lineCharIdx == 0 && tokenAhead(Action):
 			advance()
 			collectActionDefinition()
 			continue
@@ -78,6 +78,13 @@ func collectActionDefinition() {
 		advanceTimes(2)
 	}
 
+	var outputType tokenType
+	if tokenAhead(Colon) {
+		skipWhitespace()
+		var value any
+		collectType(&outputType, &value)
+	}
+
 	advanceUntilExpect('{', 3)
 	advance()
 
@@ -90,6 +97,7 @@ func collectActionDefinition() {
 	customActions[identifier] = &customAction{
 		definition: actionDefinition{
 			parameters: arguments,
+			outputType: outputType,
 		},
 		body: body,
 	}
@@ -224,14 +232,15 @@ func handleCustomActionRef(identifier *string) action {
 
 	var customActionCall = makeCustomActionCall(identifier, &arguments)
 
+	var variableIdentifier = fmt.Sprintf("_%s_cherri_call", *identifier)
 	tokens = append(tokens, token{
-		typeof:    Var,
-		ident:     fmt.Sprintf("_%s_cherri_call", *identifier),
+		typeof:    Variable,
+		ident:     variableIdentifier,
 		valueType: Dict,
 		value:     customActionCall,
 	})
 
-	variables[*identifier] = variableValue{
+	variables[variableIdentifier] = varValue{
 		variableType: "Variable",
 		valueType:    Dict,
 		value:        customActionCall,
@@ -244,8 +253,11 @@ func handleCustomActionRef(identifier *string) action {
 		ident: "runSelf",
 		args: []actionArgument{
 			{
-				valueType: Var,
-				value:     fmt.Sprintf("_%s_cherri_call", *identifier),
+				valueType: Variable,
+				value: varValue{
+					valueType: Variable,
+					value:     fmt.Sprintf("_%s_cherri_call", *identifier),
+				},
 			},
 		},
 	}
@@ -263,16 +275,17 @@ func makeCustomActionCall(identifier *string, arguments *[]actionArgument) (cust
 			case String:
 				argumentValue = fmt.Sprintf("\"%s\"", argumentValue)
 			case Variable:
-				var variableValue, found = getVariableValue(argumentValue)
+				var identifier = argument.value.(varValue).value.(string)
+				var variableValue, found = getVariableValue(identifier)
 				if !found {
 					parserError(fmt.Sprintf("Undefined reference '%s'", argumentValue))
 				}
 				if variableValue.valueType == Arr {
-					var jsonBytes, jsonErr = json.Marshal(variableValue.value)
+					var jsonBytes, jsonErr = json.Marshal(fmt.Sprintf("{%s}", identifier))
 					handle(jsonErr)
 					argumentValue = fmt.Sprintf("{\"array\":%s}", string(jsonBytes))
 				} else {
-					argumentValue = fmt.Sprintf("\"{%s}\"", argumentValue)
+					argumentValue = fmt.Sprintf("\"{%s}\"", identifier)
 				}
 			case Arr:
 				var jsonBytes, jsonErr = json.Marshal(argument.value)
@@ -293,6 +306,9 @@ func makeCustomActionCall(identifier *string, arguments *[]actionArgument) (cust
 	customActionCallJSON.WriteString("]}")
 
 	if err := json.Unmarshal([]byte(customActionCallJSON.String()), &customActionCall); err != nil {
+		if args.Using("debug") {
+			fmt.Println(customActionCallJSON.String())
+		}
 		parserError(fmt.Sprintf("Custom action JSON error: %s", err))
 	}
 
@@ -304,6 +320,7 @@ func printCustomActionsDebug() {
 	for identifier, customAction := range customActions {
 		fmt.Println("identifier:", identifier+"()")
 		fmt.Println("used:", customAction.used)
+		fmt.Println("output type:", customAction.definition.outputType)
 		fmt.Println("parameters:")
 		fmt.Println(customAction.definition.parameters)
 		fmt.Println("body:")

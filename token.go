@@ -17,7 +17,6 @@ var tokens []token
 
 /* Keywords */
 const (
-	Var            tokenType = "variable"
 	Constant       tokenType = "const"
 	If             tokenType = "if"
 	Else           tokenType = "else"
@@ -104,4 +103,6 @@ const (
 	LeftBrace      tokenType = "{"
 	RightBrace     tokenType = "}"
 	Colon          tokenType = ":"
+	And            tokenType = "&&"
+	Or             tokenType = "||"
 )
