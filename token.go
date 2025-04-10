@@ -103,4 +103,6 @@ const (
 	LeftBrace      tokenType = "{"
 	RightBrace     tokenType = "}"
 	Colon          tokenType = ":"
+	And            tokenType = "&&"
+	Or             tokenType = "||"
 )
