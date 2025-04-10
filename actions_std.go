@@ -4671,7 +4671,7 @@ var actions = map[string]*actionDefinition{
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]any)
-			if !workflow["isSelf"].(bool) {
+			if workflow["isSelf"] != nil && !workflow["isSelf"].(bool) {
 				arguments = append(arguments, decompValue(workflow["workflowName"]))
 			}
 			if action.WFWorkflowActionParameters["WFInput"] != nil {
