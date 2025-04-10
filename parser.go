@@ -1055,8 +1055,11 @@ func checkConditionalTypes(conditional *tokenType, variableType tokenType, value
 		var variable = value.(varValue)
 		variableType = variable.valueType
 		var variableValue, found = getVariableValue(variable.value.(string))
-		if found {
+		if found && variableValue.valueType != Variable {
 			variableType = variableValue.valueType
+		}
+		if variable.coerce != "" {
+			variableType = tokenType(variable.coerce)
 		}
 	}
 
