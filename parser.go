@@ -252,9 +252,7 @@ func lookAheadUntil(until rune) string {
 	return strings.Trim(strings.ToLower(ahead.String()), " \t\n")
 }
 
-var variableValueRegex = regexp.MustCompile(`^(.*?)(?:\[(.*?)])?(?:\.(.*?))?$`)
-
-func collectVariableValue(constant bool, valueType *tokenType, value *any, coerce *string, getAs *string) {
+func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 	collectValue(valueType, value, '\n')
 
 	if constant && (*valueType == Arr || *valueType == Variable) {
@@ -262,25 +260,6 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any, coerc
 	}
 	if *valueType == Question {
 		parserError(fmt.Sprintf("Illegal reference to import question '%s'. Shortcuts does not support import questions as variable values.", *value))
-	}
-	if *valueType != Variable {
-		return
-	}
-
-	var stringValue = fmt.Sprintf("%s", *value)
-	if !strings.ContainsAny(stringValue, "[]") && !strings.Contains(stringValue, ".") {
-		return
-	}
-
-	var matches = variableValueRegex.FindAllStringSubmatch(stringValue, -1)
-	for _, m := range matches {
-		*value = m[1]
-		if m[2] != "" {
-			*getAs = m[2]
-		}
-		if m[3] != "" {
-			*coerce = m[3]
-		}
 	}
 }
 
@@ -519,8 +498,6 @@ func collectVariable(constant bool) {
 
 	var valueType tokenType
 	var value any
-	var getAs string
-	var coerce string
 	var varType = Variable
 	switch {
 	case strings.Contains(lookAheadUntil('\n'), "="):
@@ -541,7 +518,7 @@ func collectVariable(constant bool) {
 		}
 		advance()
 
-		collectVariableValue(constant, &valueType, &value, &coerce, &getAs)
+		collectVariableValue(constant, &valueType, &value)
 	case tokenAhead(Colon):
 		if constant {
 			parserError("Constants cannot be initialized without a value")
@@ -567,8 +544,6 @@ func collectVariable(constant bool) {
 			variableType: "Variable",
 			valueType:    valueType,
 			value:        value,
-			getAs:        getAs,
-			coerce:       coerce,
 			constant:     constant,
 		}
 	}

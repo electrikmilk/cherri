@@ -151,7 +151,7 @@ func actionParameters(arguments []actionArgument) map[string]any {
 				continue
 			}
 			if a.validType == Variable {
-				params[a.key] = variableInput(arguments[i].value.(varValue).value.(string))
+				params[a.key] = variableValue(arguments[i].value.(varValue))
 				continue
 			}
 
