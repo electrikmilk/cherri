@@ -115,14 +115,14 @@ var languages = []string{
 
 /* Conditionals */
 
+type WFConditions struct {
+	conditions                    []condition
+	WFActionParameterFilterPrefix int
+}
+
 type condition struct {
-	variableOneType    tokenType
-	variableOneValue   any
-	condition          int
-	variableTwoType    tokenType
-	variableTwoValue   any
-	variableThreeType  tokenType
-	variableThreeValue any
+	condition int
+	arguments []actionArgument
 }
 
 var conditions = map[tokenType]int{
@@ -139,6 +139,11 @@ var conditions = map[tokenType]int{
 	LessThan:       0,
 	LessOrEqual:    1,
 	Between:        1003,
+}
+
+var conditionFilterPrefixes = map[tokenType]int{
+	Or:  0,
+	And: 1,
 }
 
 var allowedConditionalTypes = map[tokenType][]tokenType{

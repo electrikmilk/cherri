@@ -175,7 +175,7 @@ func parse() {
 	case tokenAhead(Item):
 		collectMenuItem()
 	case tokenAhead(If):
-		collectConditional()
+		collectConditionals()
 	case tokenAhead(RightBrace):
 		collectEndStatement()
 	case strings.Contains(lookAheadUntil(' '), "("):
@@ -932,62 +932,122 @@ func collectRepeatEach() {
 	repeatItemIndex++
 }
 
-func collectConditional() {
+func collectConditionals() {
 	reachable()
 	advance()
 
 	var groupingUUID = groupStatement(Conditional)
 
-	var conditionType int
-	if isChar('!') {
-		conditionType = conditions[Empty]
-	} else {
-		conditionType = conditions[Any]
+	var conditions WFConditions
+	conditions.WFActionParameterFilterPrefix = -1
+	for char != 1 && char != '{' {
+		var conditional = collectConditional()
+
+		collectFilterPrefix(&conditions)
+		conditions.conditions = append(conditions.conditions, conditional)
 	}
 
-	var variableOneType tokenType
-	var variableOneValue any
-	var variableTwoType tokenType
-	var variableTwoValue any
-	var variableThreeType tokenType
-	var variableThreeValue any
-	collectValue(&variableOneType, &variableOneValue, ' ')
-
-	skipWhitespace()
-
-	if !isChar('{') {
-		var collectConditional = collectUntil(' ')
-		var collectConditionalToken = tokenType(collectConditional)
-		if condition, found := conditions[collectConditionalToken]; found {
-			conditionType = condition
-			checkConditionalTypes(&collectConditionalToken, variableOneType, variableOneValue)
-		} else {
-			parserError(fmt.Sprintf("Invalid conditional '%s'", collectConditional))
-		}
-		advance()
-		collectValue(&variableTwoType, &variableTwoValue, ' ')
-		skipWhitespace()
-		if !isChar('{') {
-			collectValue(&variableThreeType, &variableThreeValue, '{')
-			advance()
-		}
-	}
-	isChar('{')
+	advance()
 
 	tokens = append(tokens, token{
 		typeof:    Conditional,
 		ident:     groupingUUID,
 		valueType: If,
-		value: condition{
-			variableOneType:    variableOneType,
-			variableOneValue:   variableOneValue,
-			condition:          conditionType,
-			variableTwoType:    variableTwoType,
-			variableTwoValue:   variableTwoValue,
-			variableThreeType:  variableThreeType,
-			variableThreeValue: variableThreeValue,
-		},
+		value:     conditions,
 	})
+}
+
+func collectFilterPrefix(wfConditions *WFConditions) {
+	var ahead = lookAheadUntil(' ')
+	if !containsTokens(&ahead, And, Or) {
+		return
+	}
+
+	var collectedFilterPrefix tokenType
+	switch {
+	case tokenAhead(And):
+		collectedFilterPrefix = And
+	case tokenAhead(Or):
+		collectedFilterPrefix = Or
+	}
+
+	if wfConditions.WFActionParameterFilterPrefix != -1 &&
+		wfConditions.WFActionParameterFilterPrefix != conditionFilterPrefixes[collectedFilterPrefix] {
+		var initLogicOperator string
+		switch wfConditions.WFActionParameterFilterPrefix {
+		case conditionFilterPrefixes[And]:
+			initLogicOperator = "&&"
+		case conditionFilterPrefixes[Or]:
+			initLogicOperator = "||"
+		}
+		parserError(fmt.Sprintf("Due to limitations in Shortcuts, only the initially set logical operator '%s' is allowed for all other comparisons.", initLogicOperator))
+	}
+
+	skipWhitespace()
+
+	if wfConditions.WFActionParameterFilterPrefix == -1 {
+		wfConditions.WFActionParameterFilterPrefix = conditionFilterPrefixes[collectedFilterPrefix]
+	}
+}
+
+func collectConditional() (conditional condition) {
+	if isChar('!') {
+		conditional.condition = conditions[Empty]
+	} else {
+		conditional.condition = conditions[Any]
+	}
+
+	var variableOneType tokenType
+	var variableOneValue any
+	collectValue(&variableOneType, &variableOneValue, ' ')
+	conditional.arguments = append(conditional.arguments, actionArgument{
+		valueType: variableOneType,
+		value:     variableOneValue,
+	})
+
+	skipWhitespace()
+
+	var ahead = lookAheadUntil(' ')
+	if containsTokens(&ahead, And, Or) {
+		return
+	}
+
+	if char != '{' {
+		var collectConditional = collectUntil(' ')
+		var collectConditionalToken = tokenType(collectConditional)
+		if condition, found := conditions[collectConditionalToken]; found {
+			conditional.condition = condition
+			checkConditionalTypes(&collectConditionalToken, variableOneType, variableOneValue)
+		} else {
+			parserError(fmt.Sprintf("Invalid conditional '%s'", collectConditional))
+		}
+
+		skipWhitespace()
+
+		var variableTwoType tokenType
+		var variableTwoValue any
+		collectValue(&variableTwoType, &variableTwoValue, ' ')
+		conditional.arguments = append(conditional.arguments, actionArgument{
+			valueType: variableTwoType,
+			value:     variableTwoValue,
+		})
+
+		skipWhitespace()
+
+		if char != '{' && char != '&' && char != '|' {
+			var variableThreeType tokenType
+			var variableThreeValue any
+
+			collectValue(&variableThreeType, &variableThreeValue, '{')
+			conditional.arguments = append(conditional.arguments, actionArgument{
+				valueType: variableThreeType,
+				value:     variableThreeValue,
+			})
+			skipWhitespace()
+		}
+	}
+
+	return
 }
 
 func checkConditionalTypes(conditional *tokenType, variableType tokenType, value any) {

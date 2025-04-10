@@ -242,19 +242,10 @@ func makeConditionalAction(t *token) {
 	}
 	switch t.valueType {
 	case If:
-		var cond = t.value.(condition)
-		conditionalParams["WFInput"] = map[string]any{
-			"Type":     "Variable",
-			"Variable": variableValue(cond.variableOneValue.(varValue)),
-		}
-		if cond.variableTwoValue != nil {
-			conditionalParameter("", conditionalParams, &cond.variableTwoType, cond.variableTwoValue)
-		}
-		if cond.variableThreeValue != nil {
-			conditionalParameter("WFAnotherNumber", conditionalParams, &cond.variableThreeType, cond.variableThreeValue)
-		}
-		conditionalParams["WFCondition"] = cond.condition
 		conditionalParams["WFControlFlowMode"] = startStatement
+
+		var cond = t.value.(WFConditions)
+		conditionalParams["WFConditions"] = makeConditions(&cond)
 	case Else:
 		conditionalParams["WFControlFlowMode"] = statementPart
 	case EndClosure:
@@ -262,6 +253,40 @@ func makeConditionalAction(t *token) {
 	}
 
 	buildStdAction("conditional", conditionalParams)
+}
+
+func makeConditions(wfConditions *WFConditions) map[string]any {
+	var filterTemplates []map[string]any
+	for _, condition := range wfConditions.conditions {
+		var conditionParams = map[string]any{
+			"WFCondition": condition.condition,
+			"WFInput": map[string]any{
+				"Type":     "Variable",
+				"Variable": variableValue(condition.arguments[0].value.(varValue)),
+			},
+		}
+
+		if len(condition.arguments) > 1 {
+			var argumentTwo = condition.arguments[1]
+			conditionalParameter("", conditionParams, &argumentTwo.valueType, argumentTwo.value)
+		}
+		if len(condition.arguments) > 2 {
+			var argumentThree = condition.arguments[2]
+			conditionalParameter("WFAnotherNumber", conditionParams, &argumentThree.valueType, argumentThree.value)
+		}
+
+		filterTemplates = append(filterTemplates, conditionParams)
+	}
+
+	var conditionParams = map[string]any{
+		"WFSerializationType": "WFContentPredicateTableTemplate",
+		"Value": map[string]any{
+			"WFActionParameterFilterPrefix":    wfConditions.WFActionParameterFilterPrefix,
+			"WFActionParameterFilterTemplates": filterTemplates,
+		},
+	}
+
+	return conditionParams
 }
 
 func makeMenuAction(t *token) {
