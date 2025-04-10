@@ -298,15 +298,13 @@ func makeConditions(wfConditions *WFConditions) map[string]any {
 		filterTemplates = append(filterTemplates, conditionParams)
 	}
 
-	var conditionParams = map[string]any{
-		"WFSerializationType": "WFContentPredicateTableTemplate",
+	return map[string]any{
 		"Value": map[string]any{
 			"WFActionParameterFilterPrefix":    wfConditions.WFActionParameterFilterPrefix,
 			"WFActionParameterFilterTemplates": filterTemplates,
 		},
+		"WFSerializationType": "WFContentPredicateTableTemplate",
 	}
-
-	return conditionParams
 }
 
 func makeMenuAction(t *token) {
