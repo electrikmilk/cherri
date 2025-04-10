@@ -244,8 +244,28 @@ func makeConditionalAction(t *token) {
 	case If:
 		conditionalParams["WFControlFlowMode"] = startStatement
 
-		var cond = t.value.(WFConditions)
-		conditionalParams["WFConditions"] = makeConditions(&cond)
+		if iosVersion < 18 {
+			var cond = t.value.(WFConditions)
+			var firstCondition = cond.conditions[0]
+			var firstArg = firstCondition.arguments[0]
+			conditionalParams["WFInput"] = map[string]any{
+				"Type":     "Variable",
+				"Variable": variableValue(firstArg.value.(varValue)),
+			}
+			if len(firstCondition.arguments) > 1 {
+				var secondArg = firstCondition.arguments[1]
+				conditionalParameter("", conditionalParams, &secondArg.valueType, secondArg.value)
+			}
+			if len(firstCondition.arguments) > 2 {
+				var thirdArg = firstCondition.arguments[2]
+				conditionalParameter("WFAnotherNumber", conditionalParams, &thirdArg.valueType, thirdArg.value)
+			}
+			conditionalParams["WFCondition"] = firstCondition.condition
+			conditionalParams["WFControlFlowMode"] = startStatement
+		} else {
+			var cond = t.value.(WFConditions)
+			conditionalParams["WFConditions"] = makeConditions(&cond)
+		}
 	case Else:
 		conditionalParams["WFControlFlowMode"] = statementPart
 	case EndClosure:
