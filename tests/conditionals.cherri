@@ -31,6 +31,7 @@ if intVar <> 5 6 {} // between
 if intVar && intVar == 5 {}
 if intVar || textVar {}
 if intVar == 5 && textVar == "string" {}
+if intVar == 5 && textVar == "string" && textVar == textVar2 {}
 
 // nesting...
 if intVar > 5 {
