@@ -135,6 +135,8 @@ var colorSpaces = []string{"RGB", "Gray"}
 var shuffleOptions = []string{"Off", "Songs"}
 var repeatOptions = []string{"None", "One", "All"}
 var musicDetails = []string{"Title", "Album", "Artist", "Album Artist", "Genre", "Composer", "Date Added", "Media Kind", "Duration", "Play Count", "Track Number", "Disc Number", "Album Artwork", "Is Explicit", "Lyrics", "Release Date", "Comments", "Is Cloud Item", "Skip Count", "Last Played Date", "Rating", "File Path", "Name"}
+var wifiNetworkDetails = []string{"Network Name", "BSSID", "Wi-Fi Standard", "RX Rate", "TX Rate", "RSSI", "Noise", "Channel Number", "Hardware MAC Address"}
+var cellularNetworkDetails = []string{"Carrier Name", "Radio Technology", "Country Code", "Is Roaming Abroad", "Number of Signal Bars"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -5469,6 +5471,39 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				key:       "WFContentItemPropertyName",
 			},
+		},
+	},
+	"getWifiDetail": {
+		identifier: "getwifi",
+		parameters: []parameterDefinition{
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFWiFiDetail",
+				enum:      wifiNetworkDetails,
+			},
+		},
+		addParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFNetworkDetailsNetwork": "Wi-Fi",
+			}
+		},
+	},
+	"getCellularDetail": {
+		identifier: "getwifi",
+		mac:        false,
+		parameters: []parameterDefinition{
+			{
+				name:      "detail",
+				validType: String,
+				key:       "WFCellularDetail",
+				enum:      cellularNetworkDetails,
+			},
+		},
+		addParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFNetworkDetailsNetwork": "Cellular",
+			}
 		},
 	},
 	"getCurrentURL": {
