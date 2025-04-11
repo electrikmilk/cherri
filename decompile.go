@@ -121,16 +121,14 @@ func checkParamValueAttachments(param map[string]interface{}) {
 	mapToStruct(paramValue, &inputValue)
 	mapValueReference(inputValue)
 
-	if paramValue["attachmentsByRange"] != nil {
-		mapAttachmentIdentifiers(paramValue["attachmentsByRange"].(map[string]interface{}))
+	if inputValue.AttachmentsByRange != nil {
+		mapAttachmentIdentifiers(inputValue.AttachmentsByRange)
 	}
 }
 
 // mapAttachmentIdentifiers maps the UUID and output name of an attachment value.
-func mapAttachmentIdentifiers(attachments map[string]interface{}) {
-	for _, attachment := range attachments {
-		var attachmentValue Value
-		mapToStruct(attachment, &attachmentValue)
+func mapAttachmentIdentifiers(attachments map[string]Value) {
+	for _, attachmentValue := range attachments {
 		mapValueReference(attachmentValue)
 	}
 }
