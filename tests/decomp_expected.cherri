@@ -2,8 +2,8 @@
 #define glyph apple
 
 const hello = prompt("Hello?")
-@confirm = prompt("What do you want?","Number")
-@urls = url("https://google.com","https://apple.com","https://cherrilang.org")
+@confirm = prompt("What do you want?", "Number")
+@urls = url("https://google.com", "https://apple.com", "https://cherrilang.org")
 @int = 42
 @dict = {
 	"key": "",
@@ -22,7 +22,7 @@ const hello = prompt("Hello?")
 @str = "me"
 @var = "5 {str}"
 if int == 0 {
-	alert("Title","Message")
+	alert("Title", "Message")
 	nothing()
 } else {
 	nothing()
@@ -31,7 +31,7 @@ if int == 0 {
 	}
 	nothing()
 }
-@list = list("Item 1","Item 2")
+@list = list("Item 1", "Item 2")
 if str == "me" {
 	nothing()
 }
@@ -42,5 +42,5 @@ menu "Prompt" {
 item "Item 1":
 	nothing()
 }
-alert("Title","Message")
+alert("Title", "Message")
 show(var)
