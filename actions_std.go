@@ -5613,6 +5613,9 @@ var actions = map[string]*actionDefinition{
 	"formRequest": {
 		identifier: "downloadurl",
 		parameters: httpParams,
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompHTTPAction("WFFormValues", action)
+		},
 		addParams: func(args []actionArgument) map[string]any {
 			return httpRequest("Form", "WFFormValues", args)
 		},
@@ -5620,6 +5623,9 @@ var actions = map[string]*actionDefinition{
 	"jsonRequest": {
 		identifier: "downloadurl",
 		parameters: httpParams,
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompHTTPAction("WFJSONValues", action)
+		},
 		addParams: func(args []actionArgument) map[string]any {
 			return httpRequest("JSON", "WFJSONValues", args)
 		},
@@ -5627,6 +5633,9 @@ var actions = map[string]*actionDefinition{
 	"fileRequest": {
 		identifier: "downloadurl",
 		parameters: httpParams,
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompHTTPAction("WFRequestVariable", action)
+		},
 		addParams: func(args []actionArgument) map[string]any {
 			return httpRequest("File", "WFRequestVariable", args)
 		},
@@ -6401,6 +6410,23 @@ func decompInfiniteURLAction(action *ShortcutAction) (arguments []string) {
 	var urls = action.WFWorkflowActionParameters["WFURLActionURL"].([]interface{})
 	for _, url := range urls {
 		arguments = append(arguments, decompValue(url))
+	}
+
+	return
+}
+
+func decompHTTPAction(key string, action *ShortcutAction) (arguments []string) {
+	if action.WFWorkflowActionParameters["WFURL"] != nil {
+		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFURL"]))
+	}
+	if action.WFWorkflowActionParameters["WFHTTPMethod"] != nil {
+		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFHTTPMethod"]))
+	}
+	if action.WFWorkflowActionParameters[key] != nil {
+		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters[key]))
+	}
+	if action.WFWorkflowActionParameters["WFHTTPHeaders"] != nil {
+		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFHTTPHeaders"]))
 	}
 
 	return
