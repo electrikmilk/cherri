@@ -565,23 +565,27 @@ type WFItems struct {
 	Value Value
 }
 
-var decompilingDictinary = false
+var decompilingDictionary = false
 
 func decompDictionary(action *ShortcutAction) {
-	decompilingDictinary = true
-
 	var params DictionaryActionParameters
 	mapToStruct(action.WFWorkflowActionParameters, &params)
 
-	var dictionary = decompDictionaryItems(params.WFItems.Value.WFDictionaryFieldValueItems)
+	currentVariableValue = decompDictionaryValue(params.WFItems.Value.WFDictionaryFieldValueItems)
+
+	checkConstantLiteral(action)
+}
+
+func decompDictionaryValue(items []WFDictionaryFieldValueItem) string {
+	decompilingDictionary = true
+
+	var dictionary = decompDictionaryItems(items)
 	var jsonBytes, jsonErr = json.MarshalIndent(dictionary, strings.Repeat("\t", tabLevel), "\t")
 	handle(jsonErr)
 
-	currentVariableValue = string(jsonBytes)
+	decompilingDictionary = false
 
-	checkConstantLiteral(action)
-
-	decompilingDictinary = false
+	return string(jsonBytes)
 }
 
 func isReferenceValue(value any) bool {
@@ -687,6 +691,13 @@ func decompValueObject(value map[string]interface{}) string {
 		}
 	}
 
+	if value["WFDictionaryFieldValueItems"] != nil {
+		var items []WFDictionaryFieldValueItem
+		mapToStruct(value["WFDictionaryFieldValueItems"], &items)
+
+		return decompDictionaryValue(items)
+	}
+
 	switch value["Type"] {
 	case "Variable":
 		if _, found := value["VariableName"]; found {
@@ -782,7 +793,7 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 
 	*attachmentString = escapeString(strings.Join(attachmentChars, ""))
 
-	if (!decompilingDictinary && !decompilingText) && len(attachments) == 1 && originalString == ObjectReplaceCharStr {
+	if (!decompilingDictionary && !decompilingText) && len(attachments) == 1 && originalString == ObjectReplaceCharStr {
 		*attachmentString = strings.Trim(*attachmentString, "{}")
 	} else {
 		*attachmentString = fmt.Sprintf("\"%s\"", *attachmentString)
