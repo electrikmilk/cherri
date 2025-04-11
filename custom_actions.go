@@ -299,7 +299,7 @@ func makeCustomActionCall(identifier *string, arguments *[]actionArgument) (cust
 			customActionCallJSON.WriteString(argumentValue)
 
 			if len(*arguments)-1 != i {
-				customActionCallJSON.WriteRune(',')
+				customActionCallJSON.WriteString(", ")
 			}
 		}
 	}
