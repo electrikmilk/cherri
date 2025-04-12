@@ -115,7 +115,7 @@ func checkParamIdentifiers(params map[string]interface{}) {
 
 // checkParamValueAttachments checks for attachments on values to map them.
 func checkParamValueAttachments(param map[string]interface{}) {
-	if param["Value"] == nil {
+	if param["Value"] == nil || reflect.TypeOf(param["Value"]).Kind() != reflect.Map {
 		return
 	}
 
@@ -128,6 +128,39 @@ func checkParamValueAttachments(param map[string]interface{}) {
 
 	if inputValue.AttachmentsByRange != nil {
 		mapAttachmentIdentifiers(inputValue.AttachmentsByRange)
+	}
+	if inputValue.WFDictionaryFieldValueItems != nil {
+		mapDictionaryValueIdentifiers(inputValue.WFDictionaryFieldValueItems)
+	}
+}
+
+func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
+	for _, item := range items {
+		if item.WFValue == nil || reflect.TypeOf(item.WFValue).Kind() != reflect.Map {
+			continue
+		}
+		var wfValue = item.WFValue.(map[string]interface{})
+		if wfValue["Value"] == nil {
+			continue
+		}
+
+		checkParamValueAttachments(wfValue)
+
+		var valueKind = reflect.TypeOf(wfValue["Value"]).Kind()
+		if valueKind == reflect.Map {
+			var valueTwo = wfValue["Value"].(map[string]interface{})
+			if valueTwo != nil && valueTwo["Value"] != nil && reflect.TypeOf(valueTwo["Value"]).Kind() == reflect.Map {
+				var itemsValue = valueTwo["Value"].(map[string]interface{})
+
+				var dictionaryItems []WFDictionaryFieldValueItem
+				mapToStruct(itemsValue["WFDictionaryFieldValueItems"], &dictionaryItems)
+				mapDictionaryValueIdentifiers(dictionaryItems)
+			}
+		} else if valueKind == reflect.Slice {
+			var dictionaryItems []WFDictionaryFieldValueItem
+			mapToStruct(wfValue["Value"], &dictionaryItems)
+			mapDictionaryValueIdentifiers(dictionaryItems)
+		}
 	}
 }
 
