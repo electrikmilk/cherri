@@ -320,6 +320,13 @@ func decompileActions() {
 			decompFor(&action)
 		case "is.workflow.actions.choosefrommenu":
 			decompMenu(&action)
+		case "is.workflow.actions.getvalueforkey":
+			var dictionaryKey = action.WFWorkflowActionParameters["WFDictionaryKey"]
+			if dictionaryKey != nil {
+				decompDictionaryGetValue(&action)
+				continue
+			}
+			fallthrough
 		default:
 			decompAction(&action)
 		}
@@ -456,6 +463,25 @@ func collectControlFlowUUID(action *ShortcutAction) {
 	if action.WFWorkflowActionParameters["UUID"] != nil {
 		var uuid = action.WFWorkflowActionParameters["UUID"].(string)
 		controlFlowUUIDs = append(controlFlowUUIDs, uuid)
+	}
+}
+
+func decompDictionaryGetValue(action *ShortcutAction) {
+	var dictionaryValueRef strings.Builder
+	dictionaryValueRef.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
+
+	if action.WFWorkflowActionParameters["WFDictionaryKey"] != nil {
+		dictionaryValueRef.WriteRune('[')
+		if reflect.TypeOf(action.WFWorkflowActionParameters["WFDictionaryKey"]).Kind() == reflect.String {
+			dictionaryValueRef.WriteRune('\'')
+			dictionaryValueRef.WriteString(action.WFWorkflowActionParameters["WFDictionaryKey"].(string))
+			dictionaryValueRef.WriteRune('\'')
+		} else {
+			dictionaryValueRef.WriteString(decompValue(action.WFWorkflowActionParameters["WFDictionaryKey"]))
+		}
+		dictionaryValueRef.WriteRune(']')
+		currentVariableValue = dictionaryValueRef.String()
+		checkConstantLiteral(action)
 	}
 }
 
