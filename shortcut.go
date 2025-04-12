@@ -106,14 +106,6 @@ type WFMeasurementUnit struct {
 	Value          SizeValue
 }
 
-type WFWorkflowImportQuestion struct {
-	ParameterKey string
-	Category     string
-	ActionIndex  int
-	Text         string
-	DefaultValue string
-}
-
 var uuids map[string]string
 
 type dataType string
