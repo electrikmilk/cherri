@@ -926,12 +926,7 @@ func decompAction(action *ShortcutAction) {
 	var isConstant, isVariableValue = checkOutputType(action)
 
 	if matchedIdentifier != "" {
-		var actionCallStart = fmt.Sprintf("%s(", matchedIdentifier)
-		if !isConstant && !isVariableValue {
-			newCodeLine(actionCallStart)
-		} else {
-			actionCallCode.WriteString(actionCallStart)
-		}
+		actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
 
 		if matchedAction.make != nil || matchedAction.decomp != nil {
 			decompActionCustom(&actionCallCode, &matchedAction, action)
@@ -949,10 +944,11 @@ func decompAction(action *ShortcutAction) {
 		actionCallCode.WriteString(saveCode)
 	}
 
-	if isVariableValue {
+	if isConstant {
 		currentVariableValue = actionCallCode.String()
+		checkConstantLiteral(action)
 	} else {
-		code.WriteString(actionCallCode.String())
+		code.WriteString(tabbedLine(actionCallCode.String()))
 		code.WriteRune('\n')
 		currentVariableValue = ""
 	}
@@ -972,10 +968,6 @@ func checkOutputType(action *ShortcutAction) (isConstant bool, isVariableValue b
 
 	isConstant = slices.Contains(constUUIDs, uuid)
 	isVariableValue = slices.Contains(varUUIDs, uuid)
-
-	if !isVariableValue {
-		newCodeLine(fmt.Sprintf("const %s = ", uuids[uuid]))
-	}
 
 	return
 }
