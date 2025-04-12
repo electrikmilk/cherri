@@ -196,8 +196,16 @@ func mapUUID(uuid string, varName string) {
 
 // sanitizeIdentifier strips special characters and replaces dashes with underscores.
 func sanitizeIdentifier(identifier *string) {
-	*identifier = strings.ReplaceAll(*identifier, "-", "_")
+	if strings.Contains(*identifier, " ") {
+		var words = strings.Split(strings.TrimSpace(*identifier), " ")
+		for i, word := range words {
+			words[i] = capitalize(word)
+		}
+		*identifier = strings.Join(words, "")
+	}
+
 	*identifier = specialCharsRegex.ReplaceAllString(*identifier, "")
+	*identifier = strings.ReplaceAll(*identifier, "-", "_")
 }
 
 type actionValue struct {
