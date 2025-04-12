@@ -77,6 +77,10 @@ func mapIdentifiers() {
 		}
 
 		if params["UUID"] != nil && params["CustomOutputName"] != nil {
+			checkConstantUUID(Value{
+				OutputUUID: params["UUID"].(string),
+				Type:       "ActionOutput",
+			})
 			mapUUID(params["UUID"].(string), params["CustomOutputName"].(string))
 		}
 
@@ -120,6 +124,7 @@ func checkParamValueAttachments(param map[string]interface{}) {
 	var inputValue Value
 	mapToStruct(paramValue, &inputValue)
 	mapValueReference(inputValue)
+	checkConstantUUID(inputValue)
 
 	if inputValue.AttachmentsByRange != nil {
 		mapAttachmentIdentifiers(inputValue.AttachmentsByRange)
@@ -130,6 +135,13 @@ func checkParamValueAttachments(param map[string]interface{}) {
 func mapAttachmentIdentifiers(attachments map[string]Value) {
 	for _, attachmentValue := range attachments {
 		mapValueReference(attachmentValue)
+		checkConstantUUID(attachmentValue)
+	}
+}
+
+func checkConstantUUID(value Value) {
+	if value.OutputUUID != "" && value.Type == "ActionOutput" {
+		constUUIDs = append(constUUIDs, value.OutputUUID)
 	}
 }
 
@@ -282,6 +294,7 @@ func decompileActions() {
 }
 
 var varUUIDs []string
+var constUUIDs []string
 
 // checkConstantLiteral determines if action is a constant literal and if it should be
 // written out on a new line as a constant and clear the current variable value.
@@ -890,25 +903,21 @@ func decompAction(action *ShortcutAction) {
 // checkOutputType determines if action output is a constant or a variable.
 // If it is a constant we will write a constant statement on a new line to prepend the action.
 func checkOutputType(action *ShortcutAction) (isConstant bool, isVariableValue bool) {
-	if action.WFWorkflowActionParameters["CustomOutputName"] != nil {
-		var customOutputName = action.WFWorkflowActionParameters["CustomOutputName"].(string)
-		sanitizeIdentifier(&customOutputName)
-		if ref, foundVar := variables[customOutputName]; foundVar {
-			isConstant = ref.constant
-			isVariableValue = !ref.constant
-		}
+	if action.WFWorkflowActionParameters[UUID] == nil {
+		return
+	}
+	var uuid = action.WFWorkflowActionParameters[UUID].(string)
+	if _, found := uuids[uuid]; !found {
+		return
 	}
 
-	if action.WFWorkflowActionParameters[UUID] != nil && !isVariableValue {
-		var uuid = action.WFWorkflowActionParameters[UUID].(string)
-		if _, found := uuids[uuid]; found {
-			isConstant = !slices.Contains(varUUIDs, uuid)
-			isVariableValue = slices.Contains(varUUIDs, uuid)
-			if isConstant {
-				newCodeLine(fmt.Sprintf("const %s = ", uuids[uuid]))
-			}
-		}
+	isConstant = slices.Contains(constUUIDs, uuid)
+	isVariableValue = slices.Contains(varUUIDs, uuid)
+
+	if !isVariableValue {
+		newCodeLine(fmt.Sprintf("const %s = ", uuids[uuid]))
 	}
+
 	return
 }
 
@@ -1265,6 +1274,10 @@ func printDecompDebug() {
 
 	fmt.Println("### VARIABLE UUIDs ###")
 	fmt.Println(varUUIDs)
+	fmt.Print("\n")
+
+	fmt.Println("### CONSTANT UUIDs ###")
+	fmt.Println(constUUIDs)
 	fmt.Print("\n")
 
 	fmt.Println("### UUIDS ###")
