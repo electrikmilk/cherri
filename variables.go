@@ -108,7 +108,7 @@ func makeVariableReferenceString(value varValue) string {
 	identifier.WriteString(value.value.(string))
 
 	if value.getAs != "" {
-		identifier.WriteString(fmt.Sprintf("[%s]", value.getAs))
+		identifier.WriteString(fmt.Sprintf("['%s']", value.getAs))
 	}
 	if value.coerce != "" {
 		identifier.WriteString(fmt.Sprintf(".%s", value.coerce))
