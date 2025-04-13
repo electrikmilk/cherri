@@ -818,15 +818,23 @@ func decompObjectValue(valueObj any) string {
 	var value = valueObj.(map[string]interface{})
 
 	var attachmentString string
-	if value["value"] != nil {
-		if reflect.TypeOf(value["value"]).String() != dictType {
+	if value["Value"] != nil {
+		if reflect.TypeOf(value["Value"]).String() != dictType {
 			return fmt.Sprintf("%v", valueObj)
 		}
-		value = value["value"].(map[string]interface{})
+		value = value["Value"].(map[string]interface{})
 	}
 
 	if _, found := value["string"]; found {
 		attachmentString = value["string"].(string)
+	}
+
+	if value["Aggrandizements"] != nil {
+		attachmentString = ObjectReplaceCharStr
+		decompAttachmentString(&attachmentString, map[string]any{
+			"{0, 1}": value,
+		})
+		attachmentString = strings.Trim(attachmentString, "\"{}")
 	}
 
 	if attachments, found := value["attachmentsByRange"]; found {
