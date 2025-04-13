@@ -243,7 +243,10 @@ func mapToStruct(data any, structure any) {
 	handle(marshalErr)
 
 	var jsonErr = json.Unmarshal(jsonStr, &structure)
-	handle(jsonErr)
+	if jsonErr != nil {
+		fmt.Println("Tried to map to struct, but it was not a struct!", data)
+		handle(jsonErr)
+	}
 }
 
 // waitFor takes functions and uses a WaitGroup to wait for them all to finish.

@@ -158,7 +158,15 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 			}
 		} else if valueKind == reflect.Slice {
 			var dictionaryItems []WFDictionaryFieldValueItem
-			mapToStruct(wfValue["Value"], &dictionaryItems)
+			for _, value := range wfValue["Value"].([]interface{}) {
+				if reflect.TypeOf(value).Kind() != reflect.Map {
+					continue
+				}
+
+				var dictionaryItem WFDictionaryFieldValueItem
+				mapToStruct(value, &dictionaryItem)
+				dictionaryItems = append(dictionaryItems, dictionaryItem)
+			}
 			mapDictionaryValueIdentifiers(dictionaryItems)
 		}
 	}
@@ -710,10 +718,7 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	case itemTypeText:
 		itemValue = strings.Trim(itemStringValue, "\"")
 	case itemTypeArray:
-		var arrayItems []WFDictionaryFieldValueItem
-		var value = itemValueMap["Value"].([]interface{})
-		mapToStruct(value, &arrayItems)
-		itemValue = decompArray(arrayItems)
+		itemValue = decompArray(itemValueMap["Value"].([]interface{}))
 	case itemTypeDict:
 		var dictionaryItems []WFDictionaryFieldValueItem
 		var value = itemValueMap["Value"].(map[string]interface{})
@@ -726,9 +731,15 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	return itemValue
 }
 
-func decompArray(items []WFDictionaryFieldValueItem) (array []interface{}) {
+func decompArray(items []interface{}) (array []interface{}) {
 	for _, item := range items {
-		array = append(array, decompDictionaryItem(item))
+		if reflect.TypeOf(item).Kind() == reflect.Map {
+			var fieldValueItem WFDictionaryFieldValueItem
+			mapToStruct(item, &fieldValueItem)
+			array = append(array, decompDictionaryItem(fieldValueItem))
+		}
+
+		array = append(array, strings.Trim(decompValue(item), "\""))
 	}
 	return
 }
