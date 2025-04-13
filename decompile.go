@@ -352,8 +352,7 @@ func decompileActions() {
 var varUUIDs []string
 var constUUIDs []string
 
-// checkConstantLiteral determines if action is a constant literal and if it should be
-// written out on a new line as a constant and clear the current variable value.
+// checkConstantLiteral determines if action should be written out on a new line as a constant and clear the current variable value.
 func checkConstantLiteral(action *ShortcutAction) {
 	if _, found := action.WFWorkflowActionParameters[UUID]; !found {
 		return
