@@ -2724,6 +2724,41 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
+	"seek": {
+		parameters: []parameterDefinition{
+			{
+				name:      "magnitude",
+				validType: Integer,
+			},
+			{
+				name:      "duration",
+				validType: String,
+				enum:      timerDurations,
+			},
+			{
+				name:         "behavior",
+				key:          "WFSeekBehavior",
+				validType:    String,
+				defaultValue: "To Time",
+				enum:         []string{"To Time", "Forward By", "Backward By"},
+			},
+		},
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
+			return map[string]any{
+				"WFTimeInterval": map[string]any{
+					"Value": map[string]any{
+						"Magnitude": argumentValue(args, 0),
+						"Unit":      argumentValue(args, 1),
+					},
+					"WFSerializationType": "WFQuantityFieldValue",
+				},
+			}
+		},
+	},
 	"trimVideo": {
 		parameters: []parameterDefinition{
 			{
