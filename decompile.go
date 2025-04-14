@@ -358,7 +358,8 @@ func decompileActions() {
 			decompMenu(&action)
 		case "is.workflow.actions.getvalueforkey":
 			var dictionaryKey = action.WFWorkflowActionParameters["WFDictionaryKey"]
-			if dictionaryKey != nil && !slices.Contains(constUUIDs, action.WFWorkflowActionParameters[UUID].(string)) {
+			if dictionaryKey != nil && action.WFWorkflowActionParameters[UUID] != nil &&
+				!slices.Contains(constUUIDs, action.WFWorkflowActionParameters[UUID].(string)) {
 				decompDictionaryGetValue(&action)
 				continue
 			}
