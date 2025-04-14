@@ -168,6 +168,17 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
+	"setAirdropReceiving": {
+		parameters: []parameterDefinition{
+			{
+				name:         "state",
+				key:          "WFAirDropState",
+				validType:    String,
+				defaultValue: "Everyone",
+				enum:         []string{"No One", "Contacts Only", "Everyone"},
+			},
+		},
+	},
 	"returnToHomescreen": {mac: false},
 	"vibrate":            {mac: false},
 	"currentDate": {
