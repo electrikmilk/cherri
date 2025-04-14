@@ -34,6 +34,11 @@ func decompile(b []byte) {
 	var _, marshalIndexedErr = plist.Unmarshal(b, &shortcut)
 	handle(marshalIndexedErr)
 
+	specialCharsRegex = regexp.MustCompile("[^a-zA-Z0-9_]+")
+	variables = make(map[string]varValue)
+	uuids = make(map[string]string)
+
+	mapVariables()
 	waitFor(
 		mapIdentifiers,
 		mapSplitActions,
@@ -56,9 +61,23 @@ func decompile(b []byte) {
 
 // mapIdentifiers creates a map of variable identifiers and UUIDs that are assigned throughout the Shortcut.
 func mapIdentifiers() {
-	specialCharsRegex = regexp.MustCompile("[^a-zA-Z0-9_]+")
-	variables = make(map[string]varValue)
-	uuids = make(map[string]string)
+	for _, action := range shortcut.WFWorkflowActions {
+		currentActionIdentifier = action.WFWorkflowActionIdentifier
+		var params = action.WFWorkflowActionParameters
+		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
+			continue
+		}
+
+		if params["UUID"] != nil && params["CustomOutputName"] != nil {
+			mapUUID(params["UUID"].(string), params["CustomOutputName"].(string))
+		}
+
+		checkParamIdentifiers(params)
+	}
+}
+
+// Map out variables in the Shortcut and their UUIDs for later checks.
+func mapVariables() {
 	for _, action := range shortcut.WFWorkflowActions {
 		currentActionIdentifier = action.WFWorkflowActionIdentifier
 		var params = action.WFWorkflowActionParameters
@@ -75,16 +94,6 @@ func mapIdentifiers() {
 				varUUIDs = append(varUUIDs, wfInput.Value.OutputUUID)
 			}
 		}
-
-		if params["UUID"] != nil && params["CustomOutputName"] != nil {
-			checkConstantUUID(Value{
-				OutputUUID: params["UUID"].(string),
-				Type:       "ActionOutput",
-			})
-			mapUUID(params["UUID"].(string), params["CustomOutputName"].(string))
-		}
-
-		checkParamIdentifiers(params)
 	}
 }
 
@@ -372,6 +381,19 @@ func checkConstantLiteral(action *ShortcutAction) {
 	if slices.Contains(varUUIDs, actionUUID) {
 		return
 	}
+	if outputName, found := uuids[actionUUID]; found {
+		newCodeLine(fmt.Sprintf("const %s = ", outputName))
+		code.WriteString(currentVariableValue)
+		code.WriteRune('\n')
+		currentVariableValue = ""
+	}
+}
+
+func writeConstantLiteral(action *ShortcutAction) {
+	if _, found := action.WFWorkflowActionParameters[UUID]; !found {
+		return
+	}
+	var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
 	if outputName, found := uuids[actionUUID]; found {
 		newCodeLine(fmt.Sprintf("const %s = ", outputName))
 		code.WriteString(currentVariableValue)
@@ -1001,10 +1023,13 @@ func decompAction(action *ShortcutAction) {
 		actionCallCode.WriteString(saveCode)
 	}
 
-	if isConstant {
-		currentVariableValue = actionCallCode.String()
+	currentVariableValue = actionCallCode.String()
+
+	if isConstant && isVariableValue {
+		writeConstantLiteral(action)
+	} else if isConstant {
 		checkConstantLiteral(action)
-	} else {
+	} else if !isVariableValue {
 		code.WriteString(tabbedLine(actionCallCode.String()))
 		code.WriteRune('\n')
 		currentVariableValue = ""
@@ -1023,7 +1048,7 @@ func checkOutputType(action *ShortcutAction) (isConstant bool, isVariableValue b
 		return
 	}
 
-	isConstant = slices.Contains(constUUIDs, uuid)
+	isConstant = slices.Contains(constUUIDs, uuid) || !slices.Contains(varUUIDs, uuid)
 	isVariableValue = slices.Contains(varUUIDs, uuid)
 
 	return
