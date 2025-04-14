@@ -144,6 +144,12 @@ var toggleAlarmIntent = appIntent{
 	appIntentIdentifier: "ToggleAlarmIntent",
 }
 
+var createShortcutiCloudLink = appIntent{
+	name:                "Shortcuts",
+	bundleIdentifier:    "com.apple.shortcuts",
+	appIntentIdentifier: "CreateShortcutiCloudLinkAction",
+}
+
 // actions is the data structure that determines every action the compiler knows about.
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
@@ -5298,6 +5304,18 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		minVersion: 16.4,
+	},
+	"createShortcutLink": {
+		appIdentifier: "com.apple.shortcuts",
+		identifier:    "CreateShortcutiCloudLinkAction",
+		appIntent:     createShortcutiCloudLink,
+		parameters: []parameterDefinition{
+			{
+				name:      "shortcut",
+				key:       "shortcut",
+				validType: Variable,
+			},
+		},
 	},
 	"searchShortcuts": {
 		appIdentifier: "com.apple.shortcuts",
