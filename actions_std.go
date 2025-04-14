@@ -3653,6 +3653,11 @@ var actions = map[string]*actionDefinition{
 	"lockScreen": {
 		minVersion: 17,
 	},
+	"getOrientation": {
+		identifier:    "GetOrientationAction",
+		appIdentifier: "com.apple.ShortcutsActions",
+		outputType:    String,
+	},
 	"number": {
 		parameters: []parameterDefinition{
 			{
