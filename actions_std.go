@@ -5344,6 +5344,56 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"convertToUSDZ": {
+		appIdentifier: "com.apple.HydraUSDAppIntents",
+		identifier:    "ConvertToUSDZ",
+		parameters: []parameterDefinition{
+			{
+				name:      "file",
+				key:       "file",
+				validType: Variable,
+			},
+		},
+	},
+	"runSSHScript": {
+		parameters: []parameterDefinition{
+			{
+				name:      "script",
+				key:       "WFSSHScript",
+				validType: String,
+			},
+			{
+				name:      "input",
+				key:       "WFInput",
+				validType: Variable,
+			},
+			{
+				name:      "host",
+				key:       "WFSSHHost",
+				validType: String,
+			},
+			{
+				name:      "port",
+				key:       "WFSSHPort",
+				validType: String,
+			},
+			{
+				name:      "user",
+				key:       "WFSSHUser",
+				validType: String,
+			},
+			{
+				name: "authType",
+				key:  "WFSSHAuthenticationType",
+				enum: []string{"Password", "SSH Key"},
+			},
+			{
+				name:      "password",
+				key:       "WFSSHPassword",
+				validType: String,
+			},
+		},
+	},
 	"airdrop": {
 		identifier: "airdropdocument",
 		parameters: []parameterDefinition{
