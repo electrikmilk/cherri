@@ -8,6 +8,8 @@ var definitions map[string]any
 
 var workflowName string
 
+var isFirstCommentAction = true
+
 /* Colors */
 
 var colors = map[string]int{

@@ -13,6 +13,8 @@ import (
 	"github.com/electrikmilk/args-parser"
 )
 
+var usedCustomActions bool
+
 // customAction contains the collected declaration of a custom action.
 type customAction struct {
 	definition actionDefinition
@@ -52,7 +54,8 @@ func parseCustomActions() {
 		}
 	}
 
-	if customActionsUsed() {
+	usedCustomActions = isCustomActionsUsed()
+	if usedCustomActions {
 		makeCustomActionsHeader()
 	}
 
@@ -62,7 +65,7 @@ func parseCustomActions() {
 	}
 }
 
-func customActionsUsed() bool {
+func isCustomActionsUsed() bool {
 	for _, action := range customActions {
 		if action.used {
 			return true
