@@ -45,17 +45,30 @@ func parseCustomActions() {
 	resetParse()
 
 	checkCustomActionUsage(contents)
+
 	for _, action := range customActions {
 		if strings.ContainsAny(action.body, "()") {
 			checkCustomActionUsage(action.body)
 		}
 	}
-	makeCustomActionsHeader()
+
+	if customActionsUsed() {
+		makeCustomActionsHeader()
+	}
 
 	if args.Using("debug") {
 		printCustomActionsDebug()
 		fmt.Println(contents)
 	}
+}
+
+func customActionsUsed() bool {
+	for _, action := range customActions {
+		if action.used {
+			return true
+		}
+	}
+	return false
 }
 
 func collectActionDefinition() {
