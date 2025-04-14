@@ -857,9 +857,7 @@ func decompValueObject(value map[string]interface{}) string {
 			var outputName = uuids[value["OutputUUID"].(string)]
 			sanitizeIdentifier(&outputName)
 
-			if isControlFlowUUID(value["OutputUUID"].(string)) {
-				decompWarning("Usage of control flow action output is not supported. This can be manually corrected by assigning a variable within the control flow branches and then using that variable instead.")
-			}
+			isControlFlowUUID(value["OutputUUID"].(string), outputName)
 
 			return outputName
 		}
@@ -871,8 +869,11 @@ func decompValueObject(value map[string]interface{}) string {
 	return decompObjectValue(value)
 }
 
-func isControlFlowUUID(uuid string) bool {
-	return slices.Contains(controlFlowUUIDs, uuid)
+func isControlFlowUUID(uuid string, identifier string) {
+	if slices.Contains(controlFlowUUIDs, uuid) {
+		insertCodeComment(fmt.Sprintf("TODO: Control flow output not supported. Assign variable in control flow branches to '%s'.", identifier))
+		decompWarning(fmt.Sprintf("Usage of control flow action output '%s' not supported. This can be manually corrected by assigning a variable within the control flow branches and then using that variable instead.", identifier))
+	}
 }
 
 func decompObjectValue(valueObj any) string {
@@ -937,9 +938,7 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 			decompAggrandizements(&variableName, attachment.Aggrandizements)
 		}
 
-		if isControlFlowUUID(attachment.OutputUUID) {
-			decompWarning("Usage of control flow action output is not supported. This can be manually corrected by assigning a variable within the control flow branches and then using that variable instead.")
-		}
+		isControlFlowUUID(attachment.OutputUUID, variableName)
 
 		attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
 	}
