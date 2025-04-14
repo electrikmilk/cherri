@@ -6560,6 +6560,23 @@ var toggleSetActions = map[string]actionDefinition{
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleZoomIntent",
 	},
+	"StageManager": {
+		identifier: "stagemanager.set",
+		parameters: []parameterDefinition{
+			{
+				name:         "showDock",
+				key:          "showDock",
+				validType:    Bool,
+				defaultValue: true,
+			},
+			{
+				name:         "showRecentApps",
+				key:          "showRecentApps",
+				validType:    Bool,
+				defaultValue: true,
+			},
+		},
+	},
 }
 
 // defineToggleSetActions automates the creation of actions which simply toggle and set a state in the same format.
