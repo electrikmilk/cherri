@@ -110,6 +110,17 @@ func checkParamIdentifiers(params map[string]interface{}) {
 			var paramVariable = paramValues["Variable"].(map[string]interface{})
 			checkParamValueAttachments(paramVariable)
 		}
+
+		if _, found := paramValues["WFConditions"]; found {
+			var wfConditions = paramValues["WFConditions"].(map[string]interface{})
+			var value = wfConditions["Value"].(map[string]interface{})
+			if value["WFActionParameterFilterTemplates"] != nil {
+				for _, filtertemplate := range value["WFActionParameterFilterTemplates"].(map[string]interface{}) {
+					var paramFilterTemplate = filtertemplate.(map[string]interface{})
+					checkParamIdentifiers(paramFilterTemplate["WFInput"].(map[string]interface{}))
+				}
+			}
+		}
 	}
 }
 
