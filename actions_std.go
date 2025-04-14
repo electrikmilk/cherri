@@ -168,7 +168,8 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"vibrate": {mac: false},
+	"returnToHomescreen": {mac: false},
+	"vibrate":            {mac: false},
 	"currentDate": {
 		identifier: "date",
 		addParams: func(_ []actionArgument) map[string]any {
