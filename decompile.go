@@ -743,7 +743,7 @@ func isReferenceValue(value any) bool {
 func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary map[string]interface{}) {
 	dictionary = make(map[string]interface{})
 	for _, item := range items {
-		var itemKey = decompValue(item.WFKey)
+		var itemKey = strings.Trim(decompValue(item.WFKey), "\"")
 		dictionary[itemKey] = decompDictionaryItem(item)
 	}
 	return
