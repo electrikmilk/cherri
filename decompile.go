@@ -789,6 +789,7 @@ func decompArray(items []interface{}) (array []interface{}) {
 			var fieldValueItem WFDictionaryFieldValueItem
 			mapToStruct(item, &fieldValueItem)
 			array = append(array, decompDictionaryItem(fieldValueItem))
+			continue
 		}
 
 		array = append(array, strings.Trim(decompValue(item), "\""))
