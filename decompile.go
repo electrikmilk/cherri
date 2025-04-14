@@ -427,8 +427,8 @@ func decompTextValue(action *ShortcutAction) {
 	currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 	if currentVariableValue == "" {
 		currentVariableValue = "\"\""
-	} else if currentVariableValue[0] != '"' {
-		currentVariableValue = fmt.Sprintf("\"%s\"", currentVariableValue)
+	} else {
+		currentVariableValue = fmt.Sprintf("\"%s\"", escapeString(strings.Trim(currentVariableValue, "\"")))
 	}
 	checkConstantLiteral(action)
 	decompilingText = false
@@ -818,7 +818,7 @@ func escapeString(value string) string {
 		"\n": "\\n",
 		"\t": "\\t",
 		"\r": "\\r",
-		"\"": "\"",
+		"\"": `\"`,
 	}
 	for chr, e := range escapes {
 		value = strings.ReplaceAll(value, chr, e)
