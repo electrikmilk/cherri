@@ -859,8 +859,11 @@ func decompValueObject(value map[string]interface{}) string {
 
 			isControlFlowUUID(value["OutputUUID"].(string), outputName)
 
-			return outputName
+			if value["Aggrandizements"] == nil {
+				return outputName
+			}
 		}
+		break
 	case globals[ShortcutInput].variableType:
 		hasShortcutInputVariables = true
 		return ShortcutInput
