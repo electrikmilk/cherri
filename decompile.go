@@ -818,7 +818,7 @@ func escapeString(value string) string {
 		"\n": "\\n",
 		"\t": "\\t",
 		"\r": "\\r",
-		"\"": "\\\"",
+		"\"": "\"",
 	}
 	for chr, e := range escapes {
 		value = strings.ReplaceAll(value, chr, e)
