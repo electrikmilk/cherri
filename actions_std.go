@@ -5334,6 +5334,16 @@ var actions = map[string]*actionDefinition{
 		},
 		minVersion: 16.4,
 	},
+	"searchPasswords": {
+		identifier: "openpasswords",
+		parameters: []parameterDefinition{
+			{
+				name:      "query",
+				validType: String,
+				key:       "WFShowPasswordsSearchTerm",
+			},
+		},
+	},
 	"airdrop": {
 		identifier: "airdropdocument",
 		parameters: []parameterDefinition{
