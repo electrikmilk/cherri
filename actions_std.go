@@ -6572,7 +6572,6 @@ func defineToggleSetActions() {
 			}
 		}
 		var toggleDef = def
-		toggleDef.parameters = nil
 		actions[toggleName] = &toggleDef
 
 		if name == "Appearance" {
