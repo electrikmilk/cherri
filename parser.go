@@ -948,13 +948,7 @@ func collectFilterPrefix(wfConditions *WFConditions) {
 
 	if wfConditions.WFActionParameterFilterPrefix != -1 &&
 		wfConditions.WFActionParameterFilterPrefix != conditionFilterPrefixes[collectedFilterPrefix] {
-		var initLogicOperator string
-		switch wfConditions.WFActionParameterFilterPrefix {
-		case conditionFilterPrefixes[And]:
-			initLogicOperator = "&&"
-		case conditionFilterPrefixes[Or]:
-			initLogicOperator = "||"
-		}
+		var initLogicOperator = convertFilterPrefix(wfConditions.WFActionParameterFilterPrefix)
 		parserError(fmt.Sprintf("Due to limitations in Shortcuts, only the initially set logical operator '%s' is allowed for all other comparisons.", initLogicOperator))
 	}
 
@@ -963,6 +957,16 @@ func collectFilterPrefix(wfConditions *WFConditions) {
 	if wfConditions.WFActionParameterFilterPrefix == -1 {
 		wfConditions.WFActionParameterFilterPrefix = conditionFilterPrefixes[collectedFilterPrefix]
 	}
+}
+
+func convertFilterPrefix(filterPrefix int) string {
+	switch filterPrefix {
+	case conditionFilterPrefixes[And]:
+		return "&&"
+	case conditionFilterPrefixes[Or]:
+		return "||"
+	}
+	return "||"
 }
 
 func collectConditional() (conditional condition) {

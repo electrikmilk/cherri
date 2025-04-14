@@ -598,46 +598,25 @@ func decompConditional(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		var conditionInt = action.WFWorkflowActionParameters["WFCondition"].(uint64)
-		var conditionalOperator string
-		for operator, cond := range conditions {
-			if cond == int(conditionInt) {
-				conditionalOperator = string(operator)
-			}
-		}
-		if conditionalOperator == "" {
-			decompError(fmt.Sprintf("Invalid conditional %v", conditionInt), action)
-		}
-
 		newCodeLine("if ")
 
-		if conditionalOperator == "!value" {
-			code.WriteRune('!')
-		}
+		if action.WFWorkflowActionParameters["WFConditions"] != nil {
+			var conditions = action.WFWorkflowActionParameters["WFConditions"].(map[string]interface{})
+			var conditionValue = conditions["Value"].(map[string]interface{})
+			var intFilterPrefix, convErr = strconv.Atoi(fmt.Sprintf("%d", conditionValue["WFActionParameterFilterPrefix"]))
+			handle(convErr)
+			var paramFilterPrefix = convertFilterPrefix(intFilterPrefix)
+			var filterTemplates = conditionValue["WFActionParameterFilterTemplates"].([]interface{})
+			var conditionsLen = len(filterTemplates)
+			for i, condition := range filterTemplates {
+				decompCondition(condition.(map[string]interface{}), action)
 
-		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
-
-		if conditionalOperator != "value" && conditionalOperator != "!value" {
-			code.WriteRune(' ')
-			code.WriteString(conditionalOperator)
-			code.WriteRune(' ')
-
-			if _, found := action.WFWorkflowActionParameters["WFNumberValue"]; found {
-				var numberType = reflect.TypeOf(action.WFWorkflowActionParameters["WFNumberValue"]).Kind()
-				if numberType == reflect.Uint64 {
-					code.WriteString(decompValue(action.WFWorkflowActionParameters["WFNumberValue"]))
-				} else {
-					if reflect.TypeOf(action.WFWorkflowActionParameters["WFNumberValue"]).String() == stringType {
-						var numberValue, convErr = strconv.Atoi(action.WFWorkflowActionParameters["WFNumberValue"].(string))
-						handle(convErr)
-						code.WriteString(decompValue(numberValue))
-					} else {
-						code.WriteString(decompValue(action.WFWorkflowActionParameters["WFNumberValue"]))
-					}
+				if i != conditionsLen-1 {
+					code.WriteString(fmt.Sprintf(" %s ", paramFilterPrefix))
 				}
-			} else if _, foundStr := action.WFWorkflowActionParameters["WFConditionalActionString"]; foundStr {
-				code.WriteString(decompValue(action.WFWorkflowActionParameters["WFConditionalActionString"]))
 			}
+		} else {
+			decompCondition(action.WFWorkflowActionParameters, action)
 		}
 
 		code.WriteString(" {\n")
@@ -650,6 +629,47 @@ func decompConditional(action *ShortcutAction) {
 		collectControlFlowUUID(action)
 		tabLevel--
 		newCodeLine("}\n")
+	}
+}
+
+func decompCondition(condition map[string]interface{}, action *ShortcutAction) {
+	var conditionInt = condition["WFCondition"].(uint64)
+	var conditionalOperator string
+	for operator, cond := range conditions {
+		if cond == int(conditionInt) {
+			conditionalOperator = string(operator)
+		}
+	}
+	if conditionalOperator == "" {
+		decompError(fmt.Sprintf("Invalid conditional %v", conditionInt), action)
+	}
+	if conditionalOperator == "!value" {
+		code.WriteRune('!')
+	}
+
+	code.WriteString(decompValue(condition["WFInput"]))
+
+	if conditionalOperator != "value" && conditionalOperator != "!value" {
+		code.WriteRune(' ')
+		code.WriteString(conditionalOperator)
+		code.WriteRune(' ')
+
+		if _, found := condition["WFNumberValue"]; found {
+			var numberType = reflect.TypeOf(condition["WFNumberValue"]).Kind()
+			if numberType == reflect.Uint64 {
+				code.WriteString(decompValue(condition["WFNumberValue"]))
+			} else {
+				if reflect.TypeOf(condition["WFNumberValue"]).String() == stringType {
+					var numberValue, convErr = strconv.Atoi(condition["WFNumberValue"].(string))
+					handle(convErr)
+					code.WriteString(decompValue(numberValue))
+				} else {
+					code.WriteString(decompValue(condition["WFNumberValue"]))
+				}
+			}
+		} else if _, foundStr := condition["WFConditionalActionString"]; foundStr {
+			code.WriteString(decompValue(condition["WFConditionalActionString"]))
+		}
 	}
 }
 
