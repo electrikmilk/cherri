@@ -94,6 +94,7 @@ func validReference(identifier string) bool {
 
 func getVariableValue(identifier string) (variableValue *varValue, found bool) {
 	if value, found := globals[identifier]; found {
+		isInputVariable(identifier)
 		return &value, true
 	}
 	if value, found := variables[identifier]; found {

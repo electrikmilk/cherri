@@ -367,6 +367,7 @@ func inputValue(name string, varUUID string) map[string]any {
 			value["Type"] = "Variable"
 		}
 	} else if global, found := globals[name]; found {
+		isInputVariable(name)
 		value["Type"] = global.variableType
 	} else {
 		value["OutputName"] = name
@@ -384,6 +385,7 @@ func variableValue(variable varValue) map[string]any {
 	var variableReference varValue
 	var aggrandizements []map[string]any
 	if global, found := globals[identifier]; found {
+		isInputVariable(identifier)
 		variable.variableType = global.variableType
 	} else if v, found := variables[identifier]; found {
 		variableReference = v
@@ -486,6 +488,7 @@ func makeAttachmentValues() {
 	for _, stringVar := range inlineVars {
 		var storedVar varValue
 		if g, global := globals[stringVar.identifier]; global {
+			isInputVariable(stringVar.identifier)
 			storedVar = g
 			stringVar.identifier = g.value.(string)
 		} else if v, found := variables[stringVar.identifier]; found {
