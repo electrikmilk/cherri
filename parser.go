@@ -222,8 +222,8 @@ func collectUntilIgnoreStrings(ch rune) string {
 }
 
 // collectUntil advances ahead until the current character is `ch`,
-// This should be used in cases where we are unsure how many characters will occur before we reach this character.
-// For instance a string collector would need to use this.
+// This should be used in cases where we are unsure how many characters
+// will occur before we reach this character.
 func collectUntil(ch rune) string {
 	var collected strings.Builder
 	for char != ch && char != -1 {
