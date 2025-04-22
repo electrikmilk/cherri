@@ -112,7 +112,6 @@ type dataType string
 
 const Text dataType = "string"
 const Number dataType = "integer"
-const Real dataType = "real"
 const Dictionary dataType = "dictionary"
 const Array dataType = "array"
 const Boolean dataType = "boolean"
@@ -342,13 +341,6 @@ func attachReferenceParams(params *map[string]any, reference *map[string]any) ma
 	maps.Copy(*params, *reference)
 
 	return *params
-}
-
-func variableInput(name string) map[string]any {
-	if uuid, found := uuids[name]; found {
-		return inputValue(name, uuid)
-	}
-	return inputValue(name, "")
 }
 
 func inputValue(name string, varUUID string) map[string]any {
