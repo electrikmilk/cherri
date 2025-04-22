@@ -132,7 +132,7 @@ func resetParser() {
 	questions = map[string]*question{}
 	hasShortcutInputVariables = false
 	tabLevel = 0
-	types = []string{}
+	definedWorkflowTypes = []string{}
 	inputs = []string{}
 	outputs = []string{}
 	noInput = WFWorkflowNoInputBehavior{}

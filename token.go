@@ -37,15 +37,16 @@ const (
 
 /* Definitions */
 const (
-	Name    tokenType = "name"
-	Color   tokenType = "color"
-	Glyph   tokenType = "glyph"
-	Inputs  tokenType = "inputs"
-	Outputs tokenType = "outputs"
-	From    tokenType = "from"
-	Version tokenType = "version"
-	Mac     tokenType = "mac"
-	NoInput tokenType = "noinput"
+	Name         tokenType = "name"
+	Color        tokenType = "color"
+	Glyph        tokenType = "glyph"
+	Inputs       tokenType = "inputs"
+	Outputs      tokenType = "outputs"
+	From         tokenType = "from"
+	Version      tokenType = "version"
+	Mac          tokenType = "mac"
+	NoInput      tokenType = "noinput"
+	QuickActions tokenType = "quickactions"
 )
 
 /* No Inputs */

@@ -125,7 +125,8 @@ func printParsingDebug() {
 	fmt.Printf("Glyph: %d\n", iconGlyph)
 	fmt.Printf("Inputs: %v\n", inputs)
 	fmt.Printf("Outputs: %v\n", outputs)
-	fmt.Printf("Workflows: %v\n", types)
+	fmt.Printf("Workflows: %v\n", definedWorkflowTypes)
+	fmt.Printf("Quick Actions: %v\n", definedQuickActions)
 	fmt.Printf("No Input: %v\n", noInput)
 	if def, found := definitions["mac"]; found {
 		fmt.Printf("macOS Only: %v\n", def)
@@ -614,19 +615,22 @@ func collectDefinition() {
 		collectGlyphDefinition()
 	case tokenAhead(Inputs):
 		advance()
-		inputs = collectContentItemTypes()
+		inputs = collectTypeValues("content item", contentItems)
 	case tokenAhead(Outputs):
 		advance()
-		outputs = collectContentItemTypes()
+		outputs = collectTypeValues("content item", contentItems)
 	case tokenAhead(From):
 		advance()
-		collectWorkflowType()
+		definedWorkflowTypes = collectTypeValues("workflow", workflowTypes)
 	case tokenAhead(NoInput):
 		advance()
 		collectNoInputDefinition()
 	case tokenAhead(Mac):
 		advance()
 		collectBooleanDefinition("mac")
+	case tokenAhead(QuickActions):
+		advance()
+		definedQuickActions = collectTypeValues("quick action", quickActions)
 	case tokenAhead(Version):
 		var collectVersion = collectUntil('\n')
 		if version, found := versions[collectVersion]; found {
@@ -653,20 +657,22 @@ func collectColorDefinition() {
 	}
 }
 
-func collectWorkflowType() {
-	var collectWorkflowTypes = collectUntil('\n')
-	if collectWorkflowTypes != "" {
-		var definedWorkflowTypes = strings.Split(collectWorkflowTypes, ",")
-		for _, wt := range definedWorkflowTypes {
-			wt = strings.Trim(wt, " ")
-			if wtype, found := workflowTypes[wt]; found {
-				types = append(types, wtype)
-			} else {
-				var list = makeKeyList("Available workflow types:", workflowTypes, wt)
-				parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wt, list))
-			}
-		}
+func collectTypeValues(typeName string, valueTypes map[string]string) (types []string) {
+	var collectedTypes = collectUntil('\n')
+	if collectedTypes == "" {
+		parserError("Expected type")
 	}
+	var definedTypes = strings.Split(collectedTypes, ",")
+	for _, definedType := range definedTypes {
+		definedType = strings.Trim(definedType, " ")
+		if _, found := valueTypes[definedType]; !found {
+			var list = makeKeyList(fmt.Sprintf("Available %s types:", typeName), workflowTypes, definedType)
+			parserError(fmt.Sprintf("Invalid %s type '%s'\n\n%s", typeName, definedType, list))
+			return
+		}
+		types = append(types, fmt.Sprintf("%v", valueTypes[definedType]))
+	}
+	return
 }
 
 func collectGlyphDefinition() {
@@ -698,43 +704,23 @@ func collectNoInputDefinition() {
 		}
 	case tokenAhead(AskFor):
 		advance()
-		var workflowType = collectUntil('\n')
-		if wtype, found := contentItems[workflowType]; found {
+		var contentItemType = collectUntil('\n')
+		if itemClass, found := contentItems[contentItemType]; found {
 			noInput = WFWorkflowNoInputBehavior{
 				Name: "WFWorkflowNoInputBehaviorAskForInput",
 				Parameters: map[string]string{
-					"ItemClass": wtype,
+					"ItemClass": itemClass,
 				},
 			}
 		} else {
-			var list = makeKeyList("Available workflow types:", workflowTypes, wtype)
-			parserError(fmt.Sprintf("Invalid workflow type '%s'\n\n%s", wtype, list))
+			var list = makeKeyList("Available content item types:", contentItems, itemClass)
+			parserError(fmt.Sprintf("Invalid content item type '%s'\n\n%s", itemClass, list))
 		}
 	case tokenAhead(GetClipboard):
 		noInput = WFWorkflowNoInputBehavior{
 			Name: "WFWorkflowNoInputBehaviorGetClipboard",
 		}
 	}
-}
-
-func collectContentItemTypes() (contentItemTypes []string) {
-	var collectedItemTypes = collectUntil('\n')
-	if collectedItemTypes == "" {
-		parserError("Expected content item types")
-	}
-
-	var itemTypes = strings.Split(collectedItemTypes, ",")
-	for _, itemType := range itemTypes {
-		itemType = strings.Trim(itemType, " ")
-		if contentItem, found := contentItems[itemType]; found {
-			contentItemTypes = append(contentItemTypes, contentItem)
-			continue
-		}
-
-		var list = makeKeyList("Available content item types:", contentItems, itemType)
-		parserError(fmt.Sprintf("Invalid content item type '%s'\n\n%s", itemType, list))
-	}
-	return
 }
 
 func collectBooleanDefinition(key string) {

@@ -34,7 +34,8 @@ func generateShortcut() {
 		WFWorkflowHasShortcutInputVariables:  hasShortcutInputVariables,
 		WFWorkflowMinimumClientVersion:       900,
 		WFWorkflowMinimumClientVersionString: "900",
-		WFWorkflowTypes:                      types,
+		WFWorkflowTypes:                      definedWorkflowTypes,
+		WFQuickActionSurfaces:                definedQuickActions,
 		WFWorkflowNoInputBehavior:            noInput,
 	}
 
@@ -82,7 +83,8 @@ func resetShortcutGen() {
 	variables = map[string]varValue{}
 	questions = map[string]*question{}
 	noInput = WFWorkflowNoInputBehavior{}
-	types = []string{}
+	definedWorkflowTypes = []string{}
+	definedQuickActions = []string{}
 	inputs = []string{}
 	outputs = []string{}
 }

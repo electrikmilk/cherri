@@ -70,7 +70,15 @@ var workflowTypes = map[string]string{
 	"watch":         "Watch",
 	"onscreen":      "ReceivesOnScreenContent",
 }
-var types []string
+var definedWorkflowTypes []string
+
+/* Quick Actions */
+
+var quickActions = map[string]string{
+	"finder":   "Finder",
+	"services": "Services",
+}
+var definedQuickActions []string
 
 /* Versions */
 
