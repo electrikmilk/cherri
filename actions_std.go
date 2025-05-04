@@ -6702,7 +6702,7 @@ func defineToggleSetActions() {
 		var toggleName = fmt.Sprintf("toggle%s", name)
 		def.addParams = func(_ []actionArgument) map[string]any {
 			return map[string]any{
-				"operation": "Toggle",
+				"operation": "toggle",
 			}
 		}
 		var toggleDef = def
