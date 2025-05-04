@@ -4117,15 +4117,15 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 			{
-				name:     "input",
-				key:      "WFInput",
-				optional: true,
-			},
-			{
 				name:         "playSound",
 				key:          "WFNotificationActionSound",
 				validType:    Bool,
 				defaultValue: true,
+			},
+			{
+				name:     "attachment",
+				key:      "WFInput",
+				optional: true,
 			},
 		},
 	},
