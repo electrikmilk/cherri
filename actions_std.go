@@ -4102,7 +4102,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"waitToReturn": {},
-	"notification": {
+	"showNotification": {
 		identifier: "notification",
 		parameters: []parameterDefinition{
 			{
@@ -4115,6 +4115,11 @@ var actions = map[string]*actionDefinition{
 				key:       "WFNotificationActionTitle",
 				validType: String,
 				optional:  true,
+			},
+			{
+				name:     "input",
+				key:      "WFInput",
+				optional: true,
 			},
 			{
 				name:         "playSound",
