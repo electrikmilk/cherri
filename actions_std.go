@@ -6605,6 +6605,10 @@ var toggleSetActions = map[string]actionDefinition{
 		identifier: "truetone.set",
 		setKey:     "OnValue",
 	},
+	"AirplaneMode": {
+		identifier: "airplanemode.set",
+		setKey:     "OnValue",
+	},
 	"ClassicInvert": {
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleClassicInvertIntent",
