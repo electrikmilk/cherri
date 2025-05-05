@@ -182,7 +182,8 @@ var actions = map[string]*actionDefinition{
 	"returnToHomescreen": {mac: false},
 	"vibrate":            {mac: false},
 	"currentDate": {
-		identifier: "date",
+		identifier:    "date",
+		defaultAction: true,
 		addParams: func(_ []actionArgument) map[string]any {
 			return map[string]any{
 				"WFDateActionMode": "Current Date",
