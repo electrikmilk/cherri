@@ -39,9 +39,10 @@ func decompile(b []byte) {
 	uuids = make(map[string]string)
 
 	mapVariables()
+	mapSplitActions()
 	waitFor(
 		mapIdentifiers,
-		mapSplitActions,
+		defineToggleSetActions,
 	)
 
 	defineName()
