@@ -344,6 +344,8 @@ func decompileActions() {
 			}
 		case "is.workflow.actions.dictionary":
 			decompDictionary(&action)
+		case "is.workflow.actions.math":
+			decompBasicExpression(&action)
 		case "is.workflow.actions.calculateexpression":
 			decompExpression(&action)
 		case SetVariableIdentifier, AppendVariableIdentifier:
@@ -470,6 +472,18 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 	currentVariableValue = decompValue(number)
 	checkConstantLiteral(action)
 	return
+}
+
+func decompBasicExpression(action *ShortcutAction) {
+	var input = action.WFWorkflowActionParameters["WFInput"]
+	var operand = action.WFWorkflowActionParameters["WFMathOperand"]
+	var operation = action.WFWorkflowActionParameters["WFMathOperation"]
+	var expression = strings.Trim(decompValue(input),
+		"\"") + " " + strings.Trim(decompValue(operation), "\"") + " " + strings.Trim(decompValue(operand), "\"")
+	var varRegex = regexp.MustCompile(`{(.*?)}`)
+	currentVariableValue = varRegex.ReplaceAllString(expression, "$1")
+
+	checkConstantLiteral(action)
 }
 
 func decompExpression(action *ShortcutAction) {
