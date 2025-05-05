@@ -68,6 +68,7 @@ func parseCustomActions() {
 func isCustomActionsUsed() bool {
 	for _, action := range customActions {
 		if action.used {
+			hasShortcutInputVariables = true
 			return true
 		}
 	}
