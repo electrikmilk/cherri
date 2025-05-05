@@ -29,7 +29,7 @@ func init() {
 	args.Register(args.Argument{
 		Name:        "debug",
 		Short:       "d",
-		Description: "Create plist file, print debug and stack traces.",
+		Description: "Create plist file, preprocessed file, print debug and stack traces.",
 	})
 	args.Register(args.Argument{
 		Name:         "output",
