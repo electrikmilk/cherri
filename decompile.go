@@ -370,6 +370,7 @@ func decompileActions() {
 		default:
 			decompAction(&action)
 		}
+		actionIndex++
 	}
 }
 
@@ -1055,7 +1056,6 @@ func decompAction(action *ShortcutAction) {
 		code.WriteRune('\n')
 		currentVariableValue = ""
 	}
-	actionIndex++
 }
 
 // checkOutputType determines if action output is a constant or a variable.
@@ -1077,20 +1077,21 @@ func checkOutputType(action *ShortcutAction) (isConstant bool, isVariableValue b
 
 // skipDecompAction skips actions we don't support or when necessary.
 func skipDecompAction(action *ShortcutAction) bool {
-	if action.WFWorkflowActionIdentifier == "is.workflow.actions.getvariable" {
+	var identifier = actionIdentifierEnd(action.WFWorkflowActionIdentifier)
+	if identifier == "getvariable" {
 		var varName = decompValue(action.WFWorkflowActionParameters["WFVariable"])
 
 		insertCodeComment(fmt.Sprintf("TODO: Get Variable not supported: Assign variable here to '%s'.", varName))
 		decompWarning(fmt.Sprintf("Get variable '%s' is not supported. Set a variable to that value instead if something was depending on it's output.", varName))
 
-		actionIndex++
 		return true
 	}
 
-	if action.WFWorkflowActionIdentifier == "is.workflow.actions.nothing" {
+	if identifier == "nothing" {
 		var nextAction = peekActions(1)
-		var controlflowActionIdentifiers = []string{"is.workflow.actions.conditional", "is.workflow.actions.repeat.each", "is.workflow.actions.repeat.count", "is.workflow.acitons.choosefrommenu"}
-		if slices.Contains(controlflowActionIdentifiers, nextAction.WFWorkflowActionIdentifier) {
+		var controlflowActionIdentifiers = []string{"conditional", "repeat.each", "repeat.count", "choosefrommenu"}
+		var nextActionIdentifier = actionIdentifierEnd(nextAction.WFWorkflowActionIdentifier)
+		if slices.Contains(controlflowActionIdentifiers, nextActionIdentifier) {
 			var controlFlowMode = nextAction.WFWorkflowActionParameters["WFControlFlowMode"]
 			if controlFlowMode == endStatement || controlFlowMode == statementPart {
 				return true
@@ -1099,6 +1100,10 @@ func skipDecompAction(action *ShortcutAction) bool {
 	}
 
 	return false
+}
+
+func actionIdentifierEnd(identifier string) string {
+	return strings.Replace(identifier, "is.workflow.actions.", "", 1)
 }
 
 func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
