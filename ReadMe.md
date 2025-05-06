@@ -42,11 +42,6 @@ The main goal is to make it trivial and practical to create large Shortcut proje
 - 🔍 [Glyph Search](https://glyphs.cherrilang.org/) - Search glyphs you can use in Cherri!
 - ❓ [FAQ](https://cherrilang.org/faq)
 
-## 📣 WIP 📣
-
-This project has not yet reached a stable version. It is under heavy development and backward
-incompatible changes may be made.
-
 ## Usage
 
 ```bash
@@ -64,8 +59,8 @@ browser.
 ### Development on other platforms
 
 As it stands, I don't want someone to get confused and think Shortcuts compiled using Cherri on other platforms will run
-on their Mac or iOS device. However, you can build the compiler for your platform, it will just skip signing the
-compiled Shortcut, so it will not run on iOS 15+ or macOS 12+. Also, note that the compiler is primarily developed and
+on their Mac or iOS device. However, you can build the compiler for your platform; it will just skip signing the
+compiled Shortcut, so it will not run on iOS 15+ or macOS 12+. Also, I'd like to point out that the compiler is primarily developed and
 tested on Unix-like systems.
 
 [Read my full thoughts on this](https://cherrilang.org/faq#why-macos-only)
@@ -74,7 +69,7 @@ tested on Unix-like systems.
 
 Because it's fun :)
 
-Some languages have been abandoned, don't work very well, or no longer work. I don't want Shortcuts languages to die.
+Some languages have been abandoned, don't work well, or no longer work. I don't want Shortcuts languages to die.
 There should be more, not less.
 
 Plus, some stability comes with this project being on macOS and not iOS, and I'm not aware of another Shortcuts language with macOS as its platform other than [Buttermilk](https://github.com/zachary7829/Buttermilk).
@@ -101,7 +96,7 @@ Plus, some stability comes with this project being on macOS and not iOS, and I'm
 
 ---
 
-_The original Workflow app assigned a code name to each release. Cherri is named after the second to last
+_The original Workflow app assigned a code name to each release. Cherri is named after the second-to-last
 update "Cherries" (also cherry is one of my favorite flavors)._
 
-This project started on Oct 5, 2022.
+This project started on October 5, 2022.
