@@ -40,7 +40,7 @@ func createShortcut() {
 	if !args.Using("skip-sign") {
 		switch {
 		case args.Using("signing-server"):
-			useSigningService(&signingService{
+			useSigningService(&SigningService{
 				name: "Custom Signing Server",
 				url:  args.Value("signing-server"),
 			})

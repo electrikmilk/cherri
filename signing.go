@@ -59,18 +59,20 @@ func sign() {
 		}
 
 		fmt.Printf("%s\n%s\n", ansi("Failed to sign Shortcut using macOS :(", yellow, bold), ansi(stdErr.String(), yellow))
-		hubSign()
+
+		var hubSignService = hubSign()
+		useSigningService(&hubSignService)
 	}
 }
 
-type signingService struct {
-	name  string
-	url   string
-	start func()
+type SigningService struct {
+	name string
+	url  string
+	info func() string
 }
 
 // Sign the Shortcut using a signing service.
-func useSigningService(service *signingService) {
+func useSigningService(service *SigningService) {
 	if hubSignFailed {
 		fmt.Println(ansi(fmt.Sprintf("Backing off from %s", service.name), red))
 		for i := 5; i > 0; i-- {
@@ -82,8 +84,8 @@ func useSigningService(service *signingService) {
 
 	if !args.Using("no-ansi") {
 		fmt.Println(ansi(fmt.Sprintf("Signing using %s service...", service.name), green))
-		if service.start != nil {
-			service.start()
+		if service.info != nil {
+			service.info()
 		}
 	}
 
@@ -150,14 +152,12 @@ func removeUnsigned() {
 }
 
 // Sign the Shortcut using RoutineHub's signing service.
-func hubSign() {
-	var hubSignService = signingService{
+func hubSign() SigningService {
+	return SigningService{
 		name: "HubSign",
 		url:  "https://hubsign.routinehub.services/sign",
-		start: func() {
-			fmt.Print("Shortcut Signing Powered By ")
-			fmt.Println(ansi("RoutineHub", red))
+		info: func() string {
+			return fmt.Sprintf("Shortcut Signing Powered By \n%s", ansi("RoutineHub", red))
 		},
 	}
-	useSigningService(&hubSignService)
 }
