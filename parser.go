@@ -81,6 +81,7 @@ func initParse() {
 	idx = -1
 	lineIdx = 0
 	lineCharIdx = -1
+	actionIndex = 0
 	chars = []rune{}
 	lines = []string{}
 	groupingUUIDs = map[int]string{}
@@ -1322,6 +1323,7 @@ func collectActionCall() {
 			valueType: Action,
 			value:     handleCustomActionRef(&identifier),
 		})
+		actionIndex++
 		return
 	}
 
@@ -1344,6 +1346,7 @@ func collectActionCall() {
 		valueType: Action,
 		value:     value,
 	})
+	actionIndex++
 }
 
 func collectAction(identifier *string) (value action) {

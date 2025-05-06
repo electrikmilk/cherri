@@ -427,7 +427,7 @@ func questionArg(param *parameterDefinition, argument *actionArgument) {
 	var identifier = argument.value.(string)
 	if question, found := questions[identifier]; found {
 		question.parameter = param.key
-		question.actionIndex = actionIndex - 1
+		question.actionIndex = actionIndex
 		argument.value = ""
 	}
 }
