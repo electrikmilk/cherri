@@ -6712,6 +6712,7 @@ func defineToggleSetActions() {
 			}
 		}
 		var toggleDef = def
+		def.defaultAction = false
 		actions[toggleName] = &toggleDef
 
 		if name == "Appearance" {
@@ -6720,6 +6721,7 @@ func defineToggleSetActions() {
 
 		var setName = fmt.Sprintf("set%s", name)
 		def.addParams = nil
+		def.defaultAction = true
 		var setKey = "state"
 		if def.setKey != "" {
 			setKey = def.setKey
