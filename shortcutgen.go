@@ -398,18 +398,29 @@ func makeRepeatEachAction(t *token) {
 	buildStdAction("repeat.each", repeatEachParams)
 }
 
-func generateImportQuestions() (importQuestions []map[string]any) {
+type WFQuestion struct {
+	ParameterKey string
+	Category     string
+	ActionIndex  int
+	Text         string
+	DefaultValue any
+}
+
+func generateImportQuestions() (importQuestions []WFQuestion) {
 	if len(questions) == 0 {
 		return
 	}
 
 	for _, q := range questions {
-		importQuestions = append(importQuestions, map[string]any{
-			"ParameterKey": q.parameter,
-			"Category":     "Parameter",
-			"ActionIndex":  q.actionIndex,
-			"Text":         q.text,
-			"DefaultValue": q.defaultValue,
+		if !q.used {
+			continue
+		}
+		importQuestions = append(importQuestions, WFQuestion{
+			ParameterKey: q.parameter,
+			Category:     "Parameter",
+			ActionIndex:  q.actionIndex,
+			Text:         q.text,
+			DefaultValue: q.defaultValue,
 		})
 	}
 	return
