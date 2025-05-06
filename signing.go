@@ -85,7 +85,7 @@ func useSigningService(service *SigningService) {
 	if !args.Using("no-ansi") {
 		fmt.Println(ansi(fmt.Sprintf("Signing using %s service...", service.name), green))
 		if service.info != nil {
-			service.info()
+			fmt.Println(service.info())
 		}
 	}
 
@@ -157,7 +157,7 @@ func hubSign() SigningService {
 		name: "HubSign",
 		url:  "https://hubsign.routinehub.services/sign",
 		info: func() string {
-			return fmt.Sprintf("Shortcut Signing Powered By \n%s", ansi("RoutineHub", red))
+			return fmt.Sprintf("Shortcut Signing Powered By %s", ansi("RoutineHub", red))
 		},
 	}
 }
