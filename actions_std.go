@@ -4124,9 +4124,10 @@ var actions = map[string]*actionDefinition{
 				defaultValue: true,
 			},
 			{
-				name:     "attachment",
-				key:      "WFInput",
-				optional: true,
+				name:      "attachment",
+				key:       "WFInput",
+				validType: Variable,
+				optional:  true,
 			},
 		},
 	},
