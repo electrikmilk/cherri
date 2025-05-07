@@ -10,6 +10,7 @@ import (
 	"os"
 	"regexp"
 	"slices"
+	"sourcecode.social/reiver/go-eol"
 	"strconv"
 	"strings"
 	"unicode"
@@ -153,7 +154,7 @@ func printParsingDebug() {
 
 func parse() {
 	switch {
-	case char == ' ' || char == '\t' || char == '\n':
+	case isWhitespace():
 		advance()
 	case tokenAhead(Question):
 		collectQuestion()
@@ -241,7 +242,7 @@ func lookAheadUntil(until rune) string {
 	var ahead strings.Builder
 	var nextIdx = idx
 	var nextChar rune
-	for nextChar != until {
+	for !cmpChar(nextChar, until) {
 		if len(chars) <= nextIdx {
 			break
 		}
@@ -410,7 +411,7 @@ func collectArguments() (arguments []actionArgument) {
 	var argIndex = 0
 	var param parameterDefinition
 	for {
-		if char == ')' || char == -1 {
+		if char == ')' || isEOL() || char == -1 {
 			break
 		}
 		if argIndex < paramsSize {
@@ -1371,9 +1372,50 @@ func collectAction(identifier *string) (value action) {
 	return
 }
 
+// isEOL returns bool based on if current char is an isEOL.
+func isEOL() bool {
+	return eol.IsEOL(char)
+}
+
+func skipWhitespace() {
+	for isWhitespace() {
+		advance()
+	}
+}
+
+func isWhitespace() bool {
+	return unicode.IsSpace(char) || isEOL() || char == '\t' || char == ' ' || char == '\n'
+}
+
+func isCurrentChar(ch rune) bool {
+	if ch == '\n' {
+		return eol.IsEOL(char)
+	}
+
+	return ch == char
+}
+
+func cmpChar(ch1 rune, ch2 rune) bool {
+	if ch1 == '\n' {
+		return eol.IsEOL(ch2)
+	}
+	if ch2 == '\n' {
+		return eol.IsEOL(ch1)
+	}
+
+	return ch1 == ch2
+}
+
 // advance advances the character cursor.
 func advance() {
-	if char == '\n' {
+	idx++
+	if len(chars) <= idx {
+		char = -1
+		return
+	}
+
+	char = chars[idx]
+	if isEOL() {
 		lineCharIdx = 0
 		lineIdx++
 	} else {
@@ -1388,6 +1430,21 @@ func advance() {
 	char = chars[idx]
 }
 
+// reverse reverses the character cursor.
+func reverse() {
+	idx--
+	if idx < 0 {
+		char = -1
+		return
+	}
+	if lineCharIdx == 0 {
+		lineIdx--
+	}
+
+	lineCharIdx = len(lines[lineIdx])
+	char = chars[idx]
+}
+
 // advanceTimes advances the character cursor by `times`.
 func advanceTimes(times int) {
 	for i := 0; i < times; i++ {
@@ -1397,7 +1454,7 @@ func advanceTimes(times int) {
 
 // advanceUntil advances the character cursor until we reach `ch`.
 func advanceUntil(ch rune) {
-	for char != ch && char != -1 {
+	for !isCurrentChar(ch) && char != -1 {
 		advance()
 	}
 }
@@ -1406,7 +1463,7 @@ func advanceUntil(ch rune) {
 // However, it expects to reach this character by no more than `maxAdvances` advances and throws a parser error if it doesn't.
 func advanceUntilExpect(ch rune, maxAdvances int) {
 	var advances int
-	for char != ch && char != -1 {
+	for !isCurrentChar(ch) && char != -1 {
 		if advances > maxAdvances {
 			parserError(fmt.Sprintf("Expected %c", ch))
 		}
@@ -1417,7 +1474,7 @@ func advanceUntilExpect(ch rune, maxAdvances int) {
 
 // If char is tokenChar, advance.
 func isChar(tokenChar rune) bool {
-	if char != tokenChar {
+	if !isCurrentChar(tokenChar) {
 		return false
 	}
 	advance()
@@ -1479,12 +1536,6 @@ func firstChar() {
 	lineCharIdx = -1
 	idx = -1
 	advance()
-}
-
-func skipWhitespace() {
-	for char == ' ' || char == '\t' || char == '\n' {
-		advance()
-	}
 }
 
 func printVariables() {
