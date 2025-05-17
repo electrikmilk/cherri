@@ -1,12 +1,4 @@
-rawAction("is.workflow.actions.alert", [
-    {
-        "key": "WFAlertActionMessage",
-        "type": "string",
-        "value": "Hello, world!"
-    },
-    {
-        "key": "WFAlertActionTitle",
-        "type": "string",
-        "value": "Alert"
-    }
-])
+rawAction("is.workflow.actions.alert", {
+    "WFAlertActionMessage": "Hello, world!"
+    "WFAlertActionTitle": "Alert"
+})
