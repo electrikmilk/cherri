@@ -38,6 +38,14 @@ func decompile(b []byte) {
 	variables = make(map[string]varValue)
 	uuids = make(map[string]string)
 
+	basename = strings.ReplaceAll(basename, " ", "_")
+	outputPath = getOutputPath(fmt.Sprintf("%s%s.cherri", relativePath, basename))
+	if args.Using("no-ansi") {
+		filePath = basename + ".cherri"
+	} else {
+		filePath = getOutputPath(relativePath + basename + ".cherri")
+	}
+
 	mapVariables()
 	mapSplitActions()
 	waitFor(
@@ -53,8 +61,6 @@ func decompile(b []byte) {
 	if args.Using("debug") {
 		printDecompDebug()
 	}
-
-	outputPath = getOutputPath(fmt.Sprintf("%s%s.cherri", relativePath, strings.ReplaceAll(basename, " ", "_")))
 
 	var writeErr = os.WriteFile(outputPath, []byte(code.String()), 0600)
 	handle(writeErr)
@@ -1436,14 +1442,6 @@ func printDecompDebug() {
 
 func decompWarning(message string) {
 	var linesLen = strings.Count(code.String(), "\n")
-
-	var filePath string
-	if args.Using("no-ansi") {
-		filePath = basename + ".cherri"
-	} else {
-		filePath = getOutputPath(relativePath + basename + ".cherri")
-	}
-
 	fmt.Println(ansi("Warning:", yellow, bold), fmt.Sprintf("%s (%s:%d:0)\n", message, filePath, linesLen+1))
 }
 

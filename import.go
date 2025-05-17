@@ -100,12 +100,15 @@ func readShortcutFile() []byte {
 
 	var segments = strings.Split(importPath, "/")
 	filename = segments[len(segments)-1]
+
 	var nameSegments = strings.Split(filename, ".")
 	basename = nameSegments[0]
+
 	var extension = nameSegments[len(nameSegments)-1]
 	if extension != "shortcut" && extension != "plist" {
 		exit("import: File is not a Shortcut or property list (plist) file.")
 	}
+
 	relativePath = strings.Replace(importPath, filename, "", 1)
 
 	var b, readErr = os.ReadFile(importPath)
