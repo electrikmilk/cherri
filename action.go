@@ -251,10 +251,7 @@ func checkRequiredArgs() {
 // checkEnum checks an argument value against a string slice.
 func checkEnum(param *parameterDefinition, argument *actionArgument) {
 	var value = getArgValue(*argument)
-	if value == nil {
-		return
-	}
-	if reflect.TypeOf(value).Kind() != reflect.String {
+	if value == nil || reflect.TypeOf(value).Kind() != reflect.String || argument.valueType == Question {
 		return
 	}
 	if !slices.Contains(param.enum, value.(string)) {
