@@ -1,4 +1,4 @@
 rawAction("is.workflow.actions.alert", {
-    "WFAlertActionMessage": "Hello, world!"
+    "WFAlertActionMessage": "Hello, world!",
     "WFAlertActionTitle": "Alert"
 })
