@@ -966,7 +966,7 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 
 	if (!decompilingDictionary && !decompilingText) && len(attachments) == 1 && originalString == ObjectReplaceCharStr {
 		*attachmentString = strings.Trim(*attachmentString, "{}")
-	} else {
+	} else if strings.Contains("\"", *attachmentString) {
 		*attachmentString = fmt.Sprintf("\"%s\"", *attachmentString)
 	}
 }
@@ -1173,41 +1173,29 @@ func makeRawAction(action *ShortcutAction) string {
 			onlyOutputNameParam = found
 		}
 	}
-	if paramsSize > 1 && (!onlyUUIDParam && !onlyOutputNameParam) {
-		tabLevel++
-		rawActionCode.WriteString(", [\n")
-		rawActionCode.WriteString(tabbedLine("{\n"))
-		var index = 0
-		for key, param := range action.WFWorkflowActionParameters {
-			index++
+	if paramsSize != 0 && (!onlyUUIDParam && !onlyOutputNameParam) {
+		rawActionCode.WriteString(", ")
 
-			if key == UUID || key == "CustomOutputName" {
-				continue
-			}
-
-			rawActionCode.WriteString(strings.Repeat("\t", tabLevel+1))
-			rawActionCode.WriteString(fmt.Sprintf("\"%s\": ", key))
-
-			var value = decompValue(param)
-			if !strings.Contains(value, "\"") {
-				value = fmt.Sprintf("\"{%s}\"", value)
-			}
-			rawActionCode.WriteString(value)
-
-			if index < paramsSize {
-				rawActionCode.WriteString(", ")
-			}
-			rawActionCode.WriteRune('\n')
-		}
-
-		rawActionCode.WriteString(tabbedLine("}\n"))
-		tabLevel--
-		rawActionCode.WriteString(tabbedLine("])"))
-	} else {
-		rawActionCode.WriteRune(')')
+		var rawParams = processRawParameters(action.WFWorkflowActionParameters)
+		var jb, jsonErr = json.MarshalIndent(rawParams, strings.Repeat("\t", tabLevel), "\t")
+		handle(jsonErr)
+		rawActionCode.WriteString(string(jb))
 	}
+	rawActionCode.WriteRune(')')
 
 	return rawActionCode.String()
+}
+
+func processRawParameters(params map[string]any) map[string]any {
+	for key, value := range params {
+		if reflect.TypeOf(value).Kind() == reflect.Map {
+			decompilingDictionary = true
+			params[key] = decompValueObject(value.(map[string]interface{}))
+			decompilingDictionary = false
+		}
+	}
+
+	return params
 }
 
 func matchAction(action *ShortcutAction) (name string, definition actionDefinition) {

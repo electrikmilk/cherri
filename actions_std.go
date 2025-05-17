@@ -6226,8 +6226,6 @@ var actions = map[string]*actionDefinition{
 	},
 }
 
-var plistTypes = map[string]string{"string": "", "integer": "", "boolean": "", "array": "", "dict": "", "real": ""}
-
 func defineRawAction() {
 	actions["rawAction"] = &actionDefinition{
 		parameters: []parameterDefinition{
@@ -6238,52 +6236,22 @@ func defineRawAction() {
 			{
 				name:      "parameters",
 				optional:  true,
-				validType: Arr,
+				validType: Dict,
 			},
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			actions["rawAction"].overrideIdentifier = getArgValue(args[0]).(string)
-
-			if len(args) > 1 {
-				for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
-					var definitions = parameterDefinitions.(map[string]interface{})
-					if definitions["type"] != nil {
-						var paramKey = definitions["key"]
-						var paramType = definitions["type"].(string)
-						var paramValue = definitions["value"].(string)
-						if _, found := plistTypes[paramType]; !found {
-							var list = makeKeyList("Available plist types:", plistTypes, paramValue)
-							parserError(fmt.Sprintf("Raw action parameter '%s' type '%s' is not a plist type.\n\n%s", paramKey, paramType, list))
-						}
-					}
-				}
-			}
 		},
 		make: func(args []actionArgument) map[string]any {
-			var params = make(map[string]any)
 			if len(args) == 1 {
-				return params
+				return map[string]any{}
 			}
-			for _, parameterDefinitions := range getArgValue(args[1]).([]interface{}) {
-				var paramKey string
-				var paramType dataType
-				var rawValue any
-				for key, value := range parameterDefinitions.(map[string]interface{}) {
-					switch key {
-					case "key":
-						paramKey = value.(string)
-					case "type":
-						paramType = dataType(value.(string))
-					case "value":
-						rawValue = value
-					}
-				}
 
-				var tokenType = convertDataTypeToTokenType(paramType)
-				params[paramKey] = paramValue(actionArgument{
-					valueType: tokenType,
-					value:     rawValue,
-				}, tokenType)
+			var params = getArgValue(args[1]).(map[string]interface{})
+			for key, value := range params {
+				if reflect.TypeOf(value).Kind() == reflect.String {
+					params[key] = attachmentValues(value.(string))
+				}
 			}
 
 			return params
