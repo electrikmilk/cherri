@@ -254,7 +254,7 @@ func checkEnum(param *parameterDefinition, argument *actionArgument) {
 	if value == nil {
 		return
 	}
-	if reflect.TypeOf(value).String() != stringType {
+	if reflect.TypeOf(value).Kind() != reflect.String {
 		return
 	}
 	if !slices.Contains(param.enum, value.(string)) {
@@ -558,7 +558,7 @@ func generateActionParamDefinition(param parameterDefinition) string {
 	}
 	definition.WriteString(param.name)
 	if param.defaultValue != nil {
-		if reflect.TypeOf(param.defaultValue).String() == stringType {
+		if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
 			definition.WriteString(fmt.Sprintf(" = \"%v\"", strings.Replace(param.defaultValue.(string), "\n", "\\n", 1)))
 		} else {
 			definition.WriteString(fmt.Sprintf(" = %v", param.defaultValue))

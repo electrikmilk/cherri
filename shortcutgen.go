@@ -212,16 +212,18 @@ func makeArrayVariable(t *token) {
 		var UUID = uuid.New().String()
 		var valueType tokenType
 		var itemIdent string
-		switch reflect.TypeOf(value).String() {
-		case stringType:
+		switch reflect.TypeOf(value).Kind() {
+		case reflect.String:
 			valueType = String
 			itemIdent = "Text"
-		case intType:
+		case reflect.Float64:
 			valueType = Integer
 			itemIdent = "Number"
-		case dictType:
+		case reflect.Map:
 			valueType = Dict
 			itemIdent = "Dictionary"
+		default:
+			exit(fmt.Sprintf("Invalid array value '%v' (%s)", value, reflect.TypeOf(value)))
 		}
 		makeVariableValueAction(&token{
 			typeof:    valueType,

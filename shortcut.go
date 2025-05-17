@@ -671,14 +671,6 @@ const (
 	endStatement   uint64 = 2
 )
 
-const (
-	stringType string = "string"
-	intType    string = "float64"
-	arrayType  string = "[]interface {}"
-	dictType   string = "map[string]interface {}"
-	boolType   string = "bool"
-)
-
 // makeDictionary creates a Shortcut dictionary value.
 func makeDictionary(value interface{}) (dictItems []map[string]any) {
 	for key, item := range value.(map[string]interface{}) {
@@ -701,8 +693,8 @@ func dictionaryItemValue(key string, value any) map[string]any {
 	}
 
 	if value != "" {
-		switch reflect.TypeOf(value).String() {
-		case stringType:
+		switch reflect.TypeOf(value).Kind() {
+		case reflect.String:
 			if strings.ContainsAny(value.(string), "{}") {
 				wfValue["Value"] = paramValue(actionArgument{
 					valueType: String,
@@ -717,7 +709,7 @@ func dictionaryItemValue(key string, value any) map[string]any {
 			}
 			itemType = itemTypeText
 			serializedType = "WFTextTokenString"
-		case intType:
+		case reflect.Int, reflect.Float64:
 			itemType = itemTypeNumber
 			serializedType = "WFTextTokenString"
 			wfValue = map[string]any{
@@ -725,7 +717,7 @@ func dictionaryItemValue(key string, value any) map[string]any {
 					"string": fmt.Sprintf("%v", value),
 				},
 			}
-		case arrayType:
+		case reflect.Slice:
 			itemType = itemTypeArray
 			serializedType = "WFArrayParameterState"
 			var arrayValue []map[string]interface{}
@@ -735,7 +727,7 @@ func dictionaryItemValue(key string, value any) map[string]any {
 			wfValue = map[string]any{
 				"Value": arrayValue,
 			}
-		case dictType:
+		case reflect.Map:
 			itemType = itemTypeDict
 			serializedType = "WFDictionaryFieldValue"
 			wfValue = map[string]any{
@@ -746,12 +738,14 @@ func dictionaryItemValue(key string, value any) map[string]any {
 					"WFSerializationType": "WFDictionaryFieldValue",
 				},
 			}
-		case boolType:
+		case reflect.Bool:
 			itemType = itemTypeBool
 			serializedType = "WFNumberSubstitutableState"
 			wfValue = map[string]any{
 				"Value": value,
 			}
+		default:
+			exit(fmt.Sprintf("Unsupported dictionary item value type %s", reflect.TypeOf(value)))
 		}
 	} else {
 		itemType = itemTypeText

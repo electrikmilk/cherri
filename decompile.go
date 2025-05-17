@@ -115,7 +115,7 @@ func insertCodeComment(comment string) {
 
 func checkParamIdentifiers(params map[string]interface{}) {
 	for _, value := range params {
-		if value == nil || reflect.TypeOf(value).String() != dictType {
+		if value == nil || reflect.TypeOf(value).Kind() != reflect.Map {
 			continue
 		}
 
@@ -446,7 +446,7 @@ func decompTextValue(action *ShortcutAction) {
 
 func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 	var value = action.WFWorkflowActionParameters["WFNumberActionNumber"]
-	if reflect.TypeOf(value).String() == dictType {
+	if reflect.TypeOf(value).Kind() == reflect.Map {
 		var mapValue = value.(map[string]interface{})
 		var Value = mapValue["Value"].(map[string]interface{})
 		value = decompValue(value)
@@ -466,7 +466,7 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 	var number any
 	if value != "" {
 		var convErr error
-		if reflect.TypeOf(value).String() == stringType {
+		if reflect.TypeOf(value).Kind() == reflect.String {
 			if strings.Contains(value.(string), ".") {
 				number, convErr = strconv.ParseFloat(value.(string), 64)
 			} else {
@@ -823,11 +823,12 @@ func decompValue(value any) string {
 	if value == nil {
 		return "nil"
 	}
-	var valueType = reflect.TypeOf(value).String()
+
+	var valueType = reflect.TypeOf(value).Kind()
 	switch valueType {
-	case dictType:
+	case reflect.Map:
 		return decompValueObject(value.(map[string]interface{}))
-	case stringType:
+	case reflect.String:
 		return fmt.Sprintf("\"%s\"", escapeString(value.(string)))
 	default:
 		return fmt.Sprintf("%v", value)
@@ -850,7 +851,7 @@ func escapeString(value string) string {
 
 func decompValueObject(value map[string]interface{}) string {
 	if v, found := value["Value"]; found {
-		if reflect.TypeOf(v).String() == dictType {
+		if reflect.TypeOf(v).Kind() == reflect.Map {
 			value = v.(map[string]interface{})
 		}
 	}
@@ -901,8 +902,8 @@ func isControlFlowUUID(uuid string, identifier string) {
 }
 
 func decompObjectValue(valueObj any) string {
-	var valueType = reflect.TypeOf(valueObj).String()
-	if valueType != dictType {
+	var valueType = reflect.TypeOf(valueObj).Kind()
+	if valueType != reflect.Map {
 		return fmt.Sprintf("%v", valueObj)
 	}
 
@@ -910,7 +911,7 @@ func decompObjectValue(valueObj any) string {
 
 	var attachmentString string
 	if value["Value"] != nil {
-		if reflect.TypeOf(value["Value"]).String() != dictType {
+		if reflect.TypeOf(value["Value"]).Kind() != reflect.Map {
 			return fmt.Sprintf("%v", valueObj)
 		}
 		value = value["Value"].(map[string]interface{})
@@ -1369,9 +1370,9 @@ func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameter
 		if value, found := parameters[param.key]; found {
 			matchedParams++
 
-			var defaultValueType = reflect.TypeOf(param.defaultValue).String()
-			var valueType = reflect.TypeOf(value).String()
-			if defaultValueType == dictType && valueType == dictType {
+			var defaultValueType = reflect.TypeOf(param.defaultValue).Kind()
+			var valueType = reflect.TypeOf(value).Kind()
+			if defaultValueType == reflect.Map && valueType == reflect.Map {
 				if maps.Equal(param.defaultValue.(map[string]interface{}), value.(map[string]interface{})) {
 					matchedValues++
 				}

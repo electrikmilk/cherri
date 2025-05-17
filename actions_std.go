@@ -5934,7 +5934,7 @@ var actions = map[string]*actionDefinition{
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			var value = getArgValue(args[1])
-			if reflect.TypeOf(value).String() != stringType {
+			if reflect.TypeOf(value).Kind() != reflect.String {
 				return
 			}
 
@@ -6067,7 +6067,7 @@ var actions = map[string]*actionDefinition{
 			if len(args) > 2 {
 				var photo string
 				var image = getArgValue(args[2])
-				if reflect.TypeOf(image).String() != stringType && args[2].valueType == Variable {
+				if reflect.TypeOf(image).Kind() != reflect.String && args[2].valueType == Variable {
 					photo = fmt.Sprintf("{%s}", makeVariableReferenceString(args[2].value.(varValue)))
 				} else {
 					photo = getArgValue(args[2]).(string)
@@ -6099,7 +6099,7 @@ var actions = map[string]*actionDefinition{
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			var file = getArgValue(args[0])
-			if args[0].valueType == Variable && reflect.TypeOf(file).String() != stringType {
+			if args[0].valueType == Variable && reflect.TypeOf(file).Kind() != reflect.String {
 				parserError("File path must be a string literal")
 			}
 			if _, err := os.Stat(file.(string)); os.IsNotExist(err) {
@@ -6485,22 +6485,22 @@ func httpRequest(bodyType string, valuesKey string, args []actionArgument) map[s
 
 func decompAppAction(key string, action *ShortcutAction) (arguments []string) {
 	if action.WFWorkflowActionParameters[key] != nil {
-		var appsType = reflect.TypeOf(action.WFWorkflowActionParameters[key])
-		if appsType.Kind() == reflect.String {
+		switch reflect.TypeOf(action.WFWorkflowActionParameters[key]).Kind() {
+		case reflect.String:
 			return append(arguments, decompValue(action.WFWorkflowActionParameters[key]))
-		}
-
-		if appsType.String() == dictType {
+		case reflect.Map:
 			for key, bundle := range action.WFWorkflowActionParameters[key].(map[string]interface{}) {
 				if key == "BundleIdentifier" {
 					arguments = append(arguments, fmt.Sprintf("\"%s\"", bundle))
 				}
 			}
-		} else if appsType.String() == "[]interface {}" {
+		case reflect.Array:
 			for _, app := range action.WFWorkflowActionParameters[key].([]interface{}) {
 				var bundleIdentifer = app.(map[string]interface{})["BundleIdentifier"]
 				arguments = append(arguments, fmt.Sprintf("\"%s\"", bundleIdentifer))
 			}
+		default:
+			exit("Unknown app value type")
 		}
 	}
 
@@ -6508,8 +6508,8 @@ func decompAppAction(key string, action *ShortcutAction) (arguments []string) {
 }
 
 func decompInfiniteURLAction(action *ShortcutAction) (arguments []string) {
-	var urlValueType = reflect.TypeOf(action.WFWorkflowActionParameters["WFURLActionURL"]).String()
-	if urlValueType == dictType || urlValueType == "string" {
+	var urlValueType = reflect.TypeOf(action.WFWorkflowActionParameters["WFURLActionURL"]).Kind()
+	if urlValueType == reflect.Map || urlValueType == reflect.String {
 		return append(arguments, decompValue(action.WFWorkflowActionParameters["WFURLActionURL"]))
 	}
 
