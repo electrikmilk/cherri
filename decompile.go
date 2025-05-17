@@ -679,42 +679,41 @@ func decompConditional(action *ShortcutAction) {
 
 func decompCondition(condition map[string]interface{}, action *ShortcutAction) {
 	var conditionInt = condition["WFCondition"].(uint64)
-	var conditionalOperator string
+	var conditionalOperator tokenType
 	for operator, cond := range conditions {
 		if cond == int(conditionInt) {
-			conditionalOperator = string(operator)
+			conditionalOperator = operator
 		}
 	}
 	if conditionalOperator == "" {
 		decompError(fmt.Sprintf("Invalid conditional %v", conditionInt), action)
 	}
-	if conditionalOperator == "!value" {
+	if conditionalOperator == Empty {
 		code.WriteRune('!')
 	}
 
 	code.WriteString(decompValue(condition["WFInput"]))
 
-	if conditionalOperator != "value" && conditionalOperator != "!value" {
-		code.WriteRune(' ')
-		code.WriteString(conditionalOperator)
-		code.WriteRune(' ')
+	if conditionalOperator == Any || conditionalOperator == Empty {
+		return
+	}
 
-		if _, found := condition["WFNumberValue"]; found {
-			var numberType = reflect.TypeOf(condition["WFNumberValue"]).Kind()
-			if numberType == reflect.Uint64 {
-				code.WriteString(decompValue(condition["WFNumberValue"]))
-			} else {
-				if reflect.TypeOf(condition["WFNumberValue"]).String() == stringType {
-					var numberValue, convErr = strconv.Atoi(condition["WFNumberValue"].(string))
-					handle(convErr)
-					code.WriteString(decompValue(numberValue))
-				} else {
-					code.WriteString(decompValue(condition["WFNumberValue"]))
-				}
-			}
-		} else if _, foundStr := condition["WFConditionalActionString"]; foundStr {
-			code.WriteString(decompValue(condition["WFConditionalActionString"]))
+	code.WriteString(fmt.Sprintf(" %s ", conditionalOperator))
+
+	if condition["WFNumberValue"] != nil && condition["WFNumberValue"] != "" {
+		var numberType = reflect.TypeOf(condition["WFNumberValue"]).Kind()
+		switch numberType {
+		case reflect.String:
+			var numberValue, convErr = strconv.Atoi(condition["WFNumberValue"].(string))
+			handle(convErr)
+			code.WriteString(decompValue(numberValue))
+		case reflect.Uint64:
+			code.WriteString(decompValue(condition["WFNumberValue"]))
+		default:
+			code.WriteString(decompValue(condition["WFNumberValue"]))
 		}
+	} else if _, foundStr := condition["WFConditionalActionString"]; foundStr {
+		code.WriteString(decompValue(condition["WFConditionalActionString"]))
 	}
 }
 
