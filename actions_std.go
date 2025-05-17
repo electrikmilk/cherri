@@ -3813,76 +3813,18 @@ var actions = map[string]*actionDefinition{
 				key:       "Input",
 				validType: Variable,
 			},
+			{
+				name:         "type",
+				key:          "WFCountType",
+				validType:    String,
+				enum:         []string{"Items", "Characters", "Words", "Sentences", "Lines"},
+				defaultValue: "Items",
+			},
 		},
 		defaultAction: true,
 		addParams: func(args []actionArgument) map[string]any {
 			return map[string]any{
 				"WFCountType": "Items",
-			}
-		},
-		outputType: Integer,
-	},
-	"countChars": {
-		identifier: "count",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "Input",
-				validType: String,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFCountType": "Characters",
-			}
-		},
-		outputType: Integer,
-	},
-	"countWords": {
-		identifier: "count",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "Input",
-				validType: String,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return map[string]any{
-				"WFCountType": "Words",
-			}
-		},
-		outputType: Integer,
-	},
-	"countSentences": {
-		identifier: "count",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "Input",
-				validType: String,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return map[string]any{
-				"WFCountType": "Sentences",
-			}
-		},
-		outputType: Integer,
-	},
-	"countLines": {
-		identifier: "count",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "Input",
-				validType: String,
-			},
-		},
-
-		addParams: func(args []actionArgument) map[string]any {
-			return map[string]any{
-				"WFCountType": "Lines",
 			}
 		},
 		outputType: Integer,
