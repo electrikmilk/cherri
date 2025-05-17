@@ -966,7 +966,7 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 
 	if (!decompilingDictionary && !decompilingText) && len(attachments) == 1 && originalString == ObjectReplaceCharStr {
 		*attachmentString = strings.Trim(*attachmentString, "{}")
-	} else {
+	} else if strings.Contains("\"", *attachmentString) {
 		*attachmentString = fmt.Sprintf("\"%s\"", *attachmentString)
 	}
 }
@@ -1189,7 +1189,9 @@ func makeRawAction(action *ShortcutAction) string {
 func processRawParameters(params map[string]any) map[string]any {
 	for key, value := range params {
 		if reflect.TypeOf(value).Kind() == reflect.Map {
+			decompilingDictionary = true
 			params[key] = decompValueObject(value.(map[string]interface{}))
+			decompilingDictionary = false
 		}
 	}
 

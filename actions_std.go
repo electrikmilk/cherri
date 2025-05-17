@@ -6247,7 +6247,14 @@ func defineRawAction() {
 				return map[string]any{}
 			}
 
-			return getArgValue(args[1]).(map[string]interface{})
+			var params = getArgValue(args[1]).(map[string]interface{})
+			for key, value := range params {
+				if reflect.TypeOf(value).Kind() == reflect.String {
+					params[key] = attachmentValues(value.(string))
+				}
+			}
+
+			return params
 		},
 	}
 }
