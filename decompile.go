@@ -1166,8 +1166,6 @@ func makeDefaultValue(param parameterDefinition) string {
 }
 
 func makeRawAction(action *ShortcutAction) string {
-	var rawActionCode strings.Builder
-	rawActionCode.WriteString(fmt.Sprintf("rawAction(\"%s\"", action.WFWorkflowActionIdentifier))
 	var paramsSize = len(action.WFWorkflowActionParameters)
 	var onlyUUIDParam = false
 	var onlyOutputNameParam = false
@@ -1179,21 +1177,25 @@ func makeRawAction(action *ShortcutAction) string {
 			onlyOutputNameParam = found
 		}
 	}
-	if paramsSize != 0 && (!onlyUUIDParam && !onlyOutputNameParam) {
-		rawActionCode.WriteString(", ")
-
-		var rawParams = processRawParameters(action.WFWorkflowActionParameters)
-		var jb, jsonErr = json.MarshalIndent(rawParams, strings.Repeat("\t", tabLevel), "\t")
-		handle(jsonErr)
-		rawActionCode.WriteString(string(jb))
+	if paramsSize == 0 || (onlyUUIDParam && onlyOutputNameParam) {
+		return fmt.Sprintf("rawAction(\"%s\")", action.WFWorkflowActionIdentifier)
 	}
-	rawActionCode.WriteRune(')')
 
-	return rawActionCode.String()
+	var rawParams = processRawParameters(action.WFWorkflowActionParameters)
+	var jb, jsonErr = json.MarshalIndent(rawParams, strings.Repeat("\t", tabLevel), "\t")
+	handle(jsonErr)
+
+	var arguments = strings.Join([]string{fmt.Sprintf("\"%s\"", action.WFWorkflowActionIdentifier), string(jb)}, ", ")
+
+	return fmt.Sprintf("rawAction(%s)", arguments)
 }
 
 func processRawParameters(params map[string]any) map[string]any {
 	for key, value := range params {
+		if key == UUID || key == "CustomOutputName" {
+			delete(params, key)
+		}
+
 		if reflect.TypeOf(value).Kind() == reflect.Map {
 			decompilingDictionary = true
 			params[key] = decompValueObject(value.(map[string]interface{}))
