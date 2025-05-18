@@ -22,7 +22,7 @@ The main goal is to make it trivial and practical to create large Shortcut proje
 - 🎓 Easy to learn and syntax similar to other languages
 - 🐞 1-1 translation to Shortcut actions as much as possible to make debugging easier
 - 🪄 No magic variables syntax, they're constants instead
-- 🪶 Optimized to create as small as possible Shortcuts and reduces memory usage at runtime
+- 🪶 Optimized to create as small as possible Shortcuts and reduce memory usage at runtime
 - #️⃣ Include files within others for large Shortcut projects
 - 🔧 Define custom actions
 - 📋 Copy-paste actions automatically
@@ -32,6 +32,7 @@ The main goal is to make it trivial and practical to create large Shortcut proje
 - 📄 Embed files in base64
 - 🔀 Convert Shortcuts from an iCloud link with the `--import=` option
 - 🔢 Type system and type inference
+- 🔏 Signs using macOS, falls back on [HubSign](https://routinehub.co/membership) or another server that uses [scaxyz/shortcut-signing-server](https://github.com/scaxyz/shortcut-signing-server).
 
 ### Resources
 
