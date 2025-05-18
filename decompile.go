@@ -1045,10 +1045,6 @@ func decompAction(action *ShortcutAction) {
 		}
 
 		actionCallCode.WriteString(")")
-	} else if !isConstant && !isVariableValue {
-		var saveCode = tabbedLine(actionCallCode.String())
-		actionCallCode.Reset()
-		actionCallCode.WriteString(saveCode)
 	}
 
 	currentVariableValue = actionCallCode.String()
