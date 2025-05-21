@@ -977,10 +977,12 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 
 	*attachmentString = escapeString(strings.Join(attachmentChars, ""))
 
-	if (!decompilingDictionary && !decompilingText) && len(attachments) == 1 && originalString == ObjectReplaceCharStr {
-		*attachmentString = strings.Trim(*attachmentString, "{}")
-	} else if strings.Contains("\"", *attachmentString) {
-		*attachmentString = fmt.Sprintf("\"%s\"", *attachmentString)
+	if !decompilingDictionary && !decompilingText {
+		if originalString == ObjectReplaceCharStr {
+			*attachmentString = strings.Trim(*attachmentString, "{}")
+		} else if !strings.Contains("\"", *attachmentString) {
+			*attachmentString = fmt.Sprintf("\"%s\"", *attachmentString)
+		}
 	}
 }
 
