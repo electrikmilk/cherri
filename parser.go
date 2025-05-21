@@ -55,20 +55,8 @@ func initParse() {
 	idx = -1
 	advance()
 
-	preParsing = true
+	preParse()
 
-	defineRawAction()
-	waitFor(
-		defineToggleSetActions,
-		handleIncludes,
-	)
-
-	parseCopyPastes()
-	parseCustomActions()
-
-	writeProcessed()
-
-	preParsing = false
 	for char != -1 {
 		parse()
 	}
@@ -92,6 +80,23 @@ func initParse() {
 	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green) + "\n")
 	}
+}
+
+func preParse() {
+	preParsing = true
+
+	defineRawAction()
+	waitFor(
+		defineToggleSetActions,
+		handleIncludes,
+	)
+
+	parseCopyPastes()
+	parseCustomActions()
+
+	writeProcessed()
+
+	preParsing = false
 }
 
 func writeProcessed() {
