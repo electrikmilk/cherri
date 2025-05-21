@@ -958,6 +958,13 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 			hasShortcutInputVariables = true
 			variableName = ShortcutInput
 		}
+		if attachment.Type != "Variable" {
+			for name, global := range globals {
+				if global.variableType == attachment.Type {
+					variableName = name
+				}
+			}
+		}
 
 		if len(attachment.Aggrandizements) != 0 {
 			decompAggrandizements(&variableName, attachment.Aggrandizements)
