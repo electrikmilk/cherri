@@ -13,13 +13,22 @@ import (
 )
 
 var pasteables map[string]string
-var copyPasteRegex = regexp.MustCompile(`copy .+ \{`)
+var copyPasteRegex = regexp.MustCompile(`(copy )?([\W_]+)\{`)
 
-func parseCopyPastes() {
-	if !copyPasteRegex.MatchString(contents) {
+func handleCopyPastes() {
+	var matches = copyPasteRegex.FindAllStringSubmatch(contents, -1)
+	if len(matches) == 0 {
 		return
 	}
 
+	parseCopyPastes()
+
+	if args.Using("debug") {
+		printPasteablesDebug()
+	}
+}
+
+func parseCopyPastes() {
 	pasteables = make(map[string]string)
 	for char != -1 {
 		switch {
@@ -37,10 +46,6 @@ func parseCopyPastes() {
 	}
 
 	resetParse()
-
-	if args.Using("debug") {
-		printPasteablesDebug()
-	}
 }
 
 func collectCopy() {

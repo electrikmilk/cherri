@@ -25,29 +25,14 @@ type customAction struct {
 // customActions is a map of all the custom actions that have been defined.
 var customActions map[string]*customAction
 
-// parseCustomActions parses defined actions and collects them.
-func parseCustomActions() {
+// handleCustomActions parses defined actions and checks their usage.
+func handleCustomActions() {
 	if !regexp.MustCompile(`action (.*?)\((.*?)\)`).MatchString(contents) {
 		return
 	}
-	customActions = make(map[string]*customAction)
-
-	for char != -1 {
-		switch {
-		case isChar('/'):
-			collectComment()
-		case lineCharIdx == 0 && tokenAhead(Action):
-			advance()
-			collectActionDefinition()
-			continue
-		}
-		advance()
-	}
-
-	resetParse()
+	parseCustomActions()
 
 	checkCustomActionUsage(contents)
-
 	for _, action := range customActions {
 		if strings.ContainsAny(action.body, "()") {
 			checkCustomActionUsage(action.body)
@@ -63,6 +48,23 @@ func parseCustomActions() {
 		printCustomActionsDebug()
 		fmt.Println(contents)
 	}
+}
+
+func parseCustomActions() {
+	customActions = make(map[string]*customAction)
+	for char != -1 {
+		switch {
+		case isChar('/'):
+			collectComment()
+		case lineCharIdx == 0 && tokenAhead(Action):
+			advance()
+			collectActionDefinition()
+			continue
+		}
+		advance()
+	}
+
+	resetParse()
 }
 
 func isCustomActionsUsed() bool {
@@ -145,15 +147,17 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 }
 
 func checkCustomActionUsage(content string) {
-	var actionUsageRegex = regexp.MustCompile(`(action )?([a-zA-Z0-9]+)\(`)
+	var actionUsageRegex = regexp.MustCompile(`([\W_]+)\(`)
 	var matches = actionUsageRegex.FindAllStringSubmatch(content, -1)
 	if len(matches) == 0 {
 		return
 	}
 	for _, match := range matches {
-		var ref = strings.TrimSpace(match[2])
-		if _, found := customActions[ref]; found {
-			customActions[ref].used = true
+		var ref = strings.TrimSpace(match[1])
+		if customAction, found := customActions[ref]; found {
+			if !customAction.used {
+				customActions[ref].used = true
+			}
 		}
 	}
 }

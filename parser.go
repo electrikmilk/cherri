@@ -91,8 +91,8 @@ func preParse() {
 		handleIncludes,
 	)
 
-	parseCopyPastes()
-	parseCustomActions()
+	handleCopyPastes()
+	handleCustomActions()
 
 	writeProcessed()
 
