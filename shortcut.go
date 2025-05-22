@@ -593,23 +593,6 @@ func collectInlineVariables(str *string) (noVarString string) {
 	return
 }
 
-func convertDataTypeToTokenType(dataType dataType) tokenType {
-	switch dataType {
-	case Text:
-		return String
-	case Number:
-		return Integer
-	case Array:
-		return Arr
-	case Dictionary:
-		return Dict
-	case Boolean:
-		return Bool
-	default:
-		return ""
-	}
-}
-
 func argumentValue(args []actionArgument, idx int) any {
 	var actionParameter parameterDefinition
 	if len(currentAction.parameters) <= idx {
