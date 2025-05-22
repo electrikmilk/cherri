@@ -887,7 +887,6 @@ func decompValueObject(value map[string]interface{}) string {
 		}
 		break
 	case globals[ShortcutInput].variableType:
-		hasShortcutInputVariables = true
 		return ShortcutInput
 	}
 
@@ -955,7 +954,6 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 		}
 		sanitizeIdentifier(&variableName)
 		if variableName == "" && attachment.Type == globals[ShortcutInput].variableType {
-			hasShortcutInputVariables = true
 			variableName = ShortcutInput
 		}
 		if attachment.Type != "Variable" {
