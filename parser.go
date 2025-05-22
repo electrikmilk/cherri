@@ -526,6 +526,10 @@ func collectVariable(constant bool) {
 		advance()
 
 		collectVariableValue(constant, &valueType, &value)
+
+		if valueType == Variable && value.(varValue).value == "Ask" {
+			parserError("Ask global cannot be used as a variable value.")
+		}
 	case tokenAhead(Colon):
 		if constant {
 			parserError("Constants cannot be initialized without a value")
