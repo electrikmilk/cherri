@@ -23,6 +23,7 @@ type varValue struct {
 	coerce       string
 	constant     bool
 	repeatItem   bool
+	prompt       string
 }
 
 var globals = map[string]varValue{
