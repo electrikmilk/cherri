@@ -23,6 +23,7 @@ import (
 const (
 	UUID          = "UUID"
 	ShortcutInput = "ShortcutInput"
+	Ask           = "Ask"
 )
 
 var tabLevel int
@@ -886,6 +887,12 @@ func decompValueObject(value map[string]interface{}) string {
 			}
 		}
 		break
+	case "Ask":
+		if value["Prompt"] == nil {
+			return Ask
+		}
+
+		return fmt.Sprintf("Ask: \"%s\"", value["Prompt"])
 	case globals[ShortcutInput].variableType:
 		return ShortcutInput
 	}
@@ -1130,6 +1137,9 @@ func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actio
 
 		switch param.validType {
 		case Integer:
+			if startsWith(Ask, argValue) {
+				break
+			}
 			argValue = strings.Trim(argValue, "\"")
 		}
 

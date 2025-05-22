@@ -61,6 +61,7 @@ type Value struct {
 	AttachmentsByRange          map[string]Value
 	String                      string
 	Aggrandizements             []Aggrandizement
+	Prompt                      string
 }
 
 type Aggrandizement struct {
@@ -375,7 +376,7 @@ func inputValue(name string, varUUID string) map[string]any {
 func variableValue(variable varValue) map[string]any {
 	var identifier = variable.value.(string)
 	var variableReference varValue
-	var aggrandizements []map[string]any
+	var aggrandizements []Aggrandizement
 	if global, found := globals[identifier]; found {
 		isInputVariable(identifier)
 		variable.variableType = global.variableType
@@ -390,23 +391,23 @@ func variableValue(variable varValue) map[string]any {
 			refValueType = variableReference.valueType
 		}
 		if refValueType == Dict {
-			aggrandizements = append(aggrandizements, map[string]any{
-				"Type":          "WFDictionaryValueVariableAggrandizement",
-				"DictionaryKey": variable.getAs,
+			aggrandizements = append(aggrandizements, Aggrandizement{
+				Type:          "WFDictionaryValueVariableAggrandizement",
+				DictionaryKey: variable.getAs,
 			})
 		} else {
-			aggrandizements = append(aggrandizements, map[string]any{
-				"PropertyUserInfo": 0,
-				"Type":             "WFPropertyVariableAggrandizement",
-				"PropertyName":     variable.getAs,
+			aggrandizements = append(aggrandizements, Aggrandizement{
+				PropertyUserInfo: 0,
+				Type:             "WFPropertyVariableAggrandizement",
+				PropertyName:     variable.getAs,
 			})
 		}
 	}
 	if variable.coerce != "" {
 		if contentItem, found := contentItems[variable.coerce]; found {
-			aggrandizements = append(aggrandizements, map[string]any{
-				"Type":              "WFCoercionVariableAggrandizement",
-				"CoercionItemClass": contentItem,
+			aggrandizements = append(aggrandizements, Aggrandizement{
+				Type:              "WFCoercionVariableAggrandizement",
+				CoercionItemClass: contentItem,
 			})
 		}
 	}
@@ -414,22 +415,25 @@ func variableValue(variable varValue) map[string]any {
 	if variable.variableType != "" {
 		varType = variable.variableType
 	}
-	var varValue map[string]any
+	var varValue Value
 	if variable.constant {
 		var varUUID = uuids[identifier]
-		varValue = map[string]any{
-			"OutputName": identifier,
-			"OutputUUID": varUUID,
-			"Type":       "ActionOutput",
+		varValue = Value{
+			OutputName: identifier,
+			OutputUUID: varUUID,
+			Type:       "ActionOutput",
 		}
 	} else {
-		varValue = map[string]any{
-			"VariableName": identifier,
-			"Type":         varType,
+		varValue = Value{
+			VariableName: identifier,
+			Type:         varType,
+		}
+		if varType == Ask && variable.prompt != "" {
+			varValue.Prompt = variable.prompt
 		}
 	}
 	if len(aggrandizements) > 0 {
-		varValue["Aggrandizements"] = aggrandizements
+		varValue.Aggrandizements = aggrandizements
 	}
 
 	return map[string]any{

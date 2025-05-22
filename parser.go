@@ -351,18 +351,23 @@ func checkInlineVars(value *string) {
 			continue
 		}
 		var identifier = match[1]
+
+		fmt.Println(startsWith(Ask, identifier), identifier)
+		if startsWith(Ask, identifier) {
+			identifier = Ask
+		}
+
 		if !validReference(identifier) {
-			parserError(fmt.Sprintf("Undefined reference '%s'", identifier))
+			parserError(fmt.Sprintf("Undefined inline variable reference '%s'", identifier))
 		}
 	}
 }
 
 func collectReference(valueType *tokenType, value *any, until *rune) {
-	var identifier strings.Builder
-	identifier.WriteString(collectIdentifier())
-	var reference = identifier.String()
+	var reference = collectIdentifier()
 	var getAs string
 	var coerce string
+	var prompt string
 
 	if q, found := questions[reference]; found {
 		if q.used {
@@ -379,6 +384,16 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 
 	if !validReference(reference) {
 		parserError(fmt.Sprintf("Undefined reference '%s'", reference))
+	}
+
+	if reference == "Ask" && char == ':' {
+		advance()
+		skipWhitespace()
+		if char != '"' {
+			parserError(fmt.Sprintf("Expected prompt string, got: %c", char))
+		}
+		advance()
+		prompt = collectString()
 	}
 
 	if char == '[' {
@@ -406,6 +421,7 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		value:        reference,
 		coerce:       coerce,
 		getAs:        getAs,
+		prompt:       prompt,
 	}
 }
 

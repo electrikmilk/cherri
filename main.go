@@ -180,14 +180,24 @@ func capitalize(s string) string {
 
 // startsWith determines if the beginning characters of `substr` match `s`.
 func startsWith(s string, substr string) bool {
-	var stringChars = []rune(s)
 	var subStringChars = []rune(substr)
+	var stringChars = []rune(s)
+	var stringSize = len(s)
+	var start string
 	for i, char := range subStringChars {
+		if stringSize < i+1 {
+			break
+		}
 		if char != stringChars[i] {
+			if len(start) > 0 {
+				break
+			}
 			return false
 		}
+		start = fmt.Sprintf("%s%c", start, char)
 	}
-	return true
+
+	return start == s
 }
 
 func lineReport(label string) {
