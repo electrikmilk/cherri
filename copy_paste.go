@@ -69,6 +69,9 @@ func collectCopy() {
 
 func pasteCopy() {
 	var identifier = collectIdentifier()
+	if isEOL() || char == -1 {
+		reverse()
+	}
 	if contents, found := pasteables[identifier]; found {
 		lines[lineIdx] = contents
 	} else {
