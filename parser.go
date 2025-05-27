@@ -331,7 +331,7 @@ func collectActionValue(valueType *tokenType, value *any) {
 	var identifier = collectIdentifier()
 
 	if _, found := customActions[identifier]; found {
-		*value = handleCustomActionRef(&identifier)
+		*value = makeCustomActionRef(&identifier)
 		return
 	}
 
@@ -1345,7 +1345,7 @@ func collectActionCall() {
 			typeof:    Action,
 			ident:     "runSelf",
 			valueType: Action,
-			value:     handleCustomActionRef(&identifier),
+			value:     makeCustomActionRef(&identifier),
 		})
 		actionIndex++
 		return

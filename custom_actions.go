@@ -5,7 +5,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -233,7 +232,7 @@ func generateCustomActionHeader() string {
 	return customActionsHeader.String()
 }
 
-func handleCustomActionRef(identifier *string) action {
+func makeCustomActionRef(identifier *string) action {
 	var customAction = customActions[*identifier]
 
 	var arguments []actionArgument
@@ -285,17 +284,14 @@ func handleCustomActionRef(identifier *string) action {
 	}
 }
 
-func makeCustomActionCall(identifier *string, arguments *[]actionArgument) (customActionCall interface{}) {
-	var customActionCallJSON strings.Builder
-	customActionCallJSON.WriteString("{\"cherri_functions\": 1,\"function\": \"")
-	customActionCallJSON.WriteString(*identifier)
-	customActionCallJSON.WriteString("\",\"arguments\": [")
-	if len(*arguments) > 0 {
-		for i, argument := range *arguments {
+func makeCustomActionCall(identifier *string, arguments *[]actionArgument) map[string]any {
+	var argumentValues []any
+	if len(*arguments) != 0 {
+		for _, argument := range *arguments {
 			var argumentValue = fmt.Sprintf("%v", argument.value)
 			switch argument.valueType {
 			case String:
-				argumentValue = fmt.Sprintf("\"%s\"", argumentValue)
+				argumentValues = append(argumentValues, fmt.Sprintf("\"%s\"", argumentValue))
 			case Variable:
 				var identifier = argument.value.(varValue).value.(string)
 				var variableValue, found = getVariableValue(identifier)
@@ -303,38 +299,29 @@ func makeCustomActionCall(identifier *string, arguments *[]actionArgument) (cust
 					parserError(fmt.Sprintf("Undefined reference '%s'", argumentValue))
 				}
 				if variableValue.valueType == Arr {
-					var jsonBytes, jsonErr = json.Marshal(fmt.Sprintf("{%s}", identifier))
-					handle(jsonErr)
-					argumentValue = fmt.Sprintf("{\"array\":%s}", string(jsonBytes))
+					var wrappedArray = map[string]any{"array": fmt.Sprintf("{%s}", identifier)}
+					argumentValues = append(argumentValues, wrappedArray)
 				} else {
-					argumentValue = fmt.Sprintf("\"{%s}\"", identifier)
+					argumentValues = append(argumentValues, fmt.Sprintf("\"{%s}\"", identifier))
 				}
 			case Arr:
-				var jsonBytes, jsonErr = json.Marshal(argument.value)
-				handle(jsonErr)
-				argumentValue = fmt.Sprintf("{\"array\":%s}", string(jsonBytes))
+				var wrappedArray = map[string]any{"array": argument.value}
+				argumentValues = append(argumentValues, wrappedArray)
 			case Dict:
-				var jsonBytes, jsonErr = json.Marshal(argument.value)
-				handle(jsonErr)
-				argumentValue = string(jsonBytes)
-			}
-			customActionCallJSON.WriteString(argumentValue)
-
-			if len(*arguments)-1 != i {
-				customActionCallJSON.WriteString(", ")
+				argumentValues = append(argumentValues, argument.value)
+			default:
+				argumentValues = append(argumentValues, argumentValue)
 			}
 		}
 	}
-	customActionCallJSON.WriteString("]}")
 
-	if err := json.Unmarshal([]byte(customActionCallJSON.String()), &customActionCall); err != nil {
-		if args.Using("debug") {
-			fmt.Println(customActionCallJSON.String())
-		}
-		parserError(fmt.Sprintf("Custom action JSON error: %s", err))
+	var customActionCall = map[string]any{
+		"cherri_functions": 1,
+		"function":         *identifier,
+		"arguments":        argumentValues,
 	}
 
-	return
+	return customActionCall
 }
 
 func printCustomActionsDebug() {
