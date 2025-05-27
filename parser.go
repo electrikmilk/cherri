@@ -457,11 +457,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 
 	var valueType tokenType
 	var value any
-	if strings.Contains(lookAheadUntil('\n'), ",") {
-		collectValue(&valueType, &value, ',')
-	} else {
-		collectValue(&valueType, &value, ')')
-	}
+	collectValue(&valueType, &value, endOfNextArgument())
 
 	skipWhitespace()
 
@@ -471,6 +467,14 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	}
 	if !param.infinite && (valueType != Nil && value != nil) {
 		checkArg(param, &argument)
+	}
+	return
+}
+
+func endOfNextArgument() (until rune) {
+	until = ')'
+	if strings.Contains(lookAheadUntil(')'), ",") {
+		until = ','
 	}
 	return
 }

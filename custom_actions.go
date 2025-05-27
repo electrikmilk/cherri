@@ -150,11 +150,7 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			skipWhitespace()
 
 			var defaultValueType tokenType
-			var until = ')'
-			if strings.Contains(lookAheadUntil(')'), ",") {
-				until = ','
-			}
-			collectValue(&defaultValueType, &defaultValue, until)
+			collectValue(&defaultValueType, &defaultValue, endOfNextArgument())
 		case ',':
 			advance()
 		}
