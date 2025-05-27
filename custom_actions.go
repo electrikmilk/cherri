@@ -13,7 +13,7 @@ import (
 	"github.com/electrikmilk/args-parser"
 )
 
-var usedCustomActions bool
+var usingCustomActions bool
 
 // customAction contains the collected declaration of a custom action.
 type customAction struct {
@@ -39,9 +39,12 @@ func handleCustomActions() {
 		}
 	}
 
-	usedCustomActions = isCustomActionsUsed()
-	if usedCustomActions {
-		makeCustomActionsHeader()
+	usingCustomActions = isUsingCustomActions()
+	if usingCustomActions {
+		var customActionsHeader = generateCustomActionHeader()
+		lines = append([]string{customActionsHeader}, lines...)
+
+		resetParse()
 	}
 
 	if args.Using("debug") {
@@ -67,7 +70,7 @@ func parseCustomActions() {
 	resetParse()
 }
 
-func isCustomActionsUsed() bool {
+func isUsingCustomActions() bool {
 	for _, action := range customActions {
 		if action.used {
 			hasShortcutInputVariables = true
@@ -162,7 +165,7 @@ func checkCustomActionUsage(content string) {
 	}
 }
 
-func makeCustomActionsHeader() {
+func generateCustomActionHeader() string {
 	var outputActionRegex = regexp.MustCompile(`(?:must)?[o|O]utput(?:OrClipboard)?\((.*?)\)`)
 	var customActionsHeader strings.Builder
 	customActionsHeader.WriteString("if ShortcutInput {\n")
@@ -227,9 +230,7 @@ func makeCustomActionsHeader() {
 	customActionsHeader.WriteString("            output(nil)\n")
 	customActionsHeader.WriteString("        }\n    }\n}")
 
-	lines = append([]string{customActionsHeader.String()}, lines...)
-
-	resetParse()
+	return customActionsHeader.String()
 }
 
 func handleCustomActionRef(identifier *string) action {

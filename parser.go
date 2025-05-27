@@ -1354,7 +1354,7 @@ func collectActionCall() {
 
 	var value = collectAction(&identifier)
 
-	if identifier == "comment" && usedCustomActions && isFirstCommentAction {
+	if identifier == "comment" && usingCustomActions && isFirstCommentAction {
 		isFirstCommentAction = false
 		tokens = append([]token{{
 			typeof:    Action,
