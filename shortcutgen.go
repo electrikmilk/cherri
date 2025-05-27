@@ -125,7 +125,7 @@ func generateActions() {
 }
 
 func makeCommentAction(comment string) {
-	buildStdAction("comment", map[string]any{
+	addStdAction("comment", &map[string]any{
 		"WFCommentActionText": comment,
 	})
 }
@@ -159,11 +159,11 @@ func makeVariableAction(t *token) {
 
 	if t.typeof != Variable {
 		if variables[t.ident].valueType != Arr {
-			buildStdAction("setvariable", setVariableParams)
+			addStdAction("setvariable", &setVariableParams)
 			return
 		}
 
-		buildStdAction("appendvariable", setVariableParams)
+		addStdAction("appendvariable", &setVariableParams)
 		return
 	}
 
@@ -172,7 +172,7 @@ func makeVariableAction(t *token) {
 			return
 		}
 	}
-	buildStdAction("setvariable", setVariableParams)
+	addStdAction("setvariable", &setVariableParams)
 
 	if t.valueType == Arr {
 		makeArrayVariable(t)
@@ -232,7 +232,7 @@ func makeArrayVariable(t *token) {
 			value:     value,
 		}, &itemIdent, &UUID)
 
-		buildStdAction("appendvariable", map[string]any{
+		addStdAction("appendvariable", &map[string]any{
 			"WFInput":        inputValue(itemIdent, UUID),
 			"WFVariableName": t.ident,
 		})
@@ -276,7 +276,7 @@ func makeConditionalAction(t *token) {
 		conditionalParams["WFControlFlowMode"] = endStatement
 	}
 
-	buildStdAction("conditional", conditionalParams)
+	addStdAction("conditional", &conditionalParams)
 }
 
 func makeConditions(wfConditions *WFConditions) map[string]any {
@@ -342,11 +342,11 @@ func makeMenuAction(t *token) {
 		menuParams["WFMenuItems"] = menuItems
 	}
 
-	buildStdAction("choosefrommenu", menuParams)
+	addStdAction("choosefrommenu", &menuParams)
 }
 
 func makeMenuItemAction(t *token) {
-	buildStdAction("choosefrommenu", map[string]any{
+	addStdAction("choosefrommenu", &map[string]any{
 		"GroupingIdentifier": t.ident,
 		"WFControlFlowMode":  statementPart,
 		"WFMenuItemAttributedTitle": paramValue(actionArgument{
@@ -377,7 +377,7 @@ func makeRepeatAction(t *token) {
 		}, Integer)
 	}
 
-	buildStdAction("repeat.count", repeatParams)
+	addStdAction("repeat.count", &repeatParams)
 }
 
 func makeRepeatEachAction(t *token) {
@@ -397,7 +397,7 @@ func makeRepeatEachAction(t *token) {
 		}, Integer)
 	}
 
-	buildStdAction("repeat.each", repeatEachParams)
+	addStdAction("repeat.each", &repeatEachParams)
 }
 
 type WFQuestion struct {

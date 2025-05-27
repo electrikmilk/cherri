@@ -162,17 +162,17 @@ func actionParameters(arguments []actionArgument) map[string]any {
 	return params
 }
 
-// buildStdAction is an alias of addAction that simply prepends the shortcuts bundle identifier to ident.
-func buildStdAction(ident string, params map[string]any) {
+// addStdAction is an alias of addAction that simply prepends the shortcuts bundle identifier to ident.
+func addStdAction(ident string, params *map[string]any) {
 	addAction(fmt.Sprintf("is.workflow.actions.%s", ident), params)
 }
 
 // addAction adds an action to the shortcut.
-func addAction(identifier string, params map[string]any) {
+func addAction(identifier string, params *map[string]any) {
 	shortcut.WFWorkflowActions = append(shortcut.WFWorkflowActions,
 		ShortcutAction{
 			WFWorkflowActionIdentifier: identifier,
-			WFWorkflowActionParameters: params,
+			WFWorkflowActionParameters: *params,
 		},
 	)
 }
