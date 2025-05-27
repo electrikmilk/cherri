@@ -6442,7 +6442,7 @@ func decompAppAction(key string, action *ShortcutAction) (arguments []string) {
 				arguments = append(arguments, fmt.Sprintf("\"%s\"", bundleIdentifer))
 			}
 		default:
-			exit("Unknown app value type")
+			decompError("Unknown app value type", action)
 		}
 	}
 
