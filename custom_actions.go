@@ -268,7 +268,7 @@ func generateCustomActionHeader() string {
 	return customActionsHeader.String()
 }
 
-func makeCustomActionRef(identifier *string) action {
+func makeCustomActionRef(identifier *string) any {
 	var customAction = customActions[*identifier]
 	setCurrentAction(*identifier, &customAction.definition)
 
@@ -284,21 +284,73 @@ func makeCustomActionRef(identifier *string) action {
 
 	var variableIdentifier = fmt.Sprintf("_%s_cherri_call", *identifier)
 	var customActionCall = makeCustomActionCall(identifier, &arguments)
-	insertVariable(variableIdentifier, Dict, customActionCall)
+	insertReference(variableIdentifier, Dict, customActionCall, true)
 
 	advanceUntil('\n')
 
-	return action{
+	var runSelfAction = action{
 		ident: "runSelf",
 		args: []actionArgument{
 			{
 				valueType: Variable,
 				value: varValue{
 					valueType: Variable,
-					value:     fmt.Sprintf("_%s_cherri_call", *identifier),
+					value:     variableIdentifier,
 				},
 			},
 		},
+	}
+
+	if customAction.definition.outputType != "" {
+		var outputIdentifier = fmt.Sprintf("_%s_cherri_call_output", *identifier)
+		insertReference(outputIdentifier, Action, runSelfAction, true)
+
+		return coerceOutputValue(outputIdentifier, customAction.definition.outputType, runSelfAction)
+	}
+
+	return runSelfAction
+}
+
+func coerceOutputValue(value any, valueType tokenType, defaultValue any) any {
+	switch valueType {
+	case String:
+		return action{
+			ident: "text",
+			args: []actionArgument{
+				{
+					valueType: String,
+					value:     fmt.Sprintf("{%s}", value),
+				},
+			},
+		}
+	case Bool, Integer:
+		return action{
+			ident: "number",
+			args: []actionArgument{
+				{
+					valueType: Variable,
+					value: varValue{
+						valueType: Variable,
+						value:     value,
+					},
+				},
+			},
+		}
+	case Dict:
+		return action{
+			ident: "getDictionary",
+			args: []actionArgument{
+				{
+					valueType: Variable,
+					value: varValue{
+						valueType: Variable,
+						value:     value,
+					},
+				},
+			},
+		}
+	default:
+		return defaultValue
 	}
 }
 

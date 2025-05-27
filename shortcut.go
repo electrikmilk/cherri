@@ -193,9 +193,9 @@ func makeVariableValueAction(token *token, customOutputName *string, varUUID *st
 	makeVariableValue(&reference, token.valueType, &token.value)
 }
 
-// insertVariable adds a variable type parser token and adds the variable to the variables map.
-// Does the equivalent of when we parse a variable from a file, but with the provided identifier, type and value.
-func insertVariable(identifier string, valueType tokenType, value any) {
+// insertReference adds a variable type parser token and adds the variable to the variables map.
+// Does the equivalent of when we parse a variable from a file, but with the provided identifier, type, value, and if the variable is a constant.
+func insertReference(identifier string, valueType tokenType, value any, constant bool) {
 	tokens = append(tokens, token{
 		typeof:    Variable,
 		ident:     identifier,
@@ -205,9 +205,9 @@ func insertVariable(identifier string, valueType tokenType, value any) {
 
 	variables[identifier] = varValue{
 		variableType: "Variable",
-		valueType:    valueType,
+		valueType:    Variable,
 		value:        value,
-		constant:     true,
+		constant:     constant,
 	}
 }
 
