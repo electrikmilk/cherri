@@ -230,7 +230,7 @@ func generateCustomActionHeader() string {
 				customActionsHeader.WriteString(fmt.Sprintf("                for %s_array_item in %s_array {\n", argumentReference, argumentReference))
 				customActionsHeader.WriteString(fmt.Sprintf("                    @%s += %s_array_item\n                }", param.name, argumentReference))
 			default:
-				customActionsHeader.WriteString(argumentReference)
+				customActionsHeader.WriteString(fmt.Sprintf("@%s = %s\n", param.name, argumentReference))
 			}
 
 			customActionsHeader.WriteRune('\n')

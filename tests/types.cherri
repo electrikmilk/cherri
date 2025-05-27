@@ -3,5 +3,5 @@
 @boolean: bool
 @dict: dictionary
 @collection: array
-@ref: var
+@ref: variable
 @real: float

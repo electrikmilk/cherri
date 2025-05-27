@@ -73,7 +73,6 @@ const (
 	Expression   tokenType = "expression"
 	Variable     tokenType = "variable"
 	Conditional  tokenType = "conditional"
-	VariableType tokenType = "var"
 )
 
 /* Operators */
