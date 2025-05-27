@@ -174,7 +174,7 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 }
 
 func checkCustomActionUsage(content string) {
-	var actionUsageRegex = regexp.MustCompile(`([\W_]+)\(`)
+	var actionUsageRegex = regexp.MustCompile(`([a-zA-Z0-9]+)\(`)
 	var matches = actionUsageRegex.FindAllStringSubmatch(content, -1)
 	if len(matches) == 0 {
 		return
