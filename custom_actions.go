@@ -224,7 +224,7 @@ func generateCustomActionHeader() string {
 			switch param.validType {
 			case String:
 				customActionsHeader.WriteString(fmt.Sprintf("@%s = \"{%s}\"\n", param.name, argumentReference))
-			case Integer, Bool:
+			case Integer, Float, Bool:
 				customActionsHeader.WriteString(fmt.Sprintf("@%s = number(%s)\n", param.name, argumentReference))
 			case Dict:
 				customActionsHeader.WriteString(fmt.Sprintf("@%s = getDictionary(%s)\n", param.name, argumentReference))
