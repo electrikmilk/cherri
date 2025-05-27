@@ -276,22 +276,9 @@ func makeCustomActionRef(identifier *string) action {
 		}
 	}
 
-	var customActionCall = makeCustomActionCall(identifier, &arguments)
-
 	var variableIdentifier = fmt.Sprintf("_%s_cherri_call", *identifier)
-	tokens = append(tokens, token{
-		typeof:    Variable,
-		ident:     variableIdentifier,
-		valueType: Dict,
-		value:     customActionCall,
-	})
-
-	variables[variableIdentifier] = varValue{
-		variableType: "Variable",
-		valueType:    Dict,
-		value:        customActionCall,
-		constant:     true,
-	}
+	var customActionCall = makeCustomActionCall(identifier, &arguments)
+	insertVariable(variableIdentifier, Dict, customActionCall)
 
 	advanceUntil('\n')
 

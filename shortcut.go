@@ -193,6 +193,22 @@ func makeVariableValueAction(token *token, customOutputName *string, varUUID *st
 	makeVariableValue(&reference, token.valueType, &token.value)
 }
 
+func insertVariable(identifier string, valueType tokenType, value any) {
+	tokens = append(tokens, token{
+		typeof:    Variable,
+		ident:     identifier,
+		valueType: valueType,
+		value:     value,
+	})
+
+	variables[identifier] = varValue{
+		variableType: "Variable",
+		valueType:    valueType,
+		value:        value,
+		constant:     true,
+	}
+}
+
 func makeVariableValue(reference *map[string]any, valueType tokenType, value *any) {
 	switch valueType {
 	case Integer, Float:
