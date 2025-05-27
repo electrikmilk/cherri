@@ -151,6 +151,9 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 
 			var defaultValueType tokenType
 			collectValue(&defaultValueType, &defaultValue, endOfNextArgument())
+			if defaultValueType != valueType {
+				parserError(fmt.Sprintf("Invalid default value of type '%s' for '%s' type argument '%s'", defaultValueType, valueType, identifier))
+			}
 		case ',':
 			advance()
 		}
@@ -255,21 +258,16 @@ func generateCustomActionHeader() string {
 
 func makeCustomActionRef(identifier *string) action {
 	var customAction = customActions[*identifier]
+	setCurrentAction(*identifier, &customAction.definition)
 
 	var arguments []actionArgument
 	var paramsSize = len(customAction.definition.parameters)
-	if paramsSize > 0 {
+	if paramsSize != 0 {
 		advance()
-		setCurrentAction(*identifier, &customAction.definition)
 		arguments = collectArguments()
 
-		if len(arguments) != paramsSize {
-			parserError(
-				fmt.Sprintf("Too few arguments\n\n%s",
-					generateActionDefinition(parameterDefinition{}, false, false),
-				),
-			)
-		}
+		currentArgumentsSize = len(arguments)
+		checkAction()
 	}
 
 	var variableIdentifier = fmt.Sprintf("_%s_cherri_call", *identifier)
