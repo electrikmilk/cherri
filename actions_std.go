@@ -3717,6 +3717,17 @@ var actions = map[string]*actionDefinition{
 		},
 		outputType: Integer,
 	},
+	"text": {
+		identifier: "gettext",
+		parameters: []parameterDefinition{
+			{
+				name:      "text",
+				validType: String,
+				key:       "WFTextActionText",
+			},
+		},
+		outputType: String,
+	},
 	"getObjectOfClass": {
 		identifier: "getclassaction",
 		parameters: []parameterDefinition{
