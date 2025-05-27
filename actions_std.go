@@ -6168,6 +6168,8 @@ var actions = map[string]*actionDefinition{
 	},
 }
 
+var singleAttachmentStringRegex = regexp.MustCompile(`^\{[a-zA-Z0-9]+}$`)
+
 func defineRawAction() {
 	actions["rawAction"] = &actionDefinition{
 		parameters: []parameterDefinition{
@@ -6191,9 +6193,16 @@ func defineRawAction() {
 
 			var params = getArgValue(args[1]).(map[string]interface{})
 			for key, value := range params {
-				if reflect.TypeOf(value).Kind() == reflect.String {
-					params[key] = attachmentValues(value.(string))
+				if reflect.TypeOf(value).Kind() != reflect.String {
+					continue
 				}
+				if singleAttachmentStringRegex.MatchString(value.(string)) {
+					params[key] = variableValue(varValue{
+						value: strings.Trim(value.(string), "{}"),
+					})
+					continue
+				}
+				params[key] = attachmentValues(value.(string))
 			}
 
 			return params
