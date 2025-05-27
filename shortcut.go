@@ -193,6 +193,8 @@ func makeVariableValueAction(token *token, customOutputName *string, varUUID *st
 	makeVariableValue(&reference, token.valueType, &token.value)
 }
 
+// insertVariable adds a variable type parser token and adds the variable to the variables map.
+// Does the equivalent of when we parse a variable from a file, but with the provided identifier, type and value.
 func insertVariable(identifier string, valueType tokenType, value any) {
 	tokens = append(tokens, token{
 		typeof:    Variable,
