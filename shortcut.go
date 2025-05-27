@@ -433,25 +433,21 @@ func variableValue(variable varValue) map[string]any {
 	if variable.variableType != "" {
 		varType = variable.variableType
 	}
-	var varValue Value
+	var varValue = make(map[string]any)
 	if variable.constant {
 		var varUUID = uuids[identifier]
-		varValue = Value{
-			OutputName: identifier,
-			OutputUUID: varUUID,
-			Type:       "ActionOutput",
-		}
+		varValue["OutputName"] = identifier
+		varValue["OutputUUID"] = varUUID
+		varValue["Type"] = "ActionOutput"
 	} else {
-		varValue = Value{
-			VariableName: identifier,
-			Type:         varType,
-		}
+		varValue["VariableName"] = identifier
+		varValue["Type"] = varType
 		if varType == Ask && variable.prompt != "" {
-			varValue.Prompt = variable.prompt
+			varValue["Prompt"] = variable.prompt
 		}
 	}
 	if len(aggrandizements) > 0 {
-		varValue.Aggrandizements = aggrandizements
+		varValue["Aggrandizements"] = aggrandizements
 	}
 
 	return map[string]any{
