@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -234,6 +235,17 @@ func generateCustomActionHeader() string {
 				customActionsHeader.WriteString(fmt.Sprintf("                    @%s += %s_array_item\n                }", param.name, argumentReference))
 			default:
 				customActionsHeader.WriteString(fmt.Sprintf("@%s = %s\n", param.name, argumentReference))
+			}
+
+			if param.defaultValue != nil {
+				var defaultValue = param.defaultValue
+				if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
+					defaultValue = fmt.Sprintf("\"%s\"", defaultValue)
+				}
+
+				customActionsHeader.WriteString(fmt.Sprintf("                if !%s {\n", argumentReference))
+				customActionsHeader.WriteString(fmt.Sprintf("                   @%s = %v\n", param.name, defaultValue))
+				customActionsHeader.WriteString("                }\n")
 			}
 
 			customActionsHeader.WriteRune('\n')
