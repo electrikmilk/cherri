@@ -6193,7 +6193,7 @@ func defineRawAction() {
 
 			var params = getArgValue(args[1]).(map[string]interface{})
 			for key, value := range params {
-				if reflect.TypeOf(value).Kind() != reflect.String {
+				if reflect.TypeOf(value).Kind() != reflect.String || !strings.ContainsAny(value.(string), "{}") {
 					continue
 				}
 				if useAttachmentAsVariableValueRegex.MatchString(value.(string)) {
