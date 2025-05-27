@@ -6202,7 +6202,7 @@ func defineRawAction() {
 					})
 					continue
 				}
-				params[key] = attachmentValues(value.(string))
+				params[key] = attachmentValues(strings.TrimSpace(value.(string)))
 			}
 
 			return params
