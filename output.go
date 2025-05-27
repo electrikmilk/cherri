@@ -41,7 +41,7 @@ func createShortcut() {
 		switch {
 		case args.Using("signing-server"):
 			useSigningService(&SigningService{
-				name: "Custom Signing Server",
+				name: "Custom Signing Server URL",
 				url:  args.Value("signing-server"),
 			})
 		case args.Using("hubsign"):
