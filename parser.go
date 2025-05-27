@@ -554,7 +554,7 @@ func collectVariable(constant bool) {
 			parserError("Constants cannot be initialized without a value")
 		}
 		skipWhitespace()
-		collectType(&valueType, &value)
+		collectType(&valueType, &value, '\n')
 	case constant:
 		parserError("Constants must be initialized with a value.")
 	}
@@ -579,7 +579,7 @@ func collectVariable(constant bool) {
 	}
 }
 
-func collectType(valueType *tokenType, value *any) {
+func collectType(valueType *tokenType, value *any, until rune) {
 	switch {
 	case tokenAhead(String):
 		*valueType = String
@@ -601,7 +601,7 @@ func collectType(valueType *tokenType, value *any) {
 	case tokenAhead(VariableType):
 		*valueType = Variable
 	default:
-		parserError(fmt.Sprintf("Unknown type '%s'\n\nAvailable types: \n- text\n- number\n- bool\n- array\n- dictionary\n- var", lookAheadUntil('\n')))
+		parserError(fmt.Sprintf("Unknown type '%s'\n\nAvailable types: \n- text\n- number\n- bool\n- array\n- dictionary\n- var", lookAheadUntil(until)))
 	}
 }
 

@@ -103,7 +103,7 @@ func collectActionDefinition() {
 	if tokenAhead(Colon) {
 		skipWhitespace()
 		var value any
-		collectType(&outputType, &value)
+		collectType(&outputType, &value, '{')
 	}
 
 	advanceUntilExpect('{', 3)
@@ -128,7 +128,7 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 	for char != ')' {
 		var valueType tokenType
 		var value any
-		collectType(&valueType, &value)
+		collectType(&valueType, &value, ' ')
 		value = nil
 
 		skipWhitespace()
