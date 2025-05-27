@@ -143,19 +143,19 @@ func actionParameters(arguments []actionArgument) map[string]any {
 		if argumentsSize == 0 {
 			return params
 		}
-		for i, a := range currentAction.parameters {
+		for i, param := range currentAction.parameters {
 			if argumentsSize <= i {
 				return params
 			}
-			if arguments[i].valueType == Nil || a.key == "" {
+			if arguments[i].valueType == Nil || param.key == "" {
 				continue
 			}
-			if a.validType == Variable {
-				params[a.key] = variableValue(arguments[i].value.(varValue))
+			if param.validType == Variable {
+				params[param.key] = variableValue(arguments[i].value.(varValue))
 				continue
 			}
 
-			params[a.key] = argumentValue(arguments, i)
+			params[param.key] = argumentValue(arguments, i)
 		}
 	}
 
