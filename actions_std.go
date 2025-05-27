@@ -6168,7 +6168,7 @@ var actions = map[string]*actionDefinition{
 	},
 }
 
-var singleAttachmentStringRegex = regexp.MustCompile(`^\{[a-zA-Z0-9]+}$`)
+var useAttachmentAsVariableValueRegex = regexp.MustCompile(`^\$\{[a-zA-Z0-9]+}$`)
 
 func defineRawAction() {
 	actions["rawAction"] = &actionDefinition{
@@ -6196,13 +6196,13 @@ func defineRawAction() {
 				if reflect.TypeOf(value).Kind() != reflect.String {
 					continue
 				}
-				if singleAttachmentStringRegex.MatchString(value.(string)) {
+				if useAttachmentAsVariableValueRegex.MatchString(value.(string)) {
 					params[key] = variableValue(varValue{
-						value: strings.Trim(value.(string), "{}"),
+						value: strings.Trim(value.(string), "${}"),
 					})
 					continue
 				}
-				params[key] = attachmentValues(strings.TrimSpace(value.(string)))
+				params[key] = attachmentValues(value.(string))
 			}
 
 			return params
