@@ -307,10 +307,8 @@ func makeCustomActionCall(identifier *string, arguments *[]actionArgument) map[s
 			case Arr:
 				var wrappedArray = map[string]any{"array": argument.value}
 				argumentValues = append(argumentValues, wrappedArray)
-			case Dict:
-				argumentValues = append(argumentValues, argument.value)
 			default:
-				argumentValues = append(argumentValues, argumentValue)
+				argumentValues = append(argumentValues, argument.value)
 			}
 		}
 	}
