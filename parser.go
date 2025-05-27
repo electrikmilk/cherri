@@ -352,7 +352,6 @@ func checkInlineVars(value *string) {
 		}
 		var identifier = match[1]
 
-		fmt.Println(startsWith(Ask, identifier), identifier)
 		if startsWith(Ask, identifier) {
 			identifier = Ask
 		}
