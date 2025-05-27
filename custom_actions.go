@@ -130,17 +130,42 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 		var value any
 		collectType(&valueType, &value)
 		value = nil
-		advance()
 
-		var identifier = collectIdentifier()
-		arguments = append(arguments, parameterDefinition{
-			name:      identifier,
-			validType: valueType,
-		})
+		skipWhitespace()
 
-		if char == ',' {
+		var optional bool
+		if char == '?' {
+			optional = true
 			advance()
 		}
+
+		var identifier = collectIdentifier()
+
+		skipWhitespace()
+
+		var defaultValue any
+		switch char {
+		case '=':
+			advance()
+			skipWhitespace()
+
+			var defaultValueType tokenType
+			var until = ')'
+			if strings.Contains(lookAheadUntil(')'), ",") {
+				until = ','
+			}
+			collectValue(&defaultValueType, &defaultValue, until)
+		case ',':
+			advance()
+		}
+
+		arguments = append(arguments, parameterDefinition{
+			name:         identifier,
+			validType:    valueType,
+			optional:     optional,
+			defaultValue: defaultValue,
+		})
+
 		skipWhitespace()
 	}
 	advance()

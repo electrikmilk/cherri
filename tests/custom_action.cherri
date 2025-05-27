@@ -27,3 +27,7 @@ action fibonacci(number n) {
 
 const output = fibonacci(7)
 show("{output}")
+
+action saveFileToDropbox(text path, bool ?overwrite = false): bool {
+    output("{true}")
+}
