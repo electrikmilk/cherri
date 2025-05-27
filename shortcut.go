@@ -229,26 +229,26 @@ func makeVariableValue(reference *map[string]any, valueType tokenType, value *an
 		setCurrentAction(action.ident, actions[action.ident])
 		makeAction(action.args, reference)
 	case Dict:
-		buildStdAction("dictionary", attachReferenceParams(&map[string]any{
+		buildStdAction("dictionary", attachReferenceToParams(&map[string]any{
 			"WFItems": makeDictionaryValue(value),
 		}, reference))
 	}
 }
 
 func makeIntValue(reference *map[string]any, value *any) {
-	buildStdAction("number", attachReferenceParams(&map[string]any{
+	buildStdAction("number", attachReferenceToParams(&map[string]any{
 		"WFNumberActionNumber": *value,
 	}, reference))
 }
 
 func makeStringValue(reference *map[string]any, value *any) {
-	buildStdAction("gettext", attachReferenceParams(&map[string]any{
+	buildStdAction("gettext", attachReferenceToParams(&map[string]any{
 		"WFTextActionText": attachmentValues(fmt.Sprintf("%s", *value)),
 	}, reference))
 }
 
 func makeRawStringValue(reference *map[string]any, value *any) {
-	buildStdAction("gettext", attachReferenceParams(&map[string]any{
+	buildStdAction("gettext", attachReferenceToParams(&map[string]any{
 		"WFTextActionText": fmt.Sprintf("%s", *value),
 	}, reference))
 }
@@ -259,7 +259,7 @@ func makeBoolValue(reference *map[string]any, value *any) {
 		boolValue = "1"
 	}
 
-	buildStdAction("number", attachReferenceParams(&map[string]any{
+	buildStdAction("number", attachReferenceToParams(&map[string]any{
 		"WFNumberActionNumber": boolValue,
 	}, reference))
 }
@@ -281,7 +281,7 @@ func makeExpressionValue(reference *map[string]any, value *any) {
 		wrapVariableReference(&operandOne)
 		wrapVariableReference(&operandTwo)
 
-		buildStdAction("math", attachReferenceParams(&map[string]any{
+		buildStdAction("math", attachReferenceToParams(&map[string]any{
 			"WFScientificMathOperation": attachmentValues(operation),
 			"WFMathOperation":           attachmentValues(operation),
 			"WFInput":                   attachmentValues(operandOne),
@@ -300,7 +300,7 @@ func makeExpressionValue(reference *map[string]any, value *any) {
 
 	expression = strings.Join(formattedExpression, " ")
 
-	buildStdAction("calculateexpression", attachReferenceParams(&map[string]any{
+	buildStdAction("calculateexpression", attachReferenceToParams(&map[string]any{
 		"Input": attachmentValues(expression),
 	}, reference))
 }
@@ -332,7 +332,7 @@ func variableValueModifier(token *token, reference *map[string]any) {
 		case DivideBy:
 			operation = "÷"
 		}
-		buildStdAction("math", attachReferenceParams(&map[string]any{
+		buildStdAction("math", attachReferenceToParams(&map[string]any{
 			"WFMathOperand": paramValue(actionArgument{
 				valueType: token.valueType,
 				value:     token.value,
@@ -347,7 +347,7 @@ func variableValueModifier(token *token, reference *map[string]any) {
 		var varInput = token.value.(string)
 		wrapVariableReference(&varInput)
 
-		buildStdAction("gettext", attachReferenceParams(&map[string]any{
+		buildStdAction("gettext", attachReferenceToParams(&map[string]any{
 			"WFTextActionText": paramValue(actionArgument{
 				valueType: String,
 				value:     fmt.Sprintf("{%s}%s", token.ident, varInput),
@@ -356,7 +356,7 @@ func variableValueModifier(token *token, reference *map[string]any) {
 	}
 }
 
-func attachReferenceParams(params *map[string]any, reference *map[string]any) map[string]any {
+func attachReferenceToParams(params *map[string]any, reference *map[string]any) map[string]any {
 	maps.Copy(*params, *reference)
 
 	return *params

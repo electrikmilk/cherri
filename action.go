@@ -103,7 +103,7 @@ func makeAction(arguments []actionArgument, reference *map[string]any) {
 	// Determine parameters
 	var params = actionParameters(arguments)
 	// Additionally add the output name and UUID of this action if provided
-	addAction(ident, attachReferenceParams(&params, reference))
+	addAction(ident, attachReferenceToParams(&params, reference))
 }
 
 // actionIdentifier determines the identifier of currentAction.
