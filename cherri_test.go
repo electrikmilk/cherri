@@ -143,4 +143,5 @@ func resetParser() {
 	menus = map[string][]varValue{}
 	uuids = map[string]string{}
 	customActions = map[string]*customAction{}
+	enumerations = map[string][]string{}
 }
