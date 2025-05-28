@@ -614,7 +614,16 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 		var valueType tokenType
 		var value any
 
-		collectType(&valueType, &value, ' ')
+		var enum []string
+		var ahead = lookAheadUntil(' ')
+		if enumerations[ahead] != nil {
+			var enumeration = collectUntil(' ')
+			enum = enumerations[enumeration]
+			valueType = String
+		} else {
+			collectType(&valueType, &value, ' ')
+		}
+
 		value = nil
 
 		skipWhitespace()
@@ -661,6 +670,7 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			validType:    valueType,
 			optional:     optional,
 			defaultValue: defaultValue,
+			enum:         enum,
 		})
 
 		skipWhitespace()
