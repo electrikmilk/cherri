@@ -87,6 +87,8 @@ type libraryDefinition struct {
 	make func(identifier string)
 }
 
+var enumerations map[string][]string
+
 var actionIndex int
 
 // setCurrentAction sets the current action identifier and definition for use between functions.

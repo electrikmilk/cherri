@@ -143,6 +143,10 @@ func printParsingDebug() {
 	fmt.Printf("iOS Version: %.1f\n", iosVersion)
 	fmt.Print("\n")
 
+	fmt.Println(ansi("## ENUMERATIONS ##", bold))
+	fmt.Println(enumerations)
+	fmt.Print("\n")
+
 	fmt.Println(ansi("## VARIABLES ##", bold))
 	printVariables()
 	fmt.Print("\n")
@@ -185,6 +189,8 @@ func parse() {
 		collectConditionals()
 	case tokenAhead(RightBrace):
 		collectEndStatement()
+	case tokenAhead(Enumeration):
+		collectEnumeration()
 	case strings.Contains(lookAheadUntil(' '), "("):
 		collectActionCall()
 	default:
@@ -422,6 +428,40 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		getAs:        getAs,
 		prompt:       prompt,
 	}
+}
+
+func collectEnumeration() {
+	advance()
+	if enumerations == nil {
+		enumerations = make(map[string][]string)
+	}
+
+	var identifier = collectIdentifier()
+
+	advanceUntilExpect('{', 3)
+	advance()
+	skipWhitespace()
+
+	if char != '\'' {
+		parserError(fmt.Sprintf("Expected enumeration raw string ('), got: %c", char))
+	}
+	advance()
+
+	var enumeration []string
+	for char != '}' && char != -1 {
+		var permutation = collectRawString()
+		enumeration = append(enumeration, permutation)
+		if char == ',' {
+			advance()
+		}
+		skipWhitespace()
+		if char == '\'' {
+			advance()
+		}
+	}
+
+	enumerations[identifier] = enumeration
+	advance()
 }
 
 func collectArguments() (arguments []actionArgument) {
