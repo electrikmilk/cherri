@@ -108,6 +108,9 @@ func generateActions() {
 			makeCommentAction(t.value.(string))
 		case Action:
 			var tokenAction = t.value.(action)
+			if actions[tokenAction.ident] == nil {
+				exit(fmt.Sprintf("Undefined action '%s'", tokenAction.ident))
+			}
 			setCurrentAction(tokenAction.ident, actions[tokenAction.ident])
 			makeAction(tokenAction.args, &map[string]any{})
 		case Repeat:
