@@ -669,6 +669,41 @@ func collectDefinition() {
 			var list = makeKeyList("Available versions:", versions, collectVersion)
 			parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
 		}
+	case tokenAhead(Action):
+		advance()
+		collectDefinedAction()
+	}
+}
+
+func collectDefinedAction() {
+	if char != '\'' {
+		parserError("Expected workflow action identifier raw string (').")
+	}
+	advance()
+
+	var workflowIdentifier = collectRawString()
+	var shortIdentifier string
+	var overrideIdentifier string
+	if len(strings.Split(workflowIdentifier, ".")) < 4 {
+		shortIdentifier = workflowIdentifier
+	} else {
+		overrideIdentifier = workflowIdentifier
+	}
+	advance()
+
+	var identifier, arguments, outputType = collectActionDefinition('\n')
+
+	actions[identifier] = &actionDefinition{
+		identifier:         shortIdentifier,
+		overrideIdentifier: overrideIdentifier,
+		parameters:         arguments,
+		outputType:         outputType,
+	}
+
+	if args.Using("debug") {
+		setCurrentAction(identifier, actions[identifier])
+		fmt.Println("\ndefined:", currentAction.appIdentifier, generateActionDefinition(parameterDefinition{}, true, true))
+		fmt.Print("\n")
 	}
 }
 
