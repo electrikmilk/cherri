@@ -9,7 +9,7 @@ Globals are case-sensitive
 @device = Device
 
 alert(Ask)
-wait(Ask: "How many seconds?")
+wait(Ask: 'How many seconds?')
 @prompt = "My name is {Ask}"
 
 // But you can also just inline a global in a string like other variables

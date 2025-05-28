@@ -395,10 +395,10 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		advance()
 		skipWhitespace()
 		if char != '"' {
-			parserError(fmt.Sprintf("Expected prompt string, got: %c", char))
+			parserError(fmt.Sprintf("Expected prompt raw string ('), got: %c", char))
 		}
 		advance()
-		prompt = collectString()
+		prompt = collectRawString()
 	}
 
 	if char == '[' {
