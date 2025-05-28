@@ -3,7 +3,7 @@ enum callType {
     'Video'
 }
 
-#define action 'com.apple.facetime.facetimecall' callOnFaceTime(
+#define action 'com.apple.facetime.facetime' callOnFaceTime(
     variable contact: 'WFFaceTimeContact',
     callType type: 'WFFaceTimeType' = "Video"
 )
