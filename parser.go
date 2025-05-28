@@ -198,15 +198,10 @@ func parse() {
 	}
 }
 
-var lastToken token
-
 // reachable checks if the last token was a "stopper" and throws a warning if so,
 // should only be run when we are about to parse a new statement.
 func reachable() {
-	if len(tokens) == 0 {
-		return
-	}
-	lastToken = tokens[len(tokens)-1]
+	var lastToken = getLastAddedToken()
 	if lastToken.valueType != Action {
 		return
 	}
@@ -215,6 +210,15 @@ func reachable() {
 	if slices.Contains(stoppers, lastActionIdentifier) {
 		parserWarning(fmt.Sprintf("Dead actions: Statement appears to be unreachable or does not loop as %s() was called outside of conditional.", lastActionIdentifier))
 	}
+}
+
+// getLastAddedToken returns the last token added.
+func getLastAddedToken() token {
+	if len(tokens) == 0 {
+		return token{}
+	}
+
+	return tokens[len(tokens)-1]
 }
 
 func collectUntilIgnoreStrings(ch rune) string {
@@ -1270,7 +1274,7 @@ func groupStatement(groupType tokenType) (groupingUUID string) {
 
 // addNothing helps reduce memory usage by not passing anything to the next action.
 func addNothing() {
-	lastToken = tokens[len(tokens)-1]
+	var lastToken = getLastAddedToken()
 	if lastToken.typeof == Action && lastToken.ident == "nothing" {
 		return
 	}
