@@ -667,3 +667,18 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 
 	return
 }
+
+func usingAction(content string, identifier string) bool {
+	var matches = actionUsageRegex.FindAllStringSubmatch(content, -1)
+	if len(matches) == 0 {
+		return false
+	}
+	for _, match := range matches {
+		var ref = strings.TrimSpace(match[1])
+		if ref == identifier {
+			return true
+		}
+	}
+
+	return false
+}

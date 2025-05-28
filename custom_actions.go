@@ -102,8 +102,9 @@ func collectCustomActionDefinition() {
 	}
 }
 
+var actionUsageRegex = regexp.MustCompile(`([a-zA-Z0-9]+)\(`)
+
 func checkCustomActionUsage(content string) {
-	var actionUsageRegex = regexp.MustCompile(`([a-zA-Z0-9]+)\(`)
 	var matches = actionUsageRegex.FindAllStringSubmatch(content, -1)
 	if len(matches) == 0 {
 		return

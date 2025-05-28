@@ -692,12 +692,13 @@ func collectDefinedAction() {
 	advance()
 
 	var identifier, arguments, outputType = collectActionDefinition('\n')
-
-	actions[identifier] = &actionDefinition{
-		identifier:         shortIdentifier,
-		overrideIdentifier: overrideIdentifier,
-		parameters:         arguments,
-		outputType:         outputType,
+	if usingAction(contents, identifier) {
+		actions[identifier] = &actionDefinition{
+			identifier:         shortIdentifier,
+			overrideIdentifier: overrideIdentifier,
+			parameters:         arguments,
+			outputType:         outputType,
+		}
 	}
 
 	if args.Using("debug") {
