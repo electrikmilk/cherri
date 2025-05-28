@@ -394,7 +394,7 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 	if reference == "Ask" && char == ':' {
 		advance()
 		skipWhitespace()
-		if char != '"' {
+		if char != '\'' {
 			parserError(fmt.Sprintf("Expected prompt raw string ('), got: %c", char))
 		}
 		advance()
