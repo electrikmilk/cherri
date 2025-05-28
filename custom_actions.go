@@ -61,7 +61,7 @@ func parseCustomActions() {
 			collectComment()
 		case lineCharIdx == 0 && tokenAhead(Action):
 			advance()
-			collectActionDefinition()
+			collectCustomActionDefinition()
 			continue
 		}
 		advance()
@@ -80,32 +80,9 @@ func isUsingCustomActions() bool {
 	return false
 }
 
-func collectActionDefinition() {
+func collectCustomActionDefinition() {
 	var startLine = lineIdx
-
-	var identifier = collectIdentifier()
-	if _, found := customActions[identifier]; found {
-		parserError(fmt.Sprintf("Duplication declaration of custom action '%s()'", identifier))
-	}
-	if _, found := actions[identifier]; found {
-		parserError(fmt.Sprintf("Declaration conflicts with built-in action '%s()'", identifier))
-	}
-
-	var arguments []parameterDefinition
-	if next(1) != ')' {
-		advance()
-		skipWhitespace()
-		arguments = collectParameterDefinitions()
-	} else {
-		advanceTimes(2)
-	}
-
-	var outputType tokenType
-	if tokenAhead(Colon) {
-		skipWhitespace()
-		var value any
-		collectType(&outputType, &value, '{')
-	}
+	var identifier, arguments, outputType = collectActionDefinition('{')
 
 	advanceUntilExpect('{', 3)
 	advance()
@@ -123,54 +100,6 @@ func collectActionDefinition() {
 		},
 		body: body,
 	}
-}
-
-func collectParameterDefinitions() (arguments []parameterDefinition) {
-	for char != ')' {
-		var valueType tokenType
-		var value any
-		collectType(&valueType, &value, ' ')
-		value = nil
-
-		skipWhitespace()
-
-		var optional bool
-		if char == '?' {
-			optional = true
-			advance()
-		}
-
-		var identifier = collectIdentifier()
-
-		skipWhitespace()
-
-		var defaultValue any
-		switch char {
-		case '=':
-			advance()
-			skipWhitespace()
-
-			var defaultValueType tokenType
-			collectValue(&defaultValueType, &defaultValue, endOfNextArgument())
-			if defaultValueType != valueType {
-				parserError(fmt.Sprintf("Invalid default value of type '%s' for '%s' type argument '%s'", defaultValueType, valueType, identifier))
-			}
-		case ',':
-			advance()
-		}
-
-		arguments = append(arguments, parameterDefinition{
-			name:         identifier,
-			validType:    valueType,
-			optional:     optional,
-			defaultValue: defaultValue,
-		})
-
-		skipWhitespace()
-	}
-	advance()
-
-	return
 }
 
 func checkCustomActionUsage(content string) {
