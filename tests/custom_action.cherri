@@ -10,7 +10,7 @@ action add(number op1, number op2): number {
 doSomething()
 
 @sum = add(2,2)
-show(sum)
+show("{sum}")
 
 action fibonacci(number n) {
     if n <= 1 {
@@ -31,3 +31,12 @@ show("{output}")
 action saveFileToDropbox(text path, bool ?overwrite = false): bool {
     output("{true}")
 }
+
+#define action 'dropbox.savefile' saveToDropboxPrompt(variable file: 'WFInput')
+
+#define action 'dropbox.savefile' saveToDropbox( variable file: 'WFInput', text path: 'WFFileDestinationPath', bool ?overwrite: 'WFSaveFileOverwrite' = false) {
+    "WFAskWhereToSave": false
+}
+
+@file = selectFile()
+saveToDropbox(file, '/folder/file.txt')

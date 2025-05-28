@@ -87,6 +87,8 @@ type libraryDefinition struct {
 	make func(identifier string)
 }
 
+var enumerations map[string][]string
+
 var actionIndex int
 
 // setCurrentAction sets the current action identifier and definition for use between functions.
@@ -579,4 +581,116 @@ func appIntentDescriptor(intent appIntent) map[string]any {
 			"AppIntentIdentifier": intent.appIntentIdentifier,
 		},
 	}
+}
+
+func collectActionDefinition(until rune) (identifier string, arguments []parameterDefinition, outputType tokenType) {
+	identifier = collectIdentifier()
+	if _, found := customActions[identifier]; found {
+		parserError(fmt.Sprintf("Duplication declaration of custom action '%s()'", identifier))
+	}
+	if _, found := actions[identifier]; found {
+		parserError(fmt.Sprintf("Duplication declaration of action '%s()'", identifier))
+	}
+
+	if next(1) != ')' {
+		advance()
+		skipWhitespace()
+		arguments = collectParameterDefinitions()
+	} else {
+		advanceTimes(2)
+	}
+
+	if tokenAhead(Colon) {
+		skipWhitespace()
+		var value any
+		collectType(&outputType, &value, until)
+	}
+
+	return
+}
+
+func collectParameterDefinitions() (arguments []parameterDefinition) {
+	for char != ')' && char != -1 {
+		var valueType tokenType
+		var value any
+
+		var enum []string
+		var ahead = lookAheadUntil(' ')
+		if enumerations[ahead] != nil {
+			var enumeration = collectUntil(' ')
+			enum = enumerations[enumeration]
+			valueType = String
+		} else {
+			collectType(&valueType, &value, ' ')
+		}
+
+		value = nil
+
+		skipWhitespace()
+
+		var optional bool
+		if char == '?' {
+			optional = true
+			advance()
+		}
+
+		var identifier = collectIdentifier()
+
+		var parameterKey string
+		if char == ':' {
+			advanceTimes(2)
+
+			if char != '\'' {
+				parserError("Expected parameter key raw string (').")
+			}
+			advance()
+			parameterKey = collectRawString()
+		}
+
+		skipWhitespace()
+
+		var defaultValue any
+		switch char {
+		case '=':
+			advance()
+			skipWhitespace()
+
+			var defaultValueType tokenType
+			collectValue(&defaultValueType, &defaultValue, endOfNextArgument())
+			if defaultValueType != valueType {
+				parserError(fmt.Sprintf("Invalid default value of type '%s' for '%s' type argument '%s'", defaultValueType, valueType, identifier))
+			}
+		case ',':
+			advance()
+		}
+
+		arguments = append(arguments, parameterDefinition{
+			name:         identifier,
+			key:          parameterKey,
+			validType:    valueType,
+			optional:     optional,
+			defaultValue: defaultValue,
+			enum:         enum,
+		})
+
+		skipWhitespace()
+	}
+	advance()
+
+	return
+}
+
+func usingAction(content string, identifier string) bool {
+	var matches = actionUsageRegex.FindAllStringSubmatch(content, -1)
+	if len(matches) == 0 {
+		return false
+	}
+	for _, match := range matches {
+		var ref = strings.TrimSpace(match[1])
+		if ref == identifier {
+			return true
+		}
+	}
+
+	return false
 }

@@ -143,6 +143,10 @@ func printParsingDebug() {
 	fmt.Printf("iOS Version: %.1f\n", iosVersion)
 	fmt.Print("\n")
 
+	fmt.Println(ansi("## ENUMERATIONS ##", bold))
+	fmt.Println(enumerations)
+	fmt.Print("\n")
+
 	fmt.Println(ansi("## VARIABLES ##", bold))
 	printVariables()
 	fmt.Print("\n")
@@ -185,6 +189,8 @@ func parse() {
 		collectConditionals()
 	case tokenAhead(RightBrace):
 		collectEndStatement()
+	case tokenAhead(Enumeration):
+		collectEnumeration()
 	case strings.Contains(lookAheadUntil(' '), "("):
 		collectActionCall()
 	default:
@@ -256,7 +262,7 @@ func lookAheadUntil(until rune) string {
 		nextIdx++
 	}
 
-	return strings.Trim(strings.ToLower(ahead.String()), " \t\n")
+	return strings.Trim(ahead.String(), " \t\n")
 }
 
 func collectVariableValue(constant bool, valueType *tokenType, value *any) {
@@ -422,6 +428,40 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		getAs:        getAs,
 		prompt:       prompt,
 	}
+}
+
+func collectEnumeration() {
+	advance()
+	if enumerations == nil {
+		enumerations = make(map[string][]string)
+	}
+
+	var identifier = collectIdentifier()
+
+	advanceUntilExpect('{', 3)
+	advance()
+	skipWhitespace()
+
+	if char != '\'' {
+		parserError(fmt.Sprintf("Expected enumeration raw string ('), got: %c", char))
+	}
+	advance()
+
+	var enumeration []string
+	for char != '}' && char != -1 {
+		var permutation = collectRawString()
+		enumeration = append(enumeration, permutation)
+		if char == ',' {
+			advance()
+		}
+		skipWhitespace()
+		if char == '\'' {
+			advance()
+		}
+	}
+
+	enumerations[identifier] = enumeration
+	advance()
 }
 
 func collectArguments() (arguments []actionArgument) {
@@ -669,6 +709,57 @@ func collectDefinition() {
 			var list = makeKeyList("Available versions:", versions, collectVersion)
 			parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
 		}
+	case tokenAhead(Action):
+		advance()
+		collectDefinedAction()
+	}
+}
+
+func collectDefinedAction() {
+	if char != '\'' {
+		parserError("Expected workflow action identifier raw string (').")
+	}
+	advance()
+
+	var workflowIdentifier = collectRawString()
+	var shortIdentifier string
+	var overrideIdentifier string
+	if len(strings.Split(workflowIdentifier, ".")) < 4 {
+		shortIdentifier = workflowIdentifier
+	} else {
+		overrideIdentifier = workflowIdentifier
+	}
+	advance()
+
+	var identifier, arguments, outputType = collectActionDefinition('\n')
+	if !usingAction(contents, identifier) {
+		return
+	}
+
+	skipWhitespace()
+
+	var addParams paramsFunc
+	if char == '{' {
+		advance()
+		var dict = collectDictionary()
+		addParams = func(args []actionArgument) map[string]any {
+			handleRawParams(dict.(map[string]interface{}))
+			return dict.(map[string]any)
+		}
+	}
+
+	actions[identifier] = &actionDefinition{
+		identifier:         shortIdentifier,
+		overrideIdentifier: overrideIdentifier,
+		parameters:         arguments,
+		outputType:         outputType,
+		addParams:          addParams,
+	}
+
+	if args.Using("debug") {
+		setCurrentAction(identifier, actions[identifier])
+		fmt.Println("\ndefined:", currentAction.appIdentifier, generateActionDefinition(parameterDefinition{}, true, true))
+		fmt.Print("\n")
 	}
 }
 
