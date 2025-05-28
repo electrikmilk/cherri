@@ -262,7 +262,7 @@ func lookAheadUntil(until rune) string {
 		nextIdx++
 	}
 
-	return strings.Trim(strings.ToLower(ahead.String()), " \t\n")
+	return strings.Trim(ahead.String(), " \t\n")
 }
 
 func collectVariableValue(constant bool, valueType *tokenType, value *any) {
