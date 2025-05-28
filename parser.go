@@ -719,24 +719,26 @@ func collectDefinition() {
 }
 
 func collectDefinedAction() {
-	if char != '\'' {
-		parserError("Expected workflow action identifier raw string (').")
-	}
-	advance()
-
-	var workflowIdentifier = collectRawString()
 	var shortIdentifier string
 	var overrideIdentifier string
-	if len(strings.Split(workflowIdentifier, ".")) < 4 {
-		shortIdentifier = workflowIdentifier
-	} else {
-		overrideIdentifier = workflowIdentifier
+	if char == '\'' {
+		advance()
+
+		var workflowIdentifier = collectRawString()
+		if len(strings.Split(workflowIdentifier, ".")) < 4 {
+			shortIdentifier = workflowIdentifier
+		} else {
+			overrideIdentifier = workflowIdentifier
+		}
+		advance()
 	}
-	advance()
 
 	var identifier, arguments, outputType = collectActionDefinition('\n')
 	if !usingAction(contents, identifier) {
 		return
+	}
+	if shortIdentifier == "" {
+		shortIdentifier = identifier
 	}
 
 	skipWhitespace()
