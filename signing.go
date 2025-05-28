@@ -27,8 +27,7 @@ func sign() {
 
 		if !args.Using("no-ansi") {
 			fmt.Print("\n")
-			fmt.Println("However...")
-			fmt.Println(ansi("NEW!", red), "You can use the", ansi("--hubsign", cyan), " argument to use RoutineHub's remote service to sign the compiled Shortcut.")
+			fmt.Println("You can use the", ansi("--hubsign", cyan), " argument to use RoutineHub's remote service to sign the compiled Shortcut.")
 		}
 		return
 	}
