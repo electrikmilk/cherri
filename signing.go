@@ -18,8 +18,7 @@ import (
 )
 
 var signFailed = false
-var hubSignFailed = false
-var hubSignBackoff = 10
+var backoff = 10
 
 // sign runs the shortcuts sign command on the unsigned shortcut file.
 func sign() {
@@ -73,7 +72,7 @@ type SigningService struct {
 
 // Sign the Shortcut using a signing service.
 func useSigningService(service *SigningService) {
-	if hubSignFailed {
+	if signFailed {
 		fmt.Println(ansi(fmt.Sprintf("Backing off from %s", service.name), red))
 		for i := 5; i > 0; i-- {
 			fmt.Printf("%d seconds...\r", i)
@@ -106,16 +105,16 @@ func useSigningService(service *SigningService) {
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		hubSignFailed = true
-		hubSignBackoff += 10
+		signFailed = true
+		backoff += 10
 		fmt.Println(ansi(fmt.Sprintf("Failed to sign Shortcut (%s)", response.Status), red))
 		return
 	}
 
-	if hubSignBackoff > 10 {
-		hubSignBackoff -= 10
+	if backoff > 10 {
+		backoff -= 10
 	} else {
-		hubSignBackoff = 10
+		backoff = 10
 	}
 
 	var body, readErr = io.ReadAll(response.Body)
