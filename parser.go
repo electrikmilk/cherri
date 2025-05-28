@@ -732,13 +732,28 @@ func collectDefinedAction() {
 	advance()
 
 	var identifier, arguments, outputType = collectActionDefinition('\n')
-	if usingAction(contents, identifier) {
-		actions[identifier] = &actionDefinition{
-			identifier:         shortIdentifier,
-			overrideIdentifier: overrideIdentifier,
-			parameters:         arguments,
-			outputType:         outputType,
+	if !usingAction(contents, identifier) {
+		return
+	}
+
+	skipWhitespace()
+
+	var addParams paramsFunc
+	if char == '{' {
+		advance()
+		var dict = collectDictionary()
+		addParams = func(args []actionArgument) map[string]any {
+			handleRawParams(dict.(map[string]interface{}))
+			return dict.(map[string]any)
 		}
+	}
+
+	actions[identifier] = &actionDefinition{
+		identifier:         shortIdentifier,
+		overrideIdentifier: overrideIdentifier,
+		parameters:         arguments,
+		outputType:         outputType,
+		addParams:          addParams,
 	}
 
 	if args.Using("debug") {
