@@ -10,7 +10,7 @@ action add(number op1, number op2): number {
 doSomething()
 
 @sum = add(2,2)
-show(sum)
+show("{sum}")
 
 action fibonacci(number n) {
     if n <= 1 {
