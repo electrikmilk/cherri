@@ -24,9 +24,9 @@ The main goal is to make it trivial and practical to create large Shortcut proje
 - 🪄 No magic variables syntax, they're constants instead
 - 🪶 Optimized to create as small as possible Shortcuts and reduce memory usage at runtime
 - #️⃣ Include files within others for large Shortcut projects
-- 🔧 Define custom actions
+- 🔧 Define custom actions with type checking, enums, optionals, default values, raw identifiers, and raw keys.
 - 📋 Copy-paste actions automatically
-- 🥩 Enter actions raw with custom identifier and parameters
+- 🥩 Enter actions raw with custom identifier and parameters.
 - ❓ Define import questions
 - 📇 Generate VCards for menus
 - 📄 Embed files in base64
