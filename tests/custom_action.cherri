@@ -31,3 +31,5 @@ show("{output}")
 action saveFileToDropbox(text path, bool ?overwrite = false): bool {
     output("{true}")
 }
+
+#define action 'dropbox.savefile' saveToDropbox(variable file: 'WFInput')
