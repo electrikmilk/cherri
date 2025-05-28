@@ -589,7 +589,7 @@ func collectActionDefinition(until rune) (identifier string, arguments []paramet
 		parserError(fmt.Sprintf("Duplication declaration of custom action '%s()'", identifier))
 	}
 	if _, found := actions[identifier]; found {
-		parserError(fmt.Sprintf("Declaration conflicts with built-in action '%s()'", identifier))
+		parserError(fmt.Sprintf("Duplication declaration of action '%s()'", identifier))
 	}
 
 	if next(1) != ')' {
