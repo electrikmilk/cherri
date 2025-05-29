@@ -108,6 +108,7 @@ func preParse() {
 	)
 
 	handleCopyPastes()
+	handleActionDefinitions()
 	handleCustomActions()
 
 	writeProcessed()
@@ -117,9 +118,6 @@ func preParse() {
 
 func writeProcessed() {
 	if !args.Using("debug") {
-		return
-	}
-	if len(included) == 0 && len(customActions) == 0 && len(pasteables) == 0 {
 		return
 	}
 
@@ -205,8 +203,6 @@ func parse() {
 		collectConditionals()
 	case tokenAhead(RightBrace):
 		collectEndStatement()
-	case tokenAhead(Enumeration):
-		collectEnumeration()
 	case strings.Contains(lookAheadUntil(' '), "("):
 		collectActionCall()
 	default:
@@ -736,59 +732,6 @@ func collectDefinition() {
 			var list = makeKeyList("Available versions:", versions, collectVersion)
 			parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
 		}
-	case tokenAhead(Action):
-		advance()
-		collectDefinedAction()
-	}
-}
-
-func collectDefinedAction() {
-	var shortIdentifier string
-	var overrideIdentifier string
-	if char == '\'' {
-		advance()
-
-		var workflowIdentifier = collectRawString()
-		if len(strings.Split(workflowIdentifier, ".")) < 4 {
-			shortIdentifier = workflowIdentifier
-		} else {
-			overrideIdentifier = workflowIdentifier
-		}
-		advance()
-	}
-
-	var identifier, arguments, outputType = collectActionDefinition('\n')
-	if !usingAction(contents, identifier) {
-		return
-	}
-	if shortIdentifier == "" {
-		shortIdentifier = identifier
-	}
-
-	skipWhitespace()
-
-	var addParams paramsFunc
-	if char == '{' {
-		advance()
-		var dict = collectDictionary()
-		addParams = func(args []actionArgument) map[string]any {
-			handleRawParams(dict.(map[string]interface{}))
-			return dict.(map[string]any)
-		}
-	}
-
-	actions[identifier] = &actionDefinition{
-		identifier:         shortIdentifier,
-		overrideIdentifier: overrideIdentifier,
-		parameters:         arguments,
-		outputType:         outputType,
-		addParams:          addParams,
-	}
-
-	if args.Using("debug") {
-		setCurrentAction(identifier, actions[identifier])
-		fmt.Println("\ndefined:", currentAction.appIdentifier, generateActionDefinition(parameterDefinition{}, true, true))
-		fmt.Print("\n")
 	}
 }
 

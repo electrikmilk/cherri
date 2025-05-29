@@ -590,6 +590,89 @@ func appIntentDescriptor(intent appIntent) map[string]any {
 	}
 }
 
+// handleActionDefinitions parses defined actions in the current file and collects them into the actions map.
+func handleActionDefinitions() {
+	if !regexp.MustCompile(`#define action (?:'(.+)')?(.*?)\(`).MatchString(contents) {
+		return
+	}
+	parseActionDefinitions()
+
+	resetParse()
+}
+
+func parseActionDefinitions() {
+	for char != -1 {
+		switch {
+		case isChar('/'):
+			collectComment()
+		case tokenAhead(Enumeration):
+			collectEnumeration()
+		case tokenAhead(Definition):
+			advance()
+			if tokenAhead(Action) {
+				advance()
+				collectDefinedAction()
+				continue
+			}
+		}
+		advance()
+	}
+}
+
+func collectDefinedAction() {
+	var lineRef = newLineReference()
+
+	var shortIdentifier string
+	var overrideIdentifier string
+	if char == '\'' {
+		advance()
+
+		var workflowIdentifier = collectRawString()
+		if len(strings.Split(workflowIdentifier, ".")) < 4 {
+			shortIdentifier = workflowIdentifier
+		} else {
+			overrideIdentifier = workflowIdentifier
+		}
+		advance()
+	}
+
+	var identifier, arguments, outputType = collectActionDefinition('\n')
+	if !usingAction(contents, identifier) {
+		return
+	}
+	if shortIdentifier == "" {
+		shortIdentifier = identifier
+	}
+
+	skipWhitespace()
+
+	var addParams paramsFunc
+	if char == '{' {
+		advance()
+		var dict = collectDictionary()
+		addParams = func(args []actionArgument) map[string]any {
+			handleRawParams(dict.(map[string]interface{}))
+			return dict.(map[string]any)
+		}
+	}
+
+	lineRef.replaceLines()
+
+	actions[identifier] = &actionDefinition{
+		identifier:         shortIdentifier,
+		overrideIdentifier: overrideIdentifier,
+		parameters:         arguments,
+		outputType:         outputType,
+		addParams:          addParams,
+	}
+
+	if args.Using("debug") {
+		setCurrentAction(identifier, actions[identifier])
+		fmt.Println("\ndefined:", currentAction.appIdentifier, generateActionDefinition(parameterDefinition{}, true, true))
+		fmt.Print("\n")
+	}
+}
+
 func collectActionDefinition(until rune) (identifier string, arguments []parameterDefinition, outputType tokenType) {
 	identifier = collectIdentifier()
 	if _, found := customActions[identifier]; found {
