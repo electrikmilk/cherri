@@ -480,6 +480,11 @@ func makeMeasurementUnits() {
 
 func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) string {
 	var definition strings.Builder
+	definition.WriteString("#define action ")
+	if currentAction.identifier != "" || currentAction.appIdentifier != "" {
+		setCurrentAction(currentActionIdentifier, &currentAction)
+		definition.WriteString(fmt.Sprintf("'%s' ", getActionIdentifier()))
+	}
 	definition.WriteString(fmt.Sprintf("%s(", currentActionIdentifier))
 	var arguments []string
 	for _, param := range currentAction.parameters {
@@ -493,14 +498,23 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 	definition.WriteRune(')')
 
 	if currentAction.outputType != "" {
-		definition.WriteString(fmt.Sprintf(": %s ", currentAction.outputType))
+		definition.WriteString(fmt.Sprintf(": %s", currentAction.outputType))
 	}
 
-	if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
-		definition.WriteString(generateActionRestrictions())
+	if currentAction.addParams != nil {
+		var addParams = currentAction.addParams([]actionArgument{})
+		var jsonBytes, jsonErr = json.MarshalIndent(addParams, strings.Repeat("\t", tabLevel), "\t")
+		handle(jsonErr)
+		definition.WriteString(fmt.Sprintf(" %s", string(jsonBytes)))
 	}
-	if showEnums {
-		definition.WriteString(generateActionParamEnums(focus))
+
+	if !args.Using("no-ansi") {
+		if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
+			definition.WriteString(generateActionRestrictions())
+		}
+		if showEnums {
+			definition.WriteString(generateActionParamEnums(focus))
+		}
 	}
 
 	return definition.String()
@@ -564,6 +578,11 @@ func generateActionParamDefinition(param parameterDefinition) string {
 		definition.WriteRune('?')
 	}
 	definition.WriteString(param.name)
+
+	if param.key != "" {
+		definition.WriteString(fmt.Sprintf(": '%s'", param.key))
+	}
+
 	if param.defaultValue != nil {
 		if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
 			definition.WriteString(fmt.Sprintf(" = \"%v\"", strings.Replace(param.defaultValue.(string), "\n", "\\n", 1)))
