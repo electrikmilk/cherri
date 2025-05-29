@@ -114,15 +114,15 @@ func undefinable() bool {
 func makeAction(arguments []actionArgument, reference *map[string]any) {
 	actionIndex++
 	// Determine identifier
-	var ident = getActionIdentifier()
+	var ident = getFullActionIdentifier()
 	// Determine parameters
 	var params = getActionParameters(arguments)
 	// Additionally add the output name and UUID of this action if provided
 	addAction(ident, attachReferenceToParams(&params, reference))
 }
 
-// getActionIdentifier determines the identifier of currentAction.
-func getActionIdentifier() (ident string) {
+// getFullActionIdentifier determines the full identifier of currentAction.
+func getFullActionIdentifier() (ident string) {
 	if currentAction.overrideIdentifier != "" {
 		return currentAction.overrideIdentifier
 	}
@@ -135,6 +135,19 @@ func getActionIdentifier() (ident string) {
 		ident = fmt.Sprintf("%s.%s", ident, currentAction.identifier)
 	} else {
 		ident = fmt.Sprintf("%s.%s", ident, strings.ToLower(currentActionIdentifier))
+	}
+	return
+}
+
+// getActionIdentifier determines the identifier of currentAction.
+func getActionIdentifier() (ident string) {
+	if currentAction.appIdentifier != "" {
+		ident = fmt.Sprintf("%s.", currentAction.appIdentifier)
+	}
+	if currentAction.identifier != "" {
+		ident = fmt.Sprintf("%s%s", ident, currentAction.identifier)
+	} else {
+		ident = fmt.Sprintf("%s%s", ident, strings.ToLower(currentActionIdentifier))
 	}
 	return
 }
