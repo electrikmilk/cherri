@@ -98,9 +98,16 @@ func initParse() {
 	}
 }
 
+func markBuiltins() {
+	for _, action := range actions {
+		action.builtin = true
+	}
+}
+
 func preParse() {
 	preParsing = true
 
+	markBuiltins()
 	defineRawAction()
 	waitFor(
 		defineToggleSetActions,

@@ -85,6 +85,7 @@ type actionDefinition struct {
 	minVersion         float64
 	maxVersion         float64
 	setKey             string
+	builtin            bool // builtin is based on if the action was in the actions map when it was first initialized.
 }
 
 // libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
