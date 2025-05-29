@@ -6,16 +6,23 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"maps"
 	"math"
 	"reflect"
+	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 //go:embed stdlib.cherri
 var stdLib embed.FS
+
+//go:embed actions
+var stdActions embed.FS
 
 // currentAction holds the current action definition between functions.
 var currentAction actionDefinition
