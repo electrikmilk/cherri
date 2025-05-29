@@ -81,7 +81,7 @@ func isUsingCustomActions() bool {
 }
 
 func collectCustomActionDefinition() {
-	var startLine = lineIdx
+	var lineRef = newLineReference()
 	var identifier, arguments, outputType = collectActionDefinition('{')
 
 	advanceUntilExpect('{', 3)
@@ -89,9 +89,7 @@ func collectCustomActionDefinition() {
 
 	var body = strings.TrimSpace(collectObject())
 
-	for i := startLine; i <= lineIdx; i++ {
-		lines[i] = ""
-	}
+	lineRef.replaceLines()
 
 	customActions[identifier] = &customAction{
 		definition: actionDefinition{

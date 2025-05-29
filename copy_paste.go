@@ -49,7 +49,7 @@ func parseCopyPastes() {
 }
 
 func collectCopy() {
-	var startLine = lineIdx
+	var lineRef = newLineReference()
 	var identifier = collectIdentifier()
 
 	if _, found := pasteables[identifier]; found {
@@ -60,9 +60,7 @@ func collectCopy() {
 	advance()
 	var contents = collectObject()
 
-	for i := startLine; i <= lineIdx; i++ {
-		lines[i] = ""
-	}
+	lineRef.replaceLines()
 
 	pasteables[identifier] = strings.TrimSpace(contents)
 }

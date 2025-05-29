@@ -42,6 +42,22 @@ func resetParse() {
 	firstChar()
 }
 
+type lineReference struct {
+	start int
+}
+
+// Creates a lineReference with the current lineIdx.
+func newLineReference() lineReference {
+	return lineReference{start: lineIdx}
+}
+
+// replaceLines replaces lines starting at startLine to prevent something from being parsed twice.
+func (lineRef *lineReference) replaceLines() {
+	for i := lineRef.start; i <= lineIdx; i++ {
+		lines[i] = ""
+	}
+}
+
 func initParse() {
 	if args.Using("debug") {
 		fmt.Printf("Parsing %s...\n", filename)
@@ -435,6 +451,8 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 }
 
 func collectEnumeration() {
+	var lineRef = newLineReference()
+
 	advance()
 	if enumerations == nil {
 		enumerations = make(map[string][]string)
@@ -463,6 +481,8 @@ func collectEnumeration() {
 			advance()
 		}
 	}
+
+	lineRef.replaceLines()
 
 	enumerations[identifier] = enumeration
 	advance()
