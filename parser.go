@@ -451,8 +451,6 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 }
 
 func collectEnumeration() {
-	var lineRef = newLineReference()
-
 	advance()
 	if enumerations == nil {
 		enumerations = make(map[string][]string)
@@ -481,8 +479,6 @@ func collectEnumeration() {
 			advance()
 		}
 	}
-
-	lineRef.replaceLines()
 
 	enumerations[identifier] = enumeration
 	advance()
