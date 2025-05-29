@@ -58,22 +58,22 @@ const (
 
 /* Types */
 const (
-	String       tokenType = "text"
-	RawString    tokenType = "rawtext"
-	Integer      tokenType = "number"
-	Float        tokenType = "float"
-	Dict         tokenType = "dictionary"
-	Arr          tokenType = "array"
-	Bool         tokenType = "bool"
-	Date         tokenType = "date"
-	True         tokenType = "true"
-	False        tokenType = "false"
-	Nil          tokenType = "nil"
-	Comment      tokenType = "comment"
-	Expression   tokenType = "expression"
-	Variable     tokenType = "variable"
-	Conditional  tokenType = "conditional"
-	Enumeration  tokenType = "enum"
+	String      tokenType = "text"
+	RawString   tokenType = "rawtext"
+	Integer     tokenType = "number"
+	Float       tokenType = "float"
+	Dict        tokenType = "dictionary"
+	Arr         tokenType = "array"
+	Bool        tokenType = "bool"
+	Date        tokenType = "date"
+	True        tokenType = "true"
+	False       tokenType = "false"
+	Nil         tokenType = "nil"
+	Comment     tokenType = "comment"
+	Expression  tokenType = "expression"
+	Variable    tokenType = "variable"
+	Conditional tokenType = "conditional"
+	Enumeration tokenType = "enum"
 )
 
 /* Operators */
