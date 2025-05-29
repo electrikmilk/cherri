@@ -47,8 +47,13 @@ func main() {
 
 	if args.Using("action") {
 		if args.Value("action") == "" {
+			defineRawAction()
+			defineToggleSetActions()
 			for identifier, definition := range actions {
 				setCurrentAction(identifier, definition)
+				if undefinable() {
+					continue
+				}
 				fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
 			}
 		} else {

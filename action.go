@@ -105,6 +105,11 @@ func setCurrentAction(identifier string, definition *actionDefinition) {
 	currentAction = *definition
 }
 
+// undefinable checks if the current action cannot be defined using only Cherri because of the way it is defined.
+func undefinable() bool {
+	return currentAction.builtin || currentAction.make != nil || currentAction.check != nil || currentAction.decomp != nil || currentAction.appIntent != emptyAppIntent
+}
+
 // makeAction builds an action based on its actionDefinition and adds it to the shortcut.
 func makeAction(arguments []actionArgument, reference *map[string]any) {
 	actionIndex++
@@ -480,10 +485,13 @@ func makeMeasurementUnits() {
 
 func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) string {
 	var definition strings.Builder
-	definition.WriteString("#define action ")
-	if currentAction.identifier != "" || currentAction.appIdentifier != "" {
-		setCurrentAction(currentActionIdentifier, &currentAction)
-		definition.WriteString(fmt.Sprintf("'%s' ", getActionIdentifier()))
+	var cannotDef = undefinable()
+	if !cannotDef {
+		definition.WriteString("#define action ")
+		if currentAction.identifier != "" || currentAction.appIdentifier != "" {
+			setCurrentAction(currentActionIdentifier, &currentAction)
+			definition.WriteString(fmt.Sprintf("'%s' ", getActionIdentifier()))
+		}
 	}
 	definition.WriteString(fmt.Sprintf("%s(", currentActionIdentifier))
 	var arguments []string
@@ -501,7 +509,7 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 		definition.WriteString(fmt.Sprintf(": %s", currentAction.outputType))
 	}
 
-	if currentAction.addParams != nil {
+	if !cannotDef && currentAction.addParams != nil {
 		var addParams = currentAction.addParams([]actionArgument{})
 		var jsonBytes, jsonErr = json.MarshalIndent(addParams, strings.Repeat("\t", tabLevel), "\t")
 		handle(jsonErr)
