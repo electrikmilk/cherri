@@ -109,15 +109,15 @@ func setCurrentAction(identifier string, definition *actionDefinition) {
 func makeAction(arguments []actionArgument, reference *map[string]any) {
 	actionIndex++
 	// Determine identifier
-	var ident = actionIdentifier()
+	var ident = getActionIdentifier()
 	// Determine parameters
-	var params = actionParameters(arguments)
+	var params = getActionParameters(arguments)
 	// Additionally add the output name and UUID of this action if provided
 	addAction(ident, attachReferenceToParams(&params, reference))
 }
 
-// actionIdentifier determines the identifier of currentAction.
-func actionIdentifier() (ident string) {
+// getActionIdentifier determines the identifier of currentAction.
+func getActionIdentifier() (ident string) {
 	if currentAction.overrideIdentifier != "" {
 		return currentAction.overrideIdentifier
 	}
@@ -136,8 +136,8 @@ func actionIdentifier() (ident string) {
 
 var emptyAppIntent = appIntent{}
 
-// actionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
-func actionParameters(arguments []actionArgument) map[string]any {
+// getActionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
+func getActionParameters(arguments []actionArgument) map[string]any {
 	var params = make(map[string]any)
 	if currentAction.addParams != nil {
 		maps.Copy(params, currentAction.addParams(arguments))
