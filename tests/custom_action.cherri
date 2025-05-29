@@ -32,7 +32,7 @@ action saveFileToDropbox(text path, bool ?overwrite = false): bool {
     output("{true}")
 }
 
-#define action 'dropbox.savefile' saveToDropboxPrompt(variable file: 'WFInput')
+#define action 'dropbox.savefile' saveToDropboxPromptTest(variable file: 'WFInput')
 
 #define action 'dropbox.savefile' saveToDropboxTest(
     variable file: 'WFInput',
