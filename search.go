@@ -13,10 +13,8 @@ import (
 )
 
 func actionsSearch() {
-	waitFor(
-		defineRawAction,
-		defineToggleSetActions,
-	)
+	defineRawAction()
+	defineToggleSetActions()
 	var identifier = args.Value("action")
 	if _, found := actions[identifier]; !found {
 		fmt.Println(ansi(fmt.Sprintf("\nAction '%s(...)' does not exist or has not yet been defined.", identifier), red))
