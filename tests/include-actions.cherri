@@ -1,0 +1,4 @@
+#include 'actions/dropbox'
+
+@file = selectFile()
+saveToDropboxPrompt(file)
