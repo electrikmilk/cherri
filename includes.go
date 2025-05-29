@@ -107,7 +107,7 @@ func parseInclude() {
 			parserError(fmt.Sprintf("Undefined actions include '%s'.", actionCat))
 		}
 	} else if includePath == "stdlib" {
-		includeFileBytes, includeReadErr = stdActions.ReadFile("stdlib.cherri")
+		includeFileBytes, includeReadErr = stdLib.ReadFile("stdlib.cherri")
 	} else {
 		if !strings.Contains(includePath, "..") {
 			includePath = relativePath + includePath

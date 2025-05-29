@@ -43,4 +43,4 @@ action saveFileToDropbox(text path, bool ?overwrite = false): bool {
 }
 
 @file = selectFile()
-saveToDropbox(file, '/folder/file.txt')
+saveToDropboxTest(file, '/folder/file.txt')
