@@ -168,17 +168,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"setAirdropReceiving": {
-		parameters: []parameterDefinition{
-			{
-				name:         "state",
-				key:          "WFAirDropState",
-				validType:    String,
-				defaultValue: "Everyone",
-				enum:         []string{"No One", "Contacts Only", "Everyone"},
-			},
-		},
-	},
 	"returnToHomescreen": {mac: false},
 	"vibrate":            {mac: false},
 	"currentDate": {
@@ -974,62 +963,6 @@ var actions = map[string]*actionDefinition{
 				name:      "contact",
 				validType: Variable,
 				key:       "WFCallContact",
-			},
-		},
-	},
-	"sendEmail": {
-		parameters: []parameterDefinition{
-			{
-				name:      "contact",
-				validType: Variable,
-				key:       "WFSendEmailActionToRecipients",
-			},
-			{
-				name:      "from",
-				validType: String,
-				key:       "WFSendEmailActionFrom",
-			},
-			{
-				name:      "subject",
-				validType: String,
-				key:       "WFSendEmailActionSubject",
-			},
-			{
-				name:      "body",
-				validType: String,
-				key:       "WFSendEmailActionInputAttachments",
-			},
-			{
-				name:         "prompt",
-				validType:    Bool,
-				key:          "WFSendEmailActionShowComposeSheet",
-				defaultValue: true,
-			},
-			{
-				name:         "draft",
-				validType:    Bool,
-				key:          "WFSendEmailActionSaveAsDraft",
-				defaultValue: false,
-			},
-		},
-	},
-	"sendMessage": {
-		parameters: []parameterDefinition{
-			{
-				name:      "contact",
-				validType: Variable,
-				key:       "WFSendMessageActionRecipients",
-			},
-			{
-				name:      "message",
-				validType: String,
-				key:       "WFSendMessageContent",
-			},
-			{
-				name:         "prompt",
-				validType:    Bool,
-				key:          "ShowWhenRun",
-				defaultValue: true,
 			},
 		},
 	},
@@ -5402,49 +5335,6 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"airdrop": {
-		identifier: "airdropdocument",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-	},
-	"share": {
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: String,
-			},
-		},
-	},
-	"copyToClipboard": {
-		identifier: "setclipboard",
-		parameters: []parameterDefinition{
-			{
-				name:      "value",
-				key:       "WFInput",
-				validType: Variable,
-			},
-			{
-				name:         "local",
-				key:          "WFLocalOnly",
-				validType:    Bool,
-				optional:     true,
-				defaultValue: false,
-			},
-			{
-				name:      "expire",
-				key:       "WFExpirationDate",
-				validType: String,
-				optional:  true,
-			},
-		},
-	},
-	"getClipboard": {},
 	"getURLHeaders": {
 		identifier: "url.getheaders",
 		parameters: []parameterDefinition{
@@ -6223,6 +6113,35 @@ func handleRawParams(params map[string]interface{}) {
 		}
 		params[key] = attachmentValues(value.(string))
 	}
+}
+
+var defaultActionIncludes = []string{
+	// "calendar",
+	// "contacts",
+	// "documents",
+	// "location",
+	// "math",
+	// "media",
+	// "scripting",
+	"sharing",
+	// "settings",
+	// "shortcuts",
+	// "translation",
+	// "web",
+}
+
+func loadStandardActions() {
+	includeStandardActions()
+	preParse()
+}
+
+func includeStandardActions() {
+	var actionIncludes []string
+	for _, actionInclude := range defaultActionIncludes {
+		actionIncludes = append(actionIncludes, fmt.Sprintf("#include 'actions/%s'\n", actionInclude))
+	}
+	lines = append(actionIncludes, lines...)
+	resetParse()
 }
 
 type contentKit string

@@ -47,6 +47,7 @@ func main() {
 
 	if args.Using("action") {
 		if args.Value("action") == "" {
+			loadStandardActions()
 			defineRawAction()
 			defineToggleSetActions()
 			for identifier, definition := range actions {
