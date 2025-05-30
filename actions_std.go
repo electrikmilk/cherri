@@ -3944,39 +3944,6 @@ var actions = map[string]*actionDefinition{
 		},
 		outputType: String,
 	},
-	"urlEncode": {
-		identifier: "urlencode",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: String,
-				key:       "WFInput",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFEncodeMode": "Encode",
-			}
-		},
-		defaultAction: true,
-		outputType:    String,
-	},
-	"urlDecode": {
-		identifier: "urlencode",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: String,
-				key:       "WFInput",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFEncodeMode": "Decode",
-			}
-		},
-		outputType: String,
-	},
 	"show": {
 		identifier: "showresult",
 		parameters: []parameterDefinition{
@@ -4877,17 +4844,6 @@ var actions = map[string]*actionDefinition{
 				name:      "input",
 				key:       "WFInput",
 				validType: Variable,
-			},
-		},
-		outputType: Arr,
-	},
-	"getURLs": {
-		identifier: "detect.link",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: String,
-				key:       "WFInput",
 			},
 		},
 		outputType: Arr,
