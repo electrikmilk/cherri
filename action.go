@@ -6,16 +6,23 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"maps"
 	"math"
 	"reflect"
+	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 //go:embed stdlib.cherri
 var stdLib embed.FS
+
+//go:embed actions
+var stdActions embed.FS
 
 // currentAction holds the current action definition between functions.
 var currentAction actionDefinition
@@ -78,6 +85,7 @@ type actionDefinition struct {
 	minVersion         float64
 	maxVersion         float64
 	setKey             string
+	builtin            bool // builtin is based on if the action was in the actions map when it was first initialized.
 }
 
 // libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
@@ -97,19 +105,31 @@ func setCurrentAction(identifier string, definition *actionDefinition) {
 	currentAction = *definition
 }
 
+// undefinable checks if the current action cannot be defined using only Cherri because of the way it is defined.
+func undefinable() bool {
+	if currentAction.addParams != nil {
+		var addedParams = currentAction.addParams([]actionArgument{})
+		if len(addedParams) == 0 {
+			return true
+		}
+	}
+
+	return currentAction.builtin || currentAction.make != nil || currentAction.check != nil || currentAction.decomp != nil || currentAction.appIntent != emptyAppIntent
+}
+
 // makeAction builds an action based on its actionDefinition and adds it to the shortcut.
 func makeAction(arguments []actionArgument, reference *map[string]any) {
 	actionIndex++
 	// Determine identifier
-	var ident = actionIdentifier()
+	var ident = getFullActionIdentifier()
 	// Determine parameters
-	var params = actionParameters(arguments)
+	var params = getActionParameters(arguments)
 	// Additionally add the output name and UUID of this action if provided
 	addAction(ident, attachReferenceToParams(&params, reference))
 }
 
-// actionIdentifier determines the identifier of currentAction.
-func actionIdentifier() (ident string) {
+// getFullActionIdentifier determines the full identifier of currentAction.
+func getFullActionIdentifier() (ident string) {
 	if currentAction.overrideIdentifier != "" {
 		return currentAction.overrideIdentifier
 	}
@@ -126,10 +146,23 @@ func actionIdentifier() (ident string) {
 	return
 }
 
+// getActionIdentifier determines the identifier of currentAction.
+func getActionIdentifier() (ident string) {
+	if currentAction.appIdentifier != "" {
+		ident = fmt.Sprintf("%s.", currentAction.appIdentifier)
+	}
+	if currentAction.identifier != "" {
+		ident = fmt.Sprintf("%s%s", ident, currentAction.identifier)
+	} else {
+		ident = fmt.Sprintf("%s%s", ident, strings.ToLower(currentActionIdentifier))
+	}
+	return
+}
+
 var emptyAppIntent = appIntent{}
 
-// actionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
-func actionParameters(arguments []actionArgument) map[string]any {
+// getActionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
+func getActionParameters(arguments []actionArgument) map[string]any {
 	var params = make(map[string]any)
 	if currentAction.addParams != nil {
 		maps.Copy(params, currentAction.addParams(arguments))
@@ -472,6 +505,19 @@ func makeMeasurementUnits() {
 
 func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) string {
 	var definition strings.Builder
+
+	if showEnums {
+		definition.WriteString(generateActionParamEnums(focus))
+	}
+
+	var cannotDef = undefinable()
+	if !cannotDef {
+		definition.WriteString("#define action ")
+		if currentAction.identifier != "" || currentAction.appIdentifier != "" {
+			setCurrentAction(currentActionIdentifier, &currentAction)
+			definition.WriteString(fmt.Sprintf("'%s' ", getActionIdentifier()))
+		}
+	}
 	definition.WriteString(fmt.Sprintf("%s(", currentActionIdentifier))
 	var arguments []string
 	for _, param := range currentAction.parameters {
@@ -485,14 +531,24 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 	definition.WriteRune(')')
 
 	if currentAction.outputType != "" {
-		definition.WriteString(fmt.Sprintf(": %s ", currentAction.outputType))
+		definition.WriteString(fmt.Sprintf(": %s", currentAction.outputType))
 	}
 
-	if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
-		definition.WriteString(generateActionRestrictions())
+	if !cannotDef && currentAction.addParams != nil {
+		var addParams = currentAction.addParams([]actionArgument{})
+		if len(addParams) != 0 {
+			var jsonBytes, jsonErr = json.MarshalIndent(addParams, strings.Repeat("\t", tabLevel), "\t")
+			handle(jsonErr)
+			definition.WriteString(fmt.Sprintf(" %s", string(jsonBytes)))
+		}
 	}
-	if showEnums {
-		definition.WriteString(generateActionParamEnums(focus))
+
+	definition.WriteRune('\n')
+
+	if !args.Using("no-ansi") {
+		if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
+			definition.WriteString(generateActionRestrictions())
+		}
 	}
 
 	return definition.String()
@@ -520,7 +576,6 @@ func generateActionRestrictions() string {
 
 func generateActionParamEnums(focus parameterDefinition) string {
 	var definition strings.Builder
-	var hasEnum = false
 	for _, param := range currentAction.parameters {
 		if param.enum == nil {
 			continue
@@ -528,15 +583,16 @@ func generateActionParamEnums(focus parameterDefinition) string {
 		if focus.name != "" && focus.name != param.name {
 			continue
 		}
-		definition.WriteRune('\n')
-		hasEnum = true
-		definition.WriteString(ansi(fmt.Sprintf("\nAvailable %ss:\n", param.name), yellow))
-		for _, e := range param.enum {
-			definition.WriteString(fmt.Sprintf("- %s\n", e))
+		var enumIdentifier = fmt.Sprintf("%s%ss", currentActionIdentifier, capitalize(param.name))
+		definition.WriteString(fmt.Sprintf("enum %s {\n", enumIdentifier))
+		for i, enum := range param.enum {
+			var enumSize = len(param.enum)
+			definition.WriteString(fmt.Sprintf("\t'%s'", enum))
+			if i < enumSize+1 {
+				definition.WriteString(",\n")
+			}
 		}
-	}
-	if hasEnum {
-		definition.WriteString(ansi("\nNote: Enum values are case-sensitive.", bold))
+		definition.WriteString("}\n\n")
 	}
 
 	return definition.String()
@@ -547,7 +603,7 @@ func generateActionParamDefinition(param parameterDefinition) string {
 	if param.enum == nil {
 		definition.WriteString(fmt.Sprintf("%s ", param.validType))
 	} else {
-		definition.WriteString("enum ")
+		definition.WriteString(fmt.Sprintf("%s%ss ", currentActionIdentifier, capitalize(param.name)))
 	}
 	if param.infinite {
 		definition.WriteString("...")
@@ -556,6 +612,11 @@ func generateActionParamDefinition(param parameterDefinition) string {
 		definition.WriteRune('?')
 	}
 	definition.WriteString(param.name)
+
+	if param.key != "" && param.key != param.name {
+		definition.WriteString(fmt.Sprintf(": '%s'", param.key))
+	}
+
 	if param.defaultValue != nil {
 		if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
 			definition.WriteString(fmt.Sprintf(" = \"%v\"", strings.Replace(param.defaultValue.(string), "\n", "\\n", 1)))
@@ -580,6 +641,86 @@ func appIntentDescriptor(intent appIntent) map[string]any {
 			"Name":                intent.name,
 			"AppIntentIdentifier": intent.appIntentIdentifier,
 		},
+	}
+}
+
+// handleActionDefinitions parses defined actions in the current file and collects them into the actions map.
+func handleActionDefinitions() {
+	if !regexp.MustCompile(`#define action (?:'(.+)')?(.*?)\(`).MatchString(contents) && !regexp.MustCompile(`enum (.*?) \{`).MatchString(contents) {
+		return
+	}
+	parseActionDefinitions()
+
+	resetParse()
+}
+
+func parseActionDefinitions() {
+	for char != -1 {
+		switch {
+		case isChar('/'):
+			collectComment()
+		case tokenAhead(Enumeration):
+			collectEnumeration()
+		case tokenAhead(Definition):
+			advance()
+			if tokenAhead(Action) {
+				advance()
+				collectDefinedAction()
+				continue
+			}
+		}
+		advance()
+	}
+}
+
+func collectDefinedAction() {
+	var lineRef = newLineReference()
+
+	var shortIdentifier string
+	var overrideIdentifier string
+	if char == '\'' {
+		advance()
+
+		var workflowIdentifier = collectRawString()
+		if len(strings.Split(workflowIdentifier, ".")) < 4 {
+			shortIdentifier = workflowIdentifier
+		} else {
+			overrideIdentifier = workflowIdentifier
+		}
+		advance()
+	}
+
+	var identifier, arguments, outputType = collectActionDefinition('\n')
+	if shortIdentifier == "" {
+		shortIdentifier = identifier
+	}
+
+	advance()
+
+	var addParams paramsFunc
+	if char == '{' {
+		advance()
+		var dict = collectDictionary()
+		addParams = func(args []actionArgument) map[string]any {
+			handleRawParams(dict.(map[string]interface{}))
+			return dict.(map[string]any)
+		}
+	}
+
+	lineRef.replaceLines()
+
+	actions[identifier] = &actionDefinition{
+		identifier:         shortIdentifier,
+		overrideIdentifier: overrideIdentifier,
+		parameters:         arguments,
+		outputType:         outputType,
+		addParams:          addParams,
+	}
+
+	if args.Using("debug") {
+		setCurrentAction(identifier, actions[identifier])
+		fmt.Println("\ndefined:", currentAction.appIdentifier, generateActionDefinition(parameterDefinition{}, true, true))
+		fmt.Print("\n")
 	}
 }
 
@@ -629,12 +770,9 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 		skipWhitespace()
 
 		var optional bool
-		var infinite bool
 		if char == '?' {
 			optional = true
 			advance()
-		} else if tokenAhead(Ellipsis) {
-			infinite = true
 		}
 
 		var identifier = collectIdentifier()
@@ -648,6 +786,8 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			}
 			advance()
 			parameterKey = collectRawString()
+		} else {
+			parameterKey = identifier
 		}
 
 		skipWhitespace()
@@ -663,7 +803,8 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			if defaultValueType != valueType {
 				parserError(fmt.Sprintf("Invalid default value of type '%s' for '%s' type argument '%s'", defaultValueType, valueType, identifier))
 			}
-		case ',':
+		}
+		if char == ',' {
 			advance()
 		}
 
@@ -672,7 +813,6 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			key:          parameterKey,
 			validType:    valueType,
 			optional:     optional,
-			infinite:     infinite,
 			defaultValue: defaultValue,
 			enum:         enum,
 		})
@@ -682,19 +822,4 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 	advance()
 
 	return
-}
-
-func usingAction(content string, identifier string) bool {
-	var matches = actionUsageRegex.FindAllStringSubmatch(content, -1)
-	if len(matches) == 0 {
-		return false
-	}
-	for _, match := range matches {
-		var ref = strings.TrimSpace(match[1])
-		if ref == identifier {
-			return true
-		}
-	}
-
-	return false
 }

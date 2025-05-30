@@ -32,9 +32,9 @@ action saveFileToDropbox(text path, bool ?overwrite = false): bool {
     output("{true}")
 }
 
-#define action 'dropbox.savefile' saveToDropboxPrompt(variable file: 'WFInput')
+#define action 'dropbox.savefile' saveToDropboxPromptTest(variable file: 'WFInput')
 
-#define action 'dropbox.savefile' saveToDropbox(
+#define action 'dropbox.savefile' saveToDropboxTest(
     variable file: 'WFInput',
     text path: 'WFFileDestinationPath',
     bool ?overwrite: 'WFSaveFileOverwrite' = false
@@ -43,4 +43,4 @@ action saveFileToDropbox(text path, bool ?overwrite = false): bool {
 }
 
 @file = selectFile()
-saveToDropbox(file, '/folder/file.txt')
+saveToDropboxTest(file, '/folder/file.txt')

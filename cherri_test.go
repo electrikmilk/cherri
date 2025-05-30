@@ -81,14 +81,6 @@ func TestDecomp(t *testing.T) {
 	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
 }
 
-func TestActionList(_ *testing.T) {
-	defineToggleSetActions()
-	defineRawAction()
-	for identifier := range actions {
-		fmt.Println("{label: '" + identifier + "', type: 'function', detail: 'action'},")
-	}
-}
-
 func TestActionSearch(_ *testing.T) {
 	args.Args["action"] = "replaceText"
 	actionsSearch()

@@ -25,7 +25,7 @@ type customAction struct {
 // customActions is a map of all the custom actions that have been defined.
 var customActions map[string]*customAction
 
-// handleCustomActions parses defined actions and checks their usage.
+// handleCustomActions parses defined custom actions and checks their usage.
 func handleCustomActions() {
 	if !regexp.MustCompile(`action (.*?)\((.*?)\)`).MatchString(contents) {
 		return

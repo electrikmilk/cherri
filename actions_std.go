@@ -168,17 +168,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"setAirdropReceiving": {
-		parameters: []parameterDefinition{
-			{
-				name:         "state",
-				key:          "WFAirDropState",
-				validType:    String,
-				defaultValue: "Everyone",
-				enum:         []string{"No One", "Contacts Only", "Everyone"},
-			},
-		},
-	},
 	"returnToHomescreen": {mac: false},
 	"vibrate":            {mac: false},
 	"currentDate": {
@@ -974,62 +963,6 @@ var actions = map[string]*actionDefinition{
 				name:      "contact",
 				validType: Variable,
 				key:       "WFCallContact",
-			},
-		},
-	},
-	"sendEmail": {
-		parameters: []parameterDefinition{
-			{
-				name:      "contact",
-				validType: Variable,
-				key:       "WFSendEmailActionToRecipients",
-			},
-			{
-				name:      "from",
-				validType: String,
-				key:       "WFSendEmailActionFrom",
-			},
-			{
-				name:      "subject",
-				validType: String,
-				key:       "WFSendEmailActionSubject",
-			},
-			{
-				name:      "body",
-				validType: String,
-				key:       "WFSendEmailActionInputAttachments",
-			},
-			{
-				name:         "prompt",
-				validType:    Bool,
-				key:          "WFSendEmailActionShowComposeSheet",
-				defaultValue: true,
-			},
-			{
-				name:         "draft",
-				validType:    Bool,
-				key:          "WFSendEmailActionSaveAsDraft",
-				defaultValue: false,
-			},
-		},
-	},
-	"sendMessage": {
-		parameters: []parameterDefinition{
-			{
-				name:      "contact",
-				validType: Variable,
-				key:       "WFSendMessageActionRecipients",
-			},
-			{
-				name:      "message",
-				validType: String,
-				key:       "WFSendMessageContent",
-			},
-			{
-				name:         "prompt",
-				validType:    Bool,
-				key:          "ShowWhenRun",
-				defaultValue: true,
 			},
 		},
 	},
@@ -2253,7 +2186,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 			{
-				name:         "prompt",
+				name:         "askWhenRun",
 				validType:    Bool,
 				key:          "WFOpenInAskWhenRun",
 				defaultValue: false,
@@ -2447,7 +2380,6 @@ var actions = map[string]*actionDefinition{
 	"getCurrentSong": {},
 	"getLastImport":  {identifier: "getlatestphotoimport"},
 	"getLatestBursts": {
-		identifier: "getlatestbursts",
 		parameters: []parameterDefinition{
 			{
 				name:      "count",
@@ -4780,54 +4712,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"dismissSiri": {},
-	"isOnline": {
-		identifier: "getipaddress",
-		make: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFIPAddressSourceOption": "External",
-				"WFIPAddressTypeOption":   "IPv4",
-			}
-		},
-	},
-	"getLocalIP": {
-		identifier: "getipaddress",
-		parameters: []parameterDefinition{
-			{
-				name:         "type",
-				validType:    String,
-				key:          "WFIPAddressTypeOption",
-				enum:         ipTypes,
-				defaultValue: "IPv4",
-				optional:     true,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFIPAddressSourceOption": "Local",
-			}
-		},
-		outputType: String,
-	},
-	"getExternalIP": {
-		identifier:    "getipaddress",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:         "type",
-				validType:    String,
-				key:          "WFIPAddressTypeOption",
-				enum:         ipTypes,
-				defaultValue: "IPv4",
-				optional:     true,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFIPAddressSourceOption": "External",
-			}
-		},
-		outputType: String,
-	},
 	"getFirstItem": {
 		identifier:    "getitemfromlist",
 		defaultAction: true,
@@ -5402,168 +5286,6 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"airdrop": {
-		identifier: "airdropdocument",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-	},
-	"share": {
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: String,
-			},
-		},
-	},
-	"copyToClipboard": {
-		identifier: "setclipboard",
-		parameters: []parameterDefinition{
-			{
-				name:      "value",
-				key:       "WFInput",
-				validType: Variable,
-			},
-			{
-				name:         "local",
-				key:          "WFLocalOnly",
-				validType:    Bool,
-				optional:     true,
-				defaultValue: false,
-			},
-			{
-				name:      "expire",
-				key:       "WFExpirationDate",
-				validType: String,
-				optional:  true,
-			},
-		},
-	},
-	"getClipboard": {},
-	"getURLHeaders": {
-		identifier: "url.getheaders",
-		parameters: []parameterDefinition{
-			{
-				name:      "url",
-				validType: String,
-				key:       "WFInput",
-			},
-		},
-	},
-	"openURL": {
-		parameters: []parameterDefinition{
-			{
-				name:      "url",
-				validType: String,
-				key:       "WFInput",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"Show-WFInput": true,
-			}
-		},
-	},
-	"runJavaScriptOnWebpage": {
-		parameters: []parameterDefinition{
-			{
-				name:      "javascript",
-				validType: String,
-				key:       "WFJavaScript",
-			},
-		},
-	},
-	"searchWeb": {
-		parameters: []parameterDefinition{
-			{
-				name:      "engine",
-				validType: String,
-				key:       "WFSearchWebDestination",
-				enum:      engines,
-			},
-			{
-				name:      "query",
-				validType: String,
-				key:       "WFInputText",
-			},
-		},
-	},
-	"showWebpage": {
-		parameters: []parameterDefinition{
-			{
-				name:      "url",
-				validType: String,
-				key:       "WFURL",
-			},
-			{
-				name:      "useReader",
-				validType: Bool,
-				key:       "WFEnterSafariReader",
-				optional:  true,
-			},
-		},
-	},
-	"getRSSFeeds": {
-		identifier: "rss.extract",
-		parameters: []parameterDefinition{
-			{
-				name:      "urls",
-				validType: String,
-				key:       "WFURLs",
-			},
-		},
-	},
-	"getRSS": {
-		identifier: "rss",
-		parameters: []parameterDefinition{
-			{
-				name:      "items",
-				validType: Integer,
-				key:       "WFRSSItemQuantity",
-			},
-			{
-				name:      "url",
-				validType: String,
-				key:       "WFRSSFeedURL",
-			},
-		},
-	},
-	"getWebPageDetail": {
-		identifier: "properties.safariwebpage",
-		parameters: []parameterDefinition{
-			{
-				name:      "webpage",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:      "detail",
-				validType: String,
-				key:       "WFContentItemPropertyName",
-				enum:      webpageDetails,
-			},
-		},
-	},
-	"getArticleDetail": {
-		identifier: "properties.articles",
-		parameters: []parameterDefinition{
-			{
-				name:      "article",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:      "detail",
-				validType: String,
-				key:       "WFContentItemPropertyName",
-			},
-		},
-	},
 	"getWifiDetail": {
 		identifier: "getwifi",
 		parameters: []parameterDefinition{
@@ -5594,110 +5316,6 @@ var actions = map[string]*actionDefinition{
 		addParams: func(args []actionArgument) map[string]any {
 			return map[string]any{
 				"WFNetworkDetailsNetwork": "Cellular",
-			}
-		},
-	},
-	"getCurrentURL": {
-		identifier: "safari.geturl",
-	},
-	"getWebpageContents": {
-		identifier: "getwebpagecontents",
-		parameters: []parameterDefinition{
-			{
-				name:      "url",
-				validType: String,
-				key:       "WFInput",
-			},
-		},
-	},
-	"searchGiphy": {
-		identifier: "giphy",
-		parameters: []parameterDefinition{
-			{
-				name:      "query",
-				validType: String,
-				key:       "WFGiphyQuery",
-			},
-		},
-	},
-	"getGifs": {
-		identifier:    "giphy",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "query",
-				validType: String,
-				key:       "WFGiphyQuery",
-			},
-			{
-				name:         "gifs",
-				validType:    Integer,
-				key:          "WFGiphyLimit",
-				defaultValue: 1,
-				optional:     true,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFGiphyShowPicker": false,
-			}
-		},
-	},
-	"getArticle": {
-		identifier: "getarticle",
-		parameters: []parameterDefinition{
-			{
-				name:      "webpage",
-				validType: String,
-				key:       "WFWebPage",
-			},
-		},
-	},
-	"expandURL": {
-		identifier: "url.expand",
-		parameters: []parameterDefinition{
-			{
-				name:      "url",
-				validType: String,
-				key:       "URL",
-			},
-		},
-	},
-	"getURLDetail": {
-		identifier: "geturlcomponent",
-		parameters: []parameterDefinition{
-			{
-				name:      "url",
-				validType: String,
-				key:       "WFURL",
-			},
-			{
-				name:      "detail",
-				validType: String,
-				key:       "WFURLComponent",
-				enum:      urlComponents,
-			},
-		},
-	},
-	"downloadURL": {
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "url",
-				validType: String,
-				key:       "WFURL",
-			},
-			{
-				name:      "headers",
-				validType: Dict,
-				key:       "WFHTTPHeaders",
-				optional:  true,
-				literal:   true,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFHTTPMethod": "GET",
 			}
 		},
 	},
@@ -6223,6 +5841,41 @@ func handleRawParams(params map[string]interface{}) {
 		}
 		params[key] = attachmentValues(value.(string))
 	}
+}
+
+var defaultActionIncludes = []string{
+	// "calendar",
+	// "contacts",
+	// "documents",
+	// "location",
+	// "math",
+	// "media",
+	// "scripting",
+	"sharing",
+	// "settings",
+	// "shortcuts",
+	// "translation",
+	"web",
+}
+
+func loadStandardActions() {
+	includeStandardActions()
+	preParse()
+}
+
+var includedStandardActions bool
+
+func includeStandardActions() {
+	if includedStandardActions {
+		return
+	}
+	var actionIncludes []string
+	for _, actionInclude := range defaultActionIncludes {
+		actionIncludes = append(actionIncludes, fmt.Sprintf("#include 'actions/%s'\n", actionInclude))
+	}
+	lines = append(actionIncludes, lines...)
+	resetParse()
+	includedStandardActions = true
 }
 
 type contentKit string

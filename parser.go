@@ -98,16 +98,26 @@ func initParse() {
 	}
 }
 
+func markBuiltins() {
+	for _, action := range actions {
+		action.builtin = true
+	}
+}
+
 func preParse() {
 	preParsing = true
 
-	defineRawAction()
 	waitFor(
 		defineToggleSetActions,
-		handleIncludes,
+		markBuiltins,
 	)
+	defineRawAction()
+
+	includeStandardActions()
+	handleIncludes()
 
 	handleCopyPastes()
+	handleActionDefinitions()
 	handleCustomActions()
 
 	writeProcessed()
@@ -117,9 +127,6 @@ func preParse() {
 
 func writeProcessed() {
 	if !args.Using("debug") {
-		return
-	}
-	if len(included) == 0 && len(customActions) == 0 && len(pasteables) == 0 {
 		return
 	}
 
@@ -205,8 +212,6 @@ func parse() {
 		collectConditionals()
 	case tokenAhead(RightBrace):
 		collectEndStatement()
-	case tokenAhead(Enumeration):
-		collectEnumeration()
 	case strings.Contains(lookAheadUntil(' '), "("):
 		collectActionCall()
 	default:
@@ -451,6 +456,8 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 }
 
 func collectEnumeration() {
+	var lineRef = newLineReference()
+
 	advance()
 	if enumerations == nil {
 		enumerations = make(map[string][]string)
@@ -479,6 +486,8 @@ func collectEnumeration() {
 			advance()
 		}
 	}
+
+	lineRef.replaceLines()
 
 	enumerations[identifier] = enumeration
 	advance()
@@ -732,59 +741,6 @@ func collectDefinition() {
 			var list = makeKeyList("Available versions:", versions, collectVersion)
 			parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
 		}
-	case tokenAhead(Action):
-		advance()
-		collectDefinedAction()
-	}
-}
-
-func collectDefinedAction() {
-	var shortIdentifier string
-	var overrideIdentifier string
-	if char == '\'' {
-		advance()
-
-		var workflowIdentifier = collectRawString()
-		if len(strings.Split(workflowIdentifier, ".")) < 4 {
-			shortIdentifier = workflowIdentifier
-		} else {
-			overrideIdentifier = workflowIdentifier
-		}
-		advance()
-	}
-
-	var identifier, arguments, outputType = collectActionDefinition('\n')
-	if !usingAction(contents, identifier) {
-		return
-	}
-	if shortIdentifier == "" {
-		shortIdentifier = identifier
-	}
-
-	skipWhitespace()
-
-	var addParams paramsFunc
-	if char == '{' {
-		advance()
-		var dict = collectDictionary()
-		addParams = func(args []actionArgument) map[string]any {
-			handleRawParams(dict.(map[string]interface{}))
-			return dict.(map[string]any)
-		}
-	}
-
-	actions[identifier] = &actionDefinition{
-		identifier:         shortIdentifier,
-		overrideIdentifier: overrideIdentifier,
-		parameters:         arguments,
-		outputType:         outputType,
-		addParams:          addParams,
-	}
-
-	if args.Using("debug") {
-		setCurrentAction(identifier, actions[identifier])
-		fmt.Println("\ndefined:", currentAction.appIdentifier, generateActionDefinition(parameterDefinition{}, true, true))
-		fmt.Print("\n")
 	}
 }
 
