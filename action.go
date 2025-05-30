@@ -695,7 +695,7 @@ func collectDefinedAction() {
 		shortIdentifier = identifier
 	}
 
-	advanceTimes(2)
+	advance()
 
 	var addParams paramsFunc
 	if char == '{' {
@@ -803,8 +803,8 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			if defaultValueType != valueType {
 				parserError(fmt.Sprintf("Invalid default value of type '%s' for '%s' type argument '%s'", defaultValueType, valueType, identifier))
 			}
-			advance()
-		case ',':
+		}
+		if char == ',' {
 			advance()
 		}
 
