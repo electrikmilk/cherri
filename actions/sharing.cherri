@@ -8,7 +8,11 @@ Sharing Actions
 
 #define action getClipboard()
 
-#define action setClipboard(variable value: 'WFInput', bool ?local: 'WFLocalOnly' = false, text ?expire: 'WFExpirationDate')
+#define action setClipboard(
+    variable value: 'WFInput',
+    bool ?local: 'WFLocalOnly' = false,
+    text ?expire: 'WFExpirationDate'
+)
 
 /* Email & SMS messaging */
 
