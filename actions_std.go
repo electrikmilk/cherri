@@ -6135,13 +6135,19 @@ func loadStandardActions() {
 	preParse()
 }
 
+var includedStandardActions bool
+
 func includeStandardActions() {
+	if includedStandardActions {
+		return
+	}
 	var actionIncludes []string
 	for _, actionInclude := range defaultActionIncludes {
 		actionIncludes = append(actionIncludes, fmt.Sprintf("#include 'actions/%s'\n", actionInclude))
 	}
 	lines = append(actionIncludes, lines...)
 	resetParse()
+	includedStandardActions = true
 }
 
 type contentKit string
