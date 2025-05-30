@@ -106,5 +106,4 @@ const (
 	Colon          tokenType = ":"
 	And            tokenType = "&&"
 	Or             tokenType = "||"
-	Ellipsis       tokenType = "..."
 )
