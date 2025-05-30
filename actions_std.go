@@ -2186,7 +2186,7 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 			{
-				name:         "prompt",
+				name:         "askWhenRun",
 				validType:    Bool,
 				key:          "WFOpenInAskWhenRun",
 				defaultValue: false,
@@ -2380,7 +2380,6 @@ var actions = map[string]*actionDefinition{
 	"getCurrentSong": {},
 	"getLastImport":  {identifier: "getlatestphotoimport"},
 	"getLatestBursts": {
-		identifier: "getlatestbursts",
 		parameters: []parameterDefinition{
 			{
 				name:      "count",
