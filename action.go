@@ -695,7 +695,7 @@ func collectDefinedAction() {
 		shortIdentifier = identifier
 	}
 
-	skipWhitespace()
+	advanceTimes(2)
 
 	var addParams paramsFunc
 	if char == '{' {
