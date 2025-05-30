@@ -107,6 +107,13 @@ func setCurrentAction(identifier string, definition *actionDefinition) {
 
 // undefinable checks if the current action cannot be defined using only Cherri because of the way it is defined.
 func undefinable() bool {
+	if currentAction.addParams != nil {
+		var addedParams = currentAction.addParams([]actionArgument{})
+		if len(addedParams) == 0 {
+			return true
+		}
+	}
+
 	return currentAction.builtin || currentAction.make != nil || currentAction.check != nil || currentAction.decomp != nil || currentAction.appIntent != emptyAppIntent
 }
 
