@@ -1,0 +1,115 @@
+/*
+Web Actions
+*/
+
+/* URLs */
+
+#define action openURL(text url: 'WFInput') {
+	"Show-WFInput": true
+}
+
+#define action 'url.expand' expandURL(text url: 'URL')
+
+#define action 'detect.link' getURLs(text input: 'WFInput'): array
+
+enum URLDetail {
+	'Scheme',
+	'User',
+	'Password',
+	'Host',
+	'Port',
+	'Path',
+	'Query',
+	'Fragment',
+}
+
+#define action 'geturlcomponent' getURLDetail(text url: 'WFURL', URLDetail detail: 'WFURLComponent')
+
+#define action 'url.getheaders' getURLHeaders(text url: 'WFInput')
+
+#define action 'urlencode' urlEncode(text input: 'WFInput'): text {
+	"WFEncodeMode": "Encode"
+}
+
+#define action 'urlencode' urlDecode(text input: 'WFInput'): text {
+	"WFEncodeMode": "Decode"
+}
+
+/* Safari */
+
+#define action 'safari.geturl' getCurrentURL()
+
+#define action showWebpage(text url: 'WFURL', bool ?useReader: 'WFEnterSafariReader')
+
+#define action runJavaScriptOnWebpage(text javascript: 'WFJavaScript')
+
+enum webpageDetail {
+	'Page Contents',
+	'Page Selection',
+	'Page URL',
+	'Name',
+}
+
+#define action 'properties.safariwebpage' getWebPageDetail(variable webpage: 'WFInput', webpageDetail detail: 'WFContentItemPropertyName')
+
+enum searchEngine {
+	'Amazon',
+	'Bing',
+	'DuckDuckGo',
+	'eBay',
+	'Google',
+	'Reddit',
+	'Twitter',
+	'Yahoo!',
+	'YouTube',
+}
+
+#define action searchWeb(searchEngine engine: 'WFSearchWebDestination', text query: 'WFInputText')
+
+/* IP Address */
+
+enum IPTypes {
+ 'IPv4',
+ 'IPv6',
+}
+
+#define action 'getipaddress' getLocalIP(IPTypes ?type: 'WFIPAddressTypeOption' = "IPv4"): text {
+	"WFIPAddressSourceOption": "Local"
+}
+
+#define action 'getipaddress' getExternalIP(IPTypes ?type: 'WFIPAddressTypeOption' = "IPv4"): text {
+	"WFIPAddressSourceOption": "External"
+}
+
+#define action 'getipaddress' isOnline() {
+	"WFIPAddressSourceOption": "External",
+    "WFIPAddressTypeOption": "IPv4"
+}
+
+/* Giphy */
+
+#define action 'giphy' searchGiphy(text query: 'WFGiphyQuery')
+
+#define action 'giphy' getGifs(text query: 'WFGiphyQuery', number ?gifs: 'WFGiphyLimit' = 1) {
+	"WFGiphyShowPicker": false
+}
+
+/* Articles */
+
+#define action 'getarticle' getArticle(text webpage: 'WFWebPage')
+
+#define action 'properties.articles' getArticleDetail(variable article: 'WFInput', text detail: 'WFContentItemPropertyName')
+
+/* RSS */
+
+#define action 'rss' getRSS(number items: 'WFRSSItemQuantity', text url: 'WFRSSFeedURL')
+
+#define action 'rss.extract' getRSSFeeds(text urls: 'WFURLs')
+
+/* HTTP */
+
+#define action downloadURL(text url: 'WFURL', dictionary ?headers: 'WFHTTPHeaders') {
+	"WFHTTPMethod": "GET"
+}
+
+#define action 'getwebpagecontents' getWebpageContents(text url: 'WFInput')
