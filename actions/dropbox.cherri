@@ -1,3 +1,7 @@
+/*
+3rd Party Actions: Dropbox
+*/
+
 #define action 'dropbox.savefile' saveToDropbox(
     variable file: 'WFInput',
     text path: 'WFFileDestinationPath',
