@@ -499,18 +499,8 @@ func makeMeasurementUnits() {
 func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) string {
 	var definition strings.Builder
 
-	for _, param := range currentAction.parameters {
-		if param.enum != nil {
-			definition.WriteString(fmt.Sprintf("enum %s%ss {\n", currentActionIdentifier, capitalize(param.name)))
-			for i, enum := range param.enum {
-				var enumSize = len(param.enum)
-				definition.WriteString(fmt.Sprintf(" '%s'", enum))
-				if i < enumSize+1 {
-					definition.WriteString(",\n")
-				}
-			}
-			definition.WriteString("}\n")
-		}
+	if showEnums {
+		definition.WriteString(generateActionParamEnums(focus))
 	}
 
 	var cannotDef = undefinable()
@@ -539,19 +529,18 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 
 	if !cannotDef && currentAction.addParams != nil {
 		var addParams = currentAction.addParams([]actionArgument{})
-		if addParams != nil {
+		if len(addParams) != 0 {
 			var jsonBytes, jsonErr = json.MarshalIndent(addParams, strings.Repeat("\t", tabLevel), "\t")
 			handle(jsonErr)
 			definition.WriteString(fmt.Sprintf(" %s", string(jsonBytes)))
 		}
 	}
 
+	definition.WriteRune('\n')
+
 	if !args.Using("no-ansi") {
 		if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
 			definition.WriteString(generateActionRestrictions())
-		}
-		if showEnums {
-			definition.WriteString(generateActionParamEnums(focus))
 		}
 	}
 
@@ -580,7 +569,6 @@ func generateActionRestrictions() string {
 
 func generateActionParamEnums(focus parameterDefinition) string {
 	var definition strings.Builder
-	var hasEnum = false
 	for _, param := range currentAction.parameters {
 		if param.enum == nil {
 			continue
@@ -588,15 +576,16 @@ func generateActionParamEnums(focus parameterDefinition) string {
 		if focus.name != "" && focus.name != param.name {
 			continue
 		}
-		definition.WriteRune('\n')
-		hasEnum = true
-		definition.WriteString(ansi(fmt.Sprintf("\nAvailable %ss:\n", param.name), yellow))
-		for _, e := range param.enum {
-			definition.WriteString(fmt.Sprintf("- %s\n", e))
+		var enumIdentifier = fmt.Sprintf("%s%ss", currentActionIdentifier, capitalize(param.name))
+		definition.WriteString(fmt.Sprintf("enum %s {\n", enumIdentifier))
+		for i, enum := range param.enum {
+			var enumSize = len(param.enum)
+			definition.WriteString(fmt.Sprintf(" '%s'", enum))
+			if i < enumSize+1 {
+				definition.WriteString(",\n")
+			}
 		}
-	}
-	if hasEnum {
-		definition.WriteString(ansi("\nNote: Enum values are case-sensitive.", bold))
+		definition.WriteString("}\n\n")
 	}
 
 	return definition.String()
