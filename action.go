@@ -773,12 +773,9 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 		skipWhitespace()
 
 		var optional bool
-		var infinite bool
 		if char == '?' {
 			optional = true
 			advance()
-		} else if tokenAhead(Ellipsis) {
-			infinite = true
 		}
 
 		var identifier = collectIdentifier()
@@ -818,7 +815,6 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			key:          parameterKey,
 			validType:    valueType,
 			optional:     optional,
-			infinite:     infinite,
 			defaultValue: defaultValue,
 			enum:         enum,
 		})
