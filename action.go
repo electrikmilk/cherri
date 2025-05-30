@@ -606,7 +606,7 @@ func generateActionParamDefinition(param parameterDefinition) string {
 	}
 	definition.WriteString(param.name)
 
-	if param.key != "" {
+	if param.key != "" && param.key != param.name {
 		definition.WriteString(fmt.Sprintf(": '%s'", param.key))
 	}
 
@@ -785,6 +785,8 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			}
 			advance()
 			parameterKey = collectRawString()
+		} else {
+			parameterKey = identifier
 		}
 
 		skipWhitespace()
