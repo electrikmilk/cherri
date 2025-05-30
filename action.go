@@ -803,6 +803,7 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			if defaultValueType != valueType {
 				parserError(fmt.Sprintf("Invalid default value of type '%s' for '%s' type argument '%s'", defaultValueType, valueType, identifier))
 			}
+			advance()
 		case ',':
 			advance()
 		}
