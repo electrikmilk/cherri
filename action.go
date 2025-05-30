@@ -498,6 +498,21 @@ func makeMeasurementUnits() {
 
 func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) string {
 	var definition strings.Builder
+
+	for _, param := range currentAction.parameters {
+		if param.enum != nil {
+			definition.WriteString(fmt.Sprintf("enum %s%ss {\n", currentActionIdentifier, capitalize(param.name)))
+			for i, enum := range param.enum {
+				var enumSize = len(param.enum)
+				definition.WriteString(fmt.Sprintf(" '%s'", enum))
+				if i < enumSize+1 {
+					definition.WriteString(",\n")
+				}
+			}
+			definition.WriteString("}\n")
+		}
+	}
+
 	var cannotDef = undefinable()
 	if !cannotDef {
 		definition.WriteString("#define action ")
@@ -524,9 +539,11 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 
 	if !cannotDef && currentAction.addParams != nil {
 		var addParams = currentAction.addParams([]actionArgument{})
-		var jsonBytes, jsonErr = json.MarshalIndent(addParams, strings.Repeat("\t", tabLevel), "\t")
-		handle(jsonErr)
-		definition.WriteString(fmt.Sprintf(" %s", string(jsonBytes)))
+		if addParams != nil {
+			var jsonBytes, jsonErr = json.MarshalIndent(addParams, strings.Repeat("\t", tabLevel), "\t")
+			handle(jsonErr)
+			definition.WriteString(fmt.Sprintf(" %s", string(jsonBytes)))
+		}
 	}
 
 	if !args.Using("no-ansi") {
@@ -590,7 +607,7 @@ func generateActionParamDefinition(param parameterDefinition) string {
 	if param.enum == nil {
 		definition.WriteString(fmt.Sprintf("%s ", param.validType))
 	} else {
-		definition.WriteString("enum ")
+		definition.WriteString(fmt.Sprintf("%s%ss ", currentActionIdentifier, capitalize(param.name)))
 	}
 	if param.infinite {
 		definition.WriteString("...")
