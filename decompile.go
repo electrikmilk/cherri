@@ -255,7 +255,9 @@ var identifierMap map[string][]actionValue
 
 // mapSplitActions creates a map of actions that have been split into a few actions to reduce the number of arguments.
 func mapSplitActions() {
-	identifierMap = make(map[string][]actionValue)
+	if identifierMap == nil {
+		identifierMap = make(map[string][]actionValue)
+	}
 	for identifier, action := range actions {
 		var ident = action.identifier
 		if action.identifier == "" {
@@ -264,10 +266,15 @@ func mapSplitActions() {
 
 		ident = strings.ToLower(ident)
 
-		identifierMap[ident] = append(identifierMap[ident], actionValue{
+		var splitActionValue = actionValue{
 			identifier: identifier,
 			definition: action,
-		})
+		}
+		if identifierMap[ident] != nil && slices.Contains(identifierMap[ident], splitActionValue) {
+			continue
+		}
+
+		identifierMap[ident] = append(identifierMap[ident], splitActionValue)
 	}
 	for identifier, actions := range identifierMap {
 		if len(actions) < 2 {
