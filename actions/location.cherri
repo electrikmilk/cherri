@@ -1,0 +1,85 @@
+/*
+Location Actions
+*/
+
+enum locationDetail {
+    'Name',
+    'URL',
+    'Label',
+    'Phone Number',
+    'Region',
+    'ZIP Code',
+    'State',
+    'City',
+    'Street',
+    'Altitude',
+    'Longitude',
+    'Latitude',
+}
+
+#define action 'location' getCurrentLocation() {
+	"WFLocation": {
+		"isCurrentLocation": true
+	}
+}
+
+#define action 'properties.locations' getLocationDetail(variable location: 'WFInput', locationDetail detail: 'WFContentItemPropertyName')
+
+/* Addresses */
+
+#define action 'detect.address' getAddresses(variable input: 'WFInput')
+
+#define action 'address' streetAddress(
+    text addressLine2: 'WFAddressLine1',
+    text addressLine2: 'WFAddressLine2',
+    text city: 'WFCity',
+    text state: 'WFState',
+    text country: 'WFCountry',
+    number zipCode: 'WFPostalCode'
+)
+
+/* Maps */
+
+#define action 'searchmaps' openInMaps(variable location: 'WFInput')
+
+#define action getMapsLink(variable location: 'WFInput')
+
+#define action getHalfwayPoint(variable firstLocation: 'WFGetHalfwayPointFirstLocation', variable secondLocation: 'WFGetHalfwayPointSecondLocation')
+
+/* Weather */
+
+enum weatherDetail {
+	'Name',
+	'Air Pollutants',
+	'Air Quality Category',
+	'Air Quality Index',
+	'Sunset Time',
+	'Sunrise Time',
+	'UV Index',
+	'Wind Direction',
+	'Wind Speed',
+	'Precipitation Chance',
+	'Precipitation Amount',
+	'Pressure',
+	'Humidity',
+	'Dewpoint',
+	'Visibility',
+	'Condition',
+	'Feels Like',
+	'Low',
+	'High',
+	'Temperature',
+	'Location',
+	'Date',
+}
+
+enum weatherForecastTypes {
+    'Daily',
+    'Hourly',
+}
+
+#define action 'weather.currentconditions' getCurrentWeather(text ?location: 'WFWeatherCustomLocation' = "Current Location")
+
+#define action 'weather.forecast' getWeatherForecast(weatherForecastTypes ?type: 'WFWeatherForecastType' = "Daily", text ?location: 'WFInput' = "Current Location")
+
+#define action 'properties.weather.conditions' getWeatherDetail(variable weather: 'WFInput', weatherDetail detail: 'WFContentItemPropertyName')
