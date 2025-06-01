@@ -1151,8 +1151,7 @@ var actions = map[string]*actionDefinition{
 		parameters: []parameterDefinition{
 			{
 				name:      "folder",
-				validType: Variable,
-				key:       "WFFile",
+				validType: String,
 			},
 			{
 				name:      "path",
@@ -1166,6 +1165,30 @@ var actions = map[string]*actionDefinition{
 				defaultValue: true,
 				optional:     true,
 			},
+		},
+		addParams: func(args []actionArgument) map[string]any {
+			var folderPath = getArgValue(args[0])
+			var pathParts = strings.Split(folderPath.(string), "/")
+			var fileLocationType = pathParts[0]
+
+			var filename = end(pathParts)
+			slices.Delete(pathParts, 0, len(pathParts)-1)
+			folderPath = strings.Trim(strings.Join(pathParts, "/"), "/")
+			var fileLocation = map[string]any{
+				"relativeSubpath": folderPath,
+			}
+
+			if fileLocationType == "~" {
+				fileLocation["WFFileLocationType"] = "Home"
+			}
+
+			return map[string]any{
+				"WFFile": map[string]any{
+					"fileLocation": fileLocation,
+					"filename":     filename,
+					"displayName":  filename,
+				},
+			}
 		},
 	},
 	"getFile": {
