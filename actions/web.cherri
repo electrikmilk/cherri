@@ -27,7 +27,7 @@ enum URLDetail {
 
 #define action 'url.getheaders' getURLHeaders(text url: 'WFInput')
 
-#define action 'urlencode' urlEncode(text input: 'WFInput'): text {
+#define action default 'urlencode' urlEncode(text input: 'WFInput'): text {
 	"WFEncodeMode": "Encode"
 }
 
@@ -73,12 +73,12 @@ enum IPTypes {
  'IPv6',
 }
 
-#define action 'getipaddress' getLocalIP(IPTypes ?type: 'WFIPAddressTypeOption' = "IPv4"): text {
-	"WFIPAddressSourceOption": "Local"
+#define action default 'getipaddress' getExternalIP(IPTypes ?type: 'WFIPAddressTypeOption' = "IPv4"): text {
+	"WFIPAddressSourceOption": "External"
 }
 
-#define action 'getipaddress' getExternalIP(IPTypes ?type: 'WFIPAddressTypeOption' = "IPv4"): text {
-	"WFIPAddressSourceOption": "External"
+#define action 'getipaddress' getLocalIP(IPTypes ?type: 'WFIPAddressTypeOption' = "IPv4"): text {
+	"WFIPAddressSourceOption": "Local"
 }
 
 #define action 'getipaddress' isOnline() {
@@ -88,11 +88,11 @@ enum IPTypes {
 
 /* Giphy */
 
-#define action 'giphy' searchGiphy(text query: 'WFGiphyQuery')
-
-#define action 'giphy' getGifs(text query: 'WFGiphyQuery', number ?gifs: 'WFGiphyLimit' = 1) {
+#define action default 'giphy' getGifs(text query: 'WFGiphyQuery', number ?gifs: 'WFGiphyLimit' = 1) {
 	"WFGiphyShowPicker": false
 }
+
+#define action 'giphy' searchGiphy(text query: 'WFGiphyQuery')
 
 /* Articles */
 
@@ -108,7 +108,7 @@ enum IPTypes {
 
 /* HTTP */
 
-#define action downloadURL(text url: 'WFURL', dictionary ?headers: 'WFHTTPHeaders') {
+#define action default downloadURL(text url: 'WFURL', dictionary ?headers: 'WFHTTPHeaders') {
 	"WFHTTPMethod": "GET"
 }
 
