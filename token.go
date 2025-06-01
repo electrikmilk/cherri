@@ -33,6 +33,7 @@ const (
 	Action         tokenType = "action"
 	Copy           tokenType = "copy"
 	Paste          tokenType = "paste"
+	Default        tokenType = "default"
 )
 
 /* Definitions */

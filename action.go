@@ -676,6 +676,12 @@ func parseActionDefinitions() {
 func collectDefinedAction() {
 	var lineRef = newLineReference()
 
+	var defaultAction bool
+	if tokenAhead(Default) {
+		defaultAction = true
+		advance()
+	}
+
 	var shortIdentifier string
 	var overrideIdentifier string
 	if char == '\'' {
@@ -715,6 +721,7 @@ func collectDefinedAction() {
 		parameters:         arguments,
 		outputType:         outputType,
 		addParams:          addParams,
+		defaultAction:      defaultAction,
 	}
 
 	if args.Using("debug") {
