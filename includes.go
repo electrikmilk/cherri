@@ -95,7 +95,7 @@ func parseInclude() {
 	var includePath = collectIncludePath()
 
 	if slices.Contains(included, includePath) {
-		parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
+		parserError(fmt.Sprintf("Path '%s' has already been included.", includePath))
 	}
 
 	var includeFileBytes []byte
