@@ -1,0 +1,4 @@
+enum abcSortOrder {
+ 'A to Z',
+ 'Z to A',
+}

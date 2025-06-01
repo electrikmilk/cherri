@@ -634,45 +634,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"filterContacts": {
-		identifier: "filter.contacts",
-		parameters: []parameterDefinition{
-			{
-				name:      "contacts",
-				validType: Variable,
-				key:       "WFContentItemInputParameter",
-			},
-			{
-				name:      "sortByProperty",
-				validType: String,
-				key:       "WFContentItemSortProperty",
-				enum:      contactDetails,
-				optional:  true,
-			},
-			{
-				name:         "sortOrder",
-				validType:    String,
-				key:          "WFContentItemSortOrder",
-				defaultValue: "A to Z",
-				enum:         abcSortOrders,
-				optional:     true,
-			},
-			{
-				name:      "limit",
-				validType: Integer,
-				key:       "WFContentItemLimitNumber",
-				optional:  true,
-			},
-		},
-		addParams: func(args []actionArgument) (params map[string]any) {
-			if len(args) == 4 {
-				return map[string]any{
-					"WFContentItemLimitEnabled": true,
-				}
-			}
-			return
-		},
-	},
 	"emailAddress": {
 		identifier: "email",
 		parameters: []parameterDefinition{
@@ -728,74 +689,6 @@ var actions = map[string]*actionDefinition{
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			return decompContactValue(action, "WFPhoneNumber", phoneNumber)
-		},
-	},
-	"selectContact": {
-		identifier: "selectcontacts",
-		parameters: []parameterDefinition{
-			{
-				name:         "multiple",
-				validType:    Bool,
-				defaultValue: false,
-				key:          "WFSelectMultiple",
-			},
-		},
-	},
-	"selectEmailAddress": {
-		identifier: "selectemail",
-	},
-	"selectPhoneNumber": {
-		identifier: "selectphone",
-	},
-	"getContactDetail": {
-		identifier: "properties.contacts",
-		parameters: []parameterDefinition{
-			{
-				name:      "contact",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:      "property",
-				validType: String,
-				key:       "WFContentItemPropertyName",
-				enum:      contactDetails,
-			},
-		},
-	},
-	"call": {
-		appIdentifier: "com.apple.mobilephone",
-		identifier:    "call",
-		parameters: []parameterDefinition{
-			{
-				name:      "contact",
-				validType: Variable,
-				key:       "WFCallContact",
-			},
-		},
-	},
-	"facetimeCall": {
-		appIdentifier: "com.apple.facetime",
-		identifier:    "facetime",
-		parameters: []parameterDefinition{
-			{
-				name:      "contact",
-				validType: Variable,
-				key:       "WFFaceTimeContact",
-			},
-			{
-				name:         "type",
-				validType:    String,
-				key:          "WFFaceTimeType",
-				defaultValue: "Video",
-				enum:         facetimeCallTypes,
-				optional:     true,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFFaceTimeType": "Video",
-			}
 		},
 	},
 	"newContact": {
@@ -4612,39 +4505,6 @@ var actions = map[string]*actionDefinition{
 		},
 		outputType: String,
 	},
-	"getContacts": {
-		identifier: "detect.contacts",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-		outputType: Arr,
-	},
-	"getEmails": {
-		identifier: "detect.emailaddress",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: String,
-			},
-		},
-		outputType: Arr,
-	},
-	"getPhoneNumbers": {
-		identifier: "detect.phonenumber",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-		outputType: Arr,
-	},
 	"getAllWallpapers": {
 		identifier:    "posters.get",
 		minVersion:    16.2,
@@ -5597,6 +5457,7 @@ func handleRawParams(params map[string]interface{}) {
 }
 
 var defaultActionIncludes = []string{
+	"basic",
 	"calendar",
 	// "contacts",
 	// "documents",
