@@ -4205,50 +4205,6 @@ var actions = map[string]*actionDefinition{
 			return
 		},
 	},
-	"calculate": {
-		identifier: "math",
-		parameters: []parameterDefinition{
-			{
-				name:      "operation",
-				validType: String,
-				enum:      calculationOperations,
-				key:       "WFScientificMathOperation",
-			},
-			{
-				name:      "operandOne",
-				validType: Integer,
-				key:       "WFInput",
-			},
-			{
-				name:      "operandTwo",
-				validType: Integer,
-				key:       "WFMathOperand",
-				optional:  true,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFMathOperation": "...",
-			}
-		},
-		outputType: Integer,
-	},
-	"statistic": {
-		identifier: "statistics",
-		parameters: []parameterDefinition{
-			{
-				name:      "operation",
-				validType: String,
-				key:       "WFStatisticsOperation",
-				enum:      statisticsOperations,
-			},
-			{
-				name:      "input",
-				validType: Variable,
-				key:       "WFInput",
-			},
-		},
-	},
 	"dismissSiri": {},
 	"getFirstItem": {
 		identifier:    "getitemfromlist",
@@ -4569,75 +4525,6 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 				validType: Variable,
 			},
-		},
-	},
-	"round": {
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "number",
-				validType: Integer,
-				key:       "WFInput",
-			},
-			{
-				name:         "roundTo",
-				validType:    String,
-				key:          "WFRoundTo",
-				enum:         roundings,
-				optional:     true,
-				defaultValue: "Ones Place",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFRoundMode": "Normal",
-			}
-		},
-	},
-	"ceil": {
-		identifier: "round",
-		parameters: []parameterDefinition{
-			{
-				name:      "number",
-				validType: Integer,
-				key:       "WFInput",
-			},
-			{
-				name:         "roundTo",
-				validType:    String,
-				key:          "WFRoundTo",
-				enum:         roundings,
-				optional:     true,
-				defaultValue: "Ones Place",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFRoundMode": "Always Round Up",
-			}
-		},
-	},
-	"floor": {
-		identifier: "round",
-		parameters: []parameterDefinition{
-			{
-				name:      "number",
-				validType: Integer,
-				key:       "WFInput",
-			},
-			{
-				name:         "roundTo",
-				validType:    String,
-				key:          "WFRoundTo",
-				enum:         roundings,
-				optional:     true,
-				defaultValue: "Ones Place",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFRoundMode": "Always Round Down",
-			}
 		},
 	},
 	"runShellScript": {
@@ -5332,7 +5219,7 @@ var defaultActionIncludes = []string{
 	// "contacts",
 	// "documents",
 	"location",
-	// "math",
+	"math",
 	// "media",
 	// "scripting",
 	"sharing",
