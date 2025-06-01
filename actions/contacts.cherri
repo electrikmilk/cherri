@@ -26,7 +26,12 @@ enum contactDetail {
 
 #define action 'detect.contacts' getContacts(variable input: 'WFInput'): array
 
-#define action 'filter.contacts' filterContacts(variable contacts: 'WFContentItemInputParameter', contactDetail ?sortBy: 'WFContentItemSortProperty', abcSortOrder ?sortOrder: 'WFContentItemSortOrder' = "A to Z", number ?limit: 'WFContentItemLimitNumber')
+#define action 'filter.contacts' filterContacts(
+    variable contacts: 'WFContentItemInputParameter',
+    contactDetail ?sortBy: 'WFContentItemSortProperty',
+    abcSortOrder ?sortOrder: 'WFContentItemSortOrder' = "A to Z",
+    number ?limit: 'WFContentItemLimitNumber'
+)
 
 #define action 'properties.contacts' getContactDetail(variable contact: 'WFInput', contactDetail detail: 'WFContentItemPropertyName')
 
