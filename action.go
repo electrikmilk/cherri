@@ -592,7 +592,7 @@ func generateActionParamEnums(focus parameterDefinition) string {
 				definition.WriteString(",\n")
 			}
 		}
-		definition.WriteString("}\n\n")
+		definition.WriteString("}\n")
 	}
 
 	return definition.String()
