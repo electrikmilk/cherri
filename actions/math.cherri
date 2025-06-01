@@ -3,20 +3,20 @@ Math Actions
 */
 
 enum calculationOperation {
-	'x^2',
-	'х^3',
-	'x^у',
-	'e^x',
-	'10^x',
-	'In(x)',
-	'log(x)',
-	'√x',
-	'∛x',
-	'x!',
-	'sin(x)',
-	'cos(X)',
-	'tan(x)',
-	'abs(x)',
+    'x^2',
+    'х^3',
+    'x^у',
+    'e^x',
+    '10^x',
+    'In(x)',
+    'log(x)',
+    '√x',
+    '∛x',
+    'x!',
+    'sin(x)',
+    'cos(X)',
+    'tan(x)',
+    'abs(x)',
 }
 
 #define action 'math' calculate(
