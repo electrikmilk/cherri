@@ -772,28 +772,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"speak": {
-		identifier: "speaktext",
-		parameters: []parameterDefinition{
-			{
-				name:      "prompt",
-				validType: String,
-				key:       "WFText",
-			},
-			{
-				name:         "waitUntilFinished",
-				validType:    Bool,
-				key:          "WFSpeakTextWait",
-				defaultValue: true,
-			},
-			{
-				name:      "language",
-				validType: String,
-				key:       "WFSpeakTextLanguage",
-				optional:  true,
-			},
-		},
-	},
 	"listen": {
 		identifier: "dictatetext",
 		parameters: []parameterDefinition{
@@ -812,47 +790,6 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 				enum:      languages,
 			},
-		},
-	},
-	"prependToFile": {
-		identifier: "file.append",
-		parameters: []parameterDefinition{
-			{
-				name:      "filePath",
-				validType: String,
-				key:       "WFFilePath",
-			},
-			{
-				name:      "text",
-				validType: String,
-				key:       "WFInput",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFAppendFileWriteMode": "Prepend",
-			}
-		},
-	},
-	"appendToFile": {
-		identifier:    "file.append",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "filePath",
-				validType: String,
-				key:       "WFFilePath",
-			},
-			{
-				name:      "text",
-				validType: String,
-				key:       "WFInput",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFAppendFileWriteMode": "Append",
-			}
 		},
 	},
 	"labelFile": {
@@ -918,16 +855,6 @@ var actions = map[string]*actionDefinition{
 			return
 		},
 	},
-	"optimizePDF": {
-		identifier: "compresspdf",
-		parameters: []parameterDefinition{
-			{
-				name:      "pdfFile",
-				validType: Variable,
-				key:       "WFInput",
-			},
-		},
-	},
 	"getPDFText": {
 		identifier: "gettextfrompdf",
 		parameters: []parameterDefinition{
@@ -981,62 +908,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"makePDF": {
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:         "includeMargin",
-				validType:    Bool,
-				key:          "WFPDFIncludeMargin",
-				defaultValue: false,
-				optional:     true,
-			},
-			{
-				name:         "mergeBehavior",
-				validType:    String,
-				key:          "WFPDFDocumentMergeBehavior",
-				defaultValue: "Append",
-				enum:         pdfMergeBehaviors,
-				optional:     true,
-			},
-		},
-	},
-	"makeSpokenAudio": {
-		identifier: "makespokenaudiofromtext",
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				validType: String,
-				key:       "WFInput",
-			},
-			{
-				name:      "rate",
-				validType: Integer,
-				key:       "WFSpeakTextRate",
-				optional:  true,
-			},
-			{
-				name:      "pitch",
-				validType: Integer,
-				key:       "WFSpeakTextPitch",
-				optional:  true,
-			},
-		},
-	},
-	"createFolder": { // TODO: Writing to locations other than the Shortcuts folder.
-		identifier: "file.createfolder",
-		parameters: []parameterDefinition{
-			{
-				name:      "path",
-				validType: String,
-				key:       "WFFilePath",
-			},
-		},
-	},
 	"getFolderContents": {
 		identifier: "file.getfoldercontents",
 		parameters: []parameterDefinition{
@@ -1086,65 +957,6 @@ var actions = map[string]*actionDefinition{
 				args[1].value = fmt.Sprintf("^%s", textArg.value)
 			}
 		},
-	},
-	"matchText": {
-		identifier:    "text.match",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "regexPattern",
-				validType: String,
-				key:       "WFMatchTextPattern",
-			},
-			{
-				name:      "text",
-				validType: String,
-				key:       "text",
-			},
-			{
-				name:         "caseSensitive",
-				validType:    Bool,
-				key:          "WFMatchTextCaseSensitive",
-				defaultValue: true,
-				optional:     true,
-			},
-		},
-	},
-	"getMatchGroups": {
-		identifier: "text.match.getgroup",
-		parameters: []parameterDefinition{
-			{
-				name:      "matches",
-				validType: Variable,
-				key:       "matches",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFGetGroupType": "All Groups",
-			}
-		},
-	},
-	"getMatchGroup": {
-		identifier: "text.match.getgroup",
-		parameters: []parameterDefinition{
-			{
-				name:      "matches",
-				validType: Variable,
-				key:       "matches",
-			},
-			{
-				name:      "index",
-				validType: Integer,
-				key:       "WFGroupIndex",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFGetGroupType": "Group At Index",
-			}
-		},
-		defaultAction: true,
 	},
 	"getFileFromFolder": {
 		identifier: "documentpicker.open",
@@ -1209,243 +1021,6 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"markup": {
-		identifier: "avairyeditphoto",
-		parameters: []parameterDefinition{
-			{
-				name:      "document",
-				validType: Variable,
-				key:       "WFDocument",
-			},
-		},
-	},
-	"rename": {
-		identifier: "file.rename",
-		parameters: []parameterDefinition{
-			{
-				name:      "file",
-				validType: Variable,
-				key:       "WFFile",
-			},
-			{
-				name:      "newName",
-				validType: String,
-				key:       "WFNewFilename",
-			},
-		},
-	},
-	"reveal": {
-		identifier: "file.reveal",
-		parameters: []parameterDefinition{
-			{
-				name:      "files",
-				validType: Variable,
-				key:       "WFFile",
-			},
-		},
-	},
-	"define": {
-		identifier: "showdefinition",
-		parameters: []parameterDefinition{
-			{
-				name:      "word",
-				validType: String,
-				key:       "Word",
-			},
-		},
-	},
-	"makeQRCode": {
-		identifier: "generatebarcode",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: String,
-				key:       "WFText",
-			},
-			{
-				name:         "errorCorrection",
-				validType:    String,
-				key:          "WFQRErrorCorrectionLevel",
-				enum:         errorCorrectionLevels,
-				optional:     true,
-				defaultValue: "Medium",
-			},
-		},
-	},
-	"openNote": {
-		identifier: "shownote",
-		parameters: []parameterDefinition{
-			{
-				name:      "note",
-				validType: Variable,
-				key:       "WFInput",
-			},
-		},
-	},
-	"splitPDF": {
-		parameters: []parameterDefinition{
-			{
-				name:      "pdf",
-				validType: Variable,
-				key:       "WFInput",
-			},
-		},
-	},
-	"makeHTML": {
-		identifier: "gethtmlfromrichtext",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:         "makeFullDocument",
-				validType:    Bool,
-				key:          "WFMakeFullDocument",
-				defaultValue: false,
-				optional:     true,
-			},
-		},
-	},
-	"makeMarkdown": {
-		identifier: "getmarkdownfromrichtext",
-		parameters: []parameterDefinition{
-			{
-				name:      "richText",
-				validType: Variable,
-				key:       "WFInput",
-			},
-		},
-	},
-	"getRichTextFromHTML": {
-		parameters: []parameterDefinition{
-			{
-				name:      "html",
-				validType: Variable,
-				key:       "WFHTML",
-			},
-		},
-	},
-	"getRichTextFromMarkdown": {
-		parameters: []parameterDefinition{
-			{
-				name:      "markdown",
-				validType: Variable,
-				key:       "WFInput",
-			},
-		},
-	},
-	"print": {
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-				key:       "WFInput",
-			},
-		},
-	},
-	"selectFile": {
-		identifier:    "file.select",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:         "selectMultiple",
-				validType:    Bool,
-				key:          "SelectMultiple",
-				defaultValue: false,
-				optional:     true,
-			},
-		},
-	},
-	"selectFolder": {
-		identifier: "file.select",
-		parameters: []parameterDefinition{
-			{
-				name:         "selectMultiple",
-				validType:    Bool,
-				key:          "SelectMultiple",
-				defaultValue: false,
-				optional:     true,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return map[string]any{
-				"WFPickingMode": "Folders",
-			}
-		},
-	},
-	"getFileLink": {
-		identifier: "file.getlink",
-		parameters: []parameterDefinition{
-			{
-				name:      "file",
-				validType: Variable,
-				key:       "WFFile",
-			},
-		},
-	},
-	"getParentDirectory": {
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-				key:       "WFInput",
-			},
-		},
-	},
-	"getEmojiName": {
-		identifier: "getnameofemoji",
-		parameters: []parameterDefinition{
-			{
-				name:      "emoji",
-				validType: String,
-				key:       "WFInput",
-			},
-		},
-	},
-	"getFileDetail": {
-		identifier: "properties.files",
-		parameters: []parameterDefinition{
-			{
-				name:      "file",
-				validType: Variable,
-				key:       "WFFolder",
-			},
-			{
-				name:      "detail",
-				validType: String,
-				key:       "WFContentItemPropertyName",
-			},
-		},
-	},
-	"deleteFiles": {
-		identifier: "file.delete",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
-			},
-			{
-				name:         "immediately",
-				key:          "WFDeleteImmediatelyDelete",
-				validType:    Bool,
-				defaultValue: false,
-				optional:     true,
-			},
-		},
-	},
-	"getTextFromImage": {
-		identifier: "extracttextfromimage",
-		parameters: []parameterDefinition{
-			{
-				name:      "image",
-				validType: Variable,
-				key:       "WFImage",
-			},
-		},
-	},
 	"connectToServer": {
 		identifier: "connecttoservers",
 		parameters: []parameterDefinition{
@@ -1453,111 +1028,6 @@ var actions = map[string]*actionDefinition{
 				name:      "url",
 				validType: String,
 				key:       "WFInput",
-			},
-		},
-	},
-	"appendNote": {
-		parameters: []parameterDefinition{
-			{
-				name:      "note",
-				validType: String,
-				key:       "WFNote",
-			},
-			{
-				name:      "input",
-				validType: String,
-				key:       "WFInput",
-			},
-		},
-	},
-	"addToBooks": {
-		appIdentifier: "com.apple.iBooksX",
-		identifier:    "openin",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-				key:       "BooksInput",
-			},
-		},
-	},
-	"saveFile": {
-		identifier: "documentpicker.save",
-		parameters: []parameterDefinition{
-			{
-				name:      "path",
-				validType: String,
-				key:       "WFFileDestinationPath",
-			},
-			{
-				name:      "content",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:         "overwrite",
-				validType:    Bool,
-				key:          "WFSaveFileOverwrite",
-				defaultValue: false,
-				optional:     true,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFAskWhereToSave": false,
-			}
-		},
-	},
-	"saveFilePrompt": {
-		identifier:    "documentpicker.save",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "file",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:         "overwrite",
-				validType:    Bool,
-				key:          "WFSaveFileOverwrite",
-				defaultValue: false,
-				optional:     true,
-			},
-		},
-	},
-	"getSelectedFiles": {identifier: "finder.getselectedfiles"},
-	"extractArchive": {
-		identifier: "unzip",
-		parameters: []parameterDefinition{
-			{
-				name:      "file",
-				validType: Variable,
-				key:       "WFArchive",
-			},
-		},
-	},
-	"makeArchive": {
-		identifier: "makezip",
-		parameters: []parameterDefinition{
-			{
-				name:      "files",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:         "format",
-				validType:    String,
-				key:          "WFArchiveFormat",
-				enum:         archiveTypes,
-				optional:     true,
-				defaultValue: ".zip",
-			},
-			{
-				name:      "name",
-				validType: String,
-				key:       "WFZIPName",
-				optional:  true,
 			},
 		},
 	},
@@ -1570,139 +1040,6 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 			},
 		},
-	},
-	"replaceText": {
-		identifier: "text.replace",
-		parameters: []parameterDefinition{
-			{
-				name:      "find",
-				key:       "WFReplaceTextFind",
-				validType: String,
-			},
-			{
-				name:      "replacement",
-				key:       "WFReplaceTextReplace",
-				validType: String,
-			},
-			{
-				name:      "subject",
-				key:       "WFInput",
-				validType: String,
-			},
-			{
-				name:         "caseSensitive",
-				key:          "WFReplaceTextCaseSensitive",
-				validType:    Bool,
-				defaultValue: true,
-				optional:     true,
-			},
-			{
-				name:         "regExp",
-				key:          "WFReplaceTextRegularExpression",
-				validType:    Bool,
-				defaultValue: false,
-				optional:     true,
-			},
-		},
-		outputType: String,
-	},
-	"uppercase": {
-		identifier: "text.changecase",
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				key:       "text",
-				validType: String,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return changeCase("UPPERCASE")
-		},
-		defaultAction: true,
-	},
-	"lowercase": {
-		identifier: "text.changecase",
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				key:       "text",
-				validType: String,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return changeCase("lowercase")
-		},
-	},
-	"titleCase": {
-		identifier: "text.changecase",
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				key:       "text",
-				validType: String,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return changeCase("Capitalize with Title Case")
-		},
-		outputType: String,
-	},
-	"capitalize": {
-		identifier: "text.changecase",
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				key:       "text",
-				validType: String,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return changeCase("Capitalize with sentence case")
-		},
-		outputType: String,
-	},
-	"capitalizeAll": {
-		identifier: "text.changecase",
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				key:       "text",
-				validType: String,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return changeCase("Capitalize Every Word")
-		},
-		outputType: String,
-	},
-	"alternateCase": {
-		identifier: "text.changecase",
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				key:       "text",
-				validType: String,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return changeCase("cApItAlIzE wItH aLtErNaTiNg cAsE")
-		},
-		outputType: String,
-	},
-	"correctSpelling": {
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				validType: String,
-				key:       "text",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"Show-text": true,
-			}
-		},
-		outputType: String,
 	},
 	"splitText": {
 		identifier: "text.split",
@@ -1739,34 +1076,6 @@ var actions = map[string]*actionDefinition{
 		addParams:  textParts,
 		decomp:     decompTextParts,
 		outputType: String,
-	},
-	"makeDiskImage": {
-		parameters: []parameterDefinition{
-			{
-				name:      "name",
-				validType: String,
-				key:       "VolumeName",
-			},
-			{
-				name:      "contents",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:         "encrypt",
-				validType:    Bool,
-				key:          "EncryptImage",
-				optional:     true,
-				defaultValue: false,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"SizeToFit": true,
-			}
-		},
-		mac:        true,
-		minVersion: 15,
 	},
 	"makeSizedDiskImage": {
 		identifier:    "makediskimage",
@@ -1843,35 +1152,6 @@ var actions = map[string]*actionDefinition{
 		},
 		mac:        true,
 		minVersion: 15,
-	},
-	"openFile": {
-		identifier: "openin",
-		parameters: []parameterDefinition{
-			{
-				name:      "file",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:         "askWhenRun",
-				validType:    Bool,
-				key:          "WFOpenInAskWhenRun",
-				defaultValue: false,
-				optional:     true,
-			},
-		},
-	},
-	"transcribeText": {
-		appIdentifier: "com.apple.ShortcutsActions",
-		identifier:    "TranscribeAudioAction",
-		parameters: []parameterDefinition{
-			{
-				name:      "audioFile",
-				validType: Variable,
-				key:       "audioFile",
-			},
-		},
-		minVersion: 17,
 	},
 	"removeBackground": {
 		identifier: "image.removebackground",
@@ -4549,17 +3829,6 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"convertToUSDZ": {
-		appIdentifier: "com.apple.HydraUSDAppIntents",
-		identifier:    "ConvertToUSDZ",
-		parameters: []parameterDefinition{
-			{
-				name:      "file",
-				key:       "file",
-				validType: Variable,
-			},
-		},
-	},
 	"runSSHScript": {
 		parameters: []parameterDefinition{
 			{
@@ -5160,7 +4429,7 @@ var defaultActionIncludes = []string{
 	"basic",
 	"calendar",
 	// "contacts",
-	// "documents",
+	"documents",
 	"location",
 	"math",
 	// "media",
