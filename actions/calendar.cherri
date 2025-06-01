@@ -6,49 +6,49 @@ This is a broad category of calendars, reminders, clock, date, and time actions.
 
 /* Calendar app */
 
-#define action 'addnewcalendar' addCalendar(text name: 'CalendarName')
-
-#define action showInCalendar(variable event: 'WFEvent')
-
 enum eventDetail {
- 'Start Date',
- 'End Date',
- 'Is All Day',
- 'Calendar',
- 'Location',
- 'Has Alarms',
- 'Duration',
- 'Is Canceled',
- 'My Status',
- 'Organizer',
- 'Organizer Is Me',
- 'Attendees',
- 'Number of Attendees',
- 'URL',
- 'Title',
- 'Notes',
- 'Attachments',
- 'File Size',
- 'File Extension',
- 'Creation Date',
- 'File Path',
- 'Last Modified Date',
- 'Name',
+    'Start Date',
+    'End Date',
+    'Is All Day',
+    'Calendar',
+    'Location',
+    'Has Alarms',
+    'Duration',
+    'Is Canceled',
+    'My Status',
+    'Organizer',
+    'Organizer Is Me',
+    'Attendees',
+    'Number of Attendees',
+    'URL',
+    'Title',
+    'Notes',
+    'Attachments',
+    'File Size',
+    'File Extension',
+    'Creation Date',
+    'File Path',
+    'Last Modified Date',
+    'Name',
 }
 
 enum editEventDetail {
- 'Start Date',
- 'End Date',
- 'Is All Day',
- 'Location',
- 'Duration',
- 'My Status',
- 'Attendees',
- 'URL',
- 'Title',
- 'Notes',
- 'Attachments',
+    'Start Date',
+    'End Date',
+    'Is All Day',
+    'Location',
+    'Duration',
+    'My Status',
+    'Attendees',
+    'URL',
+    'Title',
+    'Notes',
+    'Attachments',
 }
+
+#define action 'addnewcalendar' addCalendar(text name: 'CalendarName')
+
+#define action showInCalendar(variable event: 'WFEvent')
 
 #define action 'setters.calendarevents' editEvent(variable event: 'WFInput', editEventDetail detail: 'WFContentItemPropertyName', text newValue: 'WFCalendarEventContentItemStartDate')
 
@@ -66,9 +66,7 @@ enum editEventDetail {
 
 #define action 'com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent' getAlarms()
 
-/*
-Dates
-*/
+/* Dates */
 
 #define action 'detect.date' getDates(variable input: 'WFInput'): array
 
@@ -80,9 +78,7 @@ Dates
     "WFDateActionMode": "Current Date"
 }
 
-/*
-Date formatting
-*/
+/* Date formatting */
 
 enum dateFormats {
 	'None',
