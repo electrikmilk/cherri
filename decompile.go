@@ -47,6 +47,8 @@ func decompile(b []byte) {
 		filePath = getOutputPath(relativePath + basename + ".cherri")
 	}
 
+	loadStandardActions()
+
 	mapVariables()
 	mapSplitActions()
 	waitFor(
