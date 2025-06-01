@@ -583,7 +583,7 @@ func generateActionParamEnums(focus parameterDefinition) string {
 		if focus.name != "" && focus.name != param.name {
 			continue
 		}
-		var enumIdentifier = fmt.Sprintf("%s%ss", currentActionIdentifier, capitalize(param.name))
+		var enumIdentifier = fmt.Sprintf("%s%s", currentActionIdentifier, capitalize(param.name))
 		definition.WriteString(fmt.Sprintf("enum %s {\n", enumIdentifier))
 		for i, enum := range param.enum {
 			var enumSize = len(param.enum)
