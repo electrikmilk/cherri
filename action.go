@@ -682,6 +682,12 @@ func collectDefinedAction() {
 		advance()
 	}
 
+	var macOnlyAction bool
+	if tokenAhead(Mac) {
+		macOnlyAction = true
+		advance()
+	}
+
 	var shortIdentifier string
 	var overrideIdentifier string
 	if char == '\'' {
@@ -722,6 +728,7 @@ func collectDefinedAction() {
 		outputType:         outputType,
 		addParams:          addParams,
 		defaultAction:      defaultAction,
+		mac:                macOnlyAction,
 	}
 
 	if args.Using("debug") {
