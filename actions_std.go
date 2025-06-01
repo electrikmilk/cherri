@@ -153,42 +153,8 @@ var createShortcutiCloudLink = appIntent{
 // actions is the data structure that determines every action the compiler knows about.
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
-	"date": {
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				validType: String,
-				key:       "WFDateActionDate",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFDateActionMode": "Specified Date",
-			}
-		},
-	},
 	"returnToHomescreen": {mac: false},
 	"vibrate":            {mac: false},
-	"currentDate": {
-		identifier:    "date",
-		defaultAction: true,
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFDateActionMode": "Current Date",
-			}
-		},
-	},
-	"addCalendar": {
-		identifier: "addnewcalendar",
-		parameters: []parameterDefinition{
-			{
-				name:      "name",
-				validType: String,
-				key:       "CalendarName",
-			},
-		},
-	},
 	"addSeconds": {
 		identifier:    "adjustdate",
 		defaultAction: true,
@@ -493,160 +459,6 @@ var actions = map[string]*actionDefinition{
 			return adjustDate("Get Start of Year", "", args)
 		},
 	},
-	"editEvent": {
-		identifier: "setters.calendarevents",
-		parameters: []parameterDefinition{
-			{
-				name:      "event",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:      "detail",
-				validType: String,
-				key:       "WFContentItemPropertyName",
-				enum:      editEventDetails,
-			},
-			{
-				name:      "newValue",
-				validType: String,
-				key:       "WFCalendarEventContentItemStartDate",
-			},
-		},
-	},
-	"getEventDetail": {
-		identifier: "properties.calendarevents",
-		parameters: []parameterDefinition{
-			{
-				name:      "event",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:      "detail",
-				validType: String,
-				key:       "WFContentItemPropertyName",
-				enum:      eventDetails,
-			},
-		},
-	},
-	"formatTime": {
-		identifier: "format.date",
-		parameters: []parameterDefinition{
-			{
-				name:      "time",
-				validType: Variable,
-				key:       "WFDate",
-			},
-			{
-				name:         "timeFormat",
-				validType:    String,
-				key:          "WFTimeFormatStyle",
-				defaultValue: "Short",
-				enum:         timeFormats,
-				optional:     true,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFDateFormatStyle": "None",
-			}
-		},
-	},
-	"formatDate": {
-		identifier:    "format.date",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				validType: Variable,
-				key:       "WFDate",
-			},
-			{
-				name:         "dateFormat",
-				validType:    String,
-				key:          "WFDateFormatStyle",
-				defaultValue: "Short",
-				enum:         dateFormats,
-				optional:     true,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFTimeFormatStyle": "None",
-			}
-		},
-	},
-	"formatTimestamp": {
-		identifier: "format.date",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				validType: Variable,
-				key:       "WFDate",
-			},
-			{
-				name:         "dateFormat",
-				validType:    String,
-				key:          "WFDateFormatStyle",
-				defaultValue: "Short",
-				enum:         dateFormats,
-				optional:     true,
-			},
-			{
-				name:         "timeFormat",
-				validType:    String,
-				key:          "WFTimeFormatStyle",
-				defaultValue: "Short",
-				enum:         timeFormats,
-				optional:     true,
-			},
-		},
-	},
-	"removeEvents": {
-		parameters: []parameterDefinition{
-			{
-				name:      "events",
-				validType: Variable,
-				key:       "WFInputEvents",
-			},
-			{
-				name:         "includeFutureEvents",
-				validType:    Bool,
-				key:          "WFCalendarIncludeFutureEvents",
-				defaultValue: false,
-				optional:     true,
-			},
-		},
-	},
-	"removeReminders": {
-		parameters: []parameterDefinition{
-			{
-				name:      "reminders",
-				validType: Variable,
-				key:       "WFInputReminders",
-			},
-		},
-	},
-	"showInCalendar": {
-		parameters: []parameterDefinition{
-			{
-				name:      "event",
-				validType: Variable,
-				key:       "WFEvent",
-			},
-		},
-	},
-	"openRemindersList": {
-		identifier: "showlist",
-		parameters: []parameterDefinition{
-			{
-				name:      "list",
-				validType: Variable,
-				key:       "WFList",
-			},
-		},
-	},
 	"startTimer": {
 		identifier: "timer.start",
 		parameters: []parameterDefinition{
@@ -821,10 +633,6 @@ var actions = map[string]*actionDefinition{
 				"operation": "Toggle",
 			}
 		},
-	},
-	"getAlarms": {
-		appIdentifier: "com.apple.mobiletimer-framework",
-		identifier:    "MobileTimerIntents.MTGetAlarmsIntent",
 	},
 	"filterContacts": {
 		identifier: "filter.contacts",
@@ -4815,17 +4623,6 @@ var actions = map[string]*actionDefinition{
 		},
 		outputType: Arr,
 	},
-	"getDates": {
-		identifier: "detect.date",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-		outputType: Arr,
-	},
 	"getEmails": {
 		identifier: "detect.emailaddress",
 		parameters: []parameterDefinition{
@@ -5800,7 +5597,7 @@ func handleRawParams(params map[string]interface{}) {
 }
 
 var defaultActionIncludes = []string{
-	// "calendar",
+	"calendar",
 	// "contacts",
 	// "documents",
 	// "location",
