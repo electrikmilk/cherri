@@ -464,6 +464,9 @@ func collectEnumeration() {
 	}
 
 	var identifier = collectIdentifier()
+	if enumerations[identifier] != nil {
+		parserError(fmt.Sprintf("Duplicate enumeration '%s'\n%s", identifier, generateActionParamEnums(parameterDefinition{enum: enumerations[identifier]})))
+	}
 
 	advanceUntilExpect('{', 3)
 	advance()
