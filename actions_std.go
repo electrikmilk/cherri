@@ -1571,63 +1571,6 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"translateFrom": {
-		identifier: "text.translate",
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				validType: String,
-				key:       "WFInputText",
-			},
-			{
-				name:      "from",
-				validType: String,
-				key:       "WFSelectedFromLanguage",
-				enum:      languages,
-			},
-			{
-				name:      "to",
-				validType: String,
-				key:       "WFSelectedLanguage",
-				enum:      languages,
-			},
-		},
-		outputType: String,
-	},
-	"translate": {
-		identifier:    "text.translate",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				validType: String,
-				key:       "WFInputText",
-			},
-			{
-				name:      "to",
-				validType: String,
-				key:       "WFSelectedLanguage",
-				optional:  true,
-				enum:      languages,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFSelectedFromLanguage": "Detect Language",
-			}
-		},
-		outputType: String,
-	},
-	"detectLanguage": {
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: String,
-				key:       "WFInput",
-			},
-		},
-		outputType: String,
-	},
 	"replaceText": {
 		identifier: "text.replace",
 		parameters: []parameterDefinition{
@@ -5225,7 +5168,7 @@ var defaultActionIncludes = []string{
 	"sharing",
 	// "settings",
 	// "shortcuts",
-	// "translation",
+	"translation",
 	"web",
 }
 
