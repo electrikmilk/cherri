@@ -4172,7 +4172,7 @@ var defaultActionIncludes = []string{
 func loadStandardActions() {
 	includeStandardActions()
 	handleIncludes()
-	parseActionDefinitions()
+	handleActionDefinitions()
 }
 
 var includedStandardActions bool
