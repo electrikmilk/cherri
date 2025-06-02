@@ -666,7 +666,7 @@ func generateActionParamDefinition(param parameterDefinition) string {
 		} else {
 			defaultValue = fmt.Sprintf("%v", param.defaultValue)
 		}
-		definition.WriteString(ansi(defaultValue, yellow))
+		definition.WriteString(ansi(defaultValue, green))
 	}
 
 	return definition.String()
