@@ -59,7 +59,16 @@ enum archiveFormat {
 
 #define action getParentDirectory(variable input: 'WFInput')
 
-#define action 'properties.files' getFileDetail(variable file: 'WFFolder', text detail: 'WFContentItemPropertyName')
+enum fileDetail {
+    'File Size',
+    'File Extension',
+    'Creation Date',
+    'File Path',
+    'Last Modified Date',
+    'Name'
+}
+
+#define action 'properties.files' getFileDetail(variable file: 'WFFolder', fileDetail detail: 'WFContentItemPropertyName')
 
 #define action 'finder.getselectedfiles' getSelectedFiles()
 
