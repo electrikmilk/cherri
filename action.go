@@ -711,8 +711,8 @@ func collectDefinedAction() {
 
 	var minVersion float64
 	if char == 'v' {
-		advance()
-		if intChar() {
+		if intChar(next(1)) {
+			advance()
 			var valueType tokenType
 			var version any
 			collectIntegerValue(&valueType, &version, ' ')

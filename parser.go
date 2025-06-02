@@ -307,7 +307,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		parserError("Value expected")
 	}
 	switch {
-	case intChar():
+	case intChar(char):
 		*valueType = Integer
 		if strings.Contains(ahead, ".") {
 			*valueType = Float
@@ -1267,13 +1267,13 @@ func addNothing() {
 	})
 }
 
-func intChar() bool {
-	return (char >= '0' && char <= '9') || char == '-' || char == '.'
+func intChar(ch rune) bool {
+	return (ch >= '0' && ch <= '9') || ch == '-' || ch == '.'
 }
 
 func collectInteger() string {
 	var collection strings.Builder
-	for intChar() {
+	for intChar(char) {
 		collection.WriteRune(char)
 		advance()
 	}
