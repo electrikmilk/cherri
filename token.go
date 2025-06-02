@@ -46,6 +46,7 @@ const (
 	From         tokenType = "from"
 	Version      tokenType = "version"
 	Mac          tokenType = "mac"
+	NonMac       tokenType = "!mac"
 	NoInput      tokenType = "noinput"
 	QuickActions tokenType = "quickactions"
 )

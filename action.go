@@ -704,6 +704,9 @@ func collectDefinedAction() {
 	if tokenAhead(Mac) {
 		macOnlyAction = true
 		advance()
+	} else if tokenAhead(NonMac) {
+		macOnlyAction = false
+		advance()
 	}
 
 	var shortIdentifier string
