@@ -97,7 +97,7 @@ enum timeFormats {
 	'Relative',
 }
 
-#define action default 'format.date' formatDate(variable date: 'WFDate', dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short") {
+#define action default 'format.date' formatDate(variable date: 'WFDate', dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short", text ?customDateFormat: 'WFDateFormat') {
 	"WFTimeFormatStyle": "None"
 }
 
