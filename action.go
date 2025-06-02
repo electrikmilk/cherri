@@ -523,6 +523,7 @@ func checkLiteralValue(param *parameterDefinition, argument *actionArgument) {
 
 func generateActionDefinition(focus parameterDefinition, showEnums bool) string {
 	var definition strings.Builder
+	definition.WriteRune('\n')
 
 	var docTitle = currentAction.doc.title
 	if currentAction.doc.title == "" {
