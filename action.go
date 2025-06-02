@@ -513,6 +513,14 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 	var cannotDef = undefinable()
 	if !cannotDef {
 		definition.WriteString("#define action ")
+
+		if currentAction.defaultAction {
+			definition.WriteString("default ")
+		}
+		if currentAction.mac {
+			definition.WriteString("mac ")
+		}
+
 		if currentAction.identifier != "" || currentAction.appIdentifier != "" {
 			setCurrentAction(currentActionIdentifier, &currentAction)
 			definition.WriteString(fmt.Sprintf("'%s' ", getActionIdentifier()))
