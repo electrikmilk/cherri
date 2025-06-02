@@ -592,7 +592,7 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 
 func generateActionRestrictions() string {
 	var definition strings.Builder
-	definition.WriteString("\nRestrictions: ")
+	definition.WriteString("\n\nRestrictions: ")
 	var restrictions []string
 	if currentAction.maxVersion != 0 {
 		restrictions = append(restrictions, fmt.Sprintf("Removed or significantly changed after iOS %1.f+", currentAction.maxVersion))
