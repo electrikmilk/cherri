@@ -24,7 +24,7 @@ Device Actions
 	"WFShutdownMode": "Restart"
 }
 
-enum getDeviceDetailDetails {
+enum deviceDetail {
 	'Device Name',
 	'Device Hostname',
 	'Device Model',
@@ -37,7 +37,7 @@ enum getDeviceDetailDetails {
 	'Current Appearance',
 }
 
-#define action 'getdevicedetails' getDeviceDetail(getDeviceDetailDetails detail: 'WFDeviceDetail')
+#define action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail')
 
 // [Doc]: Vibrate Device: Vibrate the device. Only applies to Apple devices with the haptic engine.
 #define action !mac vibrate()
