@@ -35,6 +35,8 @@ enum URLDetail {
 	"WFEncodeMode": "Decode"
 }
 
+#define action 'openxcallbackurl' openXCallbackURL(text url: 'WFXCallbackURL')
+
 /* Safari */
 
 #define action 'safari.geturl' getCurrentURL()

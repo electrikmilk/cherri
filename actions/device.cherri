@@ -24,6 +24,32 @@ Device Actions
 	"WFShutdownMode": "Restart"
 }
 
+#define action 'dnd.set' DNDOn() {
+	"Enabled": 1,
+	"FocusModes": {
+		"DisplayString": "Do Not Disturb",
+		"Identifier": "com.apple.donotdisturb.mode.default"
+	}
+}
+
+#define action 'dnd.set' DNDOff() {
+	"Enabled": 0,
+	"FocusModes": {
+		"DisplayString": "Do Not Disturb",
+		"Identifier": "com.apple.donotdisturb.mode.default"
+	}
+}
+
+#define action 'appearance' lightMode() {
+	"operation": "set",
+	"style": "light"
+}
+
+#define action default 'appearance' darkMode() {
+	"operation": "set",
+	"style": "dark"
+}
+
 enum deviceDetail {
 	'Device Name',
 	'Device Hostname',

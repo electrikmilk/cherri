@@ -41,6 +41,8 @@ enum audioSpeeds {
 	"WFMediaAudioOnly": true
 }
 
+#define action playSound(variable input: 'WFInput')
+
 /* Shazam */
 
 #define action 'shazamMedia' startShazam(bool ?show: 'WFShazamMediaActionShowWhenRun' = true, bool ?showError: 'WFShazamMediaActionErrorIfNotRecognized' = true)

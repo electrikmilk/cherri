@@ -1124,27 +1124,6 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"fileSize": {
-		identifier: "format.filesize",
-		parameters: []parameterDefinition{
-			{
-				name:      "file",
-				validType: Variable,
-				key:       "WFFileSize",
-			},
-			{
-				name:      "format",
-				validType: String,
-				key:       "WFFileSizeFormat",
-				enum:      fileSizeUnits,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFFileSizeIncludeUnits": false,
-			}
-		},
-	},
 	"getName": {
 		identifier: "getitemname",
 		parameters: []parameterDefinition{
@@ -1199,25 +1178,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		outputType: Integer,
-	},
-	"lightMode": {
-		identifier: "appearance",
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"operation": "set",
-				"style":     "light",
-			}
-		},
-	},
-	"darkMode": {
-		identifier:    "appearance",
-		defaultAction: true,
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"operation": "set",
-				"style":     "dark",
-			}
-		},
 	},
 	"url": {
 		parameters: []parameterDefinition{
@@ -2167,18 +2127,6 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"openXCallbackURL": {
-		identifier:    "openxcallbackurl",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "url",
-				key:       "WFXCallbackURL",
-				validType: String,
-				infinite:  true,
-			},
-		},
-	},
 	"openCustomXCallbackURL": {
 		identifier: "openxcallbackurl",
 		parameters: []parameterDefinition{
@@ -2227,25 +2175,6 @@ var actions = map[string]*actionDefinition{
 			return
 		},
 	},
-	"DNDOn": {
-		identifier: "dnd.set",
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"FocusModes": focusModes,
-				"Enabled":    1,
-			}
-		},
-	},
-	"DNDOff": {
-		identifier:    "dnd.set",
-		defaultAction: true,
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"FocusModes": focusModes,
-				"Enabled":    0,
-			}
-		},
-	},
 	"setBackgroundSound": {
 		appIdentifier: "com.apple.AccessibilityUtilities",
 		identifier:    "AXSettingsShortcuts.AXSetBackgroundSoundIntent",
@@ -2268,15 +2197,6 @@ var actions = map[string]*actionDefinition{
 				name:      "volume",
 				validType: Float,
 				key:       "volumeValue",
-			},
-		},
-	},
-	"playSound": {
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
 			},
 		},
 	},
@@ -2317,18 +2237,6 @@ var actions = map[string]*actionDefinition{
 				validType: Variable,
 			},
 		},
-	},
-	"searchShortcuts": {
-		appIdentifier: "com.apple.shortcuts",
-		identifier:    "SearchShortcutsAction",
-		parameters: []parameterDefinition{
-			{
-				name:      "query",
-				validType: String,
-				key:       "searchPhrase",
-			},
-		},
-		minVersion: 16.4,
 	},
 	"searchPasswords": {
 		identifier: "openpasswords",
@@ -2539,7 +2447,6 @@ var actions = map[string]*actionDefinition{
 				key:       "WFConfiguration",
 				enum:      windowConfigurations,
 				optional:  false,
-				infinite:  false,
 			},
 		},
 		mac: true,

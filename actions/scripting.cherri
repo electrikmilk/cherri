@@ -1,0 +1,164 @@
+/*
+Scripting Actions
+*/
+
+/* App actions */
+
+#define action mac v18 'filter.apps' getApps()
+
+/* Control Flow */
+
+#define action 'delay' wait(number seconds: 'WFDelayTime')
+
+#define action waitToReturn()
+
+/* Dictionaries */
+
+// [Doc]: Get Dictionary: Get the dictionary from `input`.
+#define action 'detect.dictionary' getDictionary(variable input: 'WFInput'): dictionary
+
+// [Doc]: Get Keys from Dictionary: Get only the keys from the `dictionary`.
+#define action 'getvalueforkey' getKeys(dictionary dictionary: 'WFInput'): array {
+	"WFGetDictionaryValueType": "All Keys"
+}
+
+// [Doc]: Get Values from Dictionary: Get only the values from the `dictionary`.
+#define action 'getvalueforkey' getValues(dictionary dictionary: 'WFInput'): array {
+	"WFGetDictionaryValueType": "All Values"
+}
+
+// [Doc]: Get Value from Dictionary: For constants only, otherwise `dictionary['key']` syntax should be used.
+#define action 'getvalueforkey' getValue(dictionary dictionary: 'WFInput', text key: 'WFDictionaryKey') {
+	"WFGetDictionaryValueType": "Value"
+}
+
+// [Doc]: Set Value in Dictionary: Set the value of `key` to `value` in `dictionary`.
+#define action 'setvalueforkey' setValue(variable dictionary: 'WFDictionary', text key: 'WFDictionaryKey', text value: 'WFDictionaryValue')
+
+/* Hashes */
+
+#define action 'base64encode' base64Encode(variable encodeInput: 'WFInput'): text {
+	"input": "Encode"
+}
+
+#define action 'base64encode' base64Decode(variable input: 'WFInput'): text {
+	"WFEncodeMode": "Decode"
+}
+
+enum hashType {
+	'MD5',
+	'SHA1',
+	'SHA256',
+	'SHA512',
+}
+
+#define action hash(variable input: 'WFInput', hashType ?type: 'WFHashType' = "MD5"): text
+
+/* Items */
+
+enum countType {
+	'Items',
+	'Characters',
+	'Words',
+	'Sentences',
+	'Lines',
+}
+
+#define action count(variable input: 'Input', countType ?type: 'WFCountType' = "Items"): number
+
+#define action 'getitemname' getName(variable item: 'WFInput')
+
+#define action 'viewresult' contentGraph(variable input: 'WFInput')
+
+/* Lists */
+
+#define action chooseFromList(variable list: 'WFInput', text ?prompt: 'WFChooseFromListActionPrompt', bool ?selectMultiple: 'WFChooseFromListActionSelectMultiple' = false, bool ?selectAll: 'WFChooseFromListActionSelectAll' = false)
+
+#define action 'getitemfromlist' getFirstItem(variable list: 'WFInput') {
+	"WFItemSpecifier": "First Item"
+}
+
+#define action 'getitemfromlist' getLastItem(variable list: 'WFInput') {
+	"WFItemSpecifier": "Last Item"
+}
+
+#define action 'getitemfromlist' getRandomItem(variable list: 'WFInput') {
+	"WFItemSpecifier": "Random Item"
+}
+
+#define action 'getitemfromlist' getListItem(variable list: 'WFInput', number index: 'WFItemIndex') {
+	"WFItemSpecifier": "Item At Index"
+}
+
+#define action 'getitemfromlist' getListItems(variable list: 'WFInput', number start: 'WFItemRangeStart', number end: 'WFItemRangeEnd'): array {
+	"WFItemSpecifier": "Items in Range"
+}
+
+#define action 'setitemname' setName(variable item: 'WFInput', text name: 'WFName', bool ?includeFileExtension: 'WFDontIncludeFileExtension' = false)
+
+/* Notifications */
+
+#define action alert(text alert: 'WFAlertActionMessage', text ?title: 'WFAlertActionTitle') {
+	"WFAlertActionCancelButtonShown": false
+}
+
+#define action 'alert' confirm(text alert: 'WFAlertActionMessage', text ?title: 'WFAlertActionTitle') {
+	"WFAlertActionCancelButtonShown": true
+}
+
+#define action 'notification' showNotification(
+    text body: 'WFNotificationActionBody',
+    text ?title: 'WFNotificationActionTitle',
+    bool ?playSound: 'WFNotificationActionSound' = true,
+    variable ?attachment: 'WFInput'
+)
+
+/* Numbers */
+
+#define action 'format.number' formatNumber(number number: 'WFNumber', number ?decimalPlaces: 'WFNumberFormatDecimalPlaces' = 2): number
+
+#define action 'detect.number' getNumbers(variable input: 'WFInput'): number
+
+#define action 'number.random' randomNumber(number min: 'WFRandomNumberMinimum', number max: 'WFRandomNumberMaximum'): number
+
+/* Scripts */
+
+#define action runShellScript(text script: 'Script', variable input: 'Input', text ?shell: 'Shell' = "/bin/zsh", text ?inputMode: 'InputMode' = "to stdin")
+
+#define action runAppleScript(variable input: 'Input', text script: 'Script')
+
+#define action runSSHScript(text script: 'WFSSHScript', variable input: 'WFInput', text host: 'WFSSHHost', text port: 'WFSSHPort', text user: 'WFSSHUser', runSSHScriptAuthTypes authType: 'WFSSHAuthenticationType', text password: 'WFSSHPassword')
+
+#define action 'runjavascriptforautomation' runJSAutomation(variable input: 'Input', text script: 'Script')
+
+/* Passwords */
+
+#define action 'openpasswords' searchPasswords(text query: 'WFShowPasswordsSearchTerm')
+
+/* System */
+
+#define action dismissSiri()
+
+#define action 'wallpaper.set' setWallpaper(variable input: 'WFInput')
+
+#define action 'posters.get' getWallpaper() {
+	"WFPosterType": "Current"
+}
+
+/* Windows */
+
+enum resizeWindowConfigurations {
+ 'Fit Screen',
+ 'Top Half',
+ 'Bottom Half',
+ 'Left Half',
+ 'Right Half',
+ 'Top Left Quarter',
+ 'Top Right Quarter',
+ 'Bottom Left Quarter',
+ 'Bottom Right Quarter',
+ 'Dimensions',
+}
+
+#define action resizeWindow(variable window: 'WFWindow', resizeWindowConfigurations configuration: 'WFConfiguration')
+

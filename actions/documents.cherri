@@ -82,6 +82,23 @@ enum fileDetail {
 	"WFAskWhereToSave": false
 }
 
+enum fileSizeFormat {
+    'Closest Unit'
+    'Bytes'
+    'Kilobytes'
+    'Megabytes'
+    'Gigabytes'
+    'Terabytes'
+    'Petabytes'
+    'Exabytes'
+    'Zettabytes'
+    'Yottabytes'
+}
+
+#define action 'format.filesize' fileSize(variable file: 'WFFileSize', fileSizeFormat format: 'WFFileSizeFormat') {
+    "WFFileSizeIncludeUnits": false
+}
+
 /* Notes */
 
 #define action 'shownote' openNote(variable note: 'WFInput')
