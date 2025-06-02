@@ -10,39 +10,45 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-test:
+  build-test-linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.24
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.24
 
-    - name: Build
-      run: go build -v ./...
+      - name: Build
+        run: go build -v ./...
 
-    - name: Test
-      run: go test -run TestCherriNoSign -v ./...
+      - name: Test
+        run: go test -run TestCherriNoSign -v ./...
 
-    - name: Decompilation Test
-      run: go test -run TestDecomp -v ./...
+      - name: Decompilation Test
+        run: go test -run TestDecomp -v ./...
 
-  build-macos:
-    runs-on: macos-13
+  build-test-macos:
+    runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.24
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.24
 
-    - name: Build
-      run: go build -v ./...
+      - name: Build
+        run: go build -v ./...
 
-  build-windows:
+      - name: Test
+        run: go test -run TestCherriNoSign -v ./...
+
+      - name: Decompilation Test
+        run: go test -run TestDecomp -v ./...
+
+  build-test-windows:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
@@ -57,3 +63,6 @@ jobs:
 
     - name: Test
       run: go test -run TestCherri -v ./...
+
+    - name: Decompilation Test
+      run: go test -run TestDecomp -v ./...
