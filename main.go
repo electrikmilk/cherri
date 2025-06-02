@@ -46,10 +46,10 @@ func main() {
 	}
 
 	if args.Using("action") {
+		defineRawAction()
+		defineToggleSetActions()
+		loadStandardActions()
 		if args.Value("action") == "" {
-			defineRawAction()
-			defineToggleSetActions()
-			loadStandardActions()
 			for identifier, definition := range actions {
 				setCurrentAction(identifier, definition)
 				if undefinable() {
