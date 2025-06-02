@@ -512,26 +512,48 @@ func makeMeasurementUnits() {
 func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) string {
 	var definition strings.Builder
 
+	var docTitle = currentAction.doc.title
+	if currentAction.doc.title == "" {
+		if args.Using("no-ansi") {
+			docTitle = fmt.Sprintf("`%s()`", currentActionIdentifier)
+		} else {
+			docTitle = fmt.Sprintf("%s()", currentActionIdentifier)
+		}
+	}
+	if args.Using("no-ansi") {
+		definition.WriteString("### ")
+	}
+	definition.WriteString(fmt.Sprintf("%s\n", ansi(docTitle, bold, underline)))
+	definition.WriteRune('\n')
+	if currentAction.doc.description != "" {
+		definition.WriteString(fmt.Sprintf("%s\n\n", ansi(currentAction.doc.description, italic)))
+	}
+
+	if args.Using("no-ansi") {
+		definition.WriteString("```\n")
+	}
+
 	if showEnums {
 		definition.WriteString(generateActionParamEnums(focus))
 	}
 
-	var cannotDef = undefinable()
-	if !cannotDef {
-		definition.WriteString("#define action ")
+	definition.WriteString("#define action ")
 
-		if currentAction.defaultAction {
-			definition.WriteString("default ")
-		}
-		if currentAction.mac {
-			definition.WriteString("mac ")
-		}
-
-		if currentAction.identifier != "" || currentAction.appIdentifier != "" {
-			setCurrentAction(currentActionIdentifier, &currentAction)
-			definition.WriteString(fmt.Sprintf("'%s' ", getActionIdentifier()))
-		}
+	if currentAction.defaultAction {
+		definition.WriteString("default ")
 	}
+	if currentAction.mac {
+		definition.WriteString("mac ")
+	}
+	if currentAction.minVersion != 0 {
+		definition.WriteString(fmt.Sprintf("v%1.f+", currentAction.minVersion))
+	}
+
+	if currentAction.identifier != "" || currentAction.appIdentifier != "" {
+		setCurrentAction(currentActionIdentifier, &currentAction)
+		definition.WriteString(fmt.Sprintf("'%s' ", getActionIdentifier()))
+	}
+
 	definition.WriteString(fmt.Sprintf("%s(", currentActionIdentifier))
 	var arguments []string
 	for _, param := range currentAction.parameters {
@@ -557,12 +579,12 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 		}
 	}
 
-	definition.WriteRune('\n')
+	if args.Using("no-ansi") {
+		definition.WriteString("\n```\n")
+	}
 
-	if !args.Using("no-ansi") {
-		if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
-			definition.WriteString(generateActionRestrictions())
-		}
+	if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
+		definition.WriteString(generateActionRestrictions())
 	}
 
 	return definition.String()
@@ -572,14 +594,8 @@ func generateActionRestrictions() string {
 	var definition strings.Builder
 	definition.WriteString("\nRestrictions: ")
 	var restrictions []string
-	if currentAction.minVersion != 0 {
-		restrictions = append(restrictions, fmt.Sprintf("iOS %1.f+", currentAction.minVersion))
-	}
 	if currentAction.maxVersion != 0 {
 		restrictions = append(restrictions, fmt.Sprintf("Removed or significantly changed after iOS %1.f+", currentAction.maxVersion))
-	}
-	if currentAction.mac {
-		restrictions = append(restrictions, "macOS only")
 	}
 	if len(restrictions) > 0 {
 		definition.WriteString(strings.Join(restrictions, ", "))

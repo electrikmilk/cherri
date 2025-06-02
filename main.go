@@ -56,6 +56,7 @@ func main() {
 					continue
 				}
 				fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
+				fmt.Print("---\n\n")
 			}
 		} else {
 			actionsSearch()
