@@ -29,26 +29,36 @@ enum language {
 	'vn_VN',
 }
 
+// [Doc]: Stop Shortcut: Stops the shortcut.
 #define action 'exit' stop()
 
+// [Doc]: Nothing: Clear the current output.
 #define action nothing()
 
+// [Doc]: Comment: Add an explicit comment.
 #define action comment(rawtext text: 'WFCommentActionText')
 
+// [Doc]: Show Result: Show `input`.
 #define action 'showresult' show(text input: 'Text')
 
+// [Doc]: Quick Look: Preview `input` in Quick Look.
 #define action 'previewdocument' quicklook(variable input: 'WFInput')
 
+// [Doc]: Get Type: Get the type of input.
 #define action 'getitemtype' typeOf(variable input: 'WFInput'): text
 
+// [Doc]: Get Object of Class: Get the object of `class` from a variable.
 #define action 'getclassaction' getObjectOfClass(text class: 'Class', variable from: 'Input')
 
+// [Doc]: Output: Stop and output `output`. Do nothing if there is nowhere to output.
 #define action default output(text output: 'WFOutput')
 
+// [Doc]: Output or Clipboard: Stop and output `output`. Copy to the clipboard if there is nowhere to output.
 #define action 'output' outputOrClipboard(text output: 'WFOutput') {
 	"WFNoOutputSurfaceBehavior": "Copy to Clipboard"
 }
 
+// [Doc]: Must Output: Stop and output `output`. Respond with response if there is nowhere to output.
 #define action 'output' mustOutput(text output: 'WFOutput', text response: 'WFResponse') {
 	"WFNoOutputSurfaceBehavior": "Respond"
 }
