@@ -19,7 +19,7 @@ enum archiveFormat {
 
 #define action 'unzip' extractArchive(variable file: 'WFArchive')
 
-#define action mac makeDiskImage(text name: 'VolumeName', variable contents: 'WFInput', bool ?encrypt: 'EncryptImage' = false) {
+#define action mac v15 makeDiskImage(text name: 'VolumeName', variable contents: 'WFInput', bool ?encrypt: 'EncryptImage' = false) {
 	"SizeToFit": true
 }
 
