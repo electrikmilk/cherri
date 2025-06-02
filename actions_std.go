@@ -959,6 +959,9 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
 			var folderPath = getArgValue(args[0])
 			var pathParts = strings.Split(folderPath.(string), "/")
 			var fileLocationType = pathParts[0]
