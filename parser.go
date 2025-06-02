@@ -1579,7 +1579,7 @@ func skipWhitespace() {
 }
 
 func isWhitespace() bool {
-	return unicode.IsSpace(char) || isEOL() || char == '\t' || char == ' ' || char == '\n'
+	return unicode.IsSpace(char) || isEOL() || char == '\t' || char == ' ' || char == '\n' || char == '\r'
 }
 
 func getChar(atIndex int) rune {
