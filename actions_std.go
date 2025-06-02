@@ -1776,7 +1776,7 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "file",
 				validType: Variable,
-				key:       "WFFolder",
+				key:       "WFInput",
 			},
 			{
 				name:      "detail",
