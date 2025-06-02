@@ -13,8 +13,6 @@ import (
 )
 
 func actionsSearch() {
-	defineRawAction()
-	defineToggleSetActions()
 	var identifier = args.Value("action")
 	if _, found := actions[identifier]; !found {
 		fmt.Println(ansi(fmt.Sprintf("\nAction '%s(...)' does not exist or has not yet been defined.", identifier), red))
@@ -31,10 +29,18 @@ func actionsSearch() {
 		var actionSearchResults strings.Builder
 		for actionIdentifier, definition := range actions {
 			var matched, result = matchString(&actionIdentifier, &identifier)
-			if matched {
+			var matchedDoc bool
+			var docResult string
+			if definition.doc.title != "" {
+				matchedDoc, docResult = matchString(&definition.doc.title, &identifier)
+			}
+			if matched || matchedDoc {
 				setCurrentAction(actionIdentifier, definition)
-				var definition = generateActionDefinition(parameterDefinition{}, false, false)
+				var definition = generateActionDefinition(parameterDefinition{}, false)
 				definition, _ = strings.CutPrefix(definition, actionIdentifier)
+				if !matched && matchedDoc {
+					result = docResult
+				}
 
 				actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n", result, definition))
 			}
@@ -47,7 +53,7 @@ func actionsSearch() {
 		os.Exit(1)
 	}
 	setCurrentAction(identifier, actions[identifier])
-	fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
+	fmt.Println(generateActionDefinition(parameterDefinition{}, true))
 }
 
 func glyphsSearch() {

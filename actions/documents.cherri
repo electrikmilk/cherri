@@ -1,0 +1,224 @@
+/*
+Document Actions
+*/
+
+/* Archives */
+
+enum archiveFormat {
+    '.zip',
+    '.tar.gz',
+    '.tar.bz2',
+    '.tar.xz',
+    '.tar',
+    '.gz',
+    '.cpio',
+    '.iso',
+}
+
+#define action 'makezip' makeArchive(variable files: 'WFInput', archiveFormat ?format: 'WFArchiveFormat' = ".zip", text ?name: 'WFZIPName')
+
+#define action 'unzip' extractArchive(variable file: 'WFArchive')
+
+
+
+/* Books */
+
+#define action 'com.apple.iBooksX.openin' addToBooks(variable input: 'BooksInput')
+
+/* Editing */
+
+#define action 'avairyeditphoto' markup(variable document: 'WFDocument')
+
+/* Files & Folders */
+
+#define action 'file.getlink' getFileLink(variable file: 'WFFile')
+
+#define action default 'file.append' appendToFile(text filePath: 'WFFilePath', text text: 'WFInput') {
+	"WFAppendFileWriteMode": "Append"
+}
+
+#define action 'file.append' prependToFile(text filePath: 'WFFilePath', text text: 'WFInput') {
+	"WFAppendFileWriteMode": "Prepend"
+}
+
+#define action 'file.createfolder' createFolder(text path: 'WFFilePath') // TODO: Writing to locations other than the Shortcuts folder.
+
+#define action 'file.delete' deleteFiles(variable input: 'WFInput', bool ?immediately: 'WFDeleteImmediatelyDelete' = false)
+
+#define action default 'file.select' selectFile(bool ?selectMultiple: 'SelectMultiple' = false)
+
+#define action 'file.select' selectFolder(bool ?selectMultiple: 'SelectMultiple' = false) {
+	"WFPickingMode": "Folders"
+}
+
+#define action default 'documentpicker.open' getFile(text path: 'WFGetFilePath', bool ?errorIfNotFound: 'WFFileErrorIfNotFound' = true)
+
+#define action 'openin' openFile(variable file: 'WFInput', bool ?askWhenRun: 'WFOpenInAskWhenRun' = false)
+
+#define action getParentDirectory(variable input: 'WFInput')
+
+enum fileDetail {
+    'File Size',
+    'File Extension',
+    'Creation Date',
+    'File Path',
+    'Last Modified Date',
+    'Name'
+}
+
+#define action 'properties.files' getFileDetail(variable file: 'WFFolder', fileDetail detail: 'WFContentItemPropertyName')
+
+#define action 'finder.getselectedfiles' getSelectedFiles()
+
+#define action 'file.reveal' reveal(variable files: 'WFFile')
+
+#define action 'file.rename' rename(variable file: 'WFFile', text newName: 'WFNewFilename')
+
+#define action default 'documentpicker.save' saveFilePrompt(variable file: 'WFInput', bool ?overwrite: 'WFSaveFileOverwrite' = false)
+
+#define action 'documentpicker.save' saveFile(text path: 'WFFileDestinationPath', variable content: 'WFInput', bool ?overwrite: 'WFSaveFileOverwrite' = false) {
+	"WFAskWhereToSave": false
+}
+
+enum fileSizeFormat {
+    'Closest Unit'
+    'Bytes'
+    'Kilobytes'
+    'Megabytes'
+    'Gigabytes'
+    'Terabytes'
+    'Petabytes'
+    'Exabytes'
+    'Zettabytes'
+    'Yottabytes'
+}
+
+#define action 'format.filesize' fileSize(variable file: 'WFFileSize', fileSizeFormat format: 'WFFileSizeFormat') {
+    "WFFileSizeIncludeUnits": false
+}
+
+/* Notes */
+
+#define action 'shownote' openNote(variable note: 'WFInput')
+
+#define action appendNote(text note: 'WFNote', text input: 'WFInput')
+
+/* Printing */
+
+enum PDFMergeBehaviors {
+	'Append',
+	'Shuffle',
+}
+
+#define action makePDF(
+    variable input: 'WFInput',
+    bool ?includeMargin: 'WFPDFIncludeMargin' = false,
+    PDFMergeBehaviors ?mergeBehavior: 'WFPDFDocumentMergeBehavior' = "Append"
+)
+
+#define action 'compresspdf' optimizePDF(variable pdfFile: 'WFInput')
+
+#define action print(variable input: 'WFInput')
+
+#define action splitPDF(variable pdf: 'WFInput')
+
+/* QR Codes */
+
+enum QRCodeErrorCorrection {
+	'Low',
+	'Medium',
+	'Quartile',
+	'High',
+}
+
+#define action 'generatebarcode' makeQRCode(text input: 'WFText', QRCodeErrorCorrection ?errorCorrection: 'WFQRErrorCorrectionLevel' = "Medium")
+
+/* Rich Text */
+
+#define action 'gethtmlfromrichtext' makeHTML(variable input: 'WFInput', bool ?makeFullDocument: 'WFMakeFullDocument' = false)
+
+#define action getRichTextFromHTML(variable html: 'WFHTML')
+
+#define action 'getmarkdownfromrichtext' makeMarkdown(variable richText: 'WFInput')
+
+#define action getRichTextFromMarkdown(variable markdown: 'WFInput')
+
+/* Text */
+
+enum stopListenings {
+	'After Pause',
+	'After Short Pause',
+	'On Tap',
+}
+
+#define action 'dictatetext' listen(stopListenings ?stopListening: 'WFDictateTextStopListening' = "After Pause", language ?language: 'WFSpeechLanguage')
+
+#define action 'extracttextfromimage' getTextFromImage(variable image: 'WFImage')
+
+#define action 'getnameofemoji' getEmojiName(text emoji: 'WFInput')
+
+#define action 'detect.text' getText(variable input: 'WFInput'): text
+
+#define action 'makespokenaudiofromtext' makeSpokenAudio(text text: 'WFInput', number ?rate: 'WFSpeakTextRate', number ?pitch: 'WFSpeakTextPitch')
+
+#define action 'showdefinition' define(text word: 'Word')
+
+#define action 'speaktext' speak(text prompt: 'WFText', bool ?waitUntilFinished: 'WFSpeakTextWait' = true, text ?language: 'WFSpeakTextLanguage')
+
+#define action v17 'com.apple.ShortcutsActions.TranscribeAudioAction' transcribeText(variable audioFile)
+
+/* Text Editing */
+
+#define action default 'text.changecase' uppercase(text text) {
+	"Show-text": true,
+	"WFCaseType": "UPPERCASE"
+}
+
+#define action 'text.changecase' lowercase(text text) {
+	"Show-text": true,
+	"WFCaseType": "lowercase"
+}
+
+#define action 'text.changecase' capitalize(text text): text {
+	"Show-text": true,
+	"WFCaseType": "Capitalize with sentence case"
+}
+
+#define action 'text.changecase' capitalizeAll(text text): text {
+	"Show-text": true,
+	"WFCaseType": "Capitalize Every Word"
+}
+
+#define action 'text.changecase' titleCase(text text): text {
+	"Show-text": true,
+	"WFCaseType": "Capitalize with Title Case"
+}
+
+#define action 'text.changecase' alternatingCase(text text): text {
+	"Show-text": true,
+	"WFCaseType": "cApItAlIzE wItH aLtErNaTiNg cAsE"
+}
+
+#define action correctSpelling(text text): text {
+	"Show-text": true
+}
+
+#define action default 'text.match' matchText(text regexPattern: 'WFMatchTextPattern', text text, bool ?caseSensitive: 'WFMatchTextCaseSensitive' = true)
+
+#define action default 'text.match.getgroup' getMatchGroup(variable matches, number index: 'WFGroupIndex') {
+	"WFGetGroupType": "Group At Index"
+}
+
+#define action 'text.match.getgroup' getMatchGroups(variable matches) {
+	"WFGetGroupType": "All Groups"
+}
+
+#define action 'text.replace' replaceText(
+    text find: 'WFReplaceTextFind',
+    text replacement: 'WFReplaceTextReplace',
+    text subject: 'WFInput',
+    bool ?caseSensitive: 'WFReplaceTextCaseSensitive' = true,
+    bool ?regExp: 'WFReplaceTextRegularExpression' = false
+): text
+
+#define action 'com.apple.HydraUSDAppIntents.ConvertToUSDZ' convertToUSDZ(variable file)

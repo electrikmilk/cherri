@@ -77,7 +77,7 @@ func availableIdentifier(identifier *string) {
 		parserError(fmt.Sprintf("Cannot redefine global variable '%s'.", *identifier))
 	}
 	if _, found := questions[*identifier]; found {
-		parserError(fmt.Sprintf("Variable conflicts with defined import question '%s'.", *identifier))
+		parserError(fmt.Sprintf("Reference conflicts with defined import question '%s'.", *identifier))
 	}
 }
 

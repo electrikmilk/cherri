@@ -89,7 +89,10 @@ const (
 	underline outputType = 4
 	red       outputType = 31
 	green     outputType = 32
-	yellow    outputType = 33
+	yellow    outputType = 93
+	orange    outputType = 33
+	magenta   outputType = 95
+	blue      outputType = 34
 	cyan      outputType = 36
 )
 

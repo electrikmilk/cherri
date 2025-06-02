@@ -57,7 +57,7 @@ func sign() {
 			fmt.Print(ansi("Failed!\n", red))
 		}
 
-		fmt.Printf("%s\n%s\n", ansi("Failed to sign Shortcut using macOS :(", yellow, bold), ansi(stdErr.String(), yellow))
+		fmt.Printf("%s\n%s\n", ansi("Failed to sign Shortcut using macOS :(", orange, bold), ansi(stdErr.String(), orange))
 
 		var hubSignService = hubSign()
 		useSigningService(&hubSignService)

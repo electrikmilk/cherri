@@ -1,0 +1,61 @@
+/*
+Contacts Actions
+*/
+
+enum contactDetail {
+ 'First Name',
+ 'Middle Name',
+ 'Last Name',
+ 'Birthday',
+ 'Prefix',
+ 'Suffix',
+ 'Nickname',
+ 'Phonetic First Name',
+ 'Phonetic Last Name',
+ 'Phonetic Middle Name',
+ 'Company',
+ 'Job Title',
+ 'Department',
+ 'File Extension',
+ 'Creation Date',
+ 'File Path',
+ 'Last Modified Date',
+ 'Name',
+ 'Random',
+}
+
+#define action 'detect.contacts' getContacts(variable input: 'WFInput'): array
+
+#define action 'filter.contacts' filterContacts(
+    variable contacts: 'WFContentItemInputParameter',
+    contactDetail ?sortBy: 'WFContentItemSortProperty',
+    abcSortOrder ?sortOrder: 'WFContentItemSortOrder' = "A to Z",
+    number ?limit: 'WFContentItemLimitNumber'
+)
+
+#define action 'properties.contacts' getContactDetail(variable contact: 'WFInput', contactDetail detail: 'WFContentItemPropertyName')
+
+#define action 'selectcontacts' selectContact(bool ?multiple: 'WFSelectMultiple' = false)
+
+/* Phone */
+
+#define action 'com.apple.mobilephone.call' call(variable contact: 'WFCallContact')
+
+enum facetimeCallType {
+ 'Video',
+ 'Audio',
+}
+
+#define action 'com.apple.facetime.facetime' facetimeCall(variable contact: 'WFFaceTimeContact', facetimeCallType ?type: 'WFFaceTimeType' = "Video") {
+	"WFFaceTimeType": "Video"
+}
+
+#define action 'detect.phonenumber' getPhoneNumbers(variable input: 'WFInput'): array
+
+#define action 'selectphone' selectPhoneNumber()
+
+/* Email */
+
+#define action 'detect.emailaddress' getEmails(text input: 'WFInput'): array
+
+#define action 'selectemail' selectEmailAddress()

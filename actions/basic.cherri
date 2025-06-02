@@ -1,0 +1,78 @@
+/*
+Basic Actions and Global Types
+*/
+
+enum abcSortOrder {
+ 'A to Z',
+ 'Z to A',
+}
+
+enum language {
+	'ar_AE',
+	'zh_CN',
+	'zh_TW',
+	'nl_NL',
+	'en_GB',
+	'en_US',
+	'fr_FR',
+	'de_DE',
+	'id_ID',
+	'it_IT',
+	'jp_JP',
+	'ko_KR',
+	'pl_PL',
+	'pt_BR',
+	'ru_RU',
+	'es_ES',
+	'th_TH',
+	'tr_TR',
+	'vn_VN',
+}
+
+// [Doc]: Stop Shortcut: Stops the shortcut.
+#define action 'exit' stop()
+
+// [Doc]: Nothing: Clear the current output.
+#define action nothing()
+
+// [Doc]: Comment: Add an explicit comment.
+#define action comment(rawtext text: 'WFCommentActionText')
+
+// [Doc]: Show Result: Show `input`.
+#define action 'showresult' show(text input: 'Text')
+
+// [Doc]: Quick Look: Preview `input` in Quick Look.
+#define action 'previewdocument' quicklook(variable input: 'WFInput')
+
+// [Doc]: Get Type: Get the type of input.
+#define action 'getitemtype' typeOf(variable input: 'WFInput'): text
+
+// [Doc]: Get Object of Class: Get the object of `class` from a variable.
+#define action 'getclassaction' getObjectOfClass(text class: 'Class', variable from: 'Input')
+
+// [Doc]: Output: Stop and output `output`. Do nothing if there is nowhere to output.
+#define action default output(text output: 'WFOutput')
+
+// [Doc]: Output or Clipboard: Stop and output `output`. Copy to the clipboard if there is nowhere to output.
+#define action 'output' outputOrClipboard(text output: 'WFOutput') {
+	"WFNoOutputSurfaceBehavior": "Copy to Clipboard"
+}
+
+// [Doc]: Must Output: Stop and output `output`. Respond with response if there is nowhere to output.
+#define action 'output' mustOutput(text output: 'WFOutput', text response: 'WFResponse') {
+	"WFNoOutputSurfaceBehavior": "Respond"
+}
+
+#define action 'gettext' text(text text: 'WFTextActionText'): text
+
+#define action number(variable number: 'WFNumberActionNumber'): number
+
+// [Doc]: Open Homescreen: Open the SpringBoard, which triggers navigating to the homescreen.
+#define action !mac 'openapp' springBoard() {
+    "WFAppIdentifier": "WFAppIdentifier",
+    "WFSelectedApp": {
+        "BundleIdentifier": "com.apple.springboard",
+        "Name": "SpringBoard",
+        "TeamIdentifier": "0000000000"
+    }
+}

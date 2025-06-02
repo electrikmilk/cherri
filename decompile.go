@@ -47,6 +47,8 @@ func decompile(b []byte) {
 		filePath = getOutputPath(relativePath + basename + ".cherri")
 	}
 
+	loadStandardActions()
+
 	mapVariables()
 	mapSplitActions()
 	waitFor(
@@ -253,7 +255,9 @@ var identifierMap map[string][]actionValue
 
 // mapSplitActions creates a map of actions that have been split into a few actions to reduce the number of arguments.
 func mapSplitActions() {
-	identifierMap = make(map[string][]actionValue)
+	if identifierMap == nil {
+		identifierMap = make(map[string][]actionValue)
+	}
 	for identifier, action := range actions {
 		var ident = action.identifier
 		if action.identifier == "" {
@@ -262,10 +266,15 @@ func mapSplitActions() {
 
 		ident = strings.ToLower(ident)
 
-		identifierMap[ident] = append(identifierMap[ident], actionValue{
+		var splitActionValue = actionValue{
 			identifier: identifier,
 			definition: action,
-		})
+		}
+		if identifierMap[ident] != nil && slices.Contains(identifierMap[ident], splitActionValue) {
+			continue
+		}
+
+		identifierMap[ident] = append(identifierMap[ident], splitActionValue)
 	}
 	for identifier, actions := range identifierMap {
 		if len(actions) < 2 {
@@ -1362,7 +1371,7 @@ func scoreActionParams(splitActionParams *[]parameterDefinition, parameters map[
 		}
 		if value, found := parameters[param.key]; found {
 			matchedParams++
-			if len(param.enum) > 0 && slices.Contains(param.enum, fmt.Sprintf("%s", value)) {
+			if len(param.enum) > 0 && slices.Contains(getEnum(param.enum), fmt.Sprintf("%s", value)) {
 				matchedValues++
 			}
 			if param.defaultValue != nil {
@@ -1457,7 +1466,7 @@ func printDecompDebug() {
 
 func decompWarning(message string) {
 	var linesLen = strings.Count(code.String(), "\n")
-	fmt.Println(ansi("Warning:", yellow, bold), fmt.Sprintf("%s (%s:%d:0)\n", message, filePath, linesLen+1))
+	fmt.Println(ansi("Warning:", orange, bold), fmt.Sprintf("%s (%s:%d:0)\n", message, filePath, linesLen+1))
 }
 
 func decompError(message string, action *ShortcutAction) {

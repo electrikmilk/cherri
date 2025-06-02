@@ -33,6 +33,7 @@ const (
 	Action         tokenType = "action"
 	Copy           tokenType = "copy"
 	Paste          tokenType = "paste"
+	Default        tokenType = "default"
 )
 
 /* Definitions */
@@ -45,6 +46,7 @@ const (
 	From         tokenType = "from"
 	Version      tokenType = "version"
 	Mac          tokenType = "mac"
+	NonMac       tokenType = "!mac"
 	NoInput      tokenType = "noinput"
 	QuickActions tokenType = "quickactions"
 )
@@ -106,5 +108,4 @@ const (
 	Colon          tokenType = ":"
 	And            tokenType = "&&"
 	Or             tokenType = "||"
-	Ellipsis       tokenType = "..."
 )

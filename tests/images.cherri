@@ -1,6 +1,6 @@
 @images = selectPhotos(true)
 
-@combined = combineImages(images, "grid")
+@combined = combineImages(images, "In a Grid")
 
 @image = getFirstItem(images)
 

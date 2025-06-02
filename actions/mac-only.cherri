@@ -1,0 +1,75 @@
+/*
+macOS-only actions
+*/
+
+#define action mac v18 'filter.apps' getApps()
+
+#define action mac v15 makeDiskImage(text name: 'VolumeName', variable contents: 'WFInput', bool ?encrypt: 'EncryptImage' = false) {
+	"SizeToFit": true
+}
+
+/* Device */
+
+#define action mac startScreensaver()
+
+#define action mac v17 sleep()
+
+#define action mac v17 displaySleep()
+
+/* Interactive Screenshot */
+
+enum screenshotSelection {
+	'Window',
+	'Custom',
+}
+
+#define action mac 'takescreenshot' takeInteractiveScreenshot(screenshotSelection ?selection: 'WFTakeScreenshotActionInteractiveSelectionType' = "Window") {
+	"WFTakeScreenshotScreenshotType": "Interactive"
+}
+
+/* Windows */
+
+enum windowPosition {
+	'Top Left',
+	'Top Center',
+	'Top Right',
+	'Middle Left',
+	'Center',
+	'Middle Right',
+	'Bottom Left',
+	'Bottom Center',
+	'Bottom Right',
+	'Coordinates',
+}
+
+#define action mac moveWindow(variable window: 'WFWindow', windowPosition position: 'WFPosition', bool ?bringToFront: 'WFBringToFront' = true)
+
+enum windowConfiguration {
+ 'Fit Screen',
+ 'Top Half',
+ 'Bottom Half',
+ 'Left Half',
+ 'Right Half',
+ 'Top Left Quarter',
+ 'Top Right Quarter',
+ 'Bottom Left Quarter',
+ 'Bottom Right Quarter',
+ 'Dimensions',
+}
+
+#define action mac resizeWindow(variable window: 'WFWindow', windowConfiguration configuration: 'WFConfiguration')
+
+/* Scripts */
+
+#define action mac runShellScript(text script: 'Script', variable input: 'Input', text ?shell: 'Shell' = "/bin/zsh", text ?inputMode: 'InputMode' = "to stdin")
+
+#define action mac runAppleScript(variable input: 'Input', text script: 'Script')
+
+enum SSHScriptAuthType {
+	'Password',
+	'SSH Key',
+}
+
+#define action mac runSSHScript(text script: 'WFSSHScript', variable input: 'WFInput', text host: 'WFSSHHost', text port: 'WFSSHPort', text user: 'WFSSHUser', SSHScriptAuthType authType: 'WFSSHAuthenticationType', text password: 'WFSSHPassword')
+
+#define action mac 'runjavascriptforautomation' runJSAutomation(variable input: 'Input', text script: 'Script')

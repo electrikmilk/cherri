@@ -98,16 +98,26 @@ func initParse() {
 	}
 }
 
+func markBuiltins() {
+	for _, action := range actions {
+		action.builtin = true
+	}
+}
+
 func preParse() {
 	preParsing = true
 
-	defineRawAction()
 	waitFor(
 		defineToggleSetActions,
-		handleIncludes,
+		markBuiltins,
 	)
+	defineRawAction()
+
+	includeStandardActions()
+	handleIncludes()
 
 	handleCopyPastes()
+	handleActionDefinitions()
 	handleCustomActions()
 
 	writeProcessed()
@@ -117,9 +127,6 @@ func preParse() {
 
 func writeProcessed() {
 	if !args.Using("debug") {
-		return
-	}
-	if len(included) == 0 && len(customActions) == 0 && len(pasteables) == 0 {
 		return
 	}
 
@@ -205,8 +212,6 @@ func parse() {
 		collectConditionals()
 	case tokenAhead(RightBrace):
 		collectEndStatement()
-	case tokenAhead(Enumeration):
-		collectEnumeration()
 	case strings.Contains(lookAheadUntil(' '), "("):
 		collectActionCall()
 	default:
@@ -302,12 +307,12 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		parserError("Value expected")
 	}
 	switch {
-	case intChar():
+	case intChar(char):
 		*valueType = Integer
 		if strings.Contains(ahead, ".") {
 			*valueType = Float
 		}
-		collectIntegerValue(valueType, value, &until)
+		collectIntegerValue(valueType, value, until)
 	case char == '"':
 		collectStringValue(valueType, value)
 	case char == '\'':
@@ -451,12 +456,17 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 }
 
 func collectEnumeration() {
+	var lineRef = newLineReference()
+
 	advance()
-	if enumerations == nil {
-		enumerations = make(map[string][]string)
-	}
 
 	var identifier = collectIdentifier()
+	if enumerations[identifier] != nil {
+		currentAction.parameters = []parameterDefinition{
+			{enum: identifier},
+		}
+		parserError(fmt.Sprintf("Duplicate enumeration '%s'\n\n%s", identifier, generateActionParamEnums(parameterDefinition{})))
+	}
 
 	advanceUntilExpect('{', 3)
 	advance()
@@ -479,6 +489,8 @@ func collectEnumeration() {
 			advance()
 		}
 	}
+
+	lineRef.replaceLines()
 
 	enumerations[identifier] = enumeration
 	advance()
@@ -506,7 +518,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	if *argIndex == *paramsSize && !param.infinite {
 		parserError(
 			fmt.Sprintf("Too many arguments\n\n%s",
-				generateActionDefinition(parameterDefinition{}, false, false),
+				generateActionDefinition(parameterDefinition{}, false),
 			),
 		)
 	}
@@ -732,59 +744,6 @@ func collectDefinition() {
 			var list = makeKeyList("Available versions:", versions, collectVersion)
 			parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
 		}
-	case tokenAhead(Action):
-		advance()
-		collectDefinedAction()
-	}
-}
-
-func collectDefinedAction() {
-	var shortIdentifier string
-	var overrideIdentifier string
-	if char == '\'' {
-		advance()
-
-		var workflowIdentifier = collectRawString()
-		if len(strings.Split(workflowIdentifier, ".")) < 4 {
-			shortIdentifier = workflowIdentifier
-		} else {
-			overrideIdentifier = workflowIdentifier
-		}
-		advance()
-	}
-
-	var identifier, arguments, outputType = collectActionDefinition('\n')
-	if !usingAction(contents, identifier) {
-		return
-	}
-	if shortIdentifier == "" {
-		shortIdentifier = identifier
-	}
-
-	skipWhitespace()
-
-	var addParams paramsFunc
-	if char == '{' {
-		advance()
-		var dict = collectDictionary()
-		addParams = func(args []actionArgument) map[string]any {
-			handleRawParams(dict.(map[string]interface{}))
-			return dict.(map[string]any)
-		}
-	}
-
-	actions[identifier] = &actionDefinition{
-		identifier:         shortIdentifier,
-		overrideIdentifier: overrideIdentifier,
-		parameters:         arguments,
-		outputType:         outputType,
-		addParams:          addParams,
-	}
-
-	if args.Using("debug") {
-		setCurrentAction(identifier, actions[identifier])
-		fmt.Println("\ndefined:", currentAction.appIdentifier, generateActionDefinition(parameterDefinition{}, true, true))
-		fmt.Print("\n")
 	}
 }
 
@@ -1305,13 +1264,13 @@ func addNothing() {
 	})
 }
 
-func intChar() bool {
-	return (char >= '0' && char <= '9') || char == '-' || char == '.'
+func intChar(ch rune) bool {
+	return (ch >= '0' && ch <= '9') || ch == '-' || ch == '.'
 }
 
 func collectInteger() string {
 	var collection strings.Builder
-	for intChar() {
+	for intChar(char) {
 		collection.WriteRune(char)
 		advance()
 	}
@@ -1319,8 +1278,8 @@ func collectInteger() string {
 	return collection.String()
 }
 
-func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
-	var ahead = lookAheadUntil(*until)
+func collectIntegerValue(valueType *tokenType, value *any, until rune) {
+	var ahead = lookAheadUntil(until)
 	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
 		var integerString = collectInteger()
 
@@ -1338,7 +1297,7 @@ func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 		return
 	}
 	*valueType = Expression
-	*value = collectUntil(*until)
+	*value = collectUntil(until)
 }
 
 func collectString() string {

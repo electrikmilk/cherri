@@ -1,0 +1,145 @@
+/*
+Device Actions
+*/
+
+#define action setBrightness(float brightness: 'WFBrightness')
+
+#define action setVolume(float volume: 'WFVolume')
+
+#define action getOnScreenContent()
+
+#define action 'com.apple.ShortcutsActions.GetOrientationAction' getOrientation(): text
+
+#define action v17 lockScreen()
+
+#define action v17 'reboot' shutdown()
+
+#define action v17 reboot() {
+	"WFShutdownMode": "Restart"
+}
+
+#define action 'dnd.set' DNDOn() {
+	"Enabled": 1,
+	"FocusModes": {
+		"DisplayString": "Do Not Disturb",
+		"Identifier": "com.apple.donotdisturb.mode.default"
+	}
+}
+
+#define action 'dnd.set' DNDOff() {
+	"Enabled": 0,
+	"FocusModes": {
+		"DisplayString": "Do Not Disturb",
+		"Identifier": "com.apple.donotdisturb.mode.default"
+	}
+}
+
+#define action 'appearance' lightMode() {
+	"operation": "set",
+	"style": "light"
+}
+
+#define action default 'appearance' darkMode() {
+	"operation": "set",
+	"style": "dark"
+}
+
+enum backgroundSound {
+	'BalancedNoise',
+	'BrightNoise',
+	'DarkNoise',
+	'Ocean',
+	'Rain',
+	'Stream',
+}
+
+#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundIntent' setBackgroundSound(backgroundSound ?sound: 'backgroundSound' = "BalancedNoise")
+
+#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundVolumeIntent' setBackgroundSoundsVolume(float volume: 'volumeValue')
+
+enum textSizes {
+	'Accessibility Extra Extra Extra Large',
+	'Accessibility Extra Extra Large',
+	'Accessibility Extra Large',
+	'Accessibility Large',
+	'Accessibility Medium',
+	'Extra Extra Extra Large',
+	'Extra Extra Large',
+	'Extra Large',
+	'Default',
+	'Medium',
+	'Small',
+	'Extra Small',
+}
+
+#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetLargeTextIntent' setTextSize(textSizes size: 'textSize')
+
+enum soundRecognitionOperations {
+	'pause',
+	'activate',
+	'toggle',
+}
+
+#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent' setSoundRecognition(soundRecognitionOperations ?operation = "activate")
+
+enum deviceDetail {
+	'Device Name',
+	'Device Hostname',
+	'Device Model',
+	'Device Is Watch',
+	'System Version',
+	'Screen Width',
+	'Screen Height',
+	'Current Volume',
+	'Current Brightness',
+	'Current Appearance',
+}
+
+#define action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail')
+
+// [Doc]: Vibrate Device: Vibrate the device. Only applies to Apple devices with the haptic engine.
+#define action !mac vibrate()
+
+/* Battery */
+
+#define action default getBatteryLevel()
+
+#define action v16.2 'getbatterylevel' connectedToCharger(): bool {
+	"Subject": "Is Connected to Charger"
+}
+
+#define action v16.2 'getbatterylevel' isCharging(): bool {
+	"Subject": "Is Charging"
+}
+
+/* Network */
+
+enum wifiDetail {
+	'Network Name',
+	'BSSID',
+	'Wi-Fi Standard',
+	'RX Rate',
+	'TX Rate',
+	'RSSI',
+	'Noise',
+	'Channel Number',
+	'Hardware MAC Address',
+}
+
+enum cellularDetail {
+	'Carrier Name',
+	'Radio Technology',
+	'Country Code',
+	'Is Roaming Abroad',
+	'Number of Signal Bars',
+}
+
+#define action 'getwifi' getWifiDetail(wifiDetail detail: 'WFWiFiDetail') {
+	"WFNetworkDetailsNetwork": "Wi-Fi"
+}
+
+#define action 'getwifi' getCellularDetail(cellularDetail detail: 'WFCellularDetail') {
+	"WFNetworkDetailsNetwork": "Cellular"
+}
+
+#define action 'connecttoservers' connectToServer(text url: 'WFInput')

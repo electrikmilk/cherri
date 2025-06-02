@@ -46,11 +46,18 @@ func main() {
 	}
 
 	if args.Using("action") {
+		markBuiltins()
+		defineRawAction()
+		defineToggleSetActions()
+		loadStandardActions()
 		if args.Value("action") == "" {
 			for identifier, definition := range actions {
 				setCurrentAction(identifier, definition)
-				fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
-				fmt.Print("\n---\n\n")
+				if undefinable() {
+					continue
+				}
+				fmt.Println(generateActionDefinition(parameterDefinition{}, true))
+				fmt.Print("\n---\n")
 			}
 		} else {
 			actionsSearch()
@@ -72,7 +79,7 @@ func main() {
 		printLogo()
 		printVersion()
 		if !darwin {
-			fmt.Println(ansi("\nWarning:", yellow, bold), "Shortcuts compiled on this platform will not run on iOS 15+ or macOS 12+.")
+			fmt.Println(ansi("\nWarning:", orange, bold), "Shortcuts compiled on this platform will not run on iOS 15+ or macOS 12+.")
 		}
 		fmt.Print("\n")
 		args.PrintUsage()

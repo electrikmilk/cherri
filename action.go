@@ -6,16 +6,23 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"maps"
 	"math"
 	"reflect"
+	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/electrikmilk/args-parser"
 )
 
 //go:embed stdlib.cherri
 var stdLib embed.FS
+
+//go:embed actions
+var stdActions embed.FS
 
 // currentAction holds the current action definition between functions.
 var currentAction actionDefinition
@@ -29,7 +36,7 @@ type parameterDefinition struct {
 	validType    tokenType
 	key          string
 	defaultValue any
-	enum         []string
+	enum         string
 	optional     bool
 	infinite     bool
 	literal      bool
@@ -78,6 +85,13 @@ type actionDefinition struct {
 	minVersion         float64
 	maxVersion         float64
 	setKey             string
+	builtin            bool // builtin is based on if the action was in the actions map when it was first initialized.
+	doc                selfDoc
+}
+
+type selfDoc struct {
+	title       string
+	description string
 }
 
 // libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
@@ -87,7 +101,42 @@ type libraryDefinition struct {
 	make func(identifier string)
 }
 
-var enumerations map[string][]string
+var enumerations = map[string][]string{
+	"measurementUnitType":          {"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"},
+	"storageUnit":                  {"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"},
+	"inputType":                    {"Text", "Number", "URL", "Date", "Time", "Date and Time"},
+	"appSplitRatio":                {"half", "thirdByTwo"},
+	"httpMethod":                   {"POST", "PUT", "PATCH", "DELETE"},
+	"sortOrder":                    {"asc", "desc"},
+	"windowSorting":                {"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"},
+	"timerDurations":                {"hr", "min", "sec"},
+	"fileLabel":                    {"red", "orange", "yellow", "green", "blue", "purple", "gray"},
+	"filesSortBy":                   {"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"},
+	"seekBehavior":                  {"To Time", "Forward By", "Backward By"},
+	"Acceleration":                  {"m/s²", "g-force"},
+	"Angle":                         {"degrees", "arcminutes", "arcseconds", "radians", "grad", "revolutions"},
+	"Area":                          {"Mm²", "square kilometers", "square meters", "square centimeters", "mm²", "um²", "nm²", "square inches", "square feet", "square yards", "square miles", "acres", "a", "hectares"},
+	"Concentration Mass":            {"g/L", "mg/dL", "µg/m³"},
+	"Dispersion":                    {"ppm"},
+	"Duration":                      {"milliseconds", "microseconds", "nanoseconds", "ps", "seconds", "minutes", "hours"},
+	"Electric Charge":               {"C", "MAh", "kAh", "Ah", "mAh", "µAh"},
+	"Electric Current":              {"MA", "kA", "amp", "mA", "µA"},
+	"Electric Potential Difference": {"MV", "kV", "volt", "mV", "µV"},
+	"Electric Resistance":           {"MΩ", "kΩ", "ohm", "mΩ", "µΩ"},
+	"Energy":                        {"kJ", "joule", "kcal", "cal", "kWh"},
+	"Frequency":                     {"tHz", "GHz", "MHz", "kHz", "Hz", "mHz", "µHz", "nHz", "fps"},
+	"Fuel Efficiency":               {"L/100km", "mpg"},
+	"Illuminance":                   {"lux"},
+	"Information Storage":           {"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"},
+	"Length":                        {"Mm", "km", "hm", "dam", "m", "dm", "cm", "mm", "µm", "nm", "pm", "in", "ft", "yd", "mi", "smi", "ly", "nmi", "fathom", "furlong", "au", "parsec"},
+	"Mass":                          {"kg", "gram", "dg", "cg", "mg", "µg", "ng", "pg", "oz", "lb", "stone", "t", "ton", "carat", "oz t", "slug"},
+	"Power":                         {"TW", "GW", "MW", "kW", "watt", "mW", "µW", "nW", "pw", "fw", "hp"},
+	"Pressure":                      {"N/m²", "GPa", "MPa", "kPa", "hPa", "\" Hg", "bar", "mbar", "mm Hg", "psi"},
+	"Speed":                         {"m/s", "km/hr", "mi/hr", "kn"},
+	"Temperature":                   {"K", "ºC", "ºF"},
+	"Volume":                        {"ML", "kL", "liter", "dL", "cL", "mL", "km³", "m³", "dm³", "cm³", "mm³", "in³", "ft³", "yd³", "mi³", "acre ft", "bushel", "tsp", "tbsp", "fl oz", "pt", "qt", "Imp gal", "mcup"},
+	"fileOrderBy":                   {"Smallest First", "Biggest First", "Latest First", "Oldest First", "A to Z", "Z to A"},
+}
 
 var actionIndex int
 
@@ -97,19 +146,31 @@ func setCurrentAction(identifier string, definition *actionDefinition) {
 	currentAction = *definition
 }
 
+// undefinable checks if the current action cannot be defined using only Cherri because of the way it is defined.
+func undefinable() bool {
+	if currentAction.addParams != nil {
+		var addedParams = currentAction.addParams([]actionArgument{})
+		if len(addedParams) == 0 {
+			return true
+		}
+	}
+
+	return currentAction.builtin || currentAction.make != nil || currentAction.check != nil || currentAction.decomp != nil || currentAction.appIntent != emptyAppIntent
+}
+
 // makeAction builds an action based on its actionDefinition and adds it to the shortcut.
 func makeAction(arguments []actionArgument, reference *map[string]any) {
 	actionIndex++
 	// Determine identifier
-	var ident = actionIdentifier()
+	var ident = getFullActionIdentifier()
 	// Determine parameters
-	var params = actionParameters(arguments)
+	var params = getActionParameters(arguments)
 	// Additionally add the output name and UUID of this action if provided
 	addAction(ident, attachReferenceToParams(&params, reference))
 }
 
-// actionIdentifier determines the identifier of currentAction.
-func actionIdentifier() (ident string) {
+// getFullActionIdentifier determines the full identifier of currentAction.
+func getFullActionIdentifier() (ident string) {
 	if currentAction.overrideIdentifier != "" {
 		return currentAction.overrideIdentifier
 	}
@@ -126,10 +187,23 @@ func actionIdentifier() (ident string) {
 	return
 }
 
+// getActionIdentifier determines the identifier of currentAction.
+func getActionIdentifier() (ident string) {
+	if currentAction.appIdentifier != "" {
+		ident = fmt.Sprintf("%s.", currentAction.appIdentifier)
+	}
+	if currentAction.identifier != "" {
+		ident = fmt.Sprintf("%s%s", ident, currentAction.identifier)
+	} else {
+		ident = fmt.Sprintf("%s%s", ident, strings.ToLower(currentActionIdentifier))
+	}
+	return
+}
+
 var emptyAppIntent = appIntent{}
 
-// actionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
-func actionParameters(arguments []actionArgument) map[string]any {
+// getActionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
+func getActionParameters(arguments []actionArgument) map[string]any {
 	var params = make(map[string]any)
 	if currentAction.addParams != nil {
 		maps.Copy(params, currentAction.addParams(arguments))
@@ -245,9 +319,17 @@ func checkRequiredArgs() {
 			default:
 				suffix = "th"
 			}
-			parserError(fmt.Sprintf("Missing required %d%s argument '%s'.\n%s", argIndex, suffix, param.name, generateActionDefinition(param, false, true)))
+			parserError(fmt.Sprintf("Missing required %d%s argument '%s'.\n%s", argIndex, suffix, param.name, generateActionDefinition(param, true)))
 		}
 	}
+}
+
+func getEnum(identifier string) []string {
+	if enumerations[identifier] == nil {
+		return []string{}
+	}
+
+	return enumerations[identifier]
 }
 
 // checkEnum checks an argument value against a string slice.
@@ -256,13 +338,13 @@ func checkEnum(param *parameterDefinition, argument *actionArgument) {
 	if value == nil || reflect.TypeOf(value).Kind() != reflect.String || argument.valueType == Question {
 		return
 	}
-	if !slices.Contains(param.enum, value.(string)) {
+	if !slices.Contains(getEnum(param.enum), value.(string)) {
 		parserError(
 			fmt.Sprintf(
 				"Invalid argument '%s' for %s.\n\n%s",
 				value,
 				param.name,
-				generateActionDefinition(*param, false, true),
+				generateActionDefinition(*param, true),
 			),
 		)
 	}
@@ -324,7 +406,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 				argValueType,
 				param.name,
 				param.validType,
-				generateActionDefinition(*param, false, false),
+				generateActionDefinition(*param, false),
 			))
 		}
 	case argValueType == Question:
@@ -339,7 +421,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 			argValueType,
 			param.name,
 			param.validType,
-			generateActionDefinition(*param, false, false),
+			generateActionDefinition(*param, false),
 		))
 	}
 }
@@ -358,7 +440,7 @@ func validActionOutput(param *parameterDefinition, value any) {
 				actionOutputType,
 				param.name,
 				param.validType,
-				generateActionDefinition(*param, false, false),
+				generateActionDefinition(*param, false),
 			))
 		}
 	}
@@ -393,7 +475,7 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 		return
 	}
 
-	if param.enum != nil {
+	if param.enum != "" {
 		checkEnum(param, argument)
 	}
 
@@ -412,7 +494,7 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 			fmt.Sprintf(
 				"Value for action argument '%s' is the same as the default value.\n%s",
 				param.name,
-				generateActionDefinition(*param, false, false),
+				generateActionDefinition(*param, false),
 			),
 		)
 	}
@@ -434,109 +516,122 @@ func questionArg(param *parameterDefinition, argument *actionArgument) {
 func checkLiteralValue(param *parameterDefinition, argument *actionArgument) {
 	if argument.valueType != param.validType {
 		parserError(fmt.Sprintf(
-			"Shortcuts does not allow variables for this argument, use a literal for the argument value.\n%s",
-			generateActionDefinition(*param, false, false),
+			"Shortcuts does not allow variables for this argument, use a literal for the argument value.\n\n%s",
+			generateActionDefinition(*param, false),
 		))
 	}
 }
 
-func makeMeasurementUnits() {
-	if len(units) != 0 {
-		return
-	}
-	units = map[string][]string{
-		"Acceleration":                  {"m/s²", "g-force"},
-		"Angle":                         {"degrees", "arcminutes", "arcseconds", "radians", "grad", "revolutions"},
-		"Area":                          {"Mm²", "square kilometers", "square meters", "square centimeters", "mm²", "um²", "nm²", "square inches", "square feet", "square yards", "square miles", "acres", "a", "hectares"},
-		"Concentration Mass":            {"g/L", "mg/dL", "µg/m³"},
-		"Dispersion":                    {"ppm"},
-		"Duration":                      {"milliseconds", "microseconds", "nanoseconds", "ps", "seconds", "minutes", "hours"},
-		"Electric Charge":               {"C", "MAh", "kAh", "Ah", "mAh", "µAh"},
-		"Electric Current":              {"MA", "kA", "amp", "mA", "µA"},
-		"Electric Potential Difference": {"MV", "kV", "volt", "mV", "µV"},
-		"Electric Resistance":           {"MΩ", "kΩ", "ohm", "mΩ", "µΩ"},
-		"Energy":                        {"kJ", "joule", "kcal", "cal", "kWh"},
-		"Frequency":                     {"tHz", "GHz", "MHz", "kHz", "Hz", "mHz", "µHz", "nHz", "fps"},
-		"Fuel Efficiency":               {"L/100km", "mpg"},
-		"Illuminance":                   {"lux"},
-		"Information Storage":           {"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"},
-		"Length":                        {"Mm", "km", "hm", "dam", "m", "dm", "cm", "mm", "µm", "nm", "pm", "in", "ft", "yd", "mi", "smi", "ly", "nmi", "fathom", "furlong", "au", "parsec"},
-		"Mass":                          {"kg", "gram", "dg", "cg", "mg", "µg", "ng", "pg", "oz", "lb", "stone", "t", "ton", "carat", "oz t", "slug"},
-		"Power":                         {"TW", "GW", "MW", "kW", "watt", "mW", "µW", "nW", "pw", "fw", "hp"},
-		"Pressure":                      {"N/m²", "GPa", "MPa", "kPa", "hPa", "\" Hg", "bar", "mbar", "mm Hg", "psi"},
-		"Speed":                         {"m/s", "km/hr", "mi/hr", "kn"},
-		"Temperature":                   {"K", "ºC", "ºF"},
-		"Volume":                        {"ML", "kL", "liter", "dL", "cL", "mL", "km³", "m³", "dm³", "cm³", "mm³", "in³", "ft³", "yd³", "mi³", "acre ft", "bushel", "tsp", "tbsp", "fl oz", "pt", "qt", "Imp gal", "mcup"},
-	}
-}
-
-func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) string {
+func generateActionDefinition(focus parameterDefinition, showEnums bool) string {
 	var definition strings.Builder
-	definition.WriteString(fmt.Sprintf("%s(", currentActionIdentifier))
+	definition.WriteRune('\n')
+
+	var docTitle = currentAction.doc.title
+	if currentAction.doc.title == "" {
+		if args.Using("no-ansi") {
+			docTitle = fmt.Sprintf("`%s()`", currentActionIdentifier)
+		} else {
+			docTitle = fmt.Sprintf("%s()", currentActionIdentifier)
+		}
+	}
+	if args.Using("no-ansi") {
+		definition.WriteString("### ")
+	}
+	definition.WriteString(fmt.Sprintf("%s\n", ansi(docTitle, bold, underline)))
+	definition.WriteRune('\n')
+	if currentAction.doc.description != "" {
+		definition.WriteString(fmt.Sprintf("%s\n\n", ansi(currentAction.doc.description, italic)))
+	}
+
+	if args.Using("no-ansi") {
+		definition.WriteString("```\n")
+	}
+
+	if showEnums {
+		definition.WriteString(generateActionParamEnums(focus))
+	}
+
+	var definitionType string
+	if currentAction.builtin {
+		definitionType = "#builtin"
+	} else {
+		definitionType = "#define"
+	}
+
+	definition.WriteString(ansi(fmt.Sprintf("%s action ", definitionType), orange))
+
+	if currentAction.defaultAction {
+		definition.WriteString(ansi("default ", yellow))
+	}
+	if currentAction.mac {
+		definition.WriteString(ansi("mac ", orange))
+	}
+	if currentAction.minVersion != 0 {
+		definition.WriteString(ansi(fmt.Sprintf("v%1.f>", currentAction.minVersion), underline))
+		definition.WriteRune(' ')
+	}
+	if currentAction.maxVersion != 0 {
+		definition.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.maxVersion), red, bold))
+		definition.WriteRune(' ')
+	}
+
+	if currentAction.identifier != "" || currentAction.appIdentifier != "" {
+		setCurrentAction(currentActionIdentifier, &currentAction)
+		definition.WriteString(ansi(fmt.Sprintf("'%s' ", getActionIdentifier()), red))
+	}
+
+	definition.WriteString(fmt.Sprintf("%s(", ansi(currentActionIdentifier, blue, bold)))
 	var arguments []string
 	for _, param := range currentAction.parameters {
 		if param.name == focus.name || focus.name == "" {
 			arguments = append(arguments, generateActionParamDefinition(param))
 		} else {
-			arguments = append(arguments, "...")
+			arguments = append(arguments, ansi("...", dim))
 		}
 	}
 	definition.WriteString(strings.Join(arguments, ", "))
 	definition.WriteRune(')')
 
 	if currentAction.outputType != "" {
-		definition.WriteString(fmt.Sprintf(": %s ", currentAction.outputType))
+		definition.WriteString(fmt.Sprintf(": %s", ansi(string(currentAction.outputType), magenta)))
 	}
 
-	if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
-		definition.WriteString(generateActionRestrictions())
+	if currentAction.addParams != nil {
+		var addParams = currentAction.addParams([]actionArgument{})
+		if len(addParams) != 0 {
+			var jsonBytes, jsonErr = json.MarshalIndent(addParams, strings.Repeat("\t", tabLevel), "\t")
+			handle(jsonErr)
+			definition.WriteString(fmt.Sprintf(" %s", string(jsonBytes)))
+		}
 	}
-	if showEnums {
-		definition.WriteString(generateActionParamEnums(focus))
+
+	if args.Using("no-ansi") {
+		definition.WriteString("\n```")
 	}
 
 	return definition.String()
 }
 
-func generateActionRestrictions() string {
-	var definition strings.Builder
-	definition.WriteString("\nRestrictions: ")
-	var restrictions []string
-	if currentAction.minVersion != 0 {
-		restrictions = append(restrictions, fmt.Sprintf("iOS %1.f+", currentAction.minVersion))
-	}
-	if currentAction.maxVersion != 0 {
-		restrictions = append(restrictions, fmt.Sprintf("Removed or significantly changed after iOS %1.f+", currentAction.maxVersion))
-	}
-	if currentAction.mac {
-		restrictions = append(restrictions, "macOS only")
-	}
-	if len(restrictions) > 0 {
-		definition.WriteString(strings.Join(restrictions, ", "))
-	}
-
-	return ansi(definition.String(), red, bold)
-}
-
 func generateActionParamEnums(focus parameterDefinition) string {
 	var definition strings.Builder
-	var hasEnum = false
 	for _, param := range currentAction.parameters {
-		if param.enum == nil {
+		if param.enum == "" {
 			continue
 		}
 		if focus.name != "" && focus.name != param.name {
 			continue
 		}
-		definition.WriteRune('\n')
-		hasEnum = true
-		definition.WriteString(ansi(fmt.Sprintf("\nAvailable %ss:\n", param.name), yellow))
-		for _, e := range param.enum {
-			definition.WriteString(fmt.Sprintf("- %s\n", e))
+		definition.WriteString(ansi("enum ", orange))
+		definition.WriteString(param.enum)
+		definition.WriteString(ansi(" {\n", dim))
+		for i, enum := range getEnum(param.enum) {
+			var enumSize = len(param.enum)
+			definition.WriteString(ansi(fmt.Sprintf("\t'%s'", enum), orange))
+			if i < enumSize+1 {
+				definition.WriteString(",\n")
+			}
 		}
-	}
-	if hasEnum {
-		definition.WriteString(ansi("\nNote: Enum values are case-sensitive.", bold))
+		definition.WriteString(ansi("}\n\n", dim))
 	}
 
 	return definition.String()
@@ -544,11 +639,14 @@ func generateActionParamEnums(focus parameterDefinition) string {
 
 func generateActionParamDefinition(param parameterDefinition) string {
 	var definition strings.Builder
-	if param.enum == nil {
-		definition.WriteString(fmt.Sprintf("%s ", param.validType))
+	var argType string
+	if param.enum == "" {
+		argType = fmt.Sprintf("%s ", param.validType)
 	} else {
-		definition.WriteString("enum ")
+		argType = fmt.Sprintf("%s ", param.enum)
 	}
+	definition.WriteString(ansi(argType, magenta))
+
 	if param.infinite {
 		definition.WriteString("...")
 	}
@@ -556,12 +654,20 @@ func generateActionParamDefinition(param parameterDefinition) string {
 		definition.WriteRune('?')
 	}
 	definition.WriteString(param.name)
+
+	if param.key != "" && param.key != param.name {
+		definition.WriteString(ansi(fmt.Sprintf(": '%s'", param.key), orange))
+	}
+
 	if param.defaultValue != nil {
+		definition.WriteString(ansi(" = ", dim))
+		var defaultValue string
 		if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
-			definition.WriteString(fmt.Sprintf(" = \"%v\"", strings.Replace(param.defaultValue.(string), "\n", "\\n", 1)))
+			defaultValue = fmt.Sprintf("\"%v\"", strings.Replace(param.defaultValue.(string), "\n", "\\n", 1))
 		} else {
-			definition.WriteString(fmt.Sprintf(" = %v", param.defaultValue))
+			defaultValue = fmt.Sprintf("%v", param.defaultValue)
 		}
+		definition.WriteString(ansi(defaultValue, green))
 	}
 
 	return definition.String()
@@ -581,6 +687,155 @@ func appIntentDescriptor(intent appIntent) map[string]any {
 			"AppIntentIdentifier": intent.appIntentIdentifier,
 		},
 	}
+}
+
+// handleActionDefinitions parses defined actions in the current file and collects them into the actions map.
+func handleActionDefinitions() {
+	if !regexp.MustCompile(`#define action (?:'(.+)')?(.*?)\(`).MatchString(contents) && !regexp.MustCompile(`enum (.*?) \{`).MatchString(contents) {
+		return
+	}
+	parseActionDefinitions()
+
+	resetParse()
+}
+
+func parseActionDefinitions() {
+	for char != -1 {
+		switch {
+		case isChar('/'):
+			args.Args["comments"] = ""
+			preParsing = false
+			collectComment()
+			preParsing = true
+			delete(args.Args, "comments")
+		case tokenAhead(Enumeration):
+			collectEnumeration()
+		case tokenAhead(Definition):
+			advance()
+			if tokenAhead(Action) {
+				advance()
+				collectDefinedAction()
+				continue
+			}
+		}
+		advance()
+	}
+	tokens = []token{}
+}
+
+func collectDefinedAction() {
+	var lineRef = newLineReference()
+
+	var doc selfDoc
+	var lastToken = getLastAddedToken()
+	if lastToken.typeof == Comment {
+		var comment = lastToken.value.(string)
+		if !strings.Contains(comment, "\n") && strings.Contains(comment, ":") {
+			var parts = strings.Split(comment, ":")
+			if strings.TrimSpace(parts[0]) == "[Doc]" {
+				if len(parts) > 2 {
+					doc = selfDoc{title: strings.TrimSpace(parts[1]), description: strings.TrimSpace(parts[2])}
+				} else {
+					doc = selfDoc{description: strings.TrimSpace(parts[1])}
+				}
+			}
+		}
+	}
+
+	var defaultAction bool
+	if tokenAhead(Default) {
+		defaultAction = true
+		advance()
+	}
+
+	var macOnlyAction bool
+	if tokenAhead(Mac) {
+		macOnlyAction = true
+		advance()
+	} else if tokenAhead(NonMac) {
+		macOnlyAction = false
+		advance()
+	}
+
+	var minVersion, maxVersion = collectVersionDefinition()
+
+	var shortIdentifier string
+	var overrideIdentifier string
+	if char == '\'' {
+		advance()
+
+		var workflowIdentifier = collectRawString()
+		if len(strings.Split(workflowIdentifier, ".")) < 4 {
+			shortIdentifier = workflowIdentifier
+		} else {
+			overrideIdentifier = workflowIdentifier
+		}
+		advance()
+	}
+
+	var identifier, arguments, outputType = collectActionDefinition('\n')
+	if shortIdentifier == "" {
+		shortIdentifier = strings.ToLower(identifier)
+	}
+
+	advance()
+
+	var addParams paramsFunc
+	if char == '{' {
+		advance()
+		var dict = collectDictionary()
+		addParams = func(args []actionArgument) map[string]any {
+			handleRawParams(dict.(map[string]interface{}))
+			return dict.(map[string]any)
+		}
+	}
+
+	lineRef.replaceLines()
+
+	actions[identifier] = &actionDefinition{
+		identifier:         shortIdentifier,
+		overrideIdentifier: overrideIdentifier,
+		parameters:         arguments,
+		outputType:         outputType,
+		addParams:          addParams,
+		defaultAction:      defaultAction,
+		mac:                macOnlyAction,
+		minVersion:         minVersion,
+		maxVersion:         maxVersion,
+		doc:                doc,
+	}
+
+	if args.Using("debug") {
+		setCurrentAction(identifier, actions[identifier])
+		fmt.Println("\ndefined:", currentAction.appIdentifier, generateActionDefinition(parameterDefinition{}, true))
+		fmt.Print("\n")
+	}
+}
+
+func collectVersionDefinition() (minVersion float64, maxVersion float64) {
+	for char != -1 && char != ' ' {
+		if char != 'v' || char == 'v' && !intChar(next(1)) {
+			break
+		}
+		advance()
+		var valueType tokenType
+		var version any
+		collectIntegerValue(&valueType, &version, ' ')
+
+		switch char {
+		case '>':
+			minVersion = version.(float64)
+			advance()
+		case '<':
+			maxVersion = version.(float64)
+			advance()
+		default:
+			minVersion = version.(float64)
+		}
+		skipWhitespace()
+	}
+
+	return minVersion, maxVersion
 }
 
 func collectActionDefinition(until rune) (identifier string, arguments []parameterDefinition, outputType tokenType) {
@@ -614,14 +869,19 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 		var valueType tokenType
 		var value any
 
-		var enum []string
+		var enumeration string
 		var ahead = lookAheadUntil(' ')
 		if enumerations[ahead] != nil {
-			var enumeration = collectUntil(' ')
-			enum = enumerations[enumeration]
+			enumeration = collectUntil(' ')
 			valueType = String
 		} else {
 			collectType(&valueType, &value, ' ')
+		}
+
+		var literal bool
+		if char == '!' {
+			advance()
+			literal = true
 		}
 
 		value = nil
@@ -629,12 +889,9 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 		skipWhitespace()
 
 		var optional bool
-		var infinite bool
 		if char == '?' {
 			optional = true
 			advance()
-		} else if tokenAhead(Ellipsis) {
-			infinite = true
 		}
 
 		var identifier = collectIdentifier()
@@ -648,6 +905,8 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			}
 			advance()
 			parameterKey = collectRawString()
+		} else {
+			parameterKey = identifier
 		}
 
 		skipWhitespace()
@@ -663,7 +922,8 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			if defaultValueType != valueType {
 				parserError(fmt.Sprintf("Invalid default value of type '%s' for '%s' type argument '%s'", defaultValueType, valueType, identifier))
 			}
-		case ',':
+		}
+		if char == ',' {
 			advance()
 		}
 
@@ -672,9 +932,9 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			key:          parameterKey,
 			validType:    valueType,
 			optional:     optional,
-			infinite:     infinite,
 			defaultValue: defaultValue,
-			enum:         enum,
+			enum:         enumeration,
+			literal:      literal,
 		})
 
 		skipWhitespace()
@@ -682,19 +942,4 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 	advance()
 
 	return
-}
-
-func usingAction(content string, identifier string) bool {
-	var matches = actionUsageRegex.FindAllStringSubmatch(content, -1)
-	if len(matches) == 0 {
-		return false
-	}
-	for _, match := range matches {
-		var ref = strings.TrimSpace(match[1])
-		if ref == identifier {
-			return true
-		}
-	}
-
-	return false
 }

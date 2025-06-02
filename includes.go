@@ -95,12 +95,18 @@ func parseInclude() {
 	var includePath = collectIncludePath()
 
 	if slices.Contains(included, includePath) {
-		parserError(fmt.Sprintf("File '%s' has already been included.", includePath))
+		parserError(fmt.Sprintf("Path '%s' has already been included.", includePath))
 	}
 
 	var includeFileBytes []byte
 	var includeReadErr error
-	if includePath == "stdlib" {
+	if startsWith("actions", includePath) && strings.Contains(includePath, "/") {
+		var actionCat = end(strings.Split(includePath, "/"))
+		includeFileBytes, includeReadErr = stdActions.ReadFile(fmt.Sprintf("actions/%s.cherri", actionCat))
+		if includeReadErr != nil {
+			parserError(fmt.Sprintf("Undefined actions include '%s'.", actionCat))
+		}
+	} else if includePath == "stdlib" {
 		includeFileBytes, includeReadErr = stdLib.ReadFile("stdlib.cherri")
 	} else {
 		if !strings.Contains(includePath, "..") {

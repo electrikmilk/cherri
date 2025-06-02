@@ -1,0 +1,63 @@
+/*
+Math Actions
+*/
+
+enum calculationOperation {
+    'x^2',
+    'х^3',
+    'x^у',
+    'e^x',
+    '10^x',
+    'In(x)',
+    'log(x)',
+    '√x',
+    '∛x',
+    'x!',
+    'sin(x)',
+    'cos(X)',
+    'tan(x)',
+    'abs(x)',
+}
+
+#define action 'math' calculate(
+    calculationOperation operation: 'WFScientificMathOperation',
+    number operandOne: 'WFInput',
+    number ?operandTwo: 'WFMathOperand'
+): number {
+	"WFMathOperation": "..."
+}
+
+enum rounding {
+ 'Ones Place',
+ 'Tens Place',
+ 'Hundreds Place',
+ 'Thousands',
+ 'Ten Thousands',
+ 'Hundred Thousands',
+ 'Millions',
+}
+
+#define action default round(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
+	"WFRoundMode": "Normal"
+}
+
+#define action 'round' ceil(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
+	"WFRoundMode": "Always Round Up"
+}
+
+#define action 'round' floor(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
+	"WFRoundMode": "Always Round Down"
+}
+
+enum statisticOperations {
+	'Average',
+	'Minimum',
+	'Maximum',
+	'Sum',
+	'Median',
+	'Mode',
+	'Range',
+	'Standard Deviation',
+}
+
+#define action 'statistics' statistic(statisticOperations operation: 'WFStatisticsOperation', variable input: 'WFInput')
