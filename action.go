@@ -473,7 +473,7 @@ func questionArg(param *parameterDefinition, argument *actionArgument) {
 func checkLiteralValue(param *parameterDefinition, argument *actionArgument) {
 	if argument.valueType != param.validType {
 		parserError(fmt.Sprintf(
-			"Shortcuts does not allow variables for this argument, use a literal for the argument value.\n%s",
+			"Shortcuts does not allow variables for this argument, use a literal for the argument value.\n\n%s",
 			generateActionDefinition(*param, false, false),
 		))
 	}
