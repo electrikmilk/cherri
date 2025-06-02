@@ -1,0 +1,86 @@
+/*
+Device Actions
+*/
+
+#define action setBrightness(float brightness: 'WFBrightness')
+
+#define action setVolume(float volume: 'WFVolume')
+
+#define action getOnScreenContent()
+
+#define action 'com.apple.ShortcutsActions.GetOrientationAction' getOrientation(): text
+
+#define action mac startScreensaver()
+
+#define action 17 lockScreen()
+
+#define action 17 sleep()
+
+#define action 17 displaySleep()
+
+#define action 17 'reboot' shutdown()
+
+#define action 17 reboot() {
+	"WFShutdownMode": "Restart"
+}
+
+enum getDeviceDetailDetails {
+	'Device Name',
+	'Device Hostname',
+	'Device Model',
+	'Device Is Watch',
+	'System Version',
+	'Screen Width',
+	'Screen Height',
+	'Current Volume',
+	'Current Brightness',
+	'Current Appearance',
+}
+
+#define action 'getdevicedetails' getDeviceDetail(getDeviceDetailDetails detail: 'WFDeviceDetail')
+
+#define action !mac vibrate()
+
+/* Battery */
+
+#define action default getBatteryLevel()
+
+#define action 16.2 'getbatterylevel' connectedToCharger(): bool {
+	"Subject": "Is Connected to Charger"
+}
+
+#define action 16.2 'getbatterylevel' isCharging(): bool {
+	"Subject": "Is Charging"
+}
+
+/* Network */
+
+enum wifiDetail {
+	'Network Name',
+	'BSSID',
+	'Wi-Fi Standard',
+	'RX Rate',
+	'TX Rate',
+	'RSSI',
+	'Noise',
+	'Channel Number',
+	'Hardware MAC Address',
+}
+
+enum cellularDetail {
+	'Carrier Name',
+	'Radio Technology',
+	'Country Code',
+	'Is Roaming Abroad',
+	'Number of Signal Bars',
+}
+
+#define action 'getwifi' getWifiDetail(wifiDetail detail: 'WFWiFiDetail') {
+	"WFNetworkDetailsNetwork": "Wi-Fi"
+}
+
+#define action 'getwifi' getCellularDetail(cellularDetail detail: 'WFCellularDetail') {
+	"WFNetworkDetailsNetwork": "Cellular"
+}
+
+#define action 'connecttoservers' connectToServer(text url: 'WFInput')

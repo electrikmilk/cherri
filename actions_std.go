@@ -154,7 +154,6 @@ var createShortcutiCloudLink = appIntent{
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
 	"returnToHomescreen": {mac: false},
-	"vibrate":            {mac: false},
 	"addSeconds": {
 		identifier:    "adjustdate",
 		defaultAction: true,
@@ -986,16 +985,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"connectToServer": {
-		identifier: "connecttoservers",
-		parameters: []parameterDefinition{
-			{
-				name:      "url",
-				validType: String,
-				key:       "WFInput",
-			},
-		},
-	},
 	"splitText": {
 		identifier: "text.split",
 		parameters: []parameterDefinition{
@@ -1483,15 +1472,6 @@ var actions = map[string]*actionDefinition{
 				key:          "WFRecordingStart",
 				defaultValue: "Immediately",
 				enum:         recordingStarts,
-			},
-		},
-	},
-	"setVolume": {
-		parameters: []parameterDefinition{
-			{
-				name:      "volume",
-				validType: Float,
-				key:       "WFVolume",
 			},
 		},
 	},
@@ -2355,39 +2335,6 @@ var actions = map[string]*actionDefinition{
 		},
 		mac: true,
 	},
-	"shutdown": {
-		defaultAction: true,
-		identifier:    "reboot",
-		minVersion:    17,
-	},
-	"reboot": {
-		minVersion: 17,
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFShutdownMode": "Restart",
-			}
-		},
-	},
-	"sleep": {
-		minVersion: 17,
-		mac:        true,
-	},
-	"displaySleep": {
-		minVersion: 17,
-		mac:        true,
-	},
-	"logout": {
-		minVersion: 17,
-		mac:        true,
-	},
-	"lockScreen": {
-		minVersion: 17,
-	},
-	"getOrientation": {
-		identifier:    "GetOrientationAction",
-		appIdentifier: "com.apple.ShortcutsActions",
-		outputType:    String,
-	},
 	"getObjectOfClass": {
 		identifier: "getclassaction",
 		parameters: []parameterDefinition{
@@ -2403,7 +2350,6 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"getOnScreenContent": {},
 	"fileSize": {
 		identifier: "format.filesize",
 		parameters: []parameterDefinition{
@@ -2423,26 +2369,6 @@ var actions = map[string]*actionDefinition{
 			return map[string]any{
 				"WFFileSizeIncludeUnits": false,
 			}
-		},
-	},
-	"getDeviceDetail": {
-		identifier: "getdevicedetails",
-		parameters: []parameterDefinition{
-			{
-				name:      "detail",
-				key:       "WFDeviceDetail",
-				validType: String,
-				enum:      deviceDetails,
-			},
-		},
-	},
-	"setBrightness": {
-		parameters: []parameterDefinition{
-			{
-				name:      "brightness",
-				validType: Float,
-				key:       "WFBrightness",
-			},
 		},
 	},
 	"getName": {
@@ -2518,27 +2444,6 @@ var actions = map[string]*actionDefinition{
 				"style":     "dark",
 			}
 		},
-	},
-	"getBatteryLevel": {defaultAction: true},
-	"isCharging": {
-		identifier: "getbatterylevel",
-		minVersion: 16.2,
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"Subject": "Is Charging",
-			}
-		},
-		outputType: Bool,
-	},
-	"connectedToCharger": {
-		identifier: "getbatterylevel",
-		minVersion: 16.2,
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"Subject": "Is Connected to Charger",
-			}
-		},
-		outputType: Bool,
 	},
 	"getShortcuts": {
 		identifier: "getmyworkflows",
@@ -3482,7 +3387,6 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"startScreensaver": {mac: true},
 	"contentGraph": {
 		identifier: "viewresult",
 		parameters: []parameterDefinition{
@@ -3722,39 +3626,6 @@ var actions = map[string]*actionDefinition{
 				key:       "WFSSHPassword",
 				validType: String,
 			},
-		},
-	},
-	"getWifiDetail": {
-		identifier: "getwifi",
-		parameters: []parameterDefinition{
-			{
-				name:      "detail",
-				validType: String,
-				key:       "WFWiFiDetail",
-				enum:      wifiNetworkDetails,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return map[string]any{
-				"WFNetworkDetailsNetwork": "Wi-Fi",
-			}
-		},
-	},
-	"getCellularDetail": {
-		identifier: "getwifi",
-		mac:        false,
-		parameters: []parameterDefinition{
-			{
-				name:      "detail",
-				validType: String,
-				key:       "WFCellularDetail",
-				enum:      cellularNetworkDetails,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return map[string]any{
-				"WFNetworkDetailsNetwork": "Cellular",
-			}
 		},
 	},
 	"formRequest": {
@@ -4286,6 +4157,7 @@ var defaultActionIncludes = []string{
 	"calendar",
 	// "contacts",
 	"documents",
+	"device",
 	"location",
 	"math",
 	// "media",
