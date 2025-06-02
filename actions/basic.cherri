@@ -67,7 +67,8 @@ enum language {
 
 #define action number(variable number: 'WFNumberActionNumber'): number
 
-#define action 'openapp' springBoard() {
+// [Doc]: Open Homescreen: Open the SpringBoard, which triggers navigating to the homescreen.
+#define action !mac 'openapp' springBoard() {
     "WFAppIdentifier": "WFAppIdentifier",
     "WFSelectedApp": {
         "BundleIdentifier": "com.apple.springboard",
