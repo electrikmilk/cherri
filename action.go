@@ -877,6 +877,12 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			collectType(&valueType, &value, ' ')
 		}
 
+		var literal bool
+		if char == '!' {
+			advance()
+			literal = true
+		}
+
 		value = nil
 
 		skipWhitespace()
@@ -927,6 +933,7 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			optional:     optional,
 			defaultValue: defaultValue,
 			enum:         enum,
+			literal:      literal,
 		})
 
 		skipWhitespace()
