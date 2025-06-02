@@ -50,3 +50,12 @@ enum language {
 #define action 'gettext' text(text text: 'WFTextActionText'): text
 
 #define action number(variable number: 'WFNumberActionNumber'): number
+
+#define action 'openapp' springBoard() {
+    "WFAppIdentifier": "WFAppIdentifier",
+    "WFSelectedApp": {
+        "BundleIdentifier": "com.apple.springboard",
+        "Name": "SpringBoard",
+        "TeamIdentifier": "0000000000"
+    }
+}
