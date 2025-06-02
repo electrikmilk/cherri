@@ -31,11 +31,17 @@ enum language {
 
 #define action 'exit' stop()
 
+#define action nothing()
+
 #define action comment(rawtext text: 'WFCommentActionText')
 
 #define action 'showresult' show(text input: 'Text')
 
 #define action 'previewdocument' quicklook(variable input: 'WFInput')
+
+#define action 'getitemtype' typeOf(variable input: 'WFInput'): text
+
+#define action 'getclassaction' getObjectOfClass(text class: 'Class', variable from: 'Input')
 
 #define action default output(text output: 'WFOutput')
 

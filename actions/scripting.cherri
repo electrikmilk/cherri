@@ -37,7 +37,7 @@ Scripting Actions
 
 /* Hashes */
 
-#define action 'base64encode' base64Encode(variable encodeInput: 'WFInput'): text {
+#define action default 'base64encode' base64Encode(variable encodeInput: 'WFInput'): text {
 	"input": "Encode"
 }
 
@@ -68,6 +68,8 @@ enum countType {
 
 #define action 'getitemname' getName(variable item: 'WFInput')
 
+#define action 'setitemname' setName(variable item: 'WFInput', text name: 'WFName', bool ?includeFileExtension: 'WFDontIncludeFileExtension' = false)
+
 #define action 'viewresult' contentGraph(variable input: 'WFInput')
 
 /* Lists */
@@ -93,8 +95,6 @@ enum countType {
 #define action 'getitemfromlist' getListItems(variable list: 'WFInput', number start: 'WFItemRangeStart', number end: 'WFItemRangeEnd'): array {
 	"WFItemSpecifier": "Items in Range"
 }
-
-#define action 'setitemname' setName(variable item: 'WFInput', text name: 'WFName', bool ?includeFileExtension: 'WFDontIncludeFileExtension' = false)
 
 /* Notifications */
 
@@ -127,9 +127,14 @@ enum countType {
 
 #define action runAppleScript(variable input: 'Input', text script: 'Script')
 
-#define action runSSHScript(text script: 'WFSSHScript', variable input: 'WFInput', text host: 'WFSSHHost', text port: 'WFSSHPort', text user: 'WFSSHUser', runSSHScriptAuthTypes authType: 'WFSSHAuthenticationType', text password: 'WFSSHPassword')
+enum SSHScriptAuthType {
+	'Password',
+	'SSH Key',
+}
 
-#define action 'runjavascriptforautomation' runJSAutomation(variable input: 'Input', text script: 'Script')
+#define action runSSHScript(text script: 'WFSSHScript', variable input: 'WFInput', text host: 'WFSSHHost', text port: 'WFSSHPort', text user: 'WFSSHUser', SSHScriptAuthType authType: 'WFSSHAuthenticationType', text password: 'WFSSHPassword')
+
+#define action mac 'runjavascriptforautomation' runJSAutomation(variable input: 'Input', text script: 'Script')
 
 /* Passwords */
 
@@ -141,13 +146,30 @@ enum countType {
 
 #define action 'wallpaper.set' setWallpaper(variable input: 'WFInput')
 
-#define action 'posters.get' getWallpaper() {
+#define action default !mac v16.2 'posters.get' getAllWallpapers(): array
+
+#define action !mac v16.2 'posters.get' getWallpaper() {
 	"WFPosterType": "Current"
 }
 
 /* Windows */
 
-enum resizeWindowConfigurations {
+enum windowPosition {
+	'Top Left',
+	'Top Center',
+	'Top Right',
+	'Middle Left',
+	'Center',
+	'Middle Right',
+	'Bottom Left',
+	'Bottom Center',
+	'Bottom Right',
+	'Coordinates',
+}
+
+#define action mac moveWindow(variable window: 'WFWindow', windowPosition position: 'WFPosition', bool ?bringToFront: 'WFBringToFront' = true)
+
+enum windowConfiguration {
  'Fit Screen',
  'Top Half',
  'Bottom Half',
@@ -160,5 +182,5 @@ enum resizeWindowConfigurations {
  'Dimensions',
 }
 
-#define action resizeWindow(variable window: 'WFWindow', resizeWindowConfigurations configuration: 'WFConfiguration')
+#define action mac resizeWindow(variable window: 'WFWindow', windowConfiguration configuration: 'WFConfiguration')
 

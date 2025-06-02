@@ -20,24 +20,10 @@ import (
 const SetVariableIdentifier = "is.workflow.actions.setvariable"
 const AppendVariableIdentifier = "is.workflow.actions.appendvariable"
 
-// FIXME: Some of these actions have a value with a set list values for an arguments,
-//  but the argument value is not being checked against its possible values.
-//  Use the "hash" action as an example.
-
 var measurementUnitTypes = []string{"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"}
 var units map[string][]string
 var contactDetails = []string{"First Name", "Middle Name", "Last Name", "Birthday", "Prefix", "Suffix", "Nickname", "Phonetic First Name", "Phonetic Last Name", "Phonetic Middle Name", "Company", "Job Title", "Department", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
 var storageUnits = []string{"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"}
-var flipDirections = []string{"Horizontal", "Vertical"}
-var recordingQualities = []string{"Normal", "Very High"}
-var recordingStarts = []string{"On Tap", "Immediately"}
-var imageFormats = []string{"TIFF", "GIF", "PNG", "BMP", "PDF", "HEIF"}
-var audioFormats = []string{"M4A", "AIFF"}
-var speeds = []string{"0.5X", "Normal", "2X"}
-var videoSizes = []string{"640×480", "960×540", "1280×720", "1920×1080", "3840×2160", "HEVC 1920×1080", "HEVC 3840x2160", "ProRes 422"}
-var selectionTypes = []string{"Window", "Custom"}
-var fileSizeUnits = []string{"Closest Unit", "Bytes", "Kilobytes", "Megabytes", "Gigabytes", "Terabytes", "Petabytes", "Exabytes", "Zettabytes", "Yottabytes"}
-var hashTypes = []string{"MD5", "SHA1", "SHA256", "SHA512"}
 var inputTypes = []string{"Text", "Number", "URL", "Date", "Time", "Date and Time"}
 var appSplitRatios = []string{"half", "thirdByTwo"}
 var httpMethods = []string{"POST", "PUT", "PATCH", "DELETE"}
@@ -68,15 +54,8 @@ var httpParams = []parameterDefinition{
 		literal:   true,
 	},
 }
-var imageEditingPositions = []string{"Center", "Top Left", "Top Right", "Bottom Left", "Bottom Right", "Custom"}
 var sortOrders = []string{"asc", "desc"}
 var windowSortings = []string{"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"}
-var windowPositions = []string{"Top Left", "Top Center", "Top Right", "Middle Left", "Center", "Middle Right", "Bottom Left", "Bottom Center", "Bottom Right", "Coordinates"}
-var windowConfigurations = []string{"Fit Screen", "Top Half", "Bottom Half", "Left Half", "Right Half", "Top Left Quarter", "Top Right Quarter", "Bottom Left Quarter", "Bottom Right Quarter", "Dimensions"}
-var focusModes = map[string]any{
-	"Identifier":    "com.apple.donotdisturb.mode.default",
-	"DisplayString": "Do Not Disturb",
-}
 var timerDurations = []string{"hr", "min", "sec"}
 var weekdays = []string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
 var fileLabelsMap = map[string]int{
@@ -90,30 +69,6 @@ var fileLabelsMap = map[string]int{
 }
 var fileLabels = []string{"red", "orange", "yellow", "green", "blue", "purple", "gray"}
 var filesSortBy = []string{"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
-var cameras = []string{"Front", "Back"}
-var cameraQualities = []string{"Low", "Medium", "High"}
-var backgroundSounds = []string{"BalancedNoise", "BrightNoise", "DarkNoise", "Ocean", "Rain", "Stream"}
-var soundRecognitionOperations = []string{"pause", "activate", "toggle"}
-var textSizes = []string{
-	"Accessibility Extra Extra Extra Large",
-	"Accessibility Extra Extra Large",
-	"Accessibility Extra Large",
-	"Accessibility Large",
-	"Accessibility Medium",
-	"Extra Extra Extra Large",
-	"Extra Extra Large",
-	"Extra Large",
-	"Default",
-	"Medium",
-	"Small",
-	"Extra Small",
-}
-var imageMaskTypes = []string{"Rounded Rectangle", "Ellipse", "Icon"}
-var imageDetails = []string{"Album", "Width", "Height", "Date Taken", "Media Type", "Photo Type", "Is a Screenshot", "Is a Screen Recording", "Location", "Duration", "Frame Rate", "Orientation", "Camera Make", "Camera Model", "Metadata Dictionary", "Is Favorite", "File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name"}
-var colorSpaces = []string{"RGB", "Gray"}
-var shuffleOptions = []string{"Off", "Songs"}
-var repeatOptions = []string{"None", "One", "All"}
-var musicDetails = []string{"Title", "Album", "Artist", "Album Artist", "Genre", "Composer", "Date Added", "Media Kind", "Duration", "Play Count", "Track Number", "Disc Number", "Album Artwork", "Is Explicit", "Lyrics", "Release Date", "Comments", "Is Cloud Item", "Skip Count", "Last Played Date", "Rating", "File Path", "Name"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -1109,76 +1064,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"getObjectOfClass": {
-		identifier: "getclassaction",
-		parameters: []parameterDefinition{
-			{
-				name:      "class",
-				key:       "Class",
-				validType: String,
-			},
-			{
-				name:      "from",
-				key:       "Input",
-				validType: Variable,
-			},
-		},
-	},
-	"getName": {
-		identifier: "getitemname",
-		parameters: []parameterDefinition{
-			{
-				name:      "item",
-				validType: Variable,
-				key:       "WFInput",
-			},
-		},
-	},
-	"setName": {
-		identifier: "setitemname",
-		parameters: []parameterDefinition{
-			{
-				name:      "item",
-				key:       "WFInput",
-				validType: Variable,
-			},
-			{
-				name:      "name",
-				key:       "WFName",
-				validType: String,
-			},
-			{
-				name:         "includeFileExtension",
-				key:          "WFDontIncludeFileExtension",
-				validType:    Bool,
-				optional:     true,
-				defaultValue: false,
-			},
-		},
-	},
-	"count": {
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "Input",
-				validType: Variable,
-			},
-			{
-				name:         "type",
-				key:          "WFCountType",
-				validType:    String,
-				enum:         []string{"Items", "Characters", "Words", "Sentences", "Lines"},
-				defaultValue: "Items",
-			},
-		},
-		defaultAction: true,
-		addParams: func(args []actionArgument) map[string]any {
-			return map[string]any{
-				"WFCountType": "Items",
-			}
-		},
-		outputType: Integer,
-	},
 	"url": {
 		parameters: []parameterDefinition{
 			{
@@ -1222,173 +1107,6 @@ var actions = map[string]*actionDefinition{
 		},
 		decomp: decompInfiniteURLAction,
 	},
-	"hash": {
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:         "type",
-				key:          "WFHashType",
-				enum:         hashTypes,
-				validType:    String,
-				defaultValue: "MD5",
-				optional:     true,
-			},
-		},
-		outputType: String,
-	},
-	"formatNumber": {
-		identifier: "format.number",
-		parameters: []parameterDefinition{
-			{
-				name:      "number",
-				key:       "WFNumber",
-				validType: Integer,
-			},
-			{
-				name:         "decimalPlaces",
-				key:          "WFNumberFormatDecimalPlaces",
-				validType:    Integer,
-				optional:     true,
-				defaultValue: 2,
-			},
-		},
-		outputType: Integer,
-	},
-	"randomNumber": {
-		identifier: "number.random",
-		parameters: []parameterDefinition{
-			{
-				name:      "min",
-				key:       "WFRandomNumberMinimum",
-				validType: Integer,
-			},
-			{
-				name:      "max",
-				key:       "WFRandomNumberMaximum",
-				validType: Integer,
-			},
-		},
-		outputType: Integer,
-	},
-	"base64Encode": {
-		identifier: "base64encode",
-		parameters: []parameterDefinition{
-			{
-				name:      "encodeInput",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"input": "Encode",
-			}
-		},
-		defaultAction: true,
-		outputType:    String,
-	},
-	"base64Decode": {
-		identifier: "base64encode",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFEncodeMode": "Decode",
-			}
-		},
-		outputType: String,
-	},
-	"waitToReturn": {},
-	"showNotification": {
-		identifier: "notification",
-		parameters: []parameterDefinition{
-			{
-				name:      "body",
-				validType: String,
-				key:       "WFNotificationActionBody",
-			},
-			{
-				name:      "title",
-				key:       "WFNotificationActionTitle",
-				validType: String,
-				optional:  true,
-			},
-			{
-				name:         "playSound",
-				key:          "WFNotificationActionSound",
-				validType:    Bool,
-				defaultValue: true,
-			},
-			{
-				name:      "attachment",
-				key:       "WFInput",
-				validType: Variable,
-				optional:  true,
-			},
-		},
-	},
-	"nothing": {},
-	"wait": {
-		identifier: "delay",
-		parameters: []parameterDefinition{
-			{
-				name:      "seconds",
-				key:       "WFDelayTime",
-				validType: Integer,
-			},
-		},
-	},
-	"alert": {
-		parameters: []parameterDefinition{
-			{
-				name:      "alert",
-				key:       "WFAlertActionMessage",
-				validType: String,
-			},
-			{
-				name:      "title",
-				key:       "WFAlertActionTitle",
-				validType: String,
-				optional:  true,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFAlertActionCancelButtonShown": false,
-			}
-		},
-	},
-	"confirm": {
-		identifier:    "alert",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "alert",
-				key:       "WFAlertActionMessage",
-				validType: String,
-			},
-			{
-				name:      "title",
-				key:       "WFAlertActionTitle",
-				validType: String,
-				optional:  true,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFAlertActionCancelButtonShown": true,
-			}
-		},
-	},
 	"prompt": {
 		identifier: "ask",
 		parameters: []parameterDefinition{
@@ -1430,119 +1148,6 @@ var actions = map[string]*actionDefinition{
 			}
 
 			return defaultAnswer
-		},
-	},
-	"chooseFromList": {
-		parameters: []parameterDefinition{
-			{
-				name:      "list",
-				key:       "WFInput",
-				validType: Variable,
-			},
-			{
-				name:      "prompt",
-				key:       "WFChooseFromListActionPrompt",
-				validType: String,
-				optional:  true,
-			},
-			{
-				name:         "selectMultiple",
-				key:          "WFChooseFromListActionSelectMultiple",
-				validType:    Bool,
-				optional:     true,
-				defaultValue: false,
-			},
-			{
-				name:         "selectAll",
-				key:          "WFChooseFromListActionSelectAll",
-				validType:    Bool,
-				optional:     true,
-				defaultValue: false,
-			},
-		},
-	},
-	"typeOf": {
-		identifier: "getitemtype",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-				key:       "WFInput",
-			},
-		},
-		outputType: String,
-	},
-	"getKeys": {
-		identifier: "getvalueforkey",
-		parameters: []parameterDefinition{
-			{
-				name:      "dictionary",
-				validType: Dict,
-				key:       "WFInput",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFGetDictionaryValueType": "All Keys",
-			}
-		},
-		outputType: Arr,
-	},
-	"getValues": {
-		identifier: "getvalueforkey",
-		parameters: []parameterDefinition{
-			{
-				name:      "dictionary",
-				validType: Dict,
-				key:       "WFInput",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFGetDictionaryValueType": "All Values",
-			}
-		},
-		outputType: Arr,
-	},
-	"getValue": {
-		identifier:    "getvalueforkey",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "dictionary",
-				validType: Dict,
-				key:       "WFInput",
-			},
-			{
-				name:      "key",
-				validType: String,
-				key:       "WFDictionaryKey",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFGetDictionaryValueType": "Value",
-			}
-		},
-	},
-	"setValue": {
-		identifier: "setvalueforkey",
-		parameters: []parameterDefinition{
-			{
-				name:      "dictionary",
-				validType: Variable,
-				key:       "WFDictionary",
-			},
-			{
-				name:      "key",
-				validType: String,
-				key:       "WFDictionaryKey",
-			},
-			{
-				name:      "value",
-				validType: String,
-				key:       "WFDictionaryValue",
-			},
 		},
 	},
 	"openApp": {
@@ -1975,158 +1580,6 @@ var actions = map[string]*actionDefinition{
 			return
 		},
 	},
-	"dismissSiri": {},
-	"getFirstItem": {
-		identifier:    "getitemfromlist",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "list",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFItemSpecifier": "First Item",
-			}
-		},
-	},
-	"getLastItem": {
-		identifier: "getitemfromlist",
-		parameters: []parameterDefinition{
-			{
-				name:      "list",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return map[string]any{
-				"WFItemSpecifier": "Last Item",
-			}
-		},
-	},
-	"getRandomItem": {
-		identifier: "getitemfromlist",
-		parameters: []parameterDefinition{
-			{
-				name:      "list",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFItemSpecifier": "Random Item",
-			}
-		},
-	},
-	"getListItem": {
-		identifier: "getitemfromlist",
-		parameters: []parameterDefinition{
-			{
-				name:      "list",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:      "index",
-				validType: Integer,
-				key:       "WFItemIndex",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFItemSpecifier": "Item At Index",
-			}
-		},
-	},
-	"getListItems": {
-		identifier: "getitemfromlist",
-		parameters: []parameterDefinition{
-			{
-				name:      "list",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:      "start",
-				validType: Integer,
-				key:       "WFItemRangeStart",
-			},
-			{
-				name:      "end",
-				validType: Integer,
-				key:       "WFItemRangeEnd",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFItemSpecifier": "Items in Range",
-			}
-		},
-		outputType: Arr,
-	},
-	"getNumbers": {
-		identifier: "detect.number",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-		outputType: Integer,
-	},
-	"getDictionary": {
-		identifier: "detect.dictionary",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-		outputType: Dict,
-	},
-	"getAllWallpapers": {
-		identifier:    "posters.get",
-		minVersion:    16.2,
-		mac:           false,
-		defaultAction: true,
-		outputType:    Arr,
-	},
-	"getWallpaper": {
-		identifier: "posters.get",
-		minVersion: 16.2,
-		mac:        false,
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFPosterType": "Current",
-			}
-		},
-	},
-	"setWallpaper": {
-		identifier: "wallpaper.set",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-	},
-	"contentGraph": {
-		identifier: "viewresult",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-	},
 	"openCustomXCallbackURL": {
 		identifier: "openxcallbackurl",
 		parameters: []parameterDefinition{
@@ -2175,57 +1628,6 @@ var actions = map[string]*actionDefinition{
 			return
 		},
 	},
-	"setBackgroundSound": {
-		appIdentifier: "com.apple.AccessibilityUtilities",
-		identifier:    "AXSettingsShortcuts.AXSetBackgroundSoundIntent",
-		parameters: []parameterDefinition{
-			{
-				name:         "sound",
-				validType:    String,
-				key:          "backgroundSound",
-				defaultValue: "Balanced Noise",
-				enum:         backgroundSounds,
-				optional:     true,
-			},
-		},
-	},
-	"setBackgroundSoundsVolume": {
-		appIdentifier: "com.apple.AccessibilityUtilities",
-		identifier:    "AXSettingsShortcuts.AXSetBackgroundSoundVolumeIntent",
-		parameters: []parameterDefinition{
-			{
-				name:      "volume",
-				validType: Float,
-				key:       "volumeValue",
-			},
-		},
-	},
-	"runShellScript": {
-		parameters: []parameterDefinition{
-			{
-				name:      "script",
-				key:       "Script",
-				validType: String,
-			},
-			{
-				name:      "input",
-				key:       "Input",
-				validType: Variable,
-			},
-			{
-				name:         "shell",
-				key:          "Shell",
-				validType:    String,
-				defaultValue: "/bin/zsh",
-			},
-			{
-				name:         "inputMode",
-				key:          "InputMode",
-				validType:    String,
-				defaultValue: "to stdin",
-			},
-		},
-	},
 	"createShortcutLink": {
 		appIdentifier: "com.apple.shortcuts",
 		identifier:    "CreateShortcutiCloudLinkAction",
@@ -2235,55 +1637,6 @@ var actions = map[string]*actionDefinition{
 				name:      "shortcut",
 				key:       "shortcut",
 				validType: Variable,
-			},
-		},
-	},
-	"searchPasswords": {
-		identifier: "openpasswords",
-		parameters: []parameterDefinition{
-			{
-				name:      "query",
-				validType: String,
-				key:       "WFShowPasswordsSearchTerm",
-			},
-		},
-	},
-	"runSSHScript": {
-		parameters: []parameterDefinition{
-			{
-				name:      "script",
-				key:       "WFSSHScript",
-				validType: String,
-			},
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
-			},
-			{
-				name:      "host",
-				key:       "WFSSHHost",
-				validType: String,
-			},
-			{
-				name:      "port",
-				key:       "WFSSHPort",
-				validType: String,
-			},
-			{
-				name:      "user",
-				key:       "WFSSHUser",
-				validType: String,
-			},
-			{
-				name: "authType",
-				key:  "WFSSHAuthenticationType",
-				enum: []string{"Password", "SSH Key"},
-			},
-			{
-				name:      "password",
-				key:       "WFSSHPassword",
-				validType: String,
 			},
 		},
 	},
@@ -2316,37 +1669,6 @@ var actions = map[string]*actionDefinition{
 		addParams: func(args []actionArgument) map[string]any {
 			return httpRequest("File", "WFRequestVariable", args)
 		},
-	},
-	"runAppleScript": {
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-				key:       "Input",
-			},
-			{
-				name:      "script",
-				validType: String,
-				key:       "Script",
-			},
-		},
-		mac: true,
-	},
-	"runJSAutomation": {
-		identifier: "runjavascriptforautomation",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
-				key:       "Input",
-			},
-			{
-				name:      "script",
-				validType: String,
-				key:       "Script",
-			},
-		},
-		mac: true,
 	},
 	"getWindows": {
 		identifier: "filter.windows",
@@ -2408,46 +1730,6 @@ var actions = map[string]*actionDefinition{
 					}
 				}
 			}
-		},
-		mac: true,
-	},
-	"moveWindow": {
-		parameters: []parameterDefinition{
-			{
-				name:      "window",
-				validType: Variable,
-				key:       "WFWindow",
-			},
-			{
-				name:      "position",
-				validType: String,
-				key:       "WFPosition",
-				enum:      windowPositions,
-			},
-			{
-				name:         "bringToFront",
-				validType:    Bool,
-				key:          "WFBringToFront",
-				defaultValue: true,
-				optional:     true,
-			},
-		},
-		mac: true,
-	},
-	"resizeWindow": {
-		parameters: []parameterDefinition{
-			{
-				name:      "window",
-				validType: Variable,
-				key:       "WFWindow",
-			},
-			{
-				name:      "configuration",
-				validType: String,
-				key:       "WFConfiguration",
-				enum:      windowConfigurations,
-				optional:  false,
-			},
 		},
 		mac: true,
 	},
@@ -2686,37 +1968,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"getApps": {
-		identifier: "filter.apps",
-		mac:        true,
-		minVersion: 18,
-	},
-	"setSoundRecognition": {
-		appIdentifier: "com.apple.AccessibilityUtilities",
-		identifier:    "AXSettingsShortcuts.AXToggleSoundDetectionIntent",
-		parameters: []parameterDefinition{
-			{
-				name:         "operation",
-				validType:    String,
-				key:          "operation",
-				defaultValue: "activate",
-				enum:         soundRecognitionOperations,
-				optional:     true,
-			},
-		},
-	},
-	"setTextSize": {
-		appIdentifier: "com.apple.AccessibilityUtilities",
-		identifier:    "AXSettingsShortcuts.AXSetLargeTextIntent",
-		parameters: []parameterDefinition{
-			{
-				name:      "size",
-				validType: String,
-				key:       "textSize",
-				enum:      textSizes,
-			},
-		},
-	},
 }
 
 var useAttachmentAsVariableValueRegex = regexp.MustCompile(`^\$\{[a-zA-Z0-9]+}$`)
@@ -2768,15 +2019,14 @@ func handleRawParams(params map[string]interface{}) {
 var defaultActionIncludes = []string{
 	"basic",
 	"calendar",
-	// "contacts",
+	"contacts",
 	"documents",
 	"device",
 	"location",
 	"math",
 	"media",
-	// "scripting",
+	"scripting",
 	"sharing",
-	// "settings",
 	"shortcuts",
 	"translation",
 	"web",

@@ -50,6 +50,44 @@ Device Actions
 	"style": "dark"
 }
 
+enum backgroundSound {
+	'BalancedNoise',
+	'BrightNoise',
+	'DarkNoise',
+	'Ocean',
+	'Rain',
+	'Stream',
+}
+
+#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundIntent' setBackgroundSound(backgroundSound ?sound: 'backgroundSound' = "BalancedNoise")
+
+#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundVolumeIntent' setBackgroundSoundsVolume(float volume: 'volumeValue')
+
+enum textSizes {
+	'Accessibility Extra Extra Extra Large',
+	'Accessibility Extra Extra Large',
+	'Accessibility Extra Large',
+	'Accessibility Large',
+	'Accessibility Medium',
+	'Extra Extra Extra Large',
+	'Extra Extra Large',
+	'Extra Large',
+	'Default',
+	'Medium',
+	'Small',
+	'Extra Small',
+}
+
+#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetLargeTextIntent' setTextSize(textSizes size: 'textSize')
+
+enum soundRecognitionOperations {
+	'pause',
+	'activate',
+	'toggle',
+}
+
+#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent' setSoundRecognition(soundRecognitionOperations ?operation = "activate")
+
 enum deviceDetail {
 	'Device Name',
 	'Device Hostname',
