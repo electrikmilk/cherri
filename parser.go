@@ -312,7 +312,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		if strings.Contains(ahead, ".") {
 			*valueType = Float
 		}
-		collectIntegerValue(valueType, value, &until)
+		collectIntegerValue(valueType, value, until)
 	case char == '"':
 		collectStringValue(valueType, value)
 	case char == '\'':
@@ -1281,8 +1281,8 @@ func collectInteger() string {
 	return collection.String()
 }
 
-func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
-	var ahead = lookAheadUntil(*until)
+func collectIntegerValue(valueType *tokenType, value *any, until rune) {
+	var ahead = lookAheadUntil(until)
 	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
 		var integerString = collectInteger()
 
@@ -1300,7 +1300,7 @@ func collectIntegerValue(valueType *tokenType, value *any, until *rune) {
 		return
 	}
 	*valueType = Expression
-	*value = collectUntil(*until)
+	*value = collectUntil(until)
 }
 
 func collectString() string {

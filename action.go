@@ -709,6 +709,15 @@ func collectDefinedAction() {
 		advance()
 	}
 
+	var minVersion float64
+	if intChar() {
+		var valueType tokenType
+		var version any
+		collectIntegerValue(&valueType, &version, ' ')
+		minVersion = version.(float64)
+		advance()
+	}
+
 	var shortIdentifier string
 	var overrideIdentifier string
 	if char == '\'' {
@@ -750,6 +759,7 @@ func collectDefinedAction() {
 		addParams:          addParams,
 		defaultAction:      defaultAction,
 		mac:                macOnlyAction,
+		minVersion:         minVersion,
 	}
 
 	if args.Using("debug") {
