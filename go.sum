@@ -7,3 +7,9 @@ gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8
 gopkg.in/yaml.v1 v1.0.0-20140924161607-9f9df34309c0/go.mod h1:WDnlLJ4WF5VGsH/HVa3CI79GS0ol3YnhVnKP89i0kNg=
 howett.net/plist v1.0.1 h1:37GdZ8tP09Q35o9ych3ehygcsL+HqKSwzctveSlarvM=
 howett.net/plist v1.0.1/go.mod h1:lqaXoTrLY4hg8tnEzNru53gicrbv7rrk+2xJA/7hw9g=
+sourcecode.social/reiver/go-eol v0.0.0-20240326064055-6080dd101592 h1:5lIRVxewoVEKA8AB/xLirgx16VVGAvYY15BWZzLQdh0=
+sourcecode.social/reiver/go-eol v0.0.0-20240326064055-6080dd101592/go.mod h1:2OmaB7yZ5/S7rix/3mhFkLZ1HwkgCBt6NqdB4fFGQjI=
+sourcecode.social/reiver/go-erorr v0.0.0-20230922202459-231149d185a1 h1:wpnz4JicQBLWrgGphYBls7DysIFCcnWgDz/vce/sY8E=
+sourcecode.social/reiver/go-erorr v0.0.0-20230922202459-231149d185a1/go.mod h1:NFtd7fzEf0r6A6R7JXYZfayRhPaJy0zt/18VWoLzrxA=
+sourcecode.social/reiver/go-opt v0.0.0-20231106172254-6b4ca5231f41 h1:nWUCtY3Krm+bLKXEEFvVz+vm256v3D/iJXgfoWhcOEw=
+sourcecode.social/reiver/go-opt v0.0.0-20231106172254-6b4ca5231f41/go.mod h1:O6WKM2UcKkheRT/dA6A2b1tW0m+WenSbxdcXE+idxzI=

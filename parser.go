@@ -16,6 +16,7 @@ import (
 
 	"github.com/electrikmilk/args-parser"
 	"github.com/google/uuid"
+	"sourcecode.social/reiver/go-eol"
 )
 
 var idx int
@@ -1567,6 +1568,20 @@ func seek(mov *int, reverse bool) rune {
 	return getChar(nextChar)
 }
 
+func isEOL() bool {
+	return eol.IsEOL(char)
+}
+
+func skipWhitespace() {
+	for isWhitespace() {
+		advance()
+	}
+}
+
+func isWhitespace() bool {
+	return unicode.IsSpace(char) || isEOL() || char == '\t' || char == ' ' || char == '\n'
+}
+
 func getChar(atIndex int) rune {
 	if atIndex < 0 {
 		return -1
@@ -1582,12 +1597,6 @@ func firstChar() {
 	lineCharIdx = -1
 	idx = -1
 	advance()
-}
-
-func skipWhitespace() {
-	for char == ' ' || char == '\t' || char == '\n' {
-		advance()
-	}
 }
 
 func printVariables() {
