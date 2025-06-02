@@ -1,7 +1,5 @@
 /*
 Calendar Actions
-
-This is a broad category of calendars, reminders, clock, date, and time actions.
 */
 
 /* Calendar app */
@@ -107,4 +105,8 @@ enum timeFormats {
 	"WFDateFormatStyle": "None"
 }
 
-#define action 'format.date' formatTimestamp(variable date: 'WFDate', dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short", timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short")
+#define action 'format.date' formatTimestamp(
+    variable date: 'WFDate',
+    dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short",
+    timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short"
+)
