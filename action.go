@@ -550,7 +550,14 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 		definition.WriteString(generateActionParamEnums(focus))
 	}
 
-	definition.WriteString(ansi("#define action ", orange))
+	var definitionType string
+	if currentAction.builtin {
+		definitionType = "#builtin"
+	} else {
+		definitionType = "#define"
+	}
+
+	definition.WriteString(ansi(fmt.Sprintf("%s action ", definitionType), orange))
 
 	if currentAction.defaultAction {
 		definition.WriteString(ansi("default ", yellow))
