@@ -100,7 +100,7 @@ enum screenshotSelection {
 	"WFTakeScreenshotScreenshotType": "Interactive"
 }
 
-#define action mac takeScreenshot(bool ?mainMonitorOnly: 'WFTakeScreenshotMainMonitorOnly' = false) {
+#define action takeScreenshot(bool ?mainMonitorOnly: 'WFTakeScreenshotMainMonitorOnly' = false) {
 	"WFTakeScreenshotScreenshotType": "Full Screen"
 }
 

@@ -14,9 +14,9 @@ Device Actions
 
 #define action v17 lockScreen()
 
-#define action v17 sleep()
+#define action mac v17 sleep()
 
-#define action v17 displaySleep()
+#define action mac v17 displaySleep()
 
 #define action v17 'reboot' shutdown()
 
