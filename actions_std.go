@@ -26,16 +26,8 @@ const AppendVariableIdentifier = "is.workflow.actions.appendvariable"
 
 var measurementUnitTypes = []string{"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"}
 var units map[string][]string
-var abcSortOrders = []string{"A to Z", "Z to A"}
 var contactDetails = []string{"First Name", "Middle Name", "Last Name", "Birthday", "Prefix", "Suffix", "Nickname", "Phonetic First Name", "Phonetic Last Name", "Phonetic Middle Name", "Company", "Job Title", "Department", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
-var facetimeCallTypes = []string{"Video", "Audio"}
-var stopListening = []string{"After Pause", "After Short Pause", "On Tap"}
-var errorCorrectionLevels = []string{"Low", "Medium", "Quartile", "High"}
-var archiveTypes = []string{".zip", ".tar.gz", ".tar.bz2", ".tar.xz", ".tar", ".gz", ".cpio", ".iso"}
 var storageUnits = []string{"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"}
-var weatherDetails = []string{"Name", "Air Pollutants", "Air Quality Category", "Air Quality Index", "Sunset Time", "Sunrise Time", "UV Index", "Wind Direction", "Wind Speed", "Precipitation Chance", "Precipitation Amount", "Pressure", "Humidity", "Dewpoint", "Visibility", "Condition", "Feels Like", "Low", "High", "Temperature", "Location", "Date"}
-var weatherForecastTypes = []string{"Daily", "Hourly"}
-var locationDetails = []string{"Name", "URL", "Label", "Phone Number", "Region", "ZIP Code", "State", "City", "Street", "Altitude", "Longitude", "Latitude"}
 var flipDirections = []string{"Horizontal", "Vertical"}
 var recordingQualities = []string{"Normal", "Very High"}
 var recordingStarts = []string{"On Tap", "Immediately"}
@@ -45,16 +37,9 @@ var speeds = []string{"0.5X", "Normal", "2X"}
 var videoSizes = []string{"640×480", "960×540", "1280×720", "1920×1080", "3840×2160", "HEVC 1920×1080", "HEVC 3840x2160", "ProRes 422"}
 var selectionTypes = []string{"Window", "Custom"}
 var fileSizeUnits = []string{"Closest Unit", "Bytes", "Kilobytes", "Megabytes", "Gigabytes", "Terabytes", "Petabytes", "Exabytes", "Zettabytes", "Yottabytes"}
-var deviceDetails = []string{"Device Name", "Device Hostname", "Device Model", "Device Is Watch", "System Version", "Screen Width", "Screen Height", "Current Volume", "Current Brightness", "Current Appearance"}
 var hashTypes = []string{"MD5", "SHA1", "SHA256", "SHA512"}
 var inputTypes = []string{"Text", "Number", "URL", "Date", "Time", "Date and Time"}
 var appSplitRatios = []string{"half", "thirdByTwo"}
-var calculationOperations = []string{"x^2", "х^3", "x^у", "e^x", "10^x", "In(x)", "log(x)", "√x", "∛x", "x!", "sin(x)", "cos(X)", "tan(x)", "abs(x)"}
-var statisticsOperations = []string{"Average", "Minimum", "Maximum", "Sum", "Median", "Mode", "Range", "Standard Deviation"}
-var ipTypes = []string{"IPv4", "IPv6"}
-var engines = []string{"Amazon", "Bing", "DuckDuckGo", "eBay", "Google", "Reddit", "Twitter", "Yahoo!", "YouTube"}
-var webpageDetails = []string{"Page Contents", "Page Selection", "Page URL", "Name"}
-var urlComponents = []string{"Scheme", "User", "Password", "Host", "Port", "Path", "Query", "Fragment"}
 var httpMethods = []string{"POST", "PUT", "PATCH", "DELETE"}
 var httpParams = []parameterDefinition{
 	{
@@ -92,10 +77,6 @@ var focusModes = map[string]any{
 	"Identifier":    "com.apple.donotdisturb.mode.default",
 	"DisplayString": "Do Not Disturb",
 }
-var editEventDetails = []string{"Start Date", "End Date", "Is All Day", "Location", "Duration", "My Status", "Attendees", "URL", "Title", "Notes", "Attachments"}
-var eventDetails = []string{"Start Date", "End Date", "Is All Day", "Calendar", "Location", "Has Alarms", "Duration", "Is Canceled", "My Status", "Organizer", "Organizer Is Me", "Attendees", "Number of Attendees", "URL", "Title", "Notes", "Attachments", "File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name"}
-var dateFormats = []string{"None", "Short", "Medium", "Long", "Relative", "RFC 2822", "ISO 8601", "Custom"}
-var timeFormats = []string{"None", "Short", "Medium", "Long", "Relative"}
 var timerDurations = []string{"hr", "min", "sec"}
 var weekdays = []string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
 var fileLabelsMap = map[string]int{
@@ -109,7 +90,6 @@ var fileLabelsMap = map[string]int{
 }
 var fileLabels = []string{"red", "orange", "yellow", "green", "blue", "purple", "gray"}
 var filesSortBy = []string{"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
-var pdfMergeBehaviors = []string{"Append", "Shuffle"}
 var cameras = []string{"Front", "Back"}
 var cameraQualities = []string{"Low", "Medium", "High"}
 var backgroundSounds = []string{"BalancedNoise", "BrightNoise", "DarkNoise", "Ocean", "Rain", "Stream"}
@@ -128,15 +108,12 @@ var textSizes = []string{
 	"Small",
 	"Extra Small",
 }
-var roundings = []string{"Ones Place", "Tens Place", "Hundreds Place", "Thousands", "Ten Thousands", "Hundred Thousands", "Millions"}
 var imageMaskTypes = []string{"Rounded Rectangle", "Ellipse", "Icon"}
 var imageDetails = []string{"Album", "Width", "Height", "Date Taken", "Media Type", "Photo Type", "Is a Screenshot", "Is a Screen Recording", "Location", "Duration", "Frame Rate", "Orientation", "Camera Make", "Camera Model", "Metadata Dictionary", "Is Favorite", "File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name"}
 var colorSpaces = []string{"RGB", "Gray"}
 var shuffleOptions = []string{"Off", "Songs"}
 var repeatOptions = []string{"None", "One", "All"}
 var musicDetails = []string{"Title", "Album", "Artist", "Album Artist", "Genre", "Composer", "Date Added", "Media Kind", "Duration", "Play Count", "Track Number", "Disc Number", "Album Artwork", "Is Explicit", "Lyrics", "Release Date", "Comments", "Is Cloud Item", "Skip Count", "Last Played Date", "Rating", "File Path", "Name"}
-var wifiNetworkDetails = []string{"Network Name", "BSSID", "Wi-Fi Standard", "RX Rate", "TX Rate", "RSSI", "Noise", "Channel Number", "Hardware MAC Address"}
-var cellularNetworkDetails = []string{"Carrier Name", "Radio Technology", "Country Code", "Is Roaming Abroad", "Number of Signal Bars"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
