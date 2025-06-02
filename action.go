@@ -102,15 +102,15 @@ type libraryDefinition struct {
 }
 
 var enumerations = map[string][]string{
-	"measurementUnitTypes":          {"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"},
-	"storageUnits":                  {"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"},
-	"inputTypes":                    {"Text", "Number", "URL", "Date", "Time", "Date and Time"},
-	"appSplitRatios":                {"half", "thirdByTwo"},
-	"httpMethods":                   {"POST", "PUT", "PATCH", "DELETE"},
-	"sortOrders":                    {"asc", "desc"},
-	"windowSortings":                {"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"},
+	"measurementUnitType":          {"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"},
+	"storageUnit":                  {"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"},
+	"inputType":                    {"Text", "Number", "URL", "Date", "Time", "Date and Time"},
+	"appSplitRatio":                {"half", "thirdByTwo"},
+	"httpMethod":                   {"POST", "PUT", "PATCH", "DELETE"},
+	"sortOrder":                    {"asc", "desc"},
+	"windowSorting":                {"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"},
 	"timerDurations":                {"hr", "min", "sec"},
-	"fileLabels":                    {"red", "orange", "yellow", "green", "blue", "purple", "gray"},
+	"fileLabel":                    {"red", "orange", "yellow", "green", "blue", "purple", "gray"},
 	"filesSortBy":                   {"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"},
 	"seekBehavior":                  {"To Time", "Forward By", "Backward By"},
 	"Acceleration":                  {"m/s²", "g-force"},
@@ -135,6 +135,7 @@ var enumerations = map[string][]string{
 	"Speed":                         {"m/s", "km/hr", "mi/hr", "kn"},
 	"Temperature":                   {"K", "ºC", "ºF"},
 	"Volume":                        {"ML", "kL", "liter", "dL", "cL", "mL", "km³", "m³", "dm³", "cm³", "mm³", "in³", "ft³", "yd³", "mi³", "acre ft", "bushel", "tsp", "tbsp", "fl oz", "pt", "qt", "Imp gal", "mcup"},
+	"fileOrderBy":                   {"Smallest First", "Biggest First", "Latest First", "Oldest First", "A to Z", "Z to A"},
 }
 
 var actionIndex int

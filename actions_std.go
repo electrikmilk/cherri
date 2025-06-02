@@ -33,7 +33,7 @@ var httpParams = []parameterDefinition{
 		key:       "WFHTTPMethod",
 		validType: String,
 		optional:  true,
-		enum:      "httpMethods",
+		enum:      "httpMethod",
 	},
 	{
 		name:      "body",
@@ -390,7 +390,7 @@ var actions = map[string]*actionDefinition{
 				name:         "unit",
 				validType:    String,
 				defaultValue: "min",
-				enum:         "timerDurations",
+				enum:         "timerDuration",
 			},
 		},
 	},
@@ -704,7 +704,7 @@ var actions = map[string]*actionDefinition{
 				name:      "color",
 				validType: String,
 				optional:  false,
-				enum:      "fileLabels",
+				enum:      "fileLabel",
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
@@ -742,7 +742,7 @@ var actions = map[string]*actionDefinition{
 			},
 			{
 				name: "orderBy",
-				enum: []string{"Smallest First", "Biggest First", "Latest First", "Oldest First", "A to Z", "Z to A"},
+				enum: "fileOrderings",
 				key:  "WFContentItemSortOrder",
 			},
 		},
@@ -982,7 +982,7 @@ var actions = map[string]*actionDefinition{
 			}
 			checkEnum(&parameterDefinition{
 				name: "disk size",
-				enum: "storageUnits",
+				enum: "storageUnit",
 			}, &storageUnitArg)
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
@@ -1032,7 +1032,7 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "duration",
 				validType: String,
-				enum:      "timerDurations",
+				enum:      "timerDuration",
 			},
 			{
 				name:         "behavior",
@@ -1113,7 +1113,7 @@ var actions = map[string]*actionDefinition{
 				name:         "inputType",
 				validType:    String,
 				key:          "WFInputType",
-				enum:         "inputTypes",
+				enum:         "inputType",
 				optional:     true,
 				defaultValue: "Text",
 			},
@@ -1374,7 +1374,7 @@ var actions = map[string]*actionDefinition{
 				key:          "WFAppRatio",
 				validType:    String,
 				optional:     true,
-				enum:         "appSplitRatios",
+				enum:         "appSplitRatio",
 				defaultValue: "half",
 			},
 		},
@@ -1671,14 +1671,14 @@ var actions = map[string]*actionDefinition{
 				name:      "sortBy",
 				validType: String,
 				key:       "WFContentItemSortProperty",
-				enum:      "windowSortings",
+				enum:      "windowSorting",
 				optional:  true,
 			},
 			{
 				name:      "orderBy",
 				validType: String,
 				key:       "WFContentItemSortOrder",
-				enum:      "sortOrders",
+				enum:      "sortOrder",
 				optional:  true,
 			},
 			{
@@ -1739,7 +1739,7 @@ var actions = map[string]*actionDefinition{
 				name:      "unitType",
 				validType: String,
 				key:       "WFMeasurementUnitType",
-				enum:      "measurementUnitTypes",
+				enum:      "measurementUnitType",
 			},
 			{
 				name:      "unit",
@@ -1799,7 +1799,7 @@ var actions = map[string]*actionDefinition{
 				name:      "unitType",
 				validType: String,
 				key:       "WFMeasurementUnitType",
-				enum:      "measurementUnitTypes",
+				enum:      "measurementUnitType",
 			},
 			{
 				name:      "unit",
