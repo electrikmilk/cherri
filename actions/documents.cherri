@@ -167,7 +167,7 @@ enum stopListenings {
 
 #define action 'speaktext' speak(text prompt: 'WFText', bool ?waitUntilFinished: 'WFSpeakTextWait' = true, text ?language: 'WFSpeakTextLanguage')
 
-#define action 'com.apple.ShortcutsActions.TranscribeAudioAction' transcribeText(variable audioFile)
+#define action v17 'com.apple.ShortcutsActions.TranscribeAudioAction' transcribeText(variable audioFile)
 
 /* Text Editing */
 

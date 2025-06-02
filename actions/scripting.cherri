@@ -123,16 +123,16 @@ enum countType {
 
 /* Scripts */
 
-#define action runShellScript(text script: 'Script', variable input: 'Input', text ?shell: 'Shell' = "/bin/zsh", text ?inputMode: 'InputMode' = "to stdin")
+#define action mac runShellScript(text script: 'Script', variable input: 'Input', text ?shell: 'Shell' = "/bin/zsh", text ?inputMode: 'InputMode' = "to stdin")
 
-#define action runAppleScript(variable input: 'Input', text script: 'Script')
+#define action mac runAppleScript(variable input: 'Input', text script: 'Script')
 
 enum SSHScriptAuthType {
 	'Password',
 	'SSH Key',
 }
 
-#define action runSSHScript(text script: 'WFSSHScript', variable input: 'WFInput', text host: 'WFSSHHost', text port: 'WFSSHPort', text user: 'WFSSHUser', SSHScriptAuthType authType: 'WFSSHAuthenticationType', text password: 'WFSSHPassword')
+#define action mac runSSHScript(text script: 'WFSSHScript', variable input: 'WFInput', text host: 'WFSSHHost', text port: 'WFSSHPort', text user: 'WFSSHUser', SSHScriptAuthType authType: 'WFSSHAuthenticationType', text password: 'WFSSHPassword')
 
 #define action mac 'runjavascriptforautomation' runJSAutomation(variable input: 'Input', text script: 'Script')
 
