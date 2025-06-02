@@ -2445,10 +2445,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"getShortcuts": {
-		identifier: "getmyworkflows",
-		outputType: Arr,
-	},
 	"url": {
 		parameters: []parameterDefinition{
 			{
@@ -3536,25 +3532,6 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"makeShortcut": {
-		appIdentifier: "com.apple.shortcuts",
-		identifier:    "CreateWorkflowAction",
-		parameters: []parameterDefinition{
-			{
-				name:      "name",
-				validType: String,
-				key:       "name",
-			},
-			{
-				name:         "open",
-				validType:    Bool,
-				key:          "OpenWhenRun",
-				defaultValue: true,
-				optional:     true,
-			},
-		},
-		minVersion: 16.4,
-	},
 	"createShortcutLink": {
 		appIdentifier: "com.apple.shortcuts",
 		identifier:    "CreateShortcutiCloudLinkAction",
@@ -4057,22 +4034,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"getShortcutDetail": {
-		identifier: "properties.workflow",
-		parameters: []parameterDefinition{
-			{
-				name:      "shortcut",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:      "detail",
-				validType: String,
-				key:       "WFContentItemPropertyName",
-				enum:      []string{"Folder", "Icon", "Action Count", "File Size", "File Extension Creation Date", "File Path", "Last Modified Date", "Name"},
-			},
-		},
-	},
 	"getApps": {
 		identifier: "filter.apps",
 		mac:        true,
@@ -4164,7 +4125,7 @@ var defaultActionIncludes = []string{
 	// "scripting",
 	"sharing",
 	// "settings",
-	// "shortcuts",
+	"shortcuts",
 	"translation",
 	"web",
 }

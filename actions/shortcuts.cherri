@@ -1,0 +1,21 @@
+/*
+Shortcut Actions
+*/
+
+enum shortcutDetail {
+	'Folder',
+	'Icon',
+	'Action Count',
+	'File Size',
+	'File Extension Creation Date',
+	'File Path',
+	'Last Modified Date',
+	'Name',
+}
+
+#define action 'getmyworkflows' getShortcuts(): array
+
+#define action v16.4 'com.apple.shortcuts.CreateWorkflowAction' makeShortcut(text name, bool ?open: 'OpenWhenRun' = true)
+
+#define action 'properties.workflow' getShortcutDetail(variable shortcut: 'WFInput', shortcutDetail detail: 'WFContentItemPropertyName')
+
