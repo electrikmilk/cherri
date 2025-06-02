@@ -108,7 +108,7 @@ enum IPTypes {
 
 /* HTTP */
 
-#define action default downloadURL(text url: 'WFURL', dictionary ?headers: 'WFHTTPHeaders') {
+#define action default downloadURL(text url: 'WFURL', dictionary! ?headers: 'WFHTTPHeaders') {
 	"WFHTTPMethod": "GET"
 }
 
