@@ -773,7 +773,7 @@ func collectDefinedAction() {
 
 	var identifier, arguments, outputType = collectActionDefinition('\n')
 	if shortIdentifier == "" {
-		shortIdentifier = identifier
+		shortIdentifier = strings.ToLower(identifier)
 	}
 
 	advance()
