@@ -546,7 +546,10 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 		definition.WriteString("mac ")
 	}
 	if currentAction.minVersion != 0 {
-		definition.WriteString(fmt.Sprintf("v%1.f+", currentAction.minVersion))
+		definition.WriteString(fmt.Sprintf("v%1.f> ", currentAction.minVersion))
+	}
+	if currentAction.maxVersion != 0 {
+		definition.WriteString(fmt.Sprintf("v%1.f< ", currentAction.maxVersion))
 	}
 
 	if currentAction.identifier != "" || currentAction.appIdentifier != "" {
@@ -752,17 +755,7 @@ func collectDefinedAction() {
 		advance()
 	}
 
-	var minVersion float64
-	if char == 'v' {
-		if intChar(next(1)) {
-			advance()
-			var valueType tokenType
-			var version any
-			collectIntegerValue(&valueType, &version, ' ')
-			minVersion = version.(float64)
-			advance()
-		}
-	}
+	var minVersion, maxVersion = collectVersionDefinition()
 
 	var shortIdentifier string
 	var overrideIdentifier string
@@ -806,6 +799,7 @@ func collectDefinedAction() {
 		defaultAction:      defaultAction,
 		mac:                macOnlyAction,
 		minVersion:         minVersion,
+		maxVersion:         maxVersion,
 		doc:                doc,
 	}
 
@@ -814,6 +808,32 @@ func collectDefinedAction() {
 		fmt.Println("\ndefined:", currentAction.appIdentifier, generateActionDefinition(parameterDefinition{}, true, true))
 		fmt.Print("\n")
 	}
+}
+
+func collectVersionDefinition() (minVersion float64, maxVersion float64) {
+	for char != -1 && char != ' ' {
+		if char != 'v' || char == 'v' && !intChar(next(1)) {
+			break
+		}
+		advance()
+		var valueType tokenType
+		var version any
+		collectIntegerValue(&valueType, &version, ' ')
+
+		switch char {
+		case '>':
+			minVersion = version.(float64)
+			advance()
+		case '<':
+			maxVersion = version.(float64)
+			advance()
+		default:
+			minVersion = version.(float64)
+		}
+		skipWhitespace()
+	}
+
+	return minVersion, maxVersion
 }
 
 func collectActionDefinition(until rune) (identifier string, arguments []parameterDefinition, outputType tokenType) {
