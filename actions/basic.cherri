@@ -3,6 +3,46 @@ enum abcSortOrder {
  'Z to A',
 }
 
-#define action 'previewdocument' quicklook(variable input: 'WFInput')
+enum language {
+	'ar_AE',
+	'zh_CN',
+	'zh_TW',
+	'nl_NL',
+	'en_GB',
+	'en_US',
+	'fr_FR',
+	'de_DE',
+	'id_ID',
+	'it_IT',
+	'jp_JP',
+	'ko_KR',
+	'pl_PL',
+	'pt_BR',
+	'ru_RU',
+	'es_ES',
+	'th_TH',
+	'tr_TR',
+	'vn_VN',
+}
+
+#define action 'exit' stop()
+
+#define action comment(rawtext text: 'WFCommentActionText')
 
 #define action 'showresult' show(text input: 'Text')
+
+#define action 'previewdocument' quicklook(variable input: 'WFInput')
+
+#define action output(text output: 'WFOutput')
+
+#define action 'output' outputOrClipboard(text output: 'WFOutput') {
+	"WFNoOutputSurfaceBehavior": "Copy to Clipboard"
+}
+
+#define action 'output' mustOutput(text output: 'WFOutput', text response: 'WFResponse') {
+	"WFNoOutputSurfaceBehavior": "Respond"
+}
+
+#define action 'gettext' text(text text: 'WFTextActionText'): text
+
+#define action number(variable number: 'WFNumberActionNumber'): number

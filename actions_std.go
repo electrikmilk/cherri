@@ -772,26 +772,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"listen": {
-		identifier: "dictatetext",
-		parameters: []parameterDefinition{
-			{
-				name:         "stopListening",
-				validType:    String,
-				key:          "WFDictateTextStopListening",
-				defaultValue: "After Pause",
-				enum:         stopListening,
-				optional:     true,
-			},
-			{
-				name:      "language",
-				validType: String,
-				key:       "WFSpeechLanguage",
-				optional:  true,
-				enum:      languages,
-			},
-		},
-	},
 	"labelFile": {
 		identifier: "file.label",
 		parameters: []parameterDefinition{
@@ -1027,16 +1007,6 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "url",
 				validType: String,
-				key:       "WFInput",
-			},
-		},
-	},
-	"quicklook": {
-		identifier: "previewdocument",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				validType: Variable,
 				key:       "WFInput",
 			},
 		},
@@ -2433,27 +2403,6 @@ var actions = map[string]*actionDefinition{
 		appIdentifier: "com.apple.ShortcutsActions",
 		outputType:    String,
 	},
-	"number": {
-		parameters: []parameterDefinition{
-			{
-				name:      "number",
-				validType: Variable,
-				key:       "WFNumberActionNumber",
-			},
-		},
-		outputType: Integer,
-	},
-	"text": {
-		identifier: "gettext",
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				validType: String,
-				key:       "WFTextActionText",
-			},
-		},
-		outputType: String,
-	},
 	"getObjectOfClass": {
 		identifier: "getclassaction",
 		parameters: []parameterDefinition{
@@ -2738,16 +2687,6 @@ var actions = map[string]*actionDefinition{
 		},
 		outputType: String,
 	},
-	"show": {
-		identifier: "showresult",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "Text",
-				validType: String,
-			},
-		},
-	},
 	"waitToReturn": {},
 	"showNotification": {
 		identifier: "notification",
@@ -2774,18 +2713,6 @@ var actions = map[string]*actionDefinition{
 				key:       "WFInput",
 				validType: Variable,
 				optional:  true,
-			},
-		},
-	},
-	"stop": {
-		identifier: "exit",
-	},
-	"comment": {
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				validType: RawString,
-				key:       "WFCommentActionText",
 			},
 		},
 	},
@@ -3543,17 +3470,6 @@ var actions = map[string]*actionDefinition{
 		},
 		outputType: Dict,
 	},
-	"getText": {
-		identifier: "detect.text",
-		parameters: []parameterDefinition{
-			{
-				name:      "input",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
-		outputType: String,
-	},
 	"getAllWallpapers": {
 		identifier:    "posters.get",
 		minVersion:    16.2,
@@ -3650,51 +3566,6 @@ var actions = map[string]*actionDefinition{
 			}
 
 			return
-		},
-	},
-	"output": {
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "output",
-				validType: String,
-				key:       "WFOutput",
-			},
-		},
-	},
-	"mustOutput": {
-		identifier: "output",
-		parameters: []parameterDefinition{
-			{
-				name:      "output",
-				validType: String,
-				key:       "WFOutput",
-			},
-			{
-				name:      "response",
-				validType: String,
-				key:       "WFResponse",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFNoOutputSurfaceBehavior": "Respond",
-			}
-		},
-	},
-	"outputOrClipboard": {
-		identifier: "output",
-		parameters: []parameterDefinition{
-			{
-				name:      "output",
-				validType: String,
-				key:       "WFOutput",
-			},
-		},
-		addParams: func(_ []actionArgument) map[string]any {
-			return map[string]any{
-				"WFNoOutputSurfaceBehavior": "Copy to Clipboard",
-			}
 		},
 	},
 	"DNDOn": {

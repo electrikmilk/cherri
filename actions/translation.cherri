@@ -2,36 +2,14 @@
 Translation Actions
 */
 
-enum languages {
-	'ar_AE',
-	'zh_CN',
-	'zh_TW',
-	'nl_NL',
-	'en_GB',
-	'en_US',
-	'fr_FR',
-	'de_DE',
-	'id_ID',
-	'it_IT',
-	'jp_JP',
-	'ko_KR',
-	'pl_PL',
-	'pt_BR',
-	'ru_RU',
-	'es_ES',
-	'th_TH',
-	'tr_TR',
-	'vn_VN',
-}
-
-#define action 'text.translate' translate(text text: 'WFInputText', languages ?to: 'WFSelectedLanguage'): text {
+#define action 'text.translate' translate(text text: 'WFInputText', language ?to: 'WFSelectedLanguage'): text {
 	"WFSelectedFromLanguage": "Detect Language"
 }
 
 #define action 'text.translate' translateFrom(
     text text: 'WFInputText',
-    languages from: 'WFSelectedFromLanguage',
-    languages to: 'WFSelectedLanguage'
+    language from: 'WFSelectedFromLanguage',
+    language to: 'WFSelectedLanguage'
 ): text
 
 #define action detectLanguage(text input: 'WFInput'): text

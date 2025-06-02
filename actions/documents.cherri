@@ -31,15 +31,6 @@ enum archiveFormat {
 
 #define action 'avairyeditphoto' markup(variable document: 'WFDocument')
 
-/* PDF */
-
-enum PDFMergeBehaviors {
- 'Append',
- 'Shuffle',
-}
-
-#define action makePDF(variable input: 'WFInput', bool ?includeMargin: 'WFPDFIncludeMargin' = false, PDFMergeBehaviors ?mergeBehavior: 'WFPDFDocumentMergeBehavior' = "Append")
-
 /* Files & Folders */
 
 #define action 'file.getlink' getFileLink(variable file: 'WFFile')
@@ -134,21 +125,13 @@ enum stopListenings {
 	'On Tap',
 }
 
-#define action 'dictatetext' listen(stopListenings ?stopListening: 'WFDictateTextStopListening' = "After Pause", languages ?language: 'WFSpeechLanguage')
+#define action 'dictatetext' listen(stopListenings ?stopListening: 'WFDictateTextStopListening' = "After Pause", language ?language: 'WFSpeechLanguage')
 
 #define action 'extracttextfromimage' getTextFromImage(variable image: 'WFImage')
 
 #define action 'getnameofemoji' getEmojiName(text emoji: 'WFInput')
 
 #define action 'detect.text' getText(variable input: 'WFInput'): text
-
-#define action 'gettextfrompdf' getPDFText(
-    variable pdfFile: 'WFInput',
-    bool ?richText = false,
-    bool ?combinePages: 'WFCombinePages' = true,
-    text ?headerText: 'WFGetTextFromPDFPageHeader',
-    text ?footerText: 'WFGetTextFromPDFPageFooter'
-)
 
 #define action 'makespokenaudiofromtext' makeSpokenAudio(text text: 'WFInput', number ?rate: 'WFSpeakTextRate', number ?pitch: 'WFSpeakTextPitch')
 

@@ -16,4 +16,4 @@ Easily edit text...
 @textVar = titleCase(textVar)
 @textVar = capitalize(textVar)
 @textVar = capitalizeAll(textVar)
-@textVar = alternateCase(textVar)
+@textVar = alternatingCase(textVar)
