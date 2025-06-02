@@ -33,7 +33,7 @@ enum language {
 
 #define action 'previewdocument' quicklook(variable input: 'WFInput')
 
-#define action output(text output: 'WFOutput')
+#define action default output(text output: 'WFOutput')
 
 #define action 'output' outputOrClipboard(text output: 'WFOutput') {
 	"WFNoOutputSurfaceBehavior": "Copy to Clipboard"

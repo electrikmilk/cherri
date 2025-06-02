@@ -37,7 +37,7 @@ enum rounding {
  'Millions',
 }
 
-#define action round(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
+#define action default round(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
 	"WFRoundMode": "Normal"
 }
 

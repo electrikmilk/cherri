@@ -35,27 +35,25 @@ enum archiveFormat {
 
 #define action 'file.getlink' getFileLink(variable file: 'WFFile')
 
-#define action 'file.append' prependToFile(text filePath: 'WFFilePath', text text: 'WFInput') {
-	"WFAppendFileWriteMode": "Prepend"
+#define action default 'file.append' appendToFile(text filePath: 'WFFilePath', text text: 'WFInput') {
+	"WFAppendFileWriteMode": "Append"
 }
 
-#define action 'file.append' appendToFile(text filePath: 'WFFilePath', text text: 'WFInput') {
-	"WFAppendFileWriteMode": "Append"
+#define action 'file.append' prependToFile(text filePath: 'WFFilePath', text text: 'WFInput') {
+	"WFAppendFileWriteMode": "Prepend"
 }
 
 #define action 'file.createfolder' createFolder(text path: 'WFFilePath') // TODO: Writing to locations other than the Shortcuts folder.
 
 #define action 'file.delete' deleteFiles(variable input: 'WFInput', bool ?immediately: 'WFDeleteImmediatelyDelete' = false)
 
-#define action 'file.select' selectFile(bool ?selectMultiple: 'SelectMultiple' = false)
+#define action default 'file.select' selectFile(bool ?selectMultiple: 'SelectMultiple' = false)
 
 #define action 'file.select' selectFolder(bool ?selectMultiple: 'SelectMultiple' = false) {
 	"WFPickingMode": "Folders"
 }
 
-#define action 'documentpicker.save' saveFile(text path: 'WFFileDestinationPath', variable content: 'WFInput', bool ?overwrite: 'WFSaveFileOverwrite' = false) {
-	"WFAskWhereToSave": false
-}
+#define action default 'documentpicker.open' getFile(text path: 'WFGetFilePath', bool ?errorIfNotFound: 'WFFileErrorIfNotFound' = true)
 
 #define action 'openin' openFile(variable file: 'WFInput', bool ?askWhenRun: 'WFOpenInAskWhenRun' = false)
 
@@ -69,7 +67,11 @@ enum archiveFormat {
 
 #define action 'file.rename' rename(variable file: 'WFFile', text newName: 'WFNewFilename')
 
-#define action 'documentpicker.save' saveFilePrompt(variable file: 'WFInput', bool ?overwrite: 'WFSaveFileOverwrite' = false)
+#define action default 'documentpicker.save' saveFilePrompt(variable file: 'WFInput', bool ?overwrite: 'WFSaveFileOverwrite' = false)
+
+#define action 'documentpicker.save' saveFile(text path: 'WFFileDestinationPath', variable content: 'WFInput', bool ?overwrite: 'WFSaveFileOverwrite' = false) {
+	"WFAskWhereToSave": false
+}
 
 /* Notes */
 
@@ -143,7 +145,7 @@ enum stopListenings {
 
 /* Text Editing */
 
-#define action 'text.changecase' uppercase(text text) {
+#define action default 'text.changecase' uppercase(text text) {
 	"Show-text": true,
 	"WFCaseType": "UPPERCASE"
 }
@@ -177,14 +179,14 @@ enum stopListenings {
 	"Show-text": true
 }
 
-#define action 'text.match' matchText(text regexPattern: 'WFMatchTextPattern', text text, bool ?caseSensitive: 'WFMatchTextCaseSensitive' = true)
-
-#define action 'text.match.getgroup' getMatchGroups(variable matches) {
-	"WFGetGroupType": "All Groups"
-}
+#define action default 'text.match' matchText(text regexPattern: 'WFMatchTextPattern', text text, bool ?caseSensitive: 'WFMatchTextCaseSensitive' = true)
 
 #define action default 'text.match.getgroup' getMatchGroup(variable matches, number index: 'WFGroupIndex') {
 	"WFGetGroupType": "Group At Index"
+}
+
+#define action 'text.match.getgroup' getMatchGroups(variable matches) {
+	"WFGetGroupType": "All Groups"
 }
 
 #define action 'text.replace' replaceText(

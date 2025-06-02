@@ -986,24 +986,6 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"getFile": {
-		identifier:    "documentpicker.open",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "path",
-				validType: String,
-				key:       "WFGetFilePath",
-			},
-			{
-				name:         "errorIfNotFound",
-				validType:    Bool,
-				key:          "WFFileErrorIfNotFound",
-				defaultValue: true,
-				optional:     true,
-			},
-		},
-	},
 	"connectToServer": {
 		identifier: "connecttoservers",
 		parameters: []parameterDefinition{
@@ -4424,13 +4406,6 @@ func magnitudeValue(unit string, args []actionArgument, index int) map[string]an
 			},
 			"WFSerializationType": "WFQuantityFieldValue",
 		},
-	}
-}
-
-func changeCase(textCase string) map[string]any {
-	return map[string]any{
-		"Show-text":  true,
-		"WFCaseType": textCase,
 	}
 }
 
