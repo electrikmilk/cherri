@@ -740,6 +740,11 @@ var actions = map[string]*actionDefinition{
 				enum:      "filesSortBy",
 				optional:  true,
 			},
+			{
+				name: "orderBy",
+				enum: []string{"Smallest First", "Biggest First", "Latest First", "Oldest First", "A to Z", "Z to A"},
+				key:  "WFContentItemSortOrder",
+			},
 		},
 		addParams: func(args []actionArgument) (params map[string]any) {
 			if len(args) == 0 {
