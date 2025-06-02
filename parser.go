@@ -521,7 +521,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	if *argIndex == *paramsSize && !param.infinite {
 		parserError(
 			fmt.Sprintf("Too many arguments\n\n%s",
-				generateActionDefinition(parameterDefinition{}, false, false),
+				generateActionDefinition(parameterDefinition{},  false),
 			),
 		)
 	}

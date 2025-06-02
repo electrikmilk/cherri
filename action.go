@@ -284,7 +284,7 @@ func checkRequiredArgs() {
 			default:
 				suffix = "th"
 			}
-			parserError(fmt.Sprintf("Missing required %d%s argument '%s'.\n%s", argIndex, suffix, param.name, generateActionDefinition(param, false, true)))
+			parserError(fmt.Sprintf("Missing required %d%s argument '%s'.\n%s", argIndex, suffix, param.name, generateActionDefinition(param, true)))
 		}
 	}
 }
@@ -301,7 +301,7 @@ func checkEnum(param *parameterDefinition, argument *actionArgument) {
 				"Invalid argument '%s' for %s.\n\n%s",
 				value,
 				param.name,
-				generateActionDefinition(*param, false, true),
+				generateActionDefinition(*param, true),
 			),
 		)
 	}
@@ -363,7 +363,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 				argValueType,
 				param.name,
 				param.validType,
-				generateActionDefinition(*param, false, false),
+				generateActionDefinition(*param, false),
 			))
 		}
 	case argValueType == Question:
@@ -378,7 +378,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 			argValueType,
 			param.name,
 			param.validType,
-			generateActionDefinition(*param, false, false),
+			generateActionDefinition(*param, false),
 		))
 	}
 }
@@ -397,7 +397,7 @@ func validActionOutput(param *parameterDefinition, value any) {
 				actionOutputType,
 				param.name,
 				param.validType,
-				generateActionDefinition(*param, false, false),
+				generateActionDefinition(*param, false),
 			))
 		}
 	}
@@ -451,7 +451,7 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 			fmt.Sprintf(
 				"Value for action argument '%s' is the same as the default value.\n%s",
 				param.name,
-				generateActionDefinition(*param, false, false),
+				generateActionDefinition(*param, false),
 			),
 		)
 	}
@@ -474,7 +474,7 @@ func checkLiteralValue(param *parameterDefinition, argument *actionArgument) {
 	if argument.valueType != param.validType {
 		parserError(fmt.Sprintf(
 			"Shortcuts does not allow variables for this argument, use a literal for the argument value.\n\n%s",
-			generateActionDefinition(*param, false, false),
+			generateActionDefinition(*param, false),
 		))
 	}
 }
@@ -509,7 +509,7 @@ func makeMeasurementUnits() {
 	}
 }
 
-func generateActionDefinition(focus parameterDefinition, restrictions bool, showEnums bool) string {
+func generateActionDefinition(focus parameterDefinition, showEnums bool) string {
 	var definition strings.Builder
 
 	var docTitle = currentAction.doc.title
@@ -537,40 +537,42 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 		definition.WriteString(generateActionParamEnums(focus))
 	}
 
-	definition.WriteString("#define action ")
+	definition.WriteString(ansi("#define action ", orange))
 
 	if currentAction.defaultAction {
-		definition.WriteString("default ")
+		definition.WriteString(ansi("default ", yellow))
 	}
 	if currentAction.mac {
-		definition.WriteString("mac ")
+		definition.WriteString(ansi("mac ", orange))
 	}
 	if currentAction.minVersion != 0 {
-		definition.WriteString(fmt.Sprintf("v%1.f> ", currentAction.minVersion))
+		definition.WriteString(ansi(fmt.Sprintf("v%1.f>", currentAction.minVersion), underline))
+		definition.WriteRune(' ')
 	}
 	if currentAction.maxVersion != 0 {
-		definition.WriteString(fmt.Sprintf("v%1.f< ", currentAction.maxVersion))
+		definition.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.maxVersion), red, bold))
+		definition.WriteRune(' ')
 	}
 
 	if currentAction.identifier != "" || currentAction.appIdentifier != "" {
 		setCurrentAction(currentActionIdentifier, &currentAction)
-		definition.WriteString(fmt.Sprintf("'%s' ", getActionIdentifier()))
+		definition.WriteString(ansi(fmt.Sprintf("'%s' ", getActionIdentifier()), red))
 	}
 
-	definition.WriteString(fmt.Sprintf("%s(", currentActionIdentifier))
+	definition.WriteString(fmt.Sprintf("%s(", ansi(currentActionIdentifier, blue, bold)))
 	var arguments []string
 	for _, param := range currentAction.parameters {
 		if param.name == focus.name || focus.name == "" {
 			arguments = append(arguments, generateActionParamDefinition(param))
 		} else {
-			arguments = append(arguments, "...")
+			arguments = append(arguments, ansi("...", dim))
 		}
 	}
 	definition.WriteString(strings.Join(arguments, ", "))
 	definition.WriteRune(')')
 
 	if currentAction.outputType != "" {
-		definition.WriteString(fmt.Sprintf(": %s", currentAction.outputType))
+		definition.WriteString(fmt.Sprintf(": %s", ansi(string(currentAction.outputType), magenta)))
 	}
 
 	if currentAction.addParams != nil {
@@ -583,28 +585,10 @@ func generateActionDefinition(focus parameterDefinition, restrictions bool, show
 	}
 
 	if args.Using("no-ansi") {
-		definition.WriteString("\n```\n")
-	}
-
-	if restrictions && (currentAction.minVersion != 0 || currentAction.maxVersion != 0 || currentAction.mac) {
-		definition.WriteString(generateActionRestrictions())
+		definition.WriteString("\n```")
 	}
 
 	return definition.String()
-}
-
-func generateActionRestrictions() string {
-	var definition strings.Builder
-	definition.WriteString("\n\nRestrictions: ")
-	var restrictions []string
-	if currentAction.maxVersion != 0 {
-		restrictions = append(restrictions, fmt.Sprintf("Removed or significantly changed after iOS %1.f+", currentAction.maxVersion))
-	}
-	if len(restrictions) > 0 {
-		definition.WriteString(strings.Join(restrictions, ", "))
-	}
-
-	return ansi(definition.String(), red, bold)
 }
 
 func generateActionParamEnums(focus parameterDefinition) string {
@@ -617,15 +601,17 @@ func generateActionParamEnums(focus parameterDefinition) string {
 			continue
 		}
 		var enumIdentifier = getEnumIdentifier(&param)
-		definition.WriteString(fmt.Sprintf("enum %s {\n", enumIdentifier))
+		definition.WriteString(ansi("enum ", orange))
+		definition.WriteString(enumIdentifier)
+		definition.WriteString(ansi(" {\n", dim))
 		for i, enum := range param.enum {
 			var enumSize = len(param.enum)
-			definition.WriteString(fmt.Sprintf("\t'%s'", enum))
+			definition.WriteString(ansi(fmt.Sprintf("\t'%s'", enum), orange))
 			if i < enumSize+1 {
 				definition.WriteString(",\n")
 			}
 		}
-		definition.WriteString("}\n\n")
+		definition.WriteString(ansi("}\n\n", dim))
 	}
 
 	return definition.String()
@@ -643,11 +629,14 @@ func getEnumIdentifier(param *parameterDefinition) string {
 
 func generateActionParamDefinition(param parameterDefinition) string {
 	var definition strings.Builder
+	var argType string
 	if param.enum == nil {
-		definition.WriteString(fmt.Sprintf("%s ", param.validType))
+		argType = fmt.Sprintf("%s ", param.validType)
 	} else {
-		definition.WriteString(fmt.Sprintf("%s ", getEnumIdentifier(&param)))
+		argType = fmt.Sprintf("%s ", getEnumIdentifier(&param))
 	}
+	definition.WriteString(ansi(argType, magenta))
+
 	if param.infinite {
 		definition.WriteString("...")
 	}
@@ -657,15 +646,18 @@ func generateActionParamDefinition(param parameterDefinition) string {
 	definition.WriteString(param.name)
 
 	if param.key != "" && param.key != param.name {
-		definition.WriteString(fmt.Sprintf(": '%s'", param.key))
+		definition.WriteString(ansi(fmt.Sprintf(": '%s'", param.key), orange))
 	}
 
 	if param.defaultValue != nil {
+		definition.WriteString(ansi(" = ", dim))
+		var defaultValue string
 		if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
-			definition.WriteString(fmt.Sprintf(" = \"%v\"", strings.Replace(param.defaultValue.(string), "\n", "\\n", 1)))
+			defaultValue = fmt.Sprintf("\"%v\"", strings.Replace(param.defaultValue.(string), "\n", "\\n", 1))
 		} else {
-			definition.WriteString(fmt.Sprintf(" = %v", param.defaultValue))
+			defaultValue = fmt.Sprintf("%v", param.defaultValue)
 		}
+		definition.WriteString(ansi(defaultValue, yellow))
 	}
 
 	return definition.String()
@@ -805,7 +797,7 @@ func collectDefinedAction() {
 
 	if args.Using("debug") {
 		setCurrentAction(identifier, actions[identifier])
-		fmt.Println("\ndefined:", currentAction.appIdentifier, generateActionDefinition(parameterDefinition{}, true, true))
+		fmt.Println("\ndefined:", currentAction.appIdentifier, generateActionDefinition(parameterDefinition{}, true))
 		fmt.Print("\n")
 	}
 }

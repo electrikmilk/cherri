@@ -34,7 +34,7 @@ func actionsSearch() {
 			var matched, result = matchString(&actionIdentifier, &identifier)
 			if matched {
 				setCurrentAction(actionIdentifier, definition)
-				var definition = generateActionDefinition(parameterDefinition{}, false, false)
+				var definition = generateActionDefinition(parameterDefinition{}, false)
 				definition, _ = strings.CutPrefix(definition, actionIdentifier)
 
 				actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n", result, definition))
@@ -48,7 +48,7 @@ func actionsSearch() {
 		os.Exit(1)
 	}
 	setCurrentAction(identifier, actions[identifier])
-	fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
+	fmt.Println(generateActionDefinition(parameterDefinition{}, true))
 }
 
 func glyphsSearch() {

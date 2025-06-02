@@ -55,7 +55,7 @@ func main() {
 				if undefinable() {
 					continue
 				}
-				fmt.Println(generateActionDefinition(parameterDefinition{}, true, true))
+				fmt.Println(generateActionDefinition(parameterDefinition{}, true))
 				fmt.Print("\n---\n\n")
 			}
 		} else {
