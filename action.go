@@ -710,12 +710,15 @@ func collectDefinedAction() {
 	}
 
 	var minVersion float64
-	if intChar() {
-		var valueType tokenType
-		var version any
-		collectIntegerValue(&valueType, &version, ' ')
-		minVersion = version.(float64)
+	if char == 'v' {
 		advance()
+		if intChar() {
+			var valueType tokenType
+			var version any
+			collectIntegerValue(&valueType, &version, ' ')
+			minVersion = version.(float64)
+			advance()
+		}
 	}
 
 	var shortIdentifier string

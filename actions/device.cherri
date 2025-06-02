@@ -12,15 +12,15 @@ Device Actions
 
 #define action mac startScreensaver()
 
-#define action 17 lockScreen()
+#define action v17 lockScreen()
 
-#define action 17 sleep()
+#define action v17 sleep()
 
-#define action 17 displaySleep()
+#define action v17 displaySleep()
 
-#define action 17 'reboot' shutdown()
+#define action v17 'reboot' shutdown()
 
-#define action 17 reboot() {
+#define action v17 reboot() {
 	"WFShutdownMode": "Restart"
 }
 
@@ -45,11 +45,11 @@ enum getDeviceDetailDetails {
 
 #define action default getBatteryLevel()
 
-#define action 16.2 'getbatterylevel' connectedToCharger(): bool {
+#define action v16.2 'getbatterylevel' connectedToCharger(): bool {
 	"Subject": "Is Connected to Charger"
 }
 
-#define action 16.2 'getbatterylevel' isCharging(): bool {
+#define action v16.2 'getbatterylevel' isCharging(): bool {
 	"Subject": "Is Charging"
 }
 
