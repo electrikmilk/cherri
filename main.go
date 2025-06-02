@@ -79,7 +79,7 @@ func main() {
 		printLogo()
 		printVersion()
 		if !darwin {
-			fmt.Println(ansi("\nWarning:", yellow, bold), "Shortcuts compiled on this platform will not run on iOS 15+ or macOS 12+.")
+			fmt.Println(ansi("\nWarning:", orange, bold), "Shortcuts compiled on this platform will not run on iOS 15+ or macOS 12+.")
 		}
 		fmt.Print("\n")
 		args.PrintUsage()

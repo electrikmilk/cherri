@@ -1466,7 +1466,7 @@ func printDecompDebug() {
 
 func decompWarning(message string) {
 	var linesLen = strings.Count(code.String(), "\n")
-	fmt.Println(ansi("Warning:", yellow, bold), fmt.Sprintf("%s (%s:%d:0)\n", message, filePath, linesLen+1))
+	fmt.Println(ansi("Warning:", orange, bold), fmt.Sprintf("%s (%s:%d:0)\n", message, filePath, linesLen+1))
 }
 
 func decompError(message string, action *ShortcutAction) {
