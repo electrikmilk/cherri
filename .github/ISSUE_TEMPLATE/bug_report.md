@@ -28,7 +28,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Version Information (please complete the following information):**
  - Cherri version (run `cherri -v`): 
- - macOS version (run `uname -a`): 
+ - macOS version (run `uname -v`): 
  - Golang version (run `go version`):
 
 **Additional context**
