@@ -91,15 +91,6 @@ enum recordingStart {
 
 /* Screenshots */
 
-enum screenshotSelection {
-	'Window',
-	'Custom',
-}
-
-#define action mac 'takescreenshot' takeInteractiveScreenshot(screenshotSelection ?selection: 'WFTakeScreenshotActionInteractiveSelectionType' = "Window") {
-	"WFTakeScreenshotScreenshotType": "Interactive"
-}
-
 #define action takeScreenshot(bool ?mainMonitorOnly: 'WFTakeScreenshotMainMonitorOnly' = false) {
 	"WFTakeScreenshotScreenshotType": "Full Screen"
 }

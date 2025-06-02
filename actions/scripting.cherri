@@ -2,10 +2,6 @@
 Scripting Actions
 */
 
-/* App actions */
-
-#define action mac v18 'filter.apps' getApps()
-
 /* Control Flow */
 
 #define action 'delay' wait(number seconds: 'WFDelayTime')
@@ -121,20 +117,6 @@ enum countType {
 
 #define action 'number.random' randomNumber(number min: 'WFRandomNumberMinimum', number max: 'WFRandomNumberMaximum'): number
 
-/* Scripts */
-
-#define action mac runShellScript(text script: 'Script', variable input: 'Input', text ?shell: 'Shell' = "/bin/zsh", text ?inputMode: 'InputMode' = "to stdin")
-
-#define action mac runAppleScript(variable input: 'Input', text script: 'Script')
-
-enum SSHScriptAuthType {
-	'Password',
-	'SSH Key',
-}
-
-#define action mac runSSHScript(text script: 'WFSSHScript', variable input: 'WFInput', text host: 'WFSSHHost', text port: 'WFSSHPort', text user: 'WFSSHUser', SSHScriptAuthType authType: 'WFSSHAuthenticationType', text password: 'WFSSHPassword')
-
-#define action mac 'runjavascriptforautomation' runJSAutomation(variable input: 'Input', text script: 'Script')
 
 /* Passwords */
 
@@ -151,36 +133,3 @@ enum SSHScriptAuthType {
 #define action !mac v16.2 'posters.get' getWallpaper() {
 	"WFPosterType": "Current"
 }
-
-/* Windows */
-
-enum windowPosition {
-	'Top Left',
-	'Top Center',
-	'Top Right',
-	'Middle Left',
-	'Center',
-	'Middle Right',
-	'Bottom Left',
-	'Bottom Center',
-	'Bottom Right',
-	'Coordinates',
-}
-
-#define action mac moveWindow(variable window: 'WFWindow', windowPosition position: 'WFPosition', bool ?bringToFront: 'WFBringToFront' = true)
-
-enum windowConfiguration {
- 'Fit Screen',
- 'Top Half',
- 'Bottom Half',
- 'Left Half',
- 'Right Half',
- 'Top Left Quarter',
- 'Top Right Quarter',
- 'Bottom Left Quarter',
- 'Bottom Right Quarter',
- 'Dimensions',
-}
-
-#define action mac resizeWindow(variable window: 'WFWindow', windowConfiguration configuration: 'WFConfiguration')
-

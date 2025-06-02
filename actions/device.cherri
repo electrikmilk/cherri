@@ -10,13 +10,7 @@ Device Actions
 
 #define action 'com.apple.ShortcutsActions.GetOrientationAction' getOrientation(): text
 
-#define action mac startScreensaver()
-
 #define action v17 lockScreen()
-
-#define action mac v17 sleep()
-
-#define action mac v17 displaySleep()
 
 #define action v17 'reboot' shutdown()
 
