@@ -36,7 +36,7 @@ type parameterDefinition struct {
 	validType    tokenType
 	key          string
 	defaultValue any
-	enum         []string
+	enum         string
 	optional     bool
 	infinite     bool
 	literal      bool
@@ -101,7 +101,41 @@ type libraryDefinition struct {
 	make func(identifier string)
 }
 
-var enumerations map[string][]string
+var enumerations = map[string][]string{
+	"measurementUnitTypes":          {"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"},
+	"storageUnits":                  {"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"},
+	"inputTypes":                    {"Text", "Number", "URL", "Date", "Time", "Date and Time"},
+	"appSplitRatios":                {"half", "thirdByTwo"},
+	"httpMethods":                   {"POST", "PUT", "PATCH", "DELETE"},
+	"sortOrders":                    {"asc", "desc"},
+	"windowSortings":                {"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"},
+	"timerDurations":                {"hr", "min", "sec"},
+	"fileLabels":                    {"red", "orange", "yellow", "green", "blue", "purple", "gray"},
+	"filesSortBy":                   {"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"},
+	"seekBehavior":                  {"To Time", "Forward By", "Backward By"},
+	"Acceleration":                  {"m/s²", "g-force"},
+	"Angle":                         {"degrees", "arcminutes", "arcseconds", "radians", "grad", "revolutions"},
+	"Area":                          {"Mm²", "square kilometers", "square meters", "square centimeters", "mm²", "um²", "nm²", "square inches", "square feet", "square yards", "square miles", "acres", "a", "hectares"},
+	"Concentration Mass":            {"g/L", "mg/dL", "µg/m³"},
+	"Dispersion":                    {"ppm"},
+	"Duration":                      {"milliseconds", "microseconds", "nanoseconds", "ps", "seconds", "minutes", "hours"},
+	"Electric Charge":               {"C", "MAh", "kAh", "Ah", "mAh", "µAh"},
+	"Electric Current":              {"MA", "kA", "amp", "mA", "µA"},
+	"Electric Potential Difference": {"MV", "kV", "volt", "mV", "µV"},
+	"Electric Resistance":           {"MΩ", "kΩ", "ohm", "mΩ", "µΩ"},
+	"Energy":                        {"kJ", "joule", "kcal", "cal", "kWh"},
+	"Frequency":                     {"tHz", "GHz", "MHz", "kHz", "Hz", "mHz", "µHz", "nHz", "fps"},
+	"Fuel Efficiency":               {"L/100km", "mpg"},
+	"Illuminance":                   {"lux"},
+	"Information Storage":           {"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"},
+	"Length":                        {"Mm", "km", "hm", "dam", "m", "dm", "cm", "mm", "µm", "nm", "pm", "in", "ft", "yd", "mi", "smi", "ly", "nmi", "fathom", "furlong", "au", "parsec"},
+	"Mass":                          {"kg", "gram", "dg", "cg", "mg", "µg", "ng", "pg", "oz", "lb", "stone", "t", "ton", "carat", "oz t", "slug"},
+	"Power":                         {"TW", "GW", "MW", "kW", "watt", "mW", "µW", "nW", "pw", "fw", "hp"},
+	"Pressure":                      {"N/m²", "GPa", "MPa", "kPa", "hPa", "\" Hg", "bar", "mbar", "mm Hg", "psi"},
+	"Speed":                         {"m/s", "km/hr", "mi/hr", "kn"},
+	"Temperature":                   {"K", "ºC", "ºF"},
+	"Volume":                        {"ML", "kL", "liter", "dL", "cL", "mL", "km³", "m³", "dm³", "cm³", "mm³", "in³", "ft³", "yd³", "mi³", "acre ft", "bushel", "tsp", "tbsp", "fl oz", "pt", "qt", "Imp gal", "mcup"},
+}
 
 var actionIndex int
 
@@ -289,13 +323,21 @@ func checkRequiredArgs() {
 	}
 }
 
+func getEnum(identifier string) []string {
+	if enumerations[identifier] == nil {
+		return []string{}
+	}
+
+	return enumerations[identifier]
+}
+
 // checkEnum checks an argument value against a string slice.
 func checkEnum(param *parameterDefinition, argument *actionArgument) {
 	var value = getArgValue(*argument)
 	if value == nil || reflect.TypeOf(value).Kind() != reflect.String || argument.valueType == Question {
 		return
 	}
-	if !slices.Contains(param.enum, value.(string)) {
+	if !slices.Contains(getEnum(param.enum), value.(string)) {
 		parserError(
 			fmt.Sprintf(
 				"Invalid argument '%s' for %s.\n\n%s",
@@ -432,7 +474,7 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 		return
 	}
 
-	if param.enum != nil {
+	if param.enum != "" {
 		checkEnum(param, argument)
 	}
 
@@ -476,36 +518,6 @@ func checkLiteralValue(param *parameterDefinition, argument *actionArgument) {
 			"Shortcuts does not allow variables for this argument, use a literal for the argument value.\n\n%s",
 			generateActionDefinition(*param, false),
 		))
-	}
-}
-
-func makeMeasurementUnits() {
-	if len(units) != 0 {
-		return
-	}
-	units = map[string][]string{
-		"Acceleration":                  {"m/s²", "g-force"},
-		"Angle":                         {"degrees", "arcminutes", "arcseconds", "radians", "grad", "revolutions"},
-		"Area":                          {"Mm²", "square kilometers", "square meters", "square centimeters", "mm²", "um²", "nm²", "square inches", "square feet", "square yards", "square miles", "acres", "a", "hectares"},
-		"Concentration Mass":            {"g/L", "mg/dL", "µg/m³"},
-		"Dispersion":                    {"ppm"},
-		"Duration":                      {"milliseconds", "microseconds", "nanoseconds", "ps", "seconds", "minutes", "hours"},
-		"Electric Charge":               {"C", "MAh", "kAh", "Ah", "mAh", "µAh"},
-		"Electric Current":              {"MA", "kA", "amp", "mA", "µA"},
-		"Electric Potential Difference": {"MV", "kV", "volt", "mV", "µV"},
-		"Electric Resistance":           {"MΩ", "kΩ", "ohm", "mΩ", "µΩ"},
-		"Energy":                        {"kJ", "joule", "kcal", "cal", "kWh"},
-		"Frequency":                     {"tHz", "GHz", "MHz", "kHz", "Hz", "mHz", "µHz", "nHz", "fps"},
-		"Fuel Efficiency":               {"L/100km", "mpg"},
-		"Illuminance":                   {"lux"},
-		"Information Storage":           {"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"},
-		"Length":                        {"Mm", "km", "hm", "dam", "m", "dm", "cm", "mm", "µm", "nm", "pm", "in", "ft", "yd", "mi", "smi", "ly", "nmi", "fathom", "furlong", "au", "parsec"},
-		"Mass":                          {"kg", "gram", "dg", "cg", "mg", "µg", "ng", "pg", "oz", "lb", "stone", "t", "ton", "carat", "oz t", "slug"},
-		"Power":                         {"TW", "GW", "MW", "kW", "watt", "mW", "µW", "nW", "pw", "fw", "hp"},
-		"Pressure":                      {"N/m²", "GPa", "MPa", "kPa", "hPa", "\" Hg", "bar", "mbar", "mm Hg", "psi"},
-		"Speed":                         {"m/s", "km/hr", "mi/hr", "kn"},
-		"Temperature":                   {"K", "ºC", "ºF"},
-		"Volume":                        {"ML", "kL", "liter", "dL", "cL", "mL", "km³", "m³", "dm³", "cm³", "mm³", "in³", "ft³", "yd³", "mi³", "acre ft", "bushel", "tsp", "tbsp", "fl oz", "pt", "qt", "Imp gal", "mcup"},
 	}
 }
 
@@ -594,17 +606,16 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 func generateActionParamEnums(focus parameterDefinition) string {
 	var definition strings.Builder
 	for _, param := range currentAction.parameters {
-		if param.enum == nil {
+		if param.enum == "" {
 			continue
 		}
 		if focus.name != "" && focus.name != param.name {
 			continue
 		}
-		var enumIdentifier = getEnumIdentifier(&param)
 		definition.WriteString(ansi("enum ", orange))
-		definition.WriteString(enumIdentifier)
+		definition.WriteString(param.enum)
 		definition.WriteString(ansi(" {\n", dim))
-		for i, enum := range param.enum {
+		for i, enum := range getEnum(param.enum) {
 			var enumSize = len(param.enum)
 			definition.WriteString(ansi(fmt.Sprintf("\t'%s'", enum), orange))
 			if i < enumSize+1 {
@@ -617,23 +628,13 @@ func generateActionParamEnums(focus parameterDefinition) string {
 	return definition.String()
 }
 
-func getEnumIdentifier(param *parameterDefinition) string {
-	for identifier, enum := range enumerations {
-		if slices.Equal(param.enum, enum) {
-			return identifier
-		}
-	}
-
-	return fmt.Sprintf("%s%s", currentActionIdentifier, capitalize(param.name))
-}
-
 func generateActionParamDefinition(param parameterDefinition) string {
 	var definition strings.Builder
 	var argType string
-	if param.enum == nil {
+	if param.enum == "" {
 		argType = fmt.Sprintf("%s ", param.validType)
 	} else {
-		argType = fmt.Sprintf("%s ", getEnumIdentifier(&param))
+		argType = fmt.Sprintf("%s ", param.enum)
 	}
 	definition.WriteString(ansi(argType, magenta))
 
@@ -859,11 +860,10 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 		var valueType tokenType
 		var value any
 
-		var enum []string
+		var enumeration string
 		var ahead = lookAheadUntil(' ')
 		if enumerations[ahead] != nil {
-			var enumeration = collectUntil(' ')
-			enum = enumerations[enumeration]
+			enumeration = collectUntil(' ')
 			valueType = String
 		} else {
 			collectType(&valueType, &value, ' ')
@@ -924,7 +924,7 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			validType:    valueType,
 			optional:     optional,
 			defaultValue: defaultValue,
-			enum:         enum,
+			enum:         enumeration,
 			literal:      literal,
 		})
 

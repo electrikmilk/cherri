@@ -1371,7 +1371,7 @@ func scoreActionParams(splitActionParams *[]parameterDefinition, parameters map[
 		}
 		if value, found := parameters[param.key]; found {
 			matchedParams++
-			if len(param.enum) > 0 && slices.Contains(param.enum, fmt.Sprintf("%s", value)) {
+			if len(param.enum) > 0 && slices.Contains(getEnum(param.enum), fmt.Sprintf("%s", value)) {
 				matchedValues++
 			}
 			if param.defaultValue != nil {

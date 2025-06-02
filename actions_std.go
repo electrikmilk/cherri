@@ -20,13 +20,8 @@ import (
 const SetVariableIdentifier = "is.workflow.actions.setvariable"
 const AppendVariableIdentifier = "is.workflow.actions.appendvariable"
 
-var measurementUnitTypes = []string{"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"}
-var units map[string][]string
-var contactDetails = []string{"First Name", "Middle Name", "Last Name", "Birthday", "Prefix", "Suffix", "Nickname", "Phonetic First Name", "Phonetic Last Name", "Phonetic Middle Name", "Company", "Job Title", "Department", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
-var storageUnits = []string{"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"}
-var inputTypes = []string{"Text", "Number", "URL", "Date", "Time", "Date and Time"}
-var appSplitRatios = []string{"half", "thirdByTwo"}
-var httpMethods = []string{"POST", "PUT", "PATCH", "DELETE"}
+var weekdays = []string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
+
 var httpParams = []parameterDefinition{
 	{
 		name:      "url",
@@ -38,7 +33,7 @@ var httpParams = []parameterDefinition{
 		key:       "WFHTTPMethod",
 		validType: String,
 		optional:  true,
-		enum:      httpMethods,
+		enum:      "httpMethods",
 	},
 	{
 		name:      "body",
@@ -54,10 +49,6 @@ var httpParams = []parameterDefinition{
 		literal:   true,
 	},
 }
-var sortOrders = []string{"asc", "desc"}
-var windowSortings = []string{"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"}
-var timerDurations = []string{"hr", "min", "sec"}
-var weekdays = []string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
 var fileLabelsMap = map[string]int{
 	"red":    6,
 	"orange": 7,
@@ -67,8 +58,6 @@ var fileLabelsMap = map[string]int{
 	"purple": 3,
 	"gray":   1,
 }
-var fileLabels = []string{"red", "orange", "yellow", "green", "blue", "purple", "gray"}
-var filesSortBy = []string{"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"}
 
 var toggleAlarmIntent = appIntent{
 	name:                "Clock",
@@ -401,7 +390,7 @@ var actions = map[string]*actionDefinition{
 				name:         "unit",
 				validType:    String,
 				defaultValue: "min",
-				enum:         timerDurations,
+				enum:         "timerDurations",
 			},
 		},
 	},
@@ -694,7 +683,7 @@ var actions = map[string]*actionDefinition{
 				name:      "detail",
 				validType: String,
 				key:       "WFContentItemPropertyName",
-				enum:      contactDetails,
+				enum:      "contactDetails",
 			},
 		},
 		addParams: func(_ []actionArgument) map[string]any {
@@ -715,7 +704,7 @@ var actions = map[string]*actionDefinition{
 				name:      "color",
 				validType: String,
 				optional:  false,
-				enum:      fileLabels,
+				enum:      "fileLabels",
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
@@ -748,7 +737,7 @@ var actions = map[string]*actionDefinition{
 				name:      "sortBy",
 				validType: String,
 				key:       "WFContentItemSortProperty",
-				enum:      filesSortBy,
+				enum:      "filesSortBy",
 				optional:  true,
 			},
 		},
@@ -988,7 +977,7 @@ var actions = map[string]*actionDefinition{
 			}
 			checkEnum(&parameterDefinition{
 				name: "disk size",
-				enum: storageUnits,
+				enum: "storageUnits",
 			}, &storageUnitArg)
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
@@ -1038,14 +1027,14 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "duration",
 				validType: String,
-				enum:      timerDurations,
+				enum:      "timerDurations",
 			},
 			{
 				name:         "behavior",
 				key:          "WFSeekBehavior",
 				validType:    String,
 				defaultValue: "To Time",
-				enum:         []string{"To Time", "Forward By", "Backward By"},
+				enum:         "seekBehavior",
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
@@ -1119,7 +1108,7 @@ var actions = map[string]*actionDefinition{
 				name:         "inputType",
 				validType:    String,
 				key:          "WFInputType",
-				enum:         inputTypes,
+				enum:         "inputTypes",
 				optional:     true,
 				defaultValue: "Text",
 			},
@@ -1380,7 +1369,7 @@ var actions = map[string]*actionDefinition{
 				key:          "WFAppRatio",
 				validType:    String,
 				optional:     true,
-				enum:         appSplitRatios,
+				enum:         "appSplitRatios",
 				defaultValue: "half",
 			},
 		},
@@ -1677,14 +1666,14 @@ var actions = map[string]*actionDefinition{
 				name:      "sortBy",
 				validType: String,
 				key:       "WFContentItemSortProperty",
-				enum:      windowSortings,
+				enum:      "windowSortings",
 				optional:  true,
 			},
 			{
 				name:      "orderBy",
 				validType: String,
 				key:       "WFContentItemSortOrder",
-				enum:      sortOrders,
+				enum:      "sortOrders",
 				optional:  true,
 			},
 			{
@@ -1745,7 +1734,7 @@ var actions = map[string]*actionDefinition{
 				name:      "unitType",
 				validType: String,
 				key:       "WFMeasurementUnitType",
-				enum:      measurementUnitTypes,
+				enum:      "measurementUnitTypes",
 			},
 			{
 				name:      "unit",
@@ -1758,12 +1747,10 @@ var actions = map[string]*actionDefinition{
 				return
 			}
 
-			makeMeasurementUnits()
-
 			var unitType = value.(string)
 			checkEnum(&parameterDefinition{
 				name: "measurement unit",
-				enum: units[unitType],
+				enum: unitType,
 			}, &args[2])
 		},
 		addParams: func(args []actionArgument) map[string]any {
@@ -1807,7 +1794,7 @@ var actions = map[string]*actionDefinition{
 				name:      "unitType",
 				validType: String,
 				key:       "WFMeasurementUnitType",
-				enum:      measurementUnitTypes,
+				enum:      "measurementUnitTypes",
 			},
 			{
 				name:      "unit",
@@ -1820,12 +1807,10 @@ var actions = map[string]*actionDefinition{
 				return
 			}
 
-			makeMeasurementUnits()
-
 			var unitType = value.(string)
 			checkEnum(&parameterDefinition{
 				name: "unit",
-				enum: units[unitType],
+				enum: unitType,
 			}, &args[2])
 		},
 		addParams: func(args []actionArgument) map[string]any {
@@ -1950,7 +1935,7 @@ var actions = map[string]*actionDefinition{
 				name:      "detail",
 				validType: String,
 				key:       "WFContentItemPropertyName",
-				enum:      contactDetails,
+				enum:      "contactDetail",
 			},
 			{
 				name:      "value",

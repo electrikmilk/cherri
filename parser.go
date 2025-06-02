@@ -459,14 +459,11 @@ func collectEnumeration() {
 	var lineRef = newLineReference()
 
 	advance()
-	if enumerations == nil {
-		enumerations = make(map[string][]string)
-	}
 
 	var identifier = collectIdentifier()
 	if enumerations[identifier] != nil {
 		currentAction.parameters = []parameterDefinition{
-			{enum: enumerations[identifier]},
+			{enum: identifier},
 		}
 		parserError(fmt.Sprintf("Duplicate enumeration '%s'\n\n%s", identifier, generateActionParamEnums(parameterDefinition{})))
 	}
@@ -521,7 +518,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	if *argIndex == *paramsSize && !param.infinite {
 		parserError(
 			fmt.Sprintf("Too many arguments\n\n%s",
-				generateActionDefinition(parameterDefinition{},  false),
+				generateActionDefinition(parameterDefinition{}, false),
 			),
 		)
 	}
