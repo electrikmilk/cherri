@@ -741,9 +741,11 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 			{
-				name: "orderBy",
-				enum: "fileOrderings",
-				key:  "WFContentItemSortOrder",
+				name:      "orderBy",
+				validType: String,
+				key:       "WFContentItemSortOrder",
+				enum:      "fileOrderings",
+				optional:  true,
 			},
 		},
 		addParams: func(args []actionArgument) (params map[string]any) {
