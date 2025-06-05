@@ -109,7 +109,7 @@ var enumerations = map[string][]string{
 	"httpMethod":                    {"POST", "PUT", "PATCH", "DELETE"},
 	"sortOrder":                     {"asc", "desc"},
 	"windowSorting":                 {"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"},
-	"timerDurations":                {"hr", "min", "sec"},
+	"timerDuration":                 {"hr", "min", "sec"},
 	"fileLabel":                     {"red", "orange", "yellow", "green", "blue", "purple", "gray"},
 	"filesSortBy":                   {"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"},
 	"fileOrderings":                 {"Smallest First", "Biggest First", "Latest First", "Oldest First", "A to Z", "Z to A"},

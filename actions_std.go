@@ -392,6 +392,11 @@ var actions = map[string]*actionDefinition{
 				enum:         "timerDuration",
 			},
 		},
+		addParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFDuration": magnitudeValue(argumentValue(args, 1), args, 0),
+			}
+		},
 	},
 	"createAlarm": {
 		appIdentifier: "com.apple.mobiletimer-framework",
@@ -2117,7 +2122,7 @@ func adjustDate(operation string, unit string, args []actionArgument) (adjustDat
 	return
 }
 
-func magnitudeValue(unit string, args []actionArgument, index int) map[string]any {
+func magnitudeValue(unit any, args []actionArgument, index int) map[string]any {
 	var magnitudeValue = argumentValue(args, index)
 	if reflect.TypeOf(magnitudeValue).String() == "[]map[string]any" {
 		var value = magnitudeValue.([]map[string]any)
