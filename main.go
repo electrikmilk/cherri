@@ -213,7 +213,7 @@ func lineReport(label string) {
 	if idx != 0 {
 		fmt.Println("Previous Character:")
 		var prevChar = prev(1)
-		if eol.IsEOL(prevChar) {
+		if !eol.IsEOL(prevChar) {
 			printChar(prevChar, lineIdx, lineCharIdx-1)
 		} else {
 			printChar(prevChar, lineIdx-1, len(lines[lineIdx-1]))
@@ -227,7 +227,7 @@ func lineReport(label string) {
 	if len(contents) > idx+1 {
 		fmt.Println("Next Character:")
 		var nextChar = next(1)
-		if eol.IsEOL(nextChar) {
+		if !eol.IsEOL(nextChar) {
 			printChar(nextChar, lineIdx, lineCharIdx+1)
 		} else {
 			printChar(nextChar, lineIdx+1, 0)
