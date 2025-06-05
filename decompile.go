@@ -1046,11 +1046,11 @@ func decompAction(action *ShortcutAction) {
 		actionCallCode.WriteString(makeRawAction(action))
 	}
 
-	if matchedAction.mac && !macDefinition {
+	if (matchedAction.macOnly || matchedAction.nonMacOnly) && !macDefinition {
 		var saveCode = code.String()
+		macDefinition = matchedAction.macOnly && !matchedAction.nonMacOnly
 		code.Reset()
-		code.WriteString(fmt.Sprintf("#define mac true\n%s", saveCode))
-		macDefinition = true
+		code.WriteString(fmt.Sprintf("#define mac %v\n%s", macDefinition, saveCode))
 	}
 
 	var isConstant, isVariableValue = checkOutputType(action)

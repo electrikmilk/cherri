@@ -73,7 +73,7 @@ var createShortcutiCloudLink = appIntent{
 // actions is the data structure that determines every action the compiler knows about.
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
-	"returnToHomescreen": {mac: false},
+	"returnToHomescreen": {nonMacOnly: true},
 	"addSeconds": {
 		identifier:    "adjustdate",
 		defaultAction: true,
@@ -1026,7 +1026,7 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
-		mac:        true,
+		macOnly:    true,
 		minVersion: 15,
 	},
 	"seek": {
@@ -1731,7 +1731,7 @@ var actions = map[string]*actionDefinition{
 				}
 			}
 		},
-		mac: true,
+		macOnly: true,
 	},
 	"convertMeasurement": {
 		identifier: "measurement.convert",

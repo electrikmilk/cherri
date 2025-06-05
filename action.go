@@ -81,7 +81,8 @@ type actionDefinition struct {
 	appIntent          appIntent
 	outputType         tokenType
 	defaultAction      bool // Default action for this identifier during decompilation.
-	mac                bool
+	macOnly            bool
+	nonMacOnly         bool
 	minVersion         float64
 	maxVersion         float64
 	setKey             string
@@ -279,11 +280,11 @@ func checkAction() {
 		}
 	}
 	if isMac, found := definitions["mac"]; found {
-		if !isMac.(bool) && currentAction.mac {
+		if !isMac.(bool) && currentAction.macOnly {
 			parserError(
 				fmt.Sprintf("macOS action '%s()' in non-macOS Shortcut.", currentActionIdentifier),
 			)
-		} else if isMac.(bool) && !currentAction.mac {
+		} else if isMac.(bool) && currentAction.nonMacOnly {
 			parserError(
 				fmt.Sprintf("Non-macOS action '%s()' in macOS-only Shortcut.", currentActionIdentifier),
 			)
@@ -567,8 +568,10 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 	if currentAction.defaultAction {
 		definition.WriteString(ansi("default ", yellow))
 	}
-	if currentAction.mac {
+	if currentAction.macOnly {
 		definition.WriteString(ansi("mac ", orange))
+	} else if currentAction.nonMacOnly {
+		definition.WriteString(ansi("!mac ", orange))
 	}
 	if currentAction.minVersion != 0 {
 		definition.WriteString(ansi(fmt.Sprintf("v%1.f> ", currentAction.minVersion), cyan))
@@ -752,11 +755,12 @@ func collectDefinedAction() {
 	}
 
 	var macOnlyAction bool
+	var nonMacOnlyAction bool
 	if tokenAhead(Mac) {
 		macOnlyAction = true
 		advance()
 	} else if tokenAhead(NonMac) {
-		macOnlyAction = false
+		nonMacOnlyAction = true
 		advance()
 	}
 
@@ -802,7 +806,8 @@ func collectDefinedAction() {
 		outputType:         outputType,
 		addParams:          addParams,
 		defaultAction:      defaultAction,
-		mac:                macOnlyAction,
+		macOnly:            macOnlyAction,
+		nonMacOnly:         nonMacOnlyAction,
 		minVersion:         minVersion,
 		maxVersion:         maxVersion,
 		doc:                doc,
