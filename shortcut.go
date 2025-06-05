@@ -109,14 +109,6 @@ type WFMeasurementUnit struct {
 
 var uuids map[string]string
 
-type dataType string
-
-const Text dataType = "string"
-const Number dataType = "integer"
-const Dictionary dataType = "dictionary"
-const Array dataType = "array"
-const Boolean dataType = "boolean"
-
 type dictDataType int
 
 const itemTypeText dictDataType = 0
