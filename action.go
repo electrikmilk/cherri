@@ -102,16 +102,17 @@ type libraryDefinition struct {
 }
 
 var enumerations = map[string][]string{
-	"measurementUnitType":          {"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"},
-	"storageUnit":                  {"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"},
-	"inputType":                    {"Text", "Number", "URL", "Date", "Time", "Date and Time"},
-	"appSplitRatio":                {"half", "thirdByTwo"},
-	"httpMethod":                   {"POST", "PUT", "PATCH", "DELETE"},
-	"sortOrder":                    {"asc", "desc"},
-	"windowSorting":                {"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"},
-	"timerDurations":                {"hr", "min", "sec"},
-	"fileLabel":                    {"red", "orange", "yellow", "green", "blue", "purple", "gray"},
+	"measurementUnitType":           {"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"},
+	"storageUnit":                   {"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"},
+	"inputType":                     {"Text", "Number", "URL", "Date", "Time", "Date and Time"},
+	"appSplitRatio":                 {"half", "thirdByTwo"},
+	"httpMethod":                    {"POST", "PUT", "PATCH", "DELETE"},
+	"sortOrder":                     {"asc", "desc"},
+	"windowSorting":                 {"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"},
+	"timerDuration":                 {"hr", "min", "sec"},
+	"fileLabel":                     {"red", "orange", "yellow", "green", "blue", "purple", "gray"},
 	"filesSortBy":                   {"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"},
+	"fileOrderings":                 {"Smallest First", "Biggest First", "Latest First", "Oldest First", "A to Z", "Z to A"},
 	"seekBehavior":                  {"To Time", "Forward By", "Backward By"},
 	"Acceleration":                  {"m/s²", "g-force"},
 	"Angle":                         {"degrees", "arcminutes", "arcseconds", "radians", "grad", "revolutions"},
@@ -338,7 +339,10 @@ func checkEnum(param *parameterDefinition, argument *actionArgument) {
 	if value == nil || reflect.TypeOf(value).Kind() != reflect.String || argument.valueType == Question {
 		return
 	}
-	if !slices.Contains(getEnum(param.enum), value.(string)) {
+	if enumerations[param.enum] == nil {
+		parserError(fmt.Sprintf("Undefined enum '%s'", param.enum))
+	}
+	if !slices.Contains(enumerations[param.enum], value.(string)) {
 		parserError(
 			fmt.Sprintf(
 				"Invalid argument '%s' for %s.\n\n%s",

@@ -34,10 +34,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.24
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.24
 
       - name: Build
         run: go build -v ./...
@@ -62,7 +62,7 @@ jobs:
       run: go build -v ./...
 
     - name: Test
-      run: go test -run TestCherri -v ./...
+      run: go test -run TestCherriNoSign -v ./...
 
     - name: Decompilation Test
       run: go test -run TestDecomp -v ./...

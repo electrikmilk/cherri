@@ -7,7 +7,6 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
-	"maps"
 	"os"
 	"reflect"
 	"regexp"
@@ -393,6 +392,11 @@ var actions = map[string]*actionDefinition{
 				enum:         "timerDuration",
 			},
 		},
+		addParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFDuration": magnitudeValue(argumentValue(args, 1), args, 0),
+			}
+		},
 	},
 	"createAlarm": {
 		appIdentifier: "com.apple.mobiletimer-framework",
@@ -741,9 +745,11 @@ var actions = map[string]*actionDefinition{
 				optional:  true,
 			},
 			{
-				name: "orderBy",
-				enum: "fileOrderings",
-				key:  "WFContentItemSortOrder",
+				name:      "orderBy",
+				validType: String,
+				key:       "WFContentItemSortOrder",
+				enum:      "fileOrderings",
+				optional:  true,
 			},
 		},
 		addParams: func(args []actionArgument) (params map[string]any) {
@@ -2104,19 +2110,19 @@ func adjustDate(operation string, unit string, args []actionArgument) (adjustDat
 		return map[string]any{}
 	}
 
-	maps.Copy(adjustDateParams, map[string]any{
+	adjustDateParams = map[string]any{
 		"WFAdjustOperation": operation,
-	})
+	}
 	if unit == "" {
 		return adjustDateParams
 	}
 
-	maps.Copy(adjustDateParams, magnitudeValue(unit, args, 1))
+	adjustDateParams["WFDuration"] = magnitudeValue(unit, args, 1)
 
 	return
 }
 
-func magnitudeValue(unit string, args []actionArgument, index int) map[string]any {
+func magnitudeValue(unit any, args []actionArgument, index int) map[string]any {
 	var magnitudeValue = argumentValue(args, index)
 	if reflect.TypeOf(magnitudeValue).String() == "[]map[string]any" {
 		var value = magnitudeValue.([]map[string]any)
@@ -2124,13 +2130,11 @@ func magnitudeValue(unit string, args []actionArgument, index int) map[string]an
 	}
 
 	return map[string]any{
-		"WFDuration": map[string]any{
-			"Value": map[string]any{
-				"Unit":      unit,
-				"Magnitude": magnitudeValue,
-			},
-			"WFSerializationType": "WFQuantityFieldValue",
+		"Value": map[string]any{
+			"Unit":      unit,
+			"Magnitude": magnitudeValue,
 		},
+		"WFSerializationType": "WFQuantityFieldValue",
 	}
 }
 
