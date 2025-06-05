@@ -571,11 +571,10 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 		definition.WriteString(ansi("mac ", orange))
 	}
 	if currentAction.minVersion != 0 {
-		definition.WriteString(ansi(fmt.Sprintf("v%1.f>", currentAction.minVersion), underline))
-		definition.WriteRune(' ')
+		definition.WriteString(ansi(fmt.Sprintf("v%1.f> ", currentAction.minVersion), cyan))
 	}
 	if currentAction.maxVersion != 0 {
-		definition.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.maxVersion), red, bold))
+		definition.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.maxVersion), red, underline))
 		definition.WriteRune(' ')
 	}
 
