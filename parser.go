@@ -31,6 +31,7 @@ var groupingTypes map[int]tokenType
 var groupingIdx int
 
 var preParsing bool
+var isFirstCommentAction = true
 
 // resetParse will take the current lines and merge them together to create new contents,
 // then reset the chars and lines, then reset the parser cursor position.
@@ -452,6 +453,24 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		coerce:       coerce,
 		getAs:        getAs,
 		prompt:       prompt,
+	}
+}
+
+// insertReference adds a variable type parser token and adds the variable to the variables map.
+// Does the equivalent of when we parse a variable from a file, but with the provided identifier, type, value, and if the variable is a constant.
+func insertReference(identifier string, valueType tokenType, value any, constant bool) {
+	tokens = append(tokens, token{
+		typeof:    Variable,
+		ident:     identifier,
+		valueType: valueType,
+		value:     value,
+	})
+
+	variables[identifier] = varValue{
+		variableType: "Variable",
+		valueType:    Variable,
+		value:        value,
+		constant:     constant,
 	}
 }
 
