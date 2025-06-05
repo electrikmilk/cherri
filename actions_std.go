@@ -7,7 +7,6 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
-	"maps"
 	"os"
 	"reflect"
 	"regexp"
@@ -2106,14 +2105,14 @@ func adjustDate(operation string, unit string, args []actionArgument) (adjustDat
 		return map[string]any{}
 	}
 
-	maps.Copy(adjustDateParams, map[string]any{
+	adjustDateParams = map[string]any{
 		"WFAdjustOperation": operation,
-	})
+	}
 	if unit == "" {
 		return adjustDateParams
 	}
 
-	maps.Copy(adjustDateParams, magnitudeValue(unit, args, 1))
+	adjustDateParams["WFDuration"] = magnitudeValue(unit, args, 1)
 
 	return
 }
@@ -2126,13 +2125,11 @@ func magnitudeValue(unit string, args []actionArgument, index int) map[string]an
 	}
 
 	return map[string]any{
-		"WFDuration": map[string]any{
-			"Value": map[string]any{
-				"Unit":      unit,
-				"Magnitude": magnitudeValue,
-			},
-			"WFSerializationType": "WFQuantityFieldValue",
+		"Value": map[string]any{
+			"Unit":      unit,
+			"Magnitude": magnitudeValue,
 		},
+		"WFSerializationType": "WFQuantityFieldValue",
 	}
 }
 
