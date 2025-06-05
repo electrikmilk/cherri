@@ -187,7 +187,7 @@ func printParsingDebug() {
 
 func parse() {
 	switch {
-	case char == ' ' || char == '\t' || char == '\n':
+	case isWhitespace():
 		advance()
 	case tokenAhead(Question):
 		collectQuestion()
@@ -267,6 +267,9 @@ func collectUntilIgnoreStrings(ch rune) string {
 func collectUntil(ch rune) string {
 	var collected strings.Builder
 	for char != ch && char != -1 {
+		if ch == '\n' && isEOL() {
+			break
+		}
 		collected.WriteRune(char)
 		advance()
 	}
@@ -281,6 +284,9 @@ func lookAheadUntil(until rune) string {
 	var nextChar rune
 	for nextChar != until {
 		if len(chars) <= nextIdx {
+			break
+		}
+		if until == '\n' && isEOL() {
 			break
 		}
 
@@ -1496,7 +1502,7 @@ func collectAction(identifier *string) (value action) {
 
 // advance advances the character cursor.
 func advance() {
-	if char == '\n' {
+	if isEOL() {
 		lineCharIdx = 0
 		lineIdx++
 	} else {
@@ -1521,6 +1527,9 @@ func advanceTimes(times int) {
 // advanceUntil advances the character cursor until we reach `ch`.
 func advanceUntil(ch rune) {
 	for char != ch && char != -1 {
+		if ch == '\n' && isEOL() {
+			break
+		}
 		advance()
 	}
 }

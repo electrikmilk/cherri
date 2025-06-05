@@ -72,6 +72,8 @@ func printChar(ch rune, chLineIdx int, chLineCharIdx int) {
 		currentChar = "TAB"
 	case '\n':
 		currentChar = "LF"
+	case '\r':
+		currentChar = "CR"
 	case -1:
 		currentChar = "EMPTY"
 	default:
