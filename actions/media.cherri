@@ -252,6 +252,8 @@ enum colorSpace {
 
 #define action 'addtoplaylist' addToMusic(variable songs: 'WFInput')
 
+#define action 'exportsong' selectMusic(bool ?selectMultiple: 'WFExportSongActionSelectMultiple' = false)
+
 enum playMusicShuffles {
 	'Off',
 	'Songs',
