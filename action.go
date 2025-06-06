@@ -630,8 +630,9 @@ func generateActionParamEnums(focus parameterDefinition) string {
 		definition.WriteString(ansi("enum ", orange))
 		definition.WriteString(param.enum)
 		definition.WriteString(ansi(" {\n", dim))
-		for i, enum := range getEnum(param.enum) {
-			var enumSize = len(param.enum)
+		var enumerations = getEnum(param.enum)
+		var enumSize = len(enumerations)
+		for i, enum := range enumerations {
 			definition.WriteString(ansi(fmt.Sprintf("\t'%s'", enum), orange))
 			if i < enumSize+1 {
 				definition.WriteString(",\n")
