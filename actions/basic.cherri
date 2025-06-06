@@ -65,7 +65,7 @@ enum language {
 
 #define action 'gettext' text(text text: 'WFTextActionText'): text
 
-#define action number(variable number: 'WFNumberActionNumber'): number
+#define action number(number number: 'WFNumberActionNumber'): number
 
 // [Doc]: Open Homescreen: Open the SpringBoard, which triggers navigating to the homescreen.
 #define action !mac 'openapp' springBoard() {
