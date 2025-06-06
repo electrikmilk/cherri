@@ -98,7 +98,7 @@ enum countType {
 	"WFAlertActionCancelButtonShown": false
 }
 
-#define action 'alert' confirm(text alert: 'WFAlertActionMessage', text ?title: 'WFAlertActionTitle') {
+#define action default 'alert' confirm(text alert: 'WFAlertActionMessage', text ?title: 'WFAlertActionTitle') {
 	"WFAlertActionCancelButtonShown": true
 }
 
