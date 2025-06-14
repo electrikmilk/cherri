@@ -1956,12 +1956,13 @@ func handleRawParams(params map[string]interface{}) {
 }
 
 var defaultActionIncludes = []string{
-	"basic",
 	"calendar",
 	"contacts",
 	"documents",
 	"device",
+	"dropbox",
 	"location",
+	"mac",
 	"math",
 	"media",
 	"scripting",
@@ -1971,13 +1972,32 @@ var defaultActionIncludes = []string{
 	"web",
 }
 
+var includedStandardActions bool
+var includedBasicStandardActions bool
+
 func loadStandardActions() {
 	includeStandardActions()
+	includeBasicStandardActions()
+	handleIncludes()
+	handleActionDefinitions()
+	resetParse()
+	firstChar()
+}
+
+func loadBasicStandardActions() {
+	includeBasicStandardActions()
 	handleIncludes()
 	handleActionDefinitions()
 }
 
-var includedStandardActions bool
+func includeBasicStandardActions() {
+	if includedBasicStandardActions {
+		return
+	}
+	lines = append([]string{"#include 'actions/basic'\n"}, lines...)
+	resetParse()
+	includedBasicStandardActions = true
+}
 
 func includeStandardActions() {
 	if includedStandardActions {
@@ -1989,7 +2009,50 @@ func includeStandardActions() {
 	}
 	lines = append(actionIncludes, lines...)
 	resetParse()
-	includedStandardActions = true
+}
+
+func checkMissingStandardInclude(identifier *string, parsing bool) {
+	for _, actionInclude := range defaultActionIncludes {
+		lines = append([]string{fmt.Sprintf("#include 'actions/%s'\n", actionInclude)}, lines...)
+		resetParse()
+		handleIncludes()
+		handleActionDefinitions()
+
+		if !parsing {
+			mapSplitActions()
+		}
+
+		var name string
+		if actions[*identifier] == nil {
+			var actionName, found = findActionByIdentifier(identifier)
+			if !found {
+				continue
+			}
+			name = actionName
+		} else {
+			name = *identifier
+		}
+
+		var includeStatement = fmt.Sprintf("#include 'actions/%s'", actionInclude)
+		if parsing {
+			parserError(fmt.Sprintf("Action '%s()' requires include:\n\n%s", name, includeStatement))
+		} else {
+			popLine(includeStatement)
+			break
+		}
+	}
+	return
+}
+
+func findActionByIdentifier(identifier *string) (name string, found bool) {
+	for actionName, action := range actions {
+		currentAction = *action
+		var actionIdentifier = getFullActionIdentifier()
+		if *identifier == actionIdentifier {
+			return actionName, true
+		}
+	}
+	return "", false
 }
 
 type contentKit string
