@@ -1940,7 +1940,7 @@ func defineRawAction() {
 	}
 }
 
-func handleRawParams(params map[string]interface{}) {
+func handleRawParams(params map[string]any) {
 	for key, value := range params {
 		if reflect.TypeOf(value).Kind() != reflect.String || !strings.ContainsAny(value.(string), "{}") {
 			continue
