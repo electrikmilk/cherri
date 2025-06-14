@@ -21,33 +21,6 @@ const AppendVariableIdentifier = "is.workflow.actions.appendvariable"
 
 var weekdays = []string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
 
-var httpParams = []parameterDefinition{
-	{
-		name:      "url",
-		key:       "WFURL",
-		validType: String,
-	},
-	{
-		name:      "method",
-		key:       "WFHTTPMethod",
-		validType: String,
-		optional:  true,
-		enum:      "httpMethod",
-	},
-	{
-		name:      "body",
-		validType: Dict,
-		optional:  true,
-		literal:   true,
-	},
-	{
-		name:      "headers",
-		key:       "WFHTTPHeaders",
-		validType: Dict,
-		optional:  true,
-		literal:   true,
-	},
-}
 var fileLabelsMap = map[string]int{
 	"red":    6,
 	"orange": 7,
@@ -1640,36 +1613,6 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
-	"formRequest": {
-		identifier: "downloadurl",
-		parameters: httpParams,
-		decomp: func(action *ShortcutAction) (arguments []string) {
-			return decompHTTPAction("WFFormValues", action)
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return httpRequest("Form", "WFFormValues", args)
-		},
-	},
-	"jsonRequest": {
-		identifier: "downloadurl",
-		parameters: httpParams,
-		decomp: func(action *ShortcutAction) (arguments []string) {
-			return decompHTTPAction("WFJSONValues", action)
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return httpRequest("JSON", "WFJSONValues", args)
-		},
-	},
-	"fileRequest": {
-		identifier: "downloadurl",
-		parameters: httpParams,
-		decomp: func(action *ShortcutAction) (arguments []string) {
-			return decompHTTPAction("WFRequestVariable", action)
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return httpRequest("File", "WFRequestVariable", args)
-		},
-	},
 	"getWindows": {
 		identifier: "filter.windows",
 		parameters: []parameterDefinition{
@@ -2254,16 +2197,6 @@ func replaceAppIDs(args []actionArgument, _ *actionDefinition) {
 	}
 }
 
-func httpRequest(bodyType string, valuesKey string, args []actionArgument) map[string]any {
-	var params = map[string]any{"WFHTTPBodyType": bodyType}
-
-	if len(args) > 0 {
-		params[valuesKey] = argumentValue(args, 2)
-	}
-
-	return params
-}
-
 func decompAppAction(key string, action *ShortcutAction) (arguments []string) {
 	if action.WFWorkflowActionParameters[key] != nil {
 		switch reflect.TypeOf(action.WFWorkflowActionParameters[key]).Kind() {
@@ -2297,23 +2230,6 @@ func decompInfiniteURLAction(action *ShortcutAction) (arguments []string) {
 	var urls = action.WFWorkflowActionParameters["WFURLActionURL"].([]interface{})
 	for _, url := range urls {
 		arguments = append(arguments, decompValue(url))
-	}
-
-	return
-}
-
-func decompHTTPAction(key string, action *ShortcutAction) (arguments []string) {
-	if action.WFWorkflowActionParameters["WFURL"] != nil {
-		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFURL"]))
-	}
-	if action.WFWorkflowActionParameters["WFHTTPMethod"] != nil {
-		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFHTTPMethod"]))
-	}
-	if action.WFWorkflowActionParameters[key] != nil {
-		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters[key]))
-	}
-	if action.WFWorkflowActionParameters["WFHTTPHeaders"] != nil {
-		arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFHTTPHeaders"]))
 	}
 
 	return

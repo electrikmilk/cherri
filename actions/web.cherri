@@ -110,8 +110,45 @@ enum IPTypes {
 
 /* HTTP */
 
+enum HTTPMethod {
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE'
+}
+
 #define action default downloadURL(text url: 'WFURL', dictionary! ?headers: 'WFHTTPHeaders') {
 	"WFHTTPMethod": "GET"
+}
+
+// [Doc]: Form Request: Send a `method` request to `url` with `body` and optional `headers.
+#define action formRequest(
+    text url: 'WFURL',
+    HTTPMethod ?method: 'WFHTTPMethod',
+    dictionary! ?body: 'WFFormValues',
+    dictionary! ?headers: 'WFHTTPHeaders',
+) {
+    "WFHTTPBodyType": "Form"
+}
+
+// [Doc]: JSON Request: Send a `method` JSON request to `url` with `body` and optional `headers.
+#define action jsonRequest(
+    text url: 'WFURL',
+    HTTPMethod ?method: 'WFHTTPMethod',
+    dictionary! ?body: 'WFJSONValues',
+    dictionary! ?headers: 'WFHTTPHeaders',
+) {
+    "WFHTTPBodyType": "JSON"
+}
+
+// [Doc]: File Request: Send a `method` file request to `url` with `body` and optional `headers.
+#define action fileRequest(
+    text url: 'WFURL',
+    HTTPMethod ?method: 'WFHTTPMethod',
+    dictionary! ?body: 'WFRequestVariable',
+    dictionary! ?headers: 'WFHTTPHeaders',
+) {
+    "WFHTTPBodyType": "File"
 }
 
 #define action 'getwebpagecontents' getWebpageContents(text url: 'WFInput')

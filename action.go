@@ -107,7 +107,6 @@ var enumerations = map[string][]string{
 	"storageUnit":                   {"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"},
 	"inputType":                     {"Text", "Number", "URL", "Date", "Time", "Date and Time"},
 	"appSplitRatio":                 {"half", "thirdByTwo"},
-	"httpMethod":                    {"POST", "PUT", "PATCH", "DELETE"},
 	"sortOrder":                     {"asc", "desc"},
 	"windowSorting":                 {"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"},
 	"timerDuration":                 {"hr", "min", "sec"},
