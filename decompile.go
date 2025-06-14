@@ -1308,7 +1308,7 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 	}
 
 	sort.SliceStable(matches, func(i, j int) bool {
-		return matches[i].params > matches[j].params || matches[i].values > matches[j].values
+		return matches[i].values > matches[j].values
 	})
 
 	if args.Using("debug") {
@@ -1334,13 +1334,14 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 
 // competingMatches determines if the matches for this identifier have more values than 1 matching this action.
 func competingMatches(matches []actionMatch) bool {
+	var matchedValues int
 	for _, match := range matches {
-		if match.params > 0 || match.values > 0 {
-			return true
+		if match.values > 0 {
+			matchedValues++
 		}
 	}
 
-	return false
+	return matchedValues > 0
 }
 
 func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
@@ -1348,12 +1349,19 @@ func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefi
 	matchedParams += paramMatches
 	matchedValues += valueMatches
 
+	var splitActionAddParams []parameterDefinition
 	if splitAction.definition.addParams != nil {
-		var addParams = splitAction.definition.addParams([]actionArgument{})
-		var addParamMatches, addValueMatches = scoreActionAddParams(&addParams, parameters)
-		matchedParams += addParamMatches
-		matchedValues += addValueMatches
+		for key, value := range splitAction.definition.addParams([]actionArgument{}) {
+			splitActionAddParams = append(splitActionAddParams, parameterDefinition{
+				key:          key,
+				defaultValue: value,
+			})
+		}
 	}
+
+	var addParamMatches, addValueMatches = scoreActionAddParams(&splitActionAddParams, parameters)
+	matchedParams += addParamMatches
+	matchedValues += addValueMatches
 
 	return
 }
@@ -1380,14 +1388,21 @@ func scoreActionParams(splitActionParams *[]parameterDefinition, parameters map[
 	return
 }
 
-func scoreActionAddParams(addParams *map[string]any, parameters map[string]any) (matchedParams uint, matchedValues uint) {
-	for key, value := range *addParams {
-		if key == "" {
+func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
+	for _, param := range *splitActionAddParams {
+		if param.key == "" {
 			continue
 		}
-		if parameters[key] != nil {
+		if value, found := parameters[param.key]; found {
 			matchedParams++
-			if value == parameters[key] {
+
+			var defaultValueType = reflect.TypeOf(param.defaultValue).Kind()
+			var valueType = reflect.TypeOf(value).Kind()
+			if defaultValueType == reflect.Map && valueType == reflect.Map {
+				if maps.Equal(param.defaultValue.(map[string]interface{}), value.(map[string]interface{})) {
+					matchedValues++
+				}
+			} else if param.defaultValue == value {
 				matchedValues++
 			}
 		}
