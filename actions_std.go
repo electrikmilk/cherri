@@ -2035,7 +2035,7 @@ func checkMissingStandardInclude(identifier *string, parsing bool) {
 
 		var includeStatement = fmt.Sprintf("#include 'actions/%s'", actionInclude)
 		if parsing {
-			parserError(fmt.Sprintf("Action '%s()' requires include:\n\n%s", name, includeStatement))
+			exit(fmt.Sprintf("Action '%s()' requires include:\n\n%s", name, includeStatement))
 		} else {
 			popLine(includeStatement)
 			break
