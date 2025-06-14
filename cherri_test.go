@@ -26,7 +26,7 @@ func TestCherri(_ *testing.T) {
 	}
 	loadStandardActions()
 	for _, file := range files {
-		if !strings.Contains(file.Name(), ".cherri") || file.Name() == "decomp_expected.cherri" {
+		if !strings.Contains(file.Name(), ".cherri") || file.Name() == "decomp_expected.cherri" || file.Name() == "decomp_me.cherri" {
 			continue
 		}
 		currentTest = fmt.Sprintf("tests/%s", file.Name())
