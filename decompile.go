@@ -378,7 +378,7 @@ func decompileActions() {
 		case "is.workflow.actions.getvalueforkey":
 			var dictionaryKey = action.WFWorkflowActionParameters["WFDictionaryKey"]
 			if dictionaryKey != nil && action.WFWorkflowActionParameters[UUID] != nil &&
-				!slices.Contains(constUUIDs, action.WFWorkflowActionParameters[UUID].(string)) {
+				slices.Contains(constUUIDs, action.WFWorkflowActionParameters[UUID].(string)) {
 				decompDictionaryGetValue(&action)
 				continue
 			}
@@ -549,10 +549,13 @@ func collectControlFlowUUID(action *ShortcutAction) {
 
 func decompDictionaryGetValue(action *ShortcutAction) {
 	var dictionaryValueRef strings.Builder
+	// Without this change, the code may return const DictionaryValue = ContentsOfURL['url']
+	// However, Type variable values cannot be constants.
+	dictionaryValueRef.WriteString("getValue(")
 	dictionaryValueRef.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
 
 	if action.WFWorkflowActionParameters["WFDictionaryKey"] != nil {
-		dictionaryValueRef.WriteRune('[')
+		dictionaryValueRef.WriteString(", ")
 		if reflect.TypeOf(action.WFWorkflowActionParameters["WFDictionaryKey"]).Kind() == reflect.String {
 			dictionaryValueRef.WriteRune('\'')
 			dictionaryValueRef.WriteString(action.WFWorkflowActionParameters["WFDictionaryKey"].(string))
@@ -560,7 +563,7 @@ func decompDictionaryGetValue(action *ShortcutAction) {
 		} else {
 			dictionaryValueRef.WriteString(decompValue(action.WFWorkflowActionParameters["WFDictionaryKey"]))
 		}
-		dictionaryValueRef.WriteRune(']')
+		dictionaryValueRef.WriteRune(')')
 		currentVariableValue = dictionaryValueRef.String()
 		checkConstantLiteral(action)
 	}
