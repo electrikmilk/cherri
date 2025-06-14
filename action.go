@@ -792,8 +792,8 @@ func collectDefinedAction() {
 	if char == '{' {
 		advance()
 		var dict = collectDictionary()
+		handleRawParams(dict.(map[string]interface{}))
 		addParams = func(args []actionArgument) map[string]any {
-			handleRawParams(dict.(map[string]interface{}))
 			return dict.(map[string]any)
 		}
 	}
