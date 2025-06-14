@@ -1318,10 +1318,13 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 			fmt.Println("params:", match.params, " values:", match.values)
 			fmt.Println("---")
 		}
-		fmt.Print("\n\n")
+		fmt.Print("\n")
 	}
 
 	if !competingMatches(matches) {
+		if args.Using("debug") {
+			fmt.Println("matches are not competing! using default")
+		}
 		return
 	}
 
