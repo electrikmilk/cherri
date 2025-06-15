@@ -53,6 +53,7 @@ func parseIncludes() {
 		switch {
 		case isChar('/'):
 			collectComment()
+			continue
 		case tokenAhead(Include):
 			advance()
 			parseInclude()
