@@ -1309,7 +1309,7 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 	}
 
 	sort.SliceStable(matches, func(i, j int) bool {
-		return matches[i].values > matches[j].values
+		return matches[i].params > matches[j].params || matches[i].values > matches[j].values
 	})
 
 	if args.Using("debug") {
@@ -1335,14 +1335,12 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 
 // competingMatches determines if the matches for this identifier have more values than 1 matching this action.
 func competingMatches(matches []actionMatch) bool {
-	var matchedValues int
 	for _, match := range matches {
-		if match.values > 0 {
-			matchedValues++
+		if match.params > 1 || match.values > 0 {
+			return true
 		}
 	}
-
-	return matchedValues > 0
+	return false
 }
 
 func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
