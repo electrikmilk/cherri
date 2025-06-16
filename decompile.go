@@ -1335,8 +1335,18 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 
 // competingMatches determines if the matches for this identifier have more values than 1 matching this action.
 func competingMatches(matches []actionMatch) bool {
+	var hasCompetingValues bool
 	for _, match := range matches {
-		if match.params > 1 || match.values > 0 {
+		if match.values > 1 {
+			hasCompetingValues = true
+			break
+		}
+	}
+	if hasCompetingValues {
+		return true
+	}
+	for _, match := range matches {
+		if match.params > 1 {
 			return true
 		}
 	}
