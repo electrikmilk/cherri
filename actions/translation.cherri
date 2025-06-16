@@ -2,14 +2,10 @@
 Translation Actions
 */
 
-#define action default 'text.translate' translate(text text: 'WFInputText', language ?to: 'WFSelectedLanguage'): text {
-	"WFSelectedFromLanguage": "Detect Language"
-}
-
-#define action 'text.translate' translateFrom(
+#define action 'text.translate' translate(
     text text: 'WFInputText',
-    language from: 'WFSelectedFromLanguage',
-    language to: 'WFSelectedLanguage'
+    language to: 'WFSelectedLanguage',
+    language ?from: 'WFSelectedFromLanguage' = "Detected language",
 ): text
 
 #define action detectLanguage(text input: 'WFInput'): text
