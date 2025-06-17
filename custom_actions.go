@@ -59,6 +59,7 @@ func parseCustomActions() {
 		switch {
 		case isChar('/'):
 			collectComment()
+			continue
 		case lineCharIdx == 0 && tokenAhead(Action):
 			advance()
 			collectCustomActionDefinition()
