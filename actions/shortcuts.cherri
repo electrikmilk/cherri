@@ -20,3 +20,6 @@ enum shortcutDetail {
 #define action v16.4 'com.apple.shortcuts.SearchShortcutsAction' searchShortcuts(text query: 'searchPhrase')
 
 #define action v16.4 'com.apple.shortcuts.CreateWorkflowAction' makeShortcut(text name, bool ?open: 'OpenWhenRun' = true)
+
+// [Doc]: Run Shortcut: Run Shortcut with name shortcutName, providing it with output.
+#define action 'runworkflow' run(text shortcutName: 'WFWorkflowName', variable output: 'WFInput')
