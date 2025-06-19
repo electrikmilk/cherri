@@ -24,12 +24,7 @@ var backoff = 10
 // sign runs the shortcuts sign command on the unsigned shortcut file.
 func sign() {
 	if !darwin {
-		fmt.Println(ansi("Warning:", bold, yellow), "macOS is required to sign shortcuts. The compiled Shortcut will not run on iOS 15+ or macOS 12+.")
-
-		if !args.Using("no-ansi") {
-			fmt.Print("\n")
-			fmt.Println("You can use the", ansi("--hubsign", cyan), " argument to use RoutineHub's remote service to sign the compiled Shortcut.")
-		}
+		useHubSign()
 		return
 	}
 
@@ -59,9 +54,13 @@ func sign() {
 
 		fmt.Printf("%s\n%s\n", ansi("Failed to sign Shortcut using macOS :(", orange, bold), ansi(stdErr.String(), orange))
 
-		var hubSignService = hubSign()
-		useSigningService(&hubSignService)
+		useHubSign()
 	}
+}
+
+func useHubSign() {
+	var hubSignService = hubSign()
+	useSigningService(&hubSignService)
 }
 
 type SigningService struct {
