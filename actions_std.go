@@ -1478,48 +1478,6 @@ var actions = map[string]*actionDefinition{
 			return
 		},
 	},
-	"run": {
-		identifier:    "runworkflow",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "shortcutName",
-				validType: String,
-			},
-			{
-				name:      "output",
-				validType: Variable,
-				key:       "WFInput",
-				optional:  true,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			if len(args) == 0 {
-				return map[string]any{
-					"isSelf": false,
-				}
-			}
-
-			return map[string]any{
-				"WFWorkflow": map[string]any{
-					"workflowIdentifier": uuid.New().String(),
-					"isSelf":             false,
-					"workflowName":       argumentValue(args, 0),
-				},
-			}
-		},
-		decomp: func(action *ShortcutAction) (arguments []string) {
-			var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]any)
-			if workflow["isSelf"] != nil && !workflow["isSelf"].(bool) {
-				arguments = append(arguments, decompValue(workflow["workflowName"]))
-			}
-			if action.WFWorkflowActionParameters["WFInput"] != nil {
-				arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFInput"]))
-			}
-
-			return
-		},
-	},
 	"list": {
 		parameters: []parameterDefinition{
 			{
