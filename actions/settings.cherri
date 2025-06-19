@@ -2,16 +2,6 @@
 Device settings actions.
 */
 
-/* Wallpaper */
-
-#define action 'wallpaper.set' setWallpaper(variable input: 'WFInput')
-
-#define action default !mac v16.2 'posters.get' getAllWallpapers(): array
-
-#define action !mac v16.2 'posters.get' getWallpaper() {
-	"WFPosterType": "Current"
-}
-
 #define action setBrightness(float brightness: 'WFBrightness')
 
 #define action setVolume(float volume: 'WFVolume')
@@ -41,6 +31,8 @@ Device settings actions.
 	"operation": "set",
 	"style": "dark"
 }
+
+/* Accessibility */
 
 enum backgroundSound {
 	'BalancedNoise',
@@ -80,17 +72,12 @@ enum soundRecognitionOperations {
 
 #define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent' setSoundRecognition(soundRecognitionOperations ?operation = "activate")
 
-enum deviceDetail {
-	'Device Name',
-	'Device Hostname',
-	'Device Model',
-	'Device Is Watch',
-	'System Version',
-	'Screen Width',
-	'Screen Height',
-	'Current Volume',
-	'Current Brightness',
-	'Current Appearance',
-}
+/* Wallpaper */
 
-#define action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail')
+#define action 'wallpaper.set' setWallpaper(variable input: 'WFInput')
+
+#define action default !mac v16.2 'posters.get' getAllWallpapers(): array
+
+#define action !mac v16.2 'posters.get' getWallpaper() {
+	"WFPosterType": "Current"
+}
