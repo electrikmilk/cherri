@@ -1806,7 +1806,8 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"base64File": {
+	"embedFile": {
+		doc:        selfDoc{title: "Base 64 Embed File", description: "Embed file at path as base 64 text."},
 		identifier: "gettext",
 		parameters: []parameterDefinition{
 			{
