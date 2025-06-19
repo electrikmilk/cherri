@@ -117,7 +117,6 @@ enum countType {
 
 #define action 'number.random' randomNumber(number min: 'WFRandomNumberMinimum', number max: 'WFRandomNumberMaximum'): number
 
-
 /* Passwords */
 
 #define action 'openpasswords' searchPasswords(text query: 'WFShowPasswordsSearchTerm')
@@ -125,11 +124,3 @@ enum countType {
 /* System */
 
 #define action dismissSiri()
-
-#define action 'wallpaper.set' setWallpaper(variable input: 'WFInput')
-
-#define action default !mac v16.2 'posters.get' getAllWallpapers(): array
-
-#define action !mac v16.2 'posters.get' getWallpaper() {
-	"WFPosterType": "Current"
-}
