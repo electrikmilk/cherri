@@ -34,6 +34,7 @@ func parseCopyPastes() {
 		switch {
 		case isChar('/'):
 			collectComment()
+			continue
 		case tokenAhead(Copy):
 			advance()
 			collectCopy()

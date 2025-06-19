@@ -714,6 +714,7 @@ func parseActionDefinitions() {
 			collectComment()
 			preParsing = true
 			delete(args.Args, "comments")
+			continue
 		case tokenAhead(Enumeration):
 			collectEnumeration()
 		case tokenAhead(Definition):
