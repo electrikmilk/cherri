@@ -114,7 +114,7 @@ func preParse() {
 	)
 	defineRawAction()
 
-	includeStandardActions()
+	includeBasicStandardActions()
 	handleIncludes()
 
 	handleCopyPastes()
@@ -1473,6 +1473,7 @@ func collectActionCall() {
 
 func collectAction(identifier *string) (value action) {
 	if _, found := actions[*identifier]; !found {
+		checkMissingStandardInclude(identifier, true)
 		parserError(fmt.Sprintf("Undefined action '%s()'", *identifier))
 	}
 	advance()

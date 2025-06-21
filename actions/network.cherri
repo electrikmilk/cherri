@@ -1,0 +1,33 @@
+/*
+Network Actions
+*/
+
+enum wifiDetail {
+	'Network Name',
+	'BSSID',
+	'Wi-Fi Standard',
+	'RX Rate',
+	'TX Rate',
+	'RSSI',
+	'Noise',
+	'Channel Number',
+	'Hardware MAC Address',
+}
+
+enum cellularDetail {
+	'Carrier Name',
+	'Radio Technology',
+	'Country Code',
+	'Is Roaming Abroad',
+	'Number of Signal Bars',
+}
+
+#define action 'getwifi' getWifiDetail(wifiDetail detail: 'WFWiFiDetail') {
+	"WFNetworkDetailsNetwork": "Wi-Fi"
+}
+
+#define action 'getwifi' getCellularDetail(cellularDetail detail: 'WFCellularDetail') {
+	"WFNetworkDetailsNetwork": "Cellular"
+}
+
+#define action 'connecttoservers' connectToServer(text url: 'WFInput')

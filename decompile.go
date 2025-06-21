@@ -47,7 +47,9 @@ func decompile(b []byte) {
 		filePath = getOutputPath(relativePath + basename + ".cherri")
 	}
 
-	loadStandardActions()
+	loadBasicStandardActions()
+	resetParse()
+	firstChar()
 
 	mapVariables()
 	mapSplitActions()
@@ -1033,6 +1035,13 @@ func decompAggrandizements(reference *string, aggrs []Aggrandizement) {
 	}
 }
 
+// popLine adds line to the top of the generated Cherri code.
+func popLine(line string) {
+	var saveCode = code.String()
+	code.Reset()
+	code.WriteString(fmt.Sprintf("%s\n%s", line, saveCode))
+}
+
 var macDefinition bool
 
 func decompAction(action *ShortcutAction) {
@@ -1043,19 +1052,21 @@ func decompAction(action *ShortcutAction) {
 	var actionCallCode strings.Builder
 	var matchedIdentifier, matchedAction = matchAction(action)
 	if matchedIdentifier == "" {
-		actionCallCode.WriteString(makeRawAction(action))
-	}
-
-	if (matchedAction.macOnly || matchedAction.nonMacOnly) && !macDefinition {
-		var saveCode = code.String()
-		macDefinition = matchedAction.macOnly && !matchedAction.nonMacOnly
-		code.Reset()
-		code.WriteString(fmt.Sprintf("#define mac %v\n%s", macDefinition, saveCode))
+		checkMissingStandardInclude(&action.WFWorkflowActionIdentifier, false)
+		matchedIdentifier, matchedAction = matchAction(action)
+		if matchedIdentifier == "" {
+			actionCallCode.WriteString(makeRawAction(action))
+		}
 	}
 
 	var isConstant, isVariableValue = checkOutputType(action)
 
 	if matchedIdentifier != "" {
+		if (matchedAction.macOnly || matchedAction.nonMacOnly) && !macDefinition {
+			macDefinition = matchedAction.macOnly && !matchedAction.nonMacOnly
+			popLine(fmt.Sprintf("#define mac %v", macDefinition))
+		}
+
 		actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
 
 		if matchedAction.make != nil || matchedAction.decomp != nil {
@@ -1239,7 +1250,7 @@ func matchAction(action *ShortcutAction) (name string, definition actionDefiniti
 			appIdentifier = def.appIdentifier
 		}
 		var actionIdentifier = fmt.Sprintf("%s.%s", appIdentifier, identifier)
-		if actionIdentifier == action.WFWorkflowActionIdentifier || definition.overrideIdentifier == action.WFWorkflowActionIdentifier {
+		if actionIdentifier == action.WFWorkflowActionIdentifier || def.overrideIdentifier == action.WFWorkflowActionIdentifier {
 			definition = *def
 			name = call
 
