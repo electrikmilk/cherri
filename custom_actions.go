@@ -217,18 +217,15 @@ func makeCustomActionRef(identifier *string) any {
 
 	advanceUntil('\n')
 
-	var runSelfAction = action{
-		ident: "runSelf",
-		args: []actionArgument{
-			{
+	var runSelfAction = makeActionValue("runSelf", []actionArgument{
+		{
+			valueType: Variable,
+			value: varValue{
 				valueType: Variable,
-				value: varValue{
-					valueType: Variable,
-					value:     variableIdentifier,
-				},
+				value:     variableIdentifier,
 			},
 		},
-	}
+	})
 
 	if customAction.definition.outputType != "" {
 		var outputIdentifier = fmt.Sprintf("_%s_cherri_call_output", *identifier)
@@ -243,41 +240,32 @@ func makeCustomActionRef(identifier *string) any {
 func coerceOutputValue(value any, valueType tokenType, defaultValue any) any {
 	switch valueType {
 	case String:
-		return action{
-			ident: "text",
-			args: []actionArgument{
-				{
-					valueType: String,
-					value:     fmt.Sprintf("{%s}", value),
-				},
+		return makeActionValue("text", []actionArgument{
+			{
+				valueType: String,
+				value:     fmt.Sprintf("{%s}", value),
 			},
-		}
+		})
 	case Bool, Integer:
-		return action{
-			ident: "number",
-			args: []actionArgument{
-				{
+		return makeActionValue("number", []actionArgument{
+			{
+				valueType: Variable,
+				value: varValue{
 					valueType: Variable,
-					value: varValue{
-						valueType: Variable,
-						value:     value,
-					},
+					value:     value,
 				},
 			},
-		}
+		})
 	case Dict:
-		return action{
-			ident: "getDictionary",
-			args: []actionArgument{
-				{
+		return makeActionValue("getDictionary", []actionArgument{
+			{
+				valueType: Variable,
+				value: varValue{
 					valueType: Variable,
-					value: varValue{
-						valueType: Variable,
-						value:     value,
-					},
+					value:     value,
 				},
 			},
-		}
+		})
 	default:
 		return defaultValue
 	}

@@ -52,6 +52,8 @@ type actionArgument struct {
 type action struct {
 	// ident is the identifier of the action collected (e.g. identifier(...)).
 	ident string
+	// def is a reference to the definition of the action collected.
+	def *actionDefinition
 	// args are each of the arguments collected between the actions' parenthesis.
 	args []actionArgument
 }
@@ -951,4 +953,12 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 	advance()
 
 	return
+}
+
+func makeActionValue(identifier string, arguments []actionArgument) action {
+	return action{
+		ident: identifier,
+		def:   actions[identifier],
+		args:  arguments,
+	}
 }

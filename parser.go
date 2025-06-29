@@ -1277,9 +1277,7 @@ func addNothing() {
 		typeof:    Action,
 		ident:     "nothing",
 		valueType: Action,
-		value: action{
-			ident: "nothing",
-		},
+		value:     makeActionValue("nothing", []actionArgument{}),
 	})
 }
 
@@ -1483,11 +1481,7 @@ func collectAction(identifier *string) (value action) {
 	currentArgumentsSize = len(currentArguments)
 
 	checkAction()
-
-	value = action{
-		ident: *identifier,
-		args:  arguments,
-	}
+	value = makeActionValue(*identifier, arguments)
 
 	advance()
 	return
