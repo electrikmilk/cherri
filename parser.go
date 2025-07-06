@@ -342,9 +342,6 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		advanceUntil(until)
 	case strings.Contains(ahead, "("):
 		collectActionValue(valueType, value)
-	case containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus):
-		*valueType = Expression
-		*value = collectUntil(until)
 	default:
 		collectReference(valueType, value, &until)
 	}
