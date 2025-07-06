@@ -246,6 +246,8 @@ enum colorSpace {
 
 #define action 'extracttextfromimage' extractImageText(variable image: 'WFImage')
 
+#define action 'detect.images' getImages(variable input: 'WFInput')
+
 /* Music */
 
 #define action getCurrentSong()
