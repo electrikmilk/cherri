@@ -103,6 +103,8 @@ const (
 	Multiply       tokenType = "*"
 	Divide         tokenType = "/"
 	Modulus        tokenType = "%"
+	LeftParen      tokenType = "("
+	RightParen     tokenType = ")"
 	LeftBrace      tokenType = "{"
 	RightBrace     tokenType = "}"
 	Colon          tokenType = ":"

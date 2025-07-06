@@ -294,6 +294,12 @@ func lookAheadUntil(until rune) string {
 func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 	collectValue(valueType, value, '\n')
 
+	var aheadOfValue = lookAheadUntil('\n')
+	if containsExpressionTokens(aheadOfValue) {
+		*valueType = Expression
+		*value = fmt.Sprintf("%v %s", *value, aheadOfValue)
+		advanceUntil('\n')
+	}
 	if constant && (*valueType == Arr || *valueType == Variable) {
 		parserError(fmt.Sprintf("Type %v values cannot be constants.", *valueType))
 	}
@@ -1543,6 +1549,10 @@ func tokenAhead(token tokenType) bool {
 
 	advanceTimes(tokenLen)
 	return true
+}
+
+func containsExpressionTokens(str string) bool {
+	return containsTokens(&str, Plus, Minus, Multiply, Divide, Modulus, LeftParen, RightParen)
 }
 
 func containsTokens(str *string, v ...tokenType) bool {
