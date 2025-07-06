@@ -259,23 +259,7 @@ func makeExpressionValue(reference *map[string]any, value *any) {
 	var expression = fmt.Sprintf("%s", *value)
 	var expressionParts = strings.Split(expression, " ")
 	if len(expressionParts) == 3 && containsTokens(&expression, Plus, Minus, Multiply, Divide) {
-		var operandOne string
-		var operandTwo string
-
-		var operation = expressionParts[1]
-		expressionParts = strings.Split(expression, operation)
-		operandOne = strings.Trim(expressionParts[0], " ")
-		operandTwo = strings.Trim(expressionParts[1], " ")
-		wrapVariableReference(&operandOne)
-		wrapVariableReference(&operandTwo)
-
-		addStdAction("math", attachReferenceToParams(&map[string]any{
-			"WFScientificMathOperation": attachmentValues(operation),
-			"WFMathOperation":           attachmentValues(operation),
-			"WFInput":                   attachmentValues(operandOne),
-			"WFMathOperand":             attachmentValues(operandTwo),
-		}, reference))
-
+		makeMathValue(reference, expression, expressionParts)
 		return
 	}
 
@@ -291,6 +275,35 @@ func makeExpressionValue(reference *map[string]any, value *any) {
 	addStdAction("calculateexpression", attachReferenceToParams(&map[string]any{
 		"Input": attachmentValues(expression),
 	}, reference))
+}
+
+func makeMathValue(reference *map[string]any, expression string, expressionParts []string) {
+	var operandOne string
+	var operandTwo string
+
+	var operation = expressionParts[1]
+	expressionParts = strings.Split(expression, operation)
+
+	operandOne = strings.Trim(expressionParts[0], " ")
+	operandTwo = strings.Trim(expressionParts[1], " ")
+
+	wrapVariableReference(&operandOne)
+	wrapVariableReference(&operandTwo)
+
+	switch operation {
+	case "*":
+		operation = "×"
+	case "/":
+		operation = "÷"
+	}
+
+	addStdAction("math", attachReferenceToParams(&map[string]any{
+		"WFMathOperation": operation,
+		"WFInput":         attachmentValues(operandOne),
+		"WFMathOperand":   attachmentValues(operandTwo),
+	}, reference))
+
+	return
 }
 
 func makeDictionaryValue(value *any) map[string]any {
