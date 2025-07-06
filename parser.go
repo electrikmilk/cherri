@@ -328,6 +328,9 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		advance()
 		*valueType = Dict
 		*value = collectDictionary()
+	case char == '(':
+		*valueType = Expression
+		*value = collectUntil(until)
 	case tokenAhead(True):
 		*valueType = Bool
 		*value = true
