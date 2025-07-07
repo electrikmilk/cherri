@@ -252,10 +252,7 @@ func makeBoolValue(reference *map[string]any, value *any) {
 	}, reference))
 }
 
-var formattedExpression []string
-
 func makeExpressionValue(reference *map[string]any, value *any) {
-	formattedExpression = []string{}
 	var expression = fmt.Sprintf("%s", *value)
 	var expressionParts = strings.Split(expression, " ")
 	if len(expressionParts) == 3 && containsTokens(&expression, Plus, Minus, Multiply, Divide) {
@@ -263,18 +260,19 @@ func makeExpressionValue(reference *map[string]any, value *any) {
 		return
 	}
 
-	expressionParts = strings.Split(expression, " ")
-	for _, part := range expressionParts {
-		var p = part
-		wrapVariableReference(&p)
-		formattedExpression = append(formattedExpression, p)
-	}
-
-	expression = strings.Join(formattedExpression, " ")
+	var formattedExpression = wrapExpressionReferences(&expression)
+	fmt.Println("formattedExpression:", formattedExpression)
 
 	addStdAction("calculateexpression", attachReferenceToParams(&map[string]any{
-		"Input": attachmentValues(expression),
+		"Input": attachmentValues(formattedExpression),
 	}, reference))
+}
+
+var identifierRegex = regexp.MustCompile(`([a-zA-Z][a-zA-Z0-9_]*)`)
+
+func wrapExpressionReferences(expression *string) string {
+	fmt.Println(identifierRegex.FindAllStringSubmatch(*expression, -1))
+	return identifierRegex.ReplaceAllString(*expression, "{$1}")
 }
 
 func makeMathValue(reference *map[string]any, expression string, expressionParts []string) {
