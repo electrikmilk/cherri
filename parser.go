@@ -296,8 +296,13 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 
 	var aheadOfValue = lookAheadUntil('\n')
 	if containsExpressionTokens(aheadOfValue) {
+		if *valueType == Variable {
+			var valueRef = *value
+			*value = fmt.Sprintf("%s %s", valueRef.(varValue).value, aheadOfValue)
+		} else {
+			*value = fmt.Sprintf("%v %s", *value, aheadOfValue)
+		}
 		*valueType = Expression
-		*value = fmt.Sprintf("%v %s", *value, aheadOfValue)
 		advanceUntil('\n')
 	}
 	if constant && (*valueType == Arr || *valueType == Variable) {
