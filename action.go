@@ -815,12 +815,6 @@ func collectDefinedAction() {
 		maxVersion:         maxVersion,
 		doc:                doc,
 	}
-
-	if args.Using("debug") {
-		setCurrentAction(identifier, actions[identifier])
-		fmt.Println("\ndefined:", currentAction.appIdentifier, generateActionDefinition(parameterDefinition{}, true))
-		fmt.Print("\n")
-	}
 }
 
 func collectVersionDefinition() (minVersion float64, maxVersion float64) {
