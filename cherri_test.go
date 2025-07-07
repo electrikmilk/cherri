@@ -24,8 +24,9 @@ func TestCherri(_ *testing.T) {
 		fmt.Println(ansi("FAILED: unable to read tests directory", red))
 		panic(err)
 	}
+	loadStandardActions()
 	for _, file := range files {
-		if !strings.Contains(file.Name(), ".cherri") {
+		if !strings.Contains(file.Name(), ".cherri") || file.Name() == "decomp_expected.cherri" || file.Name() == "decomp_me.cherri" {
 			continue
 		}
 		currentTest = fmt.Sprintf("tests/%s", file.Name())
