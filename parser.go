@@ -293,9 +293,6 @@ func lookAheadUntil(until rune) string {
 
 func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 	collectValue(valueType, value, '\n')
-	if constant && (*valueType == Arr || *valueType == Variable) {
-		parserError(fmt.Sprintf("Type %v values cannot be constants.", *valueType))
-	}
 	if *valueType == Question {
 		parserError(fmt.Sprintf("Illegal reference to import question '%s'. Shortcuts does not support import questions as variable values.", *value))
 	}
@@ -307,6 +304,9 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 	if containsExpressionTokens(aheadOfValue) {
 		collectExpression(valueType, value)
 		return
+	}
+	if constant && (*valueType == Arr || *valueType == Variable) {
+		parserError(fmt.Sprintf("Type %v values cannot be constants.", *valueType))
 	}
 }
 
