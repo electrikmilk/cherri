@@ -260,11 +260,8 @@ func makeExpressionValue(reference *map[string]any, value *any) {
 		return
 	}
 
-	var formattedExpression = wrapExpressionReferences(&expression)
-	fmt.Println("formattedExpression:", formattedExpression)
-
 	addStdAction("calculateexpression", attachReferenceToParams(&map[string]any{
-		"Input": attachmentValues(formattedExpression),
+		"Input": attachmentValues(expression),
 	}, reference))
 }
 
@@ -284,9 +281,6 @@ func makeMathValue(reference *map[string]any, expression string, expressionParts
 
 	operandOne = strings.Trim(expressionParts[0], " ")
 	operandTwo = strings.Trim(expressionParts[1], " ")
-
-	wrapVariableReference(&operandOne)
-	wrapVariableReference(&operandTwo)
 
 	switch operation {
 	case "*":

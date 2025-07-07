@@ -308,50 +308,35 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 }
 
 func collectExpression(valueType *tokenType, value *any) {
+	if !slices.Contains([]tokenType{Integer, Float, Variable}, *valueType) {
+		parserError(fmt.Sprintf("Value of type '%s' not allowed in expression", *valueType))
+	}
 	if *valueType == Variable {
 		var valueRef = *value
-		*value = fmt.Sprintf("%s", valueRef.(varValue).value)
+		*value = fmt.Sprintf("{%s}", valueRef.(varValue).value)
 	} else {
 		*value = fmt.Sprintf("%v", *value)
 	}
+	*valueType = Expression
 
 	for char != -1 && char != '\n' {
 		switch {
-		case isChar(' '):
-			fallthrough
-		case isChar('('):
-			fallthrough
-		case isChar(')'):
-			fallthrough
-		case isChar('+'):
-			fallthrough
-		case isChar('-'):
-			fallthrough
-		case isChar('*'):
-			fallthrough
-		case isChar('/'):
-			fallthrough
-		case isChar('%'):
-			*value = fmt.Sprintf("%s %c", *value, char)
+		case char == ' ' || char == '+' || char == '-' || char == '*' || char == '/' || char == '%' || char == '(' || char == ')':
+			*value = fmt.Sprintf("%s%c", *value, char)
 			advance()
 		case intChar(char):
 			var intValueType tokenType
 			var intValue any
 			collectIntegerValue(&intValueType, &intValue)
-			*value = fmt.Sprintf("%s %v", *value, intValue)
+			*value = fmt.Sprintf("%s%v", *value, intValue)
 		default:
 			var until = ' '
 			var refType tokenType
 			var refValue any
 			collectReference(&refType, &refValue, &until)
-			*value = fmt.Sprintf("%s %s", *value, refValue.(varValue).value)
+			*value = fmt.Sprintf("%s{%s}", *value, refValue.(varValue).value)
 		}
 	}
-	if !slices.Contains([]tokenType{Integer, Float, Variable}, *valueType) {
-		parserError(fmt.Sprintf("Value of type '%s' not allowed in expression", *valueType))
-	}
-
-	*valueType = Expression
 }
 
 func collectValue(valueType *tokenType, value *any, until rune) {
@@ -381,8 +366,9 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*valueType = Dict
 		*value = collectDictionary()
 	case char == '(':
-		*valueType = Expression
-		*value = collectUntil(until)
+		*valueType = Integer
+		*value = ""
+		collectExpression(valueType, value)
 	case tokenAhead(True):
 		*valueType = Bool
 		*value = true
