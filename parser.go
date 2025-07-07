@@ -188,6 +188,8 @@ func parse() {
 	switch {
 	case char == ' ' || char == '\t' || char == '\n':
 		advance()
+	case isChar('/'):
+		collectComment()
 	case tokenAhead(Question):
 		collectQuestion()
 	case tokenAhead(Definition):
@@ -199,8 +201,6 @@ func parse() {
 	case tokenAhead(Constant):
 		advance()
 		collectVariable(true)
-	case isChar('/'):
-		collectComment()
 	case tokenAhead(Repeat):
 		collectRepeat()
 	case tokenAhead(RepeatWithEach):
@@ -293,12 +293,52 @@ func lookAheadUntil(until rune) string {
 
 func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 	collectValue(valueType, value, '\n')
+	if *valueType == Question {
+		parserError(fmt.Sprintf("Illegal reference to import question '%s'. Shortcuts does not support import questions as variable values.", *value))
+	}
 
+	var aheadOfValue = lookAheadUntil('\n')
+	if strings.Contains(aheadOfValue, "//") || strings.Contains(aheadOfValue, "/*") {
+		return
+	}
+	if containsExpressionTokens(aheadOfValue) {
+		collectExpression(valueType, value)
+		return
+	}
 	if constant && (*valueType == Arr || *valueType == Variable) {
 		parserError(fmt.Sprintf("Type %v values cannot be constants.", *valueType))
 	}
-	if *valueType == Question {
-		parserError(fmt.Sprintf("Illegal reference to import question '%s'. Shortcuts does not support import questions as variable values.", *value))
+}
+
+func collectExpression(valueType *tokenType, value *any) {
+	if !slices.Contains([]tokenType{Integer, Float, Variable}, *valueType) {
+		parserError(fmt.Sprintf("Value of type '%s' not allowed in expression", *valueType))
+	}
+	if *valueType == Variable {
+		var valueRef = *value
+		*value = fmt.Sprintf("{%s}", valueRef.(varValue).value)
+	} else {
+		*value = fmt.Sprintf("%v", *value)
+	}
+	*valueType = Expression
+
+	for char != -1 && char != '\n' {
+		switch {
+		case char == ' ' || char == '+' || char == '-' || char == '*' || char == '/' || char == '%' || char == '(' || char == ')':
+			*value = fmt.Sprintf("%s%c", *value, char)
+			advance()
+		case intChar(char):
+			var intValueType tokenType
+			var intValue any
+			collectIntegerValue(&intValueType, &intValue)
+			*value = fmt.Sprintf("%s%v", *value, intValue)
+		default:
+			var until = ' '
+			var refType tokenType
+			var refValue any
+			collectReference(&refType, &refValue, &until)
+			*value = fmt.Sprintf("%s{%s}", *value, refValue.(varValue).value)
+		}
 	}
 }
 
@@ -313,7 +353,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		if strings.Contains(ahead, ".") {
 			*valueType = Float
 		}
-		collectIntegerValue(valueType, value, until)
+		collectIntegerValue(valueType, value)
 	case char == '"':
 		collectStringValue(valueType, value)
 	case char == '\'':
@@ -328,6 +368,10 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		advance()
 		*valueType = Dict
 		*value = collectDictionary()
+	case char == '(':
+		*valueType = Integer
+		*value = ""
+		collectExpression(valueType, value)
 	case tokenAhead(True):
 		*valueType = Bool
 		*value = true
@@ -339,9 +383,6 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		advanceUntil(until)
 	case strings.Contains(ahead, "("):
 		collectActionValue(valueType, value)
-	case containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus):
-		*valueType = Expression
-		*value = collectUntil(until)
 	default:
 		collectReference(valueType, value, &until)
 	}
@@ -1295,26 +1336,19 @@ func collectInteger() string {
 	return collection.String()
 }
 
-func collectIntegerValue(valueType *tokenType, value *any, until rune) {
-	var ahead = lookAheadUntil(until)
-	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
-		var integerString = collectInteger()
+func collectIntegerValue(valueType *tokenType, value *any) {
+	var integerString = collectInteger()
+	if *valueType == Integer {
+		var integer, convErr = strconv.Atoi(integerString)
+		handle(convErr)
 
-		if *valueType == Integer {
-			var integer, convErr = strconv.Atoi(integerString)
-			handle(convErr)
+		*value = integer
+	} else {
+		var float, floatErr = strconv.ParseFloat(integerString, 64)
+		handle(floatErr)
 
-			*value = integer
-		} else {
-			var float, floatErr = strconv.ParseFloat(integerString, 64)
-			handle(floatErr)
-
-			*value = float
-		}
-		return
+		*value = float
 	}
-	*valueType = Expression
-	*value = collectUntil(until)
 }
 
 func collectString() string {
@@ -1550,6 +1584,10 @@ func tokenAhead(token tokenType) bool {
 
 	advanceTimes(tokenLen)
 	return true
+}
+
+func containsExpressionTokens(str string) bool {
+	return containsTokens(&str, Plus, Minus, Multiply, Divide, Modulus, LeftParen, RightParen)
 }
 
 func containsTokens(str *string, v ...tokenType) bool {

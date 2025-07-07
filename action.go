@@ -831,7 +831,7 @@ func collectVersionDefinition() (minVersion float64, maxVersion float64) {
 		advance()
 		var valueType tokenType
 		var version any
-		collectIntegerValue(&valueType, &version, ' ')
+		collectIntegerValue(&valueType, &version)
 
 		switch char {
 		case '>':
