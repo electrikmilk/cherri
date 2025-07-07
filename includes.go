@@ -36,8 +36,6 @@ func handleIncludes() {
 		printIncludesDebug()
 	}
 
-	included = []string{}
-
 	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green) + "\n")
 	}

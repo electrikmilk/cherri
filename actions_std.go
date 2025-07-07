@@ -1972,6 +1972,9 @@ func includeStandardActions() {
 
 func checkMissingStandardInclude(identifier *string, parsing bool) {
 	for _, actionInclude := range defaultActionIncludes {
+		if slices.Contains(included, fmt.Sprintf("actions/%s", actionInclude)) {
+			continue
+		}
 		lines = append([]string{fmt.Sprintf("#include 'actions/%s'\n", actionInclude)}, lines...)
 		resetParse()
 		handleIncludes()
