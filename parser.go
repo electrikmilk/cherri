@@ -296,17 +296,8 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 
 	var aheadOfValue = lookAheadUntil('\n')
 	if containsExpressionTokens(aheadOfValue) {
-		if !slices.Contains([]tokenType{Integer, Float, Variable}, *valueType) {
-			parserError(fmt.Sprintf("Value of type '%s' not allowed in expression", *valueType))
-		}
-		if *valueType == Variable {
-			var valueRef = *value
-			*value = fmt.Sprintf("%s %s", valueRef.(varValue).value, aheadOfValue)
-		} else {
-			*value = fmt.Sprintf("%v %s", *value, aheadOfValue)
-		}
-		*valueType = Expression
-		advanceUntil('\n')
+		collectExpression(valueType, value)
+		return
 	}
 	if constant && (*valueType == Arr || *valueType == Variable) {
 		parserError(fmt.Sprintf("Type %v values cannot be constants.", *valueType))
@@ -314,6 +305,53 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 	if *valueType == Question {
 		parserError(fmt.Sprintf("Illegal reference to import question '%s'. Shortcuts does not support import questions as variable values.", *value))
 	}
+}
+
+func collectExpression(valueType *tokenType, value *any) {
+	if *valueType == Variable {
+		var valueRef = *value
+		*value = fmt.Sprintf("%s", valueRef.(varValue).value)
+	} else {
+		*value = fmt.Sprintf("%v", *value)
+	}
+
+	for char != -1 && char != '\n' {
+		switch {
+		case isChar(' '):
+			fallthrough
+		case isChar('('):
+			fallthrough
+		case isChar(')'):
+			fallthrough
+		case isChar('+'):
+			fallthrough
+		case isChar('-'):
+			fallthrough
+		case isChar('*'):
+			fallthrough
+		case isChar('/'):
+			fallthrough
+		case isChar('%'):
+			*value = fmt.Sprintf("%s %c", *value, char)
+			advance()
+		case intChar(char):
+			var intValueType tokenType
+			var intValue any
+			collectIntegerValue(&intValueType, &intValue)
+			*value = fmt.Sprintf("%s %d", *value, intValue)
+		default:
+			var until = ' '
+			var refType tokenType
+			var refValue any
+			collectReference(&refType, &refValue, &until)
+			*value = fmt.Sprintf("%s %s", *value, refValue.(varValue).value)
+		}
+	}
+	if !slices.Contains([]tokenType{Integer, Float, Variable}, *valueType) {
+		parserError(fmt.Sprintf("Value of type '%s' not allowed in expression", *valueType))
+	}
+
+	*valueType = Expression
 }
 
 func collectValue(valueType *tokenType, value *any, until rune) {
