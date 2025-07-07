@@ -338,7 +338,7 @@ func collectExpression(valueType *tokenType, value *any) {
 			var intValueType tokenType
 			var intValue any
 			collectIntegerValue(&intValueType, &intValue)
-			*value = fmt.Sprintf("%s %d", *value, intValue)
+			*value = fmt.Sprintf("%s %v", *value, intValue)
 		default:
 			var until = ' '
 			var refType tokenType
