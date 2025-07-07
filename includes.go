@@ -181,7 +181,19 @@ func printIncludesDebug() {
 	fmt.Print("\n")
 
 	fmt.Println(ansi("## INCLUDES MAP ##", bold))
-	fmt.Println(includes)
+	for i := range lines {
+		for _, inc := range includes {
+			if inc.start == i {
+				fmt.Println(ansi("#include", magenta), inc.file)
+				fmt.Println(ansi(fmt.Sprintf("%d |", inc.start+1), cyan))
+				fmt.Print(ansi("...", dim))
+				fmt.Print(ansi(fmt.Sprintf("%d lines", inc.length), magenta))
+				fmt.Println(ansi("...", dim))
+				fmt.Println(ansi(fmt.Sprintf("%d |", inc.end+1), cyan))
+				fmt.Print("\n")
+			}
+		}
+	}
 
 	fmt.Print("\n")
 }
