@@ -78,9 +78,6 @@ func main() {
 	if len(os.Args) == 1 || filePath == "" {
 		printLogo()
 		printVersion()
-		if !darwin {
-			fmt.Println(ansi("\nWarning:", orange, bold), "Shortcuts compiled on this platform will not run on iOS 15+ or macOS 12+.")
-		}
 		fmt.Print("\n")
 		args.PrintUsage()
 		os.Exit(1)

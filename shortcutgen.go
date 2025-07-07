@@ -252,45 +252,43 @@ func makeBoolValue(reference *map[string]any, value *any) {
 	}, reference))
 }
 
-var formattedExpression []string
-
 func makeExpressionValue(reference *map[string]any, value *any) {
-	formattedExpression = []string{}
 	var expression = fmt.Sprintf("%s", *value)
 	var expressionParts = strings.Split(expression, " ")
 	if len(expressionParts) == 3 && containsTokens(&expression, Plus, Minus, Multiply, Divide) {
-		var operandOne string
-		var operandTwo string
-
-		var operation = expressionParts[1]
-		expressionParts = strings.Split(expression, operation)
-		operandOne = strings.Trim(expressionParts[0], " ")
-		operandTwo = strings.Trim(expressionParts[1], " ")
-		wrapVariableReference(&operandOne)
-		wrapVariableReference(&operandTwo)
-
-		addStdAction("math", attachReferenceToParams(&map[string]any{
-			"WFScientificMathOperation": attachmentValues(operation),
-			"WFMathOperation":           attachmentValues(operation),
-			"WFInput":                   attachmentValues(operandOne),
-			"WFMathOperand":             attachmentValues(operandTwo),
-		}, reference))
-
+		makeMathValue(reference, expression, expressionParts)
 		return
 	}
-
-	expressionParts = strings.Split(expression, " ")
-	for _, part := range expressionParts {
-		var p = part
-		wrapVariableReference(&p)
-		formattedExpression = append(formattedExpression, p)
-	}
-
-	expression = strings.Join(formattedExpression, " ")
 
 	addStdAction("calculateexpression", attachReferenceToParams(&map[string]any{
 		"Input": attachmentValues(expression),
 	}, reference))
+}
+
+func makeMathValue(reference *map[string]any, expression string, expressionParts []string) {
+	var operandOne string
+	var operandTwo string
+
+	var operation = expressionParts[1]
+	expressionParts = strings.Split(expression, operation)
+
+	operandOne = strings.Trim(expressionParts[0], " ")
+	operandTwo = strings.Trim(expressionParts[1], " ")
+
+	switch operation {
+	case "*":
+		operation = "×"
+	case "/":
+		operation = "÷"
+	}
+
+	addStdAction("math", attachReferenceToParams(&map[string]any{
+		"WFMathOperation": operation,
+		"WFInput":         attachmentValues(operandOne),
+		"WFMathOperand":   attachmentValues(operandTwo),
+	}, reference))
+
+	return
 }
 
 func makeDictionaryValue(value *any) map[string]any {
@@ -515,18 +513,27 @@ func makeAttachmentValues() {
 			}
 		}
 		if stringVar.getAs != "" {
-			var refValueType = variable.valueType
-			if refValueType == Dict {
-				aggr = append(aggr, map[string]string{
-					"Type":          "WFDictionaryValueVariableAggrandizement",
-					"DictionaryKey": stringVar.getAs,
-				})
-			} else {
-				aggr = append(aggr, map[string]string{
-					"Type":         "WFPropertyVariableAggrandizement",
-					"PropertyName": stringVar.getAs,
-				})
+			var aggrandizement = make(map[string]string)
+			switch variable.valueType {
+			case Dict:
+				aggrandizement["Type"] = "WFDictionaryValueVariableAggrandizement"
+			case Action:
+				var variableAction = variable.value.(action).def
+				if variableAction.outputType == Dict {
+					aggrandizement["Type"] = "WFDictionaryValueVariableAggrandizement"
+				} else {
+					aggrandizement["Type"] = "WFPropertyVariableAggrandizement"
+				}
+			default:
+				aggrandizement["Type"] = "WFPropertyVariableAggrandizement"
 			}
+
+			if aggrandizement["Type"] == "WFDictionaryValueVariableAggrandizement" {
+				aggrandizement["DictionaryKey"] = stringVar.getAs
+			} else {
+				aggrandizement["PropertyName"] = stringVar.getAs
+			}
+			aggr = append(aggr, aggrandizement)
 		}
 		if stringVar.coerce != "" {
 			if contentItem, found := contentItems[stringVar.coerce]; found {
