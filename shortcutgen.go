@@ -265,13 +265,6 @@ func makeExpressionValue(reference *map[string]any, value *any) {
 	}, reference))
 }
 
-var identifierRegex = regexp.MustCompile(`([a-zA-Z][a-zA-Z0-9_]*)`)
-
-func wrapExpressionReferences(expression *string) string {
-	fmt.Println(identifierRegex.FindAllStringSubmatch(*expression, -1))
-	return identifierRegex.ReplaceAllString(*expression, "{$1}")
-}
-
 func makeMathValue(reference *map[string]any, expression string, expressionParts []string) {
 	var operandOne string
 	var operandTwo string
