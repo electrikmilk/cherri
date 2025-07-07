@@ -296,6 +296,9 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 
 	var aheadOfValue = lookAheadUntil('\n')
 	if containsExpressionTokens(aheadOfValue) {
+		if !slices.Contains([]tokenType{Integer, Float, Variable}, *valueType) {
+			parserError(fmt.Sprintf("Value of type '%s' not allowed in expression", *valueType))
+		}
 		if *valueType == Variable {
 			var valueRef = *value
 			*value = fmt.Sprintf("%s %s", valueRef.(varValue).value, aheadOfValue)
