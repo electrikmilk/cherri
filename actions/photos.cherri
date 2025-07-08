@@ -1,0 +1,25 @@
+/*
+Photos Actions
+*/
+
+#define action 'photos.createalbum' createAlbum(text name: 'AlbumName', variable ?images: 'WFInput')
+
+#define action deletePhotos(variable photos)
+
+#define action 'getlatestphotoimport' getLastImport()
+
+#define action getLatestBursts(number count: 'WFGetLatestPhotoCount')
+
+#define action 'getlatestlivephotos' getLatestLivePhotos(number count: 'WFGetLatestPhotoCount')
+
+#define action 'getlastscreenshot' getLatestScreenshots(number count: 'WFGetLatestPhotoCount')
+
+#define action 'getlastphoto' getLatestPhotos(number count: 'WFGetLatestPhotoCount', bool ?includeScreenshots: 'WFGetLatestPhotosActionIncludeScreenshots' = true)
+
+#define action 'getlastvideo' getLatestVideos(number count: 'WFGetLatestPhotoCount')
+
+#define action 'removefromalbum' removeFromAlbum(variable photo: 'WFInput', text album: 'WFRemoveAlbumSelectedGroup')
+
+#define action 'savetocameraroll' savePhoto(variable image: 'WFInput', text ?album: 'WFCameraRollSelectedGroup' = "Recents")
+
+#define action 'selectphoto' selectPhotos(bool ?selectMultiple: 'WFSelectMultiplePhotos' = false)

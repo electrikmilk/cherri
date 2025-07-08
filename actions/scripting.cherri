@@ -31,36 +31,7 @@ Scripting Actions
 // [Doc]: Set Value in Dictionary: Set the value of `key` to `value` in `dictionary`.
 #define action 'setvalueforkey' setValue(variable dictionary: 'WFDictionary', text key: 'WFDictionaryKey', text value: 'WFDictionaryValue')
 
-/* Hashes */
-
-#define action default 'base64encode' base64Encode(variable encodeInput: 'WFInput'): text {
-	"input": "Encode"
-}
-
-#define action 'base64encode' base64Decode(variable input: 'WFInput'): text {
-	"WFEncodeMode": "Decode"
-}
-
-enum hashType {
-	'MD5',
-	'SHA1',
-	'SHA256',
-	'SHA512',
-}
-
-#define action hash(variable input: 'WFInput', hashType ?type: 'WFHashType' = "MD5"): text
-
 /* Items */
-
-enum countType {
-	'Items',
-	'Characters',
-	'Words',
-	'Sentences',
-	'Lines',
-}
-
-#define action count(variable input: 'Input', countType ?type: 'WFCountType' = "Items"): number
 
 #define action 'getitemname' getName(variable item: 'WFInput')
 

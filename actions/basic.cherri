@@ -63,6 +63,16 @@ enum language {
 	"WFNoOutputSurfaceBehavior": "Respond"
 }
 
+enum countType {
+	'Items',
+	'Characters',
+	'Words',
+	'Sentences',
+	'Lines',
+}
+
+#define action count(variable input: 'Input', countType ?type: 'WFCountType' = "Items"): number
+
 #define action 'gettext' text(text text: 'WFTextActionText'): text
 
 #define action number(number number: 'WFNumberActionNumber'): number

@@ -1,0 +1,86 @@
+/*
+Music Actions
+*/
+
+#define action getCurrentSong()
+
+#define action 'addtoplaylist' addToMusic(variable songs: 'WFInput')
+
+#define action 'exportsong' selectMusic(bool ?selectMultiple: 'WFExportSongActionSelectMultiple' = false)
+
+enum playMusicShuffles {
+	'Off',
+	'Songs',
+}
+
+enum playMusicRepeats {
+	'None',
+	'One',
+	'All',
+}
+
+#define action playMusic(variable music: 'WFMediaItems', playMusicShuffles ?shuffle: 'WFPlayMusicActionShuffle', playMusicRepeats ?repeat: 'WFPlayMusicActionRepeat')
+
+enum musicDetail {
+	'Title',
+	'Album',
+	'Artist',
+	'Album Artist',
+	'Genre',
+	'Composer',
+	'Date Added',
+	'Media Kind',
+	'Duration',
+	'Play Count',
+	'Track Number',
+	'Disc Number',
+	'Album Artwork',
+	'Is Explicit',
+	'Lyrics',
+	'Release Date',
+	'Comments',
+	'Is Cloud Item',
+	'Skip Count',
+	'Last Played Date',
+	'Rating',
+	'File Path',
+	'Name',
+}
+
+#define action 'properties.music' getMusicDetail(variable music: 'WFInput', musicDetail detail: 'WFContentItemPropertyName')
+
+/* Playback */
+
+#define action 'pausemusic' play() {
+	"WFPlayPauseBehavior": "Play"
+}
+
+#define action 'pausemusic' pause() {
+	"WFPlayPauseBehavior": "Pause"
+}
+
+#define action 'pausemusic' togglePlayPause() {
+	"WFPlayPauseBehavior": "Play/Pause"
+}
+
+#define action skipBack() {
+	"WFSkipBackBehavior": "Previous Song"
+}
+
+#define action 'skipforward' skipFwd()
+
+#define action 'addmusictoupnext' playNext(variable music: 'WFMusic') {
+	"WFWhenToPlay": "Next"
+}
+
+#define action 'addmusictoupnext' playLater(variable music: 'WFMusic') {
+	"WFWhenToPlay": "Later"
+}
+
+#define action clearUpNext()
+
+/* Playlists */
+
+#define action addToPlaylist(text playlistName: 'WFPlaylistName', variable songs: 'WFInput')
+
+#define action 'get.playlist' getPlaylistSongs(variable playlistName: 'WFPlaylistName')
