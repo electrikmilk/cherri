@@ -1914,17 +1914,24 @@ func handleRawParams(params map[string]any) {
 	}
 }
 
-var defaultActionIncludes = []string{
+var actionIncludes = []string{
 	"calendar",
 	"contacts",
-	"documents",
+	"crypto",
 	"device",
+	"documents",
 	"dropbox",
+	"images",
 	"location",
 	"mac",
 	"math",
 	"media",
+	"music",
+	"network",
+	"pdf",
+	"photos",
 	"scripting",
+	"settings",
 	"sharing",
 	"shortcuts",
 	"translation",
@@ -1962,16 +1969,16 @@ func includeStandardActions() {
 	if includedStandardActions {
 		return
 	}
-	var actionIncludes []string
-	for _, actionInclude := range defaultActionIncludes {
-		actionIncludes = append(actionIncludes, fmt.Sprintf("#include 'actions/%s'\n", actionInclude))
+	var standardIncludes []string
+	for _, actionInclude := range actionIncludes {
+		standardIncludes = append(standardIncludes, fmt.Sprintf("#include 'actions/%s'\n", actionInclude))
 	}
-	lines = append(actionIncludes, lines...)
+	lines = append(standardIncludes, lines...)
 	resetParse()
 }
 
 func checkMissingStandardInclude(identifier *string, parsing bool) {
-	for _, actionInclude := range defaultActionIncludes {
+	for _, actionInclude := range actionIncludes {
 		if slices.Contains(included, fmt.Sprintf("actions/%s", actionInclude)) {
 			continue
 		}
