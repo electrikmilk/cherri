@@ -129,13 +129,6 @@ enum imageDetail {
 
 #define action 'properties.images' getImageDetail(variable image: 'WFInput', imageDetail detail: 'WFContentItemPropertyName')
 
-enum colorSpace {
-	'RGB',
-	'Gray',
-}
-
-#define action makeImageFromPDFPage(variable pdf: 'WFInput', colorSpace ?colorSpace: 'WFMakeImageFromPDFPageColorspace' = "RGB", text ?pageResolution: 'WFMakeImageFromPDFPageResolution' = "300")
-
 #define action makeImageFromRichText(variable pdf: 'WFInput', text width: 'WFWidth', text height: 'WFHeight')
 
 #define action 'extracttextfromimage' extractImageText(variable image: 'WFImage')

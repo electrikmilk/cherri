@@ -105,22 +105,9 @@ enum fileSizeFormat {
 
 /* Printing */
 
-enum PDFMergeBehaviors {
-	'Append',
-	'Shuffle',
-}
 
-#define action makePDF(
-    variable input: 'WFInput',
-    bool ?includeMargin: 'WFPDFIncludeMargin' = false,
-    PDFMergeBehaviors ?mergeBehavior: 'WFPDFDocumentMergeBehavior' = "Append"
-)
-
-#define action 'compresspdf' optimizePDF(variable pdfFile: 'WFInput')
 
 #define action print(variable input: 'WFInput')
-
-#define action splitPDF(variable pdf: 'WFInput')
 
 /* QR Codes */
 
