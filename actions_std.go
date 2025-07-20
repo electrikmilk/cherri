@@ -1966,6 +1966,7 @@ func loadActionsByCategory() {
 		included = []string{}
 		includes = []include{}
 		lines = []string{}
+		tokens = []token{}
 
 		resetParse()
 	}
