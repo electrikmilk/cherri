@@ -1807,7 +1807,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"embedFile": {
-		doc:        ActionDoc{title: "Base 64 Embed File", description: "Embed file at path as base 64 text.", category: "scripting"},
+		doc:        selfDoc{title: "Base 64 Embed File", description: "Embed file at path as base 64 text.", category: "scripting"},
 		identifier: "gettext",
 		parameters: []parameterDefinition{
 			{

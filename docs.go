@@ -13,7 +13,7 @@ import (
 var actionCategories = []string{"basic"}
 var currentCategory string
 
-type ActionDoc struct {
+type selfDoc struct {
 	title       string
 	description string
 	category    string
