@@ -32,7 +32,6 @@ func generateDocs() {
 	defineToggleSetActions()
 	defineRawAction()
 	loadActionsByCategory()
-	args.Args["no-ansi"] = ""
 	var cat = args.Value("docs")
 	for i, category := range actionCategories {
 		if cat != "" && cat != category {
