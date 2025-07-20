@@ -380,7 +380,7 @@ func inputValue(name string, varUUID string) map[string]any {
 func variableValue(variable varValue) map[string]any {
 	var identifier = variable.value.(string)
 	var variableReference varValue
-	var aggrandizements []Aggrandizement
+	var aggrandizements []map[string]any
 	if global, found := globals[identifier]; found {
 		isInputVariable(identifier)
 		variable.variableType = global.variableType
@@ -395,23 +395,23 @@ func variableValue(variable varValue) map[string]any {
 			refValueType = variableReference.valueType
 		}
 		if refValueType == Dict {
-			aggrandizements = append(aggrandizements, Aggrandizement{
-				Type:          "WFDictionaryValueVariableAggrandizement",
-				DictionaryKey: variable.getAs,
+			aggrandizements = append(aggrandizements, map[string]any{
+				"Type":          "WFDictionaryValueVariableAggrandizement",
+				"DictionaryKey": variable.getAs,
 			})
 		} else {
-			aggrandizements = append(aggrandizements, Aggrandizement{
-				PropertyUserInfo: 0,
-				Type:             "WFPropertyVariableAggrandizement",
-				PropertyName:     variable.getAs,
+			aggrandizements = append(aggrandizements, map[string]any{
+				"PropertyUserInfo": 0,
+				"Type":             "WFPropertyVariableAggrandizement",
+				"PropertyName":     variable.getAs,
 			})
 		}
 	}
 	if variable.coerce != "" {
 		if contentItem, found := contentItems[variable.coerce]; found {
-			aggrandizements = append(aggrandizements, Aggrandizement{
-				Type:              "WFCoercionVariableAggrandizement",
-				CoercionItemClass: contentItem,
+			aggrandizements = append(aggrandizements, map[string]any{
+				"Type":              "WFCoercionVariableAggrandizement",
+				"CoercionItemClass": contentItem,
 			})
 		}
 	}
