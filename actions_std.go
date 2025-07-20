@@ -1807,7 +1807,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"embedFile": {
-		doc:        selfDoc{title: "Base 64 Embed File", description: "Embed file at path as base 64 text."},
+		doc:        ActionDoc{title: "Base 64 Embed File", description: "Embed file at path as base 64 text.", category: "scripting"},
 		identifier: "gettext",
 		parameters: []parameterDefinition{
 			{
@@ -1947,13 +1947,28 @@ func loadStandardActions() {
 	handleIncludes()
 	handleActionDefinitions()
 	resetParse()
-	firstChar()
 }
 
 func loadBasicStandardActions() {
 	includeBasicStandardActions()
 	handleIncludes()
 	handleActionDefinitions()
+}
+
+func loadActionsByCategory() {
+	for _, actionInclude := range actionCategories {
+		lines = append(lines, fmt.Sprintf("#include 'actions/%s'\n", actionInclude))
+		resetParse()
+		handleIncludes()
+		currentCategory = actionInclude
+		handleActionDefinitions()
+
+		included = []string{}
+		includes = []include{}
+		lines = []string{}
+
+		resetParse()
+	}
 }
 
 func includeBasicStandardActions() {

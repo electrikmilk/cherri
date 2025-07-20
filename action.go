@@ -89,12 +89,7 @@ type actionDefinition struct {
 	maxVersion         float64
 	setKey             string
 	builtin            bool // builtin is based on if the action was in the actions map when it was first initialized.
-	doc                selfDoc
-}
-
-type selfDoc struct {
-	title       string
-	description string
+	doc                ActionDoc
 }
 
 // libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
@@ -735,7 +730,7 @@ func parseActionDefinitions() {
 func collectDefinedAction() {
 	var lineRef = newLineReference()
 
-	var doc selfDoc
+	var doc ActionDoc
 	var lastToken = getLastAddedToken()
 	if lastToken.typeof == Comment {
 		var comment = lastToken.value.(string)
@@ -743,9 +738,9 @@ func collectDefinedAction() {
 			var parts = strings.Split(comment, ":")
 			if strings.TrimSpace(parts[0]) == "[Doc]" {
 				if len(parts) > 2 {
-					doc = selfDoc{title: strings.TrimSpace(parts[1]), description: strings.TrimSpace(parts[2])}
+					doc = ActionDoc{title: strings.TrimSpace(parts[1]), description: strings.TrimSpace(parts[2]), category: currentCategory}
 				} else {
-					doc = selfDoc{description: strings.TrimSpace(parts[1])}
+					doc = ActionDoc{description: strings.TrimSpace(parts[1]), category: currentCategory}
 				}
 			}
 		}

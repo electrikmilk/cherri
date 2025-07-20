@@ -38,6 +38,11 @@ func main() {
 		os.Exit(0)
 	}
 
+	if args.Using("docs") {
+		generateDocs()
+		os.Exit(0)
+	}
+
 	if args.Using("import") && args.Value("import") != "" {
 		var shortcutBytes = importShortcut()
 		decompile(shortcutBytes)
