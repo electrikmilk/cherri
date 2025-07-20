@@ -6,6 +6,8 @@ package main
 
 import (
 	"fmt"
+	"slices"
+	"strings"
 
 	"github.com/electrikmilk/args-parser"
 )
@@ -17,6 +19,13 @@ type selfDoc struct {
 	title       string
 	description string
 	category    string
+	subcategory string
+}
+
+type actionCategory struct {
+	title         string
+	actions       []string
+	subcategories map[string][]string
 }
 
 func generateDocs() {

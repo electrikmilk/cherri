@@ -727,22 +727,18 @@ func parseActionDefinitions() {
 	tokens = []token{}
 }
 
-func collectDefinedAction() {
-	var lineRef = newLineReference()
+var docCommentRegex = regexp.MustCompile(`^\[Doc]: ?(?:\[(.*?)])?\s(.*?)?(?:: (.*?))?$`)
 
+func collectDefinedAction() {
 	var doc selfDoc
+	var lineRef = newLineReference()
 	var lastToken = getLastAddedToken()
 	if lastToken.typeof == Comment {
 		var comment = lastToken.value.(string)
-		if !strings.Contains(comment, "\n") && strings.Contains(comment, ":") {
-			var parts = strings.Split(comment, ":")
-			if strings.TrimSpace(parts[0]) == "[Doc]" {
-				if len(parts) > 2 {
-					doc = selfDoc{title: strings.TrimSpace(parts[1]), description: strings.TrimSpace(parts[2]), category: currentCategory}
-				} else {
-					doc = selfDoc{description: strings.TrimSpace(parts[1]), category: currentCategory}
-				}
-			}
+		var matches = docCommentRegex.FindAllStringSubmatch(comment, -1)
+		if len(matches) != 0 {
+			var match = matches[0]
+			doc = selfDoc{title: strings.TrimSpace(match[2]), description: strings.TrimSpace(match[3]), category: currentCategory, subcategory: match[1]}
 		}
 	}
 
