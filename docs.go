@@ -34,35 +34,65 @@ func generateDocs() {
 	loadActionsByCategory()
 	args.Args["no-ansi"] = ""
 	var cat = args.Value("docs")
-	for _, category := range actionCategories {
+	for i, category := range actionCategories {
 		if cat != "" && cat != category {
 			continue
 		}
-		if cat == "" {
-			if category == "pdf" {
-				category = "PDF"
-			}
-			fmt.Printf("\n# %s Actions\n\n", capitalize(category))
+		var actionCategory = generateCategory(category)
+		fmt.Println("#", actionCategory.title)
+
+		slices.Sort(actionCategory.actions)
+		fmt.Println(strings.Join(actionCategory.actions, "\n\n---\n"))
+
+		if actionCategory.subcategories != nil {
+			printCategories(actionCategory.subcategories)
 		}
 
-		generateCategory(category)
+		if cat == "" && i != 0 {
+			fmt.Print("---\n")
+		}
 	}
 }
 
-func generateCategory(category string) {
-	var i = 0
+func printCategories(categories map[string][]string) {
+	var keys []string
+	for k := range categories {
+		keys = append(keys, k)
+	}
+	slices.Sort(keys)
+	for _, k := range keys {
+		var category = categories[k]
+		fmt.Printf("\n## %s\n\n", k)
+		slices.Sort(category)
+		fmt.Println(strings.Join(category, "\n\n---\n"))
+	}
+}
+
+func generateCategory(category string) actionCategory {
+	if category == "pdf" {
+		category = "PDF"
+	}
+	var cat = actionCategory{
+		title: fmt.Sprintf("%s Actions", capitalize(category)),
+	}
 	for name, def := range actions {
 		if def.doc.category != category {
 			continue
 		}
-		if i != 0 {
-			fmt.Print("\n---\n\n")
-		}
 
 		currentAction = *def
 		currentActionIdentifier = name
+		var definition = generateActionDefinition(parameterDefinition{}, true)
 
-		fmt.Println(generateActionDefinition(parameterDefinition{}, true))
-		i++
+		if def.doc.subcategory != "" {
+			if cat.subcategories == nil {
+				cat.subcategories = make(map[string][]string)
+			}
+			cat.subcategories[def.doc.subcategory] = append(cat.subcategories[def.doc.subcategory], definition)
+			continue
+		}
+
+		cat.actions = append(cat.actions, definition)
 	}
+	return cat
 }
