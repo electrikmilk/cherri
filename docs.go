@@ -61,7 +61,7 @@ func printCategories(categories map[string][]string) {
 	slices.Sort(keys)
 	for _, k := range keys {
 		var category = categories[k]
-		fmt.Printf("\n## %s\n\n", k)
+		fmt.Printf("\n## %s\n", k)
 		slices.Sort(category)
 		fmt.Println(strings.Join(category, "\n\n---\n"))
 	}
