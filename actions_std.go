@@ -447,6 +447,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"removeContactDetail": {
+		doc: selfDoc{
+			title:       "Remove Contact Detail",
+			description: "Remove detail from contact.",
+			category:    "contacts",
+			subcategory: "Contacts",
+		},
 		identifier: "setters.contacts",
 		parameters: []parameterDefinition{
 			{
@@ -461,12 +467,6 @@ var actions = map[string]*actionDefinition{
 				enum:      "contactDetails",
 			},
 		},
-		doc: selfDoc{
-			title:       "Remove Contact",
-			description: "Remove a contact.",
-			category:    "contacts",
-			subcategory: "Contacts",
-		},
 		addParams: func(_ []actionArgument) map[string]any {
 			return map[string]any{
 				"Mode": "Remove",
@@ -474,6 +474,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"labelFile": {
+		doc: selfDoc{
+			title:       "Label File",
+			description: "Label a file.",
+			category:    "documents",
+			subcategory: "Files & Folders",
+		},
 		identifier: "file.label",
 		parameters: []parameterDefinition{
 			{
@@ -501,6 +507,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"filterFiles": {
+		doc: selfDoc{
+			title:       "Filter Files",
+			description: "Filter the provided files with various filters.",
+			category:    "documents",
+			subcategory: "Files & Folders",
+		},
 		identifier: "filter.files",
 		parameters: []parameterDefinition{
 			{
@@ -544,6 +556,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getPDFText": {
+		doc: selfDoc{
+			title:       "Get PDF Text",
+			description: "Get text from PDF.",
+			category:    "pdf",
+		},
 		identifier: "gettextfrompdf",
 		parameters: []parameterDefinition{
 			{
@@ -597,6 +614,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getFolderContents": {
+		doc: selfDoc{
+			title:       "Get Folder Contacts",
+			description: "Get contents of folder.",
+			category:    "documents",
+			subcategory: "Files & Folders",
+		},
 		identifier: "file.getfoldercontents",
 		parameters: []parameterDefinition{
 			{
@@ -614,6 +637,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"containsText": {
+		doc: selfDoc{
+			title:       "Contains Text",
+			description: "Uses Match Text to check if text is within subject.",
+			category:    "documents",
+			subcategory: "Text Editing",
+		},
 		identifier: "text.match",
 		parameters: []parameterDefinition{
 			{
@@ -647,6 +676,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getFileFromFolder": {
+		doc: selfDoc{
+			title:       "Get File From Folder",
+			description: "Get a file from a folder.",
+			category:    "documents",
+			subcategory: "Files & Folders",
+		},
 		identifier: "documentpicker.open",
 		parameters: []parameterDefinition{
 			{
@@ -695,6 +730,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"splitText": {
+		doc: selfDoc{
+			title:       "Split Text",
+			description: "Split text by a separator.",
+			category:    "documents",
+			subcategory: "Text Editing",
+		},
 		identifier: "text.split",
 		parameters: []parameterDefinition{
 			{
@@ -713,6 +754,12 @@ var actions = map[string]*actionDefinition{
 		outputType: Arr,
 	},
 	"joinText": {
+		doc: selfDoc{
+			title:       "Join Text",
+			description: "Join text by a combiner.",
+			category:    "documents",
+			subcategory: "Text Editing",
+		},
 		identifier: "text.combine",
 		parameters: []parameterDefinition{
 			{
@@ -731,6 +778,11 @@ var actions = map[string]*actionDefinition{
 		outputType: String,
 	},
 	"makeSizedDiskImage": {
+		doc: selfDoc{
+			title:       "Make Size Disk Image",
+			description: "Make a sized disk image.",
+			category:    "mac",
+		},
 		identifier:    "makediskimage",
 		defaultAction: true,
 		parameters: []parameterDefinition{
@@ -807,6 +859,12 @@ var actions = map[string]*actionDefinition{
 		minVersion: 15,
 	},
 	"seek": {
+		doc: selfDoc{
+			title:       "Seek",
+			description: "Seek the currently playing media.",
+			category:    "music",
+			subcategory: "Playback",
+		},
 		parameters: []parameterDefinition{
 			{
 				name:      "magnitude",
@@ -842,6 +900,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"url": {
+		doc: selfDoc{
+			title:       "URL",
+			description: "Create a URL value.",
+			category:    "web",
+			subcategory: "URLs",
+		},
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -863,6 +927,12 @@ var actions = map[string]*actionDefinition{
 		decomp: decompInfiniteURLAction,
 	},
 	"addToReadingList": {
+		doc: selfDoc{
+			title:       "Add to Reading List",
+			description: "Add a link to the reading list.",
+			category:    "web",
+			subcategory: "Safari",
+		},
 		identifier: "readinglist",
 		parameters: []parameterDefinition{
 			{
@@ -885,6 +955,12 @@ var actions = map[string]*actionDefinition{
 		decomp: decompInfiniteURLAction,
 	},
 	"prompt": {
+		doc: selfDoc{
+			title:       "Ask for Input",
+			description: "Ask for input with prompt, with optional inputType and defaultValue.",
+			category:    "scripting",
+			subcategory: "Notification",
+		},
 		identifier: "ask",
 		parameters: []parameterDefinition{
 			{
