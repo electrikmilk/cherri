@@ -44,32 +44,32 @@ enum editEventDetail {
     'Attachments',
 }
 
-// [Doc]: Add Calendar: Create a calendar with `name`.
+// [Doc]: [Calendars] Add Calendar: Create a calendar with `name`.
 #define action 'addnewcalendar' addCalendar(text name: 'CalendarName')
 
-// [Doc]: Open Event in Calendar: Show `event` in the calendar app.
+// [Doc]: [Calendars] Open Event in Calendar: Show `event` in the calendar app.
 #define action showInCalendar(variable event: 'WFEvent')
 
-// [Doc]: Edit Event: Edit a detail of an event. Provide an event, a detail to modify, and a new value for that detail.
+// [Doc]: [Calendars] Edit Event: Edit a detail of an event. Provide an event, a detail to modify, and a new value for that detail.
 #define action 'setters.calendarevents' editEvent(variable event: 'WFInput', editEventDetail detail: 'WFContentItemPropertyName', text newValue: 'WFCalendarEventContentItemStartDate')
 
-// [Doc]: Get Event Detail: Get a detail of an event.
+// [Doc]: [Calendars] Get Event Detail: Get a detail of an event.
 #define action 'properties.calendarevents' getEventDetail(variable event: 'WFInput', eventDetail detail: 'WFContentItemPropertyName')
 
-// [Doc]: Remove Events: Remove an event.
+// [Doc]: [Calendars] Remove Events: Remove an event.
 #define action removeEvents(variable events: 'WFInputEvents', bool ?includeFutureEvents: 'WFCalendarIncludeFutureEvents' = false)
 
 /* Reminders app */
 
-// [Doc]: Open Reminders List
+// [Doc]: [Reminders] Open Reminders List
 #define action 'showlist' openRemindersList(variable list: 'WFList')
 
-// [Doc]: Remove Reminders
+// [Doc]: [Reminders] Remove Reminders
 #define action removeReminders(variable reminders: 'WFInputReminders')
 
 /* Clock app */
 
-// [Doc]: Get Alarms: Returns all of the alarms on the device.
+// [Doc]: [Alarms] Get Alarms: Returns all of the alarms on the device.
 #define action 'com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent' getAlarms()
 
 /* Dates */

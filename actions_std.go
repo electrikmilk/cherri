@@ -95,7 +95,7 @@ var actions = map[string]*actionDefinition{
 		doc: selfDoc{
 			title:       "Create Timer",
 			description: "Creates a new timer.",
-			category:    "clock",
+			category:    "calendar",
 			subcategory: "Timers",
 		},
 		identifier: "timer.start",
@@ -112,12 +112,22 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			return map[string]any{
 				"WFDuration": magnitudeValue(argumentValue(args, 1), args, 0),
 			}
 		},
 	},
 	"createAlarm": {
+		doc: selfDoc{
+			title:       "Create Alarm",
+			description: "Creates an alarm at specific time with a name, snooze allowance and applicable weekdays.",
+			category:    "calendar",
+			subcategory: "Alarms",
+		},
 		appIdentifier: "com.apple.mobiletimer-framework",
 		identifier:    "MobileTimerIntents.MTCreateAlarmIntent",
 		parameters: []parameterDefinition{
@@ -191,6 +201,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"deleteAlarm": {
+		doc: selfDoc{
+			title:       "Delete Alarm",
+			description: "Deletes an alarm.",
+			category:    "calendar",
+			subcategory: "Alarms",
+		},
 		appIdentifier: "com.apple.clock",
 		identifier:    "DeleteAlarmIntent",
 		appIntent: appIntent{
@@ -207,7 +223,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"turnOnAlarm": {
-		defaultAction: true,
+		doc: selfDoc{
+			title:       "Turn Off Alarm",
+			description: "Turn off an alarm.",
+			category:    "calendar",
+			subcategory: "Alarms",
+		},
 		appIdentifier: "com.apple.mobiletimer-framework",
 		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
 		appIntent:     toggleAlarmIntent,
@@ -230,8 +251,15 @@ var actions = map[string]*actionDefinition{
 				"state": 1,
 			}
 		},
+		defaultAction: true,
 	},
 	"turnOffAlarm": {
+		doc: selfDoc{
+			title:       "Turn Off Alarm",
+			description: "Turn off an alarm.",
+			category:    "calendar",
+			subcategory: "Alarms",
+		},
 		appIdentifier: "com.apple.mobiletimer-framework",
 		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
 		appIntent:     toggleAlarmIntent,
@@ -270,6 +298,12 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
+		doc: selfDoc{
+			title:       "Toggle Alarm",
+			description: "Toggle an alarm.",
+			category:    "calendar",
+			subcategory: "Alarms",
+		},
 		appIntent: toggleAlarmIntent,
 		addParams: func(_ []actionArgument) map[string]any {
 			return map[string]any{
@@ -285,6 +319,12 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				infinite:  true,
 			},
+		},
+		doc: selfDoc{
+			title:       "Email Address",
+			description: "Create an email address value.",
+			category:    "contacts",
+			subcategory: "Email",
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			if len(args) > 1 && args[0].valueType == Variable {
@@ -313,6 +353,12 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				infinite:  true,
 			},
+		},
+		doc: selfDoc{
+			title:       "Phone Number",
+			description: "Create a phone number value.",
+			category:    "contacts",
+			subcategory: "Phone",
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			if len(args) > 1 && args[0].valueType == Variable {
@@ -373,6 +419,12 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
+		doc: selfDoc{
+			title:       "Add New Contact",
+			description: "Create a new contact.",
+			category:    "contacts",
+			subcategory: "Contacts",
+		},
 		addParams: func(args []actionArgument) (params map[string]any) {
 			params = make(map[string]any)
 			if len(args) >= 3 {
@@ -408,6 +460,12 @@ var actions = map[string]*actionDefinition{
 				key:       "WFContentItemPropertyName",
 				enum:      "contactDetails",
 			},
+		},
+		doc: selfDoc{
+			title:       "Remove Contact",
+			description: "Remove a contact.",
+			category:    "contacts",
+			subcategory: "Contacts",
 		},
 		addParams: func(_ []actionArgument) map[string]any {
 			return map[string]any{
