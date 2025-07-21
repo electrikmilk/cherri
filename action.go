@@ -92,11 +92,6 @@ type actionDefinition struct {
 	doc                selfDoc
 }
 
-type selfDoc struct {
-	title       string
-	description string
-}
-
 // libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
 type libraryDefinition struct {
 	identifier string
@@ -112,6 +107,8 @@ var enumerations = map[string][]string{
 	"sortOrder":                     {"asc", "desc"},
 	"windowSorting":                 {"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"},
 	"timerDuration":                 {"hr", "min", "sec"},
+	"dateUnit":                      {"sec", "min", "hr", "days", "weeks", "months", "yr"},
+	"dateOperation":                 {"Add", "Subtract", "Get Start of Minute", "Get Start of Hour", "Get Start of Day", "Get Start of Week", "Get Start of Month", "Get Start of Year"},
 	"fileLabel":                     {"red", "orange", "yellow", "green", "blue", "purple", "gray"},
 	"filesSortBy":                   {"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"},
 	"fileOrderings":                 {"Smallest First", "Biggest First", "Latest First", "Oldest First", "A to Z", "Z to A"},
@@ -732,22 +729,18 @@ func parseActionDefinitions() {
 	tokens = []token{}
 }
 
-func collectDefinedAction() {
-	var lineRef = newLineReference()
+var docCommentRegex = regexp.MustCompile(`^\[Doc]: ?(?:\[(.*?)])?\s(.*?)?(?:: (.*?))?$`)
 
+func collectDefinedAction() {
 	var doc selfDoc
+	var lineRef = newLineReference()
 	var lastToken = getLastAddedToken()
 	if lastToken.typeof == Comment {
 		var comment = lastToken.value.(string)
-		if !strings.Contains(comment, "\n") && strings.Contains(comment, ":") {
-			var parts = strings.Split(comment, ":")
-			if strings.TrimSpace(parts[0]) == "[Doc]" {
-				if len(parts) > 2 {
-					doc = selfDoc{title: strings.TrimSpace(parts[1]), description: strings.TrimSpace(parts[2])}
-				} else {
-					doc = selfDoc{description: strings.TrimSpace(parts[1])}
-				}
-			}
+		var matches = docCommentRegex.FindAllStringSubmatch(comment, -1)
+		if len(matches) != 0 {
+			var match = matches[0]
+			doc = selfDoc{title: strings.TrimSpace(match[2]), description: strings.TrimSpace(match[3]), category: currentCategory, subcategory: match[1]}
 		}
 	}
 

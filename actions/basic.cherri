@@ -71,8 +71,10 @@ enum countType {
 	'Lines',
 }
 
+// [Doc]: Count: Returns a count of `type` of items in `input`.
 #define action count(variable input: 'Input', countType ?type: 'WFCountType' = "Items"): number
 
-#define action 'gettext' text(text text: 'WFTextActionText'): text
-
+// [Doc]: Number: Create a number value.
 #define action number(number number: 'WFNumberActionNumber'): number
+
+#define action 'gettext' text(text text: 'WFTextActionText'): text
