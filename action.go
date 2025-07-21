@@ -107,6 +107,8 @@ var enumerations = map[string][]string{
 	"sortOrder":                     {"asc", "desc"},
 	"windowSorting":                 {"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"},
 	"timerDuration":                 {"hr", "min", "sec"},
+	"dateUnit":                      {"sec", "min", "hr", "days", "weeks", "months", "yr"},
+	"dateOperation":                 {"Add", "Subtract", "Get Start of Minute", "Get Start of Hour", "Get Start of Day", "Get Start of Week", "Get Start of Month", "Get Start of Year"},
 	"fileLabel":                     {"red", "orange", "yellow", "green", "blue", "purple", "gray"},
 	"filesSortBy":                   {"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"},
 	"fileOrderings":                 {"Smallest First", "Biggest First", "Latest First", "Oldest First", "A to Z", "Z to A"},

@@ -47,311 +47,57 @@ var createShortcutiCloudLink = appIntent{
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
 	"returnToHomescreen": {nonMacOnly: true},
-	"addSeconds": {
-		identifier:    "adjustdate",
-		defaultAction: true,
+	"adjustDate": {
+		doc: selfDoc{
+			title:       "Adjust Date",
+			description: "Adjust a date or get the start of a time period.",
+			category:    "calendar",
+			subcategory: "Date",
+		},
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
 				key:       "WFDate",
 				validType: String,
+			},
+			{
+				name:      "operation",
+				key:       "WFAdjustOperation",
+				validType: String,
+				enum:      "dateOperation",
 			},
 			{
 				name:      "magnitude",
 				validType: Integer,
+				optional:  true,
 			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "sec", args)
-		},
-	},
-	"addMinutes": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
 			{
-				name:      "date",
-				key:       "WFDate",
+				name:      "unit",
 				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
+				enum:      "dateUnit",
+				optional:  true,
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "min", args)
-		},
-	},
-	"addHours": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "hr", args)
-		},
-	},
-	"addDays": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "days", args)
-		},
-	},
-	"addWeeks": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "weeks", args)
-		},
-	},
-	"addMonths": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "months", args)
-		},
-	},
-	"addYears": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "yr", args)
-		},
-	},
-	"subtractSeconds": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "sec", args)
-		},
-	},
-	"subtractMinutes": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "min", args)
-		},
-	},
-	"subtractHours": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "hr", args)
-		},
-	},
-	"subtractDays": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "days", args)
-		},
-	},
-	"subtractWeeks": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "weeks", args)
-		},
-	},
-	"subtractMonths": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "months", args)
-		},
-	},
-	"subtractYears": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "yr", args)
-		},
-	},
-	"getStartMinute": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Get Start of Minute", "", args)
-		},
-	},
-	"getStartHour": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Get Start of Hour", "", args)
-		},
-	},
-	"getStartWeek": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Get Start of Week", "", args)
-		},
-	},
-	"getStartMonth": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Get Start of Month", "", args)
-		},
-	},
-	"getStartYear": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Get Start of Year", "", args)
+			if len(args) != 4 {
+				return map[string]any{}
+			}
+
+			var unit = getArgValue(args[3])
+
+			return map[string]any{
+				"WFDuration": magnitudeValue(unit, args, 2),
+			}
 		},
 	},
 	"startTimer": {
+		doc: selfDoc{
+			title:       "Create Timer",
+			description: "Creates a new timer.",
+			category:    "clock",
+			subcategory: "Timers",
+		},
 		identifier: "timer.start",
 		parameters: []parameterDefinition{
 			{
