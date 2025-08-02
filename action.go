@@ -741,6 +741,7 @@ func collectDefinedAction() {
 		if len(matches) != 0 {
 			var match = matches[0]
 			doc = selfDoc{title: strings.TrimSpace(match[2]), description: strings.TrimSpace(match[3]), category: currentCategory, subcategory: match[1]}
+			tokens = slices.Delete(tokens, len(tokens)-1, len(tokens))
 		}
 	}
 
