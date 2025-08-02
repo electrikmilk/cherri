@@ -958,7 +958,8 @@ var actions = map[string]*actionDefinition{
 		doc: selfDoc{
 			title:       "Ask for Input",
 			description: "Ask for input with prompt, with optional inputType and defaultValue.",
-			category:    "scripting",
+			category:    "basic",
+
 			subcategory: "Notification",
 		},
 		identifier: "ask",

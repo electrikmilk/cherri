@@ -63,6 +63,9 @@ enum language {
 	"WFNoOutputSurfaceBehavior": "Respond"
 }
 
+// [Doc]: [Output] Content Graph: Display input as a content graph.
+#define action 'viewresult' contentGraph(variable input: 'WFInput')
+
 enum countType {
 	'Items',
 	'Characters',
@@ -96,3 +99,9 @@ enum countType {
 #define action number(number number: 'WFNumberActionNumber'): number
 
 #define action 'gettext' text(text text: 'WFTextActionText'): text
+
+// [Doc]: [Control Flow] Wait: Wait a specified number of seconds.
+#define action 'delay' wait(number seconds: 'WFDelayTime')
+
+// [Doc]: [Control Flow] Wait to Return: Wait for the user to return to Shortcuts.
+#define action waitToReturn()
