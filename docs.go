@@ -68,11 +68,12 @@ func printCategories(categories map[string][]string) {
 }
 
 func generateCategory(category string) actionCategory {
-	if category == "pdf" {
-		category = "PDF"
+	var categoryTitle = category
+	if categoryTitle == "pdf" {
+		categoryTitle = "PDF"
 	}
 	var cat = actionCategory{
-		title: fmt.Sprintf("%s Actions", capitalize(category)),
+		title: fmt.Sprintf("%s Actions", capitalize(categoryTitle)),
 	}
 	var subcat = args.Value("subcat")
 	for name, def := range actions {
