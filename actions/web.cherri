@@ -68,26 +68,6 @@ enum searchEngine {
 
 #define action searchWeb(searchEngine engine: 'WFSearchWebDestination', text query: 'WFInputText')
 
-/* IP Address */
-
-enum IPTypes {
- 'IPv4',
- 'IPv6',
-}
-
-#define action default 'getipaddress' getExternalIP(IPTypes ?type: 'WFIPAddressTypeOption' = "IPv4"): text {
-	"WFIPAddressSourceOption": "External"
-}
-
-#define action 'getipaddress' getLocalIP(IPTypes ?type: 'WFIPAddressTypeOption' = "IPv4"): text {
-	"WFIPAddressSourceOption": "Local"
-}
-
-#define action 'getipaddress' isOnline() {
-	"WFIPAddressSourceOption": "External",
-    "WFIPAddressTypeOption": "IPv4"
-}
-
 /* Giphy */
 
 #define action default 'giphy' getGifs(text query: 'WFGiphyQuery', number ?gifs: 'WFGiphyLimit' = 1) {

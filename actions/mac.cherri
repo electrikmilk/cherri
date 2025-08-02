@@ -70,6 +70,4 @@ enum SSHScriptAuthType {
 	'SSH Key',
 }
 
-#define action mac runSSHScript(text script: 'WFSSHScript', variable input: 'WFInput', text host: 'WFSSHHost', text port: 'WFSSHPort', text user: 'WFSSHUser', SSHScriptAuthType authType: 'WFSSHAuthenticationType', text password: 'WFSSHPassword')
-
 #define action mac 'runjavascriptforautomation' runJSAutomation(variable input: 'Input', text script: 'Script')

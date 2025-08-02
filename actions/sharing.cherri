@@ -2,20 +2,20 @@
 Sharing Actions
 */
 
+// [Doc]: Share: Prompt the user to share `input`.
 #define action share(variable input: 'WFInput')
 
-/* Clipboard access */
-
+// [Doc]: [Clipboard] Get Clipboard: Get the contents of the clipboard.
 #define action getClipboard()
 
+// [Doc]: [Clipboard] Set Clipboard: Set the contents of the clipboard.
 #define action setClipboard(
     variable value: 'WFInput',
     bool ?local: 'WFLocalOnly' = false,
     text ?expire: 'WFExpirationDate'
 )
 
-/* Email & SMS messaging */
-
+// [Doc]: [Email & SMS Messaging]: Send Email: Send an email to a contact.
 #define action sendEmail(
     variable contact: 'WFSendEmailActionToRecipients',
     text from: 'WFSendEmailActionFrom',
@@ -25,13 +25,15 @@ Sharing Actions
     bool ?draft: 'WFSendEmailActionSaveAsDraft' = false
 )
 
+// [Doc]: [Email & SMS Messaging]: Send Message: Send an SMS/iMessage to a contact.
 #define action sendMessage(
     variable contact: 'WFSendMessageActionRecipients',
     text message: 'WFSendMessageContent',
     bool ?prompt: 'ShowWhenRun' = true
 )
 
-/* AirDrop and receiving states */
+// [Doc]: AirDrop: Prompt the user to AirDrop `input`.
+#define action 'airdropdocument' airdrop(variable input: 'WFInput')
 
 enum airdropReceivingStates {
     'No One',
@@ -39,8 +41,7 @@ enum airdropReceivingStates {
     'Everyone',
 }
 
-#define action 'airdropdocument' airdrop(variable input: 'WFInput')
-
+// [Doc]: Set AirDrop Receiving: Set the AirDrop receiving setting.
 #define action setAirdropReceiving(
     airdropReceivingStates ?state: 'WFAirDropState' = "Everyone"
 )
