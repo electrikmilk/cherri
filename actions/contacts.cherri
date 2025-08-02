@@ -41,8 +41,6 @@ enum contactDetail {
 // [Doc]: [Contacts] Select Contact: Prompt the user to select a contact or multiple contacts. Returns selected contact.
 #define action 'selectcontacts' selectContact(bool ?multiple: 'WFSelectMultiple' = false)
 
-/* Phone */
-
 // [Doc]: [Phone] Call: Call a contact.
 #define action 'com.apple.mobilephone.call' call(variable contact: 'WFCallContact')
 
@@ -61,8 +59,6 @@ enum facetimeCallType {
 
 // [Doc]: [Phone] Select Phone Number: Prompt the user to select a phone number from their contacts.
 #define action 'selectphone' selectPhoneNumber()
-
-/* Email */
 
 // [Doc]: [Email] Get Emails: Get emails from input.
 #define action 'detect.emailaddress' getEmails(text input: 'WFInput'): array
