@@ -74,8 +74,9 @@ func generateCategory(category string) actionCategory {
 	var cat = actionCategory{
 		title: fmt.Sprintf("%s Actions", capitalize(category)),
 	}
+	var subcat = args.Value("subcat")
 	for name, def := range actions {
-		if def.doc.category != category {
+		if def.doc.category != category || (subcat != "" && def.doc.subcategory != subcat) {
 			continue
 		}
 

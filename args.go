@@ -92,4 +92,10 @@ func init() {
 		ExpectsValue: true,
 		Values:       actionCategories,
 	})
+	args.Register(args.Argument{
+		Name:         "subcat",
+		Description:  "Filter action documentation category by subcategory.",
+		DefaultValue: "",
+		ExpectsValue: true,
+	})
 }
