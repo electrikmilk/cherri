@@ -2,8 +2,6 @@
 Web Actions
 */
 
-/* URLs */
-
 // [Doc]: [URLs] Open URL: Open URL in default browser.
 #define action openURL(text url: 'WFInput') {
 	"Show-WFInput": true
