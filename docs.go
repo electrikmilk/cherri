@@ -72,6 +72,9 @@ func generateCategory(category string) actionCategory {
 	if categoryTitle == "pdf" {
 		categoryTitle = "PDF"
 	}
+	if categoryTitle == "a11y" {
+		categoryTitle = "Accessibility"
+	}
 	var cat = actionCategory{
 		title: fmt.Sprintf("%s Actions", capitalize(categoryTitle)),
 	}

@@ -26,55 +26,18 @@ Settings Actions
 	}
 }
 
+// [Doc]: Set Appearance to Light
 #define action 'appearance' lightMode() {
 	"operation": "set",
 	"style": "light"
 }
 
+// [Doc]: Set Appearance to Dark
 #define action default 'appearance' darkMode() {
 	"operation": "set",
 	"style": "dark"
 }
 
-/* Accessibility */
-
-enum backgroundSound {
-	'BalancedNoise',
-	'BrightNoise',
-	'DarkNoise',
-	'Ocean',
-	'Rain',
-	'Stream',
-}
-
-#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundIntent' setBackgroundSound(backgroundSound ?sound: 'backgroundSound' = "BalancedNoise")
-
-#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundVolumeIntent' setBackgroundSoundsVolume(float volume: 'volumeValue')
-
-enum textSizes {
-	'Accessibility Extra Extra Extra Large',
-	'Accessibility Extra Extra Large',
-	'Accessibility Extra Large',
-	'Accessibility Large',
-	'Accessibility Medium',
-	'Extra Extra Extra Large',
-	'Extra Extra Large',
-	'Extra Large',
-	'Default',
-	'Medium',
-	'Small',
-	'Extra Small',
-}
-
-#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetLargeTextIntent' setTextSize(textSizes size: 'textSize')
-
-enum soundRecognitionOperations {
-	'pause',
-	'activate',
-	'toggle',
-}
-
-#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent' setSoundRecognition(soundRecognitionOperations ?operation = "activate")
 
 /* Wallpaper */
 

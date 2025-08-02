@@ -1796,6 +1796,7 @@ func handleRawParams(params map[string]any) {
 }
 
 var actionIncludes = []string{
+	"a11y",
 	"calendar",
 	"contacts",
 	"crypto",
@@ -2167,10 +2168,18 @@ func decompInfiniteURLAction(action *ShortcutAction) (arguments []string) {
 // toggleSetActions are actions which all are state based and so can either be toggled or set in the same format.
 var toggleSetActions = map[string]actionDefinition{
 	"BackgroundSounds": {
+		doc: selfDoc{
+			title:    "Background Sounds",
+			category: "a11y",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleBackgroundSoundsIntent",
 	},
 	"MediaBackgroundSounds": {
+		doc: selfDoc{
+			title:    "Media Background Sounds",
+			category: "a11y",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleBackgroundSoundsIntent",
 		addParams: func(_ []actionArgument) map[string]any {
@@ -2180,57 +2189,115 @@ var toggleSetActions = map[string]actionDefinition{
 		},
 	},
 	"AutoAnswerCalls": {
+		doc: selfDoc{
+			title:    "Auto Answer Calls",
+			category: "a11y",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleAutoAnswerCallsIntent",
 	},
 	"Appearance": {
+		doc: selfDoc{
+			category: "settings",
+		},
 		identifier: "appearance",
 	},
 	"Bluetooth": {
+		doc: selfDoc{
+			category: "settings",
+		},
 		identifier: "bluetooth.set",
 		setKey:     "OnValue",
 	},
 	"Wifi": {
+		doc: selfDoc{
+			category: "settings",
+		},
 		identifier: "wifi.set",
 		setKey:     "OnValue",
 	},
 	"CellularData": {
+		doc: selfDoc{
+			title:    "Cellular Data",
+			category: "settings",
+		},
 		identifier: "cellulardata.set",
 		setKey:     "OnValue",
 	},
 	"NightShift": {
+		doc: selfDoc{
+			title:    "Cellular Data",
+			category: "settings",
+		},
 		identifier: "nightshift.set",
 		setKey:     "OnValue",
 	},
 	"TrueTone": {
+		doc: selfDoc{
+			title:    "Cellular Data",
+			category: "settings",
+		},
 		identifier: "truetone.set",
 		setKey:     "OnValue",
 	},
 	"AirplaneMode": {
+		doc: selfDoc{
+			title:    "Airplane Mode",
+			category: "device",
+		},
 		identifier: "airplanemode.set",
 		setKey:     "OnValue",
 	},
 	"ClassicInvert": {
+		doc: selfDoc{
+			title:       "Classic Invert",
+			category:    "a11y",
+			subcategory: "Vision",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleClassicInvertIntent",
 	},
 	"ClosedCaptionsSDH": {
+		doc: selfDoc{
+			title:       "Closed Captions SDH",
+			category:    "a11y",
+			subcategory: "Hearing",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleCaptionsIntent",
 	},
 	"ColorFilters": {
+		doc: selfDoc{
+			title:       "Color Filters",
+			category:    "a11y",
+			subcategory: "Vision",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleColorFiltersIntent",
 	},
 	"Contrast": {
+		doc: selfDoc{
+			category:    "ally",
+			subcategory: "Vision",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleContrastIntent",
 	},
 	"LEDFlash": {
+		doc: selfDoc{
+			title:       "LED Flash",
+			category:    "a11y",
+			subcategory: "Hearing",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleLEDFlashIntent",
 	},
 	"LeftRightBalance": {
+		doc: selfDoc{
+			title:       "Left-Right Balance",
+			category:    "a11y",
+			subcategory: "Hearing",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXSetLeftRightBalanceIntent",
 		parameters: []parameterDefinition{
@@ -2243,42 +2310,89 @@ var toggleSetActions = map[string]actionDefinition{
 		},
 	},
 	"LiveCaptions": {
+		doc: selfDoc{
+			title:       "Live Captions",
+			category:    "a11y",
+			subcategory: "Hearing",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleLiveCaptionsIntent",
 	},
 	"MonoAudio": {
+		doc: selfDoc{
+			title:       "Mono Audio",
+			category:    "a11y",
+			subcategory: "Hearing",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleMonoAudioIntent",
 	},
 	"ReduceMotion": {
+		doc: selfDoc{
+			title:       "Reduce Motion",
+			category:    "a11y",
+			subcategory: "Vision",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleReduceMotionIntent",
 	},
 	"ReduceTransparency": {
+		doc: selfDoc{
+			title:       "Reduce Transparency",
+			category:    "a11y",
+			subcategory: "Vision",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleTransparencyIntent",
 	},
 	"SmartInvert": {
+		doc: selfDoc{
+			title:       "Smart Invert",
+			category:    "a11y",
+			subcategory: "Vision",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleSmartInvertIntent",
 	},
 	"SwitchControl": {
+		doc: selfDoc{
+			title:    "Switch Control",
+			category: "a11y",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleSwitchControlIntent",
 	},
 	"VoiceControl": {
+		doc: selfDoc{
+			title:       "Voice Control",
+			category:    "a11y",
+			subcategory: "Vision",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleVoiceControlIntent",
 	},
 	"WhitePoint": {
+		doc: selfDoc{
+			title:       "White Point",
+			category:    "a11y",
+			subcategory: "Vision",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleWhitePointIntent",
 	},
 	"Zoom": {
+		doc: selfDoc{
+			category:    "a11y",
+			subcategory: "Vision",
+		},
 		appIdentifier: "com.apple.AccessibilityUtilities.AXSettingsShortcuts",
 		identifier:    "AXToggleZoomIntent",
 	},
 	"StageManager": {
+		doc: selfDoc{
+			title:    "Stage Manager",
+			category: "settings",
+		},
 		identifier: "stagemanager.set",
 		parameters: []parameterDefinition{
 			{
@@ -2300,14 +2414,21 @@ var toggleSetActions = map[string]actionDefinition{
 // defineToggleSetActions automates the creation of actions which simply toggle and set a state in the same format.
 func defineToggleSetActions() {
 	for name, def := range toggleSetActions {
+		var docTitle = def.doc.title
 		var toggleName = fmt.Sprintf("toggle%s", name)
 		def.addParams = func(_ []actionArgument) map[string]any {
 			return map[string]any{
 				"operation": "toggle",
 			}
 		}
-		var toggleDef = def
+		if docTitle != "" {
+			def.doc.title = fmt.Sprintf("Toggle %s", docTitle)
+		} else {
+			def.doc.title = fmt.Sprintf("Toggle %s", name)
+		}
 		def.defaultAction = false
+
+		var toggleDef = def
 		actions[toggleName] = &toggleDef
 
 		if name == "Appearance" {
@@ -2315,6 +2436,7 @@ func defineToggleSetActions() {
 		}
 
 		var setName = fmt.Sprintf("set%s", name)
+		def.defaultAction = true
 		def.addParams = nil
 		def.defaultAction = true
 		var setKey = "state"
@@ -2328,6 +2450,12 @@ func defineToggleSetActions() {
 				key:       setKey,
 			},
 		}, def.parameters...)
+		if docTitle != "" {
+			def.doc.title = fmt.Sprintf("Set %s", docTitle)
+		} else {
+			def.doc.title = fmt.Sprintf("Set %s", name)
+		}
+
 		var setDef = def
 		actions[setName] = &setDef
 	}
