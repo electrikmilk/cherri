@@ -63,23 +63,6 @@ Scripting Actions
 	"WFItemSpecifier": "Items in Range"
 }
 
-/* Notifications */
-
-#define action alert(text alert: 'WFAlertActionMessage', text ?title: 'WFAlertActionTitle') {
-	"WFAlertActionCancelButtonShown": false
-}
-
-#define action default 'alert' confirm(text alert: 'WFAlertActionMessage', text ?title: 'WFAlertActionTitle') {
-	"WFAlertActionCancelButtonShown": true
-}
-
-#define action 'notification' showNotification(
-    text body: 'WFNotificationActionBody',
-    text ?title: 'WFNotificationActionTitle',
-    bool ?playSound: 'WFNotificationActionSound' = true,
-    variable ?attachment: 'WFInput'
-)
-
 /* Numbers */
 
 #define action 'format.number' formatNumber(number number: 'WFNumber', number ?decimalPlaces: 'WFNumberFormatDecimalPlaces' = 2): number
