@@ -2,13 +2,11 @@
 Media Actions
 */
 
-/* Stores */
-
+// [Doc]: Search App Store
 #define action searchAppStore(text query: 'WFSearchTerm')
 
+// [Doc]: Show In iTunes
 #define action 'showinstore' showIniTunes(variable product: 'WFProduct')
-
-/* Audio */
 
 enum audioQuality {
 	'Normal',
@@ -31,8 +29,10 @@ enum audioSpeeds {
 	'2X',
 }
 
+// [Doc]: [Audio] Record Audio: Prompt the user to record audio.
 #define action recordAudio(audioQuality ?quality: 'WFRecordingCompression' = "Normal", audioStart ?start: 'WFRecordingStart' = "On Tap")
 
+// [Doc]: [Audio] Encode Audio: Encode audio to a different format and/or speed.
 #define action 'encodemedia' encodeAudio(
     variable audio: 'WFMedia',
     audioFormats ?format: 'WFMediaAudioFormat' = "M4A",
@@ -41,10 +41,10 @@ enum audioSpeeds {
 	"WFMediaAudioOnly": true
 }
 
+// [Doc]: [Audio] Play Audio: Play a sound.
 #define action playSound(variable input: 'WFInput')
 
-/* Shazam */
-
+// [Doc]: [Shazam] Start Shazam: Prompt the user to play music for Shazam to recognize. Returns Shazam result.
 #define action 'shazamMedia' startShazam(bool ?show: 'WFShazamMediaActionShowWhenRun' = true, bool ?showError: 'WFShazamMediaActionErrorIfNotRecognized' = true)
 
 enum shazamDetail {
@@ -61,10 +61,10 @@ enum shazamDetail {
 	'Name',
 }
 
+// [Doc]: [Shazam] Get Shazam Detail: Get detail about a Shazam result.
 #define action 'properties.shazam' getShazamDetail(variable input: 'WFInput', shazamDetail detail: 'WFContentItemPropertyName')
 
-/* Camera */
-
+// [Doc]: [Camera] Take Photo: Prompt the user to take one or more photos.
 #define action takePhoto(number count: 'WFPhotoCount' = 1, bool showPreview: 'WFCameraCaptureShowPreview' = true)
 
 enum cameraOrientation {
@@ -83,19 +83,19 @@ enum recordingStart {
 	'Immediately',
 }
 
+// [Doc]: [Camera] Take Photo: Prompt the user to start recording a video.
 #define action takeVideo(
     cameraOrientation ?camera: 'WFCameraCaptureDevice' = "Front",
     videoQuality ?quality: 'WFCameraCaptureQuality' = "High",
     recordingStart ?recordingStart: 'WFRecordingStart' = "Immediately"
 )
 
-/* Screenshots */
-
+// [Doc]: Take Screenshot
 #define action takeScreenshot(bool ?mainMonitorOnly: 'WFTakeScreenshotMainMonitorOnly' = false) {
 	"WFTakeScreenshotScreenshotType": "Full Screen"
 }
-
-/* Podcasts */
+// [Doc]: [Podcasts] Search Podcasts
+#define action searchPodcasts(text query: 'WFSearchTerm')
 
 enum podcastDetail {
 	'Feed URL',
@@ -109,20 +109,22 @@ enum podcastDetail {
 	'Name',
 }
 
-#define action searchPodcasts(text query: 'WFSearchTerm')
-
+// [Doc]: [Podcasts] Get Podcast Detail
 #define action 'properties.podcastshow' getPodcastDetail(variable podcast: 'WFInput', podcastDetail detail: 'WFContentItemPropertyName')
 
+// [Doc]: [Podcasts] Get Podcasts: Get users podcasts.
 #define action 'getpodcastsfromlibrary' getPodcasts()
 
+// [Doc]: [Podcasts] Play Podcast
 #define action playPodcast(variable podcast: 'WFPodcastShow')
 
-/* Video Editing */
 
+// [Doc]: Strip Media Metadata
 #define action 'encodemedia' stripMediaMetadata(variable media: 'WFMedia') {
 	"Metadata": true
 }
 
+// [Doc]: Set Media Metadata
 #define action 'encodemedia' setMetadata(
     variable media: 'WFMedia',
     variable ?artwork: 'WFMetadataArtwork',
@@ -152,6 +154,8 @@ enum encodeVideoSpeeds {
 	'2X',
 }
 
+// [Doc]: [Video Editing] Encode Video: Encode a video to a different format, size and/or speed.
 #define action 'encodemedia' encodeVideo(variable video: 'WFMedia', encodeVideoSizes ?size: 'WFMediaSize' = "Passthrough", encodeVideoSpeeds ?speed: 'WFMediaCustomSpeed' = "Normal", bool ?preserveTransparency: 'WFMediaPreserveTransparency' = false)
 
+// [Doc]: [Video Editing] Trim Video: Prompts the user to trim the video.
 #define action trimVideo(variable video: 'WFInputMedia')
