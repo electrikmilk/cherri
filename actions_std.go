@@ -284,6 +284,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"toggleAlarm": {
+		doc: selfDoc{
+			title:       "Toggle Alarm",
+			description: "Toggle an alarm.",
+			category:    "calendar",
+			subcategory: "Alarms",
+		},
 		parameters: []parameterDefinition{
 			{
 				name:      "alarm",
@@ -298,12 +304,6 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
-		doc: selfDoc{
-			title:       "Toggle Alarm",
-			description: "Toggle an alarm.",
-			category:    "calendar",
-			subcategory: "Alarms",
-		},
 		appIntent: toggleAlarmIntent,
 		addParams: func(_ []actionArgument) map[string]any {
 			return map[string]any{
@@ -312,6 +312,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"emailAddress": {
+		doc: selfDoc{
+			title:       "Email Address",
+			description: "Create an email address value.",
+			category:    "contacts",
+			subcategory: "Email",
+		},
 		identifier: "email",
 		parameters: []parameterDefinition{
 			{
@@ -319,12 +325,6 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				infinite:  true,
 			},
-		},
-		doc: selfDoc{
-			title:       "Email Address",
-			description: "Create an email address value.",
-			category:    "contacts",
-			subcategory: "Email",
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			if len(args) > 1 && args[0].valueType == Variable {
@@ -347,18 +347,18 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"phoneNumber": {
+		doc: selfDoc{
+			title:       "Phone Number",
+			description: "Create a phone number value.",
+			category:    "contacts",
+			subcategory: "Phone",
+		},
 		parameters: []parameterDefinition{
 			{
 				name:      "number",
 				validType: String,
 				infinite:  true,
 			},
-		},
-		doc: selfDoc{
-			title:       "Phone Number",
-			description: "Create a phone number value.",
-			category:    "contacts",
-			subcategory: "Phone",
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			if len(args) > 1 && args[0].valueType == Variable {
@@ -381,6 +381,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"newContact": {
+		doc: selfDoc{
+			title:       "Add New Contact",
+			description: "Create a new contact.",
+			category:    "contacts",
+			subcategory: "Contacts",
+		},
 		identifier: "addnewcontact",
 		parameters: []parameterDefinition{
 			{
@@ -418,12 +424,6 @@ var actions = map[string]*actionDefinition{
 				defaultValue: false,
 				optional:     true,
 			},
-		},
-		doc: selfDoc{
-			title:       "Add New Contact",
-			description: "Create a new contact.",
-			category:    "contacts",
-			subcategory: "Contacts",
 		},
 		addParams: func(args []actionArgument) (params map[string]any) {
 			params = make(map[string]any)
@@ -1005,6 +1005,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openApp": {
+		doc: selfDoc{
+			title:       "Open App",
+			description: "Open an app.",
+			category:    "scripting",
+		},
 		defaultAction: true,
 		parameters: []parameterDefinition{
 			{
@@ -1038,6 +1043,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"hideApp": {
+		doc: selfDoc{
+			title:       "Hide App",
+			description: "Hide an app.",
+			category:    "scripting",
+		},
 		identifier:    "hide.app",
 		defaultAction: true,
 		parameters: []parameterDefinition{
@@ -1067,6 +1077,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"hideAllApps": {
+		doc: selfDoc{
+			title:       "Hide Apps",
+			description: "Hide multiple apps. Allows exception.",
+			category:    "scripting",
+		},
 		identifier: "hide.app",
 		parameters: []parameterDefinition{
 			{
@@ -1100,6 +1115,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"quitApp": {
+		doc: selfDoc{
+			title:       "Qut App",
+			description: "Quit an app.",
+			category:    "scripting",
+		},
 		identifier:    "quit.app",
 		defaultAction: true,
 		parameters: []parameterDefinition{
@@ -1129,6 +1149,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"quitAllApps": {
+		doc: selfDoc{
+			title:       "Quit All Apps",
+			description: "Quits all apps. Allows exceptions.",
+			category:    "scripting",
+		},
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
 			{
@@ -1159,6 +1184,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"killApp": {
+		doc: selfDoc{
+			title:       "Kill App",
+			description: "Kill an app.",
+			category:    "scripting",
+		},
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
 			{
@@ -1190,6 +1220,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"killAllApps": {
+		doc: selfDoc{
+			title:       "Kill All Apps",
+			description: "Kills all apps. Allows exceptions.",
+			category:    "scripting",
+		},
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
 			{
@@ -1219,6 +1254,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"splitApps": {
+		doc: selfDoc{
+			title:       "Split Apps",
+			description: "Split apps across the screen.",
+			category:    "scripting",
+		},
 		identifier: "splitscreen",
 		parameters: []parameterDefinition{
 			{
@@ -1300,6 +1340,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openShortcut": {
+		doc: selfDoc{
+			title:       "Open Shortcut",
+			description: "Open a shortcut in the Shortcuts app.",
+			category:    "shortcuts",
+		},
 		appIdentifier: "com.apple.shortcuts",
 		identifier:    "OpenWorkflowAction",
 		parameters: []parameterDefinition{
@@ -1329,6 +1374,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"runSelf": {
+		doc: selfDoc{
+			title:       "Run Self",
+			description: "Run the current Shortcut with optional output.",
+			category:    "shortcuts",
+		},
 		identifier: "runworkflow",
 		parameters: []parameterDefinition{
 			{
@@ -1360,6 +1410,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"list": {
+		doc: selfDoc{
+			title:       "List",
+			description: "Create a list.",
+			category:    "scripting",
+			subcategory: "Lists",
+		},
 		parameters: []parameterDefinition{
 			{
 				name:      "listItem",
@@ -1393,6 +1449,10 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openCustomXCallbackURL": {
+		doc: selfDoc{
+			title:    "Open Custom X-Callback URL",
+			category: "web",
+		},
 		identifier: "openxcallbackurl",
 		parameters: []parameterDefinition{
 			{
@@ -1441,6 +1501,10 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"createShortcutLink": {
+		doc: selfDoc{
+			title:    "Create Shortcut Link",
+			category: "shortcuts",
+		},
 		appIdentifier: "com.apple.shortcuts",
 		identifier:    "CreateShortcutiCloudLinkAction",
 		appIntent:     createShortcutiCloudLink,
@@ -1453,6 +1517,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getWindows": {
+		doc: selfDoc{
+			title:       "Get Windows",
+			category:    "mac",
+			subcategory: "Windows",
+		},
 		identifier: "filter.windows",
 		parameters: []parameterDefinition{
 			{
@@ -1516,6 +1585,10 @@ var actions = map[string]*actionDefinition{
 		macOnly: true,
 	},
 	"convertMeasurement": {
+		doc: selfDoc{
+			title:    "Convert Measurement",
+			category: "scripting",
+		},
 		identifier: "measurement.convert",
 		parameters: []parameterDefinition{
 			{
@@ -1577,6 +1650,10 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"measurement": {
+		doc: selfDoc{
+			title:    "Create Measurement",
+			category: "scripting",
+		},
 		identifier: "measurement.create",
 		parameters: []parameterDefinition{
 			{
@@ -1637,6 +1714,10 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"makeVCard": {
+		doc: selfDoc{
+			title:    "Make VCard",
+			category: "builtin",
+		},
 		identifier: "gettext",
 		parameters: []parameterDefinition{
 			{
@@ -1688,7 +1769,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"embedFile": {
-		doc:        selfDoc{title: "Base 64 Embed File", description: "Embed file at path as base 64 text.", category: "scripting"},
+		doc: selfDoc{
+			title:       "Base 64 Embed File",
+			description: "Embed file at path as base 64 text.",
+			category:    "scripting",
+		},
 		identifier: "gettext",
 		parameters: []parameterDefinition{
 			{
@@ -1717,6 +1802,10 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"updateContact": {
+		doc: selfDoc{
+			title:    "Update Contact",
+			category: "contacts",
+		},
 		identifier:    "setters.contacts",
 		defaultAction: true,
 		parameters: []parameterDefinition{

@@ -72,6 +72,7 @@ type appIntent struct {
 
 // actionDefinition defines an action, what it expects and has functions for checking the arguments and creating the parameters.
 type actionDefinition struct {
+	doc                selfDoc
 	identifier         string
 	appIdentifier      string
 	overrideIdentifier string
@@ -89,7 +90,6 @@ type actionDefinition struct {
 	maxVersion         float64
 	setKey             string
 	builtin            bool // builtin is based on if the action was in the actions map when it was first initialized.
-	doc                selfDoc
 }
 
 // libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
