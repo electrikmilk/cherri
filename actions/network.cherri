@@ -35,6 +35,11 @@ enum cellularDetail {
 // [Doc]: [Server] Connect to Server: Connect to file server at `url`.
 #define action 'connecttoservers' connectToServer(text url: 'WFInput')
 
+enum SSHScriptAuthType {
+	'Password',
+	'SSH Key',
+}
+
 // [Doc]: [Server] Run SSH Script: Run an SSH script using connection details.
 #define action runSSHScript(text script: 'WFSSHScript', variable input: 'WFInput', text host: 'WFSSHHost', text port: 'WFSSHPort', text user: 'WFSSHUser', SSHScriptAuthType authType: 'WFSSHAuthenticationType', text password: 'WFSSHPassword')
 

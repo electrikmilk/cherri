@@ -65,9 +65,4 @@ enum windowConfiguration {
 
 #define action mac runAppleScript(variable input: 'Input', text script: 'Script')
 
-enum SSHScriptAuthType {
-	'Password',
-	'SSH Key',
-}
-
 #define action mac 'runjavascriptforautomation' runJSAutomation(variable input: 'Input', text script: 'Script')
