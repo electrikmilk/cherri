@@ -2198,44 +2198,50 @@ var toggleSetActions = map[string]actionDefinition{
 	},
 	"Appearance": {
 		doc: selfDoc{
-			category: "settings",
+			category:    "settings",
+			subcategory: "Appearance",
 		},
 		identifier: "appearance",
 	},
 	"Bluetooth": {
 		doc: selfDoc{
-			category: "settings",
+			category:    "settings",
+			subcategory: "Wireless",
 		},
 		identifier: "bluetooth.set",
 		setKey:     "OnValue",
 	},
 	"Wifi": {
 		doc: selfDoc{
-			category: "settings",
+			category:    "settings",
+			subcategory: "Wireless",
 		},
 		identifier: "wifi.set",
 		setKey:     "OnValue",
 	},
 	"CellularData": {
 		doc: selfDoc{
-			title:    "Cellular Data",
-			category: "settings",
+			title:       "Cellular Data",
+			category:    "settings",
+			subcategory: "Wireless",
 		},
 		identifier: "cellulardata.set",
 		setKey:     "OnValue",
 	},
 	"NightShift": {
 		doc: selfDoc{
-			title:    "Cellular Data",
-			category: "settings",
+			title:       "Night Shift",
+			category:    "settings",
+			subcategory: "Display",
 		},
 		identifier: "nightshift.set",
 		setKey:     "OnValue",
 	},
 	"TrueTone": {
 		doc: selfDoc{
-			title:    "Cellular Data",
-			category: "settings",
+			title:       "True Tone",
+			category:    "settings",
+			subcategory: "Display",
 		},
 		identifier: "truetone.set",
 		setKey:     "OnValue",

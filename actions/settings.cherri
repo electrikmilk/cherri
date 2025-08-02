@@ -2,13 +2,13 @@
 Settings Actions
 */
 
-// [Doc]: Set Brightness
+// [Doc]: [Device] Set Brightness
 #define action setBrightness(float brightness: 'WFBrightness')
 
-// [Doc]: Set Volume
+// [Doc]: [Device] Set Volume
 #define action setVolume(float volume: 'WFVolume')
 
-// [Doc]: Turn On Do Not Disturb
+// [Doc]: [Notifications] Turn On Do Not Disturb
 #define action 'dnd.set' DNDOn() {
 	"Enabled": 1,
 	"FocusModes": {
@@ -17,7 +17,7 @@ Settings Actions
 	}
 }
 
-// [Doc]: Turn Off Do Not Disturb
+// [Doc]: [Notifications] Turn Off Do Not Disturb
 #define action 'dnd.set' DNDOff() {
 	"Enabled": 0,
 	"FocusModes": {
@@ -26,25 +26,25 @@ Settings Actions
 	}
 }
 
-// [Doc]: Set Appearance to Light
+// [Doc]: [Appearance] Set Appearance to Light
 #define action 'appearance' lightMode() {
 	"operation": "set",
 	"style": "light"
 }
 
-// [Doc]: Set Appearance to Dark
+// [Doc]: [Appearance] Set Appearance to Dark
 #define action default 'appearance' darkMode() {
 	"operation": "set",
 	"style": "dark"
 }
 
-
-/* Wallpaper */
-
+// [Doc]: [Wallpaper] Set Wallpaper: Sets the device wallpaper to `input`.
 #define action 'wallpaper.set' setWallpaper(variable input: 'WFInput')
 
+// [Doc]: [Wallpaper] Get Wallpapers: Get device wallpapers.
 #define action default !mac v16.2 'posters.get' getAllWallpapers(): array
 
+// [Doc]: [Wallpaper] Get Wallpaper: Get current device wallpaper.
 #define action !mac v16.2 'posters.get' getWallpaper() {
 	"WFPosterType": "Current"
 }
