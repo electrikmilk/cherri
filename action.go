@@ -618,11 +618,9 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 
 func generateActionParamEnums(focus parameterDefinition) string {
 	var definition strings.Builder
+	var usedEnums []string
 	for _, param := range currentAction.parameters {
-		if param.enum == "" {
-			continue
-		}
-		if focus.name != "" && focus.name != param.name {
+		if param.enum == "" || (focus.name != "" && focus.name != param.name) || slices.Contains(usedEnums, param.enum) {
 			continue
 		}
 		definition.WriteString(ansi("enum ", orange))
@@ -637,6 +635,7 @@ func generateActionParamEnums(focus parameterDefinition) string {
 			}
 		}
 		definition.WriteString(ansi("}\n\n", dim))
+		usedEnums = append(usedEnums, param.enum)
 	}
 
 	return definition.String()
