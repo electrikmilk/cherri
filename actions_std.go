@@ -1187,6 +1187,7 @@ var actions = map[string]*actionDefinition{
 		doc: selfDoc{
 			title:       "Kill App",
 			description: "Kill an app.",
+			warning:     "This will not ask to save changes!",
 			category:    "scripting",
 		},
 		identifier: "quit.app",
@@ -1223,6 +1224,7 @@ var actions = map[string]*actionDefinition{
 		doc: selfDoc{
 			title:       "Kill All Apps",
 			description: "Kills all apps. Allows exceptions.",
+			warning:     "This will quit all the apps running on the device without asking to save changes!",
 			category:    "scripting",
 		},
 		identifier: "quit.app",

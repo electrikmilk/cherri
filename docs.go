@@ -18,6 +18,7 @@ var currentCategory string
 type selfDoc struct {
 	title       string
 	description string
+	warning     string
 	category    string
 	subcategory string
 }

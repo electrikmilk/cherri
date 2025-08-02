@@ -542,6 +542,17 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 	}
 	definition.WriteString(fmt.Sprintf("%s\n", ansi(docTitle, bold, underline)))
 	definition.WriteRune('\n')
+
+	if currentAction.doc.warning != "" {
+		if args.Using("no-ansi") {
+			definition.WriteString(fmt.Sprintf("{: .warning }\n%s\n\n", currentAction.doc.warning))
+		} else {
+			definition.WriteString(ansi(fmt.Sprintf("Warning: %s", currentAction.doc.warning), yellow, bold, underline))
+			definition.WriteRune('\n')
+			definition.WriteRune('\n')
+		}
+	}
+
 	if currentAction.doc.description != "" {
 		definition.WriteString(fmt.Sprintf("%s\n\n", ansi(currentAction.doc.description, italic)))
 	}
