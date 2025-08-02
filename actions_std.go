@@ -52,7 +52,7 @@ var actions = map[string]*actionDefinition{
 			title:       "Adjust Date",
 			description: "Adjust a date or get the start of a time period.",
 			category:    "calendar",
-			subcategory: "Date",
+			subcategory: "Dates",
 		},
 		identifier: "adjustdate",
 		parameters: []parameterDefinition{
