@@ -1,11 +1,14 @@
 /*
-Device settings actions.
+Settings Actions
 */
 
+// [Doc]: Set Brightness
 #define action setBrightness(float brightness: 'WFBrightness')
 
+// [Doc]: Set Volume
 #define action setVolume(float volume: 'WFVolume')
 
+// [Doc]: Turn On Do Not Disturb
 #define action 'dnd.set' DNDOn() {
 	"Enabled": 1,
 	"FocusModes": {
@@ -14,6 +17,7 @@ Device settings actions.
 	}
 }
 
+// [Doc]: Turn Off Do Not Disturb
 #define action 'dnd.set' DNDOff() {
 	"Enabled": 0,
 	"FocusModes": {
