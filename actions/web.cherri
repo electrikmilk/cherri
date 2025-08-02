@@ -40,7 +40,7 @@ enum URLDetail {
 	"WFEncodeMode": "Decode"
 }
 
-// [Doc]: [URLs] Open X-Callback URL: Open an X-Callback url.
+// [Doc]: [URLs] Open X-Callback URL
 #define action 'openxcallbackurl' openXCallbackURL(text url: 'WFXCallbackURL')
 
 // [Doc]: [Safari] Get Current URL: Get current URL in Safari.
