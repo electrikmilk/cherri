@@ -2,8 +2,6 @@
 Document Actions
 */
 
-/* Archives */
-
 enum archiveFormat {
     '.zip',
     '.tar.gz',
@@ -15,18 +13,16 @@ enum archiveFormat {
     '.iso',
 }
 
+// [Doc]: [Archives] Make Archive: Create an archive of `files` named `name` in `format`.
 #define action 'makezip' makeArchive(variable files: 'WFInput', archiveFormat ?format: 'WFArchiveFormat' = ".zip", text ?name: 'WFZIPName')
 
+// [Doc]: [Archives] Extract Archive: Extract files from the archive `file`.
 #define action 'unzip' extractArchive(variable file: 'WFArchive')
 
-
-
-/* Books */
-
+// [Doc]: [Books] Add to Books: Add `input` to books. `input` is expected to be a PDF or epub file.
 #define action 'com.apple.iBooksX.openin' addToBooks(variable input: 'BooksInput')
 
-/* Editing */
-
+// [Doc]: [Editing]: Markup: Opens document in a markup editor.
 #define action 'avairyeditphoto' markup(variable document: 'WFDocument')
 
 /* Files & Folders */

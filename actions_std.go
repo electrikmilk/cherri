@@ -47,311 +47,57 @@ var createShortcutiCloudLink = appIntent{
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
 	"returnToHomescreen": {nonMacOnly: true},
-	"addSeconds": {
-		identifier:    "adjustdate",
-		defaultAction: true,
+	"adjustDate": {
+		doc: selfDoc{
+			title:       "Adjust Date",
+			description: "Adjust a date or get the start of a time period.",
+			category:    "calendar",
+			subcategory: "Dates",
+		},
+		identifier: "adjustdate",
 		parameters: []parameterDefinition{
 			{
 				name:      "date",
 				key:       "WFDate",
 				validType: String,
+			},
+			{
+				name:      "operation",
+				key:       "WFAdjustOperation",
+				validType: String,
+				enum:      "dateOperation",
 			},
 			{
 				name:      "magnitude",
 				validType: Integer,
+				optional:  true,
 			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "sec", args)
-		},
-	},
-	"addMinutes": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
 			{
-				name:      "date",
-				key:       "WFDate",
+				name:      "unit",
 				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
+				enum:      "dateUnit",
+				optional:  true,
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "min", args)
-		},
-	},
-	"addHours": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "hr", args)
-		},
-	},
-	"addDays": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "days", args)
-		},
-	},
-	"addWeeks": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "weeks", args)
-		},
-	},
-	"addMonths": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "months", args)
-		},
-	},
-	"addYears": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Add", "yr", args)
-		},
-	},
-	"subtractSeconds": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "sec", args)
-		},
-	},
-	"subtractMinutes": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "min", args)
-		},
-	},
-	"subtractHours": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "hr", args)
-		},
-	},
-	"subtractDays": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "days", args)
-		},
-	},
-	"subtractWeeks": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "weeks", args)
-		},
-	},
-	"subtractMonths": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "months", args)
-		},
-	},
-	"subtractYears": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Subtract", "yr", args)
-		},
-	},
-	"getStartMinute": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Get Start of Minute", "", args)
-		},
-	},
-	"getStartHour": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Get Start of Hour", "", args)
-		},
-	},
-	"getStartWeek": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Get Start of Week", "", args)
-		},
-	},
-	"getStartMonth": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Get Start of Month", "", args)
-		},
-	},
-	"getStartYear": {
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			return adjustDate("Get Start of Year", "", args)
+			if len(args) != 4 {
+				return map[string]any{}
+			}
+
+			var unit = getArgValue(args[3])
+
+			return map[string]any{
+				"WFDuration": magnitudeValue(unit, args, 2),
+			}
 		},
 	},
 	"startTimer": {
+		doc: selfDoc{
+			title:       "Create Timer",
+			description: "Creates a new timer.",
+			category:    "calendar",
+			subcategory: "Timers",
+		},
 		identifier: "timer.start",
 		parameters: []parameterDefinition{
 			{
@@ -366,12 +112,22 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		addParams: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
+
 			return map[string]any{
 				"WFDuration": magnitudeValue(argumentValue(args, 1), args, 0),
 			}
 		},
 	},
 	"createAlarm": {
+		doc: selfDoc{
+			title:       "Create Alarm",
+			description: "Creates an alarm at specific time with a name, snooze allowance and applicable weekdays.",
+			category:    "calendar",
+			subcategory: "Alarms",
+		},
 		appIdentifier: "com.apple.mobiletimer-framework",
 		identifier:    "MobileTimerIntents.MTCreateAlarmIntent",
 		parameters: []parameterDefinition{
@@ -445,6 +201,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"deleteAlarm": {
+		doc: selfDoc{
+			title:       "Delete Alarm",
+			description: "Deletes an alarm.",
+			category:    "calendar",
+			subcategory: "Alarms",
+		},
 		appIdentifier: "com.apple.clock",
 		identifier:    "DeleteAlarmIntent",
 		appIntent: appIntent{
@@ -461,7 +223,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"turnOnAlarm": {
-		defaultAction: true,
+		doc: selfDoc{
+			title:       "Turn Off Alarm",
+			description: "Turn off an alarm.",
+			category:    "calendar",
+			subcategory: "Alarms",
+		},
 		appIdentifier: "com.apple.mobiletimer-framework",
 		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
 		appIntent:     toggleAlarmIntent,
@@ -484,8 +251,15 @@ var actions = map[string]*actionDefinition{
 				"state": 1,
 			}
 		},
+		defaultAction: true,
 	},
 	"turnOffAlarm": {
+		doc: selfDoc{
+			title:       "Turn Off Alarm",
+			description: "Turn off an alarm.",
+			category:    "calendar",
+			subcategory: "Alarms",
+		},
 		appIdentifier: "com.apple.mobiletimer-framework",
 		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
 		appIntent:     toggleAlarmIntent,
@@ -524,6 +298,12 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
+		doc: selfDoc{
+			title:       "Toggle Alarm",
+			description: "Toggle an alarm.",
+			category:    "calendar",
+			subcategory: "Alarms",
+		},
 		appIntent: toggleAlarmIntent,
 		addParams: func(_ []actionArgument) map[string]any {
 			return map[string]any{
@@ -539,6 +319,12 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				infinite:  true,
 			},
+		},
+		doc: selfDoc{
+			title:       "Email Address",
+			description: "Create an email address value.",
+			category:    "contacts",
+			subcategory: "Email",
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			if len(args) > 1 && args[0].valueType == Variable {
@@ -567,6 +353,12 @@ var actions = map[string]*actionDefinition{
 				validType: String,
 				infinite:  true,
 			},
+		},
+		doc: selfDoc{
+			title:       "Phone Number",
+			description: "Create a phone number value.",
+			category:    "contacts",
+			subcategory: "Phone",
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			if len(args) > 1 && args[0].valueType == Variable {
@@ -627,6 +419,12 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 			},
 		},
+		doc: selfDoc{
+			title:       "Add New Contact",
+			description: "Create a new contact.",
+			category:    "contacts",
+			subcategory: "Contacts",
+		},
 		addParams: func(args []actionArgument) (params map[string]any) {
 			params = make(map[string]any)
 			if len(args) >= 3 {
@@ -649,6 +447,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"removeContactDetail": {
+		doc: selfDoc{
+			title:       "Remove Contact Detail",
+			description: "Remove detail from contact.",
+			category:    "contacts",
+			subcategory: "Contacts",
+		},
 		identifier: "setters.contacts",
 		parameters: []parameterDefinition{
 			{
@@ -670,6 +474,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"labelFile": {
+		doc: selfDoc{
+			title:       "Label File",
+			description: "Label a file.",
+			category:    "documents",
+			subcategory: "Files & Folders",
+		},
 		identifier: "file.label",
 		parameters: []parameterDefinition{
 			{
@@ -697,6 +507,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"filterFiles": {
+		doc: selfDoc{
+			title:       "Filter Files",
+			description: "Filter the provided files with various filters.",
+			category:    "documents",
+			subcategory: "Files & Folders",
+		},
 		identifier: "filter.files",
 		parameters: []parameterDefinition{
 			{
@@ -740,6 +556,11 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getPDFText": {
+		doc: selfDoc{
+			title:       "Get PDF Text",
+			description: "Get text from PDF.",
+			category:    "pdf",
+		},
 		identifier: "gettextfrompdf",
 		parameters: []parameterDefinition{
 			{
@@ -793,6 +614,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getFolderContents": {
+		doc: selfDoc{
+			title:       "Get Folder Contacts",
+			description: "Get contents of folder.",
+			category:    "documents",
+			subcategory: "Files & Folders",
+		},
 		identifier: "file.getfoldercontents",
 		parameters: []parameterDefinition{
 			{
@@ -810,6 +637,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"containsText": {
+		doc: selfDoc{
+			title:       "Contains Text",
+			description: "Uses Match Text to check if text is within subject.",
+			category:    "documents",
+			subcategory: "Text Editing",
+		},
 		identifier: "text.match",
 		parameters: []parameterDefinition{
 			{
@@ -843,6 +676,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getFileFromFolder": {
+		doc: selfDoc{
+			title:       "Get File From Folder",
+			description: "Get a file from a folder.",
+			category:    "documents",
+			subcategory: "Files & Folders",
+		},
 		identifier: "documentpicker.open",
 		parameters: []parameterDefinition{
 			{
@@ -891,6 +730,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"splitText": {
+		doc: selfDoc{
+			title:       "Split Text",
+			description: "Split text by a separator.",
+			category:    "documents",
+			subcategory: "Text Editing",
+		},
 		identifier: "text.split",
 		parameters: []parameterDefinition{
 			{
@@ -909,6 +754,12 @@ var actions = map[string]*actionDefinition{
 		outputType: Arr,
 	},
 	"joinText": {
+		doc: selfDoc{
+			title:       "Join Text",
+			description: "Join text by a combiner.",
+			category:    "documents",
+			subcategory: "Text Editing",
+		},
 		identifier: "text.combine",
 		parameters: []parameterDefinition{
 			{
@@ -927,6 +778,11 @@ var actions = map[string]*actionDefinition{
 		outputType: String,
 	},
 	"makeSizedDiskImage": {
+		doc: selfDoc{
+			title:       "Make Size Disk Image",
+			description: "Make a sized disk image.",
+			category:    "mac",
+		},
 		identifier:    "makediskimage",
 		defaultAction: true,
 		parameters: []parameterDefinition{
@@ -1003,6 +859,12 @@ var actions = map[string]*actionDefinition{
 		minVersion: 15,
 	},
 	"seek": {
+		doc: selfDoc{
+			title:       "Seek",
+			description: "Seek the currently playing media.",
+			category:    "music",
+			subcategory: "Playback",
+		},
 		parameters: []parameterDefinition{
 			{
 				name:      "magnitude",
@@ -1038,6 +900,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"url": {
+		doc: selfDoc{
+			title:       "URL",
+			description: "Create a URL value.",
+			category:    "web",
+			subcategory: "URLs",
+		},
 		parameters: []parameterDefinition{
 			{
 				name:      "url",
@@ -1059,6 +927,12 @@ var actions = map[string]*actionDefinition{
 		decomp: decompInfiniteURLAction,
 	},
 	"addToReadingList": {
+		doc: selfDoc{
+			title:       "Add to Reading List",
+			description: "Add a link to the reading list.",
+			category:    "web",
+			subcategory: "Safari",
+		},
 		identifier: "readinglist",
 		parameters: []parameterDefinition{
 			{
@@ -1081,6 +955,13 @@ var actions = map[string]*actionDefinition{
 		decomp: decompInfiniteURLAction,
 	},
 	"prompt": {
+		doc: selfDoc{
+			title:       "Ask for Input",
+			description: "Ask for input with prompt, with optional inputType and defaultValue.",
+			category:    "basic",
+
+			subcategory: "Notification",
+		},
 		identifier: "ask",
 		parameters: []parameterDefinition{
 			{
@@ -1807,7 +1688,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"embedFile": {
-		doc:        selfDoc{title: "Base 64 Embed File", description: "Embed file at path as base 64 text."},
+		doc:        selfDoc{title: "Base 64 Embed File", description: "Embed file at path as base 64 text.", category: "scripting"},
 		identifier: "gettext",
 		parameters: []parameterDefinition{
 			{
@@ -1947,13 +1828,29 @@ func loadStandardActions() {
 	handleIncludes()
 	handleActionDefinitions()
 	resetParse()
-	firstChar()
 }
 
 func loadBasicStandardActions() {
 	includeBasicStandardActions()
 	handleIncludes()
 	handleActionDefinitions()
+}
+
+func loadActionsByCategory() {
+	for _, actionInclude := range actionCategories {
+		lines = append(lines, fmt.Sprintf("#include 'actions/%s'\n", actionInclude))
+		resetParse()
+		handleIncludes()
+		currentCategory = actionInclude
+		handleActionDefinitions()
+
+		included = []string{}
+		includes = []include{}
+		lines = []string{}
+		tokens = []token{}
+
+		resetParse()
+	}
 }
 
 func includeBasicStandardActions() {
