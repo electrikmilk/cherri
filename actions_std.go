@@ -124,7 +124,7 @@ var actions = map[string]*actionDefinition{
 	"createAlarm": {
 		doc: selfDoc{
 			title:       "Create Alarm",
-			description: "Creates an alarm at specific time with a name, snooze allowance and applicable weekdays.",
+			description: "Creates an alarm at a specific time with a name, snooze allowance, and applicable weekdays.",
 			category:    "calendar",
 			subcategory: "Alarms",
 		},
