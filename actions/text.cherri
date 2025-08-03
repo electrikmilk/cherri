@@ -85,7 +85,7 @@ enum stopListeningTrigger {
 	"Show-text": true
 }
 
-// [Doc]: [Text Editing]
+// [Doc]: [Text Editing] Replace Text: Replace `find` in `subject`, optionally using a regular expression or case insensitive search.
 #define action 'text.replace' replaceText(
     text find: 'WFReplaceTextFind',
     text replacement: 'WFReplaceTextReplace',
@@ -98,12 +98,12 @@ enum stopListeningTrigger {
 // [Doc]: [Regular Expressions] Match Text: Use regular expressions to match text.
 #define action default 'text.match' matchText(text regexPattern: 'WFMatchTextPattern', text text, bool ?caseSensitive: 'WFMatchTextCaseSensitive' = true)
 
-// [Doc]: [Regular Expressions] Get Match Group: Get the match group at an index from a text match.
+// [Doc]: [Regular Expressions] Get Match Group: Get match group at `index` in `matches`.
 #define action default 'text.match.getgroup' getMatchGroup(variable matches, number index: 'WFGroupIndex') {
 	"WFGetGroupType": "Group At Index"
 }
 
-// [Doc]: [Regular Expressions] Get Match Groups: Get match groups from matches
+// [Doc]: [Regular Expressions] Get Match Groups: Get all groups in `matches`.
 #define action 'text.match.getgroup' getMatchGroups(variable matches) {
 	"WFGetGroupType": "All Groups"
 }
