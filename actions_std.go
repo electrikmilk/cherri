@@ -224,8 +224,8 @@ var actions = map[string]*actionDefinition{
 	},
 	"turnOnAlarm": {
 		doc: selfDoc{
-			title:       "Turn Off Alarm",
-			description: "Turn off an alarm.",
+			title:       "Turn On Alarm",
+			description: "Turn on an alarm.",
 			category:    "calendar",
 			subcategory: "Alarms",
 		},
