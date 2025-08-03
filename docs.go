@@ -41,6 +41,14 @@ func generateDocs() {
 		var actionCategory = generateCategory(category)
 		fmt.Println("#", actionCategory.title)
 
+		fmt.Print("\nTo use actions in this category, use this include statement:\n\n")
+
+		if args.Using("no-ansi") {
+			fmt.Printf("```\n#include 'actions/%s'\n```\n", category)
+		} else {
+			fmt.Println(ansi(fmt.Sprintf("#include 'actions/%s'", category), red))
+		}
+
 		slices.Sort(actionCategory.actions)
 		fmt.Println(strings.Join(actionCategory.actions, "\n\n---\n"))
 
