@@ -613,7 +613,7 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 		definition.WriteString(fmt.Sprintf(": %s", ansi(string(currentAction.outputType), magenta)))
 	}
 
-	if currentAction.addParams != nil && args.Using("debug") {
+	if args.Using("debug") && currentAction.addParams != nil {
 		var addParams = currentAction.addParams([]actionArgument{})
 		if len(addParams) != 0 {
 			var jsonBytes, jsonErr = json.MarshalIndent(addParams, strings.Repeat("\t", tabLevel), "\t")
@@ -672,7 +672,7 @@ func generateActionParamDefinition(param parameterDefinition) string {
 	}
 	definition.WriteString(param.name)
 
-	if param.key != "" && param.key != param.name {
+	if args.Using("debug") && (param.key != "" && param.key != param.name) {
 		definition.WriteString(ansi(fmt.Sprintf(": '%s'", param.key), orange))
 	}
 
