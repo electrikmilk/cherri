@@ -565,34 +565,36 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 		definition.WriteString(generateActionParamEnums(focus))
 	}
 
-	var definitionType string
-	if currentAction.builtin {
-		definitionType = "#builtin"
-	} else {
-		definitionType = "#define"
-	}
+	if args.Using("debug") {
+		var definitionType string
+		if currentAction.builtin {
+			definitionType = "#builtin"
+		} else {
+			definitionType = "#define"
+		}
 
-	definition.WriteString(ansi(fmt.Sprintf("%s action ", definitionType), orange))
+		definition.WriteString(ansi(fmt.Sprintf("%s action ", definitionType), orange))
 
-	if currentAction.defaultAction {
-		definition.WriteString(ansi("default ", yellow))
-	}
-	if currentAction.macOnly {
-		definition.WriteString(ansi("mac ", orange))
-	} else if currentAction.nonMacOnly {
-		definition.WriteString(ansi("!mac ", orange))
-	}
-	if currentAction.minVersion != 0 {
-		definition.WriteString(ansi(fmt.Sprintf("v%1.f> ", currentAction.minVersion), cyan))
-	}
-	if currentAction.maxVersion != 0 {
-		definition.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.maxVersion), red, underline))
-		definition.WriteRune(' ')
-	}
+		if currentAction.defaultAction {
+			definition.WriteString(ansi("default ", yellow))
+		}
+		if currentAction.macOnly {
+			definition.WriteString(ansi("mac ", orange))
+		} else if currentAction.nonMacOnly {
+			definition.WriteString(ansi("!mac ", orange))
+		}
+		if currentAction.minVersion != 0 {
+			definition.WriteString(ansi(fmt.Sprintf("v%1.f> ", currentAction.minVersion), cyan))
+		}
+		if currentAction.maxVersion != 0 {
+			definition.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.maxVersion), red, underline))
+			definition.WriteRune(' ')
+		}
 
-	if currentAction.identifier != "" || currentAction.appIdentifier != "" {
-		setCurrentAction(currentActionIdentifier, &currentAction)
-		definition.WriteString(ansi(fmt.Sprintf("'%s' ", getActionIdentifier()), red))
+		if currentAction.identifier != "" || currentAction.appIdentifier != "" {
+			setCurrentAction(currentActionIdentifier, &currentAction)
+			definition.WriteString(ansi(fmt.Sprintf("'%s' ", getActionIdentifier()), red))
+		}
 	}
 
 	definition.WriteString(fmt.Sprintf("%s(", ansi(currentActionIdentifier, blue, bold)))
@@ -611,7 +613,7 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 		definition.WriteString(fmt.Sprintf(": %s", ansi(string(currentAction.outputType), magenta)))
 	}
 
-	if currentAction.addParams != nil {
+	if currentAction.addParams != nil && args.Using("debug") {
 		var addParams = currentAction.addParams([]actionArgument{})
 		if len(addParams) != 0 {
 			var jsonBytes, jsonErr = json.MarshalIndent(addParams, strings.Repeat("\t", tabLevel), "\t")
