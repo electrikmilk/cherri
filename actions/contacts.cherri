@@ -35,7 +35,7 @@ enum contactDetail {
     number ?limit: 'WFContentItemLimitNumber'
 )
 
-// [Doc]: [Contacts] Get Detail of Contact: Get detail about a contact.
+// [Doc]: [Contacts] Get Detail of Contact: Get a detail about a contact.
 #define action 'properties.contacts' getContactDetail(variable contact: 'WFInput', contactDetail detail: 'WFContentItemPropertyName')
 
 // [Doc]: [Contacts] Select Contact: Prompt the user to select a contact or multiple contacts. Returns selected contact.

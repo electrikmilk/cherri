@@ -15,7 +15,7 @@ enum deviceDetail {
 	'Current Appearance',
 }
 
-// [Doc]: Get Device Detail: Get detail about current device.
+// [Doc]: Get Device Detail: Get a detail about current device.
 #define action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail')
 
 // [Doc]: Get On-Screen Content: Get the content currently on-screen.

@@ -24,7 +24,7 @@ enum locationDetail {
     'Latitude',
 }
 
-// [Doc]: Get Location Detail: Get detail about a location.
+// [Doc]: Get Location Detail: Get a detail about a location.
 #define action 'properties.locations' getLocationDetail(variable location: 'WFInput', locationDetail detail: 'WFContentItemPropertyName')
 
 // [Doc]: [Addresses] Get Addresses: Get addresses from `input`.
@@ -85,5 +85,5 @@ enum weatherDetail {
 	'Date',
 }
 
-// [Doc]: [Weather] Get Weather Detail: Get detail about a weather forecast.
+// [Doc]: [Weather] Get Weather Detail: Get a detail about a weather forecast.
 #define action 'properties.weather.conditions' getWeatherDetail(variable weather: 'WFInput', weatherDetail detail: 'WFContentItemPropertyName')

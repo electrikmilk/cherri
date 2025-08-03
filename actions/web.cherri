@@ -24,7 +24,7 @@ enum URLDetail {
 	'Fragment',
 }
 
-// [Doc]: [URLs] Get URL Detail: Get detail about a URL.
+// [Doc]: [URLs] Get URL Detail: Get a detail about a URL.
 #define action 'geturlcomponent' getURLDetail(text url: 'WFURL', URLDetail detail: 'WFURLComponent')
 
 // [Doc]: [URLs] Get URL Headers: Get the headers from a URL.
@@ -59,7 +59,7 @@ enum webpageDetail {
 	'Name',
 }
 
-// [Doc]: [Safari] Get Webpage Detail: Get detail about a provided webpage.
+// [Doc]: [Safari] Get Webpage Detail: Get a detail about a provided webpage.
 #define action 'properties.safariwebpage' getWebPageDetail(variable webpage: 'WFInput', webpageDetail detail: 'WFContentItemPropertyName')
 
 enum searchEngine {
@@ -91,7 +91,7 @@ enum searchEngine {
 // [Doc]: [Articles] Get Article: Get article from webpage.
 #define action 'getarticle' getArticle(text webpage: 'WFWebPage')
 
-// [Doc]: [Articles] Get Article Detail: Get detail about an article.
+// [Doc]: [Articles] Get Article Detail: Get a detail about an article.
 #define action 'properties.articles' getArticleDetail(variable article: 'WFInput', text detail: 'WFContentItemPropertyName')
 
 // [Doc]: [RSS] Get RSS: Get RSS feed contents at URL. Limited by number of items.

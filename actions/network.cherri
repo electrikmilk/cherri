@@ -22,12 +22,12 @@ enum cellularDetail {
 	'Number of Signal Bars',
 }
 
-// [Doc]: [Wireless] Get WiFi Detail: Get detail of current WiFi network.
+// [Doc]: [Wireless] Get WiFi Detail: Get a detail of the current WiFi network.
 #define action 'getwifi' getWifiDetail(wifiDetail detail: 'WFWiFiDetail') {
 	"WFNetworkDetailsNetwork": "Wi-Fi"
 }
 
-// [Doc]: [Wireless] Get Cellular Detail: Get detail of current Cellular network.
+// [Doc]: [Wireless] Get Cellular Detail: Get a detail of the current Cellular network.
 #define action 'getwifi' getCellularDetail(cellularDetail detail: 'WFCellularDetail') {
 	"WFNetworkDetailsNetwork": "Cellular"
 }

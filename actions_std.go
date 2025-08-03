@@ -1907,6 +1907,7 @@ var actionIncludes = []string{
 	"settings",
 	"sharing",
 	"shortcuts",
+	"text",
 	"translation",
 	"web",
 }

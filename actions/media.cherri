@@ -61,7 +61,7 @@ enum shazamDetail {
 	'Name',
 }
 
-// [Doc]: [Shazam] Get Shazam Detail: Get detail about a Shazam result.
+// [Doc]: [Shazam] Get Shazam Detail: Get a detail about a Shazam result.
 #define action 'properties.shazam' getShazamDetail(variable input: 'WFInput', shazamDetail detail: 'WFContentItemPropertyName')
 
 // [Doc]: [Camera] Take Photo: Prompt the user to take one or more photos.
