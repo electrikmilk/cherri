@@ -2,6 +2,7 @@
 3rd Party Actions: Dropbox
 */
 
+// [Doc]: Save File to Dropbox: Save a file to Dropbox. Requires user to setup Dropbox account in Shortcuts app.
 #define action 'dropbox.savefile' saveToDropbox(
     variable file: 'WFInput',
     text path: 'WFFileDestinationPath',
@@ -10,6 +11,7 @@
      "WFAskWhereToSave": false
 }
 
+// [Doc]: Save File to Dropbox Prompt: Prompt to save a file to Dropbox. Requires user to setup Dropbox account in Shortcuts app.
 #define action 'dropbox.savefile' saveToDropboxPrompt(
     variable file: 'WFInput',
     bool ?overwrite: 'WFSaveFileOverwrite' = false

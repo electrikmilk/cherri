@@ -1,11 +1,14 @@
 /*
-Device settings actions.
+Settings Actions
 */
 
+// [Doc]: [Device] Set Brightness
 #define action setBrightness(float brightness: 'WFBrightness')
 
+// [Doc]: [Device] Set Volume
 #define action setVolume(float volume: 'WFVolume')
 
+// [Doc]: [Notifications] Turn On Do Not Disturb
 #define action 'dnd.set' DNDOn() {
 	"Enabled": 1,
 	"FocusModes": {
@@ -14,6 +17,7 @@ Device settings actions.
 	}
 }
 
+// [Doc]: [Notifications] Turn Off Do Not Disturb
 #define action 'dnd.set' DNDOff() {
 	"Enabled": 0,
 	"FocusModes": {
@@ -22,62 +26,25 @@ Device settings actions.
 	}
 }
 
+// [Doc]: [Appearance] Set Appearance to Light
 #define action 'appearance' lightMode() {
 	"operation": "set",
 	"style": "light"
 }
 
+// [Doc]: [Appearance] Set Appearance to Dark
 #define action default 'appearance' darkMode() {
 	"operation": "set",
 	"style": "dark"
 }
 
-/* Accessibility */
-
-enum backgroundSound {
-	'BalancedNoise',
-	'BrightNoise',
-	'DarkNoise',
-	'Ocean',
-	'Rain',
-	'Stream',
-}
-
-#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundIntent' setBackgroundSound(backgroundSound ?sound: 'backgroundSound' = "BalancedNoise")
-
-#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundVolumeIntent' setBackgroundSoundsVolume(float volume: 'volumeValue')
-
-enum textSizes {
-	'Accessibility Extra Extra Extra Large',
-	'Accessibility Extra Extra Large',
-	'Accessibility Extra Large',
-	'Accessibility Large',
-	'Accessibility Medium',
-	'Extra Extra Extra Large',
-	'Extra Extra Large',
-	'Extra Large',
-	'Default',
-	'Medium',
-	'Small',
-	'Extra Small',
-}
-
-#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetLargeTextIntent' setTextSize(textSizes size: 'textSize')
-
-enum soundRecognitionOperations {
-	'pause',
-	'activate',
-	'toggle',
-}
-
-#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent' setSoundRecognition(soundRecognitionOperations ?operation = "activate")
-
-/* Wallpaper */
-
+// [Doc]: [Wallpaper] Set Wallpaper: Sets the device wallpaper to `input`.
 #define action 'wallpaper.set' setWallpaper(variable input: 'WFInput')
 
+// [Doc]: [Wallpaper] Get Wallpapers: Get device wallpapers.
 #define action default !mac v16.2 'posters.get' getAllWallpapers(): array
 
+// [Doc]: [Wallpaper] Get Wallpaper: Get current device wallpaper.
 #define action !mac v16.2 'posters.get' getWallpaper() {
 	"WFPosterType": "Current"
 }

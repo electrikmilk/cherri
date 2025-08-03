@@ -1,4 +1,3 @@
-#include 'actions/scripting'
 #define color red
 #define glyph apple
 

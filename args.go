@@ -81,4 +81,21 @@ func init() {
 		DefaultValue: "",
 		ExpectsValue: true,
 	})
+
+	for _, actionCat := range actionIncludes {
+		actionCategories = append(actionCategories, actionCat)
+	}
+	args.Register(args.Argument{
+		Name:         "docs",
+		Description:  "Generate action documentation, optionally by category.",
+		DefaultValue: "",
+		ExpectsValue: true,
+		Values:       actionCategories,
+	})
+	args.Register(args.Argument{
+		Name:         "subcat",
+		Description:  "Filter action documentation category by subcategory.",
+		DefaultValue: "",
+		ExpectsValue: true,
+	})
 }

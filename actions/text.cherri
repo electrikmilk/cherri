@@ -1,0 +1,109 @@
+/*
+Text Editing Actions
+*/
+
+// [Doc]: [Rich Text] Make HTML: Make HTML from Rich Text.
+#define action 'gethtmlfromrichtext' makeHTML(text input: 'WFInput', bool ?makeFullDocument: 'WFMakeFullDocument' = false): text
+
+// [Doc]: [Rich Text] Make Rich Text from HTML
+#define action getRichTextFromHTML(text html: 'WFHTML'): text
+
+// [Doc]: [Rich Text] Make Markdown: Make Markdown from Rich Text.
+#define action 'getmarkdownfromrichtext' makeMarkdown(text richText: 'WFInput'): text
+
+// [Doc]: [Rich Text] Get Rich Text from Markdown
+#define action getRichTextFromMarkdown(text markdown: 'WFInput'): text
+
+enum stopListeningTrigger {
+	'After Pause',
+	'After Short Pause',
+	'On Tap',
+}
+
+// [Doc]: Dictation: Transcribes user recorded audio to text, optionally in another language.
+#define action 'dictatetext' listen(stopListeningTrigger ?stopListening: 'WFDictateTextStopListening' = "After Pause", language ?language: 'WFSpeechLanguage'): text
+
+// [Doc]: Get Text from Image
+#define action 'extracttextfromimage' getTextFromImage(variable image: 'WFImage'): text
+
+// [Doc]: Get Name of Emoji: Detects emoji in the text and returns its name.
+#define action 'getnameofemoji' getEmojiName(text emoji: 'WFInput'): text
+
+// [Doc]: Get Text: Get text from input.
+#define action 'detect.text' getText(variable input: 'WFInput'): text
+
+// [Doc]: Make Spoken Audio: Creates custom spoken audio from text with controls for rate and pitch.
+#define action 'makespokenaudiofromtext' makeSpokenAudio(text text: 'WFInput', number ?rate: 'WFSpeakTextRate', number ?pitch: 'WFSpeakTextPitch')
+
+// [Doc]: Define: Returns the definition of the word.
+#define action 'showdefinition' define(text word: 'Word'): text
+
+// [Doc]: Speak: Speaks the provided text, optionally in another language.
+#define action 'speaktext' speak(text prompt: 'WFText', bool ?waitUntilFinished: 'WFSpeakTextWait' = true, text ?language: 'WFSpeakTextLanguage')
+
+// [Doc]: Transcribe Audio: Transcribes text from the provided audio.
+#define action v17 'com.apple.ShortcutsActions.TranscribeAudioAction' transcribeText(variable audio): text
+
+// [Doc]: [Text Editing] Uppercase: Transforms the text to all uppercase.
+#define action default 'text.changecase' uppercase(text text): text {
+	"Show-text": true,
+	"WFCaseType": "UPPERCASE"
+}
+
+// [Doc]: [Text Editing] Lowercase: Transforms the text to all lowercase.
+#define action 'text.changecase' lowercase(text text): text {
+	"Show-text": true,
+	"WFCaseType": "lowercase"
+}
+
+// [Doc]: [Text Editing] Capitalize: Capitalizes the text with sentence case.
+#define action 'text.changecase' capitalize(text text): text {
+	"Show-text": true,
+	"WFCaseType": "Capitalize with sentence case"
+}
+
+// [Doc]: [Text Editing] Capitalize All: Capitalizes every word in the text.
+#define action 'text.changecase' capitalizeAll(text text): text {
+	"Show-text": true,
+	"WFCaseType": "Capitalize Every Word"
+}
+
+// [Doc]: [Text Editing] Title Case: Capitalizes the text with Title Case.
+#define action 'text.changecase' titleCase(text text): text {
+	"Show-text": true,
+	"WFCaseType": "Capitalize with Title Case"
+}
+
+// [Doc]: [Text Editing] Alternating Case: Capitalizes the text with alternating case.
+#define action 'text.changecase' alternatingCase(text text): text {
+	"Show-text": true,
+	"WFCaseType": "cApItAlIzE wItH aLtErNaTiNg cAsE"
+}
+
+// [Doc]: [Text Editing] Correct Spelling: Corrects the spelling of the provided text.
+#define action correctSpelling(text text): text {
+	"Show-text": true
+}
+
+// [Doc]: [Text Editing] Replace Text: Replace `find` in `subject`, optionally using a regular expression or case insensitive search.
+#define action 'text.replace' replaceText(
+    text find: 'WFReplaceTextFind',
+    text replacement: 'WFReplaceTextReplace',
+    text subject: 'WFInput',
+    bool ?caseSensitive: 'WFReplaceTextCaseSensitive' = true,
+    bool ?regExp: 'WFReplaceTextRegularExpression' = false
+): text
+
+
+// [Doc]: [Regular Expressions] Match Text: Use regular expressions to match text.
+#define action default 'text.match' matchText(text regexPattern: 'WFMatchTextPattern', text text, bool ?caseSensitive: 'WFMatchTextCaseSensitive' = true)
+
+// [Doc]: [Regular Expressions] Get Match Group: Get match group at `index` in `matches`.
+#define action default 'text.match.getgroup' getMatchGroup(variable matches, number index: 'WFGroupIndex') {
+	"WFGetGroupType": "Group At Index"
+}
+
+// [Doc]: [Regular Expressions] Get Match Groups: Get all groups in `matches`.
+#define action 'text.match.getgroup' getMatchGroups(variable matches) {
+	"WFGetGroupType": "All Groups"
+}

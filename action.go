@@ -72,6 +72,7 @@ type appIntent struct {
 
 // actionDefinition defines an action, what it expects and has functions for checking the arguments and creating the parameters.
 type actionDefinition struct {
+	doc                selfDoc
 	identifier         string
 	appIdentifier      string
 	overrideIdentifier string
@@ -89,12 +90,6 @@ type actionDefinition struct {
 	maxVersion         float64
 	setKey             string
 	builtin            bool // builtin is based on if the action was in the actions map when it was first initialized.
-	doc                selfDoc
-}
-
-type selfDoc struct {
-	title       string
-	description string
 }
 
 // libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
@@ -112,6 +107,8 @@ var enumerations = map[string][]string{
 	"sortOrder":                     {"asc", "desc"},
 	"windowSorting":                 {"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"},
 	"timerDuration":                 {"hr", "min", "sec"},
+	"dateUnit":                      {"sec", "min", "hr", "days", "weeks", "months", "yr"},
+	"dateOperation":                 {"Add", "Subtract", "Get Start of Minute", "Get Start of Hour", "Get Start of Day", "Get Start of Week", "Get Start of Month", "Get Start of Year"},
 	"fileLabel":                     {"red", "orange", "yellow", "green", "blue", "purple", "gray"},
 	"filesSortBy":                   {"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"},
 	"fileOrderings":                 {"Smallest First", "Biggest First", "Latest First", "Oldest First", "A to Z", "Z to A"},
@@ -545,6 +542,17 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 	}
 	definition.WriteString(fmt.Sprintf("%s\n", ansi(docTitle, bold, underline)))
 	definition.WriteRune('\n')
+
+	if currentAction.doc.warning != "" {
+		if args.Using("no-ansi") {
+			definition.WriteString(fmt.Sprintf("{: .warning }\n%s\n\n", currentAction.doc.warning))
+		} else {
+			definition.WriteString(ansi(fmt.Sprintf("Warning: %s", currentAction.doc.warning), yellow, bold, underline))
+			definition.WriteRune('\n')
+			definition.WriteRune('\n')
+		}
+	}
+
 	if currentAction.doc.description != "" {
 		definition.WriteString(fmt.Sprintf("%s\n\n", ansi(currentAction.doc.description, italic)))
 	}
@@ -557,34 +565,36 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 		definition.WriteString(generateActionParamEnums(focus))
 	}
 
-	var definitionType string
-	if currentAction.builtin {
-		definitionType = "#builtin"
-	} else {
-		definitionType = "#define"
-	}
+	if args.Using("debug") {
+		var definitionType string
+		if currentAction.builtin {
+			definitionType = "#builtin"
+		} else {
+			definitionType = "#define"
+		}
 
-	definition.WriteString(ansi(fmt.Sprintf("%s action ", definitionType), orange))
+		definition.WriteString(ansi(fmt.Sprintf("%s action ", definitionType), orange))
 
-	if currentAction.defaultAction {
-		definition.WriteString(ansi("default ", yellow))
-	}
-	if currentAction.macOnly {
-		definition.WriteString(ansi("mac ", orange))
-	} else if currentAction.nonMacOnly {
-		definition.WriteString(ansi("!mac ", orange))
-	}
-	if currentAction.minVersion != 0 {
-		definition.WriteString(ansi(fmt.Sprintf("v%1.f> ", currentAction.minVersion), cyan))
-	}
-	if currentAction.maxVersion != 0 {
-		definition.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.maxVersion), red, underline))
-		definition.WriteRune(' ')
-	}
+		if currentAction.defaultAction {
+			definition.WriteString(ansi("default ", yellow))
+		}
+		if currentAction.macOnly {
+			definition.WriteString(ansi("mac ", orange))
+		} else if currentAction.nonMacOnly {
+			definition.WriteString(ansi("!mac ", orange))
+		}
+		if currentAction.minVersion != 0 {
+			definition.WriteString(ansi(fmt.Sprintf("v%1.f> ", currentAction.minVersion), cyan))
+		}
+		if currentAction.maxVersion != 0 {
+			definition.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.maxVersion), red, underline))
+			definition.WriteRune(' ')
+		}
 
-	if currentAction.identifier != "" || currentAction.appIdentifier != "" {
-		setCurrentAction(currentActionIdentifier, &currentAction)
-		definition.WriteString(ansi(fmt.Sprintf("'%s' ", getActionIdentifier()), red))
+		if currentAction.identifier != "" || currentAction.appIdentifier != "" {
+			setCurrentAction(currentActionIdentifier, &currentAction)
+			definition.WriteString(ansi(fmt.Sprintf("'%s' ", getActionIdentifier()), red))
+		}
 	}
 
 	definition.WriteString(fmt.Sprintf("%s(", ansi(currentActionIdentifier, blue, bold)))
@@ -603,7 +613,7 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 		definition.WriteString(fmt.Sprintf(": %s", ansi(string(currentAction.outputType), magenta)))
 	}
 
-	if currentAction.addParams != nil {
+	if currentAction.addParams != nil && args.Using("debug") {
 		var addParams = currentAction.addParams([]actionArgument{})
 		if len(addParams) != 0 {
 			var jsonBytes, jsonErr = json.MarshalIndent(addParams, strings.Repeat("\t", tabLevel), "\t")
@@ -621,11 +631,9 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 
 func generateActionParamEnums(focus parameterDefinition) string {
 	var definition strings.Builder
+	var usedEnums []string
 	for _, param := range currentAction.parameters {
-		if param.enum == "" {
-			continue
-		}
-		if focus.name != "" && focus.name != param.name {
+		if param.enum == "" || (focus.name != "" && focus.name != param.name) || slices.Contains(usedEnums, param.enum) {
 			continue
 		}
 		definition.WriteString(ansi("enum ", orange))
@@ -640,6 +648,7 @@ func generateActionParamEnums(focus parameterDefinition) string {
 			}
 		}
 		definition.WriteString(ansi("}\n\n", dim))
+		usedEnums = append(usedEnums, param.enum)
 	}
 
 	return definition.String()
@@ -732,22 +741,19 @@ func parseActionDefinitions() {
 	tokens = []token{}
 }
 
-func collectDefinedAction() {
-	var lineRef = newLineReference()
+var docCommentRegex = regexp.MustCompile(`^\[Doc]: ?(?:\[(.*?)])?\s(.*?)?(?:: (.*?))?$`)
 
+func collectDefinedAction() {
 	var doc selfDoc
+	var lineRef = newLineReference()
 	var lastToken = getLastAddedToken()
 	if lastToken.typeof == Comment {
 		var comment = lastToken.value.(string)
-		if !strings.Contains(comment, "\n") && strings.Contains(comment, ":") {
-			var parts = strings.Split(comment, ":")
-			if strings.TrimSpace(parts[0]) == "[Doc]" {
-				if len(parts) > 2 {
-					doc = selfDoc{title: strings.TrimSpace(parts[1]), description: strings.TrimSpace(parts[2])}
-				} else {
-					doc = selfDoc{description: strings.TrimSpace(parts[1])}
-				}
-			}
+		var matches = docCommentRegex.FindAllStringSubmatch(comment, -1)
+		if len(matches) != 0 {
+			var match = matches[0]
+			doc = selfDoc{title: strings.TrimSpace(match[2]), description: strings.TrimSpace(match[3]), category: currentCategory, subcategory: match[1]}
+			tokens = slices.Delete(tokens, len(tokens)-1, len(tokens))
 		}
 	}
 

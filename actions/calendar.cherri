@@ -2,8 +2,6 @@
 Calendar Actions
 */
 
-/* Calendar app */
-
 enum eventDetail {
     'Start Date',
     'End Date',
@@ -44,39 +42,42 @@ enum editEventDetail {
     'Attachments',
 }
 
+// [Doc]: [Calendars] Add Calendar: Create a calendar with `name`.
 #define action 'addnewcalendar' addCalendar(text name: 'CalendarName')
 
+// [Doc]: [Calendars] Open Event in Calendar: Show `event` in the calendar app.
 #define action showInCalendar(variable event: 'WFEvent')
 
+// [Doc]: [Calendars] Edit Event: Edit a detail of an event. Provide an event, a detail to modify, and a new value for that detail.
 #define action 'setters.calendarevents' editEvent(variable event: 'WFInput', editEventDetail detail: 'WFContentItemPropertyName', text newValue: 'WFCalendarEventContentItemStartDate')
 
+// [Doc]: [Calendars] Get Event Detail: Get a detail of an event.
 #define action 'properties.calendarevents' getEventDetail(variable event: 'WFInput', eventDetail detail: 'WFContentItemPropertyName')
 
+// [Doc]: [Calendars] Remove Events: Remove an event.
 #define action removeEvents(variable events: 'WFInputEvents', bool ?includeFutureEvents: 'WFCalendarIncludeFutureEvents' = false)
 
-/* Reminders app */
-
+// [Doc]: [Reminders] Open Reminders List
 #define action 'showlist' openRemindersList(variable list: 'WFList')
 
+// [Doc]: [Reminders] Remove Reminders
 #define action removeReminders(variable reminders: 'WFInputReminders')
 
-/* Clock app */
-
+// [Doc]: [Alarms] Get Alarms: Returns all of the alarms on the device.
 #define action 'com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent' getAlarms()
 
-/* Dates */
-
+// [Doc]: [Dates] Get Dates: Get dates from input.
 #define action 'detect.date' getDates(variable input: 'WFInput'): array
 
+// [Doc]: [Dates] Date: Create a date value from `date`. Example: October 5, 2022.
 #define action date(text date: 'WFDateActionDate') {
 	"WFDateActionMode": "Specified Date"
 }
 
+// [Doc]: [Dates] Current Date: Get the current date.
 #define action default 'date' currentDate() {
     "WFDateActionMode": "Current Date"
 }
-
-/* Date formatting */
 
 enum dateFormats {
 	'None',
@@ -97,16 +98,20 @@ enum timeFormats {
 	'Relative',
 }
 
+// [Doc]: [Formatting] Format Date: Format a date using a standard or custom format.
 #define action default 'format.date' formatDate(variable date: 'WFDate', dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short", text ?customDateFormat: 'WFDateFormat') {
 	"WFTimeFormatStyle": "None"
 }
 
+// [Doc]: [Formatting] Format Time: Format a time using a standard or custom format.
 #define action 'format.date' formatTime(variable time: 'WFDate', timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short") {
 	"WFDateFormatStyle": "None"
 }
 
+// [Doc]: [Formatting] Format Timestamp: Format a timestamp using standard formats and/or a custom date format.
 #define action 'format.date' formatTimestamp(
     variable date: 'WFDate',
     dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short",
-    timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short"
+    timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short",
+    text ?customDateFormat: 'WFDateFormat'
 )

@@ -1,0 +1,45 @@
+/*
+Accessibility Actions
+*/
+
+enum backgroundSound {
+	'BalancedNoise',
+	'BrightNoise',
+	'DarkNoise',
+	'Ocean',
+	'Rain',
+	'Stream',
+}
+
+// [Doc]: Set Background Sound: Set the background sound that plays.
+#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundIntent' setBackgroundSound(backgroundSound ?sound: 'backgroundSound' = "BalancedNoise")
+
+// [Doc]: Set Background Sound Volume
+#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundVolumeIntent' setBackgroundSoundsVolume(float volume: 'volumeValue')
+
+enum textSizes {
+	'Accessibility Extra Extra Extra Large',
+	'Accessibility Extra Extra Large',
+	'Accessibility Extra Large',
+	'Accessibility Large',
+	'Accessibility Medium',
+	'Extra Extra Extra Large',
+	'Extra Extra Large',
+	'Extra Large',
+	'Default',
+	'Medium',
+	'Small',
+	'Extra Small',
+}
+
+// [Doc]: [Vision] Set Text Size: Sets the system text size.
+#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetLargeTextIntent' setTextSize(textSizes size: 'textSize')
+
+enum soundRecognitionOperations {
+	'pause',
+	'activate',
+	'toggle',
+}
+
+// [Doc]: [Hearing] Set Sound Recognition
+#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent' setSoundRecognition(soundRecognitionOperations ?operation = "activate")

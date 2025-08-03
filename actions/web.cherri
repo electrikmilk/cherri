@@ -2,14 +2,15 @@
 Web Actions
 */
 
-/* URLs */
-
+// [Doc]: [URLs] Open URL: Open URL in default browser.
 #define action openURL(text url: 'WFInput') {
 	"Show-WFInput": true
 }
 
+// [Doc]: [URLs] Expand URL: Get the expanded version of a URL. For instance, returns the full URL for a short URL, or the URL which a URL immediately redirects to, etc.
 #define action 'url.expand' expandURL(text url: 'URL')
 
+// [Doc]: [URLs] Get URLs: Get URLs from `input`.
 #define action 'detect.link' getURLs(text input: 'WFInput'): array
 
 enum URLDetail {
@@ -23,26 +24,32 @@ enum URLDetail {
 	'Fragment',
 }
 
+// [Doc]: [URLs] Get URL Detail: Get a detail about a URL.
 #define action 'geturlcomponent' getURLDetail(text url: 'WFURL', URLDetail detail: 'WFURLComponent')
 
+// [Doc]: [URLs] Get URL Headers: Get the headers from a URL.
 #define action 'url.getheaders' getURLHeaders(text url: 'WFInput')
 
+// [Doc]: [URLs] URL Encode: Encode text for a URL.
 #define action default 'urlencode' urlEncode(text input: 'WFInput'): text {
 	"WFEncodeMode": "Encode"
 }
 
+// [Doc]: [URLs] URL Decode: Decode text from URL encoding.
 #define action 'urlencode' urlDecode(text input: 'WFInput'): text {
 	"WFEncodeMode": "Decode"
 }
 
+// [Doc]: [URLs] Open X-Callback URL
 #define action 'openxcallbackurl' openXCallbackURL(text url: 'WFXCallbackURL')
 
-/* Safari */
-
+// [Doc]: [Safari] Get Current URL: Get current URL in Safari.
 #define action 'safari.geturl' getCurrentURL()
 
+// [Doc]: [Safari] Show Webpage: Show webpage using Safari.
 #define action showWebpage(text url: 'WFURL', bool ?useReader: 'WFEnterSafariReader')
 
+// [Doc]: [Safari] Run JavaScript on Webpage: Run some custom JavaScript on the current webpage in Safari.
 #define action runJavaScriptOnWebpage(text javascript: 'WFJavaScript')
 
 enum webpageDetail {
@@ -52,6 +59,7 @@ enum webpageDetail {
 	'Name',
 }
 
+// [Doc]: [Safari] Get Webpage Detail: Get a detail about a provided webpage.
 #define action 'properties.safariwebpage' getWebPageDetail(variable webpage: 'WFInput', webpageDetail detail: 'WFContentItemPropertyName')
 
 enum searchEngine {
@@ -66,49 +74,31 @@ enum searchEngine {
 	'YouTube',
 }
 
+// [Doc]: [Safari] Search Web: Search the web using a provided search engine and query.
 #define action searchWeb(searchEngine engine: 'WFSearchWebDestination', text query: 'WFInputText')
 
-/* IP Address */
+// [Doc]: [Safari] Get Webpage Contents: Get contents of Webpage from Safari.
+#define action 'getwebpagecontents' getWebpageContents(text url: 'WFInput')
 
-enum IPTypes {
- 'IPv4',
- 'IPv6',
-}
-
-#define action default 'getipaddress' getExternalIP(IPTypes ?type: 'WFIPAddressTypeOption' = "IPv4"): text {
-	"WFIPAddressSourceOption": "External"
-}
-
-#define action 'getipaddress' getLocalIP(IPTypes ?type: 'WFIPAddressTypeOption' = "IPv4"): text {
-	"WFIPAddressSourceOption": "Local"
-}
-
-#define action 'getipaddress' isOnline() {
-	"WFIPAddressSourceOption": "External",
-    "WFIPAddressTypeOption": "IPv4"
-}
-
-/* Giphy */
-
+// [Doc]: [Giphy] Get GIFs from Giphy: Gets a number of GIFs from Giphy for a search query.
 #define action default 'giphy' getGifs(text query: 'WFGiphyQuery', number ?gifs: 'WFGiphyLimit' = 1) {
 	"WFGiphyShowPicker": false
 }
 
+// [Doc]: [Giphy] Search Giphy: Gets GIFs from Giphy for a search query.
 #define action 'giphy' searchGiphy(text query: 'WFGiphyQuery')
 
-/* Articles */
-
+// [Doc]: [Articles] Get Article: Get article from webpage.
 #define action 'getarticle' getArticle(text webpage: 'WFWebPage')
 
+// [Doc]: [Articles] Get Article Detail: Get a detail about an article.
 #define action 'properties.articles' getArticleDetail(variable article: 'WFInput', text detail: 'WFContentItemPropertyName')
 
-/* RSS */
-
+// [Doc]: [RSS] Get RSS: Get RSS feed contents at URL. Limited by number of items.
 #define action 'rss' getRSS(number items: 'WFRSSItemQuantity', text url: 'WFRSSFeedURL')
 
+// [Doc]: [RSS] Get RSS Feeds: Get feeds from multiple URLs.
 #define action 'rss.extract' getRSSFeeds(text urls: 'WFURLs')
-
-/* HTTP */
 
 enum HTTPMethod {
     'POST',
@@ -117,11 +107,12 @@ enum HTTPMethod {
     'DELETE'
 }
 
+// [Doc]: [HTTP] Download URL: Download the contents of a URL.
 #define action default downloadURL(text url: 'WFURL', dictionary! ?headers: 'WFHTTPHeaders') {
 	"WFHTTPMethod": "GET"
 }
 
-// [Doc]: Form Request: Send a `method` request to `url` with `body` and optional `headers.
+// [Doc]: [HTTP] Form Request: Send a `method` request to `url` with `body` and optional `headers.
 #define action formRequest(
     text url: 'WFURL',
     HTTPMethod ?method: 'WFHTTPMethod',
@@ -131,7 +122,7 @@ enum HTTPMethod {
     "WFHTTPBodyType": "Form"
 }
 
-// [Doc]: JSON Request: Send a `method` JSON request to `url` with `body` and optional `headers.
+// [Doc]: [HTTP] JSON Request: Send a `method` JSON request to `url` with `body` and optional `headers.
 #define action jsonRequest(
     text url: 'WFURL',
     HTTPMethod ?method: 'WFHTTPMethod',
@@ -141,7 +132,7 @@ enum HTTPMethod {
     "WFHTTPBodyType": "JSON"
 }
 
-// [Doc]: File Request: Send a `method` file request to `url` with `body` and optional `headers.
+// [Doc]: [HTTP] File Request: Send a `method` file request to `url` with `body` and optional `headers.
 #define action fileRequest(
     text url: 'WFURL',
     HTTPMethod ?method: 'WFHTTPMethod',
@@ -150,5 +141,3 @@ enum HTTPMethod {
 ) {
     "WFHTTPBodyType": "File"
 }
-
-#define action 'getwebpagecontents' getWebpageContents(text url: 'WFInput')
