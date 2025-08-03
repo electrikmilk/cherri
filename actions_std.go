@@ -640,7 +640,7 @@ var actions = map[string]*actionDefinition{
 		doc: selfDoc{
 			title:       "Contains Text",
 			description: "Uses Match Text to check if text is within subject.",
-			category:    "documents",
+			category:    "text",
 			subcategory: "Text Editing",
 		},
 		identifier: "text.match",
@@ -733,7 +733,7 @@ var actions = map[string]*actionDefinition{
 		doc: selfDoc{
 			title:       "Split Text",
 			description: "Split text by a separator.",
-			category:    "documents",
+			category:    "text",
 			subcategory: "Text Editing",
 		},
 		identifier: "text.split",
@@ -757,7 +757,7 @@ var actions = map[string]*actionDefinition{
 		doc: selfDoc{
 			title:       "Join Text",
 			description: "Join text by a combiner.",
-			category:    "documents",
+			category:    "text",
 			subcategory: "Text Editing",
 		},
 		identifier: "text.combine",
