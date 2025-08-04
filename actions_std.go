@@ -1009,6 +1009,7 @@ var actions = map[string]*actionDefinition{
 			title:       "Open App",
 			description: "Open an app.",
 			category:    "scripting",
+			subcategory: "Apps",
 		},
 		defaultAction: true,
 		parameters: []parameterDefinition{
@@ -1047,6 +1048,7 @@ var actions = map[string]*actionDefinition{
 			title:       "Hide App",
 			description: "Hide an app.",
 			category:    "scripting",
+			subcategory: "Apps",
 		},
 		identifier:    "hide.app",
 		defaultAction: true,
@@ -1081,6 +1083,7 @@ var actions = map[string]*actionDefinition{
 			title:       "Hide Apps",
 			description: "Hide multiple apps. Allows exception.",
 			category:    "scripting",
+			subcategory: "Apps",
 		},
 		identifier: "hide.app",
 		parameters: []parameterDefinition{
@@ -1119,6 +1122,7 @@ var actions = map[string]*actionDefinition{
 			title:       "Qut App",
 			description: "Quit an app.",
 			category:    "scripting",
+			subcategory: "Apps",
 		},
 		identifier:    "quit.app",
 		defaultAction: true,
@@ -1153,6 +1157,7 @@ var actions = map[string]*actionDefinition{
 			title:       "Quit All Apps",
 			description: "Quits all apps. Allows exceptions.",
 			category:    "scripting",
+			subcategory: "Apps",
 		},
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
@@ -1189,6 +1194,7 @@ var actions = map[string]*actionDefinition{
 			description: "Kill an app.",
 			warning:     "This will not ask to save changes!",
 			category:    "scripting",
+			subcategory: "Apps",
 		},
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
@@ -1226,6 +1232,7 @@ var actions = map[string]*actionDefinition{
 			description: "Kills all apps. Allows exceptions.",
 			warning:     "This will quit all the apps running on the device without asking to save changes!",
 			category:    "scripting",
+			subcategory: "Apps",
 		},
 		identifier: "quit.app",
 		parameters: []parameterDefinition{
@@ -1260,6 +1267,7 @@ var actions = map[string]*actionDefinition{
 			title:       "Split Apps",
 			description: "Split apps across the screen.",
 			category:    "scripting",
+			subcategory: "Apps",
 		},
 		identifier: "splitscreen",
 		parameters: []parameterDefinition{
