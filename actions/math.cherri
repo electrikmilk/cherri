@@ -28,31 +28,6 @@ enum calculationOperation {
 	"WFMathOperation": "..."
 }
 
-enum rounding {
- 'Ones Place',
- 'Tens Place',
- 'Hundreds Place',
- 'Thousands',
- 'Ten Thousands',
- 'Hundred Thousands',
- 'Millions',
-}
-
-// [Doc]: Round: Rounds number up to specified rounding place.
-#define action default round(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
-	"WFRoundMode": "Normal"
-}
-
-// [Doc]: Round Up: Always round a number up to a specified rounding place.
-#define action 'round' ceil(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
-	"WFRoundMode": "Always Round Up"
-}
-
-// [Doc]: Round Down: Always round a number down to a specified rounding place.
-#define action 'round' floor(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
-	"WFRoundMode": "Always Round Down"
-}
-
 enum statisticOperations {
 	'Average',
 	'Minimum',
@@ -64,5 +39,30 @@ enum statisticOperations {
 	'Standard Deviation',
 }
 
-// [Doc]: Statistic: Perform a statistic operation on `input`.
+// [Doc]: Statistic: Perform a statistical operation on `input`.
 #define action 'statistics' statistic(statisticOperations operation: 'WFStatisticsOperation', variable input: 'WFInput')
+
+enum rounding {
+ 'Ones Place',
+ 'Tens Place',
+ 'Hundreds Place',
+ 'Thousands',
+ 'Ten Thousands',
+ 'Hundred Thousands',
+ 'Millions',
+}
+
+// [Doc]: [Rounding] Round: Rounds number up to specified rounding place.
+#define action default round(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
+	"WFRoundMode": "Normal"
+}
+
+// [Doc]: [Rounding] Round Up: Always round a number up to a specified rounding place.
+#define action 'round' ceil(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
+	"WFRoundMode": "Always Round Up"
+}
+
+// [Doc]: [Rounding] Round Down: Always round a number down to a specified rounding place.
+#define action 'round' floor(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
+	"WFRoundMode": "Always Round Down"
+}
