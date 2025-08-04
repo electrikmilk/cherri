@@ -32,7 +32,7 @@ Sharing Actions
     bool ?prompt: 'ShowWhenRun' = true
 )
 
-// [Doc]: AirDrop: Prompt the user to AirDrop `input`.
+// [Doc]: [AirDrop] AirDrop: Prompt the user to AirDrop `input`.
 #define action 'airdropdocument' airdrop(variable input: 'WFInput')
 
 enum airdropReceivingStates {
@@ -41,7 +41,7 @@ enum airdropReceivingStates {
     'Everyone',
 }
 
-// [Doc]: Set AirDrop Receiving: Set the AirDrop receiving setting.
+// [Doc]: [AirDrop] Set AirDrop Receiving: Set the AirDrop receiving setting.
 #define action setAirdropReceiving(
     airdropReceivingStates ?state: 'WFAirDropState' = "Everyone"
 )
