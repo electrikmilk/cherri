@@ -119,12 +119,12 @@ enum podcastDetail {
 #define action playPodcast(variable podcast: 'WFPodcastShow')
 
 
-// [Doc]: Strip Media Metadata
+// [Doc]: [Metadata] Strip Media Metadata
 #define action 'encodemedia' stripMediaMetadata(variable media: 'WFMedia') {
 	"Metadata": true
 }
 
-// [Doc]: Set Media Metadata
+// [Doc]: [Metadata] Set Media Metadata
 #define action 'encodemedia' setMetadata(
     variable media: 'WFMedia',
     variable ?artwork: 'WFMetadataArtwork',
