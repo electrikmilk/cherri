@@ -15,7 +15,7 @@ Sharing Actions
     text ?expire: 'WFExpirationDate'
 )
 
-// [Doc]: [Email & SMS Messaging]: Send Email: Send an email to a contact.
+// [Doc]: [Email & SMS Messaging] Send Email: Send an email to a contact.
 #define action sendEmail(
     variable contact: 'WFSendEmailActionToRecipients',
     text from: 'WFSendEmailActionFrom',
@@ -25,7 +25,7 @@ Sharing Actions
     bool ?draft: 'WFSendEmailActionSaveAsDraft' = false
 )
 
-// [Doc]: [Email & SMS Messaging]: Send Message: Send an SMS/iMessage to a contact.
+// [Doc]: [Email & SMS Messaging] Send Message: Send an SMS/iMessage to a contact.
 #define action sendMessage(
     variable contact: 'WFSendMessageActionRecipients',
     text message: 'WFSendMessageContent',
