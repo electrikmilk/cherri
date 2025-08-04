@@ -1588,8 +1588,9 @@ var actions = map[string]*actionDefinition{
 	},
 	"convertMeasurement": {
 		doc: selfDoc{
-			title:    "Convert Measurement",
-			category: "scripting",
+			title:       "Convert Measurement",
+			category:    "scripting",
+			subcategory: "Measurement",
 		},
 		identifier: "measurement.convert",
 		parameters: []parameterDefinition{
@@ -1653,8 +1654,9 @@ var actions = map[string]*actionDefinition{
 	},
 	"measurement": {
 		doc: selfDoc{
-			title:    "Create Measurement",
-			category: "scripting",
+			title:       "Create Measurement",
+			category:    "scripting",
+			subcategory: "Measurement",
 		},
 		identifier: "measurement.create",
 		parameters: []parameterDefinition{
