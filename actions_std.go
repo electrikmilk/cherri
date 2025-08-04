@@ -959,8 +959,7 @@ var actions = map[string]*actionDefinition{
 			title:       "Ask for Input",
 			description: "Ask for input with prompt, with optional inputType and defaultValue.",
 			category:    "basic",
-
-			subcategory: "Notification",
+			subcategory: "Notifications",
 		},
 		identifier: "ask",
 		parameters: []parameterDefinition{
