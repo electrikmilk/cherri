@@ -385,7 +385,6 @@ var actions = map[string]*actionDefinition{
 			title:       "Add New Contact",
 			description: "Create a new contact.",
 			category:    "contacts",
-			subcategory: "Contacts",
 		},
 		identifier: "addnewcontact",
 		parameters: []parameterDefinition{
@@ -451,7 +450,6 @@ var actions = map[string]*actionDefinition{
 			title:       "Remove Contact Detail",
 			description: "Remove detail from contact.",
 			category:    "contacts",
-			subcategory: "Contacts",
 		},
 		identifier: "setters.contacts",
 		parameters: []parameterDefinition{
