@@ -2077,23 +2077,6 @@ func decompContactValue(action *ShortcutAction, key string, contentKit contentKi
 	return
 }
 
-func adjustDate(operation string, unit string, args []actionArgument) (adjustDateParams map[string]any) {
-	if len(args) == 0 {
-		return map[string]any{}
-	}
-
-	adjustDateParams = map[string]any{
-		"WFAdjustOperation": operation,
-	}
-	if unit == "" {
-		return adjustDateParams
-	}
-
-	adjustDateParams["WFDuration"] = magnitudeValue(unit, args, 1)
-
-	return
-}
-
 func magnitudeValue(unit any, args []actionArgument, index int) map[string]any {
 	var magnitudeValue = argumentValue(args, index)
 	if reflect.TypeOf(magnitudeValue).String() == "[]map[string]any" {
