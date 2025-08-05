@@ -27,7 +27,6 @@ const (
 	Menu           tokenType = "menu"
 	Item           tokenType = "item"
 	Definition     tokenType = "#define"
-	Import         tokenType = "#import"
 	Question       tokenType = "#question"
 	Include        tokenType = "#include"
 	Action         tokenType = "action"

@@ -92,13 +92,6 @@ type actionDefinition struct {
 	builtin            bool // builtin is based on if the action was in the actions map when it was first initialized.
 }
 
-// libraryDefinition defines a 3rd-party actions library that can be imported using the `#import` syntax.
-type libraryDefinition struct {
-	identifier string
-	// make is the function to call to add the actions in this library to the actions map.
-	make func(identifier string)
-}
-
 var enumerations = map[string][]string{
 	"measurementUnitType":           {"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"},
 	"storageUnit":                   {"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"},
@@ -688,11 +681,6 @@ func generateActionParamDefinition(param parameterDefinition) string {
 	}
 
 	return definition.String()
-}
-
-// makeLibraries makes the library variable, this is where 3rd party action library definitions will start.
-func makeLibraries() {
-	libraries = make(map[string]libraryDefinition)
 }
 
 func appIntentDescriptor(intent appIntent) map[string]any {

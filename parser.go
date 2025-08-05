@@ -194,8 +194,6 @@ func parse() {
 		collectQuestion()
 	case tokenAhead(Definition):
 		collectDefinition()
-	case tokenAhead(Import):
-		collectImport()
 	case isChar('@'):
 		collectVariable(false)
 	case tokenAhead(Constant):
@@ -895,21 +893,6 @@ func collectBooleanDefinition(key string) {
 		definitions[key] = false
 	default:
 		parserError(fmt.Sprintf("Invalid value for boolean definition '%s'", key))
-	}
-}
-
-// libraries is a map of the 3rd party libraries defined in the compiler.
-// The key determines the identifier of the identifier name that must be used in the syntax, it's value defines its behavior, etc. using an libraryDefinition.
-var libraries map[string]libraryDefinition
-
-func collectImport() {
-	makeLibraries()
-	advanceTimes(2)
-	var collectedLibrary = collectString()
-	if lib, found := libraries[collectedLibrary]; found {
-		lib.make(lib.identifier)
-	} else {
-		parserError(fmt.Sprintf("Import library '%s' does not exist!", collectedLibrary))
 	}
 }
 
