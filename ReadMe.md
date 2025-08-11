@@ -18,7 +18,7 @@ The primary goal is to make it trivial and practical to create large Shortcut pr
 
 ### 🌟 Top Features
 
-- 🖥️ Laptop/Desktop based development (CLI, [VSCode extension](https://marketplace.visualstudio.com/items?itemName=electrikmilk.cherri-vscode-extension), macOS app)
+- 🖥️ Laptop/Desktop-based development (CLI, [VSCode extension](https://marketplace.visualstudio.com/items?itemName=electrikmilk.cherri-vscode-extension), macOS app)
 - 🎓 Easy to learn and syntax similar to other languages
 - 🐞 1-1 translation to Shortcut actions as much as possible to make debugging easier
 - 🪄 No magic variables syntax, they're constants instead
@@ -51,20 +51,6 @@ cherri file.cherri
 
 Run `cherri` without any arguments to see all options and usage. For development, use the `--debug` (or `-d`) option to print
 stack traces, debug information, and output a `.plist` file.
-
-## Why macOS only?
-
-Generating valid Shortcuts is only possible on macOS. However, there is a [Cherri Playground](https://playground.cherrilang.org) that outputs valid Shortcuts on any platform with a web
-browser.
-
-### Development on other platforms
-
-As it stands, I don't want someone to get confused and think Shortcuts compiled using Cherri on other platforms will run
-on their Mac or iOS device. However, you can build the compiler for your platform; it will just skip signing the
-compiled Shortcut, so it will not run on iOS 15+ or macOS 12+. Also, I'd like to point out that the compiler is primarily developed and
-tested on Unix-like systems.
-
-[Read my full thoughts on this](https://cherrilang.org/faq#why-macos-only)
 
 ## Why another Shortcuts language?
 
