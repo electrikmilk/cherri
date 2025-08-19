@@ -113,7 +113,7 @@ enum HTTPMethod {
 }
 
 // [Doc]: [HTTP] Form Request: Send a `method` request to `url` with `body` and optional `headers.
-#define action formRequest(
+#define action 'downloadurl' formRequest(
     text url: 'WFURL',
     HTTPMethod ?method: 'WFHTTPMethod',
     dictionary! ?body: 'WFFormValues',
@@ -123,7 +123,7 @@ enum HTTPMethod {
 }
 
 // [Doc]: [HTTP] JSON Request: Send a `method` JSON request to `url` with `body` and optional `headers.
-#define action jsonRequest(
+#define action 'downloadurl' jsonRequest(
     text url: 'WFURL',
     HTTPMethod ?method: 'WFHTTPMethod',
     dictionary! ?body: 'WFJSONValues',
@@ -133,7 +133,7 @@ enum HTTPMethod {
 }
 
 // [Doc]: [HTTP] File Request: Send a `method` file request to `url` with `body` and optional `headers.
-#define action fileRequest(
+#define action 'downloadurl' fileRequest(
     text url: 'WFURL',
     HTTPMethod ?method: 'WFHTTPMethod',
     dictionary! ?body: 'WFRequestVariable',
