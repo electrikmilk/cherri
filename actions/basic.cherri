@@ -96,7 +96,7 @@ enum countType {
 )
 
 // [Doc]: Number: Create a number value.
-#define action number(number number: 'WFNumberActionNumber'): number
+#define action number(variable number: 'WFNumberActionNumber'): number
 
 #define action 'gettext' text(text text: 'WFTextActionText'): text
 
