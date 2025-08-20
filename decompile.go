@@ -437,7 +437,7 @@ func decompComment(action *ShortcutAction) {
 		if strings.Contains(commentText, "\n") {
 			newCodeLine("/*\n")
 			for _, line := range strings.Split(commentText, "\n") {
-				newCodeLine(fmt.Sprintf("%s\n", line))
+				newCodeLine(fmt.Sprintln(line))
 			}
 			newCodeLine("*/\n")
 		} else {
