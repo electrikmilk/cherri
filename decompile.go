@@ -497,7 +497,7 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 func decompBasicExpression(action *ShortcutAction) {
 	var input = action.WFWorkflowActionParameters["WFInput"]
 	var operand = action.WFWorkflowActionParameters["WFMathOperand"]
-	var operation string
+	var operation = "+"
 	if action.WFWorkflowActionParameters["WFMathOperation"] != nil {
 		switch action.WFWorkflowActionParameters["WFMathOperation"] {
 		case "×":
