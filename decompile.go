@@ -497,9 +497,18 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 func decompBasicExpression(action *ShortcutAction) {
 	var input = action.WFWorkflowActionParameters["WFInput"]
 	var operand = action.WFWorkflowActionParameters["WFMathOperand"]
-	var operation = action.WFWorkflowActionParameters["WFMathOperation"]
-	var expression = strings.Trim(decompValue(input),
-		"\"") + " " + strings.Trim(decompValue(operation), "\"") + " " + strings.Trim(decompValue(operand), "\"")
+	var operation string
+	if action.WFWorkflowActionParameters["WFMathOperation"] != nil {
+		switch action.WFWorkflowActionParameters["WFMathOperation"] {
+		case "×":
+			operation = "*"
+		case "÷":
+			operation = "/"
+		default:
+			operation = action.WFWorkflowActionParameters["WFMathOperation"].(string)
+		}
+	}
+	var expression = strings.Trim(decompValue(input), "\"") + " " + strings.Trim(operation, "\"") + " " + strings.Trim(decompValue(operand), "\"")
 	var varRegex = regexp.MustCompile(`{(.*?)}`)
 	currentVariableValue = varRegex.ReplaceAllString(expression, "$1")
 
