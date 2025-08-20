@@ -734,7 +734,7 @@ func collectType(valueType *tokenType, value *any, until rune) {
 	case tokenAhead(Variable):
 		*valueType = Variable
 	default:
-		parserError(fmt.Sprintf("Unknown type '%s'\n\nAvailable types: \n- text\n- rawtext\n- number\n- bool\n- array\n- dictionary\n- var", collectUntil(until)))
+		parserError(fmt.Sprintf("Unknown type '%s'\n\nAvailable types: \n- text\n- rawtext\n- number\n- bool\n- array\n- dictionary\n- variable", collectUntil(until)))
 	}
 }
 
