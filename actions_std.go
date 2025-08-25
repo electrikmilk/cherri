@@ -1889,9 +1889,9 @@ var actions = map[string]*actionDefinition{
 
 			var title string
 			var subtitle string
-			var style = argumentValue(args, 1)
-			if args[1].valueType == String {
-				style = getArgValue(args[1])
+			var style = argumentValue(args, 2)
+			if args[2].valueType == String {
+				style = getArgValue(args[2])
 				switch style {
 				case "chatgpt":
 					style = "z_external_provider"
