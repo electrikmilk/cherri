@@ -60,7 +60,7 @@ enum saveToPlaygroundBehavior {
 #define action 'com.apple.GenerativePlaygroundApp.GenerateImageIntent' createImagePlayground(
     text prompt: 'prompt',
     saveToPlaygroundBehavior ?saveToPlayground: 'saveToPlayground' = "always",
-    variable style: 'style'
+    variable ?style: 'style'
 )
 
 enum textTone {
