@@ -1873,7 +1873,6 @@ var actions = map[string]*actionDefinition{
 				optional:     true,
 				enum:         "imagePlaygroundStyle",
 			},
-
 			{
 				name:         "saveToPlayground",
 				validType:    String,
