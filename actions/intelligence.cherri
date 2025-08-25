@@ -75,4 +75,6 @@ enum textTone {
 #define action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextIntent' generateSummary(text text: 'text'): text
 
 // [Doc]: [Writing Tools] Summarize Text Key Points: Generate a summary of key points of text using Apple Intelligence Writing Tools.
-#define action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextIntent' generateKeyPoints(text text: 'text'): text
+#define action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextIntent' generateKeyPoints(text text: 'text'): text {
+    "summaryType": "createKeyPoints"
+}
