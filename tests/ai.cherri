@@ -7,7 +7,7 @@ askChatGPT("How many r's are in strawberry?")
 
 /* Image Playground */
 
-createImagePlayground("Lizard Cowboy")
+generateImage("Two cherries on a stem")
 
 /* Writing Tools */
 

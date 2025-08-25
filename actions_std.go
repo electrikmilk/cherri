@@ -1845,6 +1845,91 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
+	"generateImage": {
+		doc: selfDoc{
+			title:       "Create Image using Image Playground",
+			description: "Generate an Image with a prompt using the Image Playground app.",
+			category:    "intelligence",
+			subcategory: "Image Playground",
+		},
+		appIdentifier: "com.apple.GenerativePlaygroundApp",
+		identifier:    "GenerateImageIntent",
+		parameters: []parameterDefinition{
+			{
+				name:      "prompt",
+				validType: String,
+				key:       "prompt",
+			},
+			{
+				name:      "image",
+				validType: Variable,
+				key:       "image",
+				optional:  true,
+			},
+			{
+				name:         "style",
+				validType:    String,
+				defaultValue: "animation",
+				optional:     true,
+				enum:         "imagePlaygroundStyle",
+			},
+
+			{
+				name:         "saveToPlayground",
+				validType:    String,
+				key:          "saveToPlayground",
+				enum:         "saveToPlaygroundBehavior",
+				defaultValue: "always",
+				optional:     true,
+			},
+		},
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) < 3 {
+				return map[string]any{}
+			}
+
+			var title string
+			var subtitle string
+			var style = argumentValue(args, 1)
+			if args[1].valueType == String {
+				style = getArgValue(args[1])
+				switch style {
+				case "chatgpt":
+					style = "z_external_provider"
+					title = "ChatGPT"
+					subtitle = "ChatGPT"
+				case "chatgpt_oil_painting":
+					style = "z_external_provider_1"
+					title = "Oil Painting (ChatGPT)"
+					subtitle = "Oil Painting (ChatGPT)"
+				case "chatgpt_watercolor":
+					style = "z_external_provider_2"
+					title = "Watercolor (ChatGPT)"
+					subtitle = "Watercolor (ChatGPT)"
+				case "chatgpt_vector":
+					style = "z_external_provider_3"
+					title = "Vector (ChatGPT)"
+					subtitle = "Vector (ChatGPT)"
+				case "chatgpt_anime":
+					style = "z_external_provider_4"
+					title = "Anime (ChatGPT)"
+					subtitle = "Anime (ChatGPT)"
+				case "chatgpt_print":
+					style = "z_external_provider_5"
+					title = "Print (ChatGPT)"
+					subtitle = "Print (ChatGPT)"
+				}
+			}
+
+			return map[string]any{
+				"style": map[string]any{
+					"identifier": style,
+					"subtitle":   subtitle,
+					"title":      title,
+				},
+			}
+		},
+	},
 }
 
 var useAttachmentAsVariableValueRegex = regexp.MustCompile(`^\$\{[a-zA-Z0-9]+}$`)

@@ -50,20 +50,6 @@ enum LLMModel {
     "WFLLMModel": "ChatGPT"
 }
 
-enum saveToPlaygroundBehavior {
-    'always',
-    'askWhenRun',
-    'never',
-}
-
-// [Doc]: [Image Playground] Create Image using Image Playground: Generate an image with a prompt using Image Playground.
-#define action 'com.apple.GenerativePlaygroundApp.GenerateImageIntent' createImagePlayground(
-    text prompt: 'prompt',
-    variable ?image: 'image',
-    saveToPlaygroundBehavior ?saveToPlayground: 'saveToPlayground' = "always",
-    variable ?style: 'style'
-)
-
 enum textTone {
     'friendly',
     'professional',
