@@ -8,6 +8,7 @@ askChatGPT("How many r's are in strawberry?")
 /* Image Playground */
 
 generateImage("Two cherries on a stem")
+generateImage("Two cherries on a stem", nil, "chatgpt_oil_painting")
 
 /* Writing Tools */
 
