@@ -1902,6 +1902,7 @@ var actionIncludes = []string{
 	"documents",
 	"dropbox",
 	"images",
+	"intelligence",
 	"location",
 	"mac",
 	"math",
