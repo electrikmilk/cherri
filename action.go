@@ -715,10 +715,8 @@ func parseActionDefinitions() {
 			delete(args.Args, "comments")
 			continue
 		case char == '"':
-			var valueType tokenType
-			var value any
-			collectStringValue(&valueType, &value)
-			value = nil
+			collectString()
+			advanceUntil('\n')
 		case tokenAhead(Enumeration):
 			collectEnumeration()
 		case tokenAhead(Definition):
