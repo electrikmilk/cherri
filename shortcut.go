@@ -209,8 +209,8 @@ var versions = map[string]string{
 	"13":     "600",
 	"12":     "500",
 }
-var clientVersion = "3218.0.4.100"
-var iosVersion = 18.4
+var clientVersion = versions["26"]
+var iosVersion = 26.0
 
 /* Language Codes */
 var languages = []string{
