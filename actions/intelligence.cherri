@@ -32,7 +32,7 @@ enum LLMModel {
     generativeResultType ?resultType: 'WFGenerativeResultType' = "Automatic"
 )
 
-// [Doc]: [Language Models] Ask On-Device LLM: Ask an on-Device LLM using a prompt. Follow up will open a follow-up prompt to the model.
+// [Doc]: [Language Models] Ask On-Device LLM: Ask an On-Device LLM using a prompt. Follow up will open a follow-up prompt to the model.
 #define action v26 'askllm' askDeviceLLM(
     text prompt: 'WFLLMPrompt',
     bool ?followUp: 'FollowUp' = false,
@@ -88,4 +88,4 @@ enum textTone {
 #define action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextIntent' generateSummary(text text: 'text'): text
 
 // [Doc]: [Writing Tools] Summarize Text Key Points: Generate a summary of key points of text using Apple Intelligence Writing Tools.
-#define action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextIntent' summarizeKeyPoints(text text: 'text'): text
+#define action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextIntent' generateKeyPoints(text text: 'text'): text
