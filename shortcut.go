@@ -211,29 +211,6 @@ var versions = map[string]string{
 var clientVersion = "3218.0.4.100"
 var iosVersion = 18.4
 
-/* Language Codes */
-var languages = []string{
-	"ar_AE",
-	"zh_CN",
-	"zh_TW",
-	"nl_NL",
-	"en_GB",
-	"en_US",
-	"fr_FR",
-	"de_DE",
-	"id_ID",
-	"it_IT",
-	"jp_JP",
-	"ko_KR",
-	"pl_PL",
-	"pt_BR",
-	"ru_RU",
-	"es_ES",
-	"th_TH",
-	"tr_TR",
-	"vn_VN",
-}
-
 /* Conditionals */
 
 type WFConditions struct {
