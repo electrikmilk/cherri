@@ -278,7 +278,7 @@ func makeCustomActionCall(identifier *string, arguments *[]actionArgument) map[s
 			var argumentValue = fmt.Sprintf("%v", argument.value)
 			switch argument.valueType {
 			case String:
-				argumentValues = append(argumentValues, fmt.Sprintf("\"%s\"", argumentValue))
+				argumentValues = append(argumentValues, fmt.Sprintf("%s", argumentValue))
 			case Variable:
 				var identifier = argument.value.(varValue).value.(string)
 				var variableValue, found = getVariableValue(identifier)
