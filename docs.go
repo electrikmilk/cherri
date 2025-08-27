@@ -82,11 +82,13 @@ func printCategories(categories map[string][]string) {
 
 func generateCategory(category string) actionCategory {
 	var categoryTitle = category
-	if categoryTitle == "pdf" {
+	switch categoryTitle {
+	case "pdf":
 		categoryTitle = "PDF"
-	}
-	if categoryTitle == "a11y" {
+	case "a11y":
 		categoryTitle = "Accessibility"
+	case "intelligence":
+		categoryTitle = "Apple Intelligence"
 	}
 	var cat = actionCategory{
 		title: fmt.Sprintf("%s Actions", capitalize(categoryTitle)),
