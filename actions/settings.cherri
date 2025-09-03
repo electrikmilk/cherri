@@ -16,7 +16,7 @@ enum FocusUntil {
 }
 
 // [Doc]: [Notifications] Turn On Do Not Disturb
-#define action 'dnd.set' DNDOn(FocusUntil ?until: 'AssertionType' = "Turned Off", text ?time: 'Time', variable ?event: 'Event') {
+#define action 'dnd.set' DNDOn() {
 	"Enabled": 1,
 	"FocusModes": {
 		"DisplayString": "Do Not Disturb",

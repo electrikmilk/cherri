@@ -129,6 +129,8 @@ var enumerations = map[string][]string{
 	"Temperature":                   {"K", "ºC", "ºF"},
 	"Volume":                        {"ML", "kL", "liter", "dL", "cL", "mL", "km³", "m³", "dm³", "cm³", "mm³", "in³", "ft³", "yd³", "mi³", "acre ft", "bushel", "tsp", "tbsp", "fl oz", "pt", "qt", "Imp gal", "mcup"},
 	"fileOrderBy":                   {"Smallest First", "Biggest First", "Latest First", "Oldest First", "A to Z", "Z to A"},
+	"focusModes":                    {"Do Not Disturb", "Personal", "Work", "Sleep", "Driving"},
+	"focusUntil":                    {"Turned Off", "Time", "I Leave", "Event Ends"},
 }
 
 var actionIndex int
