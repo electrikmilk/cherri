@@ -8,8 +8,15 @@ Settings Actions
 // [Doc]: [Device] Set Volume
 #define action setVolume(float volume: 'WFVolume')
 
+enum FocusUntil {
+    'Turned Off'
+    'Time'
+    'I Leave'
+    'Event Ends'
+}
+
 // [Doc]: [Notifications] Turn On Do Not Disturb
-#define action 'dnd.set' DNDOn() {
+#define action 'dnd.set' DNDOn(FocusUntil ?until: 'AssertionType' = "Turned Off", text ?time: 'Time', variable ?event: 'Event') {
 	"Enabled": 1,
 	"FocusModes": {
 		"DisplayString": "Do Not Disturb",
