@@ -26,6 +26,9 @@ Settings Actions
 	}
 }
 
+// [Doc]: [Notifications] Get Focus Mode: Get the current Focus Mode.
+#define action 'dnd.getfocus' getFocusMode()
+
 // [Doc]: [Appearance] Set Appearance to Light
 #define action 'appearance' lightMode() {
 	"operation": "set",
