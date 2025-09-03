@@ -26,6 +26,15 @@ Settings Actions
 	}
 }
 
+// [Doc]: [Notifications] Toggle Do Not Disturb
+#define action 'dnd.set' toggleDND() {
+    "Operation": "Toggle",
+    "FocusModes": {
+        "DisplayString": "Do Not Disturb",
+        "Identifier": "com.apple.donotdisturb.mode.default"
+    }
+}
+
 // [Doc]: [Notifications] Get Focus Mode: Get the current Focus Mode.
 #define action 'dnd.getfocus' getFocusMode()
 
