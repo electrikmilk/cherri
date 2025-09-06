@@ -1927,7 +1927,7 @@ var actions = map[string]*actionDefinition{
 			return params
 		},
 	},
-  "generateImage": {
+	"generateImage": {
 		doc: selfDoc{
 			title:       "Create Image using Image Playground",
 			description: "Generate an Image with a prompt using the Image Playground app.",
@@ -2010,6 +2010,7 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
+	},
 }
 
 type focusMode struct {
@@ -2096,6 +2097,7 @@ var actionIncludes = []string{
 	"dropbox",
 	"images",
 	"location",
+	"intelligence",
 	"mac",
 	"math",
 	"media",
