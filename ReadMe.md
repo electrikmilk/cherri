@@ -63,7 +63,7 @@ Plus, some stability comes with this project being on macOS and not iOS, and I'm
 
 ## Community
 
-- [VS Code Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=electrikmilk.cherri-vscode-extension) ([repo]([https://github.com/erenyenigul/cherri-vscode-highlight](https://github.com/electrikmilk/cherri-vscode)))
+- [VS Code Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=electrikmilk.cherri-vscode-extension) ([repo](https://github.com/electrikmilk/cherri-vscode))
 
 ## Credits
 
