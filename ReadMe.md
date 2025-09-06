@@ -26,7 +26,7 @@ The primary goal is to make it practical to create large Shortcut projects (with
 - #️⃣ Include files within others for large Shortcut projects
 - 🔧 Define custom actions with type checking, enums, optionals, default values, raw identifiers, and raw keys.
 - 📋 Copy-paste actions automatically
-- 🥩 Enter actions raw with custom identifier and parameters.
+- 🥩 Enter actions raw with a custom identifier and parameters.
 - ❓ Define import questions
 - 📇 Generate VCards for menus
 - 📄 Embed files in base64
@@ -63,7 +63,7 @@ Plus, some stability comes with this project being on macOS and not iOS, and I'm
 
 ## Community
 
-- [VS Code Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=erenyenigul.cherri) ([repo](https://github.com/erenyenigul/cherri-vscode-highlight))
+- [VS Code Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=electrikmilk.cherri-vscode-extension) ([repo]([https://github.com/erenyenigul/cherri-vscode-highlight](https://github.com/electrikmilk/cherri-vscode)))
 
 ## Credits
 
