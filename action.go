@@ -131,6 +131,8 @@ var enumerations = map[string][]string{
 	"fileOrderBy":                   {"Smallest First", "Biggest First", "Latest First", "Oldest First", "A to Z", "Z to A"},
 	"imagePlaygroundStyle":          {"animation", "illustration", "sketch", "chatgpt", "chatgpt_oil_painting", "chatgpt_watercolor", "chatgpt_vector", "chatgpt_anime", "chatgpt_print"},
 	"saveToPlaygroundBehavior":      {"always", "askWhenRun", "never"},
+	"focusModes":                    {"Do Not Disturb", "Personal", "Work", "Sleep", "Driving"},
+	"focusUntil":                    {"Turned Off", "Time", "I Leave", "Event Ends"},
 }
 
 var actionIndex int

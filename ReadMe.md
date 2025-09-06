@@ -12,7 +12,7 @@
 
 **Cherri** (pronounced cherry) is a [Shortcuts](https://apps.apple.com/us/app/shortcuts/id1462947752) programming language that compiles directly to a valid runnable Shortcut.
 
-The primary goal is to make it trivial and practical to create large Shortcut projects (within the limits of Shortcuts) and maintain them over the long term.
+The primary goal is to make it practical to create large Shortcut projects (within the limitations of Shortcuts) and maintain them long term.
 
 [![Hello World Example](https://github.com/electrikmilk/cherri/blob/main/assets/hello_world.png)](https://playground.cherrilang.org)
 

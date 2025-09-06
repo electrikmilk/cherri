@@ -8,6 +8,13 @@ Settings Actions
 // [Doc]: [Device] Set Volume
 #define action setVolume(float volume: 'WFVolume')
 
+enum FocusUntil {
+    'Turned Off'
+    'Time'
+    'I Leave'
+    'Event Ends'
+}
+
 // [Doc]: [Notifications] Turn On Do Not Disturb
 #define action 'dnd.set' DNDOn() {
 	"Enabled": 1,
@@ -25,6 +32,18 @@ Settings Actions
 		"Identifier": "com.apple.donotdisturb.mode.default"
 	}
 }
+
+// [Doc]: [Notifications] Toggle Do Not Disturb
+#define action 'dnd.set' toggleDND() {
+    "Operation": "Toggle",
+    "FocusModes": {
+        "DisplayString": "Do Not Disturb",
+        "Identifier": "com.apple.donotdisturb.mode.default"
+    }
+}
+
+// [Doc]: [Notifications] Get Focus Mode: Get the current Focus Mode.
+#define action 'dnd.getfocus' getFocusMode()
 
 // [Doc]: [Appearance] Set Appearance to Light
 #define action 'appearance' lightMode() {

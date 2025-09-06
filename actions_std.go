@@ -1845,7 +1845,89 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
-	"generateImage": {
+	"setFocusMode": {
+		doc: selfDoc{
+			title:       "Set Focus Mode",
+			description: "Set a default focus mode on or off. If setting to on, optionally set until with optional arguments for time or event.",
+			category:    "settings",
+			subcategory: "Notifications",
+		},
+		identifier: "dnd.set",
+		parameters: []parameterDefinition{
+			{
+				name:         "focusMode",
+				validType:    String,
+				defaultValue: "Do Not Disturb",
+				enum:         "focusModes",
+				optional:     true,
+			},
+			{
+				name:         "until",
+				validType:    String,
+				key:          "AssertionType",
+				defaultValue: "Turned Off",
+				enum:         "focusUntil",
+				optional:     true,
+			},
+			{
+				name:      "time",
+				validType: String,
+				key:       "Time",
+				optional:  true,
+			},
+			{
+				name:      "event",
+				validType: Variable,
+				key:       "Event",
+				optional:  true,
+			},
+		},
+		addParams: func(args []actionArgument) map[string]any {
+			if len(args) > 0 {
+				var mode = getArgValue(args[0]).(string)
+				if fm, found := focusModes[mode]; found {
+					return map[string]any{
+						"FocusModes": fm,
+					}
+				}
+			}
+
+			return map[string]any{}
+		},
+	},
+	"toggleFocusMode": {
+		doc: selfDoc{
+			title:       "Toggle Focus Mode",
+			description: "Toggle a focus mode.",
+			category:    "settings",
+			subcategory: "Notifications",
+		},
+		identifier: "dnd.set",
+		parameters: []parameterDefinition{
+			{
+				name:         "focusMode",
+				validType:    String,
+				defaultValue: "Do Not Disturb",
+				enum:         "focusModes",
+				optional:     true,
+			},
+		},
+		addParams: func(args []actionArgument) map[string]any {
+			var params = map[string]any{
+				"Operation": "Toggle",
+			}
+
+			if len(args) > 0 {
+				var mode = getArgValue(args[0]).(string)
+				if fm, found := focusModes[mode]; found {
+					params["FocusModes"] = fm
+				}
+			}
+
+			return params
+		},
+	},
+  "generateImage": {
 		doc: selfDoc{
 			title:       "Create Image using Image Playground",
 			description: "Generate an Image with a prompt using the Image Playground app.",
@@ -1928,6 +2010,33 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
+}
+
+type focusMode struct {
+	DisplayString string
+	Identifier    string
+}
+
+var focusModes = map[string]focusMode{
+	"Do Not Disturb": {
+		DisplayString: "Do Not Disturb",
+		Identifier:    "com.apple.donotdisturb.mode.default",
+	},
+	"Personal": {
+		DisplayString: "Personal",
+		Identifier:    "com.apple.focus.personal-time",
+	},
+	"Work": {
+		DisplayString: "Work",
+		Identifier:    "com.apple.focus.work",
+	},
+	"Sleep": {
+		DisplayString: "Sleep",
+		Identifier:    "com.apple.focus.sleep-mode",
+	},
+	"Driving": {
+		DisplayString: "Driving",
+		Identifier:    "com.apple.donotdisturb.mode.driving",
 	},
 }
 
@@ -1986,7 +2095,6 @@ var actionIncludes = []string{
 	"documents",
 	"dropbox",
 	"images",
-	"intelligence",
 	"location",
 	"mac",
 	"math",
