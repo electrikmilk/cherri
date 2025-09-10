@@ -59,7 +59,7 @@ var globals = map[string]varValue{
 	},
 	"RepeatIndex": {
 		variableType: "Variable",
-		valueType:    String,
+		valueType:    Integer,
 		value:        "Repeat Index",
 	},
 }
