@@ -129,6 +129,8 @@ var enumerations = map[string][]string{
 	"Temperature":                   {"K", "ºC", "ºF"},
 	"Volume":                        {"ML", "kL", "liter", "dL", "cL", "mL", "km³", "m³", "dm³", "cm³", "mm³", "in³", "ft³", "yd³", "mi³", "acre ft", "bushel", "tsp", "tbsp", "fl oz", "pt", "qt", "Imp gal", "mcup"},
 	"fileOrderBy":                   {"Smallest First", "Biggest First", "Latest First", "Oldest First", "A to Z", "Z to A"},
+	"imagePlaygroundStyle":          {"animation", "illustration", "sketch", "chatgpt", "chatgpt_oil_painting", "chatgpt_watercolor", "chatgpt_vector", "chatgpt_anime", "chatgpt_print"},
+	"saveToPlaygroundBehavior":      {"always", "askWhenRun", "never"},
 	"focusModes":                    {"Do Not Disturb", "Personal", "Work", "Sleep", "Driving"},
 	"focusUntil":                    {"Turned Off", "Time", "I Leave", "Event Ends"},
 }
@@ -716,6 +718,9 @@ func parseActionDefinitions() {
 			preParsing = true
 			delete(args.Args, "comments")
 			continue
+		case char == '"':
+			collectString()
+			advanceUntil('\n')
 		case tokenAhead(Enumeration):
 			collectEnumeration()
 		case tokenAhead(Definition):
