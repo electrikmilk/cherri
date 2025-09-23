@@ -180,6 +180,8 @@ var workflowTypes = map[string]string{
 	"sleepmode":     "Sleep",
 	"watch":         "Watch",
 	"onscreen":      "ReceivesOnScreenContent",
+	"search":        "WFWorkflowTypeShowInSearch",
+	"spotlight":     "WFWorkflowTypeReceivesInputFromSearch",
 }
 var definedWorkflowTypes []string
 
