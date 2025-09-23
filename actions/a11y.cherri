@@ -42,13 +42,13 @@ enum soundRecognitionOperations {
 }
 
 // [Doc]: [Hearing] Set Sound Recognition
-#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent' setSoundRecognition(soundRecognitionOperations ?operation = "activate")
+#define action !mac v18 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent' setSoundRecognition(soundRecognitionOperations ?operation = "activate")
 
 // [Doc]: [Magnifier] Describe This
-#define action 'com.apple.Magnifier.DescribeThisIntent' magnifierDescribe()
+#define action !mac v18 'com.apple.Magnifier.DescribeThisIntent' magnifierDescribe()
 
 // [Doc]: [Magnifier] Open Reader
-#define action 'com.apple.Magnifier.ReaderModeIntent' magnifierReader()
+#define action !mac v18 'com.apple.Magnifier.ReaderModeIntent' magnifierReader()
 
 // [Doc]: [Magnifier] Start Point & Speak
-#define action 'com.apple.Magnifier.PointAndSpeakIntent' magnifierPointAndSpeak()
+#define action !mac v18 'com.apple.Magnifier.PointAndSpeakIntent' magnifierPointAndSpeak()
