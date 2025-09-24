@@ -370,6 +370,9 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*valueType = Integer
 		*value = ""
 		collectExpression(valueType, value)
+	case tokenAhead(Color):
+		*valueType = Color
+		collectColorValue(value)
 	case tokenAhead(True):
 		*valueType = Bool
 		*value = true
@@ -383,6 +386,43 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		collectActionValue(valueType, value)
 	default:
 		collectReference(valueType, value, &until)
+	}
+}
+
+func collectColorValue(value *any) {
+	advance()
+	currentActionIdentifier = "color"
+	currentAction = actionDefinition{parameters: []parameterDefinition{
+		{
+			name:         "red",
+			validType:    Float,
+			defaultValue: 0.0,
+			literal:      true,
+		},
+		{
+			name:         "green",
+			validType:    Float,
+			defaultValue: 0.0,
+			literal:      true,
+		},
+		{
+			name:         "blue",
+			validType:    Float,
+			defaultValue: 0.0,
+			literal:      true,
+		},
+		{
+			name:         "alpha",
+			validType:    Float,
+			defaultValue: 1.0,
+			literal:      true,
+		},
+	}}
+
+	*value = collectArguments()
+
+	if char == ')' {
+		advance()
 	}
 }
 
@@ -733,8 +773,10 @@ func collectType(valueType *tokenType, value *any, until rune) {
 		*value = make(map[string]interface{})
 	case tokenAhead(Variable):
 		*valueType = Variable
+	case tokenAhead(Color):
+		*valueType = Color
 	default:
-		parserError(fmt.Sprintf("Unknown type '%s'\n\nAvailable types: \n- text\n- rawtext\n- number\n- bool\n- array\n- dictionary\n- variable", collectUntil(until)))
+		parserError(fmt.Sprintf("Unknown type '%s'\n\nAvailable types: \n- text\n- rawtext\n- number\n- float\n- bool\n- array\n- dictionary\n- variable\n- color", collectUntil(until)))
 	}
 }
 

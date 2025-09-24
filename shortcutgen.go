@@ -642,6 +642,15 @@ func paramValue(arg actionArgument, handleAs tokenType) any {
 		fallthrough
 	case Float:
 		return arg.value
+	case Color:
+		var colorArgs = arg.value.([]actionArgument)
+		return map[string]any{
+			"WFColorRepresentationType": "WFColorRepresentationTypeCGColor",
+			"redComponent":              colorArgs[0].value.(float64),
+			"greenComponent":            colorArgs[1].value.(float64),
+			"blueComponent":             colorArgs[2].value.(float64),
+			"alphaComponent":            colorArgs[3].value,
+		}
 	default:
 		return attachmentValues(arg.value.(string))
 	}
