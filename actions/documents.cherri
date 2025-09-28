@@ -114,6 +114,9 @@ enum fileSizeFormat {
 // [Doc]: [Notes] Append Note: Append text to a note.
 #define action appendNote(text note: 'WFNote', text input: 'WFInput')
 
+// [Doc]: [Notes] Show Quick Note: Show quick note.
+#define action 'com.apple.mobilenotes.ShowQuickNoteIntent' showQuickNote()
+
 // [Doc]: [Printing] Print: Print input to a printer.
 #define action print(variable input: 'WFInput')
 

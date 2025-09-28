@@ -60,6 +60,9 @@ enum editEventDetail {
 // [Doc]: [Reminders] Open Reminders List
 #define action 'showlist' openRemindersList(variable list: 'WFList')
 
+// [Doc]: [Reminders] Add Quick Reminder
+#define action 'is.workflow.actions.addquickreminder' addQuickReminder()
+
 // [Doc]: [Reminders] Remove Reminders
 #define action removeReminders(variable reminders: 'WFInputReminders')
 
@@ -73,6 +76,64 @@ enum editEventDetail {
 #define action date(text date: 'WFDateActionDate') {
 	"WFDateActionMode": "Specified Date"
 }
+
+enum holidayYear {
+    '2023',
+    '2024',
+    '2025',
+    '2026',
+    '2027',
+}
+
+enum eventOccurrenceMode {
+    'Next Occurrence',
+    'Specified Year',
+}
+
+enum holiday {
+    'April Fools\' Day',
+    'Ash Wednesday',
+    'Christmas Day',
+    'Christmas Eve',
+    'Cinco de Mayo',
+    'Columbus Day',
+    'Day of the Dead',
+    'Daylight Saving Time',
+    'Daylight Saving Time End',
+    'Diwali',
+    'Earth Day',
+    'Easter Sunday',
+    'Eid al-Adha',
+    'Eid al-Fitr',
+    'Election Day',
+    'Father\'s Day',
+    'First Night of Ramadan',
+    'Flag Day',
+    'Good Friday',
+    'Groundhog Day',
+    'Halloween',
+    'Holi',
+    'Inauguration Day',
+    'Independence Day',
+    'Indigenous Peoples\' Day',
+    'Juneteenth',
+    'Martin Luther King Jr. Day',
+    'Memorial Day',
+    'Mother\'s Day',
+    'New Year\'s Day',
+    'New Year\'s Eve',
+    'Palm Sunday',
+    'Presidents\' Day',
+    'St. Patrick\'s Day',
+    'Tax Day',
+    'Thanksgiving',
+    'Valentine\'s Day',
+    'Veterans Day',
+    'Workers\' Day',
+}
+
+// [Doc]: [Dates] Get Holiday Date: Get the date of a holiday, optionally specifically for a few past or future years.
+#define action 'date' getHolidayDate(holiday holiday: 'WFDateActionMode', eventOccurrenceMode ?occurrenceMode: 'WFEventOccurrenceMode' = "Next Occurrence", holidayYear ?forYear: 'WFEventOccurrenceSpecifiedYear'): text
 
 // [Doc]: [Dates] Current Date: Get the current date.
 #define action default 'date' currentDate() {

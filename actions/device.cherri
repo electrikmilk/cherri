@@ -50,3 +50,23 @@ enum deviceDetail {
 #define action v16.2 'getbatterylevel' isCharging(): bool {
 	"Subject": "Is Charging"
 }
+
+enum deviceUsageType {
+    'all',
+    'app',
+    'website'
+}
+
+enum usageDuration {
+    'today',
+    'yesterday',
+    'lastWeek',
+    'thisWeek',
+    'thisMonth',
+    'thisYear',
+    'specifiedDay',
+    'inBetween',
+}
+
+// [Doc]: [Screen Time] Get Website & App Activity
+#define action 'com.apple.intelligenceplatform.IntelligencePlatform.IntelligencePlatformDataActionsAppIntentsExtension.CalculateAppUsageIntent' getDeviceUsage(deviceUsageType usageType: 'activityType' = "all", variable ?device: 'selectedDevice', usageDuration during: 'during' = "today", text ?startTime: 'startTime', text ?startTime: 'endTime')

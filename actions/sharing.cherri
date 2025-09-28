@@ -32,6 +32,15 @@ Sharing Actions
     bool ?prompt: 'ShowWhenRun' = true
 )
 
+// [Doc]: [Email & SMS Messaging] Find Email: Find email.
+#define action 'com.apple.mobilemail.MailMessageEntity' findEmail(text search: 'WFContentItemInputParameter')
+
+// [Doc]: [Email & SMS Messaging] Find Message: Find SMS/iMessage message.
+#define action 'com.apple.MobileSMS.MessageEntity' findMessage(text search: 'WFContentItemInputParameter')
+
+// [Doc]: [Email & SMS Messaging] Find Conversation: Find SMS/iMessage conversation.
+#define action 'com.apple.MobileSMS.ConversationEntity' findConversation(text search: 'WFContentItemInputParameter')
+
 // [Doc]: [AirDrop] AirDrop: Prompt the user to AirDrop `input`.
 #define action 'airdropdocument' airdrop(variable input: 'WFInput')
 

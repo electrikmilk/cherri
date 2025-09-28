@@ -105,3 +105,6 @@ enum countType {
 
 // [Doc]: [Control Flow] Wait to Return: Wait for the user to return to Shortcuts.
 #define action waitToReturn()
+
+// [Doc]: [Search] Search/Spotlight: Get results from search on iOS or iPadOS, and Spotlight on macOS.
+#define action 'spotlightsearch' search(text query: 'WFInputText', number ?limit: 'WFSpotlightSearchLimit' = 5, array ?resultType: 'WFSpotlightSearchResultType' = ["Calendar Events","Contacts","Mail","Messages","Notes","Photos","Reminders","Voice Recordings","Bookmarks"]): array

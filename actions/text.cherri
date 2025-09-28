@@ -94,6 +94,8 @@ enum stopListeningTrigger {
     bool ?regExp: 'WFReplaceTextRegularExpression' = false
 ): text
 
+// [Doc]: [Text Editing] Trim Whitespace: Trim any whitespace from the start and end of `text`.
+#define action 'text.trimwhitespace' trimWhitespace(text text: 'WFInput'): text
 
 // [Doc]: [Regular Expressions] Match Text: Use regular expressions to match text.
 #define action default 'text.match' matchText(text regexPattern: 'WFMatchTextPattern', text text, bool ?caseSensitive: 'WFMatchTextCaseSensitive' = true)

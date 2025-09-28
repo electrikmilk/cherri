@@ -88,5 +88,8 @@ enum weatherDetail {
 // [Doc]: [Weather] Get Weather Detail: Get a detail about a weather forecast.
 #define action 'properties.weather.conditions' getWeatherDetail(variable weather: 'WFInput', weatherDetail detail: 'WFContentItemPropertyName')
 
-// [Doc]: [Weather] Add Location to List: Add location to weather app.
+// [Doc]: [Weather] Add Location to List: Add a location to Weather app.
 #define action 'com.apple.weather.AddSavedLocationIntent' addWeatherLocation(variable location: 'placemark')
+
+// [Doc]: [Weather] Remove Location from List: Remove a location from the Weather app.
+#define action 'com.apple.weather.RemoveSavedLocationIntent' removeWeatherLocation(variable location: 'entities')

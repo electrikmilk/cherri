@@ -5,6 +5,12 @@ Photos Actions
 // [Doc]: Create Album
 #define action 'photos.createalbum' createAlbum(text name: 'AlbumName', variable ?images: 'WFInput')
 
+// [Doc]: Rename Album
+#define action renameAlbum(variable album: 'album', text newTitle: 'title')
+
+// [Doc]: Search Photos
+#define action 'com.apple.mobileslideshow.PhotosSearchAssistantIntent' searchPhotos(text criteria: 'criteria'): array
+
 // [Doc]: Delete Photos
 #define action deletePhotos(variable photos)
 

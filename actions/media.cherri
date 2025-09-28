@@ -159,3 +159,6 @@ enum encodeVideoSpeeds {
 
 // [Doc]: [Video Editing] Trim Video: Prompts the user to trim the video.
 #define action trimVideo(variable video: 'WFInputMedia')
+
+// [Doc]: [Voice Memos] Search Voice Memos
+#define action 'com.apple.VoiceMemos.SearchRecordings' searchVoiceMemos(text search: 'searchPhrase'): array
