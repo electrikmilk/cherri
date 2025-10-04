@@ -43,6 +43,22 @@ The primary goal is to make it practical to create large Shortcut projects (with
 - 🔍 [Glyph Search](https://glyphs.cherrilang.org/) - Search glyphs you can use in Cherri!
 - ❓ [FAQ](https://cherrilang.org/faq)
 
+## Installation
+
+You can install Cherri by downloading the latest release or via the Homebrew package manager:
+
+**Add Tap:**
+
+```console
+brew tap electrikmilk/cherri
+```
+
+**Install:**
+
+```console
+brew install electrikmilk/cherri/cherri
+```
+
 ## Usage
 
 ```bash
