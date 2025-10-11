@@ -521,5 +521,5 @@ var glyphs = map[string]int{
 	"seal":                       62499,
 	"rhombus":                    62500,
 	"shield":                     62501,
-	"shazamLogo":                 61796,
+	"shazam":                 61796,
 }
