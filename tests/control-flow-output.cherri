@@ -1,0 +1,17 @@
+@deviceModel = "{Device['Model']}"
+const connectionName = if deviceModel == "iPhone" {
+    getCellularDetail("Carrier Name")
+} else {
+    getWifiDetail("Network Name")
+}
+
+show("{connectionName}")
+
+const deviceDetail = menu "Get Device Detail" {
+    item "Battery":
+        getBatteryLevel()
+    item "Clipboard":
+        getClipboard()
+}
+
+show("{deviceDetail}")
