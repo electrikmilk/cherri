@@ -33,7 +33,6 @@ type controlFlowGroup struct {
 }
 
 var controlFlowGroups map[int]controlFlowGroup
-var groupingTypes map[int]tokenType
 var groupingIdx int
 
 var preParsing bool
@@ -72,7 +71,6 @@ func initParse() {
 	variables = make(map[string]varValue)
 	questions = make(map[string]*question)
 	controlFlowGroups = make(map[int]controlFlowGroup)
-	groupingTypes = make(map[int]tokenType)
 	chars = []rune(contents)
 	lines = strings.Split(contents, "\n")
 	idx = -1
@@ -96,7 +94,6 @@ func initParse() {
 	chars = []rune{}
 	lines = []string{}
 	controlFlowGroups = map[int]controlFlowGroup{}
-	groupingTypes = map[int]tokenType{}
 	groupingIdx = 0
 	includes = []include{}
 
