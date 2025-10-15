@@ -116,7 +116,7 @@ func resetParser() {
 	idx = 0
 	lineIdx = 0
 	lineCharIdx = -1
-	groupingUUIDs = map[int]string{}
+	controlFlowGroups = map[int]controlFlowGroup{}
 	groupingTypes = map[int]tokenType{}
 	groupingIdx = 0
 	variables = map[string]varValue{}
