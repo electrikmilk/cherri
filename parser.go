@@ -1339,19 +1339,22 @@ func collectEndStatement() {
 		if _, ok := controlFlowGroups[groupingIdx]; !ok {
 			parserError("Ending has no starting statement.")
 		}
-		var groupType = groupingTypes[groupingIdx]
-		if groupType == Repeat || groupType == RepeatWithEach {
+
+		var controlFlowGroup = controlFlowGroups[groupingIdx]
+		if controlFlowGroup.groupType == Repeat || controlFlowGroup.groupType == RepeatWithEach {
 			repeatItemIndex--
 			reachable()
 		}
 
-		var controlFlowGroup = controlFlowGroups[groupingIdx]
+		variables[controlFlowGroup.identifier] = varValue{
+			constant: true,
+		}
 
 		tokens = append(tokens, token{
-			typeof:    groupType,
+			typeof:    controlFlowGroup.groupType,
 			ident:     controlFlowGroup.uuid,
 			valueType: EndClosure,
-			value:     nil,
+			value:     controlFlowGroup.identifier,
 		})
 		groupingIdx--
 	}

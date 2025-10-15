@@ -869,9 +869,10 @@ func makeArrayVariable(t *token) {
 }
 
 func makeConditionalAction(t *token) {
+	var actionUUID = uuid.NewString()
 	var conditionalParams = map[string]any{
 		"GroupingIdentifier": t.ident,
-		"UUID":               uuid.New().String(),
+		"UUID":               actionUUID,
 	}
 	switch t.valueType {
 	case If:
@@ -902,6 +903,7 @@ func makeConditionalAction(t *token) {
 	case Else:
 		conditionalParams["WFControlFlowMode"] = statementPart
 	case EndClosure:
+		uuids[t.value.(string)] = actionUUID
 		conditionalParams["WFControlFlowMode"] = endStatement
 	}
 
