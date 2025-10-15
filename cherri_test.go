@@ -130,7 +130,7 @@ func resetParser() {
 	definedWorkflowTypes = []string{}
 	inputs = []string{}
 	outputs = []string{}
-	noInput = WFWorkflowNoInputBehavior{}
+	noInput = map[string]any{}
 	tokens = []token{}
 	included = []string{}
 	includes = []include{}

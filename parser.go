@@ -900,9 +900,9 @@ func collectNoInputDefinition() {
 	case tokenAhead(StopWith):
 		advanceTimes(2)
 		var stopWithError = collectString()
-		noInput = WFWorkflowNoInputBehavior{
-			Name: "WFWorkflowNoInputBehaviorShowError",
-			Parameters: map[string]string{
+		noInput = map[string]any{
+			"Name": "WFWorkflowNoInputBehaviorShowError",
+			"Parameters": map[string]string{
 				"Error": stopWithError,
 			},
 		}
@@ -910,9 +910,9 @@ func collectNoInputDefinition() {
 		advance()
 		var contentItemType = collectUntil('\n')
 		if itemClass, found := contentItems[contentItemType]; found {
-			noInput = WFWorkflowNoInputBehavior{
-				Name: "WFWorkflowNoInputBehaviorAskForInput",
-				Parameters: map[string]string{
+			noInput = map[string]any{
+				"Name": "WFWorkflowNoInputBehaviorAskForInput",
+				"Parameters": map[string]string{
 					"ItemClass": itemClass,
 				},
 			}
@@ -921,8 +921,8 @@ func collectNoInputDefinition() {
 			parserError(fmt.Sprintf("Invalid content item type '%s'\n\n%s", itemClass, list))
 		}
 	case tokenAhead(GetClipboard):
-		noInput = WFWorkflowNoInputBehavior{
-			Name: "WFWorkflowNoInputBehaviorGetClipboard",
+		noInput = map[string]any{
+			"Name": "WFWorkflowNoInputBehaviorGetClipboard",
 		}
 	}
 }

@@ -52,13 +52,11 @@ func generateShortcut() {
 		},
 	)
 
-	if workflowName != "" {
-		shortcut.WFWorkflowName = workflowName
-	}
-
 	generateActions()
 
 	marshalPlist()
+
+	optimizePlist()
 
 	if args.Using("debug") {
 		printShortcutGenDebug()
@@ -73,8 +71,18 @@ func marshalPlist() {
 	handle(plistErr)
 
 	compiled = string(marshaledPlist)
+}
+
+func optimizePlist() {
 	compiled = longEmptyArraySyntax.ReplaceAllString(compiled, "<array/>")
 	compiled = longEmptyDictSyntax.ReplaceAllString(compiled, "<dict/>")
+
+	compiled = strings.Replace(compiled, "<key>WFWorkflowActions</key>\n\t\t<array/>\n\t\t", "", 1)
+	compiled = strings.Replace(compiled, "<key>WFQuickActionSurfaces</key>\n\t\t<array/>\n\t\t", "", 1)
+	compiled = strings.Replace(compiled, "<key>WFWorkflowImportQuestions</key>\n\t\t<array/>\n\t\t", "", 1)
+	compiled = strings.Replace(compiled, "<key>WFWorkflowNoInputBehavior</key>\n\t\t<dict/>\n\t\t", "", 1)
+	compiled = strings.Replace(compiled, "<key>WFWorkflowOutputContentItemClasses</key>\n\t\t<array/>\n\t\t", "", 1)
+	compiled = strings.Replace(compiled, "\t<key>WFWorkflowTypes</key>\n\t\t<array/>\n\t", "", 1)
 }
 
 func resetShortcutGen() {
@@ -83,7 +91,7 @@ func resetShortcutGen() {
 	uuids = map[string]string{}
 	variables = map[string]varValue{}
 	questions = map[string]*question{}
-	noInput = WFWorkflowNoInputBehavior{}
+	noInput = map[string]any{}
 	definedWorkflowTypes = []string{}
 	definedQuickActions = []string{}
 	inputs = []string{}

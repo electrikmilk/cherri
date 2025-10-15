@@ -26,8 +26,7 @@ type Shortcut struct {
 	WFWorkflowOutputContentItemClasses   []string
 	WFWorkflowHasShortcutInputVariables  bool
 	WFWorkflowHasOutputFallback          bool
-	WFWorkflowNoInputBehavior            WFWorkflowNoInputBehavior
-	WFWorkflowName                       string
+	WFWorkflowNoInputBehavior            map[string]any
 }
 
 var shortcut Shortcut
@@ -35,11 +34,6 @@ var shortcut Shortcut
 type ShortcutAction struct {
 	WFWorkflowActionIdentifier string
 	WFWorkflowActionParameters map[string]any
-}
-
-type WFWorkflowNoInputBehavior struct {
-	Name       string
-	Parameters map[string]string
 }
 
 type Value struct {
@@ -109,7 +103,7 @@ const itemTypeArray dictDataType = 2
 const itemTypeDict dictDataType = 1
 const itemTypeBool dictDataType = 4
 
-var noInput WFWorkflowNoInputBehavior
+var noInput map[string]any
 
 var hasShortcutInputVariables = false
 
