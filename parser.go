@@ -720,6 +720,10 @@ func collectVariable(constant bool) {
 		}
 		advance()
 
+		if collectControlFlowOutput(&identifier, &constant) {
+			return
+		}
+
 		collectVariableValue(constant, &valueType, &value)
 
 		if valueType == Variable && value.(varValue).value == "Ask" {
@@ -753,6 +757,33 @@ func collectVariable(constant bool) {
 			constant:     constant,
 		}
 	}
+}
+
+func collectControlFlowOutput(identifier *string, constant *bool) (identified bool) {
+	var controlFlowOutput bool
+
+	switch {
+	case tokenAhead(If):
+		collectConditionals(*identifier)
+		controlFlowOutput = true
+	case tokenAhead(Menu):
+		collectMenu(*identifier)
+		controlFlowOutput = true
+	case tokenAhead(Repeat):
+		collectRepeat(*identifier)
+		controlFlowOutput = true
+	case tokenAhead(RepeatWithEach):
+		collectRepeatEach(*identifier)
+		controlFlowOutput = true
+	}
+	if controlFlowOutput {
+		if !*constant {
+			parserError("Control flow output must be a constant.")
+		}
+		return true
+	}
+
+	return false
 }
 
 func collectType(valueType *tokenType, value *any, until rune) {
