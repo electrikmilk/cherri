@@ -1302,7 +1302,7 @@ func collectMenuItem() {
 	advanceUntil(':')
 	advance()
 
-	if len(menus[group.uuid]) > 0 {
+	if len(menus[group.uuid]) > 0 && group.identifier == "" {
 		addNothing()
 	}
 
@@ -1344,6 +1344,10 @@ func collectEndStatement() {
 		if controlFlowGroup.groupType == Repeat || controlFlowGroup.groupType == RepeatWithEach {
 			repeatItemIndex--
 			reachable()
+		}
+
+		if controlFlowGroup.identifier == "" {
+			addNothing()
 		}
 
 		variables[controlFlowGroup.identifier] = varValue{
