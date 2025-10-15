@@ -15,3 +15,17 @@ const deviceDetail = menu "Get Device Detail" {
 }
 
 show("{deviceDetail}")
+
+const repeated = repeat i for 6 {
+    number(i)
+}
+
+show("{repeated}")
+
+@items = ["Item 1", "Item 2", "Item 3"]
+@new = []
+const map = for item in items {
+    @new += "Label: {item}"
+}
+
+show("{new}")
