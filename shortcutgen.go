@@ -901,7 +901,7 @@ func makeConditionalAction(t *token) {
 	case Else:
 		conditionalParams["WFControlFlowMode"] = statementPart
 	case EndClosure:
-		conditionalParams["UUID"] = createReference(t.value.(string))
+		conditionalParams["UUID"] = createUUIDReference(t.value.(string))
 		conditionalParams["WFControlFlowMode"] = endStatement
 	}
 
@@ -984,13 +984,6 @@ func conditionalParameterVariable(conditionalParams map[string]any, value any) {
 	}
 }
 
-func createReference(identifier string) string {
-	var actionUUID = uuid.NewString()
-	uuids[identifier] = actionUUID
-
-	return actionUUID
-}
-
 func makeMenuAction(t *token) {
 	var menuParams = map[string]any{
 		"GroupingIdentifier": t.ident,
@@ -998,7 +991,7 @@ func makeMenuAction(t *token) {
 	}
 	if t.valueType == EndClosure {
 		menuParams["WFControlFlowMode"] = endStatement
-		menuParams["UUID"] = createReference(t.value.(string))
+		menuParams["UUID"] = createUUIDReference(t.value.(string))
 	}
 	if t.valueType != EndClosure {
 		if t.valueType != Nil {
@@ -1050,7 +1043,7 @@ func makeRepeatAction(t *token) {
 		"GroupingIdentifier": t.ident,
 	}
 	if controlFlowMode == endStatement {
-		repeatParams["UUID"] = createReference(t.value.(string))
+		repeatParams["UUID"] = createUUIDReference(t.value.(string))
 	}
 	if controlFlowMode == startStatement {
 		repeatParams["WFRepeatCount"] = paramValue(actionArgument{
@@ -1072,7 +1065,7 @@ func makeRepeatEachAction(t *token) {
 		"GroupingIdentifier": t.ident,
 	}
 	if controlFlowMode == endStatement {
-		repeatEachParams["UUID"] = createReference(t.value.(string))
+		repeatEachParams["UUID"] = createUUIDReference(t.value.(string))
 	}
 	if controlFlowMode == startStatement {
 		repeatEachParams["WFInput"] = paramValue(actionArgument{
