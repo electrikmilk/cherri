@@ -70,13 +70,11 @@ func marshalPlist() {
 	compiled = string(marshaledPlist)
 }
 
-var longEmptyArraySyntax = regexp.MustCompile(`<array>\n(.*?)</array>`)
-var longEmptyDictSyntax = regexp.MustCompile(`<dict>\n(.*?)</dict>`)
+var longEmptyArraySyntax = regexp.MustCompile(`<(array|dict)>\n(.*?)</(array|dict)>`)
 var emptyArrayOrDictSyntax = regexp.MustCompile(`<key>(.*?)</key>\n\t\t<(array|dict)/>\n\t\t`)
 
 func optimizePlist() {
-	compiled = longEmptyArraySyntax.ReplaceAllString(compiled, "<array/>")
-	compiled = longEmptyDictSyntax.ReplaceAllString(compiled, "<dict/>")
+	compiled = longEmptyArraySyntax.ReplaceAllString(compiled, "<$1/>")
 	compiled = emptyArrayOrDictSyntax.ReplaceAllString(compiled, "")
 }
 
