@@ -1,0 +1,21 @@
+/* Large Language Models */
+
+askLLM("How many r's are in strawberry?", "Apple Intelligence on Device", true, "Text")
+askDeviceLLM("How many r's are in strawberry?")
+askCloudLLM("How many r's are in strawberry?")
+askChatGPT("How many r's are in strawberry?")
+
+/* Image Playground */
+
+generateImage("Two cherries on a stem")
+generateImage("Two cherries on a stem", nil, "chatgpt_oil_painting")
+
+/* Writing Tools */
+
+adjustTextTone("Hey buddy, what's up?", "professional")
+generateList("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
+generateTable("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
+generateProofread("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
+generateRewrite("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
+generateSummary("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
+generateKeyPoints("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")

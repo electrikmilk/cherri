@@ -1,0 +1,65 @@
+/*
+Network Actions
+*/
+
+enum wifiDetail {
+	'Network Name',
+	'BSSID',
+	'Wi-Fi Standard',
+	'RX Rate',
+	'TX Rate',
+	'RSSI',
+	'Noise',
+	'Channel Number',
+	'Hardware MAC Address',
+}
+
+enum cellularDetail {
+	'Carrier Name',
+	'Radio Technology',
+	'Country Code',
+	'Is Roaming Abroad',
+	'Number of Signal Bars',
+}
+
+// [Doc]: [Wireless] Get WiFi Detail: Get a detail of the current WiFi network.
+#define action 'getwifi' getWifiDetail(wifiDetail detail: 'WFWiFiDetail') {
+	"WFNetworkDetailsNetwork": "Wi-Fi"
+}
+
+// [Doc]: [Wireless] Get Cellular Detail: Get a detail of the current Cellular network.
+#define action 'getwifi' getCellularDetail(cellularDetail detail: 'WFCellularDetail') {
+	"WFNetworkDetailsNetwork": "Cellular"
+}
+
+// [Doc]: [Server] Connect to Server: Connect to file server at `url`.
+#define action 'connecttoservers' connectToServer(text url: 'WFInput')
+
+enum SSHScriptAuthType {
+	'Password',
+	'SSH Key',
+}
+
+// [Doc]: [Server] Run SSH Script: Run an SSH script using connection details.
+#define action runSSHScript(text script: 'WFSSHScript', variable input: 'WFInput', text host: 'WFSSHHost', text port: 'WFSSHPort', text user: 'WFSSHUser', SSHScriptAuthType authType: 'WFSSHAuthenticationType', text password: 'WFSSHPassword')
+
+enum IPTypes {
+ 'IPv4',
+ 'IPv6',
+}
+
+// [Doc]: [IP Address] Get External IP: Get the users external IP address.
+#define action default 'getipaddress' getExternalIP(IPTypes ?type: 'WFIPAddressTypeOption' = "IPv4"): text {
+	"WFIPAddressSourceOption": "External"
+}
+
+// [Doc]: [IP Address] Get Local IP: Get the users local IP address.
+#define action 'getipaddress' getLocalIP(IPTypes ?type: 'WFIPAddressTypeOption' = "IPv4"): text {
+	"WFIPAddressSourceOption": "Local"
+}
+
+// [Doc]: [IP Address] Is Online: Determine if the user is online. Alias for get Get External IP.
+#define action 'getipaddress' isOnline() {
+	"WFIPAddressSourceOption": "External",
+    "WFIPAddressTypeOption": "IPv4"
+}

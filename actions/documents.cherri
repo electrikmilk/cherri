@@ -2,8 +2,6 @@
 Document Actions
 */
 
-/* Archives */
-
 enum archiveFormat {
     '.zip',
     '.tar.gz',
@@ -15,46 +13,52 @@ enum archiveFormat {
     '.iso',
 }
 
+// [Doc]: [Archives] Make Archive: Create an archive of `files` named `name` in `format`.
 #define action 'makezip' makeArchive(variable files: 'WFInput', archiveFormat ?format: 'WFArchiveFormat' = ".zip", text ?name: 'WFZIPName')
 
+// [Doc]: [Archives] Extract Archive: Extract files from the archive `file`.
 #define action 'unzip' extractArchive(variable file: 'WFArchive')
 
-
-
-/* Books */
-
+// [Doc]: [Books] Add to Books: Add `input` to books. `input` is expected to be a PDF or epub file.
 #define action 'com.apple.iBooksX.openin' addToBooks(variable input: 'BooksInput')
 
-/* Editing */
-
+// [Doc]: [Editing] Markup: Opens document in a markup editor.
 #define action 'avairyeditphoto' markup(variable document: 'WFDocument')
 
-/* Files & Folders */
-
+// [Doc]: [Files & Folders] Get File Link: Get a link for the provided file.
 #define action 'file.getlink' getFileLink(variable file: 'WFFile')
 
+// [Doc]: [Files & Folders] Append File: Append text to a file.
 #define action default 'file.append' appendToFile(text filePath: 'WFFilePath', text text: 'WFInput') {
 	"WFAppendFileWriteMode": "Append"
 }
 
+// [Doc]: [Files & Folders] Prepend File: Prepend text to a file.
 #define action 'file.append' prependToFile(text filePath: 'WFFilePath', text text: 'WFInput') {
 	"WFAppendFileWriteMode": "Prepend"
 }
 
+// [Doc]: [Files & Folders] Create Folder: Create a folder.
 #define action 'file.createfolder' createFolder(text path: 'WFFilePath') // TODO: Writing to locations other than the Shortcuts folder.
 
+// [Doc]: [Files & Folders] Delete Files: Delete a file or multiple files.
 #define action 'file.delete' deleteFiles(variable input: 'WFInput', bool ?immediately: 'WFDeleteImmediatelyDelete' = false)
 
+// [Doc]: [Files & Folders] Select File: Prompt the user to select one or optionally multiple files.
 #define action default 'file.select' selectFile(bool ?selectMultiple: 'SelectMultiple' = false)
 
+// [Doc]: [Files & Folders] Select Folder: Prompt the user to select one or optionally multiple folders.
 #define action 'file.select' selectFolder(bool ?selectMultiple: 'SelectMultiple' = false) {
 	"WFPickingMode": "Folders"
 }
 
-#define action default 'documentpicker.open' getFile(text path: 'WFGetFilePath', bool ?errorIfNotFound: 'WFFileErrorIfNotFound' = true)
+// [Doc]: [Files & Folders] Get File: Get file from a path in the Shortcuts folder.
+#define action default 'documentpicker.open' getFile(text path: 'WFGetFilePath', bool ?errorIfNotFound: 'WFFileErrorIfNotFound' = true) // TODO: Writing to locations other than the Shortcuts folder.
 
+// [Doc]: [Files & Folders] Open File: Open a file.
 #define action 'openin' openFile(variable file: 'WFInput', bool ?askWhenRun: 'WFOpenInAskWhenRun' = false)
 
+// [Doc]: [Files & Folders] Get Parent Directory: Get the parent directory of the input directory.
 #define action getParentDirectory(variable input: 'WFInput')
 
 enum fileDetail {
@@ -66,16 +70,22 @@ enum fileDetail {
     'Name'
 }
 
+// [Doc]: [Files & Folders] Get File Detail: Get a detail about a file.
 #define action 'properties.files' getFileDetail(variable file: 'WFFolder', fileDetail detail: 'WFContentItemPropertyName')
 
+// [Doc]: [Files & Folders] Get Selected
 #define action 'finder.getselectedfiles' getSelectedFiles()
 
+// [Doc]: [Files & Folders] Reveal in Finder
 #define action 'file.reveal' reveal(variable files: 'WFFile')
 
+// [Doc]: [Files & Folders] Rename File
 #define action 'file.rename' rename(variable file: 'WFFile', text newName: 'WFNewFilename')
 
+// [Doc]: [Files & Folders] Save File Prompt: Prompt the user to choose a location to save the file.
 #define action default 'documentpicker.save' saveFilePrompt(variable file: 'WFInput', bool ?overwrite: 'WFSaveFileOverwrite' = false)
 
+// [Doc]: [Files & Folders] Save File: Save contents to a file at the specified path.
 #define action 'documentpicker.save' saveFile(text path: 'WFFileDestinationPath', variable content: 'WFInput', bool ?overwrite: 'WFSaveFileOverwrite' = false) {
 	"WFAskWhereToSave": false
 }
@@ -93,36 +103,22 @@ enum fileSizeFormat {
     'Yottabytes'
 }
 
+// [Doc]: [Files & Folders] File Size: Returns the size of a file.
 #define action 'format.filesize' fileSize(variable file: 'WFFileSize', fileSizeFormat format: 'WFFileSizeFormat') {
     "WFFileSizeIncludeUnits": false
 }
 
-/* Notes */
-
+// [Doc]: [Notes] Open Note: Open note in the Notes app.
 #define action 'shownote' openNote(variable note: 'WFInput')
 
+// [Doc]: [Notes] Append Note: Append text to a note.
 #define action appendNote(text note: 'WFNote', text input: 'WFInput')
 
-/* Printing */
+// [Doc]: [Notes] Show Quick Note: Show quick note.
+#define action 'com.apple.mobilenotes.ShowQuickNoteIntent' showQuickNote()
 
-enum PDFMergeBehaviors {
-	'Append',
-	'Shuffle',
-}
-
-#define action makePDF(
-    variable input: 'WFInput',
-    bool ?includeMargin: 'WFPDFIncludeMargin' = false,
-    PDFMergeBehaviors ?mergeBehavior: 'WFPDFDocumentMergeBehavior' = "Append"
-)
-
-#define action 'compresspdf' optimizePDF(variable pdfFile: 'WFInput')
-
+// [Doc]: [Printing] Print: Print input to a printer.
 #define action print(variable input: 'WFInput')
-
-#define action splitPDF(variable pdf: 'WFInput')
-
-/* QR Codes */
 
 enum QRCodeErrorCorrection {
 	'Low',
@@ -131,94 +127,8 @@ enum QRCodeErrorCorrection {
 	'High',
 }
 
-#define action 'generatebarcode' makeQRCode(text input: 'WFText', QRCodeErrorCorrection ?errorCorrection: 'WFQRErrorCorrectionLevel' = "Medium")
+// [Doc]: [QR Codes] Make QR Code
+#define action 'generatebarcode' makeQRCode(text input: 'WFText', QRCodeErrorCorrection ?errorCorrection: 'WFQRErrorCorrectionLevel' = "Medium", color foregroundColor: 'WFQRForegroundColor' = color(0.0,0.0,0.0,1.0), color backgroundColor: 'WFQRBackgroundColor' = color(2.0,2.0,2.0,1.0))
 
-/* Rich Text */
-
-#define action 'gethtmlfromrichtext' makeHTML(variable input: 'WFInput', bool ?makeFullDocument: 'WFMakeFullDocument' = false)
-
-#define action getRichTextFromHTML(variable html: 'WFHTML')
-
-#define action 'getmarkdownfromrichtext' makeMarkdown(variable richText: 'WFInput')
-
-#define action getRichTextFromMarkdown(variable markdown: 'WFInput')
-
-/* Text */
-
-enum stopListenings {
-	'After Pause',
-	'After Short Pause',
-	'On Tap',
-}
-
-#define action 'dictatetext' listen(stopListenings ?stopListening: 'WFDictateTextStopListening' = "After Pause", language ?language: 'WFSpeechLanguage')
-
-#define action 'extracttextfromimage' getTextFromImage(variable image: 'WFImage')
-
-#define action 'getnameofemoji' getEmojiName(text emoji: 'WFInput')
-
-#define action 'detect.text' getText(variable input: 'WFInput'): text
-
-#define action 'makespokenaudiofromtext' makeSpokenAudio(text text: 'WFInput', number ?rate: 'WFSpeakTextRate', number ?pitch: 'WFSpeakTextPitch')
-
-#define action 'showdefinition' define(text word: 'Word')
-
-#define action 'speaktext' speak(text prompt: 'WFText', bool ?waitUntilFinished: 'WFSpeakTextWait' = true, text ?language: 'WFSpeakTextLanguage')
-
-#define action v17 'com.apple.ShortcutsActions.TranscribeAudioAction' transcribeText(variable audioFile)
-
-/* Text Editing */
-
-#define action default 'text.changecase' uppercase(text text) {
-	"Show-text": true,
-	"WFCaseType": "UPPERCASE"
-}
-
-#define action 'text.changecase' lowercase(text text) {
-	"Show-text": true,
-	"WFCaseType": "lowercase"
-}
-
-#define action 'text.changecase' capitalize(text text): text {
-	"Show-text": true,
-	"WFCaseType": "Capitalize with sentence case"
-}
-
-#define action 'text.changecase' capitalizeAll(text text): text {
-	"Show-text": true,
-	"WFCaseType": "Capitalize Every Word"
-}
-
-#define action 'text.changecase' titleCase(text text): text {
-	"Show-text": true,
-	"WFCaseType": "Capitalize with Title Case"
-}
-
-#define action 'text.changecase' alternatingCase(text text): text {
-	"Show-text": true,
-	"WFCaseType": "cApItAlIzE wItH aLtErNaTiNg cAsE"
-}
-
-#define action correctSpelling(text text): text {
-	"Show-text": true
-}
-
-#define action default 'text.match' matchText(text regexPattern: 'WFMatchTextPattern', text text, bool ?caseSensitive: 'WFMatchTextCaseSensitive' = true)
-
-#define action default 'text.match.getgroup' getMatchGroup(variable matches, number index: 'WFGroupIndex') {
-	"WFGetGroupType": "Group At Index"
-}
-
-#define action 'text.match.getgroup' getMatchGroups(variable matches) {
-	"WFGetGroupType": "All Groups"
-}
-
-#define action 'text.replace' replaceText(
-    text find: 'WFReplaceTextFind',
-    text replacement: 'WFReplaceTextReplace',
-    text subject: 'WFInput',
-    bool ?caseSensitive: 'WFReplaceTextCaseSensitive' = true,
-    bool ?regExp: 'WFReplaceTextRegularExpression' = false
-): text
-
+// [Doc]: Convert to USDZ
 #define action 'com.apple.HydraUSDAppIntents.ConvertToUSDZ' convertToUSDZ(variable file)

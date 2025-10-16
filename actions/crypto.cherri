@@ -1,0 +1,23 @@
+/*
+Cryptography Actions
+*/
+
+// [Doc]: Base 64 Encode: Base 64 encodes input.
+#define action default 'base64encode' base64Encode(variable encodeInput: 'WFInput'): text {
+	"input": "Encode"
+}
+
+// [Doc]: Base 64 Decode: Base 64 decodes input.
+#define action 'base64encode' base64Decode(variable input: 'WFInput'): text {
+	"WFEncodeMode": "Decode"
+}
+
+enum hashType {
+	'MD5',
+	'SHA1',
+	'SHA256',
+	'SHA512',
+}
+
+// [Doc]: Hash: Generate a hash of type using input.
+#define action hash(variable input: 'WFInput', hashType ?type: 'WFHashType' = "MD5"): text

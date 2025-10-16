@@ -1,6 +1,6 @@
 // VCard menu
 
-const cherri_icon = base64File("assets/cherri_icon.png")
+const cherri_icon = embedFile("assets/cherri_icon.png")
 
 @items = []
 repeat i for 3 {

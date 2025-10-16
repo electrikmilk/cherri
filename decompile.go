@@ -38,6 +38,7 @@ func decompile(b []byte) {
 	specialCharsRegex = regexp.MustCompile("[^a-zA-Z0-9_]+")
 	variables = make(map[string]varValue)
 	uuids = make(map[string]string)
+	controlFlowGroups = make(map[int]controlFlowGroup)
 
 	basename = strings.ReplaceAll(basename, " ", "_")
 	outputPath = getOutputPath(fmt.Sprintf("%s%s.cherri", relativePath, basename))
@@ -47,12 +48,15 @@ func decompile(b []byte) {
 		filePath = getOutputPath(relativePath + basename + ".cherri")
 	}
 
-	loadStandardActions()
+	loadBasicStandardActions()
+	resetParse()
+	firstChar()
 
 	mapVariables()
 	mapSplitActions()
+	mapIdentifiers()
 	waitFor(
-		mapIdentifiers,
+		mapControlFlowOutputs,
 		defineToggleSetActions,
 	)
 
@@ -84,6 +88,39 @@ func mapIdentifiers() {
 
 		checkParamIdentifiers(params)
 	}
+}
+
+func mapControlFlowOutputs() {
+	for _, action := range shortcut.WFWorkflowActions {
+		switch action.WFWorkflowActionIdentifier {
+		case "is.workflow.actions.conditional":
+			fallthrough
+		case "is.workflow.actions.choosefrommenu":
+			fallthrough
+		case "is.workflow.actions.repeat.count":
+			fallthrough
+		case "is.workflow.actions.repeat.each":
+			var params = action.WFWorkflowActionParameters
+			if params["WFControlFlowMode"].(uint64) != endStatement {
+				continue
+			}
+
+			var groupName string
+			if params["UUID"] != nil {
+				var endingUUID = params["UUID"].(string)
+				if uuids[endingUUID] != "" {
+					groupName = uuids[endingUUID]
+				}
+			}
+
+			controlFlowGroups[groupingIdx] = controlFlowGroup{
+				groupType:  Conditional,
+				identifier: groupName,
+			}
+			groupingIdx++
+		}
+	}
+	groupingIdx = 0
 }
 
 // Map out variables in the Shortcut and their UUIDs for later checks.
@@ -433,7 +470,11 @@ func decompComment(action *ShortcutAction) {
 		}
 	} else {
 		if strings.Contains(commentText, "\n") {
-			newCodeLine(fmt.Sprintf("/*\n%s\n*/\n\n", commentText))
+			newCodeLine("/*\n")
+			for _, line := range strings.Split(commentText, "\n") {
+				newCodeLine(fmt.Sprintln(line))
+			}
+			newCodeLine("*/\n")
 		} else {
 			newCodeLine(fmt.Sprintf("// %s\n\n", commentText))
 		}
@@ -495,9 +536,18 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 func decompBasicExpression(action *ShortcutAction) {
 	var input = action.WFWorkflowActionParameters["WFInput"]
 	var operand = action.WFWorkflowActionParameters["WFMathOperand"]
-	var operation = action.WFWorkflowActionParameters["WFMathOperation"]
-	var expression = strings.Trim(decompValue(input),
-		"\"") + " " + strings.Trim(decompValue(operation), "\"") + " " + strings.Trim(decompValue(operand), "\"")
+	var operation = "+"
+	if action.WFWorkflowActionParameters["WFMathOperation"] != nil {
+		switch action.WFWorkflowActionParameters["WFMathOperation"] {
+		case "×":
+			operation = "*"
+		case "÷":
+			operation = "/"
+		default:
+			operation = action.WFWorkflowActionParameters["WFMathOperation"].(string)
+		}
+	}
+	var expression = strings.Trim(decompValue(input), "\"") + " " + strings.Trim(operation, "\"") + " " + strings.Trim(decompValue(operand), "\"")
 	var varRegex = regexp.MustCompile(`{(.*?)}`)
 	currentVariableValue = varRegex.ReplaceAllString(expression, "$1")
 
@@ -538,15 +588,6 @@ func decompVariable(action *ShortcutAction) {
 	code.WriteRune('\n')
 }
 
-var controlFlowUUIDs []string
-
-func collectControlFlowUUID(action *ShortcutAction) {
-	if action.WFWorkflowActionParameters["UUID"] != nil {
-		var uuid = action.WFWorkflowActionParameters["UUID"].(string)
-		controlFlowUUIDs = append(controlFlowUUIDs, uuid)
-	}
-}
-
 func decompDictionaryGetValue(action *ShortcutAction) {
 	var dictionaryValueRef strings.Builder
 	dictionaryValueRef.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
@@ -566,6 +607,33 @@ func decompDictionaryGetValue(action *ShortcutAction) {
 	}
 }
 
+func checkControlFlowOutput(action *ShortcutAction) bool {
+	switch action.WFWorkflowActionIdentifier {
+	case "is.workflow.actions.conditional":
+		fallthrough
+	case "is.workflow.actions.choosefrommenu":
+		fallthrough
+	case "is.workflow.actions.repeat.count":
+		fallthrough
+	case "is.workflow.actions.repeat.each":
+		if action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64) == startStatement {
+			var group = controlFlowGroups[groupingIdx]
+			if group.identifier != "" {
+				newCodeLine(fmt.Sprintf("const %s = ", group.identifier))
+				groupingIdx++
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func spaceOutStatements() {
+	if tabLevel == 0 {
+		newCodeLine("\n")
+	}
+}
+
 func decompMenu(action *ShortcutAction) {
 	if len(menus) == 0 {
 		menus = make(map[string][]varValue)
@@ -574,12 +642,18 @@ func decompMenu(action *ShortcutAction) {
 	var groupingUUID = action.WFWorkflowActionParameters["GroupingIdentifier"].(string)
 	switch controlFlowMode {
 	case startStatement:
+		spaceOutStatements()
+		if checkControlFlowOutput(action) {
+			code.WriteString("menu ")
+		} else {
+			newCodeLine("menu ")
+		}
+
 		menus[groupingUUID] = []varValue{}
 		var items = action.WFWorkflowActionParameters["WFMenuItems"]
 		for _, item := range items.([]interface{}) {
 			menus[groupingUUID] = append(menus[groupingUUID], varValue{value: item})
 		}
-		newCodeLine("menu ")
 		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFMenuPrompt"]))
 		code.WriteString(" {\n")
 		tabLevel++
@@ -597,7 +671,6 @@ func decompMenu(action *ShortcutAction) {
 		code.WriteString(":\n")
 		tabLevel++
 	case endStatement:
-		collectControlFlowUUID(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -607,8 +680,9 @@ func decompRepeat(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		if tabLevel == 0 {
-			newCodeLine("\nrepeat ")
+		spaceOutStatements()
+		if checkControlFlowOutput(action) {
+			code.WriteString("repeat ")
 		} else {
 			newCodeLine("repeat ")
 		}
@@ -620,7 +694,6 @@ func decompRepeat(action *ShortcutAction) {
 		code.WriteString(" {\n")
 		tabLevel++
 	case endStatement:
-		collectControlFlowUUID(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -630,8 +703,8 @@ func decompFor(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		if tabLevel == 0 {
-			newCodeLine("\nfor ")
+		if checkControlFlowOutput(action) {
+			code.WriteString("for ")
 		} else {
 			newCodeLine("for ")
 		}
@@ -643,7 +716,6 @@ func decompFor(action *ShortcutAction) {
 		code.WriteString(" {\n")
 		tabLevel++
 	case endStatement:
-		collectControlFlowUUID(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -653,7 +725,12 @@ func decompConditional(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		newCodeLine("if ")
+		spaceOutStatements()
+		if checkControlFlowOutput(action) {
+			code.WriteString("if ")
+		} else {
+			newCodeLine("if ")
+		}
 
 		if action.WFWorkflowActionParameters["WFConditions"] != nil {
 			var conditions = action.WFWorkflowActionParameters["WFConditions"].(map[string]interface{})
@@ -681,7 +758,6 @@ func decompConditional(action *ShortcutAction) {
 		newCodeLine("} else {\n")
 		tabLevel++
 	case endStatement:
-		collectControlFlowUUID(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -889,8 +965,6 @@ func decompValueObject(value map[string]interface{}) string {
 			var outputName = uuids[value["OutputUUID"].(string)]
 			sanitizeIdentifier(&outputName)
 
-			isControlFlowUUID(value["OutputUUID"].(string), outputName)
-
 			if value["Aggrandizements"] == nil {
 				return outputName
 			}
@@ -907,13 +981,6 @@ func decompValueObject(value map[string]interface{}) string {
 	}
 
 	return decompObjectValue(value)
-}
-
-func isControlFlowUUID(uuid string, identifier string) {
-	if slices.Contains(controlFlowUUIDs, uuid) {
-		insertCodeComment(fmt.Sprintf("TODO: Control flow output not supported. Assign variable in control flow branches to '%s'.", identifier))
-		decompWarning(fmt.Sprintf("Usage of control flow action output '%s' not supported. This can be manually corrected by assigning a variable within the control flow branches and then using that variable instead.", identifier))
-	}
 }
 
 func decompObjectValue(valueObj any) string {
@@ -984,8 +1051,6 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 			decompAggrandizements(&variableName, attachment.Aggrandizements)
 		}
 
-		isControlFlowUUID(attachment.OutputUUID, variableName)
-
 		attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
 	}
 
@@ -1033,6 +1098,13 @@ func decompAggrandizements(reference *string, aggrs []Aggrandizement) {
 	}
 }
 
+// popLine adds line to the top of the generated Cherri code.
+func popLine(line string) {
+	var saveCode = code.String()
+	code.Reset()
+	code.WriteString(fmt.Sprintf("%s\n%s", line, saveCode))
+}
+
 var macDefinition bool
 
 func decompAction(action *ShortcutAction) {
@@ -1043,19 +1115,21 @@ func decompAction(action *ShortcutAction) {
 	var actionCallCode strings.Builder
 	var matchedIdentifier, matchedAction = matchAction(action)
 	if matchedIdentifier == "" {
-		actionCallCode.WriteString(makeRawAction(action))
-	}
-
-	if matchedAction.mac && !macDefinition {
-		var saveCode = code.String()
-		code.Reset()
-		code.WriteString(fmt.Sprintf("#define mac true\n%s", saveCode))
-		macDefinition = true
+		checkMissingStandardInclude(&action.WFWorkflowActionIdentifier, false)
+		matchedIdentifier, matchedAction = matchAction(action)
+		if matchedIdentifier == "" {
+			actionCallCode.WriteString(makeRawAction(action))
+		}
 	}
 
 	var isConstant, isVariableValue = checkOutputType(action)
 
 	if matchedIdentifier != "" {
+		if (matchedAction.macOnly || matchedAction.nonMacOnly) && !macDefinition {
+			macDefinition = matchedAction.macOnly && !matchedAction.nonMacOnly
+			popLine(fmt.Sprintf("#define mac %v", macDefinition))
+		}
+
 		actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
 
 		if matchedAction.make != nil || matchedAction.decomp != nil {
@@ -1239,7 +1313,7 @@ func matchAction(action *ShortcutAction) (name string, definition actionDefiniti
 			appIdentifier = def.appIdentifier
 		}
 		var actionIdentifier = fmt.Sprintf("%s.%s", appIdentifier, identifier)
-		if actionIdentifier == action.WFWorkflowActionIdentifier || definition.overrideIdentifier == action.WFWorkflowActionIdentifier {
+		if actionIdentifier == action.WFWorkflowActionIdentifier || def.overrideIdentifier == action.WFWorkflowActionIdentifier {
 			definition = *def
 			name = call
 
@@ -1309,19 +1383,22 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 	}
 
 	sort.SliceStable(matches, func(i, j int) bool {
-		return matches[i].values > matches[j].values
+		return matches[i].params > matches[j].params || matches[i].values > matches[j].values
 	})
 
 	if args.Using("debug") {
-		for _, match := range matches[1:] {
+		for _, match := range matches[0:2] {
 			fmt.Printf("%s()\n", match.action.identifier)
-			fmt.Println("params:", match.params, ", values:", match.values)
+			fmt.Println("params:", match.params, " values:", match.values)
 			fmt.Println("---")
 		}
-		fmt.Print("\n\n")
+		fmt.Print("\n")
 	}
 
 	if !competingMatches(matches) {
+		if args.Using("debug") {
+			fmt.Println("matches are not competing! using default")
+		}
 		return
 	}
 
@@ -1332,14 +1409,22 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 
 // competingMatches determines if the matches for this identifier have more values than 1 matching this action.
 func competingMatches(matches []actionMatch) bool {
-	var matchedValues int
+	var hasCompetingValues bool
 	for _, match := range matches {
-		if match.values > 0 {
-			matchedValues++
+		if match.values > 1 {
+			hasCompetingValues = true
+			break
 		}
 	}
-
-	return matchedValues > 0
+	if hasCompetingValues {
+		return true
+	}
+	for _, match := range matches {
+		if match.params > 1 {
+			return true
+		}
+	}
+	return false
 }
 
 func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {

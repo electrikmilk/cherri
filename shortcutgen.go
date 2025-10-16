@@ -18,9 +18,6 @@ import (
 
 var compiled string
 
-var longEmptyArraySyntax = regexp.MustCompile(`<array>\n(.*?)</array>`)
-var longEmptyDictSyntax = regexp.MustCompile(`<dict>\n(.*?)</dict>`)
-
 func generateShortcut() {
 	if args.Using("debug") {
 		fmt.Print("Generating Shortcut data...")
@@ -52,13 +49,11 @@ func generateShortcut() {
 		},
 	)
 
-	if workflowName != "" {
-		shortcut.WFWorkflowName = workflowName
-	}
-
 	generateActions()
 
 	marshalPlist()
+
+	optimizePlist()
 
 	if args.Using("debug") {
 		printShortcutGenDebug()
@@ -73,8 +68,16 @@ func marshalPlist() {
 	handle(plistErr)
 
 	compiled = string(marshaledPlist)
+}
+
+var longEmptyArraySyntax = regexp.MustCompile(`<array>\n(.*?)</array>`)
+var longEmptyDictSyntax = regexp.MustCompile(`<dict>\n(.*?)</dict>`)
+var emptyArrayOrDictSyntax = regexp.MustCompile(`<key>(.*?)</key>\n\t\t<(array|dict)/>\n\t\t`)
+
+func optimizePlist() {
 	compiled = longEmptyArraySyntax.ReplaceAllString(compiled, "<array/>")
 	compiled = longEmptyDictSyntax.ReplaceAllString(compiled, "<dict/>")
+	compiled = emptyArrayOrDictSyntax.ReplaceAllString(compiled, "")
 }
 
 func resetShortcutGen() {
@@ -83,7 +86,7 @@ func resetShortcutGen() {
 	uuids = map[string]string{}
 	variables = map[string]varValue{}
 	questions = map[string]*question{}
-	noInput = WFWorkflowNoInputBehavior{}
+	noInput = map[string]any{}
 	definedWorkflowTypes = []string{}
 	definedQuickActions = []string{}
 	inputs = []string{}
@@ -252,45 +255,43 @@ func makeBoolValue(reference *map[string]any, value *any) {
 	}, reference))
 }
 
-var formattedExpression []string
-
 func makeExpressionValue(reference *map[string]any, value *any) {
-	formattedExpression = []string{}
 	var expression = fmt.Sprintf("%s", *value)
 	var expressionParts = strings.Split(expression, " ")
 	if len(expressionParts) == 3 && containsTokens(&expression, Plus, Minus, Multiply, Divide) {
-		var operandOne string
-		var operandTwo string
-
-		var operation = expressionParts[1]
-		expressionParts = strings.Split(expression, operation)
-		operandOne = strings.Trim(expressionParts[0], " ")
-		operandTwo = strings.Trim(expressionParts[1], " ")
-		wrapVariableReference(&operandOne)
-		wrapVariableReference(&operandTwo)
-
-		addStdAction("math", attachReferenceToParams(&map[string]any{
-			"WFScientificMathOperation": attachmentValues(operation),
-			"WFMathOperation":           attachmentValues(operation),
-			"WFInput":                   attachmentValues(operandOne),
-			"WFMathOperand":             attachmentValues(operandTwo),
-		}, reference))
-
+		makeMathValue(reference, expression, expressionParts)
 		return
 	}
-
-	expressionParts = strings.Split(expression, " ")
-	for _, part := range expressionParts {
-		var p = part
-		wrapVariableReference(&p)
-		formattedExpression = append(formattedExpression, p)
-	}
-
-	expression = strings.Join(formattedExpression, " ")
 
 	addStdAction("calculateexpression", attachReferenceToParams(&map[string]any{
 		"Input": attachmentValues(expression),
 	}, reference))
+}
+
+func makeMathValue(reference *map[string]any, expression string, expressionParts []string) {
+	var operandOne string
+	var operandTwo string
+
+	var operation = expressionParts[1]
+	expressionParts = strings.Split(expression, operation)
+
+	operandOne = strings.Trim(expressionParts[0], " ")
+	operandTwo = strings.Trim(expressionParts[1], " ")
+
+	switch operation {
+	case "*":
+		operation = "×"
+	case "/":
+		operation = "÷"
+	}
+
+	addStdAction("math", attachReferenceToParams(&map[string]any{
+		"WFMathOperation": operation,
+		"WFInput":         attachmentValues(operandOne),
+		"WFMathOperand":   attachmentValues(operandTwo),
+	}, reference))
+
+	return
 }
 
 func makeDictionaryValue(value *any) map[string]any {
@@ -382,7 +383,7 @@ func inputValue(name string, varUUID string) map[string]any {
 func variableValue(variable varValue) map[string]any {
 	var identifier = variable.value.(string)
 	var variableReference varValue
-	var aggrandizements []Aggrandizement
+	var aggrandizements []map[string]any
 	if global, found := globals[identifier]; found {
 		isInputVariable(identifier)
 		variable.variableType = global.variableType
@@ -397,23 +398,23 @@ func variableValue(variable varValue) map[string]any {
 			refValueType = variableReference.valueType
 		}
 		if refValueType == Dict {
-			aggrandizements = append(aggrandizements, Aggrandizement{
-				Type:          "WFDictionaryValueVariableAggrandizement",
-				DictionaryKey: variable.getAs,
+			aggrandizements = append(aggrandizements, map[string]any{
+				"Type":          "WFDictionaryValueVariableAggrandizement",
+				"DictionaryKey": variable.getAs,
 			})
 		} else {
-			aggrandizements = append(aggrandizements, Aggrandizement{
-				PropertyUserInfo: 0,
-				Type:             "WFPropertyVariableAggrandizement",
-				PropertyName:     variable.getAs,
+			aggrandizements = append(aggrandizements, map[string]any{
+				"PropertyUserInfo": 0,
+				"Type":             "WFPropertyVariableAggrandizement",
+				"PropertyName":     variable.getAs,
 			})
 		}
 	}
 	if variable.coerce != "" {
 		if contentItem, found := contentItems[variable.coerce]; found {
-			aggrandizements = append(aggrandizements, Aggrandizement{
-				Type:              "WFCoercionVariableAggrandizement",
-				CoercionItemClass: contentItem,
+			aggrandizements = append(aggrandizements, map[string]any{
+				"Type":              "WFCoercionVariableAggrandizement",
+				"CoercionItemClass": contentItem,
 			})
 		}
 	}
@@ -515,18 +516,27 @@ func makeAttachmentValues() {
 			}
 		}
 		if stringVar.getAs != "" {
-			var refValueType = variable.valueType
-			if refValueType == Dict {
-				aggr = append(aggr, map[string]string{
-					"Type":          "WFDictionaryValueVariableAggrandizement",
-					"DictionaryKey": stringVar.getAs,
-				})
-			} else {
-				aggr = append(aggr, map[string]string{
-					"Type":         "WFPropertyVariableAggrandizement",
-					"PropertyName": stringVar.getAs,
-				})
+			var aggrandizement = make(map[string]string)
+			switch variable.valueType {
+			case Dict:
+				aggrandizement["Type"] = "WFDictionaryValueVariableAggrandizement"
+			case Action:
+				var variableAction = variable.value.(action).def
+				if variableAction.outputType == Dict {
+					aggrandizement["Type"] = "WFDictionaryValueVariableAggrandizement"
+				} else {
+					aggrandizement["Type"] = "WFPropertyVariableAggrandizement"
+				}
+			default:
+				aggrandizement["Type"] = "WFPropertyVariableAggrandizement"
 			}
+
+			if aggrandizement["Type"] == "WFDictionaryValueVariableAggrandizement" {
+				aggrandizement["DictionaryKey"] = stringVar.getAs
+			} else {
+				aggrandizement["PropertyName"] = stringVar.getAs
+			}
+			aggr = append(aggr, aggrandizement)
 		}
 		if stringVar.coerce != "" {
 			if contentItem, found := contentItems[stringVar.coerce]; found {
@@ -635,6 +645,15 @@ func paramValue(arg actionArgument, handleAs tokenType) any {
 		fallthrough
 	case Float:
 		return arg.value
+	case Color:
+		var colorArgs = arg.value.([]actionArgument)
+		return map[string]any{
+			"WFColorRepresentationType": "WFColorRepresentationTypeCGColor",
+			"redComponent":              colorArgs[0].value.(float64),
+			"greenComponent":            colorArgs[1].value.(float64),
+			"blueComponent":             colorArgs[2].value.(float64),
+			"alphaComponent":            colorArgs[3].value,
+		}
 	default:
 		return attachmentValues(arg.value.(string))
 	}
@@ -847,7 +866,6 @@ func makeArrayVariable(t *token) {
 func makeConditionalAction(t *token) {
 	var conditionalParams = map[string]any{
 		"GroupingIdentifier": t.ident,
-		"UUID":               uuid.New().String(),
 	}
 	switch t.valueType {
 	case If:
@@ -878,6 +896,7 @@ func makeConditionalAction(t *token) {
 	case Else:
 		conditionalParams["WFControlFlowMode"] = statementPart
 	case EndClosure:
+		conditionalParams["UUID"] = createUUIDReference(t.value.(string))
 		conditionalParams["WFControlFlowMode"] = endStatement
 	}
 
@@ -961,13 +980,13 @@ func conditionalParameterVariable(conditionalParams map[string]any, value any) {
 }
 
 func makeMenuAction(t *token) {
-	var controlFlowMode = startStatement
-	if t.valueType == EndClosure {
-		controlFlowMode = endStatement
-	}
 	var menuParams = map[string]any{
 		"GroupingIdentifier": t.ident,
-		"WFControlFlowMode":  controlFlowMode,
+		"WFControlFlowMode":  startStatement,
+	}
+	if t.valueType == EndClosure {
+		menuParams["WFControlFlowMode"] = endStatement
+		menuParams["UUID"] = createUUIDReference(t.value.(string))
 	}
 	if t.valueType != EndClosure {
 		if t.valueType != Nil {
@@ -1017,7 +1036,9 @@ func makeRepeatAction(t *token) {
 	var repeatParams = map[string]any{
 		"WFControlFlowMode":  controlFlowMode,
 		"GroupingIdentifier": t.ident,
-		"UUID":               uuid.New().String(),
+	}
+	if controlFlowMode == endStatement {
+		repeatParams["UUID"] = createUUIDReference(t.value.(string))
 	}
 	if controlFlowMode == startStatement {
 		repeatParams["WFRepeatCount"] = paramValue(actionArgument{
@@ -1037,7 +1058,9 @@ func makeRepeatEachAction(t *token) {
 	var repeatEachParams = map[string]any{
 		"WFControlFlowMode":  controlFlowMode,
 		"GroupingIdentifier": t.ident,
-		"UUID":               uuid.New().String(),
+	}
+	if controlFlowMode == endStatement {
+		repeatEachParams["UUID"] = createUUIDReference(t.value.(string))
 	}
 	if controlFlowMode == startStatement {
 		repeatEachParams["WFInput"] = paramValue(actionArgument{

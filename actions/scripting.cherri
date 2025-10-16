@@ -2,134 +2,77 @@
 Scripting Actions
 */
 
-/* Control Flow */
-
-#define action 'delay' wait(number seconds: 'WFDelayTime')
-
-#define action waitToReturn()
-
-/* Dictionaries */
-
-// [Doc]: Get Dictionary: Get the dictionary from `input`.
+// [Doc]: [Dictionaries] Get Dictionary: Get the dictionary from `input`.
 #define action 'detect.dictionary' getDictionary(variable input: 'WFInput'): dictionary
 
-// [Doc]: Get Keys from Dictionary: Get only the keys from the `dictionary`.
+// [Doc]: [Dictionaries] Get Keys from Dictionary: Get only the keys from the `dictionary`.
 #define action 'getvalueforkey' getKeys(dictionary dictionary: 'WFInput'): array {
 	"WFGetDictionaryValueType": "All Keys"
 }
 
-// [Doc]: Get Values from Dictionary: Get only the values from the `dictionary`.
+// [Doc]: [Dictionaries] Get Values from Dictionary: Get only the values from the `dictionary`.
 #define action 'getvalueforkey' getValues(dictionary dictionary: 'WFInput'): array {
 	"WFGetDictionaryValueType": "All Values"
 }
 
-// [Doc]: Get Value from Dictionary: For constants only, otherwise `dictionary['key']` syntax should be used.
+// [Doc]: [Dictionaries] Get Value from Dictionary: For constants only, otherwise `dictionary['key']` syntax should be used.
 #define action 'getvalueforkey' getValue(dictionary dictionary: 'WFInput', text key: 'WFDictionaryKey') {
 	"WFGetDictionaryValueType": "Value"
 }
 
-// [Doc]: Set Value in Dictionary: Set the value of `key` to `value` in `dictionary`.
+// [Doc]: [Dictionaries] Set Value in Dictionary: Set the value of `key` to `value` in `dictionary`.
 #define action 'setvalueforkey' setValue(variable dictionary: 'WFDictionary', text key: 'WFDictionaryKey', text value: 'WFDictionaryValue')
 
-/* Hashes */
-
-#define action default 'base64encode' base64Encode(variable encodeInput: 'WFInput'): text {
-	"input": "Encode"
-}
-
-#define action 'base64encode' base64Decode(variable input: 'WFInput'): text {
-	"WFEncodeMode": "Decode"
-}
-
-enum hashType {
-	'MD5',
-	'SHA1',
-	'SHA256',
-	'SHA512',
-}
-
-#define action hash(variable input: 'WFInput', hashType ?type: 'WFHashType' = "MD5"): text
-
-/* Items */
-
-enum countType {
-	'Items',
-	'Characters',
-	'Words',
-	'Sentences',
-	'Lines',
-}
-
-#define action count(variable input: 'Input', countType ?type: 'WFCountType' = "Items"): number
-
+// [Doc]: [Items] Get Name: Get the name of an item.
 #define action 'getitemname' getName(variable item: 'WFInput')
 
+// [Doc]: [Items] Set Name: Set the name of an item.
 #define action 'setitemname' setName(variable item: 'WFInput', text name: 'WFName', bool ?includeFileExtension: 'WFDontIncludeFileExtension' = false)
 
-#define action 'viewresult' contentGraph(variable input: 'WFInput')
+// [Doc]: [Lists] Choose from List: Prompts the user to choose from a list.
+#define action chooseFromList(
+    variable list: 'WFInput',
+    text ?prompt: 'WFChooseFromListActionPrompt',
+    bool ?selectMultiple: 'WFChooseFromListActionSelectMultiple' = false,
+    bool ?selectAll: 'WFChooseFromListActionSelectAll' = false
+)
 
-/* Lists */
-
-#define action chooseFromList(variable list: 'WFInput', text ?prompt: 'WFChooseFromListActionPrompt', bool ?selectMultiple: 'WFChooseFromListActionSelectMultiple' = false, bool ?selectAll: 'WFChooseFromListActionSelectAll' = false)
-
+// [Doc]: [Lists] Get First Item: Get first item in a list.
 #define action 'getitemfromlist' getFirstItem(variable list: 'WFInput') {
 	"WFItemSpecifier": "First Item"
 }
 
+// [Doc]: [Lists] Get Last Item: Get the last item in a list.
 #define action 'getitemfromlist' getLastItem(variable list: 'WFInput') {
 	"WFItemSpecifier": "Last Item"
 }
 
+// [Doc]: [Lists] Get Random Item: Get random item from list.
 #define action 'getitemfromlist' getRandomItem(variable list: 'WFInput') {
 	"WFItemSpecifier": "Random Item"
 }
 
+// [Doc]: [Lists] Get List Item: Get item from `list` at `index`. Keep in mind Shortcuts starts counting indexes at 1.
 #define action 'getitemfromlist' getListItem(variable list: 'WFInput', number index: 'WFItemIndex') {
 	"WFItemSpecifier": "Item At Index"
 }
 
+// [Doc]: [Lists] Get List Items: Get items from a `list` between two indexes. Keep in mind Shortcuts starts counting indexes at 1.
 #define action 'getitemfromlist' getListItems(variable list: 'WFInput', number start: 'WFItemRangeStart', number end: 'WFItemRangeEnd'): array {
 	"WFItemSpecifier": "Items in Range"
 }
 
-/* Notifications */
-
-#define action alert(text alert: 'WFAlertActionMessage', text ?title: 'WFAlertActionTitle') {
-	"WFAlertActionCancelButtonShown": false
-}
-
-#define action 'alert' confirm(text alert: 'WFAlertActionMessage', text ?title: 'WFAlertActionTitle') {
-	"WFAlertActionCancelButtonShown": true
-}
-
-#define action 'notification' showNotification(
-    text body: 'WFNotificationActionBody',
-    text ?title: 'WFNotificationActionTitle',
-    bool ?playSound: 'WFNotificationActionSound' = true,
-    variable ?attachment: 'WFInput'
-)
-
-/* Numbers */
-
+// [Doc]: [Numbers] Format Number: Format number based on decimal place.
 #define action 'format.number' formatNumber(number number: 'WFNumber', number ?decimalPlaces: 'WFNumberFormatDecimalPlaces' = 2): number
 
+// [Doc]: [Numbers] Get Numbers: Get numbers from input.
 #define action 'detect.number' getNumbers(variable input: 'WFInput'): number
 
+// [Doc]: [Numbers] Random Number: Returns a random number between `min` and `max`.
 #define action 'number.random' randomNumber(number min: 'WFRandomNumberMinimum', number max: 'WFRandomNumberMaximum'): number
 
-
-/* Passwords */
-
+// [Doc]: [Passwords] Search Passwords: Searches passwords in the Passwords app.
 #define action 'openpasswords' searchPasswords(text query: 'WFShowPasswordsSearchTerm')
 
-/* System */
-
+// [Doc]: [System] Dismiss Siri: Dismisses Siri.
 #define action dismissSiri()
-
-#define action 'wallpaper.set' setWallpaper(variable input: 'WFInput')
-
-#define action default !mac v16.2 'posters.get' getAllWallpapers(): array
-
-#define action !mac v16.2 'posters.get' getWallpaper() {
-	"WFPosterType": "Current"
-}

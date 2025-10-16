@@ -27,8 +27,13 @@ var char rune
 var lineIdx int
 var lineCharIdx int
 
-var groupingUUIDs map[int]string
-var groupingTypes map[int]tokenType
+type controlFlowGroup struct {
+	identifier string
+	groupType  tokenType
+	uuid       string
+}
+
+var controlFlowGroups map[int]controlFlowGroup
 var groupingIdx int
 
 var preParsing bool
@@ -66,8 +71,7 @@ func initParse() {
 	}
 	variables = make(map[string]varValue)
 	questions = make(map[string]*question)
-	groupingUUIDs = make(map[int]string)
-	groupingTypes = make(map[int]tokenType)
+	controlFlowGroups = make(map[int]controlFlowGroup)
 	chars = []rune(contents)
 	lines = strings.Split(contents, "\n")
 	idx = -1
@@ -90,8 +94,7 @@ func initParse() {
 	actionIndex = 0
 	chars = []rune{}
 	lines = []string{}
-	groupingUUIDs = map[int]string{}
-	groupingTypes = map[int]tokenType{}
+	controlFlowGroups = map[int]controlFlowGroup{}
 	groupingIdx = 0
 	includes = []include{}
 
@@ -115,7 +118,7 @@ func preParse() {
 	)
 	defineRawAction()
 
-	includeStandardActions()
+	includeBasicStandardActions()
 	handleIncludes()
 
 	handleCopyPastes()
@@ -189,29 +192,27 @@ func parse() {
 	switch {
 	case isWhitespace():
 		advance()
+	case isChar('/'):
+		collectComment()
 	case tokenAhead(Question):
 		collectQuestion()
 	case tokenAhead(Definition):
 		collectDefinition()
-	case tokenAhead(Import):
-		collectImport()
 	case isChar('@'):
 		collectVariable(false)
 	case tokenAhead(Constant):
 		advance()
 		collectVariable(true)
-	case isChar('/'):
-		collectComment()
 	case tokenAhead(Repeat):
-		collectRepeat()
+		collectRepeat("")
 	case tokenAhead(RepeatWithEach):
-		collectRepeatEach()
+		collectRepeatEach("")
 	case tokenAhead(Menu):
-		collectMenu()
+		collectMenu("")
 	case tokenAhead(Item):
 		collectMenuItem()
 	case tokenAhead(If):
-		collectConditionals()
+		collectConditionals("")
 	case tokenAhead(RightBrace):
 		collectEndStatement()
 	case strings.Contains(lookAheadUntil(' '), "("):
@@ -300,12 +301,52 @@ func lookAheadUntil(until rune) string {
 
 func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 	collectValue(valueType, value, '\n')
+	if *valueType == Question {
+		parserError(fmt.Sprintf("Illegal reference to import question '%s'. Shortcuts does not support import questions as variable values.", *value))
+	}
 
+	var aheadOfValue = lookAheadUntil('\n')
+	if strings.Contains(aheadOfValue, "//") || strings.Contains(aheadOfValue, "/*") {
+		return
+	}
+	if containsExpressionTokens(aheadOfValue) {
+		collectExpression(valueType, value)
+		return
+	}
 	if constant && (*valueType == Arr || *valueType == Variable) {
 		parserError(fmt.Sprintf("Type %v values cannot be constants.", *valueType))
 	}
-	if *valueType == Question {
-		parserError(fmt.Sprintf("Illegal reference to import question '%s'. Shortcuts does not support import questions as variable values.", *value))
+}
+
+func collectExpression(valueType *tokenType, value *any) {
+	if !slices.Contains([]tokenType{Integer, Float, Variable}, *valueType) {
+		parserError(fmt.Sprintf("Value of type '%s' not allowed in expression", *valueType))
+	}
+	if *valueType == Variable {
+		var valueRef = *value
+		*value = fmt.Sprintf("{%s}", valueRef.(varValue).value)
+	} else {
+		*value = fmt.Sprintf("%v", *value)
+	}
+	*valueType = Expression
+
+	for char != -1 && char != '\n' {
+		switch {
+		case char == ' ' || char == '+' || char == '-' || char == '*' || char == '/' || char == '%' || char == '(' || char == ')':
+			*value = fmt.Sprintf("%s%c", *value, char)
+			advance()
+		case intChar(char):
+			var intValueType tokenType
+			var intValue any
+			collectIntegerValue(&intValueType, &intValue)
+			*value = fmt.Sprintf("%s%v", *value, intValue)
+		default:
+			var until = ' '
+			var refType tokenType
+			var refValue any
+			collectReference(&refType, &refValue, &until)
+			*value = fmt.Sprintf("%s{%s}", *value, refValue.(varValue).value)
+		}
 	}
 }
 
@@ -320,7 +361,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		if strings.Contains(ahead, ".") {
 			*valueType = Float
 		}
-		collectIntegerValue(valueType, value, until)
+		collectIntegerValue(valueType, value)
 	case char == '"':
 		collectStringValue(valueType, value)
 	case char == '\'':
@@ -335,6 +376,13 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		advance()
 		*valueType = Dict
 		*value = collectDictionary()
+	case char == '(':
+		*valueType = Integer
+		*value = ""
+		collectExpression(valueType, value)
+	case tokenAhead(Color):
+		*valueType = Color
+		collectColorValue(value)
 	case tokenAhead(True):
 		*valueType = Bool
 		*value = true
@@ -346,11 +394,45 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		advanceUntil(until)
 	case strings.Contains(ahead, "("):
 		collectActionValue(valueType, value)
-	case containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus):
-		*valueType = Expression
-		*value = collectUntil(until)
 	default:
 		collectReference(valueType, value, &until)
+	}
+}
+
+func collectColorValue(value *any) {
+	advance()
+	currentActionIdentifier = "color"
+	currentAction = actionDefinition{parameters: []parameterDefinition{
+		{
+			name:         "red",
+			validType:    Float,
+			defaultValue: 0.0,
+			literal:      true,
+		},
+		{
+			name:         "green",
+			validType:    Float,
+			defaultValue: 0.0,
+			literal:      true,
+		},
+		{
+			name:         "blue",
+			validType:    Float,
+			defaultValue: 0.0,
+			literal:      true,
+		},
+		{
+			name:         "alpha",
+			validType:    Float,
+			defaultValue: 1.0,
+			literal:      true,
+		},
+	}}
+
+	*value = collectArguments()
+
+	if char == ')' {
+		advance()
 	}
 }
 
@@ -642,6 +724,10 @@ func collectVariable(constant bool) {
 		}
 		advance()
 
+		if collectControlFlowOutput(&identifier, &constant) {
+			return
+		}
+
 		collectVariableValue(constant, &valueType, &value)
 
 		if valueType == Variable && value.(varValue).value == "Ask" {
@@ -677,6 +763,33 @@ func collectVariable(constant bool) {
 	}
 }
 
+func collectControlFlowOutput(identifier *string, constant *bool) (identified bool) {
+	var controlFlowOutput bool
+
+	switch {
+	case tokenAhead(If):
+		collectConditionals(*identifier)
+		controlFlowOutput = true
+	case tokenAhead(Menu):
+		collectMenu(*identifier)
+		controlFlowOutput = true
+	case tokenAhead(Repeat):
+		collectRepeat(*identifier)
+		controlFlowOutput = true
+	case tokenAhead(RepeatWithEach):
+		collectRepeatEach(*identifier)
+		controlFlowOutput = true
+	}
+	if controlFlowOutput {
+		if !*constant {
+			parserError("Control flow output must be a constant.")
+		}
+		return true
+	}
+
+	return false
+}
+
 func collectType(valueType *tokenType, value *any, until rune) {
 	switch {
 	case tokenAhead(String):
@@ -701,8 +814,10 @@ func collectType(valueType *tokenType, value *any, until rune) {
 		*value = make(map[string]interface{})
 	case tokenAhead(Variable):
 		*valueType = Variable
+	case tokenAhead(Color):
+		*valueType = Color
 	default:
-		parserError(fmt.Sprintf("Unknown type '%s'\n\nAvailable types: \n- text\n- rawtext\n- number\n- bool\n- array\n- dictionary\n- var", collectUntil(until)))
+		parserError(fmt.Sprintf("Unknown type '%s'\n\nAvailable types: \n- text\n- rawtext\n- number\n- float\n- bool\n- array\n- dictionary\n- variable\n- color", collectUntil(until)))
 	}
 }
 
@@ -826,9 +941,9 @@ func collectNoInputDefinition() {
 	case tokenAhead(StopWith):
 		advanceTimes(2)
 		var stopWithError = collectString()
-		noInput = WFWorkflowNoInputBehavior{
-			Name: "WFWorkflowNoInputBehaviorShowError",
-			Parameters: map[string]string{
+		noInput = map[string]any{
+			"Name": "WFWorkflowNoInputBehaviorShowError",
+			"Parameters": map[string]string{
 				"Error": stopWithError,
 			},
 		}
@@ -836,9 +951,9 @@ func collectNoInputDefinition() {
 		advance()
 		var contentItemType = collectUntil('\n')
 		if itemClass, found := contentItems[contentItemType]; found {
-			noInput = WFWorkflowNoInputBehavior{
-				Name: "WFWorkflowNoInputBehaviorAskForInput",
-				Parameters: map[string]string{
+			noInput = map[string]any{
+				"Name": "WFWorkflowNoInputBehaviorAskForInput",
+				"Parameters": map[string]string{
 					"ItemClass": itemClass,
 				},
 			}
@@ -847,8 +962,8 @@ func collectNoInputDefinition() {
 			parserError(fmt.Sprintf("Invalid content item type '%s'\n\n%s", itemClass, list))
 		}
 	case tokenAhead(GetClipboard):
-		noInput = WFWorkflowNoInputBehavior{
-			Name: "WFWorkflowNoInputBehaviorGetClipboard",
+		noInput = map[string]any{
+			"Name": "WFWorkflowNoInputBehaviorGetClipboard",
 		}
 	}
 }
@@ -861,21 +976,6 @@ func collectBooleanDefinition(key string) {
 		definitions[key] = false
 	default:
 		parserError(fmt.Sprintf("Invalid value for boolean definition '%s'", key))
-	}
-}
-
-// libraries is a map of the 3rd party libraries defined in the compiler.
-// The key determines the identifier of the identifier name that must be used in the syntax, it's value defines its behavior, etc. using an libraryDefinition.
-var libraries map[string]libraryDefinition
-
-func collectImport() {
-	makeLibraries()
-	advanceTimes(2)
-	var collectedLibrary = collectString()
-	if lib, found := libraries[collectedLibrary]; found {
-		lib.make(lib.identifier)
-	} else {
-		parserError(fmt.Sprintf("Import library '%s' does not exist!", collectedLibrary))
 	}
 }
 
@@ -922,9 +1022,9 @@ func collectQuestion() {
 
 var repeatItemIndex = 1
 
-func collectRepeat() {
+func collectRepeat(identifier string) {
 	reachable()
-	var groupingUUID = groupStatement(Repeat)
+	var group = groupStatement(Repeat, &identifier)
 
 	var index string
 	if repeatItemIndex > 1 {
@@ -949,7 +1049,7 @@ func collectRepeat() {
 	tokens = append(tokens,
 		token{
 			typeof:    Repeat,
-			ident:     groupingUUID,
+			ident:     group.uuid,
 			valueType: timesType,
 			value:     timesValue,
 		}, token{
@@ -971,9 +1071,9 @@ func collectRepeat() {
 	}
 }
 
-func collectRepeatEach() {
+func collectRepeatEach(identifier string) {
 	reachable()
-	var groupingUUID = groupStatement(RepeatWithEach)
+	var group = groupStatement(RepeatWithEach, &identifier)
 
 	var index string
 	if repeatItemIndex > 1 {
@@ -999,7 +1099,7 @@ func collectRepeatEach() {
 	tokens = append(tokens,
 		token{
 			typeof:    RepeatWithEach,
-			ident:     groupingUUID,
+			ident:     group.uuid,
 			valueType: iterableType,
 			value:     iterableValue,
 		}, token{
@@ -1023,11 +1123,11 @@ func collectRepeatEach() {
 	repeatItemIndex++
 }
 
-func collectConditionals() {
+func collectConditionals(identifier string) {
 	reachable()
 	advance()
 
-	var groupingUUID = groupStatement(Conditional)
+	var group = groupStatement(Conditional, &identifier)
 
 	var conditions WFConditions
 	conditions.WFActionParameterFilterPrefix = -1
@@ -1042,7 +1142,7 @@ func collectConditionals() {
 
 	tokens = append(tokens, token{
 		typeof:    Conditional,
-		ident:     groupingUUID,
+		ident:     group.uuid,
 		valueType: If,
 		value:     conditions,
 	})
@@ -1169,14 +1269,14 @@ func checkConditionalTypes(conditional *tokenType, variableType tokenType, value
 	}
 }
 
-func collectMenu() {
+func collectMenu(identifier string) {
 	if len(menus) == 0 {
 		menus = make(map[string][]varValue)
 	}
 
 	reachable()
 	advance()
-	var groupingUUID = groupStatement(Menu)
+	var group = groupStatement(Menu, &identifier)
 
 	var promptType tokenType
 	var promptValue any
@@ -1184,10 +1284,10 @@ func collectMenu() {
 	advanceUntil('{')
 	advance()
 
-	menus[groupingUUID] = []varValue{}
+	menus[group.uuid] = []varValue{}
 	tokens = append(tokens, token{
 		typeof:    Menu,
-		ident:     groupingUUID,
+		ident:     group.uuid,
 		valueType: promptType,
 		value:     promptValue,
 	})
@@ -1195,10 +1295,10 @@ func collectMenu() {
 
 func collectMenuItem() {
 	advance()
-	if _, ok := groupingUUIDs[groupingIdx]; !ok {
+	if _, ok := controlFlowGroups[groupingIdx]; !ok {
 		parserError("Item has no starting menu statement.")
 	}
-	var groupingUUID = groupingUUIDs[groupingIdx]
+	var group = controlFlowGroups[groupingIdx]
 
 	var itemType tokenType
 	var itemValue any
@@ -1206,11 +1306,11 @@ func collectMenuItem() {
 	advanceUntil(':')
 	advance()
 
-	if len(menus[groupingUUID]) > 0 {
+	if len(menus[group.uuid]) > 0 && group.identifier == "" {
 		addNothing()
 	}
 
-	menus[groupingUUID] = append(menus[groupingUUID], varValue{
+	menus[group.uuid] = append(menus[group.uuid], varValue{
 		valueType: itemType,
 		value:     itemValue,
 	})
@@ -1218,7 +1318,7 @@ func collectMenuItem() {
 	tokens = append(tokens,
 		token{
 			typeof:    Item,
-			ident:     groupingUUID,
+			ident:     group.uuid,
 			valueType: itemType,
 			value:     itemValue,
 		},
@@ -1228,49 +1328,56 @@ func collectMenuItem() {
 func collectEndStatement() {
 	advance()
 	if tokenAhead(Else) {
-		addNothing()
-
 		advance()
-		if _, ok := groupingUUIDs[groupingIdx]; !ok {
+		if _, ok := controlFlowGroups[groupingIdx]; !ok {
 			parserError("Else has no starting if statement.")
 		}
 		tokens = append(tokens, token{
 			typeof:    Conditional,
-			ident:     groupingUUIDs[groupingIdx],
+			ident:     controlFlowGroups[groupingIdx].uuid,
 			valueType: Else,
 			value:     nil,
 		})
 		tokenAhead(LeftBrace)
 	} else {
-		if _, ok := groupingUUIDs[groupingIdx]; !ok {
+		if _, ok := controlFlowGroups[groupingIdx]; !ok {
 			parserError("Ending has no starting statement.")
 		}
-		var groupType = groupingTypes[groupingIdx]
-		if groupType == Repeat || groupType == RepeatWithEach {
+
+		var controlFlowGroup = controlFlowGroups[groupingIdx]
+		if controlFlowGroup.groupType == Repeat || controlFlowGroup.groupType == RepeatWithEach {
 			repeatItemIndex--
 			reachable()
 		}
 
-		addNothing()
+		if controlFlowGroup.identifier == "" {
+			addNothing()
+		}
+
+		variables[controlFlowGroup.identifier] = varValue{
+			constant: true,
+		}
 
 		tokens = append(tokens, token{
-			typeof:    groupType,
-			ident:     groupingUUIDs[groupingIdx],
+			typeof:    controlFlowGroup.groupType,
+			ident:     controlFlowGroup.uuid,
 			valueType: EndClosure,
-			value:     nil,
+			value:     controlFlowGroup.identifier,
 		})
 		groupingIdx--
 	}
 }
 
 // groupStatement creates a grouping UUID for a statement and adds to the statement groupings.
-func groupStatement(groupType tokenType) (groupingUUID string) {
-	groupingUUID = uuid.New().String()
+func groupStatement(groupType tokenType, identifier *string) controlFlowGroup {
 	groupingIdx++
-	groupingUUIDs[groupingIdx] = groupingUUID
-	groupingTypes[groupingIdx] = groupType
+	controlFlowGroups[groupingIdx] = controlFlowGroup{
+		uuid:       uuid.NewString(),
+		identifier: *identifier,
+		groupType:  groupType,
+	}
 
-	return
+	return controlFlowGroups[groupingIdx]
 }
 
 // addNothing helps reduce memory usage by not passing anything to the next action.
@@ -1284,9 +1391,7 @@ func addNothing() {
 		typeof:    Action,
 		ident:     "nothing",
 		valueType: Action,
-		value: action{
-			ident: "nothing",
-		},
+		value:     makeActionValue("nothing", []actionArgument{}),
 	})
 }
 
@@ -1304,26 +1409,19 @@ func collectInteger() string {
 	return collection.String()
 }
 
-func collectIntegerValue(valueType *tokenType, value *any, until rune) {
-	var ahead = lookAheadUntil(until)
-	if !containsTokens(&ahead, Plus, Minus, Multiply, Divide, Modulus) {
-		var integerString = collectInteger()
+func collectIntegerValue(valueType *tokenType, value *any) {
+	var integerString = collectInteger()
+	if *valueType == Integer {
+		var integer, convErr = strconv.Atoi(integerString)
+		handle(convErr)
 
-		if *valueType == Integer {
-			var integer, convErr = strconv.Atoi(integerString)
-			handle(convErr)
+		*value = integer
+	} else {
+		var float, floatErr = strconv.ParseFloat(integerString, 64)
+		handle(floatErr)
 
-			*value = integer
-		} else {
-			var float, floatErr = strconv.ParseFloat(integerString, 64)
-			handle(floatErr)
-
-			*value = float
-		}
-		return
+		*value = float
 	}
-	*valueType = Expression
-	*value = collectUntil(until)
 }
 
 func collectString() string {
@@ -1480,6 +1578,7 @@ func collectActionCall() {
 
 func collectAction(identifier *string) (value action) {
 	if _, found := actions[*identifier]; !found {
+		checkMissingStandardInclude(identifier, true)
 		parserError(fmt.Sprintf("Undefined action '%s()'", *identifier))
 	}
 	advance()
@@ -1490,11 +1589,7 @@ func collectAction(identifier *string) (value action) {
 	currentArgumentsSize = len(currentArguments)
 
 	checkAction()
-
-	value = action{
-		ident: *identifier,
-		args:  arguments,
-	}
+	value = makeActionValue(*identifier, arguments)
 
 	advance()
 	return
@@ -1566,6 +1661,10 @@ func tokenAhead(token tokenType) bool {
 
 	advanceTimes(tokenLen)
 	return true
+}
+
+func containsExpressionTokens(str string) bool {
+	return containsTokens(&str, Plus, Minus, Multiply, Divide, Modulus, LeftParen, RightParen)
 }
 
 func containsTokens(str *string, v ...tokenType) bool {

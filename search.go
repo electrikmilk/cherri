@@ -38,11 +38,11 @@ func actionsSearch() {
 				setCurrentAction(actionIdentifier, definition)
 				var definition = generateActionDefinition(parameterDefinition{}, false)
 				definition, _ = strings.CutPrefix(definition, actionIdentifier)
-				if !matched && matchedDoc {
+				if !matched {
 					result = docResult
 				}
 
-				actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n", result, definition))
+				actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n\n", result, definition))
 			}
 		}
 		if actionSearchResults.Len() > 0 {

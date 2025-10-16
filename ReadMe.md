@@ -10,15 +10,15 @@
 [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://pkg.go.dev/github.com/electrikmilk/cherri?tab=doc)
 [![Go Report Card](https://goreportcard.com/badge/github.com/electrikmilk/cherri)](https://goreportcard.com/report/github.com/electrikmilk/cherri)
 
-**Cherri** (pronounced cherry) is a [Shortcuts](https://apps.apple.com/us/app/shortcuts/id1462947752) programming language, that compiles directly to a valid runnable Shortcut.
+**Cherri** (pronounced cherry) is a [Shortcuts](https://apps.apple.com/us/app/shortcuts/id1462947752) programming language that compiles directly to a valid runnable Shortcut.
 
-The main goal is to make it trivial and practical to create large Shortcut projects (within the limits of Shortcuts) and maintain them long-term.
+The primary goal is to make it practical to create large Shortcut projects (within the limitations of Shortcuts) and maintain them long term.
 
-[![Hello World Example](https://github.com/electrikmilk/cherri/assets/4368524/8532e8f7-245b-47f3-9691-8b1eac5774c7)](https://playground.cherrilang.org)
+[![Hello World Example](https://github.com/electrikmilk/cherri/blob/main/assets/hello_world.png)](https://playground.cherrilang.org)
 
 ### 🌟 Top Features
 
-- 🖥️ Laptop/Desktop based development (CLI, [VSCode extension](https://marketplace.visualstudio.com/items?itemName=electrikmilk.cherri-vscode-extension), macOS app)
+- 🖥️ Laptop/Desktop-based development (CLI, [VSCode extension](https://marketplace.visualstudio.com/items?itemName=electrikmilk.cherri-vscode-extension), macOS app)
 - 🎓 Easy to learn and syntax similar to other languages
 - 🐞 1-1 translation to Shortcut actions as much as possible to make debugging easier
 - 🪄 No magic variables syntax, they're constants instead
@@ -26,7 +26,7 @@ The main goal is to make it trivial and practical to create large Shortcut proje
 - #️⃣ Include files within others for large Shortcut projects
 - 🔧 Define custom actions with type checking, enums, optionals, default values, raw identifiers, and raw keys.
 - 📋 Copy-paste actions automatically
-- 🥩 Enter actions raw with custom identifier and parameters.
+- 🥩 Enter actions raw with a custom identifier and parameters.
 - ❓ Define import questions
 - 📇 Generate VCards for menus
 - 📄 Embed files in base64
@@ -43,6 +43,22 @@ The main goal is to make it trivial and practical to create large Shortcut proje
 - 🔍 [Glyph Search](https://glyphs.cherrilang.org/) - Search glyphs you can use in Cherri!
 - ❓ [FAQ](https://cherrilang.org/faq)
 
+## Installation
+
+You can install Cherri by downloading the latest release or via the Homebrew package manager:
+
+**Add Tap:**
+
+```console
+brew tap electrikmilk/cherri
+```
+
+**Install:**
+
+```console
+brew install electrikmilk/cherri/cherri
+```
+
 ## Usage
 
 ```bash
@@ -51,20 +67,6 @@ cherri file.cherri
 
 Run `cherri` without any arguments to see all options and usage. For development, use the `--debug` (or `-d`) option to print
 stack traces, debug information, and output a `.plist` file.
-
-## Why macOS only?
-
-Generating valid Shortcuts is only possible on macOS. However, there is a [Cherri Playground](https://playground.cherrilang.org) that outputs valid Shortcuts on any platform with a web
-browser.
-
-### Development on other platforms
-
-As it stands, I don't want someone to get confused and think Shortcuts compiled using Cherri on other platforms will run
-on their Mac or iOS device. However, you can build the compiler for your platform; it will just skip signing the
-compiled Shortcut, so it will not run on iOS 15+ or macOS 12+. Also, I'd like to point out that the compiler is primarily developed and
-tested on Unix-like systems.
-
-[Read my full thoughts on this](https://cherrilang.org/faq#why-macos-only)
 
 ## Why another Shortcuts language?
 
@@ -77,7 +79,7 @@ Plus, some stability comes with this project being on macOS and not iOS, and I'm
 
 ## Community
 
-- [VS Code Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=erenyenigul.cherri) ([repo](https://github.com/erenyenigul/cherri-vscode-highlight))
+- [VS Code Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=electrikmilk.cherri-vscode-extension) ([repo](https://github.com/electrikmilk/cherri-vscode))
 
 ## Credits
 

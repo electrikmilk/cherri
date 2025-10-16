@@ -1,0 +1,29 @@
+/*
+PDF Actions
+*/
+
+enum PDFMergeBehaviors {
+	'Append',
+	'Shuffle',
+}
+
+enum colorSpace {
+	'RGB',
+	'Gray',
+}
+
+// [Doc]: Make PDF: Make a PDF file using the provided input.
+#define action makePDF(
+    variable input: 'WFInput',
+    bool ?includeMargin: 'WFPDFIncludeMargin' = false,
+    PDFMergeBehaviors ?mergeBehavior: 'WFPDFDocumentMergeBehavior' = "Append"
+)
+
+// [Doc]: Optimize PDF: Returns a compressed version of the PDF.
+#define action 'compresspdf' optimizePDF(variable pdfFile: 'WFInput')
+
+// [Doc]: Split PDF: Splits a PDF into pages.
+#define action splitPDF(variable pdf: 'WFInput'): array
+
+// [Doc]: Make Image from PDF Page: Returns an image of the provided PDF.
+#define action makeImageFromPDFPage(variable pdf: 'WFInput', colorSpace ?colorSpace: 'WFMakeImageFromPDFPageColorspace' = "RGB", text ?pageResolution: 'WFMakeImageFromPDFPageResolution' = "300")

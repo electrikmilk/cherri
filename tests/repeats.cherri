@@ -11,5 +11,5 @@ repeat i for 6 {
 
 @listVar = list("item 1","item 2","item 3")
 for item in listVar {
-    alert(RepeatIndex,item)
+    alert("{RepeatIndex}",item)
 }

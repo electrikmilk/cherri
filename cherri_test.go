@@ -24,8 +24,9 @@ func TestCherri(_ *testing.T) {
 		fmt.Println(ansi("FAILED: unable to read tests directory", red))
 		panic(err)
 	}
+	loadStandardActions()
 	for _, file := range files {
-		if !strings.Contains(file.Name(), ".cherri") {
+		if !strings.Contains(file.Name(), ".cherri") || file.Name() == "decomp_expected.cherri" || file.Name() == "decomp_me.cherri" {
 			continue
 		}
 		currentTest = fmt.Sprintf("tests/%s", file.Name())
@@ -115,8 +116,7 @@ func resetParser() {
 	idx = 0
 	lineIdx = 0
 	lineCharIdx = -1
-	groupingUUIDs = map[int]string{}
-	groupingTypes = map[int]tokenType{}
+	controlFlowGroups = map[int]controlFlowGroup{}
 	groupingIdx = 0
 	variables = map[string]varValue{}
 	iconColor = -1263359489
@@ -129,7 +129,7 @@ func resetParser() {
 	definedWorkflowTypes = []string{}
 	inputs = []string{}
 	outputs = []string{}
-	noInput = WFWorkflowNoInputBehavior{}
+	noInput = map[string]any{}
 	tokens = []token{}
 	included = []string{}
 	includes = []include{}

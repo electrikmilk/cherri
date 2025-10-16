@@ -38,41 +38,73 @@ enum language {
 // [Doc]: Comment: Add an explicit comment.
 #define action comment(rawtext text: 'WFCommentActionText')
 
-// [Doc]: Show Result: Show `input`.
-#define action 'showresult' show(text input: 'Text')
-
-// [Doc]: Quick Look: Preview `input` in Quick Look.
-#define action 'previewdocument' quicklook(variable input: 'WFInput')
-
 // [Doc]: Get Type: Get the type of input.
 #define action 'getitemtype' typeOf(variable input: 'WFInput'): text
 
 // [Doc]: Get Object of Class: Get the object of `class` from a variable.
 #define action 'getclassaction' getObjectOfClass(text class: 'Class', variable from: 'Input')
 
-// [Doc]: Output: Stop and output `output`. Do nothing if there is nowhere to output.
+// [Doc]: [Output] Show Result: Show `input`.
+#define action 'showresult' show(text input: 'Text')
+
+// [Doc]: [Output] Quick Look: Preview `input` in Quick Look.
+#define action 'previewdocument' quicklook(variable input: 'WFInput')
+
+// [Doc]: [Output] Stop and Output: Stop and output `output`. Do nothing if there is nowhere to output.
 #define action default output(text output: 'WFOutput')
 
-// [Doc]: Output or Clipboard: Stop and output `output`. Copy to the clipboard if there is nowhere to output.
+// [Doc]: [Output] Output or Copy to Clipboard: Stop and output `output`. Copy to the clipboard if there is nowhere to output.
 #define action 'output' outputOrClipboard(text output: 'WFOutput') {
 	"WFNoOutputSurfaceBehavior": "Copy to Clipboard"
 }
 
-// [Doc]: Must Output: Stop and output `output`. Respond with response if there is nowhere to output.
+// [Doc]: [Output] Must Output: Stop and output `output`. Respond with response if there is nowhere to output.
 #define action 'output' mustOutput(text output: 'WFOutput', text response: 'WFResponse') {
 	"WFNoOutputSurfaceBehavior": "Respond"
 }
 
-#define action 'gettext' text(text text: 'WFTextActionText'): text
+// [Doc]: [Output] Content Graph: Display input as a content graph.
+#define action 'viewresult' contentGraph(variable input: 'WFInput')
 
+enum countType {
+	'Items',
+	'Characters',
+	'Words',
+	'Sentences',
+	'Lines',
+}
+
+// [Doc]: Count: Returns a count of `type` of items in `input`.
+#define action count(variable input: 'Input', countType ?type: 'WFCountType' = "Items"): number
+
+// [Doc]: [Notifications] Alert: Shows an alert with text and optional title and an OK button to proceed.
+#define action alert(text alert: 'WFAlertActionMessage', text ?title: 'WFAlertActionTitle') {
+	"WFAlertActionCancelButtonShown": false
+}
+
+// [Doc]: [Notifications] Confirm: Shows an alert with text and optional title. It displays an OK button to proceed, and a cancel button that stops the Shortcut.
+#define action default 'alert' confirm(text alert: 'WFAlertActionMessage', text ?title: 'WFAlertActionTitle') {
+	"WFAlertActionCancelButtonShown": true
+}
+
+// [Doc]: [Notifications] Show Notification: Shows a custom notification message.
+#define action 'notification' showNotification(
+    text body: 'WFNotificationActionBody',
+    text ?title: 'WFNotificationActionTitle',
+    bool ?playSound: 'WFNotificationActionSound' = true,
+    variable ?attachment: 'WFInput'
+)
+
+// [Doc]: Number: Create a number value.
 #define action number(variable number: 'WFNumberActionNumber'): number
 
-// [Doc]: Open Homescreen: Open the SpringBoard, which triggers navigating to the homescreen.
-#define action !mac 'openapp' springBoard() {
-    "WFAppIdentifier": "com.apple.springboard",
-    "WFSelectedApp": {
-        "BundleIdentifier": "com.apple.springboard",
-        "Name": "SpringBoard",
-        "TeamIdentifier": "0000000000"
-    }
-}
+#define action 'gettext' text(text text: 'WFTextActionText'): text
+
+// [Doc]: [Control Flow] Wait: Wait a specified number of seconds.
+#define action 'delay' wait(number seconds: 'WFDelayTime')
+
+// [Doc]: [Control Flow] Wait to Return: Wait for the user to return to Shortcuts.
+#define action waitToReturn()
+
+// [Doc]: [Search] Search/Spotlight: Get results from search on iOS or iPadOS, and Spotlight on macOS.
+#define action 'spotlightsearch' search(text query: 'WFInputText', number ?limit: 'WFSpotlightSearchLimit' = 5, array ?resultType: 'WFSpotlightSearchResultType' = ["Calendar Events","Contacts","Mail","Messages","Notes","Photos","Reminders","Voice Recordings","Bookmarks"]): array

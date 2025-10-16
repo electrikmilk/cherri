@@ -26,8 +26,7 @@ type Shortcut struct {
 	WFWorkflowOutputContentItemClasses   []string
 	WFWorkflowHasShortcutInputVariables  bool
 	WFWorkflowHasOutputFallback          bool
-	WFWorkflowNoInputBehavior            WFWorkflowNoInputBehavior
-	WFWorkflowName                       string
+	WFWorkflowNoInputBehavior            map[string]any
 }
 
 var shortcut Shortcut
@@ -35,11 +34,6 @@ var shortcut Shortcut
 type ShortcutAction struct {
 	WFWorkflowActionIdentifier string
 	WFWorkflowActionParameters map[string]any
-}
-
-type WFWorkflowNoInputBehavior struct {
-	Name       string
-	Parameters map[string]string
 }
 
 type Value struct {
@@ -109,7 +103,7 @@ const itemTypeArray dictDataType = 2
 const itemTypeDict dictDataType = 1
 const itemTypeBool dictDataType = 4
 
-var noInput WFWorkflowNoInputBehavior
+var noInput map[string]any
 
 var hasShortcutInputVariables = false
 
@@ -180,6 +174,8 @@ var workflowTypes = map[string]string{
 	"sleepmode":     "Sleep",
 	"watch":         "Watch",
 	"onscreen":      "ReceivesOnScreenContent",
+	"search":        "WFWorkflowTypeShowInSearch",
+	"spotlight":     "WFWorkflowTypeReceivesInputFromSearch",
 }
 var definedWorkflowTypes []string
 
@@ -194,6 +190,7 @@ var definedQuickActions []string
 /* Versions */
 
 var versions = map[string]string{
+	"26":     "4033.0.4.3",
 	"18.4":   "3218.0.4.100",
 	"18":     "3036.0.4.2",
 	"17":     "2106.0.3",
@@ -208,31 +205,8 @@ var versions = map[string]string{
 	"13":     "600",
 	"12":     "500",
 }
-var clientVersion = "3218.0.4.100"
-var iosVersion = 18.4
-
-/* Language Codes */
-var languages = []string{
-	"ar_AE",
-	"zh_CN",
-	"zh_TW",
-	"nl_NL",
-	"en_GB",
-	"en_US",
-	"fr_FR",
-	"de_DE",
-	"id_ID",
-	"it_IT",
-	"jp_JP",
-	"ko_KR",
-	"pl_PL",
-	"pt_BR",
-	"ru_RU",
-	"es_ES",
-	"th_TH",
-	"tr_TR",
-	"vn_VN",
-}
+var clientVersion = versions["26"]
+var iosVersion = 26.0
 
 /* Conditionals */
 

@@ -1,0 +1,175 @@
+/*
+Images Actions
+*/
+
+enum imageCombineMode {
+    'Vertically',
+    'In a Grid'
+}
+
+// [Doc]: [Image Editing] Combine Images
+#define action combineImages(variable images: 'WFInput', imageCombineMode ?mode: 'WFImageCombineMode' = "Vertically", number ?spacing: 'WFImageCombineSpacing' = 1)
+
+enum cropImagePosition {
+	'Center',
+	'Top Left',
+	'Top Right',
+	'Bottom Left',
+	'Bottom Right',
+	'Custom',
+}
+
+// [Doc]: [Image Editing] Crop Image
+#define action 'image.crop' cropImage(variable image: 'WFInput', text ?width: 'WFImageCropWidth' = "100", text ?height: 'WFImageCropHeight' = "100", cropImagePosition ?position: 'WFImageCropPosition' = "Center", text ?customPositionX: 'WFImageCropX', text ?customPositionY: 'WFImageCropY')
+
+enum flipImageDirection {
+	'Horizontal',
+	'Vertical',
+}
+
+// [Doc]: [Image Editing] Flip Image
+#define action 'image.flip' flipImage(variable image: 'WFInput', flipImageDirection direction: 'WFImageFlipDirection')
+
+enum maskImageType {
+	'Rounded Rectangle',
+	'Ellipse',
+	'Icon',
+}
+
+// [Doc]: [Image Editing] Mask Image: Mask an image with another image.
+#define action 'image.mask' maskImage(variable image: 'WFInput', maskImageType type: 'WFMaskType', text ?radius: 'WFMaskCornerRadius')
+
+// [Doc]: [Image Editing] Custom Image Mask: Mask an image with a custom image mask.
+#define action 'image.mask' customImageMask(variable image: 'WFInput', variable customMaskImage: 'WFCustomMaskImage') {
+	"WFMaskType": "Custom Image"
+}
+
+// [Doc]: [Image Editing] Overlay Image: Overlay an image on top of another image.
+#define action 'overlayimageonimage' overlayImage(variable image: 'WFInput', variable overlayImage: 'WFImage') {
+	"WFShouldShowImageEditor": true
+}
+
+enum customImageOverlayPosition {
+	'Center',
+	'Top Left',
+	'Top Right',
+	'Bottom Left',
+	'Bottom Right',
+	'Custom',
+}
+
+// [Doc]: [Image Editing] Custom Image Overlay: Specify custom image overlay configuration.
+#define action 'overlayimageonimage' customImageOverlay(
+    variable image: 'WFInput',
+    variable overlayImage: 'WFImage',
+    text ?width: 'WFImageWidth',
+    text ?height: 'WFImageHeight',
+    text ?rotation: 'WFRotation' = "0",
+    text ?opacity: 'WFOverlayImageOpacity' = "100",
+    customImageOverlayPosition ?position: 'WFImagePosition' = "Center",
+    text ?customPositionX: 'WFImageX',
+    text ?customPositionY: 'WFImageY'
+) {
+	"WFShouldShowImageEditor": false
+}
+
+// [Doc]: [Image Editing] Resize Image
+#define action 'image.resize' resizeImage(variable image: 'WFImage', text width: 'WFImageResizeWidth', text ?height: 'WFImageResizeHeight')
+
+// [Doc]: [Image Editing] Resize Image By Percent
+#define action 'image.resize' resizeImageByPercent(variable image: 'WFImage', text percentage: 'WFImageResizePercentage') {
+	"WFImageResizeKey": "Percentage"
+}
+
+// [Doc]: [Image Editing] Resize Image By Longest Edge
+#define action 'image.resize' resizeImageByLongestEdge(variable image: 'WFImage', text length: 'WFImageResizeLength') {
+	"WFImageResizeKey": "Longest Edge"
+}
+
+// [Doc]: [Image Editing] Remove Image Background
+#define action 'image.removebackground' removeBackground(variable image: 'WFInput', bool ?crop: 'WFCropToBounds' = false)
+
+// [Doc]: [Image Editing] Rotate Media: Rotate an image or a video
+#define action 'image.rotate' rotateMedia(variable media: 'WFImage', text degrees: 'WFImageRotateAmount')
+
+enum convertImageFormats {
+	'TIFF',
+	'GIF',
+	'PNG',
+	'BMP',
+	'PDF',
+	'HEIF',
+}
+
+// [Doc]: [Image Editing] Convert Image: Convert image to another format, compression quality, and/or remove metadata.
+#define action 'image.convert' convertImage(variable image: 'WFInput', convertImageFormats format: 'WFImageFormat', float ?quality: 'WFImageCompressionQuality', bool ?preserveMetadata: 'WFImagePreserveMetadata' = true)
+
+// [Doc]: [Image Editing] Convert to JPEG: Convert image to a JPEG.
+#define action 'image.convert' convertToJPEG(variable image: 'WFInput', number ?compressionQuality: 'WFImageCompressionQuality', bool ?preserveMetadata: 'WFImagePreserveMetadata' = true) {
+	"WFImageFormat": "JPEG"
+}
+
+// [Doc]: [Image Editing] Strip Image Metadata
+#define action 'image.convert' stripImageMetadata(variable image: 'WFInput') {
+	"WFImageFormat": "Match Input",
+	"WFImagePreserveMetadata": false
+}
+
+enum imageDetail {
+	'Album',
+	'Width',
+	'Height',
+	'Date Taken',
+	'Media Type',
+	'Photo Type',
+	'Is a Screenshot',
+	'Is a Screen Recording',
+	'Location',
+	'Duration',
+	'Frame Rate',
+	'Orientation',
+	'Camera Make',
+	'Camera Model',
+	'Metadata Dictionary',
+	'Is Favorite',
+	'File Size',
+	'File Extension',
+	'Creation Date',
+	'File Path',
+	'Last Modified Date',
+	'Name',
+}
+
+// [Doc]: [Image Editing] Get Image Detail: Get a detail about an image.
+#define action 'properties.images' getImageDetail(variable image: 'WFInput', imageDetail detail: 'WFContentItemPropertyName')
+
+// [Doc]: [Image Editing] Make Image from Rich Text
+#define action makeImageFromRichText(variable pdf: 'WFInput', text width: 'WFWidth', text height: 'WFHeight')
+
+// [Doc]: [Image Editing] Extract Image Text
+#define action 'extracttextfromimage' extractImageText(variable image: 'WFImage'): text
+
+// [Doc]: [Image Editing] Get Images: Detect images in input
+#define action 'detect.images' getImages(variable input: 'WFInput'): array
+
+// [Doc]: [GIFs] Make GIF
+#define action makeGIF(variable input: 'WFInput', text ?delay: 'WFMakeGIFActionDelayTime' = "0.3", number ?loops: 'WFMakeGIFActionLoopCount', text ?width: 'WFMakeGIFActionManualSizeWidth', text ?height: 'WFMakeGIFActionManualSizeHeight') {
+	"WFMakeGIFActionAutoSize": true,
+	"WFMakeGIFActionLoopEnabled": true
+}
+
+// [Doc]: [GIFs] Add To GIF: Add a frame to a GIF.
+#define action 'addframetogif' addToGIF(
+    variable image: 'WFImage',
+    variable gif: 'WFInputGIF',
+    text ?delay: 'WFGIFDelayTime' = "0.25",
+    bool ?autoSize: 'WFGIFAutoSize' = true,
+    text ?width: 'WFGIFManualSizeWidth',
+    text ?height: 'WFGIFManualSizeHeight'
+)
+
+// [Doc]: [GIFs] Make Video From GIF
+#define action makeVideoFromGIF(variable gif: 'WFInputGIF', number ?loops: 'WFMakeVideoFromGIFActionLoopCount' = 1)
+
+// [Doc]: [GIFs] Get Image Frames: Get frames from a GIF.
+#define action 'getframesfromimage' getImageFrames(variable image: 'WFImage')
