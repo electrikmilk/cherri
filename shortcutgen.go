@@ -18,9 +18,6 @@ import (
 
 var compiled string
 
-var longEmptyArraySyntax = regexp.MustCompile(`<array>\n(.*?)</array>`)
-var longEmptyDictSyntax = regexp.MustCompile(`<dict>\n(.*?)</dict>`)
-
 func generateShortcut() {
 	if args.Using("debug") {
 		fmt.Print("Generating Shortcut data...")
@@ -73,6 +70,8 @@ func marshalPlist() {
 	compiled = string(marshaledPlist)
 }
 
+var longEmptyArraySyntax = regexp.MustCompile(`<array>\n(.*?)</array>`)
+var longEmptyDictSyntax = regexp.MustCompile(`<dict>\n(.*?)</dict>`)
 var emptyArrayOrDictSyntax = regexp.MustCompile(`<key>(.*?)</key>\n\t\t<(array|dict)/>\n\t\t`)
 
 func optimizePlist() {
