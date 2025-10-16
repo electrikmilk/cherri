@@ -73,16 +73,12 @@ func marshalPlist() {
 	compiled = string(marshaledPlist)
 }
 
+var emptyArrayOrDictSyntax = regexp.MustCompile(`<key>(.*?)</key>\n\t\t<(array|dict)/>\n\t\t`)
+
 func optimizePlist() {
 	compiled = longEmptyArraySyntax.ReplaceAllString(compiled, "<array/>")
 	compiled = longEmptyDictSyntax.ReplaceAllString(compiled, "<dict/>")
-
-	compiled = strings.Replace(compiled, "<key>WFWorkflowActions</key>\n\t\t<array/>\n\t\t", "", 1)
-	compiled = strings.Replace(compiled, "<key>WFQuickActionSurfaces</key>\n\t\t<array/>\n\t\t", "", 1)
-	compiled = strings.Replace(compiled, "<key>WFWorkflowImportQuestions</key>\n\t\t<array/>\n\t\t", "", 1)
-	compiled = strings.Replace(compiled, "<key>WFWorkflowNoInputBehavior</key>\n\t\t<dict/>\n\t\t", "", 1)
-	compiled = strings.Replace(compiled, "<key>WFWorkflowOutputContentItemClasses</key>\n\t\t<array/>\n\t\t", "", 1)
-	compiled = strings.Replace(compiled, "\t<key>WFWorkflowTypes</key>\n\t\t<array/>\n\t", "", 1)
+	compiled = emptyArrayOrDictSyntax.ReplaceAllString(compiled, "")
 }
 
 func resetShortcutGen() {
