@@ -869,10 +869,8 @@ func makeArrayVariable(t *token) {
 }
 
 func makeConditionalAction(t *token) {
-	var actionUUID = uuid.NewString()
 	var conditionalParams = map[string]any{
 		"GroupingIdentifier": t.ident,
-		"UUID":               actionUUID,
 	}
 	switch t.valueType {
 	case If:
@@ -903,7 +901,7 @@ func makeConditionalAction(t *token) {
 	case Else:
 		conditionalParams["WFControlFlowMode"] = statementPart
 	case EndClosure:
-		uuids[t.value.(string)] = actionUUID
+		conditionalParams["UUID"] = createReference(t.value.(string))
 		conditionalParams["WFControlFlowMode"] = endStatement
 	}
 
@@ -986,14 +984,21 @@ func conditionalParameterVariable(conditionalParams map[string]any, value any) {
 	}
 }
 
+func createReference(identifier string) string {
+	var actionUUID = uuid.NewString()
+	uuids[identifier] = actionUUID
+
+	return actionUUID
+}
+
 func makeMenuAction(t *token) {
-	var controlFlowMode = startStatement
-	if t.valueType == EndClosure {
-		controlFlowMode = endStatement
-	}
 	var menuParams = map[string]any{
 		"GroupingIdentifier": t.ident,
-		"WFControlFlowMode":  controlFlowMode,
+		"WFControlFlowMode":  startStatement,
+	}
+	if t.valueType == EndClosure {
+		menuParams["WFControlFlowMode"] = endStatement
+		menuParams["UUID"] = createReference(t.value.(string))
 	}
 	if t.valueType != EndClosure {
 		if t.valueType != Nil {
@@ -1043,7 +1048,9 @@ func makeRepeatAction(t *token) {
 	var repeatParams = map[string]any{
 		"WFControlFlowMode":  controlFlowMode,
 		"GroupingIdentifier": t.ident,
-		"UUID":               uuid.New().String(),
+	}
+	if controlFlowMode == endStatement {
+		repeatParams["UUID"] = createReference(t.value.(string))
 	}
 	if controlFlowMode == startStatement {
 		repeatParams["WFRepeatCount"] = paramValue(actionArgument{
@@ -1063,7 +1070,9 @@ func makeRepeatEachAction(t *token) {
 	var repeatEachParams = map[string]any{
 		"WFControlFlowMode":  controlFlowMode,
 		"GroupingIdentifier": t.ident,
-		"UUID":               uuid.New().String(),
+	}
+	if controlFlowMode == endStatement {
+		repeatEachParams["UUID"] = createReference(t.value.(string))
 	}
 	if controlFlowMode == startStatement {
 		repeatEachParams["WFInput"] = paramValue(actionArgument{
