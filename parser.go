@@ -16,6 +16,7 @@ import (
 
 	"github.com/electrikmilk/args-parser"
 	"github.com/google/uuid"
+	"sourcecode.social/reiver/go-eol"
 )
 
 var idx int
@@ -189,7 +190,7 @@ func printParsingDebug() {
 
 func parse() {
 	switch {
-	case char == ' ' || char == '\t' || char == '\n':
+	case isWhitespace():
 		advance()
 	case isChar('/'):
 		collectComment()
@@ -267,6 +268,9 @@ func collectUntilIgnoreStrings(ch rune) string {
 func collectUntil(ch rune) string {
 	var collected strings.Builder
 	for char != ch && char != -1 {
+		if ch == '\n' && isEOL() {
+			break
+		}
 		collected.WriteRune(char)
 		advance()
 	}
@@ -281,6 +285,9 @@ func lookAheadUntil(until rune) string {
 	var nextChar rune
 	for nextChar != until {
 		if len(chars) <= nextIdx {
+			break
+		}
+		if until == '\n' && isEOL() {
 			break
 		}
 
@@ -1590,7 +1597,7 @@ func collectAction(identifier *string) (value action) {
 
 // advance advances the character cursor.
 func advance() {
-	if char == '\n' {
+	if isEOL() {
 		lineCharIdx = 0
 		lineIdx++
 	} else {
@@ -1615,6 +1622,9 @@ func advanceTimes(times int) {
 // advanceUntil advances the character cursor until we reach `ch`.
 func advanceUntil(ch rune) {
 	for char != ch && char != -1 {
+		if ch == '\n' && isEOL() {
+			break
+		}
 		advance()
 	}
 }
@@ -1685,6 +1695,20 @@ func seek(mov *int, reverse bool) rune {
 	return getChar(nextChar)
 }
 
+func isEOL() bool {
+	return eol.IsEOL(char)
+}
+
+func skipWhitespace() {
+	for isWhitespace() {
+		advance()
+	}
+}
+
+func isWhitespace() bool {
+	return unicode.IsSpace(char) || isEOL() || char == '\t' || char == ' ' || char == '\n' || char == '\r'
+}
+
 func getChar(atIndex int) rune {
 	if atIndex < 0 {
 		return -1
@@ -1700,12 +1724,6 @@ func firstChar() {
 	lineCharIdx = -1
 	idx = -1
 	advance()
-}
-
-func skipWhitespace() {
-	for char == ' ' || char == '\t' || char == '\n' {
-		advance()
-	}
 }
 
 func printVariables() {
