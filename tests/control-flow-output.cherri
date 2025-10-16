@@ -1,0 +1,30 @@
+@deviceModel = "{Device['Model']}"
+const connectionName = if deviceModel == "iPhone" {
+    getCellularDetail("Carrier Name")
+} else {
+    getWifiDetail("Network Name")
+}
+
+show("{connectionName}")
+
+const deviceDetail = menu "Get Device Detail" {
+    item "Battery":
+        getBatteryLevel()
+    item "Clipboard":
+        getClipboard()
+}
+
+show("{deviceDetail}")
+
+const repeated = repeat i for 6 {
+    number(i)
+}
+
+show("{repeated}")
+
+@items = ["Item 1", "Item 2", "Item 3"]
+const map = for item in items {
+    number(item)
+}
+
+show("{map}")

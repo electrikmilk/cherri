@@ -116,8 +116,7 @@ func resetParser() {
 	idx = 0
 	lineIdx = 0
 	lineCharIdx = -1
-	groupingUUIDs = map[int]string{}
-	groupingTypes = map[int]tokenType{}
+	controlFlowGroups = map[int]controlFlowGroup{}
 	groupingIdx = 0
 	variables = map[string]varValue{}
 	iconColor = -1263359489

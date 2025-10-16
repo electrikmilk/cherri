@@ -38,6 +38,7 @@ func decompile(b []byte) {
 	specialCharsRegex = regexp.MustCompile("[^a-zA-Z0-9_]+")
 	variables = make(map[string]varValue)
 	uuids = make(map[string]string)
+	controlFlowGroups = make(map[int]controlFlowGroup)
 
 	basename = strings.ReplaceAll(basename, " ", "_")
 	outputPath = getOutputPath(fmt.Sprintf("%s%s.cherri", relativePath, basename))
@@ -53,8 +54,9 @@ func decompile(b []byte) {
 
 	mapVariables()
 	mapSplitActions()
+	mapIdentifiers()
 	waitFor(
-		mapIdentifiers,
+		mapControlFlowOutputs,
 		defineToggleSetActions,
 	)
 
@@ -86,6 +88,39 @@ func mapIdentifiers() {
 
 		checkParamIdentifiers(params)
 	}
+}
+
+func mapControlFlowOutputs() {
+	for _, action := range shortcut.WFWorkflowActions {
+		switch action.WFWorkflowActionIdentifier {
+		case "is.workflow.actions.conditional":
+			fallthrough
+		case "is.workflow.actions.choosefrommenu":
+			fallthrough
+		case "is.workflow.actions.repeat.count":
+			fallthrough
+		case "is.workflow.actions.repeat.each":
+			var params = action.WFWorkflowActionParameters
+			if params["WFControlFlowMode"].(uint64) != endStatement {
+				continue
+			}
+
+			var groupName string
+			if params["UUID"] != nil {
+				var endingUUID = params["UUID"].(string)
+				if uuids[endingUUID] != "" {
+					groupName = uuids[endingUUID]
+				}
+			}
+
+			controlFlowGroups[groupingIdx] = controlFlowGroup{
+				groupType:  Conditional,
+				identifier: groupName,
+			}
+			groupingIdx++
+		}
+	}
+	groupingIdx = 0
 }
 
 // Map out variables in the Shortcut and their UUIDs for later checks.
@@ -553,15 +588,6 @@ func decompVariable(action *ShortcutAction) {
 	code.WriteRune('\n')
 }
 
-var controlFlowUUIDs []string
-
-func collectControlFlowUUID(action *ShortcutAction) {
-	if action.WFWorkflowActionParameters["UUID"] != nil {
-		var uuid = action.WFWorkflowActionParameters["UUID"].(string)
-		controlFlowUUIDs = append(controlFlowUUIDs, uuid)
-	}
-}
-
 func decompDictionaryGetValue(action *ShortcutAction) {
 	var dictionaryValueRef strings.Builder
 	dictionaryValueRef.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
@@ -581,6 +607,33 @@ func decompDictionaryGetValue(action *ShortcutAction) {
 	}
 }
 
+func checkControlFlowOutput(action *ShortcutAction) bool {
+	switch action.WFWorkflowActionIdentifier {
+	case "is.workflow.actions.conditional":
+		fallthrough
+	case "is.workflow.actions.choosefrommenu":
+		fallthrough
+	case "is.workflow.actions.repeat.count":
+		fallthrough
+	case "is.workflow.actions.repeat.each":
+		if action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64) == startStatement {
+			var group = controlFlowGroups[groupingIdx]
+			if group.identifier != "" {
+				newCodeLine(fmt.Sprintf("const %s = ", group.identifier))
+				groupingIdx++
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func spaceOutStatements() {
+	if tabLevel == 0 {
+		newCodeLine("\n")
+	}
+}
+
 func decompMenu(action *ShortcutAction) {
 	if len(menus) == 0 {
 		menus = make(map[string][]varValue)
@@ -589,12 +642,18 @@ func decompMenu(action *ShortcutAction) {
 	var groupingUUID = action.WFWorkflowActionParameters["GroupingIdentifier"].(string)
 	switch controlFlowMode {
 	case startStatement:
+		spaceOutStatements()
+		if checkControlFlowOutput(action) {
+			code.WriteString("menu ")
+		} else {
+			newCodeLine("menu ")
+		}
+
 		menus[groupingUUID] = []varValue{}
 		var items = action.WFWorkflowActionParameters["WFMenuItems"]
 		for _, item := range items.([]interface{}) {
 			menus[groupingUUID] = append(menus[groupingUUID], varValue{value: item})
 		}
-		newCodeLine("menu ")
 		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFMenuPrompt"]))
 		code.WriteString(" {\n")
 		tabLevel++
@@ -612,7 +671,6 @@ func decompMenu(action *ShortcutAction) {
 		code.WriteString(":\n")
 		tabLevel++
 	case endStatement:
-		collectControlFlowUUID(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -622,8 +680,9 @@ func decompRepeat(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		if tabLevel == 0 {
-			newCodeLine("\nrepeat ")
+		spaceOutStatements()
+		if checkControlFlowOutput(action) {
+			code.WriteString("repeat ")
 		} else {
 			newCodeLine("repeat ")
 		}
@@ -635,7 +694,6 @@ func decompRepeat(action *ShortcutAction) {
 		code.WriteString(" {\n")
 		tabLevel++
 	case endStatement:
-		collectControlFlowUUID(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -645,8 +703,8 @@ func decompFor(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		if tabLevel == 0 {
-			newCodeLine("\nfor ")
+		if checkControlFlowOutput(action) {
+			code.WriteString("for ")
 		} else {
 			newCodeLine("for ")
 		}
@@ -658,7 +716,6 @@ func decompFor(action *ShortcutAction) {
 		code.WriteString(" {\n")
 		tabLevel++
 	case endStatement:
-		collectControlFlowUUID(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -668,7 +725,12 @@ func decompConditional(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		newCodeLine("if ")
+		spaceOutStatements()
+		if checkControlFlowOutput(action) {
+			code.WriteString("if ")
+		} else {
+			newCodeLine("if ")
+		}
 
 		if action.WFWorkflowActionParameters["WFConditions"] != nil {
 			var conditions = action.WFWorkflowActionParameters["WFConditions"].(map[string]interface{})
@@ -696,7 +758,6 @@ func decompConditional(action *ShortcutAction) {
 		newCodeLine("} else {\n")
 		tabLevel++
 	case endStatement:
-		collectControlFlowUUID(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -904,8 +965,6 @@ func decompValueObject(value map[string]interface{}) string {
 			var outputName = uuids[value["OutputUUID"].(string)]
 			sanitizeIdentifier(&outputName)
 
-			isControlFlowUUID(value["OutputUUID"].(string), outputName)
-
 			if value["Aggrandizements"] == nil {
 				return outputName
 			}
@@ -922,13 +981,6 @@ func decompValueObject(value map[string]interface{}) string {
 	}
 
 	return decompObjectValue(value)
-}
-
-func isControlFlowUUID(uuid string, identifier string) {
-	if slices.Contains(controlFlowUUIDs, uuid) {
-		insertCodeComment(fmt.Sprintf("TODO: Control flow output not supported. Assign variable in control flow branches to '%s'.", identifier))
-		decompWarning(fmt.Sprintf("Usage of control flow action output '%s' not supported. This can be manually corrected by assigning a variable within the control flow branches and then using that variable instead.", identifier))
-	}
 }
 
 func decompObjectValue(valueObj any) string {
@@ -998,8 +1050,6 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 		if len(attachment.Aggrandizements) != 0 {
 			decompAggrandizements(&variableName, attachment.Aggrandizements)
 		}
-
-		isControlFlowUUID(attachment.OutputUUID, variableName)
 
 		attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
 	}

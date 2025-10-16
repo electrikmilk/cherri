@@ -26,8 +26,13 @@ var char rune
 var lineIdx int
 var lineCharIdx int
 
-var groupingUUIDs map[int]string
-var groupingTypes map[int]tokenType
+type controlFlowGroup struct {
+	identifier string
+	groupType  tokenType
+	uuid       string
+}
+
+var controlFlowGroups map[int]controlFlowGroup
 var groupingIdx int
 
 var preParsing bool
@@ -65,8 +70,7 @@ func initParse() {
 	}
 	variables = make(map[string]varValue)
 	questions = make(map[string]*question)
-	groupingUUIDs = make(map[int]string)
-	groupingTypes = make(map[int]tokenType)
+	controlFlowGroups = make(map[int]controlFlowGroup)
 	chars = []rune(contents)
 	lines = strings.Split(contents, "\n")
 	idx = -1
@@ -89,8 +93,7 @@ func initParse() {
 	actionIndex = 0
 	chars = []rune{}
 	lines = []string{}
-	groupingUUIDs = map[int]string{}
-	groupingTypes = map[int]tokenType{}
+	controlFlowGroups = map[int]controlFlowGroup{}
 	groupingIdx = 0
 	includes = []include{}
 
@@ -200,15 +203,15 @@ func parse() {
 		advance()
 		collectVariable(true)
 	case tokenAhead(Repeat):
-		collectRepeat()
+		collectRepeat("")
 	case tokenAhead(RepeatWithEach):
-		collectRepeatEach()
+		collectRepeatEach("")
 	case tokenAhead(Menu):
-		collectMenu()
+		collectMenu("")
 	case tokenAhead(Item):
 		collectMenuItem()
 	case tokenAhead(If):
-		collectConditionals()
+		collectConditionals("")
 	case tokenAhead(RightBrace):
 		collectEndStatement()
 	case strings.Contains(lookAheadUntil(' '), "("):
@@ -714,6 +717,10 @@ func collectVariable(constant bool) {
 		}
 		advance()
 
+		if collectControlFlowOutput(&identifier, &constant) {
+			return
+		}
+
 		collectVariableValue(constant, &valueType, &value)
 
 		if valueType == Variable && value.(varValue).value == "Ask" {
@@ -747,6 +754,33 @@ func collectVariable(constant bool) {
 			constant:     constant,
 		}
 	}
+}
+
+func collectControlFlowOutput(identifier *string, constant *bool) (identified bool) {
+	var controlFlowOutput bool
+
+	switch {
+	case tokenAhead(If):
+		collectConditionals(*identifier)
+		controlFlowOutput = true
+	case tokenAhead(Menu):
+		collectMenu(*identifier)
+		controlFlowOutput = true
+	case tokenAhead(Repeat):
+		collectRepeat(*identifier)
+		controlFlowOutput = true
+	case tokenAhead(RepeatWithEach):
+		collectRepeatEach(*identifier)
+		controlFlowOutput = true
+	}
+	if controlFlowOutput {
+		if !*constant {
+			parserError("Control flow output must be a constant.")
+		}
+		return true
+	}
+
+	return false
 }
 
 func collectType(valueType *tokenType, value *any, until rune) {
@@ -981,9 +1015,9 @@ func collectQuestion() {
 
 var repeatItemIndex = 1
 
-func collectRepeat() {
+func collectRepeat(identifier string) {
 	reachable()
-	var groupingUUID = groupStatement(Repeat)
+	var group = groupStatement(Repeat, &identifier)
 
 	var index string
 	if repeatItemIndex > 1 {
@@ -1008,7 +1042,7 @@ func collectRepeat() {
 	tokens = append(tokens,
 		token{
 			typeof:    Repeat,
-			ident:     groupingUUID,
+			ident:     group.uuid,
 			valueType: timesType,
 			value:     timesValue,
 		}, token{
@@ -1030,9 +1064,9 @@ func collectRepeat() {
 	}
 }
 
-func collectRepeatEach() {
+func collectRepeatEach(identifier string) {
 	reachable()
-	var groupingUUID = groupStatement(RepeatWithEach)
+	var group = groupStatement(RepeatWithEach, &identifier)
 
 	var index string
 	if repeatItemIndex > 1 {
@@ -1058,7 +1092,7 @@ func collectRepeatEach() {
 	tokens = append(tokens,
 		token{
 			typeof:    RepeatWithEach,
-			ident:     groupingUUID,
+			ident:     group.uuid,
 			valueType: iterableType,
 			value:     iterableValue,
 		}, token{
@@ -1082,11 +1116,11 @@ func collectRepeatEach() {
 	repeatItemIndex++
 }
 
-func collectConditionals() {
+func collectConditionals(identifier string) {
 	reachable()
 	advance()
 
-	var groupingUUID = groupStatement(Conditional)
+	var group = groupStatement(Conditional, &identifier)
 
 	var conditions WFConditions
 	conditions.WFActionParameterFilterPrefix = -1
@@ -1101,7 +1135,7 @@ func collectConditionals() {
 
 	tokens = append(tokens, token{
 		typeof:    Conditional,
-		ident:     groupingUUID,
+		ident:     group.uuid,
 		valueType: If,
 		value:     conditions,
 	})
@@ -1228,14 +1262,14 @@ func checkConditionalTypes(conditional *tokenType, variableType tokenType, value
 	}
 }
 
-func collectMenu() {
+func collectMenu(identifier string) {
 	if len(menus) == 0 {
 		menus = make(map[string][]varValue)
 	}
 
 	reachable()
 	advance()
-	var groupingUUID = groupStatement(Menu)
+	var group = groupStatement(Menu, &identifier)
 
 	var promptType tokenType
 	var promptValue any
@@ -1243,10 +1277,10 @@ func collectMenu() {
 	advanceUntil('{')
 	advance()
 
-	menus[groupingUUID] = []varValue{}
+	menus[group.uuid] = []varValue{}
 	tokens = append(tokens, token{
 		typeof:    Menu,
-		ident:     groupingUUID,
+		ident:     group.uuid,
 		valueType: promptType,
 		value:     promptValue,
 	})
@@ -1254,10 +1288,10 @@ func collectMenu() {
 
 func collectMenuItem() {
 	advance()
-	if _, ok := groupingUUIDs[groupingIdx]; !ok {
+	if _, ok := controlFlowGroups[groupingIdx]; !ok {
 		parserError("Item has no starting menu statement.")
 	}
-	var groupingUUID = groupingUUIDs[groupingIdx]
+	var group = controlFlowGroups[groupingIdx]
 
 	var itemType tokenType
 	var itemValue any
@@ -1265,11 +1299,11 @@ func collectMenuItem() {
 	advanceUntil(':')
 	advance()
 
-	if len(menus[groupingUUID]) > 0 {
+	if len(menus[group.uuid]) > 0 && group.identifier == "" {
 		addNothing()
 	}
 
-	menus[groupingUUID] = append(menus[groupingUUID], varValue{
+	menus[group.uuid] = append(menus[group.uuid], varValue{
 		valueType: itemType,
 		value:     itemValue,
 	})
@@ -1277,7 +1311,7 @@ func collectMenuItem() {
 	tokens = append(tokens,
 		token{
 			typeof:    Item,
-			ident:     groupingUUID,
+			ident:     group.uuid,
 			valueType: itemType,
 			value:     itemValue,
 		},
@@ -1287,49 +1321,56 @@ func collectMenuItem() {
 func collectEndStatement() {
 	advance()
 	if tokenAhead(Else) {
-		addNothing()
-
 		advance()
-		if _, ok := groupingUUIDs[groupingIdx]; !ok {
+		if _, ok := controlFlowGroups[groupingIdx]; !ok {
 			parserError("Else has no starting if statement.")
 		}
 		tokens = append(tokens, token{
 			typeof:    Conditional,
-			ident:     groupingUUIDs[groupingIdx],
+			ident:     controlFlowGroups[groupingIdx].uuid,
 			valueType: Else,
 			value:     nil,
 		})
 		tokenAhead(LeftBrace)
 	} else {
-		if _, ok := groupingUUIDs[groupingIdx]; !ok {
+		if _, ok := controlFlowGroups[groupingIdx]; !ok {
 			parserError("Ending has no starting statement.")
 		}
-		var groupType = groupingTypes[groupingIdx]
-		if groupType == Repeat || groupType == RepeatWithEach {
+
+		var controlFlowGroup = controlFlowGroups[groupingIdx]
+		if controlFlowGroup.groupType == Repeat || controlFlowGroup.groupType == RepeatWithEach {
 			repeatItemIndex--
 			reachable()
 		}
 
-		addNothing()
+		if controlFlowGroup.identifier == "" {
+			addNothing()
+		}
+
+		variables[controlFlowGroup.identifier] = varValue{
+			constant: true,
+		}
 
 		tokens = append(tokens, token{
-			typeof:    groupType,
-			ident:     groupingUUIDs[groupingIdx],
+			typeof:    controlFlowGroup.groupType,
+			ident:     controlFlowGroup.uuid,
 			valueType: EndClosure,
-			value:     nil,
+			value:     controlFlowGroup.identifier,
 		})
 		groupingIdx--
 	}
 }
 
 // groupStatement creates a grouping UUID for a statement and adds to the statement groupings.
-func groupStatement(groupType tokenType) (groupingUUID string) {
-	groupingUUID = uuid.New().String()
+func groupStatement(groupType tokenType, identifier *string) controlFlowGroup {
 	groupingIdx++
-	groupingUUIDs[groupingIdx] = groupingUUID
-	groupingTypes[groupingIdx] = groupType
+	controlFlowGroups[groupingIdx] = controlFlowGroup{
+		uuid:       uuid.NewString(),
+		identifier: *identifier,
+		groupType:  groupType,
+	}
 
-	return
+	return controlFlowGroups[groupingIdx]
 }
 
 // addNothing helps reduce memory usage by not passing anything to the next action.

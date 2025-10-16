@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/electrikmilk/args-parser"
+	"github.com/google/uuid"
 )
 
 var variables map[string]varValue
@@ -79,6 +80,13 @@ func availableIdentifier(identifier *string) {
 	if _, found := questions[*identifier]; found {
 		parserError(fmt.Sprintf("Reference conflicts with defined import question '%s'.", *identifier))
 	}
+}
+
+func createUUIDReference(identifier string) string {
+	var actionUUID = uuid.NewString()
+	uuids[identifier] = actionUUID
+
+	return actionUUID
 }
 
 func validReference(identifier string) bool {
