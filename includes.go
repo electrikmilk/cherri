@@ -170,6 +170,19 @@ func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
 	return
 }
 
+// insideInclude returns a boolean based on if we are within an included file with a name that contains needle.
+func insideInclude(needle string) bool {
+	for _, inc := range includes {
+		if !strings.Contains(inc.file, needle) || lineIdx < inc.start || lineIdx > inc.end {
+			continue
+		}
+
+		return true
+	}
+
+	return false
+}
+
 func printIncludesDebug() {
 	fmt.Println(ansi("### INCLUDES ###", bold) + "\n")
 

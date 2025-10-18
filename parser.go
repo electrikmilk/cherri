@@ -654,15 +654,23 @@ func collectComment() {
 	var collect = args.Using("comments")
 	var comment strings.Builder
 	if isChar('/') {
+		var commentLineIdx = lineIdx
 		if collect {
 			comment.WriteString(collectUntil('\n'))
 		} else {
 			advanceUntil('\n')
 		}
+		if preParsing && insideInclude("actions/") {
+			lines[commentLineIdx] = ""
+		}
 	} else if char == '*' {
+		var lineRef = newLineReference()
 		collectMultilineComment(&comment, &collect)
+		if preParsing && insideInclude("actions/") {
+			lineRef.replaceLines()
+		}
 	}
-	if collect && !preParsing {
+	if collect || preParsing {
 		var commentStr = strings.Trim(comment.String(), " \n")
 		tokens = append(tokens, token{
 			typeof:    Comment,

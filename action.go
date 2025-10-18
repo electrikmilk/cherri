@@ -713,9 +713,7 @@ func parseActionDefinitions() {
 		switch {
 		case isChar('/'):
 			args.Args["comments"] = ""
-			preParsing = false
 			collectComment()
-			preParsing = true
 			delete(args.Args, "comments")
 			continue
 		case char == '"':
