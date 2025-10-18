@@ -111,11 +111,9 @@ func markBuiltins() {
 func preParse() {
 	preParsing = true
 
-	waitFor(
-		defineToggleSetActions,
-		markBuiltins,
-	)
+	defineToggleSetActions()
 	defineRawAction()
+	markBuiltins()
 
 	includeBasicStandardActions()
 	handleIncludes()
