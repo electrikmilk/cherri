@@ -119,7 +119,6 @@ func checkCustomActionUsage(content string) {
 }
 
 func generateCustomActionHeader() string {
-	var outputActionRegex = regexp.MustCompile(`(?:must)?[o|O]utput(?:OrClipboard)?\((.*?)\)`)
 	var customActionsHeader strings.Builder
 	customActionsHeader.WriteString("if ShortcutInput {\n")
 	customActionsHeader.WriteString("    @_cherri_empty_dictionary: dictionary\n")
@@ -134,6 +133,16 @@ func generateCustomActionHeader() string {
 	customActionsHeader.WriteString("            const _cherri_function_name = \"{_cherri_function}\"\n")
 	customActionsHeader.WriteString("            const _cherri_function_args = getValue(_cherri_input, \"arguments\")\n")
 
+	generateCustomActions(&customActionsHeader)
+
+	customActionsHeader.WriteString("            output(nil)\n")
+	customActionsHeader.WriteString("        }\n    }\n}")
+
+	return customActionsHeader.String()
+}
+
+func generateCustomActions(customActionsHeader *strings.Builder) {
+	var outputActionRegex = regexp.MustCompile(`(?:must)?[o|O]utput(?:OrClipboard)?\((.*?)\)`)
 	for identifier, customAction := range customActions {
 		if !customAction.used {
 			continue
@@ -143,42 +152,7 @@ func generateCustomActionHeader() string {
 		customActionsHeader.WriteString(identifier)
 		customActionsHeader.WriteString("\" {\n")
 
-		for i, param := range customAction.definition.parameters {
-			var idx = i + 1
-			var argumentReference = fmt.Sprintf("_cherri_%s_arg_%d_%s", identifier, idx, param.name)
-
-			customActionsHeader.WriteString(fmt.Sprintf("                const %s = getListItem(_cherri_function_args, %d)\n", argumentReference, idx))
-			customActionsHeader.WriteString(fmt.Sprintf("                @%s: %s\n                ", param.name, param.validType))
-
-			switch param.validType {
-			case String:
-				customActionsHeader.WriteString(fmt.Sprintf("@%s = \"{%s}\"\n", param.name, argumentReference))
-			case Integer, Float, Bool:
-				customActionsHeader.WriteString(fmt.Sprintf("@%s = number(%s)\n", param.name, argumentReference))
-			case Dict:
-				customActionsHeader.WriteString(fmt.Sprintf("@%s = getDictionary(%s)\n", param.name, argumentReference))
-			case Arr:
-				customActionsHeader.WriteString(fmt.Sprintf("const %s_array_dictionary = getDictionary(%s)\n", argumentReference, argumentReference))
-				customActionsHeader.WriteString(fmt.Sprintf("                const %s_array = getValue(%s,\"array\")\n", argumentReference, argumentReference))
-				customActionsHeader.WriteString(fmt.Sprintf("                for %s_array_item in %s_array {\n", argumentReference, argumentReference))
-				customActionsHeader.WriteString(fmt.Sprintf("                    @%s += %s_array_item\n                }", param.name, argumentReference))
-			default:
-				customActionsHeader.WriteString(fmt.Sprintf("@%s = %s\n", param.name, argumentReference))
-			}
-
-			if param.defaultValue != nil {
-				var defaultValue = param.defaultValue
-				if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
-					defaultValue = fmt.Sprintf("\"%s\"", defaultValue)
-				}
-
-				customActionsHeader.WriteString(fmt.Sprintf("                if !%s {\n", argumentReference))
-				customActionsHeader.WriteString(fmt.Sprintf("                   @%s = %v\n", param.name, defaultValue))
-				customActionsHeader.WriteString("                }\n")
-			}
-
-			customActionsHeader.WriteRune('\n')
-		}
+		provideCustomActionArguments(customActionsHeader, identifier, customAction)
 
 		customActionsHeader.WriteString(customAction.body)
 
@@ -190,11 +164,45 @@ func generateCustomActionHeader() string {
 
 		customActionsHeader.WriteString("            }\n")
 	}
+}
 
-	customActionsHeader.WriteString("            output(nil)\n")
-	customActionsHeader.WriteString("        }\n    }\n}")
+func provideCustomActionArguments(customActionsHeader *strings.Builder, identifier string, customAction *customAction) {
+	for i, param := range customAction.definition.parameters {
+		var idx = i + 1
+		var argumentReference = fmt.Sprintf("_cherri_%s_arg_%d_%s", identifier, idx, param.name)
 
-	return customActionsHeader.String()
+		customActionsHeader.WriteString(fmt.Sprintf("                const %s = getListItem(_cherri_function_args, %d)\n", argumentReference, idx))
+		customActionsHeader.WriteString(fmt.Sprintf("                @%s: %s\n                ", param.name, param.validType))
+
+		switch param.validType {
+		case String:
+			customActionsHeader.WriteString(fmt.Sprintf("@%s = \"{%s}\"\n", param.name, argumentReference))
+		case Integer, Float, Bool:
+			customActionsHeader.WriteString(fmt.Sprintf("@%s = number(%s)\n", param.name, argumentReference))
+		case Dict:
+			customActionsHeader.WriteString(fmt.Sprintf("@%s = getDictionary(%s)\n", param.name, argumentReference))
+		case Arr:
+			customActionsHeader.WriteString(fmt.Sprintf("const %s_array_dictionary = getDictionary(%s)\n", argumentReference, argumentReference))
+			customActionsHeader.WriteString(fmt.Sprintf("                const %s_array = getValue(%s,\"array\")\n", argumentReference, argumentReference))
+			customActionsHeader.WriteString(fmt.Sprintf("                for %s_array_item in %s_array {\n", argumentReference, argumentReference))
+			customActionsHeader.WriteString(fmt.Sprintf("                    @%s += %s_array_item\n                }", param.name, argumentReference))
+		default:
+			customActionsHeader.WriteString(fmt.Sprintf("@%s = %s\n", param.name, argumentReference))
+		}
+
+		if param.defaultValue != nil {
+			var defaultValue = param.defaultValue
+			if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
+				defaultValue = fmt.Sprintf("\"%s\"", defaultValue)
+			}
+
+			customActionsHeader.WriteString(fmt.Sprintf("                if !%s {\n", argumentReference))
+			customActionsHeader.WriteString(fmt.Sprintf("                   @%s = %v\n", param.name, defaultValue))
+			customActionsHeader.WriteString("                }\n")
+		}
+
+		customActionsHeader.WriteRune('\n')
+	}
 }
 
 func makeCustomActionRef(identifier *string) any {
