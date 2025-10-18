@@ -911,8 +911,10 @@ func makeConditionalAction(t *token) {
 	addStdAction("conditional", &conditionalParams)
 }
 
+var filterTemplates []map[string]any
+
 func makeConditions(wfConditions *WFConditions) map[string]any {
-	var filterTemplates []map[string]any
+	filterTemplates = []map[string]any{}
 	for _, condition := range wfConditions.conditions {
 		var conditionParams = map[string]any{
 			"WFCondition": condition.condition,
