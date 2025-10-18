@@ -357,17 +357,10 @@ func defineName() {
 }
 
 func decompileIcon() {
-	var hasDefinitions bool
 	var icon = shortcut.WFWorkflowIcon
 	if icon.WFWorkflowIconStartColor != iconColor {
-		for name, i := range colors {
-			if icon.WFWorkflowIconStartColor != i {
-				continue
-			}
-
-			newCodeLine(fmt.Sprintf("#define color %s\n", name))
-			hasDefinitions = true
-		}
+		defineColors(icon, colors)
+		defineColors(icon, altColors)
 	}
 
 	if icon.WFWorkflowIconGlyphNumber != iconGlyph {
@@ -377,12 +370,17 @@ func decompileIcon() {
 			}
 
 			newCodeLine(fmt.Sprintf("#define glyph %s\n", name))
-			hasDefinitions = true
 		}
 	}
+}
 
-	if hasDefinitions {
-		code.WriteRune('\n')
+func defineColors(icon ShortcutIcon, colors map[string]int) {
+	for name, i := range colors {
+		if icon.WFWorkflowIconStartColor != i {
+			continue
+		}
+
+		newCodeLine(fmt.Sprintf("#define color %s\n", name))
 	}
 }
 

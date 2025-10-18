@@ -136,6 +136,24 @@ var colors = map[string]int{
 }
 var iconColor = -1263359489
 
+var altColors = map[string]int{
+	"red":        -12365313,
+	"darkorange": -43634177,
+	"orange":     -23508481,
+	"yellow":     -20702977,
+	"green":      -2873601,
+	"teal":       -3863149569,
+	"lightblue":  -2854559233,
+	"blue":       -3831826433,
+	"darkblue":   -3347980545,
+	"violet":     -2223838721,
+	"purple":     -615917313,
+	"pink":       -314141441,
+	"darkgray":   -4294967041,
+	"gray":       -1263359489,
+	"taupe":      -1448498689,
+}
+
 /* Inputs */
 
 var contentItems = map[string]string{
