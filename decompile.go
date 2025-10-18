@@ -1359,7 +1359,7 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 	})
 
 	if args.Using("debug") {
-		for _, match := range matches[0:2] {
+		for _, match := range matches[0:] {
 			fmt.Printf("%s()\n", match.action.identifier)
 			fmt.Println("params:", match.params, " values:", match.values)
 			fmt.Println("---")
