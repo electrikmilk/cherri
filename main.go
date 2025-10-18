@@ -65,6 +65,10 @@ func main() {
 	}
 
 	if args.Using("action") {
+		markBuiltins()
+		defineRawAction()
+		defineToggleSetActions()
+		loadStandardActions()
 		handleActionSearch()
 		os.Exit(0)
 	}

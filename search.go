@@ -13,11 +13,6 @@ import (
 )
 
 func handleActionSearch() {
-	markBuiltins()
-	defineRawAction()
-	defineToggleSetActions()
-	loadStandardActions()
-
 	if args.Value("action") == "" {
 		for identifier, definition := range actions {
 			setCurrentAction(identifier, definition)

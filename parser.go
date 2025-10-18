@@ -78,8 +78,8 @@ func initParse() {
 
 	preParse()
 
-	if args.Using("action") && args.Value("action") != "" {
-		actionsSearch()
+	if args.Using("action") {
+		handleActionSearch()
 		os.Exit(0)
 	}
 
