@@ -213,26 +213,27 @@ func getActionParameters(arguments []actionArgument) map[string]any {
 	}
 	if currentAction.parameters != nil {
 		var argumentsSize = len(arguments)
-		if argumentsSize == 0 {
+		if argumentsSize == 0 || argumentsSize < len(currentAction.parameters) {
 			return params
 		}
-		for i, param := range currentAction.parameters {
-			if argumentsSize <= i {
-				return params
-			}
-			if arguments[i].valueType == Nil || param.key == "" {
-				continue
-			}
-			if param.validType == Variable {
-				params[param.key] = variableValue(arguments[i].value.(varValue))
-				continue
-			}
-
-			params[param.key] = argumentValue(arguments, i)
-		}
+		makeActionParams(arguments, params)
 	}
 
 	return params
+}
+
+func makeActionParams(arguments []actionArgument, params map[string]any) {
+	for i, param := range currentAction.parameters {
+		if arguments[i].valueType == Nil || param.key == "" {
+			continue
+		}
+
+		if param.validType == Variable {
+			params[param.key] = variableValue(arguments[i].value.(varValue))
+		} else {
+			params[param.key] = argumentValue(arguments, i)
+		}
+	}
 }
 
 // addStdAction is an alias of addAction that simply prepends the shortcuts bundle identifier to ident.
@@ -259,21 +260,29 @@ func checkAction() {
 	if currentAction.check != nil {
 		currentAction.check(currentArguments, &currentAction)
 	}
-	if currentAction.minVersion != 0 {
-		if currentAction.minVersion > iosVersion {
-			parserError(
-				fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentActionIdentifier, math.Ceil(iosVersion)),
-			)
-		}
+
+	checkActionVersion()
+	checkMacActionUsage()
+}
+
+func checkActionVersion() {
+	if currentAction.minVersion != 0 && currentAction.minVersion > iosVersion {
+		parserError(
+			fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentActionIdentifier, math.Ceil(iosVersion)),
+		)
 	}
 	if currentAction.maxVersion != 0 {
-		parserWarning(fmt.Sprintf("Action '%s()' has been deprecated as it was removed or significantly modified.", currentActionIdentifier))
 		if currentAction.maxVersion < iosVersion {
 			parserError(
 				fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentActionIdentifier, math.Ceil(iosVersion)),
 			)
+		} else {
+			parserWarning(fmt.Sprintf("Action '%s()' has been deprecated as it was removed or significantly modified.", currentActionIdentifier))
 		}
 	}
+}
+
+func checkMacActionUsage() {
 	if isMac, found := definitions["mac"]; found {
 		if !isMac.(bool) && currentAction.macOnly {
 			parserError(
@@ -563,35 +572,7 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 	}
 
 	if args.Using("debug") {
-		var definitionType string
-		if currentAction.builtin {
-			definitionType = "#builtin"
-		} else {
-			definitionType = "#define"
-		}
-
-		definition.WriteString(ansi(fmt.Sprintf("%s action ", definitionType), orange))
-
-		if currentAction.defaultAction {
-			definition.WriteString(ansi("default ", yellow))
-		}
-		if currentAction.macOnly {
-			definition.WriteString(ansi("mac ", orange))
-		} else if currentAction.nonMacOnly {
-			definition.WriteString(ansi("!mac ", orange))
-		}
-		if currentAction.minVersion != 0 {
-			definition.WriteString(ansi(fmt.Sprintf("v%1.f> ", currentAction.minVersion), cyan))
-		}
-		if currentAction.maxVersion != 0 {
-			definition.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.maxVersion), red, underline))
-			definition.WriteRune(' ')
-		}
-
-		if currentAction.identifier != "" || currentAction.appIdentifier != "" {
-			setCurrentAction(currentActionIdentifier, &currentAction)
-			definition.WriteString(ansi(fmt.Sprintf("'%s' ", getActionIdentifier()), red))
-		}
+		definition.WriteString(generateActionDebugDefinition())
 	}
 
 	definition.WriteString(fmt.Sprintf("%s(", ansi(currentActionIdentifier, blue, bold)))
@@ -611,12 +592,7 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 	}
 
 	if args.Using("debug") && currentAction.addParams != nil {
-		var addParams = currentAction.addParams([]actionArgument{})
-		if len(addParams) != 0 {
-			var jsonBytes, jsonErr = json.MarshalIndent(addParams, strings.Repeat("\t", tabLevel), "\t")
-			handle(jsonErr)
-			definition.WriteString(fmt.Sprintf(" %s", string(jsonBytes)))
-		}
+		definition.WriteString(generateActionAdditionalParams())
 	}
 
 	if args.Using("no-ansi") {
@@ -624,6 +600,16 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 	}
 
 	return definition.String()
+}
+
+func generateActionAdditionalParams() string {
+	var addParams = currentAction.addParams([]actionArgument{})
+	if len(addParams) != 0 {
+		var jsonBytes, jsonErr = json.MarshalIndent(addParams, strings.Repeat("\t", tabLevel), "\t")
+		handle(jsonErr)
+		return fmt.Sprintf(" %s", string(jsonBytes))
+	}
+	return ""
 }
 
 func generateActionParamEnums(focus parameterDefinition) string {
@@ -682,6 +668,41 @@ func generateActionParamDefinition(param parameterDefinition) string {
 			defaultValue = fmt.Sprintf("%v", param.defaultValue)
 		}
 		definition.WriteString(ansi(defaultValue, green))
+	}
+
+	return definition.String()
+}
+
+func generateActionDebugDefinition() string {
+	var definition strings.Builder
+	var definitionType string
+	if currentAction.builtin {
+		definitionType = "#builtin"
+	} else {
+		definitionType = "#define"
+	}
+
+	definition.WriteString(ansi(fmt.Sprintf("%s action ", definitionType), orange))
+
+	if currentAction.defaultAction {
+		definition.WriteString(ansi("default ", yellow))
+	}
+	if currentAction.macOnly {
+		definition.WriteString(ansi("mac ", orange))
+	} else if currentAction.nonMacOnly {
+		definition.WriteString(ansi("!mac ", orange))
+	}
+	if currentAction.minVersion != 0 {
+		definition.WriteString(ansi(fmt.Sprintf("v%1.f> ", currentAction.minVersion), cyan))
+	}
+	if currentAction.maxVersion != 0 {
+		definition.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.maxVersion), red, underline))
+		definition.WriteRune(' ')
+	}
+
+	if currentAction.identifier != "" || currentAction.appIdentifier != "" {
+		setCurrentAction(currentActionIdentifier, &currentAction)
+		definition.WriteString(ansi(fmt.Sprintf("'%s' ", getActionIdentifier()), red))
 	}
 
 	return definition.String()

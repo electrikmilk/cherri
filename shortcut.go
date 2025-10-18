@@ -161,6 +161,19 @@ var contentItems = map[string]string{
 	"url":         "WFURLContentItem",
 }
 
+var revContentItems map[string]string
+
+func reversedContentItems() map[string]string {
+	if len(revContentItems) == 0 {
+		var revContentItems = make(map[string]string)
+		for key, item := range contentItems {
+			revContentItems[item] = key
+		}
+	}
+
+	return revContentItems
+}
+
 var inputs []string
 var outputs []string
 

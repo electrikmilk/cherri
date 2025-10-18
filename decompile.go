@@ -1057,18 +1057,10 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 	}
 }
 
-var revContentItems map[string]string
-
 func decompAggrandizements(reference *string, aggrs []Aggrandizement) {
-	if len(revContentItems) == 0 {
-		revContentItems = make(map[string]string)
-		for key, item := range contentItems {
-			revContentItems[item] = key
-		}
-	}
-
 	var index string
 	var coerce string
+	var revContentItems = reversedContentItems()
 	for _, aggr := range aggrs {
 		switch aggr.Type {
 		case "WFCoercionVariableAggrandizement":
@@ -1128,25 +1120,27 @@ func makeActionCallCode(action *ShortcutAction) string {
 		if matchedIdentifier == "" {
 			actionCallCode.WriteString(makeRawAction(action))
 		}
-	} else {
-		if (matchedAction.macOnly || matchedAction.nonMacOnly) && !macDefinition {
-			macDefinition = matchedAction.macOnly && !matchedAction.nonMacOnly
-			popLine(fmt.Sprintf("#define mac %v", macDefinition))
-		}
 
-		actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
-
-		if matchedAction.make != nil || matchedAction.decomp != nil {
-			decompActionCustom(&actionCallCode, &matchedAction, action)
-		} else {
-			var matchedParamsSize = len(matchedAction.parameters)
-			if matchedParamsSize > 0 {
-				decompActionArguments(&actionCallCode, &matchedAction, action)
-			}
-		}
-
-		actionCallCode.WriteString(")")
+		return actionCallCode.String()
 	}
+
+	if (matchedAction.macOnly || matchedAction.nonMacOnly) && !macDefinition {
+		macDefinition = matchedAction.macOnly && !matchedAction.nonMacOnly
+		popLine(fmt.Sprintf("#define mac %v", macDefinition))
+	}
+
+	actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
+
+	if matchedAction.make != nil || matchedAction.decomp != nil {
+		decompActionCustom(&actionCallCode, &matchedAction, action)
+	} else {
+		var matchedParamsSize = len(matchedAction.parameters)
+		if matchedParamsSize > 0 {
+			decompActionArguments(&actionCallCode, &matchedAction, action)
+		}
+	}
+
+	actionCallCode.WriteString(")")
 
 	return actionCallCode.String()
 }
