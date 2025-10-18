@@ -440,9 +440,6 @@ func checkConstantLiteral(action *ShortcutAction) {
 		return
 	}
 	var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
-	if slices.Contains(varUUIDs, actionUUID) {
-		return
-	}
 	if outputName, found := uuids[actionUUID]; found {
 		newCodeLine(fmt.Sprintf("const %s = ", outputName))
 		code.WriteString(currentVariableValue)
