@@ -65,31 +65,12 @@ func main() {
 	}
 
 	if args.Using("action") {
-		markBuiltins()
-		defineRawAction()
-		defineToggleSetActions()
-		loadStandardActions()
-		if args.Value("action") == "" {
-			for identifier, definition := range actions {
-				setCurrentAction(identifier, definition)
-				if undefinable() {
-					continue
-				}
-				fmt.Println(generateActionDefinition(parameterDefinition{}, true))
-				fmt.Print("\n---\n")
-			}
-		} else {
-			actionsSearch()
-		}
+		handleActionSearch()
 		os.Exit(0)
 	}
 
 	if args.Using("glyph") {
-		if args.Value("glyph") == "" {
-			fmt.Println("Search all usable glyphs at https://glyphs.cherrilang.org.")
-		} else {
-			glyphsSearch()
-		}
+		handleGlyphSearch()
 		os.Exit(0)
 	}
 

@@ -12,6 +12,27 @@ import (
 	"github.com/electrikmilk/args-parser"
 )
 
+func handleActionSearch() {
+	markBuiltins()
+	defineRawAction()
+	defineToggleSetActions()
+	loadStandardActions()
+
+	if args.Value("action") == "" {
+		for identifier, definition := range actions {
+			setCurrentAction(identifier, definition)
+			if undefinable() {
+				continue
+			}
+			fmt.Println(generateActionDefinition(parameterDefinition{}, true))
+			fmt.Print("\n---\n")
+		}
+		return
+	}
+
+	actionsSearch()
+}
+
 func actionsSearch() {
 	var identifier = args.Value("action")
 	if _, found := actions[identifier]; !found {
@@ -54,6 +75,20 @@ func actionsSearch() {
 	}
 	setCurrentAction(identifier, actions[identifier])
 	fmt.Println(generateActionDefinition(parameterDefinition{}, true))
+}
+
+func handleGlyphSearch() {
+	if args.Value("glyph") == "" {
+		fmt.Println(ansi("You can generate Shortcut icon code using: https://glyphs.cherrilang.org.\n", cyan))
+		if args.Value("action") == "" {
+			for identifier := range glyphs {
+				fmt.Println(identifier)
+			}
+			return
+		}
+	}
+
+	glyphsSearch()
 }
 
 func glyphsSearch() {
