@@ -78,6 +78,11 @@ func initParse() {
 
 	preParse()
 
+	if args.Using("action") && args.Value("action") != "" {
+		actionsSearch()
+		os.Exit(0)
+	}
+
 	for char != -1 {
 		parse()
 	}
