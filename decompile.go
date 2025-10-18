@@ -224,19 +224,23 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 				mapDictionaryValueIdentifiers(dictionaryItems)
 			}
 		} else if valueKind == reflect.Slice {
-			var dictionaryItems []WFDictionaryFieldValueItem
-			for _, value := range wfValue["Value"].([]interface{}) {
-				if reflect.TypeOf(value).Kind() != reflect.Map {
-					continue
-				}
-
-				var dictionaryItem WFDictionaryFieldValueItem
-				mapToStruct(value, &dictionaryItem)
-				dictionaryItems = append(dictionaryItems, dictionaryItem)
-			}
+			var dictionaryItems = mapDictionaryItems(wfValue["Value"].([]interface{}))
 			mapDictionaryValueIdentifiers(dictionaryItems)
 		}
 	}
+}
+
+func mapDictionaryItems(items []interface{}) (dictionaryItems []WFDictionaryFieldValueItem) {
+	for _, value := range items {
+		if reflect.TypeOf(value).Kind() != reflect.Map {
+			continue
+		}
+
+		var dictionaryItem WFDictionaryFieldValueItem
+		mapToStruct(value, &dictionaryItem)
+		dictionaryItems = append(dictionaryItems, dictionaryItem)
+	}
+	return
 }
 
 // mapAttachmentIdentifiers maps the UUID and output name of an attachment value.
