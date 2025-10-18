@@ -948,8 +948,7 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 		skipWhitespace()
 
 		var defaultValue any
-		switch char {
-		case '=':
+		if char == '=' {
 			advance()
 			skipWhitespace()
 

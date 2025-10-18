@@ -1331,6 +1331,7 @@ func collectMenuItem() {
 
 func collectEndStatement() {
 	advance()
+
 	if tokenAhead(Else) {
 		advance()
 		if _, ok := controlFlowGroups[groupingIdx]; !ok {
@@ -1343,33 +1344,34 @@ func collectEndStatement() {
 			value:     nil,
 		})
 		tokenAhead(LeftBrace)
-	} else {
-		if _, ok := controlFlowGroups[groupingIdx]; !ok {
-			parserError("Ending has no starting statement.")
-		}
-
-		var controlFlowGroup = controlFlowGroups[groupingIdx]
-		if controlFlowGroup.groupType == Repeat || controlFlowGroup.groupType == RepeatWithEach {
-			repeatItemIndex--
-			reachable()
-		}
-
-		if controlFlowGroup.identifier == "" {
-			addNothing()
-		}
-
-		variables[controlFlowGroup.identifier] = varValue{
-			constant: true,
-		}
-
-		tokens = append(tokens, token{
-			typeof:    controlFlowGroup.groupType,
-			ident:     controlFlowGroup.uuid,
-			valueType: EndClosure,
-			value:     controlFlowGroup.identifier,
-		})
-		groupingIdx--
+		return
 	}
+
+	if _, ok := controlFlowGroups[groupingIdx]; !ok {
+		parserError("Ending has no starting statement.")
+	}
+
+	var controlFlowGroup = controlFlowGroups[groupingIdx]
+	if controlFlowGroup.groupType == Repeat || controlFlowGroup.groupType == RepeatWithEach {
+		repeatItemIndex--
+		reachable()
+	}
+
+	if controlFlowGroup.identifier == "" {
+		addNothing()
+	}
+
+	variables[controlFlowGroup.identifier] = varValue{
+		constant: true,
+	}
+
+	tokens = append(tokens, token{
+		typeof:    controlFlowGroup.groupType,
+		ident:     controlFlowGroup.uuid,
+		valueType: EndClosure,
+		value:     controlFlowGroup.identifier,
+	})
+	groupingIdx--
 }
 
 // groupStatement creates a grouping UUID for a statement and adds to the statement groupings.
