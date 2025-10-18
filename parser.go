@@ -46,6 +46,7 @@ func resetParse() {
 	chars = []rune(contents)
 	lines = strings.Split(contents, "\n")
 	firstChar()
+	tokens = []token{}
 }
 
 type lineReference struct {
