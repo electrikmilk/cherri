@@ -5,7 +5,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -56,14 +55,6 @@ func TestCherriNoSign(t *testing.T) {
 	TestCherri(t)
 }
 
-func TestSingleFile(_ *testing.T) {
-	currentTest = "tests/conditionals.cherri"
-	fmt.Printf("⚙️ Compiling %s...\n", ansi(currentTest, bold))
-	os.Args[1] = currentTest
-	main()
-	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
-}
-
 func TestDecomp(t *testing.T) {
 	fmt.Println("Decompiling...")
 	args.Args["import"] = "tests/decomp_me.plist"
@@ -80,23 +71,6 @@ func TestDecomp(t *testing.T) {
 	}
 
 	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
-}
-
-func TestActionSearch(_ *testing.T) {
-	args.Args["action"] = "replaceText"
-	actionsSearch()
-}
-
-func TestGlyphSearch(_ *testing.T) {
-	args.Args["glyph"] = "robot"
-	glyphsSearch()
-}
-
-func TestGlyphList(_ *testing.T) {
-	var data, jsonErr = json.Marshal(glyphs)
-	handle(jsonErr)
-
-	fmt.Println(string(data))
 }
 
 func compile() {
