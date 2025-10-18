@@ -1087,6 +1087,7 @@ func popLine(line string) {
 }
 
 var macDefinition bool
+var setMacDefinition bool
 
 func decompAction(action *ShortcutAction) {
 	if skipDecompAction(action) {
@@ -1121,9 +1122,10 @@ func makeActionCallCode(action *ShortcutAction) string {
 		return actionCallCode.String()
 	}
 
-	if (matchedAction.macOnly || matchedAction.nonMacOnly) && !macDefinition {
+	if (matchedAction.macOnly || matchedAction.nonMacOnly) && !setMacDefinition {
 		macDefinition = matchedAction.macOnly && !matchedAction.nonMacOnly
 		popLine(fmt.Sprintf("#define mac %v", macDefinition))
+		setMacDefinition = true
 	}
 
 	actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
