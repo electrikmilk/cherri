@@ -517,28 +517,9 @@ func makeAttachmentValues() {
 				"Type":       "ActionOutput",
 			}
 		}
-		if stringVar.getAs != "" {
-			var aggrandizement = make(map[string]string)
-			switch variable.valueType {
-			case Dict:
-				aggrandizement["Type"] = "WFDictionaryValueVariableAggrandizement"
-			case Action:
-				var variableAction = variable.value.(action).def
-				if variableAction.outputType == Dict {
-					aggrandizement["Type"] = "WFDictionaryValueVariableAggrandizement"
-				} else {
-					aggrandizement["Type"] = "WFPropertyVariableAggrandizement"
-				}
-			default:
-				aggrandizement["Type"] = "WFPropertyVariableAggrandizement"
-			}
 
-			if aggrandizement["Type"] == "WFDictionaryValueVariableAggrandizement" {
-				aggrandizement["DictionaryKey"] = stringVar.getAs
-			} else {
-				aggrandizement["PropertyName"] = stringVar.getAs
-			}
-			aggr = append(aggr, aggrandizement)
+		if stringVar.getAs != "" {
+			aggr = append(aggr, makeAggrandizement(&variable.valueType, &variable, stringVar.getAs))
 		}
 		if stringVar.coerce != "" {
 			if contentItem, found := contentItems[stringVar.coerce]; found {
@@ -558,6 +539,31 @@ func makeAttachmentValues() {
 		var positionsKey = fmt.Sprintf("{%d, 1}", stringVar.col)
 		varPositions[positionsKey] = varValue
 	}
+}
+
+func makeAggrandizement(valueType *tokenType, variable *varValue, getAs string) map[string]string {
+	var aggrandizement = make(map[string]string)
+	switch *valueType {
+	case Dict:
+		aggrandizement["Type"] = "WFDictionaryValueVariableAggrandizement"
+	case Action:
+		var variableAction = *variable.value.(action).def
+		if variableAction.outputType == Dict {
+			aggrandizement["Type"] = "WFDictionaryValueVariableAggrandizement"
+		} else {
+			aggrandizement["Type"] = "WFPropertyVariableAggrandizement"
+		}
+	default:
+		aggrandizement["Type"] = "WFPropertyVariableAggrandizement"
+	}
+
+	if aggrandizement["Type"] == "WFDictionaryValueVariableAggrandizement" {
+		aggrandizement["DictionaryKey"] = getAs
+	} else {
+		aggrandizement["PropertyName"] = getAs
+	}
+
+	return aggrandizement
 }
 
 // mapInlineVars finds occurrences of ObjectReplaceChar and adds them to inlineVars to map the inline variables in noVarString.
