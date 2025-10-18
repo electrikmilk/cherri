@@ -628,9 +628,16 @@ func checkControlFlowOutput(action *ShortcutAction) bool {
 	return false
 }
 
-func spaceOutStatements() {
+func beginStatement(t tokenType, action *ShortcutAction) {
 	if tabLevel == 0 {
 		newCodeLine("\n")
+	}
+
+	var statementKeyword = fmt.Sprintf("%s ", strings.TrimSpace(string(t)))
+	if checkControlFlowOutput(action) {
+		code.WriteString(statementKeyword)
+	} else {
+		newCodeLine(statementKeyword)
 	}
 }
 
@@ -642,12 +649,7 @@ func decompMenu(action *ShortcutAction) {
 	var groupingUUID = action.WFWorkflowActionParameters["GroupingIdentifier"].(string)
 	switch controlFlowMode {
 	case startStatement:
-		spaceOutStatements()
-		if checkControlFlowOutput(action) {
-			code.WriteString("menu ")
-		} else {
-			newCodeLine("menu ")
-		}
+		beginStatement(Menu, action)
 
 		menus[groupingUUID] = []varValue{}
 		var items = action.WFWorkflowActionParameters["WFMenuItems"]
@@ -680,12 +682,7 @@ func decompRepeat(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		spaceOutStatements()
-		if checkControlFlowOutput(action) {
-			code.WriteString("repeat ")
-		} else {
-			newCodeLine("repeat ")
-		}
+		beginStatement(Repeat, action)
 
 		code.WriteString("_ for ")
 
@@ -703,11 +700,7 @@ func decompFor(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		if checkControlFlowOutput(action) {
-			code.WriteString("for ")
-		} else {
-			newCodeLine("for ")
-		}
+		beginStatement(RepeatWithEach, action)
 
 		code.WriteString("_ in ")
 
@@ -725,12 +718,7 @@ func decompConditional(action *ShortcutAction) {
 	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
 	switch controlFlowMode {
 	case startStatement:
-		spaceOutStatements()
-		if checkControlFlowOutput(action) {
-			code.WriteString("if ")
-		} else {
-			newCodeLine("if ")
-		}
+		beginStatement(If, action)
 
 		if action.WFWorkflowActionParameters["WFConditions"] != nil {
 			var conditions = action.WFWorkflowActionParameters["WFConditions"].(map[string]interface{})
