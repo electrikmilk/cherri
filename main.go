@@ -28,6 +28,20 @@ const unsignedEnd = "_unsigned.shortcut"
 const darwin = runtime.GOOS == "darwin"
 
 func main() {
+	filePath = fileArg()
+	if filePath != "" {
+		filename = checkFile(filePath)
+
+		handleFile()
+
+		initParse()
+
+		generateShortcut()
+
+		createShortcut()
+		return
+	}
+
 	if args.Using("help") {
 		args.PrintUsage()
 		os.Exit(0)
@@ -79,24 +93,11 @@ func main() {
 		os.Exit(0)
 	}
 
-	filePath = fileArg()
-	if len(os.Args) == 1 || filePath == "" {
-		printLogo()
-		printVersion()
-		fmt.Print("\n")
-		args.PrintUsage()
-		os.Exit(1)
-	}
-
-	filename = checkFile(filePath)
-
-	handleFile()
-
-	initParse()
-
-	generateShortcut()
-
-	createShortcut()
+	printLogo()
+	printVersion()
+	fmt.Print("\n")
+	args.PrintUsage()
+	os.Exit(1)
 }
 
 func handle(err error) {
@@ -131,12 +132,9 @@ func printVersion() {
 }
 
 func fileArg() string {
-	for _, arg := range os.Args {
-		if !strings.Contains(arg, ".cherri") || startsWith("-", arg) {
-			continue
-		}
-
-		return arg
+	var fileName = os.Args[1]
+	if !startsWith("-", fileName) && strings.Contains(fileName, ".cherri") {
+		return fileName
 	}
 	return ""
 }
