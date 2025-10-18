@@ -63,7 +63,7 @@ func actionsSearch() {
 				result = docResult
 			}
 
-			actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n\n", result, definition))
+			actionSearchResults.WriteString(fmt.Sprintf("\n- %s\n%s\n\n", result, definition))
 		}
 	}
 	if actionSearchResults.Len() > 0 {
