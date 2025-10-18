@@ -472,16 +472,16 @@ func decompComment(action *ShortcutAction) {
 		} else {
 			newCodeLine(fmt.Sprintf("comment('%s')\n", commentText))
 		}
-	} else {
-		if strings.Contains(commentText, "\n") {
-			newCodeLine("/*\n")
-			for _, line := range strings.Split(commentText, "\n") {
-				newCodeLine(fmt.Sprintln(line))
-			}
-			newCodeLine("*/\n")
-		} else {
-			newCodeLine(fmt.Sprintf("// %s\n\n", commentText))
+	}
+
+	if strings.Contains(commentText, "\n") {
+		newCodeLine("/*\n")
+		for _, line := range strings.Split(commentText, "\n") {
+			newCodeLine(fmt.Sprintln(line))
 		}
+		newCodeLine("*/\n")
+	} else {
+		newCodeLine(fmt.Sprintf("// %s\n\n", commentText))
 	}
 }
 
@@ -519,21 +519,21 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 	}
 
 	var number any
-	if value != "" {
-		var convErr error
-		if reflect.TypeOf(value).Kind() == reflect.String {
-			if strings.Contains(value.(string), ".") {
-				number, convErr = strconv.ParseFloat(value.(string), 64)
-			} else {
-				number, convErr = strconv.Atoi(value.(string))
-			}
-			handle(convErr)
-		} else {
-			number = int(value.(uint64))
+	var convErr error
+	if reflect.TypeOf(value).Kind() == reflect.String {
+		if strings.Contains(value.(string), ".") {
+			number, convErr = strconv.ParseFloat(value.(string), 64)
+		} else if value != "" {
+			number, convErr = strconv.Atoi(value.(string))
 		}
+		handle(convErr)
+	} else {
+		number = int(value.(uint64))
 	}
+
 	currentVariableValue = decompValue(number)
 	checkConstantLiteral(action)
+
 	return
 }
 
@@ -755,14 +755,18 @@ func decompConditional(action *ShortcutAction) {
 	}
 }
 
-func decompCondition(condition map[string]interface{}, action *ShortcutAction) {
-	var conditionInt = condition["WFCondition"].(uint64)
-	var conditionalOperator tokenType
+func matchConditionOperator(number int) tokenType {
 	for operator, cond := range conditions {
-		if cond == int(conditionInt) {
-			conditionalOperator = operator
+		if cond == number {
+			return operator
 		}
 	}
+	return ""
+}
+
+func decompCondition(condition map[string]interface{}, action *ShortcutAction) {
+	var conditionInt = condition["WFCondition"].(uint64)
+	var conditionalOperator = matchConditionOperator(int(conditionInt))
 	if conditionalOperator == "" {
 		decompError(fmt.Sprintf("Invalid conditional %v", conditionInt), action)
 	}
@@ -779,15 +783,11 @@ func decompCondition(condition map[string]interface{}, action *ShortcutAction) {
 	code.WriteString(fmt.Sprintf(" %s ", conditionalOperator))
 
 	if condition["WFNumberValue"] != nil && condition["WFNumberValue"] != "" {
-		var numberType = reflect.TypeOf(condition["WFNumberValue"]).Kind()
-		switch numberType {
-		case reflect.String:
+		if reflect.TypeOf(condition["WFNumberValue"]).Kind() == reflect.String {
 			var numberValue, convErr = strconv.Atoi(condition["WFNumberValue"].(string))
 			handle(convErr)
 			code.WriteString(decompValue(numberValue))
-		case reflect.Uint64:
-			code.WriteString(decompValue(condition["WFNumberValue"]))
-		default:
+		} else {
 			code.WriteString(decompValue(condition["WFNumberValue"]))
 		}
 	} else if _, foundStr := condition["WFConditionalActionString"]; foundStr {
@@ -1104,19 +1104,31 @@ func decompAction(action *ShortcutAction) {
 		return
 	}
 
+	currentVariableValue = makeActionCallCode(action)
+
+	var isConstant, isVariableValue = checkOutputType(action)
+	if isConstant && isVariableValue {
+		makeConstantLiteral(action)
+	} else if isConstant {
+		checkConstantLiteral(action)
+	} else if !isVariableValue {
+		code.WriteString(tabbedLine(currentVariableValue))
+		code.WriteRune('\n')
+		currentVariableValue = ""
+	}
+}
+
+func makeActionCallCode(action *ShortcutAction) string {
 	var actionCallCode strings.Builder
 	var matchedIdentifier, matchedAction = matchAction(action)
 	if matchedIdentifier == "" {
 		checkMissingStandardInclude(&action.WFWorkflowActionIdentifier, false)
+
 		matchedIdentifier, matchedAction = matchAction(action)
 		if matchedIdentifier == "" {
 			actionCallCode.WriteString(makeRawAction(action))
 		}
-	}
-
-	var isConstant, isVariableValue = checkOutputType(action)
-
-	if matchedIdentifier != "" {
+	} else {
 		if (matchedAction.macOnly || matchedAction.nonMacOnly) && !macDefinition {
 			macDefinition = matchedAction.macOnly && !matchedAction.nonMacOnly
 			popLine(fmt.Sprintf("#define mac %v", macDefinition))
@@ -1136,17 +1148,7 @@ func decompAction(action *ShortcutAction) {
 		actionCallCode.WriteString(")")
 	}
 
-	currentVariableValue = actionCallCode.String()
-
-	if isConstant && isVariableValue {
-		writeConstantLiteral(action)
-	} else if isConstant {
-		checkConstantLiteral(action)
-	} else if !isVariableValue {
-		code.WriteString(tabbedLine(actionCallCode.String()))
-		code.WriteRune('\n')
-		currentVariableValue = ""
-	}
+	return actionCallCode.String()
 }
 
 // checkOutputType determines if action output is a constant or a variable.
@@ -1305,29 +1307,31 @@ func matchAction(action *ShortcutAction) (name string, definition actionDefiniti
 			appIdentifier = def.appIdentifier
 		}
 		var actionIdentifier = fmt.Sprintf("%s.%s", appIdentifier, identifier)
-		if actionIdentifier == action.WFWorkflowActionIdentifier || def.overrideIdentifier == action.WFWorkflowActionIdentifier {
-			definition = *def
-			name = call
-
-			if splitActions, found := identifierMap[identifier]; found {
-				matchSplitAction(&splitActions, action.WFWorkflowActionParameters, &name, &definition)
-				if name != "run" && name != "runSelf" {
-					break
-				}
-				var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]interface{})
-				if _, isSelf := workflow["isSelf"]; !isSelf {
-					break
-				}
-
-				if workflow["isSelf"].(bool) || action.WFWorkflowActionParameters["WFWorkflowName"] == basename {
-					name = "runSelf"
-					definition = *actions["runSelf"]
-				} else {
-					name = "run"
-				}
-			}
-			break
+		if actionIdentifier != action.WFWorkflowActionIdentifier && def.overrideIdentifier != action.WFWorkflowActionIdentifier {
+			continue
 		}
+
+		definition = *def
+		name = call
+
+		if splitActions, found := identifierMap[identifier]; found {
+			matchSplitAction(&splitActions, action.WFWorkflowActionParameters, &name, &definition)
+			if name != "run" && name != "runSelf" {
+				return
+			}
+			var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]interface{})
+			if _, isSelf := workflow["isSelf"]; !isSelf {
+				return
+			}
+			if workflow["isSelf"].(bool) || action.WFWorkflowActionParameters["WFWorkflowName"] == basename {
+				name = "runSelf"
+				definition = *actions["runSelf"]
+			} else {
+				name = "run"
+			}
+		}
+
+		return
 	}
 	return
 }
@@ -1338,14 +1342,11 @@ type actionMatch struct {
 	action actionValue
 }
 
-var matches []actionMatch
-
 func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, identifier *string, definition *actionDefinition) {
 	if args.Using("debug") {
 		fmt.Println("## MATCHING SPLIT ACTIONS ##")
 		fmt.Println("parameters", parameters)
 	}
-	matches = []actionMatch{}
 
 	var defaultAction, hasDefaultAction = getDefaultAction(splitActions)
 	if hasDefaultAction {
@@ -1356,19 +1357,7 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 		}
 	}
 
-	for _, splitAction := range *splitActions {
-		var matchedParams, matchedValues = scoreActionMatch(splitAction, splitAction.definition.parameters, parameters)
-
-		if matchedParams == 0 {
-			continue
-		}
-
-		matches = append(matches, actionMatch{
-			params: matchedParams,
-			values: matchedValues,
-			action: splitAction,
-		})
-	}
+	var matches = getSplitActionMatches(splitActions, parameters)
 
 	if len(matches) == 0 {
 		return
@@ -1397,6 +1386,22 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 	var matchedAction = matches[0]
 	*identifier = matchedAction.action.identifier
 	*definition = *matchedAction.action.definition
+}
+
+func getSplitActionMatches(splitActions *[]actionValue, parameters map[string]any) (matches []actionMatch) {
+	for _, splitAction := range *splitActions {
+		var matchedParams, matchedValues = scoreActionMatch(splitAction, splitAction.definition.parameters, parameters)
+		if matchedParams == 0 {
+			continue
+		}
+
+		matches = append(matches, actionMatch{
+			params: matchedParams,
+			values: matchedValues,
+			action: splitAction,
+		})
+	}
+	return
 }
 
 // competingMatches determines if the matches for this identifier have more values than 1 matching this action.
