@@ -734,21 +734,9 @@ func parseActionDefinitions() {
 	tokens = []token{}
 }
 
-var docCommentRegex = regexp.MustCompile(`^\[Doc]: ?(?:\[(.*?)])?\s(.*?)?(?:: (.*?))?$`)
-
 func collectDefinedAction() {
-	var doc selfDoc
 	var lineRef = newLineReference()
-	var lastToken = getLastAddedToken()
-	if lastToken.typeof == Comment {
-		var comment = lastToken.value.(string)
-		var matches = docCommentRegex.FindAllStringSubmatch(comment, -1)
-		if len(matches) != 0 {
-			var match = matches[0]
-			doc = selfDoc{title: strings.TrimSpace(match[2]), description: strings.TrimSpace(match[3]), category: currentCategory, subcategory: match[1]}
-			tokens = slices.Delete(tokens, len(tokens)-1, len(tokens))
-		}
-	}
+	var doc = collectDocComment()
 
 	var defaultAction bool
 	if tokenAhead(Default) {
@@ -814,6 +802,29 @@ func collectDefinedAction() {
 		maxVersion:         maxVersion,
 		doc:                doc,
 	}
+}
+
+var docCommentRegex = regexp.MustCompile(`^\[Doc]: ?(?:\[(.*?)])?\s(.*?)?(?:: (.*?))?$`)
+
+func collectDocComment() (doc selfDoc) {
+	var lastToken = getLastAddedToken()
+	if lastToken.typeof == Comment {
+		var comment = lastToken.value.(string)
+
+		var matches = docCommentRegex.FindAllStringSubmatch(comment, -1)
+		if len(matches) != 0 {
+			var match = matches[0]
+			doc = selfDoc{
+				title:       strings.TrimSpace(match[2]),
+				description: strings.TrimSpace(match[3]),
+				category:    currentCategory,
+				subcategory: match[1],
+			}
+
+			tokens = slices.Delete(tokens, len(tokens)-1, len(tokens))
+		}
+	}
+	return
 }
 
 func collectVersionDefinition() (minVersion float64, maxVersion float64) {
