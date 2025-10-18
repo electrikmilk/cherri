@@ -141,25 +141,7 @@ func makeVariableAction(t *token) {
 	}
 
 	if t.value != nil {
-		var outputName = makeOutputName(t)
-		var varUUID string
-		if uuids[outputName] == "" {
-			varUUID = uuid.New().String()
-			uuids[outputName] = varUUID
-		} else {
-			varUUID = uuids[outputName]
-		}
-
-		makeVariableValueAction(t, &outputName, &varUUID)
-		if t.valueType != Arr {
-			if t.typeof == Variable && t.valueType == Variable {
-				setVariableParams["WFInput"] = variableValue(t.value.(varValue))
-			} else {
-				setVariableParams["WFInput"] = inputValue(outputName, varUUID)
-			}
-
-			setVariableParams["WFSerializationType"] = "WFTextTokenAttachment"
-		}
+		makeVariableInput(t, setVariableParams)
 	}
 
 	if t.typeof != Variable {
@@ -181,6 +163,28 @@ func makeVariableAction(t *token) {
 
 	if t.valueType == Arr {
 		makeArrayVariable(t)
+	}
+}
+
+func makeVariableInput(t *token, params map[string]any) {
+	var outputName = makeOutputName(t)
+	var varUUID string
+	if uuids[outputName] == "" {
+		varUUID = uuid.New().String()
+		uuids[outputName] = varUUID
+	} else {
+		varUUID = uuids[outputName]
+	}
+
+	makeVariableValueAction(t, &outputName, &varUUID)
+	if t.valueType != Arr {
+		if t.typeof == Variable && t.valueType == Variable {
+			params["WFInput"] = variableValue(t.value.(varValue))
+		} else {
+			params["WFInput"] = inputValue(outputName, varUUID)
+		}
+
+		params["WFSerializationType"] = "WFTextTokenAttachment"
 	}
 }
 
