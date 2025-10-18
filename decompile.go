@@ -358,6 +358,12 @@ func defineName() {
 
 func decompileIcon() {
 	var icon = shortcut.WFWorkflowIcon
+	var hasIcon = icon.WFWorkflowIconStartColor != iconColor || icon.WFWorkflowIconGlyphNumber != iconGlyph
+
+	if hasIcon {
+		newCodeLine("\n")
+	}
+
 	if icon.WFWorkflowIconStartColor != iconColor {
 		defineColors(icon, colors)
 		defineColors(icon, altColors)
@@ -371,6 +377,10 @@ func decompileIcon() {
 
 			newCodeLine(fmt.Sprintf("#define glyph %s\n", name))
 		}
+	}
+
+	if hasIcon {
+		newCodeLine("\n")
 	}
 }
 

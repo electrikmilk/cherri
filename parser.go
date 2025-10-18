@@ -903,6 +903,7 @@ func collectColorDefinition() {
 		for c := range colors {
 			list += fmt.Sprintf("- %s\n", c)
 		}
+
 		parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s", collectColor, list))
 	}
 }
