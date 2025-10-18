@@ -2,12 +2,15 @@
 Location Actions
 */
 
-// [Doc]: Get Current Location: Get current user location.
-#define action 'location' getCurrentLocation() {
+// [Doc]: Current Location: Get current user location.
+#define action 'location' currentLocation() {
 	"WFLocation": {
 		"isCurrentLocation": true
 	}
 }
+
+// [Doc]: Get Current Location
+#define action 'getcurrentlocation' getCurrentLocation()
 
 enum locationDetail {
     'Name',
