@@ -35,46 +35,48 @@ func handleActionSearch() {
 
 func actionsSearch() {
 	var identifier = args.Value("action")
-	if _, found := actions[identifier]; !found {
-		fmt.Println(ansi(fmt.Sprintf("\nAction '%s(...)' does not exist or has not yet been defined.", identifier), red))
+	if _, found := actions[identifier]; found {
+		setCurrentAction(identifier, actions[identifier])
+		fmt.Println(generateActionDefinition(parameterDefinition{}, true))
+		return
+	}
 
-		switch identifier {
-		case "text":
-			fmt.Print("\nText actions are abstracted into string statements. For example:\n\n@variable = \"Hello, Cherri!\"\n\n")
-			os.Exit(1)
-		case "dictionary":
-			fmt.Print("\nDictionary actions are abstracted into JSON object statements. For example:\n\n@variable = {\"test\":5\", \"key\":\"value\"}\n\n")
-			os.Exit(1)
-		}
+	fmt.Println(ansi(fmt.Sprintf("\nAction '%s(...)' does not exist or has not yet been defined.", identifier), red))
 
-		var actionSearchResults strings.Builder
-		for actionIdentifier, definition := range actions {
-			var matched, result = matchString(&actionIdentifier, &identifier)
-			var matchedDoc bool
-			var docResult string
-			if definition.doc.title != "" {
-				matchedDoc, docResult = matchString(&definition.doc.title, &identifier)
-			}
-			if matched || matchedDoc {
-				setCurrentAction(actionIdentifier, definition)
-				var definition = generateActionDefinition(parameterDefinition{}, false)
-				definition, _ = strings.CutPrefix(definition, actionIdentifier)
-				if !matched {
-					result = docResult
-				}
-
-				actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n\n", result, definition))
-			}
-		}
-		if actionSearchResults.Len() > 0 {
-			fmt.Println(ansi("\nThe closest actions are:", yellow, italic, bold))
-			fmt.Println(actionSearchResults.String())
-		}
-
+	switch identifier {
+	case "text":
+		fmt.Print("\nText actions are abstracted into string statements. For example:\n\n@variable = \"Hello, Cherri!\"\n\n")
+		os.Exit(1)
+	case "dictionary":
+		fmt.Print("\nDictionary actions are abstracted into JSON object statements. For example:\n\n@variable = {\"test\":5\", \"key\":\"value\"}\n\n")
 		os.Exit(1)
 	}
-	setCurrentAction(identifier, actions[identifier])
-	fmt.Println(generateActionDefinition(parameterDefinition{}, true))
+
+	var actionSearchResults strings.Builder
+	for actionIdentifier, definition := range actions {
+		var matched, result = matchString(&actionIdentifier, &identifier)
+		var matchedDoc bool
+		var docResult string
+		if definition.doc.title != "" {
+			matchedDoc, docResult = matchString(&definition.doc.title, &identifier)
+		}
+		if matched || matchedDoc {
+			setCurrentAction(actionIdentifier, definition)
+			var definition = generateActionDefinition(parameterDefinition{}, false)
+			definition, _ = strings.CutPrefix(definition, actionIdentifier)
+			if !matched {
+				result = docResult
+			}
+
+			actionSearchResults.WriteString(fmt.Sprintf("- %s%s\n\n", result, definition))
+		}
+	}
+	if actionSearchResults.Len() > 0 {
+		fmt.Println(ansi("\nThe closest actions are:", yellow, italic, bold))
+		fmt.Println(actionSearchResults.String())
+	}
+
+	os.Exit(1)
 }
 
 func handleGlyphSearch() {
