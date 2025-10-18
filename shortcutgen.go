@@ -70,12 +70,12 @@ func marshalPlist() {
 	compiled = string(marshaledPlist)
 }
 
-var longEmptyArraySyntax = regexp.MustCompile(`<(array|dict)>\n(.*?)</(array|dict)>`)
-var emptyArrayOrDictSyntax = regexp.MustCompile(`<key>(.*?)</key>\n\t\t<(array|dict)/>\n\t\t`)
+var plistLongEmptyArrayRegex = regexp.MustCompile(`<(array|dict)>\n(.*?)</(array|dict)>`)
+var plistEmptyArrayOrDictRegex = regexp.MustCompile(`(\t)?<key>(.*?)</key>\n\t\t<(array|dict)/>\n\t(\t)?`)
 
 func optimizePlist() {
-	compiled = longEmptyArraySyntax.ReplaceAllString(compiled, "<$1/>")
-	compiled = emptyArrayOrDictSyntax.ReplaceAllString(compiled, "")
+	compiled = plistLongEmptyArrayRegex.ReplaceAllString(compiled, "<$1/>")
+	compiled = plistEmptyArrayOrDictRegex.ReplaceAllString(compiled, "")
 }
 
 func resetShortcutGen() {
