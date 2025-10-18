@@ -451,7 +451,7 @@ func checkConstantLiteral(action *ShortcutAction) {
 	}
 }
 
-func writeConstantLiteral(action *ShortcutAction) {
+func makeConstantLiteral(action *ShortcutAction) {
 	if _, found := action.WFWorkflowActionParameters[UUID]; !found {
 		return
 	}
