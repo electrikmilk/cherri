@@ -1,18 +1,4 @@
-action doSomething() {
-    nothing()
-}
-
-action add(number op1, number op2): number {
-    const result = op1 + op2
-    output("{result}")
-}
-
-doSomething()
-
-@sum = add(2,2)
-show("{sum}")
-
-action fibonacci(number n) {
+function fibonacci(number n) {
     if n <= 1 {
         output("{n}")
     } else {
@@ -27,7 +13,3 @@ action fibonacci(number n) {
 
 const output = fibonacci(7)
 show("{output}")
-
-action saveFileToDropbox(text path, bool ?overwrite = false): bool {
-    output("{true}")
-}

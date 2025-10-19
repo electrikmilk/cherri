@@ -126,7 +126,7 @@ func preParse() {
 
 	handleCopyPastes()
 	handleActionDefinitions()
-	handleCustomActions()
+	handleFunctions()
 
 	writeProcessed()
 
@@ -448,8 +448,8 @@ func collectActionValue(valueType *tokenType, value *any) {
 	*valueType = Action
 	var identifier = collectIdentifier()
 
-	if _, found := customActions[identifier]; found {
-		*value = makeCustomActionRef(&identifier)
+	if _, found := functions[identifier]; found {
+		*value = makeFunctionRef(&identifier)
 		return
 	}
 
@@ -1551,12 +1551,12 @@ func collectObject() string {
 func collectActionCall() {
 	reachable()
 	var identifier = collectIdentifier()
-	if _, found := customActions[identifier]; found {
+	if _, found := functions[identifier]; found {
 		tokens = append(tokens, token{
 			typeof:    Action,
 			ident:     "runSelf",
 			valueType: Action,
-			value:     makeCustomActionRef(&identifier),
+			value:     makeFunctionRef(&identifier),
 		})
 		actionIndex++
 		return
@@ -1564,7 +1564,7 @@ func collectActionCall() {
 
 	var value = collectAction(&identifier)
 
-	if identifier == "comment" && usingCustomActions && isFirstCommentAction {
+	if identifier == "comment" && usingFunctions && isFirstCommentAction {
 		isFirstCommentAction = false
 		tokens = append([]token{{
 			typeof:    Action,

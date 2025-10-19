@@ -110,5 +110,5 @@ func resetParser() {
 	workflowName = ""
 	menus = map[string][]varValue{}
 	uuids = map[string]string{}
-	customActions = map[string]*customAction{}
+	functions = map[string]*function{}
 }

@@ -228,7 +228,7 @@ func panicDebug(err error) {
 	fmt.Println(ansi("###################\n#   DEBUG PANIC   #\n###################\n", bold, red))
 	printParsingDebug()
 	printShortcutGenDebug()
-	printCustomActionsDebug()
+	printFunctionsDebug()
 	printIncludesDebug()
 	fmt.Println(ansi("#############################################################\n", bold, red))
 

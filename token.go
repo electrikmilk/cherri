@@ -30,6 +30,7 @@ const (
 	Question       tokenType = "#question"
 	Include        tokenType = "#include"
 	Action         tokenType = "action"
+	Function       tokenType = "function"
 	Copy           tokenType = "copy"
 	Paste          tokenType = "paste"
 	Default        tokenType = "default"
