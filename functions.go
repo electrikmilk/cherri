@@ -2,6 +2,21 @@
  * Copyright (c) Cherri
  */
 
+/*
+
+Shortcut Functions
+
+This implementation runs actions within the Shortcut isolated from the
+rest of the Shortcut via input to a Run Shortcut action and interception
+at the beginning of the Shortcut using a generated header.
+
+By the mechanisms of input and output in a Shortcut and our internal references,
+the assignment of a function call is assigned to the output of the Run Shortcut
+action with defined input. Thus, any output the function produces using an output
+action will be returned to the original call.
+
+*/
+
 package main
 
 import (
