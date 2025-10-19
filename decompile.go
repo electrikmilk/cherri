@@ -360,10 +360,6 @@ func decompileIcon() {
 	var icon = shortcut.WFWorkflowIcon
 	var hasIcon = icon.WFWorkflowIconStartColor != iconColor || icon.WFWorkflowIconGlyphNumber != iconGlyph
 
-	if hasIcon {
-		newCodeLine("\n")
-	}
-
 	if icon.WFWorkflowIconStartColor != iconColor {
 		defineColors(icon, colors)
 		defineColors(icon, altColors)
