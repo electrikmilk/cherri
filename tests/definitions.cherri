@@ -6,4 +6,4 @@
 #define quickactions finder, services
 #define noinput getclipboard
 #define name Test
-#define version 17
+#define version 26

@@ -1,0 +1,10 @@
+#define action 'dropbox.savefile' saveToDropboxTest(
+    variable file: 'WFInput',
+    text path: 'WFFileDestinationPath',
+    bool ?overwrite: 'WFSaveFileOverwrite' = false
+) {
+    "WFAskWhereToSave": false
+}
+
+@file = selectFile()
+saveToDropboxTest(file, '/folder/file.txt')
