@@ -874,7 +874,7 @@ func collectVersionDefinition() (minVersion float64, maxVersion float64) {
 func collectActionDefinition(until rune) (identifier string, arguments []parameterDefinition, outputType tokenType) {
 	identifier = collectIdentifier()
 	if _, found := functions[identifier]; found {
-		parserError(fmt.Sprintf("Duplication declaration of custom action '%s()'", identifier))
+		parserError(fmt.Sprintf("Duplication declaration of function '%s()'", identifier))
 	}
 	if _, found := actions[identifier]; found {
 		parserError(fmt.Sprintf("Duplication declaration of action '%s()'", identifier))

@@ -40,7 +40,7 @@ var isFirstCommentAction = true
 
 // resetParse will take the current lines and merge them together to create new contents,
 // then reset the chars and lines, then reset the parser cursor position.
-// This is usually done when something modifies the contents of the file like custom actions or includes.
+// This is usually done when something modifies the contents of the file like functions or includes.
 func resetParse() {
 	contents = strings.Join(lines, "\n")
 	chars = []rune(contents)
