@@ -3,21 +3,21 @@ macOS-only actions
 */
 
 // [Doc]: Get Apps: Get list of applications.
-#define action mac v18 'filter.apps' getApps(): array
+action mac v18 'filter.apps' getApps(): array
 
 // [Doc]: Make Disk Image: Create a new disk image.
-#define action mac v15 makeDiskImage(text name: 'VolumeName', variable contents: 'WFInput', bool ?encrypt: 'EncryptImage' = false) {
+action mac v15 makeDiskImage(text name: 'VolumeName', variable contents: 'WFInput', bool ?encrypt: 'EncryptImage' = false) {
 	"SizeToFit": true
 }
 
 // [Doc]: [Device] Start Screensaver
-#define action mac startScreensaver()
+action mac startScreensaver()
 
 // [Doc]: [Device] Sleep: Puts the Mac to sleep.
-#define action mac v17 sleep()
+action mac v17 sleep()
 
 // [Doc]: [Device] Display Sleep: Only puts the Mac display to sleep, device remains awake.
-#define action mac v17 displaySleep()
+action mac v17 displaySleep()
 
 enum screenshotSelection {
 	'Window',
@@ -25,7 +25,7 @@ enum screenshotSelection {
 }
 
 // [Doc]: Take Interactive Screenshot
-#define action mac 'takescreenshot' takeInteractiveScreenshot(screenshotSelection ?selection: 'WFTakeScreenshotActionInteractiveSelectionType' = "Window") {
+action mac 'takescreenshot' takeInteractiveScreenshot(screenshotSelection ?selection: 'WFTakeScreenshotActionInteractiveSelectionType' = "Window") {
 	"WFTakeScreenshotScreenshotType": "Interactive"
 }
 
@@ -43,7 +43,7 @@ enum windowPosition {
 }
 
 // [Doc]: [Windows] Move Window: Move a window to a defined position.
-#define action mac moveWindow(variable window: 'WFWindow', windowPosition position: 'WFPosition', bool ?bringToFront: 'WFBringToFront' = true)
+action mac moveWindow(variable window: 'WFWindow', windowPosition position: 'WFPosition', bool ?bringToFront: 'WFBringToFront' = true)
 
 enum windowSize {
  'Fit Screen',
@@ -59,13 +59,13 @@ enum windowSize {
 }
 
 // [Doc]: [Windows] Resize Window: Resize a window to defined size.
-#define action mac resizeWindow(variable window: 'WFWindow', windowSize configuration: 'WFConfiguration')
+action mac resizeWindow(variable window: 'WFWindow', windowSize configuration: 'WFConfiguration')
 
 // [Doc]: [Scripts] Run Shell Script
-#define action mac runShellScript(text script: 'Script', variable input: 'Input', text ?shell: 'Shell' = "/bin/zsh", text ?inputMode: 'InputMode' = "to stdin")
+action mac runShellScript(text script: 'Script', variable input: 'Input', text ?shell: 'Shell' = "/bin/zsh", text ?inputMode: 'InputMode' = "to stdin")
 
 // [Doc]: [Scripts] Run Apple Script
-#define action mac runAppleScript(variable input: 'Input', text script: 'Script')
+action mac runAppleScript(variable input: 'Input', text script: 'Script')
 
 // [Doc]: [Scripts] Run JavaScript for Automation
-#define action mac 'runjavascriptforautomation' runJSAutomation(variable input: 'Input', text script: 'Script')
+action mac 'runjavascriptforautomation' runJSAutomation(variable input: 'Input', text script: 'Script')

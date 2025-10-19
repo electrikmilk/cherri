@@ -14,16 +14,16 @@ enum shortcutDetail {
 }
 
 // [Doc]: Get Shortcuts: Get all of the Shortcuts on the device.
-#define action 'getmyworkflows' getShortcuts(): array
+action 'getmyworkflows' getShortcuts(): array
 
 // [Doc]: Get Shortcut Detail: Get a detail about a Shortcut.
-#define action 'properties.workflow' getShortcutDetail(variable shortcut: 'WFInput', shortcutDetail detail: 'WFContentItemPropertyName')
+action 'properties.workflow' getShortcutDetail(variable shortcut: 'WFInput', shortcutDetail detail: 'WFContentItemPropertyName')
 
 // [Doc]: Search Shortcuts: Search the users Shortcuts.
-#define action v16.4 'com.apple.shortcuts.SearchShortcutsAction' searchShortcuts(text query: 'searchPhrase')
+action v16.4 'com.apple.shortcuts.SearchShortcutsAction' searchShortcuts(text query: 'searchPhrase')
 
 // [Doc]: Make Shortcut: Create a shortcut.
-#define action v16.4 'com.apple.shortcuts.CreateWorkflowAction' makeShortcut(text name, bool ?open: 'OpenWhenRun' = true)
+action v16.4 'com.apple.shortcuts.CreateWorkflowAction' makeShortcut(text name, bool ?open: 'OpenWhenRun' = true)
 
 // [Doc]: Run Shortcut: Run Shortcut with name `shortcutName`, providing it with `input`.
-#define action 'runworkflow' run(text shortcutName: 'WFWorkflowName', variable input: 'WFInput')
+action 'runworkflow' run(text shortcutName: 'WFWorkflowName', variable input: 'WFInput')
