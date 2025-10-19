@@ -18,7 +18,7 @@ enum LLMModel {
 }
 
 // [Doc]: [Language Models] Ask LLM: Ask a specific LLM using a prompt. Follow up will open a follow-up prompt to the model.
-#define action v26 askLLM(
+action v26 askLLM(
     text prompt: 'WFLLMPrompt',
     LLMModel ?model: 'WFLLMModel' = "Private Cloud Compute",
     bool ?followUp: 'FollowUp' = false,
@@ -26,14 +26,14 @@ enum LLMModel {
 )
 
 // [Doc]: [Language Models] Ask Private Cloud Compute LLM: Ask a private cloud compute LLM using a prompt. Follow up will open a follow-up prompt to the model.
-#define action v26 'askllm' askCloudLLM(
+action v26 'askllm' askCloudLLM(
     text prompt: 'WFLLMPrompt',
     bool ?followUp: 'FollowUp' = false,
     generativeResultType ?resultType: 'WFGenerativeResultType' = "Automatic"
 )
 
 // [Doc]: [Language Models] Ask On-Device LLM: Ask an On-Device LLM using a prompt. Follow up will open a follow-up prompt to the model.
-#define action v26 'askllm' askDeviceLLM(
+action v26 'askllm' askDeviceLLM(
     text prompt: 'WFLLMPrompt',
     bool ?followUp: 'FollowUp' = false,
     generativeResultType ?resultType: 'WFGenerativeResultType' = "Automatic"
@@ -42,7 +42,7 @@ enum LLMModel {
 }
 
 // [Doc]: [Language Models] Ask Chat GPT: Ask Chat GPT using a prompt. Follow up will open a follow-up prompt to the model.
-#define action v26 'askllm' askChatGPT(
+action v26 'askllm' askChatGPT(
     text prompt: 'WFLLMPrompt',
     bool ?followUp: 'FollowUp' = false,
     generativeResultType ?resultType: 'WFGenerativeResultType' = "Automatic"
@@ -57,24 +57,24 @@ enum textTone {
 }
 
 // [Doc]: [Writing Tools] Adjust Text Tone: Adjust the tone of the text using Apple Intelligence Writing Tools.
-#define action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.AdjustToneIntent' adjustTextTone(text text: 'text', textTone tone): text
+action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.AdjustToneIntent' adjustTextTone(text text: 'text', textTone tone): text
 
 // [Doc]: [Writing Tools] Make List From Text: Generate list from text  using Apple Intelligence Writing Tools.
-#define action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.FormatListIntent' generateList(text text: 'text'): text
+action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.FormatListIntent' generateList(text text: 'text'): text
 
 // [Doc]: [Writing Tools] Make Table From Text: Generate table from text using Apple Intelligence Writing Tools.
-#define action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.FormatTableIntent' generateTable(text text: 'text'): text
+action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.FormatTableIntent' generateTable(text text: 'text'): text
 
 // [Doc]: [Writing Tools] Proofread Text: Generate a proofread version of text using Apple Intelligence Writing Tools.
-#define action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.ProofreadIntent' generateProofread(text text: 'text'): text
+action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.ProofreadIntent' generateProofread(text text: 'text'): text
 
 // [Doc]: [Writing Tools] Rewrite Text: Generate a rewritten version of text using Apple Intelligence Writing Tools.
-#define action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.RewriteTextIntent' generateRewrite(text text: 'text'): text
+action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.RewriteTextIntent' generateRewrite(text text: 'text'): text
 
 // [Doc]: [Writing Tools] Summarize Text: Generate a summarized version of text using Apple Intelligence Writing Tools.
-#define action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextIntent' generateSummary(text text: 'text'): text
+action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextIntent' generateSummary(text text: 'text'): text
 
 // [Doc]: [Writing Tools] Summarize Text Key Points: Generate a summary of key points of text using Apple Intelligence Writing Tools.
-#define action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextIntent' generateKeyPoints(text text: 'text'): text {
+action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextIntent' generateKeyPoints(text text: 'text'): text {
     "summaryType": "createKeyPoints"
 }

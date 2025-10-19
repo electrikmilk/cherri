@@ -16,38 +16,38 @@ enum deviceDetail {
 }
 
 // [Doc]: Get Device Detail: Get a detail about current device.
-#define action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail')
+action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail')
 
 // [Doc]: Get On-Screen Content: Get the content currently on-screen.
-#define action getOnScreenContent()
+action getOnScreenContent()
 
 // [Doc]: Get Orientation: Get the current orientation of the device.
-#define action 'com.apple.ShortcutsActions.GetOrientationAction' getOrientation(): text
+action 'com.apple.ShortcutsActions.GetOrientationAction' getOrientation(): text
 
 // [Doc]: Lock Screen: Lock the device screen.
-#define action v17 lockScreen()
+action v17 lockScreen()
 
 // [Doc]: Shut Down: Power off the device.
-#define action v17 'reboot' shutdown()
+action v17 'reboot' shutdown()
 
 // [Doc]: Reboot: Power off the device, then power it on again.
-#define action v17 reboot() {
+action v17 reboot() {
 	"WFShutdownMode": "Restart"
 }
 
 // [Doc]: Vibrate Device: Vibrate the device. Only applies to Apple devices with the haptic engine.
-#define action !mac vibrate()
+action !mac vibrate()
 
 // [Doc]: [Battery] Get Battery Level: Get the current level of charge of the device battery.
-#define action default getBatteryLevel()
+action default getBatteryLevel()
 
 // [Doc]: [Battery] Connected to Charger: Determines if the device is currently connected to a charger.
-#define action v16.2 'getbatterylevel' connectedToCharger(): bool {
+action v16.2 'getbatterylevel' connectedToCharger(): bool {
 	"Subject": "Is Connected to Charger"
 }
 
 // [Doc]: [Battery] Is Charging: Determines if the device is currently charging.
-#define action v16.2 'getbatterylevel' isCharging(): bool {
+action v16.2 'getbatterylevel' isCharging(): bool {
 	"Subject": "Is Charging"
 }
 
@@ -69,4 +69,4 @@ enum usageDuration {
 }
 
 // [Doc]: [Screen Time] Get Website & App Activity
-#define action 'com.apple.intelligenceplatform.IntelligencePlatform.IntelligencePlatformDataActionsAppIntentsExtension.CalculateAppUsageIntent' getDeviceUsage(deviceUsageType usageType: 'activityType' = "all", variable ?device: 'selectedDevice', usageDuration during: 'during' = "today", text ?startTime: 'startTime', text ?startTime: 'endTime')
+action 'com.apple.intelligenceplatform.IntelligencePlatform.IntelligencePlatformDataActionsAppIntentsExtension.CalculateAppUsageIntent' getDeviceUsage(deviceUsageType usageType: 'activityType' = "all", variable ?device: 'selectedDevice', usageDuration during: 'during' = "today", text ?startTime: 'startTime', text ?startTime: 'endTime')
