@@ -1,0 +1,34 @@
+/* Test variable interpolation with UTF-16 multi-byte characters */
+
+#include 'actions/intelligence'
+
+// Test 1: Variable after emoji
+@testVar1 = "value1"
+@result1 = "✅ Emoji before: {testVar1}"
+show("{result1}")
+
+// Test 2: Multiple emojis before variable
+@testVar2 = "value2"
+@result2 = "✅ 📝 🎉 Multiple emojis: {testVar2}"
+show("{result2}")
+
+// Test 3: Variable at start (no emojis)
+@testVar3 = "value3"
+@result3 = "{testVar3} at the beginning"
+show("{result3}")
+
+// Test 4: Multiple variables with emojis in between
+@testVar4a = "first"
+@testVar4b = "second"
+@result4 = "{testVar4a} ✅ middle emoji ✅ {testVar4b}"
+show("{result4}")
+
+// Test 5: Complex emojis (4-byte UTF-8, 2 UTF-16 code units)
+@testVar6 = "test"
+@result6 = "𝐁𝐨𝐥𝐝 text {testVar6}"  // Mathematical bold characters
+show("{result6}")
+
+// Test 6: Mixed ASCII, emoji, and variables
+@testVar7 = "mixed"
+@result7 = "ASCII ✅ emoji 123 numbers {testVar7} end"
+show("{result7}")
