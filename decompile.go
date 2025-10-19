@@ -138,7 +138,9 @@ func mapVariables() {
 			if action.WFWorkflowActionParameters["WFInput"] != nil {
 				var wfInput WFInput
 				mapToStruct(action.WFWorkflowActionParameters["WFInput"], &wfInput)
-				varUUIDs = append(varUUIDs, wfInput.Value.OutputUUID)
+				if _, found := uuids[wfInput.Value.OutputUUID]; !found {
+					varUUIDs = append(varUUIDs, wfInput.Value.OutputUUID)
+				}
 			}
 		}
 	}
@@ -444,7 +446,7 @@ func checkConstantLiteral(action *ShortcutAction) {
 		return
 	}
 	var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
-	if slices.Contains(varUUIDs, actionUUID) {
+	if slices.Contains(varUUIDs, actionUUID) && !slices.Contains(constUUIDs, actionUUID) {
 		return
 	}
 	if outputName, found := uuids[actionUUID]; found {
