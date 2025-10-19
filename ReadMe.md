@@ -27,7 +27,7 @@ The primary goal is to make it practical to create large Shortcut projects (with
 - #️⃣ Include files within others for large Shortcut projects
 - 🔧 Define custom actions with type checking, enums, optionals, default values, raw identifiers, and raw keys.
 - 📋 Copy-paste actions automatically
-- 🥩 Enter actions raw with a custom identifier and parameters.
+- 🥩 Enter action identifier and parameters manually using Raw Actions.
 - ❓ Define import questions
 - 📇 Generate VCards for menus
 - 📄 Embed files in base64
