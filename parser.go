@@ -40,7 +40,7 @@ var isFirstCommentAction = true
 
 // resetParse will take the current lines and merge them together to create new contents,
 // then reset the chars and lines, then reset the parser cursor position.
-// This is usually done when something modifies the contents of the file like custom actions or includes.
+// This is usually done when something modifies the contents of the file like functions or includes.
 func resetParse() {
 	contents = strings.Join(lines, "\n")
 	chars = []rune(contents)
@@ -126,7 +126,7 @@ func preParse() {
 
 	handleCopyPastes()
 	handleActionDefinitions()
-	handleCustomActions()
+	handleFunctions()
 
 	writeProcessed()
 
@@ -448,8 +448,8 @@ func collectActionValue(valueType *tokenType, value *any) {
 	*valueType = Action
 	var identifier = collectIdentifier()
 
-	if _, found := customActions[identifier]; found {
-		*value = makeCustomActionRef(&identifier)
+	if _, found := functions[identifier]; found {
+		*value = makeFunctionRef(&identifier)
 		return
 	}
 
@@ -1551,12 +1551,12 @@ func collectObject() string {
 func collectActionCall() {
 	reachable()
 	var identifier = collectIdentifier()
-	if _, found := customActions[identifier]; found {
+	if _, found := functions[identifier]; found {
 		tokens = append(tokens, token{
 			typeof:    Action,
 			ident:     "runSelf",
 			valueType: Action,
-			value:     makeCustomActionRef(&identifier),
+			value:     makeFunctionRef(&identifier),
 		})
 		actionIndex++
 		return
@@ -1564,7 +1564,7 @@ func collectActionCall() {
 
 	var value = collectAction(&identifier)
 
-	if identifier == "comment" && usingCustomActions && isFirstCommentAction {
+	if identifier == "comment" && usingFunctions && isFirstCommentAction {
 		isFirstCommentAction = false
 		tokens = append([]token{{
 			typeof:    Action,

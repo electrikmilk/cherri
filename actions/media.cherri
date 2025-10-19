@@ -3,10 +3,10 @@ Media Actions
 */
 
 // [Doc]: Search App Store
-#define action searchAppStore(text query: 'WFSearchTerm')
+action searchAppStore(text query: 'WFSearchTerm')
 
 // [Doc]: Show In iTunes
-#define action 'showinstore' showIniTunes(variable product: 'WFProduct')
+action 'showinstore' showIniTunes(variable product: 'WFProduct')
 
 enum audioQuality {
 	'Normal',
@@ -30,10 +30,10 @@ enum audioSpeeds {
 }
 
 // [Doc]: [Audio] Record Audio: Prompt the user to record audio.
-#define action recordAudio(audioQuality ?quality: 'WFRecordingCompression' = "Normal", audioStart ?start: 'WFRecordingStart' = "On Tap")
+action recordAudio(audioQuality ?quality: 'WFRecordingCompression' = "Normal", audioStart ?start: 'WFRecordingStart' = "On Tap")
 
 // [Doc]: [Audio] Encode Audio: Encode audio to a different format and/or speed.
-#define action 'encodemedia' encodeAudio(
+action 'encodemedia' encodeAudio(
     variable audio: 'WFMedia',
     audioFormats ?format: 'WFMediaAudioFormat' = "M4A",
     audioSpeeds ?speed: 'WFMediaCustomSpeed' = "Normal"
@@ -42,10 +42,10 @@ enum audioSpeeds {
 }
 
 // [Doc]: [Audio] Play Audio: Play a sound.
-#define action playSound(variable input: 'WFInput')
+action playSound(variable input: 'WFInput')
 
 // [Doc]: [Shazam] Start Shazam: Prompt the user to play music for Shazam to recognize. Returns Shazam result.
-#define action 'shazamMedia' startShazam(bool ?show: 'WFShazamMediaActionShowWhenRun' = true, bool ?showError: 'WFShazamMediaActionErrorIfNotRecognized' = true)
+action 'shazamMedia' startShazam(bool ?show: 'WFShazamMediaActionShowWhenRun' = true, bool ?showError: 'WFShazamMediaActionErrorIfNotRecognized' = true)
 
 enum shazamDetail {
 	'Apple Music ID',
@@ -62,7 +62,7 @@ enum shazamDetail {
 }
 
 // [Doc]: [Shazam] Get Shazam Detail: Get a detail about a Shazam result.
-#define action 'properties.shazam' getShazamDetail(variable input: 'WFInput', shazamDetail detail: 'WFContentItemPropertyName')
+action 'properties.shazam' getShazamDetail(variable input: 'WFInput', shazamDetail detail: 'WFContentItemPropertyName')
 
 // [Doc]: [Camera] Take Photo: Prompt the user to take one or more photos.
 #define action takePhoto(number count: 'WFPhotoCount' = 1, bool showPreview: 'WFCameraCaptureShowPreview' = true)

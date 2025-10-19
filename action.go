@@ -721,7 +721,7 @@ func appIntentDescriptor(intent appIntent) map[string]any {
 
 // handleActionDefinitions parses defined actions in the current file and collects them into the actions map.
 func handleActionDefinitions() {
-	if !regexp.MustCompile(`#define action (?:'(.+)')?(.*?)\(`).MatchString(contents) && !regexp.MustCompile(`enum (.*?) \{`).MatchString(contents) {
+	if !regexp.MustCompile(`action (?:'(.+)')?(.*?)\(`).MatchString(contents) && !regexp.MustCompile(`enum (.*?) \{`).MatchString(contents) {
 		return
 	}
 	parseActionDefinitions()
@@ -742,13 +742,10 @@ func parseActionDefinitions() {
 			advanceUntil('\n')
 		case tokenAhead(Enumeration):
 			collectEnumeration()
-		case tokenAhead(Definition):
+		case tokenAhead(Action):
 			advance()
-			if tokenAhead(Action) {
-				advance()
-				collectDefinedAction()
-				continue
-			}
+			collectDefinedAction()
+			continue
 		}
 		advance()
 	}
@@ -876,8 +873,8 @@ func collectVersionDefinition() (minVersion float64, maxVersion float64) {
 
 func collectActionDefinition(until rune) (identifier string, arguments []parameterDefinition, outputType tokenType) {
 	identifier = collectIdentifier()
-	if _, found := customActions[identifier]; found {
-		parserError(fmt.Sprintf("Duplication declaration of custom action '%s()'", identifier))
+	if _, found := functions[identifier]; found {
+		parserError(fmt.Sprintf("Duplication declaration of function '%s()'", identifier))
 	}
 	if _, found := actions[identifier]; found {
 		parserError(fmt.Sprintf("Duplication declaration of action '%s()'", identifier))

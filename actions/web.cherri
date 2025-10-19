@@ -3,15 +3,15 @@ Web Actions
 */
 
 // [Doc]: [URLs] Open URL: Open URL in default browser.
-#define action openURL(text url: 'WFInput') {
+action openURL(text url: 'WFInput') {
 	"Show-WFInput": true
 }
 
 // [Doc]: [URLs] Expand URL: Get the expanded version of a URL. For instance, returns the full URL for a short URL, or the URL which a URL immediately redirects to, etc.
-#define action 'url.expand' expandURL(text url: 'URL')
+action 'url.expand' expandURL(text url: 'URL')
 
 // [Doc]: [URLs] Get URLs: Get URLs from `input`.
-#define action 'detect.link' getURLs(text input: 'WFInput'): array
+action 'detect.link' getURLs(text input: 'WFInput'): array
 
 enum URLDetail {
 	'Scheme',
@@ -25,32 +25,32 @@ enum URLDetail {
 }
 
 // [Doc]: [URLs] Get URL Detail: Get a detail about a URL.
-#define action 'geturlcomponent' getURLDetail(text url: 'WFURL', URLDetail detail: 'WFURLComponent')
+action 'geturlcomponent' getURLDetail(text url: 'WFURL', URLDetail detail: 'WFURLComponent')
 
 // [Doc]: [URLs] Get URL Headers: Get the headers from a URL.
-#define action 'url.getheaders' getURLHeaders(text url: 'WFInput')
+action 'url.getheaders' getURLHeaders(text url: 'WFInput')
 
 // [Doc]: [URLs] URL Encode: Encode text for a URL.
-#define action default 'urlencode' urlEncode(text input: 'WFInput'): text {
+action default 'urlencode' urlEncode(text input: 'WFInput'): text {
 	"WFEncodeMode": "Encode"
 }
 
 // [Doc]: [URLs] URL Decode: Decode text from URL encoding.
-#define action 'urlencode' urlDecode(text input: 'WFInput'): text {
+action 'urlencode' urlDecode(text input: 'WFInput'): text {
 	"WFEncodeMode": "Decode"
 }
 
 // [Doc]: [URLs] Open X-Callback URL
-#define action 'openxcallbackurl' openXCallbackURL(text url: 'WFXCallbackURL')
+action 'openxcallbackurl' openXCallbackURL(text url: 'WFXCallbackURL')
 
 // [Doc]: [Safari] Get Current URL: Get current URL in Safari.
-#define action 'safari.geturl' getCurrentURL()
+action 'safari.geturl' getCurrentURL()
 
 // [Doc]: [Safari] Show Webpage: Show webpage using Safari.
-#define action showWebpage(text url: 'WFURL', bool ?useReader: 'WFEnterSafariReader')
+action showWebpage(text url: 'WFURL', bool ?useReader: 'WFEnterSafariReader')
 
 // [Doc]: [Safari] Run JavaScript on Webpage: Run some custom JavaScript on the current webpage in Safari.
-#define action runJavaScriptOnWebpage(text javascript: 'WFJavaScript')
+action runJavaScriptOnWebpage(text javascript: 'WFJavaScript')
 
 enum webpageDetail {
 	'Page Contents',
@@ -60,7 +60,7 @@ enum webpageDetail {
 }
 
 // [Doc]: [Safari] Get Webpage Detail: Get a detail about a provided webpage.
-#define action 'properties.safariwebpage' getWebPageDetail(variable webpage: 'WFInput', webpageDetail detail: 'WFContentItemPropertyName')
+action 'properties.safariwebpage' getWebPageDetail(variable webpage: 'WFInput', webpageDetail detail: 'WFContentItemPropertyName')
 
 enum searchEngine {
 	'Amazon',

@@ -3,13 +3,13 @@ Music Actions
 */
 
 // [Doc]: Get Current Song: Gets the currently playing song.
-#define action getCurrentSong()
+action getCurrentSong()
 
 // [Doc]: Add to Music: Add music to library.
-#define action 'addtoplaylist' addToMusic(variable songs: 'WFInput')
+action 'addtoplaylist' addToMusic(variable songs: 'WFInput')
 
 // [Doc]: Select Music: Prompt the user to select music.
-#define action 'exportsong' selectMusic(bool ?selectMultiple: 'WFExportSongActionSelectMultiple' = false)
+action 'exportsong' selectMusic(bool ?selectMultiple: 'WFExportSongActionSelectMultiple' = false)
 
 enum shuffleMode {
 	'Off',
@@ -23,7 +23,7 @@ enum repeatMode {
 }
 
 // [Doc]: Play Music: Set music to play with modes for shuffle and repeat.
-#define action playMusic(variable music: 'WFMediaItems', shuffleMode ?shuffle: 'WFPlayMusicActionShuffle', repeatMode ?repeat: 'WFPlayMusicActionRepeat')
+action playMusic(variable music: 'WFMediaItems', shuffleMode ?shuffle: 'WFPlayMusicActionShuffle', repeatMode ?repeat: 'WFPlayMusicActionRepeat')
 
 enum musicDetail {
 	'Title',
@@ -52,46 +52,46 @@ enum musicDetail {
 }
 
 // [Doc]: Get Music Detail: Get a detail about a song.
-#define action 'properties.music' getMusicDetail(variable music: 'WFInput', musicDetail detail: 'WFContentItemPropertyName')
+action 'properties.music' getMusicDetail(variable music: 'WFInput', musicDetail detail: 'WFContentItemPropertyName')
 
 // [Doc]: [Playback] Play: Press play.
-#define action 'pausemusic' play() {
+action 'pausemusic' play() {
 	"WFPlayPauseBehavior": "Play"
 }
 
 // [Doc]: [Playback] Pause: Press pause.
-#define action 'pausemusic' pause() {
+action 'pausemusic' pause() {
 	"WFPlayPauseBehavior": "Pause"
 }
 
 // [Doc]: [Playback] Toggle Play/Pause
-#define action 'pausemusic' togglePlayPause() {
+action 'pausemusic' togglePlayPause() {
 	"WFPlayPauseBehavior": "Play/Pause"
 }
 
 // [Doc]: [Playback] Skip Back: Go to the previous song.
-#define action skipBack() {
+action skipBack() {
 	"WFSkipBackBehavior": "Previous Song"
 }
 
 // [Doc]: [Playback] Skip Forward: Go to the next song.
-#define action 'skipforward' skipFwd()
+action 'skipforward' skipFwd()
 
 // [Doc]: [Playback] Play Next: Add music to play next in the queue.
-#define action 'addmusictoupnext' playNext(variable music: 'WFMusic') {
+action 'addmusictoupnext' playNext(variable music: 'WFMusic') {
 	"WFWhenToPlay": "Next"
 }
 
 // [Doc]: [Playback] Play Next: Add music to the end of the queue.
-#define action 'addmusictoupnext' playLater(variable music: 'WFMusic') {
+action 'addmusictoupnext' playLater(variable music: 'WFMusic') {
 	"WFWhenToPlay": "Later"
 }
 
 // [Doc]: [Playback] Clear Up Next: Clear the queue.
-#define action clearUpNext()
+action clearUpNext()
 
 // [Doc]: [Playlists] Add to Playlist
-#define action addToPlaylist(text playlistName: 'WFPlaylistName', variable songs: 'WFInput')
+action addToPlaylist(text playlistName: 'WFPlaylistName', variable songs: 'WFInput')
 
 // [Doc]: [Playlists] Get Playlist: Gets songs from a playlist
 #define action 'get.playlist' getPlaylistSongs(variable playlistName: 'WFPlaylistName'): array

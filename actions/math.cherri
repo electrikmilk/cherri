@@ -20,7 +20,7 @@ enum calculationOperation {
 }
 
 // [Doc]: Calculate: Perform various calculation operations using one or two operands.
-#define action 'math' calculate(
+action 'math' calculate(
     calculationOperation operation: 'WFScientificMathOperation',
     number operandOne: 'WFInput',
     number ?operandTwo: 'WFMathOperand'
@@ -40,7 +40,7 @@ enum statisticOperations {
 }
 
 // [Doc]: Statistic: Perform a statistical operation on `input`.
-#define action 'statistics' statistic(statisticOperations operation: 'WFStatisticsOperation', variable input: 'WFInput')
+action 'statistics' statistic(statisticOperations operation: 'WFStatisticsOperation', variable input: 'WFInput')
 
 enum rounding {
  'Ones Place',
@@ -53,16 +53,16 @@ enum rounding {
 }
 
 // [Doc]: [Rounding] Round: Rounds number to specified rounding place.
-#define action default round(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
+action default round(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
 	"WFRoundMode": "Normal"
 }
 
 // [Doc]: [Rounding] Round Up: Always round a number up to a specified rounding place.
-#define action 'round' ceil(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
+action 'round' ceil(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
 	"WFRoundMode": "Always Round Up"
 }
 
 // [Doc]: [Rounding] Round Down: Always round a number down to a specified rounding place.
-#define action 'round' floor(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
+action 'round' floor(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
 	"WFRoundMode": "Always Round Down"
 }

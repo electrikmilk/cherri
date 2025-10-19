@@ -30,22 +30,22 @@ enum language {
 }
 
 // [Doc]: Stop Shortcut: Stops the shortcut.
-#define action 'exit' stop()
+action 'exit' stop()
 
 // [Doc]: Nothing: Clear the current output.
-#define action nothing()
+action nothing()
 
 // [Doc]: Comment: Add an explicit comment.
-#define action comment(rawtext text: 'WFCommentActionText')
+action comment(rawtext text: 'WFCommentActionText')
 
 // [Doc]: Get Type: Get the type of input.
-#define action 'getitemtype' typeOf(variable input: 'WFInput'): text
+action 'getitemtype' typeOf(variable input: 'WFInput'): text
 
 // [Doc]: Get Object of Class: Get the object of `class` from a variable.
-#define action 'getclassaction' getObjectOfClass(text class: 'Class', variable from: 'Input')
+action 'getclassaction' getObjectOfClass(text class: 'Class', variable from: 'Input')
 
 // [Doc]: [Output] Show Result: Show `input`.
-#define action 'showresult' show(text input: 'Text')
+action 'showresult' show(text input: 'Text')
 
 // [Doc]: [Output] Quick Look: Preview `input` in Quick Look.
 #define action 'previewdocument' quicklook(variable input: 'WFInput')

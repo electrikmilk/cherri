@@ -3,16 +3,16 @@ Text Editing Actions
 */
 
 // [Doc]: [Rich Text] Make HTML: Make HTML from Rich Text.
-#define action 'gethtmlfromrichtext' makeHTML(text input: 'WFInput', bool ?makeFullDocument: 'WFMakeFullDocument' = false): text
+action 'gethtmlfromrichtext' makeHTML(text input: 'WFInput', bool ?makeFullDocument: 'WFMakeFullDocument' = false): text
 
 // [Doc]: [Rich Text] Make Rich Text from HTML
-#define action getRichTextFromHTML(text html: 'WFHTML'): text
+action getRichTextFromHTML(text html: 'WFHTML'): text
 
 // [Doc]: [Rich Text] Make Markdown: Make Markdown from Rich Text.
-#define action 'getmarkdownfromrichtext' makeMarkdown(text richText: 'WFInput'): text
+action 'getmarkdownfromrichtext' makeMarkdown(text richText: 'WFInput'): text
 
 // [Doc]: [Rich Text] Get Rich Text from Markdown
-#define action getRichTextFromMarkdown(text markdown: 'WFInput'): text
+action getRichTextFromMarkdown(text markdown: 'WFInput'): text
 
 enum stopListeningTrigger {
 	'After Pause',
@@ -21,19 +21,19 @@ enum stopListeningTrigger {
 }
 
 // [Doc]: Dictation: Transcribes user recorded audio to text, optionally in another language.
-#define action 'dictatetext' listen(stopListeningTrigger ?stopListening: 'WFDictateTextStopListening' = "After Pause", language ?language: 'WFSpeechLanguage'): text
+action 'dictatetext' listen(stopListeningTrigger ?stopListening: 'WFDictateTextStopListening' = "After Pause", language ?language: 'WFSpeechLanguage'): text
 
 // [Doc]: Get Text from Image
-#define action 'extracttextfromimage' getTextFromImage(variable image: 'WFImage'): text
+action 'extracttextfromimage' getTextFromImage(variable image: 'WFImage'): text
 
 // [Doc]: Get Name of Emoji: Detects emoji in the text and returns its name.
-#define action 'getnameofemoji' getEmojiName(text emoji: 'WFInput'): text
+action 'getnameofemoji' getEmojiName(text emoji: 'WFInput'): text
 
 // [Doc]: Get Text: Get text from input.
-#define action 'detect.text' getText(variable input: 'WFInput'): text
+action 'detect.text' getText(variable input: 'WFInput'): text
 
 // [Doc]: Make Spoken Audio: Creates custom spoken audio from text with controls for rate and pitch.
-#define action 'makespokenaudiofromtext' makeSpokenAudio(text text: 'WFInput', number ?rate: 'WFSpeakTextRate', number ?pitch: 'WFSpeakTextPitch')
+action 'makespokenaudiofromtext' makeSpokenAudio(text text: 'WFInput', number ?rate: 'WFSpeakTextRate', number ?pitch: 'WFSpeakTextPitch')
 
 // [Doc]: Define: Returns the definition of the word.
 #define action 'showdefinition' define(text word: 'Word'): text

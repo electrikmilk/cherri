@@ -12,10 +12,10 @@ enum backgroundSound {
 }
 
 // [Doc]: Set Background Sound: Set the background sound that plays.
-#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundIntent' setBackgroundSound(backgroundSound ?sound: 'backgroundSound' = "BalancedNoise")
+action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundIntent' setBackgroundSound(backgroundSound ?sound: 'backgroundSound' = "BalancedNoise")
 
 // [Doc]: Set Background Sound Volume
-#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundVolumeIntent' setBackgroundSoundsVolume(float volume: 'volumeValue')
+action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetBackgroundSoundVolumeIntent' setBackgroundSoundsVolume(float volume: 'volumeValue')
 
 enum textSizes {
 	'Accessibility Extra Extra Extra Large',
@@ -33,7 +33,7 @@ enum textSizes {
 }
 
 // [Doc]: [Vision] Set Text Size: Sets the system text size.
-#define action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetLargeTextIntent' setTextSize(textSizes size: 'textSize')
+action 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXSetLargeTextIntent' setTextSize(textSizes size: 'textSize')
 
 enum soundRecognitionOperations {
 	'pause',
@@ -42,13 +42,13 @@ enum soundRecognitionOperations {
 }
 
 // [Doc]: [Hearing] Set Sound Recognition
-#define action !mac v18 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent' setSoundRecognition(soundRecognitionOperations ?operation = "activate")
+action !mac v18 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent' setSoundRecognition(soundRecognitionOperations ?operation = "activate")
 
 // [Doc]: [Magnifier] Describe This
-#define action !mac v18 'com.apple.Magnifier.DescribeThisIntent' magnifierDescribe()
+action !mac v18 'com.apple.Magnifier.DescribeThisIntent' magnifierDescribe()
 
 // [Doc]: [Magnifier] Open Reader
-#define action !mac v18 'com.apple.Magnifier.ReaderModeIntent' magnifierReader()
+action !mac v18 'com.apple.Magnifier.ReaderModeIntent' magnifierReader()
 
 // [Doc]: [Magnifier] Start Point & Speak
-#define action !mac v18 'com.apple.Magnifier.PointAndSpeakIntent' magnifierPointAndSpeak()
+action !mac v18 'com.apple.Magnifier.PointAndSpeakIntent' magnifierPointAndSpeak()

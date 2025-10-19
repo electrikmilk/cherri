@@ -3,10 +3,10 @@ Settings Actions
 */
 
 // [Doc]: [Device] Set Brightness
-#define action setBrightness(float brightness: 'WFBrightness')
+action setBrightness(float brightness: 'WFBrightness')
 
 // [Doc]: [Device] Set Volume
-#define action setVolume(float volume: 'WFVolume')
+action setVolume(float volume: 'WFVolume')
 
 enum FocusUntil {
     'Turned Off'
@@ -16,7 +16,7 @@ enum FocusUntil {
 }
 
 // [Doc]: [Notifications] Turn On Do Not Disturb
-#define action 'dnd.set' DNDOn() {
+action 'dnd.set' DNDOn() {
 	"Enabled": 1,
 	"FocusModes": {
 		"DisplayString": "Do Not Disturb",
@@ -25,7 +25,7 @@ enum FocusUntil {
 }
 
 // [Doc]: [Notifications] Turn Off Do Not Disturb
-#define action 'dnd.set' DNDOff() {
+action 'dnd.set' DNDOff() {
 	"Enabled": 0,
 	"FocusModes": {
 		"DisplayString": "Do Not Disturb",
@@ -34,7 +34,7 @@ enum FocusUntil {
 }
 
 // [Doc]: [Notifications] Toggle Do Not Disturb
-#define action 'dnd.set' toggleDND() {
+action 'dnd.set' toggleDND() {
     "Operation": "Toggle",
     "FocusModes": {
         "DisplayString": "Do Not Disturb",
@@ -43,27 +43,27 @@ enum FocusUntil {
 }
 
 // [Doc]: [Notifications] Get Focus Mode: Get the current Focus Mode.
-#define action 'dnd.getfocus' getFocusMode()
+action 'dnd.getfocus' getFocusMode()
 
 // [Doc]: [Appearance] Set Appearance to Light
-#define action 'appearance' lightMode() {
+action 'appearance' lightMode() {
 	"operation": "set",
 	"style": "light"
 }
 
 // [Doc]: [Appearance] Set Appearance to Dark
-#define action default 'appearance' darkMode() {
+action default 'appearance' darkMode() {
 	"operation": "set",
 	"style": "dark"
 }
 
 // [Doc]: [Wallpaper] Set Wallpaper: Sets the device wallpaper to `input`.
-#define action 'wallpaper.set' setWallpaper(variable input: 'WFInput')
+action 'wallpaper.set' setWallpaper(variable input: 'WFInput')
 
 // [Doc]: [Wallpaper] Get Wallpapers: Get device wallpapers.
-#define action default !mac v16.2 'posters.get' getAllWallpapers(): array
+action default !mac v16.2 'posters.get' getAllWallpapers(): array
 
 // [Doc]: [Wallpaper] Get Wallpaper: Get current device wallpaper.
-#define action !mac v16.2 'posters.get' getWallpaper() {
+action !mac v16.2 'posters.get' getWallpaper() {
 	"WFPosterType": "Current"
 }
