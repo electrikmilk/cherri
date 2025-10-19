@@ -3,14 +3,14 @@ Location Actions
 */
 
 // [Doc]: Current Location: Get current user location.
-#define action 'location' currentLocation() {
+action 'location' currentLocation() {
 	"WFLocation": {
 		"isCurrentLocation": true
 	}
 }
 
 // [Doc]: Get Current Location
-#define action 'getcurrentlocation' getCurrentLocation()
+action 'getcurrentlocation' getCurrentLocation()
 
 enum locationDetail {
     'Name',
@@ -28,13 +28,13 @@ enum locationDetail {
 }
 
 // [Doc]: Get Location Detail: Get a detail about a location.
-#define action 'properties.locations' getLocationDetail(variable location: 'WFInput', locationDetail detail: 'WFContentItemPropertyName')
+action 'properties.locations' getLocationDetail(variable location: 'WFInput', locationDetail detail: 'WFContentItemPropertyName')
 
 // [Doc]: [Addresses] Get Addresses: Get addresses from `input`.
-#define action 'detect.address' getAddresses(variable input: 'WFInput')
+action 'detect.address' getAddresses(variable input: 'WFInput')
 
 // [Doc]: [Addresses] Street Address: Create a location value with an address.
-#define action 'address' streetAddress(
+action 'address' streetAddress(
     text addressLine2: 'WFAddressLine1',
     text addressLine2: 'WFAddressLine2',
     text city: 'WFCity',
@@ -44,16 +44,16 @@ enum locationDetail {
 )
 
 // [Doc]: [Maps] Open in Maps: Open a location in maps.
-#define action 'searchmaps' openInMaps(variable location: 'WFInput')
+action 'searchmaps' openInMaps(variable location: 'WFInput')
 
 // [Doc]: [Maps] Get Maps Link: Get a link for a location.
-#define action getMapsLink(variable location: 'WFInput')
+action getMapsLink(variable location: 'WFInput')
 
 // [Doc]: [Maps] Get Halfway Point: Get the halfway point between two locations.
-#define action getHalfwayPoint(variable firstLocation: 'WFGetHalfwayPointFirstLocation', variable secondLocation: 'WFGetHalfwayPointSecondLocation')
+action getHalfwayPoint(variable firstLocation: 'WFGetHalfwayPointFirstLocation', variable secondLocation: 'WFGetHalfwayPointSecondLocation')
 
 // [Doc]: [Weather] Get Current Weather: Get the current weather for a location.
-#define action 'weather.currentconditions' getCurrentWeather(text ?location: 'WFWeatherCustomLocation' = "Current Location")
+action 'weather.currentconditions' getCurrentWeather(text ?location: 'WFWeatherCustomLocation' = "Current Location")
 
 enum weatherForecastTypes {
     'Daily',
@@ -61,7 +61,7 @@ enum weatherForecastTypes {
 }
 
 // [Doc]: [Weather] Get Weather Forecast: Get various types of weather forecast for a location.
-#define action 'weather.forecast' getWeatherForecast(weatherForecastTypes ?type: 'WFWeatherForecastType' = "Daily", text ?location: 'WFInput' = "Current Location")
+action 'weather.forecast' getWeatherForecast(weatherForecastTypes ?type: 'WFWeatherForecastType' = "Daily", text ?location: 'WFInput' = "Current Location")
 
 enum weatherDetail {
 	'Name',
@@ -89,10 +89,10 @@ enum weatherDetail {
 }
 
 // [Doc]: [Weather] Get Weather Detail: Get a detail about a weather forecast.
-#define action 'properties.weather.conditions' getWeatherDetail(variable weather: 'WFInput', weatherDetail detail: 'WFContentItemPropertyName')
+action 'properties.weather.conditions' getWeatherDetail(variable weather: 'WFInput', weatherDetail detail: 'WFContentItemPropertyName')
 
 // [Doc]: [Weather] Add Location to List: Add a location to Weather app.
-#define action 'com.apple.weather.AddSavedLocationIntent' addWeatherLocation(variable location: 'placemark')
+action 'com.apple.weather.AddSavedLocationIntent' addWeatherLocation(variable location: 'placemark')
 
 // [Doc]: [Weather] Remove Location from List: Remove a location from the Weather app.
-#define action 'com.apple.weather.RemoveSavedLocationIntent' removeWeatherLocation(variable location: 'entities')
+action 'com.apple.weather.RemoveSavedLocationIntent' removeWeatherLocation(variable location: 'entities')

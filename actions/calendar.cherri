@@ -64,16 +64,16 @@ action 'showlist' openRemindersList(variable list: 'WFList')
 action 'is.workflow.actions.addquickreminder' addQuickReminder()
 
 // [Doc]: [Reminders] Remove Reminders
-#define action removeReminders(variable reminders: 'WFInputReminders')
+action removeReminders(variable reminders: 'WFInputReminders')
 
 // [Doc]: [Alarms] Get Alarms: Returns all of the alarms on the device.
-#define action 'com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent' getAlarms()
+action 'com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent' getAlarms()
 
 // [Doc]: [Dates] Get Dates: Get dates from input.
-#define action 'detect.date' getDates(variable input: 'WFInput'): array
+action 'detect.date' getDates(variable input: 'WFInput'): array
 
 // [Doc]: [Dates] Date: Create a date value from `date`. Example: October 5, 2022.
-#define action date(text date: 'WFDateActionDate') {
+action date(text date: 'WFDateActionDate') {
 	"WFDateActionMode": "Specified Date"
 }
 
@@ -133,10 +133,10 @@ enum holiday {
 }
 
 // [Doc]: [Dates] Get Holiday Date: Get the date of a holiday, optionally specifically for a few past or future years.
-#define action 'date' getHolidayDate(holiday holiday: 'WFDateActionMode', eventOccurrenceMode ?occurrenceMode: 'WFEventOccurrenceMode' = "Next Occurrence", holidayYear ?forYear: 'WFEventOccurrenceSpecifiedYear'): text
+action 'date' getHolidayDate(holiday holiday: 'WFDateActionMode', eventOccurrenceMode ?occurrenceMode: 'WFEventOccurrenceMode' = "Next Occurrence", holidayYear ?forYear: 'WFEventOccurrenceSpecifiedYear'): text
 
 // [Doc]: [Dates] Current Date: Get the current date.
-#define action default 'date' currentDate() {
+action default 'date' currentDate() {
     "WFDateActionMode": "Current Date"
 }
 
@@ -160,17 +160,17 @@ enum timeFormats {
 }
 
 // [Doc]: [Formatting] Format Date: Format a date using a standard or custom format.
-#define action default 'format.date' formatDate(variable date: 'WFDate', dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short", text ?customDateFormat: 'WFDateFormat') {
+action default 'format.date' formatDate(variable date: 'WFDate', dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short", text ?customDateFormat: 'WFDateFormat') {
 	"WFTimeFormatStyle": "None"
 }
 
 // [Doc]: [Formatting] Format Time: Format a time using a standard or custom format.
-#define action 'format.date' formatTime(variable time: 'WFDate', timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short") {
+action 'format.date' formatTime(variable time: 'WFDate', timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short") {
 	"WFDateFormatStyle": "None"
 }
 
 // [Doc]: [Formatting] Format Timestamp: Format a timestamp using standard formats and/or a custom date format.
-#define action 'format.date' formatTimestamp(
+action 'format.date' formatTimestamp(
     variable date: 'WFDate',
     dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short",
     timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short",

@@ -75,30 +75,30 @@ enum searchEngine {
 }
 
 // [Doc]: [Safari] Search Web: Search the web using a provided search engine and query.
-#define action searchWeb(searchEngine engine: 'WFSearchWebDestination', text query: 'WFInputText')
+action searchWeb(searchEngine engine: 'WFSearchWebDestination', text query: 'WFInputText')
 
 // [Doc]: [Safari] Get Webpage Contents: Get contents of Webpage from Safari.
-#define action 'getwebpagecontents' getWebpageContents(text url: 'WFInput')
+action 'getwebpagecontents' getWebpageContents(text url: 'WFInput')
 
 // [Doc]: [Giphy] Get GIFs from Giphy: Gets a number of GIFs from Giphy for a search query.
-#define action default 'giphy' getGifs(text query: 'WFGiphyQuery', number ?gifs: 'WFGiphyLimit' = 1) {
+action default 'giphy' getGifs(text query: 'WFGiphyQuery', number ?gifs: 'WFGiphyLimit' = 1) {
 	"WFGiphyShowPicker": false
 }
 
 // [Doc]: [Giphy] Search Giphy: Gets GIFs from Giphy for a search query.
-#define action 'giphy' searchGiphy(text query: 'WFGiphyQuery')
+action 'giphy' searchGiphy(text query: 'WFGiphyQuery')
 
 // [Doc]: [Articles] Get Article: Get article from webpage.
-#define action 'getarticle' getArticle(text webpage: 'WFWebPage')
+action 'getarticle' getArticle(text webpage: 'WFWebPage')
 
 // [Doc]: [Articles] Get Article Detail: Get a detail about an article.
-#define action 'properties.articles' getArticleDetail(variable article: 'WFInput', text detail: 'WFContentItemPropertyName')
+action 'properties.articles' getArticleDetail(variable article: 'WFInput', text detail: 'WFContentItemPropertyName')
 
 // [Doc]: [RSS] Get RSS: Get RSS feed contents at URL. Limited by number of items.
-#define action 'rss' getRSS(number items: 'WFRSSItemQuantity', text url: 'WFRSSFeedURL')
+action 'rss' getRSS(number items: 'WFRSSItemQuantity', text url: 'WFRSSFeedURL')
 
 // [Doc]: [RSS] Get RSS Feeds: Get feeds from multiple URLs.
-#define action 'rss.extract' getRSSFeeds(text urls: 'WFURLs')
+action 'rss.extract' getRSSFeeds(text urls: 'WFURLs')
 
 enum HTTPMethod {
     'POST',
@@ -108,12 +108,12 @@ enum HTTPMethod {
 }
 
 // [Doc]: [HTTP] Download URL: Download the contents of a URL.
-#define action default downloadURL(text url: 'WFURL', dictionary! ?headers: 'WFHTTPHeaders') {
+action default downloadURL(text url: 'WFURL', dictionary! ?headers: 'WFHTTPHeaders') {
 	"WFHTTPMethod": "GET"
 }
 
 // [Doc]: [HTTP] Form Request: Send a `method` request to `url` with `body` and optional `headers.
-#define action 'downloadurl' formRequest(
+action 'downloadurl' formRequest(
     text url: 'WFURL',
     HTTPMethod ?method: 'WFHTTPMethod',
     dictionary! ?body: 'WFFormValues',
@@ -123,7 +123,7 @@ enum HTTPMethod {
 }
 
 // [Doc]: [HTTP] JSON Request: Send a `method` JSON request to `url` with `body` and optional `headers.
-#define action 'downloadurl' jsonRequest(
+action 'downloadurl' jsonRequest(
     text url: 'WFURL',
     HTTPMethod ?method: 'WFHTTPMethod',
     dictionary! ?body: 'WFJSONValues',
@@ -133,7 +133,7 @@ enum HTTPMethod {
 }
 
 // [Doc]: [HTTP] File Request: Send a `method` file request to `url` with `body` and optional `headers.
-#define action 'downloadurl' fileRequest(
+action 'downloadurl' fileRequest(
     text url: 'WFURL',
     HTTPMethod ?method: 'WFHTTPMethod',
     dictionary! ?body: 'WFRequestVariable',

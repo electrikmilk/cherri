@@ -94,4 +94,4 @@ action clearUpNext()
 action addToPlaylist(text playlistName: 'WFPlaylistName', variable songs: 'WFInput')
 
 // [Doc]: [Playlists] Get Playlist: Gets songs from a playlist
-#define action 'get.playlist' getPlaylistSongs(variable playlistName: 'WFPlaylistName'): array
+action 'get.playlist' getPlaylistSongs(variable playlistName: 'WFPlaylistName'): array

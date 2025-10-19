@@ -3,20 +3,20 @@ Sharing Actions
 */
 
 // [Doc]: Share: Prompt the user to share `input`.
-#define action share(variable input: 'WFInput')
+action share(variable input: 'WFInput')
 
 // [Doc]: [Clipboard] Get Clipboard: Get the contents of the clipboard.
-#define action getClipboard()
+action getClipboard()
 
 // [Doc]: [Clipboard] Set Clipboard: Set the contents of the clipboard.
-#define action setClipboard(
+action setClipboard(
     variable value: 'WFInput',
     bool ?local: 'WFLocalOnly' = false,
     text ?expire: 'WFExpirationDate'
 )
 
 // [Doc]: [Email & SMS Messaging] Send Email: Send an email to a contact.
-#define action sendEmail(
+action sendEmail(
     variable contact: 'WFSendEmailActionToRecipients',
     text from: 'WFSendEmailActionFrom',
     text subject: 'WFSendEmailActionSubject',
@@ -26,23 +26,23 @@ Sharing Actions
 )
 
 // [Doc]: [Email & SMS Messaging] Send Message: Send an SMS/iMessage to a contact.
-#define action sendMessage(
+action sendMessage(
     variable contact: 'WFSendMessageActionRecipients',
     text message: 'WFSendMessageContent',
     bool ?prompt: 'ShowWhenRun' = true
 )
 
 // [Doc]: [Email & SMS Messaging] Find Email: Find email.
-#define action 'com.apple.mobilemail.MailMessageEntity' findEmail(text search: 'WFContentItemInputParameter')
+action 'com.apple.mobilemail.MailMessageEntity' findEmail(text search: 'WFContentItemInputParameter')
 
 // [Doc]: [Email & SMS Messaging] Find Message: Find SMS/iMessage message.
-#define action 'com.apple.MobileSMS.MessageEntity' findMessage(text search: 'WFContentItemInputParameter')
+action 'com.apple.MobileSMS.MessageEntity' findMessage(text search: 'WFContentItemInputParameter')
 
 // [Doc]: [Email & SMS Messaging] Find Conversation: Find SMS/iMessage conversation.
-#define action 'com.apple.MobileSMS.ConversationEntity' findConversation(text search: 'WFContentItemInputParameter')
+action 'com.apple.MobileSMS.ConversationEntity' findConversation(text search: 'WFContentItemInputParameter')
 
 // [Doc]: [AirDrop] AirDrop: Prompt the user to AirDrop `input`.
-#define action 'airdropdocument' airdrop(variable input: 'WFInput')
+action 'airdropdocument' airdrop(variable input: 'WFInput')
 
 enum airdropReceivingStates {
     'No One',
@@ -51,6 +51,6 @@ enum airdropReceivingStates {
 }
 
 // [Doc]: [AirDrop] Set AirDrop Receiving: Set the AirDrop receiving setting.
-#define action setAirdropReceiving(
+action setAirdropReceiving(
     airdropReceivingStates ?state: 'WFAirDropState' = "Everyone"
 )

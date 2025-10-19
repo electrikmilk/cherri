@@ -14,10 +14,10 @@ enum archiveFormat {
 }
 
 // [Doc]: [Archives] Make Archive: Create an archive of `files` named `name` in `format`.
-#define action 'makezip' makeArchive(variable files: 'WFInput', archiveFormat ?format: 'WFArchiveFormat' = ".zip", text ?name: 'WFZIPName')
+action 'makezip' makeArchive(variable files: 'WFInput', archiveFormat ?format: 'WFArchiveFormat' = ".zip", text ?name: 'WFZIPName')
 
 // [Doc]: [Archives] Extract Archive: Extract files from the archive `file`.
-#define action 'unzip' extractArchive(variable file: 'WFArchive')
+action 'unzip' extractArchive(variable file: 'WFArchive')
 
 // [Doc]: [Books] Add to Books: Add `input` to books. `input` is expected to be a PDF or epub file.
 #define action 'com.apple.iBooksX.openin' addToBooks(variable input: 'BooksInput')

@@ -65,7 +65,7 @@ enum shazamDetail {
 action 'properties.shazam' getShazamDetail(variable input: 'WFInput', shazamDetail detail: 'WFContentItemPropertyName')
 
 // [Doc]: [Camera] Take Photo: Prompt the user to take one or more photos.
-#define action takePhoto(number count: 'WFPhotoCount' = 1, bool showPreview: 'WFCameraCaptureShowPreview' = true)
+action takePhoto(number count: 'WFPhotoCount' = 1, bool showPreview: 'WFCameraCaptureShowPreview' = true)
 
 enum cameraOrientation {
 	'Front',
@@ -84,18 +84,18 @@ enum recordingStart {
 }
 
 // [Doc]: [Camera] Take Photo: Prompt the user to start recording a video.
-#define action takeVideo(
+action takeVideo(
     cameraOrientation ?camera: 'WFCameraCaptureDevice' = "Front",
     videoQuality ?quality: 'WFCameraCaptureQuality' = "High",
     recordingStart ?recordingStart: 'WFRecordingStart' = "Immediately"
 )
 
 // [Doc]: Take Screenshot
-#define action takeScreenshot(bool ?mainMonitorOnly: 'WFTakeScreenshotMainMonitorOnly' = false) {
+action takeScreenshot(bool ?mainMonitorOnly: 'WFTakeScreenshotMainMonitorOnly' = false) {
 	"WFTakeScreenshotScreenshotType": "Full Screen"
 }
 // [Doc]: [Podcasts] Search Podcasts
-#define action searchPodcasts(text query: 'WFSearchTerm')
+action searchPodcasts(text query: 'WFSearchTerm')
 
 enum podcastDetail {
 	'Feed URL',
@@ -110,22 +110,22 @@ enum podcastDetail {
 }
 
 // [Doc]: [Podcasts] Get Podcast Detail
-#define action 'properties.podcastshow' getPodcastDetail(variable podcast: 'WFInput', podcastDetail detail: 'WFContentItemPropertyName')
+action 'properties.podcastshow' getPodcastDetail(variable podcast: 'WFInput', podcastDetail detail: 'WFContentItemPropertyName')
 
 // [Doc]: [Podcasts] Get Podcasts: Get users podcasts.
-#define action 'getpodcastsfromlibrary' getPodcasts()
+action 'getpodcastsfromlibrary' getPodcasts()
 
 // [Doc]: [Podcasts] Play Podcast
-#define action playPodcast(variable podcast: 'WFPodcastShow')
+action playPodcast(variable podcast: 'WFPodcastShow')
 
 
 // [Doc]: [Metadata] Strip Media Metadata
-#define action 'encodemedia' stripMediaMetadata(variable media: 'WFMedia') {
+action 'encodemedia' stripMediaMetadata(variable media: 'WFMedia') {
 	"Metadata": true
 }
 
 // [Doc]: [Metadata] Set Media Metadata
-#define action 'encodemedia' setMetadata(
+action 'encodemedia' setMetadata(
     variable media: 'WFMedia',
     variable ?artwork: 'WFMetadataArtwork',
     text ?title: 'WFMetadataTitle',
@@ -155,10 +155,10 @@ enum encodeVideoSpeeds {
 }
 
 // [Doc]: [Video Editing] Encode Video: Encode a video to a different format, size and/or speed.
-#define action 'encodemedia' encodeVideo(variable video: 'WFMedia', encodeVideoSizes ?size: 'WFMediaSize' = "Passthrough", encodeVideoSpeeds ?speed: 'WFMediaCustomSpeed' = "Normal", bool ?preserveTransparency: 'WFMediaPreserveTransparency' = false)
+action 'encodemedia' encodeVideo(variable video: 'WFMedia', encodeVideoSizes ?size: 'WFMediaSize' = "Passthrough", encodeVideoSpeeds ?speed: 'WFMediaCustomSpeed' = "Normal", bool ?preserveTransparency: 'WFMediaPreserveTransparency' = false)
 
 // [Doc]: [Video Editing] Trim Video: Prompts the user to trim the video.
-#define action trimVideo(variable video: 'WFInputMedia')
+action trimVideo(variable video: 'WFInputMedia')
 
 // [Doc]: [Voice Memos] Search Voice Memos
-#define action 'com.apple.VoiceMemos.SearchRecordings' searchVoiceMemos(text search: 'searchPhrase'): array
+action 'com.apple.VoiceMemos.SearchRecordings' searchVoiceMemos(text search: 'searchPhrase'): array

@@ -3,40 +3,40 @@ Photos Actions
 */
 
 // [Doc]: Create Album
-#define action 'photos.createalbum' createAlbum(text name: 'AlbumName', variable ?images: 'WFInput')
+action 'photos.createalbum' createAlbum(text name: 'AlbumName', variable ?images: 'WFInput')
 
 // [Doc]: Rename Album
-#define action renameAlbum(variable album: 'album', text newTitle: 'title')
+action renameAlbum(variable album: 'album', text newTitle: 'title')
 
 // [Doc]: Search Photos
-#define action 'com.apple.mobileslideshow.PhotosSearchAssistantIntent' searchPhotos(text criteria: 'criteria'): array
+action 'com.apple.mobileslideshow.PhotosSearchAssistantIntent' searchPhotos(text criteria: 'criteria'): array
 
 // [Doc]: Delete Photos
-#define action deletePhotos(variable photos)
+action deletePhotos(variable photos)
 
 // [Doc]: Get Last Import
-#define action 'getlatestphotoimport' getLastImport()
+action 'getlatestphotoimport' getLastImport()
 
 // [Doc]: Get Latest Bursts
-#define action getLatestBursts(number count: 'WFGetLatestPhotoCount')
+action getLatestBursts(number count: 'WFGetLatestPhotoCount')
 
 // [Doc]: Get Latest Live Photos
-#define action 'getlatestlivephotos' getLatestLivePhotos(number count: 'WFGetLatestPhotoCount')
+action 'getlatestlivephotos' getLatestLivePhotos(number count: 'WFGetLatestPhotoCount')
 
 // [Doc]: Get Latest Screenshots
-#define action 'getlastscreenshot' getLatestScreenshots(number count: 'WFGetLatestPhotoCount')
+action 'getlastscreenshot' getLatestScreenshots(number count: 'WFGetLatestPhotoCount')
 
 // [Doc]: Get Latest Photos
-#define action 'getlastphoto' getLatestPhotos(number count: 'WFGetLatestPhotoCount', bool ?includeScreenshots: 'WFGetLatestPhotosActionIncludeScreenshots' = true)
+action 'getlastphoto' getLatestPhotos(number count: 'WFGetLatestPhotoCount', bool ?includeScreenshots: 'WFGetLatestPhotosActionIncludeScreenshots' = true)
 
 // [Doc]: Get Latest Videos
-#define action 'getlastvideo' getLatestVideos(number count: 'WFGetLatestPhotoCount')
+action 'getlastvideo' getLatestVideos(number count: 'WFGetLatestPhotoCount')
 
 // [Doc]: Remove Photo from Album
-#define action 'removefromalbum' removeFromAlbum(variable photo: 'WFInput', text album: 'WFRemoveAlbumSelectedGroup')
+action 'removefromalbum' removeFromAlbum(variable photo: 'WFInput', text album: 'WFRemoveAlbumSelectedGroup')
 
 // [Doc]: Save Photo to Album
-#define action 'savetocameraroll' savePhoto(variable image: 'WFInput', text ?album: 'WFCameraRollSelectedGroup' = "Recents")
+action 'savetocameraroll' savePhoto(variable image: 'WFInput', text ?album: 'WFCameraRollSelectedGroup' = "Recents")
 
 // [Doc]: Select Photos: Prompt the user to select from their photo library.
-#define action 'selectphoto' selectPhotos(bool ?selectMultiple: 'WFSelectMultiplePhotos' = false)
+action 'selectphoto' selectPhotos(bool ?selectMultiple: 'WFSelectMultiplePhotos' = false)
