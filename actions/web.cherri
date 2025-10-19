@@ -31,7 +31,7 @@ action 'geturlcomponent' getURLDetail(text url: 'WFURL', URLDetail detail: 'WFUR
 action 'url.getheaders' getURLHeaders(text url: 'WFInput')
 
 // [Doc]: [URLs] URL Encode: Encode text for a URL.
-action default 'urlencode' urlEncode(text input: 'WFInput'): text {
+action default urlEncode(text input: 'WFInput'): text {
 	"WFEncodeMode": "Encode"
 }
 
@@ -78,7 +78,7 @@ enum searchEngine {
 action searchWeb(searchEngine engine: 'WFSearchWebDestination', text query: 'WFInputText')
 
 // [Doc]: [Safari] Get Webpage Contents: Get contents of Webpage from Safari.
-action 'getwebpagecontents' getWebpageContents(text url: 'WFInput')
+action getWebpageContents(text url: 'WFInput')
 
 // [Doc]: [Giphy] Get GIFs from Giphy: Gets a number of GIFs from Giphy for a search query.
 action default 'giphy' getGifs(text query: 'WFGiphyQuery', number ?gifs: 'WFGiphyLimit' = 1) {
@@ -89,7 +89,7 @@ action default 'giphy' getGifs(text query: 'WFGiphyQuery', number ?gifs: 'WFGiph
 action 'giphy' searchGiphy(text query: 'WFGiphyQuery')
 
 // [Doc]: [Articles] Get Article: Get article from webpage.
-action 'getarticle' getArticle(text webpage: 'WFWebPage')
+action getArticle(text webpage: 'WFWebPage')
 
 // [Doc]: [Articles] Get Article Detail: Get a detail about an article.
 action 'properties.articles' getArticleDetail(variable article: 'WFInput', text detail: 'WFContentItemPropertyName')
