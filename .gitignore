@@ -4,7 +4,6 @@
 *.dll
 *.so
 *.dylib
-src/aml
 
 # Test binary, built with `go test -c`
 *.test
