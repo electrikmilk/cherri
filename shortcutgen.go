@@ -566,28 +566,29 @@ func makeAggrandizement(valueType *tokenType, variable *varValue, getAs string) 
 	return aggrandizement
 }
 
+const utf16BMPThreshold = 0x10000
+
 // mapInlineVars finds occurrences of ObjectReplaceChar and adds them to inlineVars to map the inline variables in noVarString.
-// Uses UTF-16 code unit positions to match Apple Shortcuts' encoding requirements.
+// Accounts for UTF-16 characters with code units which require the inline variable position to be doubled (e.g. emoji, bold text).
 func mapInlineVars(noVarString *string) {
 	var variableIdx int
-	var utf16Pos = 0
+	var charPos = 0
 
 	for _, r := range *noVarString {
 		if r == ObjectReplaceChar {
 			inlineVars = append(inlineVars, inlineVar{
 				identifier: varIndex[variableIdx].identifier,
-				col:        utf16Pos,
+				col:        charPos,
 				getAs:      varIndex[variableIdx].getAs,
 				coerce:     varIndex[variableIdx].coerce,
 			})
 			variableIdx++
 		}
 
-		// Count UTF-16 code units: surrogate pairs (outside BMP) count as 2
-		if r >= 0x10000 {
-			utf16Pos += 2
+		if r >= utf16BMPThreshold {
+			charPos += 2
 		} else {
-			utf16Pos += 1
+			charPos += 1
 		}
 	}
 }

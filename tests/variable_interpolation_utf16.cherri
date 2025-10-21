@@ -1,7 +1,5 @@
 /* Test variable interpolation with UTF-16 multi-byte characters */
 
-#include 'actions/intelligence'
-
 // Test 1: Variable after emoji
 @testVar1 = "value1"
 @result1 = "✅ Emoji before: {testVar1}"
