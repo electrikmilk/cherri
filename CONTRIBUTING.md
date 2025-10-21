@@ -59,6 +59,10 @@ reproduce it and what environment it may be isolated to are clearly communicated
 - If you change how a feature works, modify the existing feature or add a new feature, add or update a related file in the tests folder to add to the commit checks.
 - Test your feature or bug fix by writing a Cherri file and checking that it compiles to a valid Shortcut. If you are on
   a non-macOS platform, ensure you use the `--hubsign` option to test the Shortcut signs successfully.
+- Use `go test` to test Cherri using one of the following test names:
+  - **macOS:** `go test -run TestCherri` Runs all Cherri code tests in the `/tests/` directory.
+  - **Linux, other:** `go test -run TestCherriNoSign` Runs all Cherri code tests, but skips signing the produced Shortcuts.
+  - **All platforms:** `go test -run TestDecomp` Runs a decompilation test.
 - Squash commits when doing fixups so that if you remove something, you don't have a commit where you created it
   and then another commit where you remove it, and squash them together so that whatever ended up not being needed is also
   removed from the commit history.
