@@ -566,21 +566,30 @@ func makeAggrandizement(valueType *tokenType, variable *varValue, getAs string) 
 	return aggrandizement
 }
 
+const utf16BMPThreshold = 0x10000
+
 // mapInlineVars finds occurrences of ObjectReplaceChar and adds them to inlineVars to map the inline variables in noVarString.
+// Accounts for UTF-16 characters with code units which require the inline variable position to be doubled (e.g. emoji, bold text).
 func mapInlineVars(noVarString *string) {
 	var variableIdx int
-	var i = 0
-	for _, c := range *noVarString {
-		if c == ObjectReplaceChar {
+	var charPos = 0
+
+	for _, r := range *noVarString {
+		if r == ObjectReplaceChar {
 			inlineVars = append(inlineVars, inlineVar{
 				identifier: varIndex[variableIdx].identifier,
-				col:        i,
+				col:        charPos,
 				getAs:      varIndex[variableIdx].getAs,
 				coerce:     varIndex[variableIdx].coerce,
 			})
 			variableIdx++
 		}
-		i++
+
+		if r >= utf16BMPThreshold {
+			charPos += 2
+		} else {
+			charPos += 1
+		}
 	}
 }
 
