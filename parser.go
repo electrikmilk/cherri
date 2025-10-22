@@ -330,23 +330,46 @@ func collectExpression(valueType *tokenType, value *any) {
 	*valueType = Expression
 
 	for char != -1 && char != '\n' {
-		switch {
-		case char == ' ' || char == '+' || char == '-' || char == '*' || char == '/' || char == '%' || char == '(' || char == ')':
-			*value = fmt.Sprintf("%s%c", *value, char)
-			advance()
-		case intChar(char):
-			var intValueType tokenType
-			var intValue any
-			collectIntegerValue(&intValueType, &intValue)
-			*value = fmt.Sprintf("%s%v", *value, intValue)
-		default:
-			var until = ' '
-			var refType tokenType
-			var refValue any
-			collectReference(&refType, &refValue, &until)
-			*value = fmt.Sprintf("%s{%s}", *value, refValue.(varValue).value)
-		}
+		collectExpressionValue(value)
 	}
+}
+
+func collectExpressionValue(value *any) {
+	switch char {
+	case ' ':
+		fallthrough
+	case '+':
+		fallthrough
+	case '-':
+		fallthrough
+	case '*':
+		fallthrough
+	case '/':
+		fallthrough
+	case '%':
+		fallthrough
+	case '(':
+		fallthrough
+	case ')':
+		*value = fmt.Sprintf("%s%c", *value, char)
+		advance()
+		return
+	}
+
+	if intChar(char) {
+		var intValueType tokenType
+		var intValue any
+		collectIntegerValue(&intValueType, &intValue)
+
+		*value = fmt.Sprintf("%s%v", *value, intValue)
+		return
+	}
+
+	var until = ' '
+	var refType tokenType
+	var refValue any
+	collectReference(&refType, &refValue, &until)
+	*value = fmt.Sprintf("%s{%s}", *value, refValue.(varValue).value)
 }
 
 func collectValue(valueType *tokenType, value *any, until rune) {
