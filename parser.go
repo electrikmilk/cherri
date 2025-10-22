@@ -684,7 +684,9 @@ func endOfNextArgument() (until rune) {
 func collectComment() {
 	var collect = args.Using("comments")
 	var comment strings.Builder
-	if isChar('/') {
+	switch char {
+	case '/':
+		advance()
 		var commentLineIdx = lineIdx
 		if collect {
 			comment.WriteString(collectUntil('\n'))
@@ -694,13 +696,14 @@ func collectComment() {
 		if preParsing && insideInclude("actions/") {
 			lines[commentLineIdx] = ""
 		}
-	} else if char == '*' {
+	case '*':
 		var lineRef = newLineReference()
 		collectMultilineComment(&comment, &collect)
 		if preParsing && insideInclude("actions/") {
 			lineRef.replaceLines()
 		}
 	}
+
 	if collect || preParsing {
 		var commentStr = strings.Trim(comment.String(), " \n")
 		tokens = append(tokens, token{
