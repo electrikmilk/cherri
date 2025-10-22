@@ -797,15 +797,7 @@ func collectDefinedAction() {
 
 	advance()
 
-	var addParams paramsFunc
-	if char == '{' {
-		advance()
-		var dict = collectDictionary()
-		handleRawParams(dict.(map[string]interface{}))
-		addParams = func(args []actionArgument) map[string]any {
-			return dict.(map[string]any)
-		}
-	}
+	var addParams = collectAdditionalParams()
 
 	lineRef.replaceLines()
 
@@ -822,6 +814,19 @@ func collectDefinedAction() {
 		maxVersion:         maxVersion,
 		doc:                doc,
 	}
+}
+
+func collectAdditionalParams() (function paramsFunc) {
+	if char == '{' {
+		advance()
+		var dict = collectDictionary()
+		handleRawParams(dict.(map[string]interface{}))
+		return func(args []actionArgument) map[string]any {
+			return dict.(map[string]any)
+		}
+	}
+
+	return
 }
 
 var docCommentRegex = regexp.MustCompile(`^\[Doc]: ?(?:\[(.*?)])?\s(.*?)?(?:: (.*?))?$`)
