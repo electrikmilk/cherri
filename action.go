@@ -772,7 +772,7 @@ func collectDefinedAction() {
 		advance()
 	}
 
-	var minVersion, maxVersion = collectVersionDefinition()
+	var minVersion, maxVersion = collectVersionLimitsDefinition()
 
 	var shortIdentifier string
 	var overrideIdentifier string
@@ -845,7 +845,7 @@ func collectDocComment() (doc selfDoc) {
 	return
 }
 
-func collectVersionDefinition() (minVersion float64, maxVersion float64) {
+func collectVersionLimitsDefinition() (minVersion float64, maxVersion float64) {
 	for char != -1 && char != ' ' {
 		if char != 'v' || char == 'v' && !intChar(next(1)) {
 			break

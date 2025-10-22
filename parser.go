@@ -72,6 +72,7 @@ func initParse() {
 	variables = make(map[string]varValue)
 	questions = make(map[string]*question)
 	controlFlowGroups = make(map[int]controlFlowGroup)
+	definitions = make(map[string]any)
 	originalContents = contents
 	chars = []rune(contents)
 	lines = strings.Split(contents, "\n")
@@ -202,6 +203,7 @@ func parse() {
 	case tokenAhead(Question):
 		collectQuestion()
 	case tokenAhead(Definition):
+		advance()
 		collectDefinition()
 	case isChar('@'):
 		collectVariable(false)
@@ -870,21 +872,9 @@ func collectIdentifier() string {
 }
 
 func collectDefinition() {
-	if len(definitions) == 0 {
-		definitions = make(map[string]any)
-	}
-	advance()
-
 	switch {
 	case tokenAhead(Name):
-		advance()
-		workflowName = collectUntil('\n')
-		if strings.Trim(workflowName, " \n\t") == "" {
-			parserError("Expected name")
-		}
-		if !args.Using("output") {
-			outputPath = relativePath + workflowName + ".shortcut"
-		}
+		collectNameDefinition()
 	case tokenAhead(Color):
 		advance()
 		collectColorDefinition()
@@ -910,14 +900,29 @@ func collectDefinition() {
 		advance()
 		definedQuickActions = collectTypeValues("quick action", quickActions)
 	case tokenAhead(Version):
-		var collectVersion = collectUntil('\n')
-		if version, found := versions[collectVersion]; found {
-			clientVersion = version
-			iosVersion, _ = strconv.ParseFloat(collectVersion, 32)
-		} else {
-			var list = makeKeyList("Available versions:", versions, collectVersion)
-			parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
-		}
+		collectVersionDefinition()
+	}
+}
+
+func collectNameDefinition() {
+	advance()
+	workflowName = collectUntil('\n')
+	if strings.Trim(workflowName, " \n\t") == "" {
+		parserError("Expected name")
+	}
+	if !args.Using("output") {
+		outputPath = relativePath + workflowName + ".shortcut"
+	}
+}
+
+func collectVersionDefinition() {
+	var collectVersion = collectUntil('\n')
+	if version, found := versions[collectVersion]; found {
+		clientVersion = version
+		iosVersion, _ = strconv.ParseFloat(collectVersion, 32)
+	} else {
+		var list = makeKeyList("Available versions:", versions, collectVersion)
+		parserError(fmt.Sprintf("Invalid minimum version '%s'\n\n%s", collectVersion, list))
 	}
 }
 
