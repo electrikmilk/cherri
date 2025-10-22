@@ -534,49 +534,47 @@ func checkLiteralValue(param *parameterDefinition, argument *actionArgument) {
 func generateActionDefinition(focus parameterDefinition, showEnums bool) string {
 	var definition strings.Builder
 	definition.WriteRune('\n')
+	definition.WriteString(generateActionDoc())
+	definition.WriteString(generateActionCode(focus, showEnums))
 
-	var docTitle = currentAction.doc.title
-	if currentAction.doc.title == "" {
-		if args.Using("no-ansi") {
-			docTitle = fmt.Sprintf("`%s()`", currentActionIdentifier)
-		} else {
-			docTitle = fmt.Sprintf("%s()", currentActionIdentifier)
-		}
-	}
+	return definition.String()
+}
+
+func generateActionCode(focus parameterDefinition, showEnums bool) string {
+	var actionCode strings.Builder
 	if args.Using("no-ansi") {
-		definition.WriteString("### ")
-	}
-	definition.WriteString(fmt.Sprintf("%s\n", ansi(docTitle, bold, underline)))
-	definition.WriteRune('\n')
-
-	if currentAction.doc.warning != "" {
-		if args.Using("no-ansi") {
-			definition.WriteString(fmt.Sprintf("{: .warning }\n%s\n\n", currentAction.doc.warning))
-		} else {
-			definition.WriteString(ansi(fmt.Sprintf("Warning: %s", currentAction.doc.warning), yellow, bold, underline))
-			definition.WriteRune('\n')
-			definition.WriteRune('\n')
-		}
-	}
-
-	if currentAction.doc.description != "" {
-		definition.WriteString(fmt.Sprintf("%s\n\n", ansi(currentAction.doc.description, italic)))
-	}
-
-	if args.Using("no-ansi") {
-		definition.WriteString("```\n")
+		actionCode.WriteString("```\n")
 	}
 
 	if showEnums {
-		definition.WriteString(generateActionParamEnums(focus))
+		actionCode.WriteString(generateActionParamEnums(focus))
 	}
 
 	if args.Using("debug") {
-		definition.WriteString(generateActionDebugDefinition())
+		actionCode.WriteString(generateActionDebugDefinition())
 	}
 
-	definition.WriteString(fmt.Sprintf("%s(", ansi(currentActionIdentifier, blue, bold)))
-	var arguments []string
+	actionCode.WriteString(fmt.Sprintf("%s(", ansi(currentActionIdentifier, blue, bold)))
+
+	actionCode.WriteString(strings.Join(generateActionArguments(focus), ", "))
+	actionCode.WriteRune(')')
+
+	if currentAction.outputType != "" {
+		actionCode.WriteString(fmt.Sprintf(": %s", ansi(string(currentAction.outputType), magenta)))
+	}
+
+	if args.Using("debug") && currentAction.addParams != nil {
+		actionCode.WriteString(generateActionAdditionalParams())
+	}
+
+	if args.Using("no-ansi") {
+		actionCode.WriteString("\n```")
+	}
+
+	return actionCode.String()
+}
+
+func generateActionArguments(focus parameterDefinition) (arguments []string) {
 	for _, param := range currentAction.parameters {
 		if param.name == focus.name || focus.name == "" {
 			arguments = append(arguments, generateActionParamDefinition(param))
@@ -584,22 +582,7 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 			arguments = append(arguments, ansi("...", dim))
 		}
 	}
-	definition.WriteString(strings.Join(arguments, ", "))
-	definition.WriteRune(')')
-
-	if currentAction.outputType != "" {
-		definition.WriteString(fmt.Sprintf(": %s", ansi(string(currentAction.outputType), magenta)))
-	}
-
-	if args.Using("debug") && currentAction.addParams != nil {
-		definition.WriteString(generateActionAdditionalParams())
-	}
-
-	if args.Using("no-ansi") {
-		definition.WriteString("\n```")
-	}
-
-	return definition.String()
+	return
 }
 
 func generateActionAdditionalParams() string {
@@ -610,6 +593,39 @@ func generateActionAdditionalParams() string {
 		return fmt.Sprintf(" %s", string(jsonBytes))
 	}
 	return ""
+}
+
+func generateActionDoc() string {
+	var actionDoc strings.Builder
+	var docTitle = currentAction.doc.title
+	if currentAction.doc.title == "" {
+		if args.Using("no-ansi") {
+			docTitle = fmt.Sprintf("`%s()`", currentActionIdentifier)
+		} else {
+			docTitle = fmt.Sprintf("%s()", currentActionIdentifier)
+		}
+	}
+	if args.Using("no-ansi") {
+		actionDoc.WriteString("### ")
+	}
+	actionDoc.WriteString(fmt.Sprintf("%s\n", ansi(docTitle, bold, underline)))
+	actionDoc.WriteRune('\n')
+
+	if currentAction.doc.warning != "" {
+		if args.Using("no-ansi") {
+			actionDoc.WriteString(fmt.Sprintf("{: .warning }\n%s\n\n", currentAction.doc.warning))
+		} else {
+			actionDoc.WriteString(ansi(fmt.Sprintf("Warning: %s", currentAction.doc.warning), yellow, bold, underline))
+			actionDoc.WriteRune('\n')
+			actionDoc.WriteRune('\n')
+		}
+	}
+
+	if currentAction.doc.description != "" {
+		actionDoc.WriteString(fmt.Sprintf("%s\n\n", ansi(currentAction.doc.description, italic)))
+	}
+
+	return actionDoc.String()
 }
 
 var usedEnums []string
