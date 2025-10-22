@@ -612,9 +612,11 @@ func generateActionAdditionalParams() string {
 	return ""
 }
 
+var usedEnums []string
+
 func generateActionParamEnums(focus parameterDefinition) string {
 	var definition strings.Builder
-	var usedEnums []string
+	usedEnums = []string{}
 	for _, param := range currentAction.parameters {
 		if param.enum == "" || (focus.name != "" && focus.name != param.name) || slices.Contains(usedEnums, param.enum) {
 			continue
