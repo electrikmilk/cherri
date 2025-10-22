@@ -57,7 +57,7 @@ func TestCherriNoSign(t *testing.T) {
 
 func TestDecomp(t *testing.T) {
 	fmt.Println("Decompiling...")
-	args.Args["import"] = "tests/decomp_me.plist"
+	args.Args["import"] = "tests/decomp-me.plist"
 	decompile(importShortcut())
 
 	fmt.Println("Comparing to expected...")
