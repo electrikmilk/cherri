@@ -72,6 +72,7 @@ func initParse() {
 	variables = make(map[string]varValue)
 	questions = make(map[string]*question)
 	controlFlowGroups = make(map[int]controlFlowGroup)
+	originalContents = contents
 	chars = []rune(contents)
 	lines = strings.Split(contents, "\n")
 	idx = -1
@@ -92,6 +93,7 @@ func initParse() {
 	}
 
 	contents = ""
+	originalContents = ""
 	char = -1
 	idx = -1
 	lineIdx = 0

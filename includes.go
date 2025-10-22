@@ -153,21 +153,37 @@ func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
 	if len(includes) == 0 {
 		return
 	}
+
+	var currentLine = lines[lineIdx]
+	var found bool
 	for _, inc := range includes {
-		if lineIdx+1 <= inc.start && lineIdx+1 >= inc.end {
+		if errorLine <= inc.start || errorLine >= inc.end {
 			continue
 		}
 		errorFilename = inc.file
+
 		for l, line := range inc.lines {
-			if lineIdx > len(lines) {
-				continue
-			}
-			if line == lines[lineIdx] {
+			if line == currentLine {
 				errorLine = l + 1
+				found = true
+				break
 			}
 		}
 	}
+
+	if !found {
+		findOriginalLine(&errorLine)
+	}
+
 	return
+}
+
+func findOriginalLine(errorLine *int) {
+	for l, line := range strings.Split(originalContents, "\n") {
+		if line == lines[lineIdx] {
+			*errorLine = l
+		}
+	}
 }
 
 // insideInclude returns a boolean based on if we are within an included file with a name that contains needle.
