@@ -742,22 +742,7 @@ func collectVariable(constant bool) {
 	var varType = Variable
 	switch {
 	case strings.Contains(lookAheadUntil('\n'), "="):
-		advance()
-		switch {
-		case tokenAhead(AddTo):
-			varType = AddTo
-		case tokenAhead(SubFrom):
-			varType = SubFrom
-		case tokenAhead(MultiplyBy):
-			varType = MultiplyBy
-		case tokenAhead(DivideBy):
-			varType = DivideBy
-		case tokenAhead(Set):
-		}
-		if varType != Variable && constant {
-			parserError("Constants cannot be added to.")
-		}
-		advance()
+		collectVariableModifier(constant, &varType)
 
 		if collectControlFlowOutput(&identifier, &constant) {
 			return
@@ -796,6 +781,25 @@ func collectVariable(constant bool) {
 			constant:     constant,
 		}
 	}
+}
+
+func collectVariableModifier(constant bool, varType *tokenType) {
+	advance()
+	switch {
+	case tokenAhead(AddTo):
+		*varType = AddTo
+	case tokenAhead(SubFrom):
+		*varType = SubFrom
+	case tokenAhead(MultiplyBy):
+		*varType = MultiplyBy
+	case tokenAhead(DivideBy):
+		*varType = DivideBy
+	case tokenAhead(Set):
+	}
+	if *varType != Variable && constant {
+		parserError("Constants cannot be added to.")
+	}
+	advance()
 }
 
 func collectControlFlowOutput(identifier *string, constant *bool) (identified bool) {
