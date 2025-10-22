@@ -1,4 +1,4 @@
-<img src="https://github.com/electrikmilk/cherri/blob/main/assets/cherri_icon.png" width="200"/>
+<img width="200" height="200" alt="Cherri Icon" src="https://github.com/user-attachments/assets/a9c23532-a1df-41ec-bd5b-6621f54064c8" />
 
 # Cherri
 
@@ -14,7 +14,7 @@
 
 The primary goal is to make it practical to create large Shortcut projects (within the limitations of Shortcuts) and maintain them long term.
 
-[![Hello World Example](https://github.com/electrikmilk/cherri/blob/main/assets/hello_world.png)](https://playground.cherrilang.org)
+[![Hello World Example](https://github.com/user-attachments/assets/dc2ce82e-f85e-44ab-9f43-50f9518ddcda)](https://playground.cherrilang.org)
 
 ### 🌟 Top Features
 
