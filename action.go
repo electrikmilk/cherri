@@ -750,20 +750,16 @@ func handleActionDefinitions() {
 func parseActionDefinitions() {
 	for char != -1 {
 		switch {
-		case isChar('/'):
-			args.Args["comments"] = ""
-			collectComment()
-			delete(args.Args, "comments")
-			continue
 		case char == '"':
 			collectString()
 			advanceUntil('\n')
+		case commentAhead():
+			collectComment()
 		case tokenAhead(Enumeration):
 			collectEnumeration()
 		case tokenAhead(Action):
 			advance()
 			collectDefinedAction()
-			continue
 		}
 		advance()
 	}

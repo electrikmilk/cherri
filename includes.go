@@ -49,9 +49,11 @@ func parseIncludes() {
 	includedFile = false
 	for char != -1 {
 		switch {
-		case isChar('/'):
+		case char == '"':
+			collectString()
+			advanceUntil('\n')
+		case commentAhead():
 			collectComment()
-			continue
 		case tokenAhead(Include):
 			advance()
 			parseInclude()

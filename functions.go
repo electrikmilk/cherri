@@ -72,13 +72,11 @@ func parseFunctions() {
 	functions = make(map[string]*function)
 	for char != -1 {
 		switch {
-		case isChar('/'):
+		case commentAhead():
 			collectComment()
-			continue
 		case lineCharIdx == 0 && tokenAhead(Function):
 			advance()
 			collectFunctionDefinition()
-			continue
 		}
 		advance()
 	}

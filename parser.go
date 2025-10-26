@@ -198,7 +198,7 @@ func parse() {
 	switch {
 	case char == ' ' || char == '\t' || char == '\n':
 		advance()
-	case isChar('/'):
+	case commentAhead():
 		collectComment()
 	case tokenAhead(Question):
 		collectQuestion()
@@ -1691,6 +1691,11 @@ func isChar(tokenChar rune) bool {
 	}
 	advance()
 	return true
+}
+
+func commentAhead() bool {
+	var nextChar = next(1)
+	return isChar('/') && (nextChar == '/' || nextChar == '*')
 }
 
 func tokenAhead(token tokenType) bool {

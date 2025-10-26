@@ -32,16 +32,17 @@ func parseCopyPastes() {
 	pasteables = make(map[string]string)
 	for char != -1 {
 		switch {
-		case isChar('/'):
+		case char == '"':
+			collectString()
+			advanceUntil('\n')
+		case commentAhead():
 			collectComment()
-			continue
 		case tokenAhead(Copy):
 			advance()
 			collectCopy()
 		case tokenAhead(Paste):
 			advance()
 			pasteCopy()
-			continue
 		}
 		advance()
 	}
