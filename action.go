@@ -772,7 +772,7 @@ func parseActionDefinitions() {
 
 func collectDefinedAction() {
 	var lineRef = newLineReference()
-	var doc = collectDocComment()
+	var doc = checkDocComment()
 
 	var defaultAction bool
 	if tokenAhead(Default) {
@@ -847,7 +847,7 @@ func collectAdditionalParams() (function paramsFunc) {
 
 var docCommentRegex = regexp.MustCompile(`^\[Doc]: ?(?:\[(.*?)])?\s(.*?)?(?:: (.*?))?$`)
 
-func collectDocComment() (doc selfDoc) {
+func checkDocComment() (doc selfDoc) {
 	var lastToken = getLastAddedToken()
 	if lastToken.typeof == Comment {
 		var comment = lastToken.value.(string)
