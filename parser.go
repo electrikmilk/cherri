@@ -684,6 +684,7 @@ func endOfNextArgument() (until rune) {
 }
 
 func collectComment() {
+	var lineRef = newLineReference()
 	var collect = args.Using("comments")
 	var comment strings.Builder
 	switch char {
@@ -699,7 +700,6 @@ func collectComment() {
 			lines[commentLineIdx] = ""
 		}
 	case '*':
-		var lineRef = newLineReference()
 		collectMultilineComment(&comment, &collect)
 		if preParsing && insideInclude("actions/") {
 			lineRef.replaceLines()
