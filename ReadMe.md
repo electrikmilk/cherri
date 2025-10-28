@@ -26,6 +26,7 @@ The primary goal is to make it practical to create large Shortcut projects (with
 - 🪶 Optimized to create as small as possible Shortcuts and reduce memory usage at runtime
 - #️⃣ Include files within others for large Shortcut projects
 - 🔧 Define actions with type checking, enums, optionals, default values, raw identifiers, and raw keys.
+- 🔄 Define functions to run within their own scope at the top of your Shortcut to reduce duplicate actions.
 - 📋 Copy-paste actions automatically
 - 🥩 Enter action identifier and parameters manually using Raw Actions.
 - ❓ Define import questions
