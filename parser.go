@@ -684,48 +684,31 @@ func endOfNextArgument() (until rune) {
 }
 
 func collectComment() {
-	var lineRef = newLineReference()
-	var collect = args.Using("comments")
 	var comment strings.Builder
 	switch char {
 	case '/':
 		advance()
-		var commentLineIdx = lineIdx
-		if collect {
-			comment.WriteString(collectUntil('\n'))
-		} else {
-			advanceUntil('\n')
-		}
-		if preParsing && insideInclude("actions/") {
-			lines[commentLineIdx] = ""
-		}
+		comment.WriteString(collectUntil('\n'))
 	case '*':
-		collectMultilineComment(&comment, &collect)
-		if preParsing && insideInclude("actions/") {
-			lineRef.replaceLines()
-		}
+		collectMultilineComment(&comment)
 	}
 
-	if collect || preParsing {
-		var commentStr = strings.Trim(comment.String(), " \n")
-		tokens = append(tokens, token{
-			typeof:    Comment,
-			ident:     "",
-			valueType: String,
-			value:     commentStr,
-		})
-	}
+	var commentStr = strings.Trim(comment.String(), " \n")
+	tokens = append(tokens, token{
+		typeof:    Comment,
+		ident:     "",
+		valueType: String,
+		value:     commentStr,
+	})
 }
 
-func collectMultilineComment(comment *strings.Builder, collect *bool) {
+func collectMultilineComment(comment *strings.Builder) {
 	advanceTimes(2)
 	for char != 1 {
 		if char == '*' && next(1) == '/' {
 			break
 		}
-		if *collect {
-			comment.WriteRune(char)
-		}
+		comment.WriteRune(char)
 		advance()
 	}
 	advanceTimes(3)

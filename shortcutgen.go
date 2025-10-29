@@ -130,9 +130,11 @@ func generateActions() {
 }
 
 func makeCommentAction(comment string) {
-	addStdAction("comment", &map[string]any{
-		"WFCommentActionText": comment,
-	})
+	if args.Using("comments") {
+		addStdAction("comment", &map[string]any{
+			"WFCommentActionText": comment,
+		})
+	}
 }
 
 func makeVariableAction(t *token) {
