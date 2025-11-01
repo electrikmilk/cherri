@@ -118,6 +118,9 @@ func printVersion() {
 }
 
 func fileArg() string {
+	if len(os.Args) < 2 {
+		return ""
+	}
 	var fileName = os.Args[1]
 	if !startsWith("-", fileName) && strings.Contains(fileName, ".cherri") {
 		return fileName
