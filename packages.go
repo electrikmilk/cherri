@@ -56,7 +56,7 @@ func (pkg *cherriPackage) install() (installed bool) {
 		return
 	}
 
-	fmt.Println(ansi(fmt.Sprintf("[+] installed %s: %s\n", pkg.signature(), pkg.path()), green))
+	fmt.Println(ansi(fmt.Sprintf("[+] %s installed: %s\n", pkg.signature(), pkg.path()), green))
 	return true
 }
 
@@ -254,7 +254,7 @@ func removePackage() {
 
 		targetPkg.uninstall()
 		writePackage()
-		fmt.Println(ansi(fmt.Sprintf("[-] Removed %s", targetPkg.signature()), red))
+		fmt.Println(ansi(fmt.Sprintf("[-] %s removed: %s", targetPkg.signature(), targetPkg.path()), red))
 	} else {
 		exit("install: info.plist does not exist. Use --init argument to create a package.")
 	}
