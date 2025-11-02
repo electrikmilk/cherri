@@ -22,10 +22,10 @@ var currentPkg *cherriPackage
 var pkgRegex = regexp.MustCompile(`(.*?)/(.*?)$`)
 
 type cherriPackage struct {
-	Name         string
-	User         string
-	Archived     bool
-	Dependencies []cherriPackage
+	Name     string
+	User     string
+	Archived bool
+	Packages []cherriPackage
 }
 
 func (pkg *cherriPackage) installed() (installed bool) {
@@ -61,7 +61,7 @@ func (pkg *cherriPackage) install() (installed bool) {
 }
 
 func (pkg *cherriPackage) uninstall() {
-	for i, dep := range currentPkg.Dependencies {
+	for i, dep := range currentPkg.Packages {
 		if dep.Name == pkg.Name {
 			var packagePath = pkg.path()
 			if _, pkgStatErr := os.Stat(packagePath); os.IsNotExist(pkgStatErr) {
@@ -69,17 +69,17 @@ func (pkg *cherriPackage) uninstall() {
 			}
 			var gitDirRemoveErr = os.RemoveAll(packagePath)
 			handle(gitDirRemoveErr)
-			currentPkg.Dependencies = append(currentPkg.Dependencies[:i], currentPkg.Dependencies[i+1:]...)
+			currentPkg.Packages = append(currentPkg.Packages[:i], currentPkg.Packages[i+1:]...)
 		}
 	}
 }
 
 func (pkg *cherriPackage) loadDependencies(reinstall bool) {
-	if len(pkg.Dependencies) == 0 {
+	if len(pkg.Packages) == 0 {
 		return
 	}
 	if pkg, found := loadPackage(fmt.Sprintf("%s/info.plist", pkg.path())); found {
-		installPackages(pkg.Dependencies, reinstall)
+		installPackages(pkg.Packages, reinstall)
 	}
 }
 
@@ -144,7 +144,7 @@ func writePackage() {
 func tidyPackage() {
 	if pkg, found := loadPackage("info.plist"); found {
 		currentPkg = pkg
-		installPackages(currentPkg.Dependencies, true)
+		installPackages(currentPkg.Packages, true)
 		return
 	}
 
@@ -170,8 +170,8 @@ func addPackage() {
 		}
 		fmt.Println("")
 
-		currentPkg.Dependencies = append(currentPkg.Dependencies, newPkg)
-		installPackages(currentPkg.Dependencies, false)
+		currentPkg.Packages = append(currentPkg.Packages, newPkg)
+		installPackages(currentPkg.Packages, false)
 		writePackage()
 	} else {
 		exit("install: info.plist does not exist. Use --init argument to initialize a package.")
