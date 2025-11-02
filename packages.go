@@ -36,20 +36,24 @@ func (pkg *cherriPackage) installed() (installed bool) {
 }
 
 func (pkg *cherriPackage) install() (installed bool) {
-	var packagePath = pkg.path()
 	fmt.Println(fmt.Sprintf("Installing %s from %s...", pkg.signature(), pkg.url()))
+
+	var packagePath = pkg.path()
 	var _, cloneErr = git.PlainClone(packagePath, false, &git.CloneOptions{
-		URL: pkg.url(),
+		URL:          pkg.url(),
+		SingleBranch: true,
 	})
 	if cloneErr != nil {
 		pkg.failed(cloneErr)
 		return
 	}
+
 	var entryPath = fmt.Sprintf("%s/main.cherri", packagePath)
 	if _, statErr := os.Stat(entryPath); os.IsNotExist(statErr) {
 		pkg.failed(statErr)
 		return
 	}
+
 	var infoPlist = fmt.Sprintf("%s/info.plist", packagePath)
 	if _, infoStatErr := os.Stat(infoPlist); os.IsNotExist(infoStatErr) {
 		pkg.failed(infoStatErr)
@@ -57,6 +61,7 @@ func (pkg *cherriPackage) install() (installed bool) {
 	}
 
 	fmt.Println(ansi(fmt.Sprintf("[+] %s installed: %s\n", pkg.signature(), pkg.path()), green))
+
 	return true
 }
 
