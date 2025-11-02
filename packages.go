@@ -194,7 +194,7 @@ func createPackage(name string) cherriPackage {
 }
 
 // installPackages installs the given dependencies.
-func installPackages(packages []cherriPackage, reinstall bool) {
+func installPackages(packages []cherriPackage, tidy bool) {
 	if len(packages) == 0 {
 		return
 	}
@@ -203,12 +203,12 @@ func installPackages(packages []cherriPackage, reinstall bool) {
 		if dep.Archived {
 			fmt.Println(ansi(fmt.Sprintf("[!] Archived package: %s", dep.Name), yellow))
 		}
-		if _, statErr := os.Stat(fmt.Sprintf("./packages/%s", dep.Name)); os.IsNotExist(statErr) || reinstall {
-			if reinstall && dep.installed() {
+		if _, statErr := os.Stat(fmt.Sprintf("./packages/%s", dep.Name)); os.IsNotExist(statErr) || tidy {
+			if tidy && dep.installed() {
 				dep.uninstall()
 			}
 			if dep.install() {
-				dep.loadDependencies(reinstall)
+				dep.loadDependencies(tidy)
 			}
 		}
 	}

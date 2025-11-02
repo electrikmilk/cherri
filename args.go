@@ -64,12 +64,12 @@ func init() {
 	})
 	args.Register(args.Argument{
 		Name:         "remove",
-		Description:  "Remove a dependency to your Cherri project.",
+		Description:  "Remove a dependency from your Cherri project.",
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
 		Name:        "tidy",
-		Description: "Cleanup dependencies in your Cherri project.",
+		Description: "Reinstall dependencies to your Cherri project.",
 	})
 	args.Register(args.Argument{
 		Name:         "signing-server",
