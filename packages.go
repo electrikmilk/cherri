@@ -37,7 +37,7 @@ func (pkg *cherriPackage) installed() (installed bool) {
 
 func (pkg *cherriPackage) install() (installed bool) {
 	var packagePath = pkg.path()
-	fmt.Println(fmt.Sprintf("installing %s from %s...", pkg.signature(), pkg.url()))
+	fmt.Println(fmt.Sprintf("Installing %s from %s...", pkg.signature(), pkg.url()))
 	var _, cloneErr = git.PlainClone(packagePath, false, &git.CloneOptions{
 		URL: pkg.url(),
 	})
@@ -208,30 +208,38 @@ func installPackages(packages []cherriPackage, tidy bool) {
 		return
 	}
 
-	for _, dep := range packages {
-		if dep.Archived {
-			fmt.Println(ansi(fmt.Sprintf("[!] Archived package: %s", dep.Name), yellow))
+	for _, pkg := range packages {
+		if pkg.Archived {
+			fmt.Println(ansi(fmt.Sprintf("[!] Archived package: %s", pkg.Name), yellow))
 		}
-		if _, statErr := os.Stat(fmt.Sprintf("./packages/%s", dep.Name)); os.IsNotExist(statErr) || tidy {
-			if tidy && dep.installed() {
-				dep.uninstall()
+		if _, statErr := os.Stat(pkg.path()); os.IsNotExist(statErr) || tidy {
+			if tidy && pkg.installed() {
+				pkg.uninstall()
 			}
-			if dep.install() {
-				dep.loadDependencies(tidy)
+			if pkg.install() {
+				pkg.loadDependencies(tidy)
 			}
 		}
 	}
 }
 
 // includePackages adds lines to include all the packages for the current directory.
-func includePackages() {
-	var packages, dirErr = os.ReadDir("./packages")
+func includePackages(path string) {
+	var packages, dirErr = os.ReadDir(path)
 	handle(dirErr)
-	for _, pkg := range packages {
-		var packageInclude = fmt.Sprintf("#include 'packages/%s/main.cherri'\n\n", pkg.Name())
-		lines = append([]string{packageInclude}, lines...)
+	for _, user := range packages {
+		includeUserPackages(fmt.Sprintf("%s/%s", path, user.Name()))
 	}
 	resetParse()
+}
+
+func includeUserPackages(path string) {
+	var packages, dirErr = os.ReadDir(path)
+	handle(dirErr)
+	for _, pkg := range packages {
+		var packageInclude = fmt.Sprintf("#include '%s/%s/main.cherri'\n", path, pkg.Name())
+		lines = append([]string{packageInclude}, lines...)
+	}
 }
 
 // removePackage uninstalls a package from the current directory.
@@ -246,7 +254,7 @@ func removePackage() {
 
 		targetPkg.uninstall()
 		writePackage()
-		fmt.Println(ansi(fmt.Sprintf("[-] Removed %s", targetPkg.path()), red))
+		fmt.Println(ansi(fmt.Sprintf("[-] Removed %s", targetPkg.signature()), red))
 	} else {
 		exit("install: info.plist does not exist. Use --init argument to create a package.")
 	}

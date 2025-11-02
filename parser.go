@@ -130,7 +130,7 @@ func preParse() {
 			fmt.Println("current package:", currentPkg)
 		}
 		installPackages(currentPkg.Packages, false)
-		includePackages()
+		includePackages("./packages")
 	}
 
 	includeBasicStandardActions()
