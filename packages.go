@@ -37,7 +37,7 @@ func (pkg *cherriPackage) installed() (installed bool) {
 
 func (pkg *cherriPackage) install() (installed bool) {
 	var packagePath = pkg.path()
-	fmt.Println(ansi(fmt.Sprintf("installing %s from %s...", pkg.Name, pkg.url()), green))
+	fmt.Println(fmt.Sprintf("installing %s from %s...", pkg.Name, pkg.url()))
 	var _, cloneErr = git.PlainClone(packagePath, false, &git.CloneOptions{
 		URL: pkg.url(),
 	})
