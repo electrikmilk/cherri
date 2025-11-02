@@ -9,6 +9,7 @@ import (
 	"os"
 	"regexp"
 	"slices"
+	"strings"
 
 	"github.com/electrikmilk/args-parser"
 	"github.com/go-git/go-git/v5"
@@ -337,20 +338,24 @@ func installPackages(packages []cherriPackage, tidy bool) {
 }
 
 // includePackages adds lines to include all the packages for the current directory.
+// Sorts packages in deterministic order. Only includes files in info.plist.
 func includePackages() {
-	for _, pkg := range currentPkg.Packages {
-		includeUserPackages(fmt.Sprintf("./packages/@%s", pkg.User))
+	if len(currentPkg.Packages) == 0 {
+		return
 	}
-	resetParse()
-}
 
-func includeUserPackages(path string) {
-	var packages, dirErr = os.ReadDir(path)
-	handle(dirErr)
-	for _, pkg := range packages {
-		var packageInclude = fmt.Sprintf("#include '%s/%s/main.cherri'\n", path, pkg.Name())
+	var sortedPackages []cherriPackage
+	copy(sortedPackages, currentPkg.Packages)
+	slices.SortFunc(sortedPackages, func(a, b cherriPackage) int {
+		return strings.Compare(a.signature(), b.signature())
+	})
+
+	for _, pkg := range sortedPackages {
+		var packageInclude = fmt.Sprintf("#include './packages/%s/main.cherri'\n", pkg.signature())
 		lines = append([]string{packageInclude}, lines...)
 	}
+
+	resetParse()
 }
 
 // removePackage uninstalls a package from the current directory.
