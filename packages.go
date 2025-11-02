@@ -161,7 +161,9 @@ func addPackage() {
 			exit(fmt.Sprintf("Package %s already installed.", newPkg.signature()))
 		}
 
-		var packagePrompt = fmt.Sprintf("Do you trust this package?\n\nThis will download the GitHub repository: %s", newPkg.url())
+		fmt.Println(ansi(fmt.Sprintf("Install package %s\n", pkg.signature()), green))
+
+		var packagePrompt = fmt.Sprintf("Do you trust this package?\n\nThis will download this GitHub repository and automatically include it in this project:\n%s", newPkg.url())
 		fmt.Println(ansi(packagePrompt, yellow))
 		if !yesNo() {
 			return
