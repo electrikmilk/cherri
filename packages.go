@@ -272,7 +272,6 @@ func addPackage() {
 		initPackageError()
 	}
 
-	loadTrustedPackages()
 	currentPkg = pkg
 	var name = args.Value("install")
 	var newPkg = newPackage(name)
@@ -290,7 +289,7 @@ func addPackage() {
 }
 
 func checkPackageTrust(newPkg *cherriPackage) {
-	if !slices.Contains(trusted.Packages, newPkg.signature()) {
+	if !newPkg.trusted() {
 		var packagePrompt = fmt.Sprintf("Do you trust this package?\n\nThis will download this GitHub repository and automatically include it in this project:\n%s", newPkg.url())
 		fmt.Println(ansi(packagePrompt, yellow))
 		if !yesNo() {
