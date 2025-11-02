@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"slices"
 
 	"github.com/electrikmilk/args-parser"
 	"github.com/go-git/go-git/v5"
@@ -19,6 +20,7 @@ Package management through GitHub repositories
 */
 
 var currentPkg *cherriPackage
+var visitedPackages []string
 var pkgRegex = regexp.MustCompile(`^@([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)$`)
 
 type cherriPackage struct {
@@ -263,7 +265,11 @@ func installPackages(packages []cherriPackage, tidy bool) {
 		if pkg.Archived {
 			fmt.Println(ansi(fmt.Sprintf("[!] Archived package: %s", pkg.Name), yellow))
 		}
+		if slices.Contains(visitedPackages, pkg.path()) {
+			continue
+		}
 		if _, statErr := os.Stat(pkg.path()); os.IsNotExist(statErr) || tidy {
+			visitedPackages = append(visitedPackages, pkg.path())
 			if tidy && pkg.installed() {
 				pkg.uninstall()
 			}
