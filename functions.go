@@ -74,7 +74,7 @@ func parseFunctions() {
 		switch {
 		case commentAhead():
 			collectComment()
-		case lineCharIdx == 0 && tokenAhead(Function):
+		case startOfLineTokenAhead(Function):
 			advance()
 			collectFunctionDefinition()
 		}

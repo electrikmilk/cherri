@@ -200,9 +200,9 @@ func parse() {
 		advance()
 	case commentAhead():
 		collectComment()
-	case tokenAhead(Question):
+	case startOfLineTokenAhead(Question):
 		collectQuestion()
-	case tokenAhead(Definition):
+	case startOfLineTokenAhead(Definition):
 		advance()
 		collectDefinition()
 	case isChar('@'):
@@ -1679,6 +1679,10 @@ func isChar(tokenChar rune) bool {
 func commentAhead() bool {
 	var nextChar = next(1)
 	return isChar('/') && (nextChar == '/' || nextChar == '*')
+}
+
+func startOfLineTokenAhead(token tokenType) bool {
+	return lineCharIdx == 0 && tokenAhead(token)
 }
 
 func tokenAhead(token tokenType) bool {
