@@ -129,6 +129,20 @@ func listPackage() {
 	}
 }
 
+// listPackages shows the current installed packages info.
+func listPackages() {
+	fmt.Println(ansi("Installed Packages:\n", green))
+	if pkg, found := loadPackage("info.plist"); found {
+		if len(pkg.Packages) != 0 {
+			for _, pkg := range pkg.Packages {
+				printPackage(&pkg)
+			}
+		}
+	} else {
+		initPackageError()
+	}
+}
+
 func printPackage(pkg *cherriPackage) {
 	var isArchived string
 	if pkg.Archived {

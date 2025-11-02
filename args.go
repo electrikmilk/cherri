@@ -72,6 +72,10 @@ func init() {
 		Description: "List package info.",
 	})
 	args.Register(args.Argument{
+		Name:        "packages",
+		Description: "List installed packages.",
+	})
+	args.Register(args.Argument{
 		Name:        "tidy",
 		Description: "Re-install all packages.",
 	})
