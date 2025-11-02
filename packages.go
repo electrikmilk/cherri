@@ -236,7 +236,7 @@ func addPackage() {
 		if !yesNo() {
 			return
 		}
-		fmt.Println("")
+		fmt.Print("\n")
 
 		currentPkg.Packages = append(currentPkg.Packages, newPkg)
 		installPackages(currentPkg.Packages, false)
