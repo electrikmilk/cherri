@@ -37,6 +37,7 @@ func (pkg *cherriPackage) installed() (installed bool) {
 
 func (pkg *cherriPackage) install() (installed bool) {
 	var packagePath = pkg.path()
+	fmt.Println(ansi(fmt.Sprintf("installing %s from %s...", pkg.Name, pkg.url()), green))
 	var _, cloneErr = git.PlainClone(packagePath, false, &git.CloneOptions{
 		URL: pkg.url(),
 	})
@@ -55,6 +56,7 @@ func (pkg *cherriPackage) install() (installed bool) {
 		return
 	}
 
+	fmt.Println(ansi(fmt.Sprintf("[+] %s installed: %s\n", pkg.Name, pkg.path()), green))
 	return true
 }
 
@@ -205,7 +207,6 @@ func installPackages(packages []cherriPackage, reinstall bool) {
 			}
 			if dep.install() {
 				dep.loadDependencies(reinstall)
-				fmt.Println(ansi(fmt.Sprintf("[+] %s installed: %s", dep.Name, dep.path()), green))
 			}
 		}
 	}
