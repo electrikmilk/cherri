@@ -100,7 +100,7 @@ func (pkg *cherriPackage) signature() string {
 
 // path returns the absolute path of the package.
 func (pkg *cherriPackage) path() string {
-	return fmt.Sprintf("./packages/%s", pkg.Name)
+	return fmt.Sprintf("./packages/%s", pkg.signature())
 }
 
 // initPackage initializes a package in the current directory using an info.plist file based on cherriPackage.
@@ -157,11 +157,11 @@ func addPackage() {
 		currentPkg = pkg
 		var name = args.Value("install")
 		var newPkg = createPackage(name)
-		if newPkg.installed() {
+		if newPkg.installed() || findPackage(&newPkg) {
 			exit(fmt.Sprintf("Package %s already installed.", newPkg.signature()))
 		}
 
-		fmt.Println(ansi(fmt.Sprintf("Install package %s\n", pkg.signature()), green))
+		fmt.Println(ansi(fmt.Sprintf("Install package %s\n", newPkg.signature()), green))
 
 		var packagePrompt = fmt.Sprintf("Do you trust this package?\n\nThis will download this GitHub repository and automatically include it in this project:\n%s", newPkg.url())
 		fmt.Println(ansi(packagePrompt, yellow))
@@ -176,6 +176,15 @@ func addPackage() {
 	} else {
 		exit("install: info.plist does not exist. Use --init argument to initialize a package.")
 	}
+}
+
+func findPackage(pkg *cherriPackage) (found bool) {
+	for _, p := range currentPkg.Packages {
+		if p.signature() == pkg.signature() {
+			return true
+		}
+	}
+	return
 }
 
 // createPackage creates a cherriPackage type from a string matching pkgRegex.
