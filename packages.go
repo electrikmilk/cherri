@@ -37,7 +37,7 @@ func (pkg *cherriPackage) installed() (installed bool) {
 
 func (pkg *cherriPackage) install() (installed bool) {
 	var packagePath = pkg.path()
-	fmt.Println(fmt.Sprintf("installing %s from %s...", pkg.Name, pkg.url()))
+	fmt.Println(fmt.Sprintf("installing %s from %s...", pkg.signature(), pkg.url()))
 	var _, cloneErr = git.PlainClone(packagePath, false, &git.CloneOptions{
 		URL: pkg.url(),
 	})
@@ -56,7 +56,7 @@ func (pkg *cherriPackage) install() (installed bool) {
 		return
 	}
 
-	fmt.Println(ansi(fmt.Sprintf("[+] %s installed: %s\n", pkg.Name, pkg.path()), green))
+	fmt.Println(ansi(fmt.Sprintf("[+] installed %s: %s\n", pkg.signature(), pkg.path()), green))
 	return true
 }
 
@@ -85,7 +85,7 @@ func (pkg *cherriPackage) loadDependencies(reinstall bool) {
 
 // Reports that the package failed to install.
 func (pkg *cherriPackage) failed(err error) {
-	fmt.Println(ansi(fmt.Sprintf("[x] %s - Unable to install: %s\n", pkg.Name, err), yellow))
+	fmt.Println(ansi(fmt.Sprintf("[x] %s - unable to install: %s\n", pkg.signature(), err), yellow))
 }
 
 // url returns the GitHub repository git URL of the package.
@@ -95,7 +95,7 @@ func (pkg *cherriPackage) url() string {
 
 // signature returns a formatted string of the author and name of the package.
 func (pkg *cherriPackage) signature() string {
-	return fmt.Sprintf("%s/%s", pkg.User, pkg.Name)
+	return fmt.Sprintf("@%s/%s", pkg.User, pkg.Name)
 }
 
 // path returns the absolute path of the package.
