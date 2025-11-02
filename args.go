@@ -53,6 +53,26 @@ func init() {
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
+		Name:         "init",
+		Description:  "Create a Cherri project. Pattern: {github_username}/{package-name}",
+		DefaultValue: "",
+		ExpectsValue: true,
+	})
+	args.Register(args.Argument{
+		Name:         "install",
+		Description:  "Install a dependency to your Cherri project.",
+		ExpectsValue: true,
+	})
+	args.Register(args.Argument{
+		Name:         "remove",
+		Description:  "Remove a dependency to your Cherri project.",
+		ExpectsValue: true,
+	})
+	args.Register(args.Argument{
+		Name:        "tidy",
+		Description: "Cleanup dependencies in your Cherri project.",
+	})
+	args.Register(args.Argument{
 		Name:         "signing-server",
 		ExpectsValue: true,
 		Description:  "Sign the compiled Shortcut using a remote signing service that runs https://github.com/scaxyz/shortcut-signing-server.",
