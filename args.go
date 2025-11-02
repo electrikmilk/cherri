@@ -54,22 +54,26 @@ func init() {
 	})
 	args.Register(args.Argument{
 		Name:         "init",
-		Description:  "Create a Cherri project. Pattern: {github_username}/{package-name}",
+		Description:  "Create a Cherri package. Pattern: @{github_username}/{package-name}",
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
 		Name:         "install",
-		Description:  "Install a dependency to your Cherri project.",
+		Description:  "Install a package.",
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
 		Name:         "remove",
-		Description:  "Remove a dependency from your Cherri project.",
+		Description:  "Remove a package.",
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
+		Name:        "package",
+		Description: "List package info.",
+	})
+	args.Register(args.Argument{
 		Name:        "tidy",
-		Description: "Reinstall dependencies to your Cherri project.",
+		Description: "Re-install all packages.",
 	})
 	args.Register(args.Argument{
 		Name:         "signing-server",
