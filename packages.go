@@ -229,11 +229,9 @@ func installPackages(packages []cherriPackage, tidy bool) {
 }
 
 // includePackages adds lines to include all the packages for the current directory.
-func includePackages(path string) {
-	var packages, dirErr = os.ReadDir(path)
-	handle(dirErr)
-	for _, user := range packages {
-		includeUserPackages(fmt.Sprintf("%s/%s", path, user.Name()))
+func includePackages() {
+	for _, pkg := range currentPkg.Packages {
+		includeUserPackages(fmt.Sprintf("./packages/@%s", pkg.User))
 	}
 	resetParse()
 }
