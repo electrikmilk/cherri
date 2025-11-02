@@ -1732,10 +1732,12 @@ var actions = map[string]*actionDefinition{
 			{
 				name:      "title",
 				validType: String,
+				literal:   true,
 			},
 			{
 				name:      "subtitle",
 				validType: String,
+				literal:   true,
 			},
 			{
 				name:      "base64Image",
