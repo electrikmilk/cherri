@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -58,6 +59,23 @@ func main() {
 		os.Exit(0)
 	}
 
+	if args.Using("init") {
+		initPackage()
+		os.Exit(0)
+	}
+	if args.Using("install") {
+		addPackage()
+		os.Exit(0)
+	}
+	if args.Using("remove") {
+		removePackage()
+		os.Exit(0)
+	}
+	if args.Using("tidy") {
+		tidyPackage()
+		os.Exit(0)
+	}
+
 	if args.Using("import") && args.Value("import") != "" {
 		var shortcutBytes = importShortcut()
 		decompile(shortcutBytes)
@@ -84,6 +102,28 @@ func main() {
 	fmt.Print("\n")
 	args.PrintUsage()
 	os.Exit(1)
+}
+
+func yesNo() bool {
+	var input string
+	for {
+		scan("(y/n) ", &input)
+		input = strings.ToLower(input)
+		if input == "y" || input == "n" {
+			return input == "y"
+		}
+	}
+}
+
+func scan(prompt string, store *string) {
+	fmt.Print(prompt)
+	var scanner = bufio.NewScanner(os.Stdin)
+	if scanner.Scan() {
+		*store = scanner.Text()
+	}
+	if err := scanner.Err(); err != nil {
+		panic(err)
+	}
 }
 
 func handle(err error) {
