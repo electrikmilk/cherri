@@ -55,6 +55,56 @@ func TestCherriNoSign(t *testing.T) {
 	TestCherri(t)
 }
 
+func TestPackages(t *testing.T) {
+	args.Args["no-ansi"] = ""
+
+	if _, statErr := os.Stat("info.plist"); !os.IsNotExist(statErr) {
+		var removeErr = os.Remove("info.plist")
+		handle(removeErr)
+	}
+
+	if _, statErr := os.Stat("./packages"); !os.IsNotExist(statErr) {
+		var removeDirErr = os.RemoveAll("./packages")
+		handle(removeDirErr)
+	}
+
+	args.Args["init"] = "@electrikmilk/package-example"
+	initPackage()
+	delete(args.Args, "init")
+
+	args.Args["install"] = "@electrikmilk/package-example"
+	input := []byte("y")
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = w.Write(input)
+	if err != nil {
+		t.Error(err)
+	}
+	err = w.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	// Restore stdin right after the test.
+	defer func(v *os.File) { os.Stdin = v }(os.Stdin)
+	os.Stdin = r
+
+	addPackage()
+	fmt.Println("You entered:", string(input))
+	delete(args.Args, "install")
+
+	listPackage()
+
+	listPackages()
+
+	args.Args["remove"] = "@electrikmilk/package-example"
+	removePackage()
+	delete(args.Args, "remove")
+}
+
 func TestDecomp(t *testing.T) {
 	fmt.Println("Decompiling...")
 	args.Args["import"] = "tests/decomp-me.plist"
