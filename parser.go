@@ -124,6 +124,15 @@ func preParse() {
 	defineRawAction()
 	markBuiltins()
 
+	if pkg, found := loadPackage("info.plist"); found {
+		currentPkg = pkg
+		if args.Using("debug") {
+			fmt.Println("current package:", currentPkg)
+		}
+		installPackages(currentPkg.Dependencies, false)
+		includePackages()
+	}
+
 	includeBasicStandardActions()
 	handleIncludes()
 
