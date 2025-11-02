@@ -73,20 +73,20 @@ func (pkg *cherriPackage) install() (installed bool) {
 	return true
 }
 
-func (pkg *cherriPackage) uninstall() {
+func (pkg *cherriPackage) removeFiles() {
+	var packagePath = pkg.path()
+	if _, pkgStatErr := os.Stat(packagePath); os.IsNotExist(pkgStatErr) {
+		return
+	}
+	var removeErr = os.RemoveAll(packagePath)
+	handle(removeErr)
+}
+
+func (pkg *cherriPackage) removeFromManifest() {
 	for i, dep := range currentPkg.Packages {
 		if dep.signature() != pkg.signature() {
 			continue
 		}
-
-		var packagePath = pkg.path()
-		if _, pkgStatErr := os.Stat(packagePath); os.IsNotExist(pkgStatErr) {
-			break
-		}
-
-		var removeErr = os.RemoveAll(packagePath)
-		handle(removeErr)
-
 		currentPkg.Packages = append(currentPkg.Packages[:i], currentPkg.Packages[i+1:]...)
 		break
 	}
@@ -327,7 +327,7 @@ func installPackages(packages []cherriPackage, tidy bool) {
 		if _, statErr := os.Stat(pkg.path()); os.IsNotExist(statErr) || tidy {
 			visitedPackages = append(visitedPackages, pkg.path())
 			if tidy && pkg.installed() {
-				pkg.uninstall()
+				pkg.removeFiles()
 			}
 			if pkg.install() {
 				pkg.loadDependencies(tidy)
@@ -363,7 +363,8 @@ func removePackage() {
 			exit(fmt.Sprintf("Package %s is not installed.", targetPkg.signature()))
 		}
 
-		targetPkg.uninstall()
+		targetPkg.removeFiles()
+		targetPkg.removeFromManifest()
 		writePackage()
 		fmt.Println(ansi(fmt.Sprintf("[-] %s removed: %s", targetPkg.signature(), targetPkg.path()), red))
 	} else {
