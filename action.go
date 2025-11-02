@@ -528,8 +528,13 @@ func questionArg(param *parameterDefinition, argument *actionArgument) {
 
 func checkLiteralValue(param *parameterDefinition, argument *actionArgument) {
 	if argument.valueType != param.validType {
+		var inlineVarSolution string
+		if param.validType == String {
+			inlineVarSolution = " or an inline variable reference"
+		}
 		parserError(fmt.Sprintf(
-			"Shortcuts does not allow variables for this argument, use a literal for the argument value.\n\n%s",
+			"Shortcuts does not allow variable values for this argument, use a literal for the argument value%s.\n\n%s",
+			inlineVarSolution,
 			generateActionDefinition(*param, false),
 		))
 	}
