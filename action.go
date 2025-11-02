@@ -528,8 +528,13 @@ func questionArg(param *parameterDefinition, argument *actionArgument) {
 
 func checkLiteralValue(param *parameterDefinition, argument *actionArgument) {
 	if argument.valueType != param.validType {
+		var inlineVarSolution string
+		if param.validType == String {
+			inlineVarSolution = " or an inline variable reference"
+		}
 		parserError(fmt.Sprintf(
-			"Shortcuts does not allow variables for this argument, use a literal for the argument value.\n\n%s",
+			"Shortcuts does not allow variable values for this argument, use a literal for the argument value%s.\n\n%s",
+			inlineVarSolution,
 			generateActionDefinition(*param, false),
 		))
 	}
@@ -743,7 +748,7 @@ func appIntentDescriptor(intent appIntent) map[string]any {
 
 // handleActionDefinitions parses defined actions in the current file and collects them into the actions map.
 func handleActionDefinitions() {
-	if !regexp.MustCompile(`action (?:'(.+)')?(.*?)\(`).MatchString(contents) && !regexp.MustCompile(`enum (.*?) \{`).MatchString(contents) {
+	if !regexp.MustCompile(`action (?:'(.+)')?(.*?)\((.*?)\)$`).MatchString(contents) && !regexp.MustCompile(`enum (.*?) \{`).MatchString(contents) {
 		return
 	}
 	parseActionDefinitions()
@@ -759,9 +764,9 @@ func parseActionDefinitions() {
 			advanceUntil('\n')
 		case commentAhead():
 			collectComment()
-		case tokenAhead(Enumeration):
+		case startOfLineTokenAhead(Enumeration):
 			collectEnumeration()
-		case tokenAhead(Action):
+		case startOfLineTokenAhead(Action):
 			advance()
 			collectDefinedAction()
 		}

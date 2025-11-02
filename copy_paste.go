@@ -37,10 +37,10 @@ func parseCopyPastes() {
 			advanceUntil('\n')
 		case commentAhead():
 			collectComment()
-		case tokenAhead(Copy):
+		case startOfLineTokenAhead(Copy):
 			advance()
 			collectCopy()
-		case tokenAhead(Paste):
+		case startOfLineTokenAhead(Paste):
 			advance()
 			pasteCopy()
 		}

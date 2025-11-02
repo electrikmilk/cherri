@@ -209,9 +209,9 @@ func parse() {
 		advance()
 	case commentAhead():
 		collectComment()
-	case tokenAhead(Question):
+	case startOfLineTokenAhead(Question):
 		collectQuestion()
-	case tokenAhead(Definition):
+	case startOfLineTokenAhead(Definition):
 		advance()
 		collectDefinition()
 	case isChar('@'):
@@ -879,13 +879,13 @@ func collectDefinition() {
 		collectGlyphDefinition()
 	case tokenAhead(Inputs):
 		advance()
-		inputs = collectTypeValues("content item", contentItems)
+		collectTypeValues("content item", contentItems, &inputs)
 	case tokenAhead(Outputs):
 		advance()
-		outputs = collectTypeValues("content item", contentItems)
+		collectTypeValues("content item", contentItems, &outputs)
 	case tokenAhead(From):
 		advance()
-		definedWorkflowTypes = collectTypeValues("workflow", workflowTypes)
+		collectTypeValues("workflow", workflowTypes, &definedWorkflowTypes)
 	case tokenAhead(NoInput):
 		advance()
 		collectNoInputDefinition()
@@ -894,7 +894,7 @@ func collectDefinition() {
 		collectBooleanDefinition("mac")
 	case tokenAhead(QuickActions):
 		advance()
-		definedQuickActions = collectTypeValues("quick action", quickActions)
+		collectTypeValues("quick action", quickActions, &definedQuickActions)
 	case tokenAhead(Version):
 		collectVersionDefinition()
 	}
@@ -937,7 +937,7 @@ func collectColorDefinition() {
 	}
 }
 
-func collectTypeValues(typeName string, valueTypes map[string]string) (types []string) {
+func collectTypeValues(typeName string, valueTypes map[string]string, slice *[]string) {
 	var collectedTypes = collectUntil('\n')
 	if collectedTypes == "" {
 		parserError("Expected type")
@@ -950,7 +950,10 @@ func collectTypeValues(typeName string, valueTypes map[string]string) (types []s
 			parserError(fmt.Sprintf("Invalid %s type '%s'\n\n%s", typeName, definedType, list))
 			return
 		}
-		types = append(types, fmt.Sprintf("%v", valueTypes[definedType]))
+		if slices.Contains(*slice, definedType) {
+			continue
+		}
+		*slice = append(*slice, fmt.Sprintf("%v", valueTypes[definedType]))
 	}
 	return
 }
@@ -1688,6 +1691,10 @@ func isChar(tokenChar rune) bool {
 func commentAhead() bool {
 	var nextChar = next(1)
 	return isChar('/') && (nextChar == '/' || nextChar == '*')
+}
+
+func startOfLineTokenAhead(token tokenType) bool {
+	return lineCharIdx == 0 && tokenAhead(token)
 }
 
 func tokenAhead(token tokenType) bool {
