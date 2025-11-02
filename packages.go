@@ -236,6 +236,6 @@ func removePackage() {
 		writePackage()
 		fmt.Println(ansi(fmt.Sprintf("[-] Removed %s", targetPkg.path()), red))
 	} else {
-		exit("install: info.plist does not exist. Use --init argument to initialize a package.")
+		exit("install: info.plist does not exist. Use --init argument to create a package.")
 	}
 }
