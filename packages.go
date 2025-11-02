@@ -81,6 +81,7 @@ func (pkg *cherriPackage) loadDependencies(reinstall bool) {
 	}
 }
 
+// Reports that the package failed to install.
 func (pkg *cherriPackage) failed(err error) {
 	fmt.Println(ansi(fmt.Sprintf("[x] %s - Unable to install: %s\n", pkg.Name, err), yellow))
 }
@@ -221,6 +222,7 @@ func includePackages() {
 	resetParse()
 }
 
+// removePackage uninstalls a package from the current directory.
 func removePackage() {
 	if pkg, found := loadPackage("info.plist"); found {
 		currentPkg = pkg
