@@ -55,7 +55,6 @@ func init() {
 	args.Register(args.Argument{
 		Name:         "init",
 		Description:  "Create a Cherri project. Pattern: {github_username}/{package-name}",
-		DefaultValue: "",
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
