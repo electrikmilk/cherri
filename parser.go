@@ -129,7 +129,7 @@ func preParse() {
 		if args.Using("debug") {
 			fmt.Println("current package:", currentPkg)
 		}
-		installPackages(currentPkg.Dependencies, false)
+		installPackages(currentPkg.Packages, false)
 		includePackages()
 	}
 
