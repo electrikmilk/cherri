@@ -19,7 +19,7 @@ Package management through GitHub repositories
 */
 
 var currentPkg *cherriPackage
-var pkgRegex = regexp.MustCompile(`(.*?)/(.*?)$`)
+var pkgRegex = regexp.MustCompile(`^@([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)$`)
 
 type cherriPackage struct {
 	Name     string
