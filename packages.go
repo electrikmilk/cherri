@@ -37,6 +37,11 @@ func (pkg *cherriPackage) installed() (installed bool) {
 	return true
 }
 
+func (pkg *cherriPackage) trusted() bool {
+	loadTrustedPackages()
+	return slices.Contains(trusted.Packages, pkg.signature())
+}
+
 func (pkg *cherriPackage) install() (installed bool) {
 	fmt.Println(fmt.Sprintf("Installing %s from %s...", pkg.signature(), pkg.url()))
 
@@ -170,6 +175,47 @@ func initPackage() {
 	fmt.Println(ansi("Initialized Cherri package", green))
 }
 
+var internalDirectoryPath = os.ExpandEnv("$HOME/.cherri")
+var trustedPackagesPlistPath = os.ExpandEnv("$HOME/.cherri/trusted.plist")
+
+type packageTrust struct {
+	Packages []string
+}
+
+var trusted packageTrust
+
+func loadTrustedPackages() {
+	if _, statErr := os.Stat(trustedPackagesPlistPath); os.IsNotExist(statErr) {
+		return
+	}
+	var trustPlist, readErr = os.ReadFile(trustedPackagesPlistPath)
+	handle(readErr)
+
+	var _, plistErr = plist.Unmarshal(trustPlist, &trusted)
+	handle(plistErr)
+}
+
+func writeTrustedPackages() {
+	if _, statErr := os.Stat(internalDirectoryPath); os.IsNotExist(statErr) {
+		var intDirErr = os.Mkdir(internalDirectoryPath, 0777)
+		handle(intDirErr)
+
+		var trustedPlistFile, createErr = os.Create(trustedPackagesPlistPath)
+		handle(createErr)
+
+		defer func(f *os.File) {
+			fileCloseErr := f.Close()
+			handle(fileCloseErr)
+		}(trustedPlistFile)
+	}
+
+	var marshaledPlist, plistErr = plist.MarshalIndent(trusted, plist.XMLFormat, "\t")
+	handle(plistErr)
+
+	compiled = string(marshaledPlist)
+	writeFile(trustedPackagesPlistPath, trustedPackagesPlistPath)
+}
+
 // loadPackage loads the package in the current directory.
 func loadPackage(path string) (pkg *cherriPackage, found bool) {
 	if _, statErr := os.Stat(path); os.IsNotExist(statErr) {
@@ -221,16 +267,30 @@ func newPackage(name string) cherriPackage {
 
 // addPackage adds a package to the dependencies for the package in the current directory and triggers lazy installation.
 func addPackage() {
-	if pkg, found := loadPackage("info.plist"); found {
-		currentPkg = pkg
-		var name = args.Value("install")
-		var newPkg = newPackage(name)
-		if newPkg.installed() || addedPackage(&newPkg) {
-			exit(fmt.Sprintf("Package %s already installed.", newPkg.signature()))
-		}
+	var pkg, found = loadPackage("info.plist")
+	if !found {
+		initPackageError()
+	}
 
-		fmt.Println(ansi(fmt.Sprintf("Install package %s\n", newPkg.signature()), green))
+	loadTrustedPackages()
+	currentPkg = pkg
+	var name = args.Value("install")
+	var newPkg = newPackage(name)
+	if newPkg.installed() || addedPackage(&newPkg) {
+		exit(fmt.Sprintf("Package %s already installed.", newPkg.signature()))
+	}
 
+	fmt.Println(ansi(fmt.Sprintf("Install package %s\n", newPkg.signature()), green))
+
+	checkPackageTrust(&newPkg)
+
+	currentPkg.Packages = append(currentPkg.Packages, newPkg)
+	installPackages(currentPkg.Packages, false)
+	writePackage()
+}
+
+func checkPackageTrust(newPkg *cherriPackage) {
+	if !slices.Contains(trusted.Packages, newPkg.signature()) {
 		var packagePrompt = fmt.Sprintf("Do you trust this package?\n\nThis will download this GitHub repository and automatically include it in this project:\n%s", newPkg.url())
 		fmt.Println(ansi(packagePrompt, yellow))
 		if !yesNo() {
@@ -238,11 +298,8 @@ func addPackage() {
 		}
 		fmt.Print("\n")
 
-		currentPkg.Packages = append(currentPkg.Packages, newPkg)
-		installPackages(currentPkg.Packages, false)
-		writePackage()
-	} else {
-		initPackageError()
+		trusted.Packages = append(trusted.Packages, newPkg.signature())
+		writeTrustedPackages()
 	}
 }
 
