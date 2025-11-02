@@ -81,8 +81,6 @@ func collectIncludePath() string {
 	return collection.String()
 }
 
-var packageIncludeRegex = regexp.MustCompile("packages/(.*?)/")
-
 func parseInclude() {
 	if char == '"' {
 		parserError("Use raw string (') for include file paths")
@@ -137,13 +135,16 @@ func parseInclude() {
 	included = append(included, includePath)
 }
 
+var packageIncludeRegex = regexp.MustCompile("packages/@(.*?)/(.*?)/")
+
 // handlePackageIncludePath resolves internal package includes.
 func handlePackageIncludePath(includePath *string) {
-	if inc, found := insideInclude("packages/"); found {
+	if inc, found := insideInclude("packages/@"); found {
 		var matches = packageIncludeRegex.FindAllStringSubmatch(inc.file, -1)
 		if len(matches) != 0 {
-			var packageName = matches[0][1]
-			*includePath = fmt.Sprintf("packages/%s/%s", packageName, *includePath)
+			var userName = matches[0][1]
+			var packageName = matches[0][2]
+			*includePath = fmt.Sprintf("packages/@%s/%s/%s", userName, packageName, *includePath)
 		}
 	}
 }
