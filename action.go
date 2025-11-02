@@ -213,7 +213,7 @@ func getActionParameters(arguments []actionArgument) map[string]any {
 	}
 	if currentAction.parameters != nil {
 		var argumentsSize = len(arguments)
-		if argumentsSize == 0 || argumentsSize < len(currentAction.parameters) {
+		if argumentsSize == 0 {
 			return params
 		}
 		makeActionParams(arguments, params)
@@ -223,7 +223,11 @@ func getActionParameters(arguments []actionArgument) map[string]any {
 }
 
 func makeActionParams(arguments []actionArgument, params map[string]any) {
+	var argumentsSize = len(arguments)
 	for i, param := range currentAction.parameters {
+		if argumentsSize <= i {
+			return
+		}
 		if arguments[i].valueType == Nil || param.key == "" {
 			continue
 		}
