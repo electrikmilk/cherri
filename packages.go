@@ -21,7 +21,7 @@ Package management through GitHub repositories
 
 var currentPkg *cherriPackage
 var visitedPackages []string
-var pkgRegex = regexp.MustCompile(`^@([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)$`)
+var pkgSignatureRegex = regexp.MustCompile(`^@([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)$`)
 
 type cherriPackage struct {
 	Name     string
@@ -250,9 +250,9 @@ func tidyPackage() {
 	}
 }
 
-// newPackage creates a cherriPackage type from a string matching pkgRegex.
+// newPackage creates a cherriPackage type from a string matching pkgSignatureRegex.
 func newPackage(name string) cherriPackage {
-	var matches = pkgRegex.FindAllStringSubmatch(name, -1)
+	var matches = pkgSignatureRegex.FindAllStringSubmatch(name, -1)
 	if len(matches) == 0 {
 		exit(fmt.Sprintf("Package must follow pattern: @{github_username}/{repo_package_name}, got: %s", name))
 	}
