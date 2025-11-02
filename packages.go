@@ -62,15 +62,20 @@ func (pkg *cherriPackage) install() (installed bool) {
 
 func (pkg *cherriPackage) uninstall() {
 	for i, dep := range currentPkg.Packages {
-		if dep.signature() == pkg.signature() {
-			var packagePath = pkg.path()
-			if _, pkgStatErr := os.Stat(packagePath); os.IsNotExist(pkgStatErr) {
-				break
-			}
-			var gitDirRemoveErr = os.RemoveAll(packagePath)
-			handle(gitDirRemoveErr)
-			currentPkg.Packages = append(currentPkg.Packages[:i], currentPkg.Packages[i+1:]...)
+		if dep.signature() != pkg.signature() {
+			continue
 		}
+
+		var packagePath = pkg.path()
+		if _, pkgStatErr := os.Stat(packagePath); os.IsNotExist(pkgStatErr) {
+			break
+		}
+
+		var removeErr = os.RemoveAll(packagePath)
+		handle(removeErr)
+
+		currentPkg.Packages = append(currentPkg.Packages[:i], currentPkg.Packages[i+1:]...)
+		break
 	}
 }
 
