@@ -21,7 +21,8 @@ The primary goal is to make it practical to create large Shortcut projects (with
 - 🖥️ Laptop/Desktop-based development (CLI, [VSCode extension](https://marketplace.visualstudio.com/items?itemName=electrikmilk.cherri-vscode-extension), macOS app)
 - 🎓 Easy to learn and syntax similar to other languages
 - 🐞 1-1 translation to Shortcut actions as much as possible to make debugging easier
-- 🥾 Half-bootstrapped: Most actions and types are written in the language.
+- 🥾 Half-bootstrapped: Most actions and types are written in the language
+- 📦 Package manager: GitHub repo-based package manager built in, allowing for automatic inclusion and updates.
 - 🪄 No magic variables syntax, they're constants instead
 - 🪶 Optimized to create as small as possible Shortcuts and reduce memory usage at runtime
 - #️⃣ Include files within others for large Shortcut projects
