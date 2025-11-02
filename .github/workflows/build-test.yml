@@ -29,6 +29,9 @@ jobs:
     - name: Decompilation Test
       run: go test -run TestDecomp -v ./...
 
+    - name: Package Manager Test
+      run: go test -run TestPackages -v ./...
+
   build-test-macos:
     runs-on: macos-latest
     steps:
@@ -47,3 +50,6 @@ jobs:
 
     - name: Decompilation Test
       run: go test -run TestDecomp -v ./...
+
+    - name: Package Manager Test
+      run: go test -run TestPackages -v ./...
