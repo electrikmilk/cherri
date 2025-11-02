@@ -157,7 +157,7 @@ func addPackage() {
 		currentPkg = pkg
 		var name = args.Value("install")
 		var newPkg = createPackage(name)
-		if newPkg.installed() || findPackage(&newPkg) {
+		if newPkg.installed() || addedPackage(&newPkg) {
 			exit(fmt.Sprintf("Package %s already installed.", newPkg.signature()))
 		}
 
@@ -178,7 +178,7 @@ func addPackage() {
 	}
 }
 
-func findPackage(pkg *cherriPackage) (found bool) {
+func addedPackage(pkg *cherriPackage) (added bool) {
 	for _, p := range currentPkg.Packages {
 		if p.signature() == pkg.signature() {
 			return true
