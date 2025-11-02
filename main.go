@@ -71,6 +71,10 @@ func main() {
 		removePackage()
 		os.Exit(0)
 	}
+	if args.Using("package") {
+		listPackage()
+		os.Exit(0)
+	}
 	if args.Using("tidy") {
 		tidyPackage()
 		os.Exit(0)

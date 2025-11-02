@@ -42,6 +42,7 @@ func (pkg *cherriPackage) install() (installed bool) {
 	var _, cloneErr = git.PlainClone(packagePath, false, &git.CloneOptions{
 		URL:          pkg.url(),
 		SingleBranch: true,
+		Depth:        5,
 	})
 	if cloneErr != nil {
 		pkg.failed(cloneErr)
@@ -113,13 +114,39 @@ func (pkg *cherriPackage) path() string {
 	return fmt.Sprintf("./packages/%s", pkg.signature())
 }
 
+// listPackage shows the current package info.
+func listPackage() {
+	if pkg, found := loadPackage("info.plist"); found {
+		printPackage(pkg)
+		if len(pkg.Packages) != 0 {
+			fmt.Println(ansi("\nDependent Packages:", green, underline))
+			for _, pkg := range pkg.Packages {
+				printPackage(&pkg)
+			}
+		}
+	} else {
+		initPackageError()
+	}
+}
+
+func printPackage(pkg *cherriPackage) {
+	var isArchived string
+	if pkg.Archived {
+		isArchived = " (archived)"
+	}
+	fmt.Println("-", ansi(pkg.signature(), blue))
+	fmt.Println("\tName:", pkg.Name, isArchived)
+	fmt.Println("\tUser:", pkg.User)
+	fmt.Println("\tInstalled path:", pkg.path())
+}
+
 // initPackage initializes a package in the current directory using an info.plist file based on cherriPackage.
 func initPackage() {
 	if _, statErr := os.Stat("info.plist"); !os.IsNotExist(statErr) {
 		exit("info.plist already exists. Delete it to create new package.")
 	}
 	var pkgSig = args.Value("init")
-	var newPkg = createPackage(pkgSig)
+	var newPkg = newPackage(pkgSig)
 	currentPkg = &newPkg
 	writePackage()
 
@@ -155,10 +182,24 @@ func tidyPackage() {
 	if pkg, found := loadPackage("info.plist"); found {
 		currentPkg = pkg
 		installPackages(currentPkg.Packages, true)
-		return
+	} else {
+		initPackageError()
 	}
+}
 
-	exit("info.plist does not exist. Use --init argument to initialize a package.")
+// newPackage creates a cherriPackage type from a string matching pkgRegex.
+func newPackage(name string) cherriPackage {
+	var matches = pkgRegex.FindAllStringSubmatch(name, -1)
+	if len(matches) == 0 {
+		exit(fmt.Sprintf("Package must follow pattern: @{github_username}/{repo_package_name}, got: %s", name))
+	}
+	var user = matches[0][1]
+	var pkg = matches[0][2]
+
+	return cherriPackage{
+		Name: pkg,
+		User: user,
+	}
 }
 
 // addPackage adds a package to the dependencies for the package in the current directory and triggers lazy installation.
@@ -166,7 +207,7 @@ func addPackage() {
 	if pkg, found := loadPackage("info.plist"); found {
 		currentPkg = pkg
 		var name = args.Value("install")
-		var newPkg = createPackage(name)
+		var newPkg = newPackage(name)
 		if newPkg.installed() || addedPackage(&newPkg) {
 			exit(fmt.Sprintf("Package %s already installed.", newPkg.signature()))
 		}
@@ -184,7 +225,7 @@ func addPackage() {
 		installPackages(currentPkg.Packages, false)
 		writePackage()
 	} else {
-		exit("install: info.plist does not exist. Use --init argument to initialize a package.")
+		initPackageError()
 	}
 }
 
@@ -195,21 +236,6 @@ func addedPackage(pkg *cherriPackage) (added bool) {
 		}
 	}
 	return
-}
-
-// createPackage creates a cherriPackage type from a string matching pkgRegex.
-func createPackage(name string) cherriPackage {
-	var matches = pkgRegex.FindAllStringSubmatch(name, -1)
-	if len(matches) == 0 {
-		exit(fmt.Sprintf("Package must follow pattern: {github_username}/{repo_package_name}, got: %s", name))
-	}
-	var user = matches[0][1]
-	var pkg = matches[0][2]
-
-	return cherriPackage{
-		Name: pkg,
-		User: user,
-	}
 }
 
 // installPackages installs the given dependencies.
@@ -255,7 +281,7 @@ func removePackage() {
 	if pkg, found := loadPackage("info.plist"); found {
 		currentPkg = pkg
 		var name = args.Value("remove")
-		var targetPkg = createPackage(name)
+		var targetPkg = newPackage(name)
 		if !targetPkg.installed() {
 			exit(fmt.Sprintf("Package %s is not installed.", targetPkg.signature()))
 		}
@@ -264,6 +290,10 @@ func removePackage() {
 		writePackage()
 		fmt.Println(ansi(fmt.Sprintf("[-] %s removed: %s", targetPkg.signature(), targetPkg.path()), red))
 	} else {
-		exit("install: info.plist does not exist. Use --init argument to create a package.")
+		initPackageError()
 	}
+}
+
+func initPackageError() {
+	exit("install: info.plist does not exist. Use --init argument to create a package.")
 }
