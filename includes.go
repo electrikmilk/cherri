@@ -33,10 +33,6 @@ func handleIncludes() {
 	parseIncludes()
 
 	if args.Using("debug") {
-		printIncludesDebug()
-	}
-
-	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green) + "\n")
 	}
 }
