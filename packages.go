@@ -62,7 +62,7 @@ func (pkg *cherriPackage) install() (installed bool) {
 
 func (pkg *cherriPackage) uninstall() {
 	for i, dep := range currentPkg.Packages {
-		if dep.Name == pkg.Name {
+		if dep.signature() == pkg.signature() {
 			var packagePath = pkg.path()
 			if _, pkgStatErr := os.Stat(packagePath); os.IsNotExist(pkgStatErr) {
 				break
