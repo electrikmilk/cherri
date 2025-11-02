@@ -117,13 +117,14 @@ func yesNo() bool {
 
 func scan(prompt string, store *string) {
 	fmt.Print(prompt)
+
 	var scanner = bufio.NewScanner(os.Stdin)
 	if scanner.Scan() {
 		*store = scanner.Text()
 	}
-	if err := scanner.Err(); err != nil {
-		panic(err)
-	}
+
+	var scanErr = scanner.Err()
+	handle(scanErr)
 }
 
 func handle(err error) {
