@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -80,6 +81,8 @@ func collectIncludePath() string {
 	return collection.String()
 }
 
+var packageIncludeRegex = regexp.MustCompile("packages/(.*?)/")
+
 func parseInclude() {
 	if char == '"' {
 		parserError("Use raw string (') for include file paths")
@@ -90,6 +93,8 @@ func parseInclude() {
 	advance()
 
 	var includePath = collectIncludePath()
+
+	handlePackageIncludePath(&includePath)
 
 	if slices.Contains(included, includePath) {
 		parserError(fmt.Sprintf("Path '%s' has already been included.", includePath))
@@ -130,6 +135,17 @@ func parseInclude() {
 
 	lines[lineIdx] = includeContents
 	included = append(included, includePath)
+}
+
+// handlePackageIncludePath resolves internal package includes.
+func handlePackageIncludePath(includePath *string) {
+	if inc, found := insideInclude("packages/"); found {
+		var matches = packageIncludeRegex.FindAllStringSubmatch(inc.file, -1)
+		if len(matches) != 0 {
+			var packageName = matches[0][1]
+			*includePath = fmt.Sprintf("packages/%s/%s", packageName, *includePath)
+		}
+	}
 }
 
 // updateIncludesMap checks if an included file starts on `line`.
@@ -185,16 +201,16 @@ func findOriginalLine(errorLine *int) {
 }
 
 // insideInclude returns a boolean based on if we are within an included file with a name that contains needle.
-func insideInclude(needle string) bool {
+func insideInclude(needle string) (inc *include, inside bool) {
 	for _, inc := range includes {
 		if !strings.Contains(inc.file, needle) || lineIdx+1 < inc.start || lineIdx+1 > inc.end {
 			continue
 		}
 
-		return true
+		return &inc, true
 	}
 
-	return false
+	return nil, false
 }
 
 func printIncludesDebug() {
