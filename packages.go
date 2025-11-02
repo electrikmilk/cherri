@@ -137,7 +137,8 @@ func printPackage(pkg *cherriPackage) {
 	fmt.Println("-", ansi(pkg.signature(), blue))
 	fmt.Println("\tName:", pkg.Name, isArchived)
 	fmt.Println("\tUser:", pkg.User)
-	fmt.Println("\tInstalled path:", pkg.path())
+	fmt.Println("\tDep. Packages:", len(pkg.Packages))
+	fmt.Println("\tInstall path:", pkg.path())
 }
 
 // initPackage initializes a package in the current directory using an info.plist file based on cherriPackage.
