@@ -21,7 +21,7 @@ action 'getvalueforkey' getValue(dictionary dictionary: 'WFInput', text key: 'WF
 }
 
 // [Doc]: [Dictionaries] Set Value in Dictionary: Set the value of `key` to `value` in `dictionary`.
-action 'setvalueforkey' setValue(variable dictionary: 'WFDictionary', text key: 'WFDictionaryKey', text value: 'WFDictionaryValue')
+action 'setvalueforkey' setValue(variable dictionary: 'WFDictionary', text key: 'WFDictionaryKey', text value: 'WFDictionaryValue'): dictionary
 
 // [Doc]: [Items] Get Name: Get the name of an item.
 action 'getitemname' getName(variable item: 'WFInput')
