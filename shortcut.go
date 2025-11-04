@@ -134,7 +134,7 @@ var colors = map[string]int{
 	"gray":       3031607807,
 	"taupe":      2846468607,
 }
-var iconColor = -1263359489
+var iconColor = 3031607807
 
 var altColors = map[string]int{
 	"red":        -12365313,
