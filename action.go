@@ -317,7 +317,7 @@ func checkRequiredArgs() {
 			checkInfiniteArgs(i)
 			continue
 		}
-		if i+1 > currentArgumentsSize && !param.optional && param.defaultValue == nil {
+		if currentArgumentsSize < i && !param.optional && param.defaultValue == nil {
 			var argIndex = i + 1
 			var suffix string
 			switch argIndex {
