@@ -437,7 +437,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 
 func collectColorValue(value *any) {
 	advance()
-	var saveActionIdentifier = currentActionIdentifier
+	saveCurrentAction()
 
 	currentActionIdentifier = "color"
 	currentAction = actionDefinition{parameters: []parameterDefinition{
@@ -473,14 +473,15 @@ func collectColorValue(value *any) {
 		advance()
 	}
 
-	currentActionIdentifier = saveActionIdentifier
+	restoreCurrentAction()
 }
 
 func collectQtyValue(value *any) {
 	advance()
-	var saveActionIdentifier = currentActionIdentifier
+	saveCurrentAction()
 
 	currentActionIdentifier = "qty"
+	currentArgumentsSize = 2
 	currentAction = actionDefinition{parameters: []parameterDefinition{
 		{
 			name:      "value",
@@ -498,7 +499,7 @@ func collectQtyValue(value *any) {
 		advance()
 	}
 
-	currentActionIdentifier = saveActionIdentifier
+	restoreCurrentAction()
 }
 
 func collectStringValue(valueType *tokenType, value *any) {

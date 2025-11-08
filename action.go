@@ -26,9 +26,16 @@ var stdActions embed.FS
 
 // currentAction holds the current action definition between functions.
 var currentAction actionDefinition
+var saveAction actionDefinition
+
 var currentActionIdentifier string
+var saveActionIdentifier string
+
 var currentArguments []actionArgument
+var saveArguments []actionArgument
+
 var currentArgumentsSize int
+var saveArgumentsSize int
 
 // parameterDefinition is used to define an actions parameters and to check against collected argument values.
 type parameterDefinition struct {
@@ -142,6 +149,25 @@ var actionIndex int
 func setCurrentAction(identifier string, definition *actionDefinition) {
 	currentActionIdentifier = identifier
 	currentAction = *definition
+}
+
+func setCurrentArguments(args []actionArgument) {
+	currentArguments = args
+	currentArgumentsSize = len(args)
+}
+
+func saveCurrentAction() {
+	saveAction = currentAction
+	saveActionIdentifier = currentActionIdentifier
+	saveArguments = currentArguments
+	saveArgumentsSize = currentArgumentsSize
+}
+
+func restoreCurrentAction() {
+	currentAction = saveAction
+	currentActionIdentifier = saveActionIdentifier
+	currentArguments = saveArguments
+	currentArgumentsSize = saveArgumentsSize
 }
 
 // undefinable checks if the current action cannot be defined using only Cherri because of the way it is defined.
@@ -317,7 +343,7 @@ func checkRequiredArgs() {
 			checkInfiniteArgs(i)
 			continue
 		}
-		if currentArgumentsSize < i && !param.optional && param.defaultValue == nil {
+		if currentArgumentsSize < i+1 && !param.optional && param.defaultValue == nil {
 			var argIndex = i + 1
 			var suffix string
 			switch argIndex {
