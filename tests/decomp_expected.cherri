@@ -1,8 +1,10 @@
+#include 'actions/location'
 #define color red
 #define glyph apple
 
 const hello = prompt("Hello?")
 @confirm = prompt("What do you want?", "Number")
+const location = location(Ask)
 @urls = url("https://google.com", "https://apple.com", "https://cherrilang.org")
 @int = 42
 @dict = {

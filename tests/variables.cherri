@@ -15,6 +15,7 @@ var"
 @boolVarFalse = false
 @urlVar = url('https://apple.com','https://google.com')
 @dateVar = date("October 5, 2022")
+@locationVar = location(Ask)
 @email = emailAddress("test@test.com")
 @phone = phoneNumber("(555) 555-5555")
 @dictVar = {
