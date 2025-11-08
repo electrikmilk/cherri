@@ -79,10 +79,6 @@ type WFContactFieldValue struct {
 	SerializedEntry map[string]interface{}
 }
 
-type ImageSize struct {
-	Value SizeValue
-}
-
 type SizeValue struct {
 	Unit      string
 	Magnitude string

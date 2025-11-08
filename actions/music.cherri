@@ -77,6 +77,15 @@ action skipBack() {
 // [Doc]: [Playback] Skip Forward: Go to the next song.
 action 'skipforward' skipFwd()
 
+enum seekBehavior {
+    'To Time',
+    'Forward By',
+    'Backward By',
+}
+
+// [Doc]: [Playback] Seek: Seek the currently playing media.
+action seek(#timerDuration timeInterval: 'WFTimeInterval' = qty(0, "sec"), seekBehavior behavior: 'WFSeekBehavior' = "To Time")
+
 // [Doc]: [Playback] Play Next: Add music to play next in the queue.
 action 'addmusictoupnext' playNext(variable music: 'WFMusic') {
 	"WFWhenToPlay": "Next"
