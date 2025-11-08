@@ -693,7 +693,10 @@ func generateActionParamDefinition(param parameterDefinition) string {
 	if param.defaultValue != nil {
 		definition.WriteString(ansi(" = ", dim))
 		var defaultValue string
-		if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
+		if param.validType == Quantity {
+			var qtyArgs = param.defaultValue.([]actionArgument)
+			defaultValue = fmt.Sprintf("qty(%d, \"%s\")", qtyArgs[0].value, qtyArgs[1].value)
+		} else if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
 			defaultValue = fmt.Sprintf("\"%v\"", strings.Replace(param.defaultValue.(string), "\n", "\\n", 1))
 		} else {
 			defaultValue = fmt.Sprintf("%v", param.defaultValue)
@@ -1030,11 +1033,6 @@ func makeActionValue(identifier string, arguments []actionArgument) action {
 		def:   actions[identifier],
 		args:  arguments,
 	}
-}
-
-type quantityValue struct {
-	enum      string
-	valueType tokenType
 }
 
 func makeQuantityFieldValue(args []actionArgument) map[string]any {
