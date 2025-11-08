@@ -179,11 +179,11 @@ func initPackage() {
 var internalDirectoryPath = os.ExpandEnv("$HOME/.cherri")
 var trustedPackagesPlistPath = os.ExpandEnv("$HOME/.cherri/trusted.plist")
 
-type packageTrust struct {
+type trustedPackages struct {
 	Packages []string
 }
 
-var trusted packageTrust
+var trusted trustedPackages
 
 func loadTrustedPackages() {
 	if _, statErr := os.Stat(trustedPackagesPlistPath); os.IsNotExist(statErr) {
@@ -282,14 +282,14 @@ func addPackage() {
 
 	fmt.Println(ansi(fmt.Sprintf("Install package %s\n", newPkg.signature()), green))
 
-	checkPackageTrust(&newPkg)
+	checkTrustedPackages(&newPkg)
 
 	currentPkg.Packages = append(currentPkg.Packages, newPkg)
 	installPackages(currentPkg.Packages, false)
 	writePackage()
 }
 
-func checkPackageTrust(newPkg *cherriPackage) {
+func checkTrustedPackages(newPkg *cherriPackage) {
 	if !newPkg.trusted() {
 		var packagePrompt = fmt.Sprintf("Do you trust this package?\n\nThis will download this GitHub repository and automatically include it in this project:\n%s", newPkg.url())
 		fmt.Println(ansi(packagePrompt, yellow))
