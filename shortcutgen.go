@@ -673,6 +673,8 @@ func paramValue(arg actionArgument, handleAs tokenType) any {
 			"blueComponent":             colorArgs[2].value.(float64),
 			"alphaComponent":            colorArgs[3].value,
 		}
+	case Quantity:
+		return makeQuantityFieldValue(arg.value.([]actionArgument))
 	default:
 		return attachmentValues(arg.value.(string))
 	}

@@ -76,6 +76,7 @@ const (
 	Variable    tokenType = "variable"
 	Conditional tokenType = "conditional"
 	Enumeration tokenType = "enum"
+	Quantity    tokenType = "qty"
 )
 
 /* Operators */

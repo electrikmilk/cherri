@@ -2274,22 +2274,6 @@ func decompContactValue(action *ShortcutAction, key string, contentKit contentKi
 	return
 }
 
-func magnitudeValue(unit any, args []actionArgument, index int) map[string]any {
-	var magnitudeValue = argumentValue(args, index)
-	if reflect.TypeOf(magnitudeValue).String() == "[]map[string]any" {
-		var value = magnitudeValue.([]map[string]any)
-		magnitudeValue = value[0]
-	}
-
-	return map[string]any{
-		"Value": map[string]any{
-			"Unit":      unit,
-			"Magnitude": magnitudeValue,
-		},
-		"WFSerializationType": "WFQuantityFieldValue",
-	}
-}
-
 func textParts(args []actionArgument) map[string]any {
 	if len(args) == 0 {
 		return map[string]any{}

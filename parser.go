@@ -416,6 +416,9 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	case tokenAhead(Color):
 		*valueType = Color
 		collectColorValue(value)
+	case tokenAhead(Quantity):
+		*valueType = Quantity
+		collectQtyValue(value)
 	case tokenAhead(True):
 		*valueType = Bool
 		*value = true
@@ -434,6 +437,8 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 
 func collectColorValue(value *any) {
 	advance()
+	var saveActionIdentifier = currentActionIdentifier
+
 	currentActionIdentifier = "color"
 	currentAction = actionDefinition{parameters: []parameterDefinition{
 		{
@@ -467,6 +472,33 @@ func collectColorValue(value *any) {
 	if char == ')' {
 		advance()
 	}
+
+	currentActionIdentifier = saveActionIdentifier
+}
+
+func collectQtyValue(value *any) {
+	advance()
+	var saveActionIdentifier = currentActionIdentifier
+
+	currentActionIdentifier = "qty"
+	currentAction = actionDefinition{parameters: []parameterDefinition{
+		{
+			name:      "value",
+			validType: Integer,
+		},
+		{
+			name:      "unit",
+			validType: String,
+		},
+	}}
+
+	*value = collectArguments()
+
+	if char == ')' {
+		advance()
+	}
+
+	currentActionIdentifier = saveActionIdentifier
 }
 
 func collectStringValue(valueType *tokenType, value *any) {
