@@ -1126,9 +1126,8 @@ func makeActionCallCode(action *ShortcutAction) string {
 		matchedIdentifier, matchedAction = matchAction(action)
 		if matchedIdentifier == "" {
 			actionCallCode.WriteString(makeRawAction(action))
+			return actionCallCode.String()
 		}
-
-		return actionCallCode.String()
 	}
 
 	if (matchedAction.macOnly || matchedAction.nonMacOnly) && !setMacDefinition {
