@@ -37,6 +37,7 @@ type parameterDefinition struct {
 	key          string
 	defaultValue any
 	enum         string
+	qty          bool
 	optional     bool
 	infinite     bool
 	literal      bool
@@ -671,6 +672,9 @@ func generateActionParamDefinition(param parameterDefinition) string {
 		argType = fmt.Sprintf("%s ", param.validType)
 	} else {
 		argType = fmt.Sprintf("%s ", param.enum)
+		if param.qty {
+			argType = fmt.Sprintf("#%s(qty)", argType)
+		}
 	}
 	definition.WriteString(ansi(argType, magenta))
 
@@ -925,17 +929,32 @@ func collectActionDefinition(until rune) (identifier string, arguments []paramet
 	return
 }
 
+func collectEnumerationType(valueType *tokenType, quantity *bool, until rune) (enumeration string) {
+	if isChar('#') {
+		*quantity = true
+	}
+
+	var ahead = lookAheadUntil(until)
+	if enumerations[ahead] != nil {
+		enumeration = collectUntil(until)
+		*valueType = String
+	}
+
+	if *quantity {
+		*valueType = Quantity
+	}
+
+	return enumeration
+}
+
 func collectParameterDefinitions() (arguments []parameterDefinition) {
 	for char != ')' && char != -1 {
 		var valueType tokenType
 		var value any
 
-		var enumeration string
-		var ahead = lookAheadUntil(' ')
-		if enumerations[ahead] != nil {
-			enumeration = collectUntil(' ')
-			valueType = String
-		} else {
+		var quantity bool
+		var enumeration = collectEnumerationType(&valueType, &quantity, ' ')
+		if enumeration == "" {
 			collectType(&valueType, &value, ' ')
 		}
 
@@ -994,6 +1013,7 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			optional:     optional,
 			defaultValue: defaultValue,
 			enum:         enumeration,
+			qty:          quantity,
 			literal:      literal,
 		})
 
@@ -1009,5 +1029,20 @@ func makeActionValue(identifier string, arguments []actionArgument) action {
 		ident: identifier,
 		def:   actions[identifier],
 		args:  arguments,
+	}
+}
+
+type quantityValue struct {
+	enum      string
+	valueType tokenType
+}
+
+func makeQuantityFieldValue(args []actionArgument) map[string]any {
+	return map[string]any{
+		"Value": map[string]any{
+			"Magnitude": argumentValue(args, 0),
+			"Unit":      argumentValue(args, 1),
+		},
+		"WFSerializationType": "WFQuantityFieldValue",
 	}
 }
