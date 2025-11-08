@@ -47,80 +47,6 @@ var createShortcutiCloudLink = appIntent{
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
 	"returnToHomescreen": {nonMacOnly: true},
-	"adjustDate": {
-		doc: selfDoc{
-			title:       "Adjust Date",
-			description: "Adjust a date or get the start of a time period.",
-			category:    "calendar",
-			subcategory: "Dates",
-		},
-		identifier: "adjustdate",
-		parameters: []parameterDefinition{
-			{
-				name:      "date",
-				key:       "WFDate",
-				validType: String,
-			},
-			{
-				name:      "operation",
-				key:       "WFAdjustOperation",
-				validType: String,
-				enum:      "dateOperation",
-			},
-			{
-				name:      "magnitude",
-				validType: Integer,
-				optional:  true,
-			},
-			{
-				name:      "unit",
-				validType: String,
-				enum:      "dateUnit",
-				optional:  true,
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			if len(args) != 4 {
-				return map[string]any{}
-			}
-
-			var unit = getArgValue(args[3])
-
-			return map[string]any{
-				"WFDuration": magnitudeValue(unit, args, 2),
-			}
-		},
-	},
-	"startTimer": {
-		doc: selfDoc{
-			title:       "Create Timer",
-			description: "Creates a new timer.",
-			category:    "calendar",
-			subcategory: "Timers",
-		},
-		identifier: "timer.start",
-		parameters: []parameterDefinition{
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-			{
-				name:         "unit",
-				validType:    String,
-				defaultValue: "min",
-				enum:         "timerDuration",
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			if len(args) == 0 {
-				return map[string]any{}
-			}
-
-			return map[string]any{
-				"WFDuration": magnitudeValue(argumentValue(args, 1), args, 0),
-			}
-		},
-	},
 	"createAlarm": {
 		doc: selfDoc{
 			title:       "Create Alarm",
@@ -774,128 +700,6 @@ var actions = map[string]*actionDefinition{
 		addParams:  textParts,
 		decomp:     decompTextParts,
 		outputType: String,
-	},
-	"makeSizedDiskImage": {
-		doc: selfDoc{
-			title:       "Make Size Disk Image",
-			description: "Make a sized disk image.",
-			category:    "mac",
-		},
-		identifier:    "makediskimage",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "name",
-				validType: String,
-				key:       "VolumeName",
-			},
-			{
-				name:      "contents",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:         "size",
-				validType:    String,
-				defaultValue: "1 GB",
-			},
-			{
-				name:         "encrypt",
-				key:          "EncryptImage",
-				validType:    Bool,
-				defaultValue: false,
-				optional:     true,
-			},
-		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			var size = strings.Split(getArgValue(args[2]).(string), " ")
-			var storageUnitArg = actionArgument{
-				valueType: String,
-				value:     size[1],
-			}
-			checkEnum(&parameterDefinition{
-				name: "disk size",
-				enum: "storageUnit",
-			}, &storageUnitArg)
-		},
-		decomp: func(action *ShortcutAction) (arguments []string) {
-			var imageSize = ImageSize{
-				Value: SizeValue{
-					Unit:      "GB",
-					Magnitude: "1",
-				},
-			}
-			mapToStruct(action.WFWorkflowActionParameters["ImageSize"], &imageSize)
-			var size = fmt.Sprintf("\"%s %s\"", imageSize.Value.Magnitude, imageSize.Value.Unit)
-
-			return []string{
-				decompValue(action.WFWorkflowActionParameters["VolumeName"]),
-				decompValue(action.WFWorkflowActionParameters["WFInput"]),
-				size,
-				decompValue(action.WFWorkflowActionParameters["EncryptImage"]),
-			}
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			if len(args) == 0 {
-				return map[string]any{}
-			}
-
-			var size = strings.Split(getArgValue(args[2]).(string), " ")
-
-			return map[string]any{
-				"SizeToFit": false,
-				"ImageSize": map[string]any{
-					"Value": map[string]any{
-						"Unit":      size[0],
-						"Magnitude": size[1],
-					},
-					"WFSerializationType": "WFQuantityFieldValue",
-				},
-			}
-		},
-		macOnly:    true,
-		minVersion: 15,
-	},
-	"seek": {
-		doc: selfDoc{
-			title:       "Seek",
-			description: "Seek the currently playing media.",
-			category:    "music",
-			subcategory: "Playback",
-		},
-		parameters: []parameterDefinition{
-			{
-				name:      "magnitude",
-				validType: Integer,
-			},
-			{
-				name:      "duration",
-				validType: String,
-				enum:      "timerDuration",
-			},
-			{
-				name:         "behavior",
-				key:          "WFSeekBehavior",
-				validType:    String,
-				defaultValue: "To Time",
-				enum:         "seekBehavior",
-			},
-		},
-		addParams: func(args []actionArgument) map[string]any {
-			if len(args) == 0 {
-				return map[string]any{}
-			}
-
-			return map[string]any{
-				"WFTimeInterval": map[string]any{
-					"Value": map[string]any{
-						"Magnitude": argumentValue(args, 0),
-						"Unit":      argumentValue(args, 1),
-					},
-					"WFSerializationType": "WFQuantityFieldValue",
-				},
-			}
-		},
 	},
 	"url": {
 		doc: selfDoc{
@@ -1688,7 +1492,7 @@ var actions = map[string]*actionDefinition{
 
 			var unitType = value.(string)
 			checkEnum(&parameterDefinition{
-				name: "unit",
+				name: fmt.Sprintf("%s unit", unitType),
 				enum: unitType,
 			}, &args[2])
 		},

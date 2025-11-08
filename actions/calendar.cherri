@@ -42,6 +42,12 @@ enum editEventDetail {
     'Attachments',
 }
 
+enum timerDuration {
+    'hr',
+    'min',
+    'sec'
+}
+
 // [Doc]: [Calendars] Add Calendar: Create a calendar with `name`.
 action 'addnewcalendar' addCalendar(text name: 'CalendarName')
 
@@ -69,6 +75,9 @@ action removeReminders(variable reminders: 'WFInputReminders')
 // [Doc]: [Alarms] Get Alarms: Returns all of the alarms on the device.
 action 'com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent' getAlarms()
 
+// [Doc]: [Timers] Start Timer: Creates a new timer.
+action 'timer.start' startTimer(#timerDuration duration: 'WFDuration' = qty(0, "min"))
+
 // [Doc]: [Dates] Get Dates: Get dates from input.
 action 'detect.date' getDates(variable input: 'WFInput'): array
 
@@ -76,6 +85,30 @@ action 'detect.date' getDates(variable input: 'WFInput'): array
 action date(text date: 'WFDateActionDate') {
 	"WFDateActionMode": "Specified Date"
 }
+
+enum dateAdjustOperation {
+    'Add',
+    'Subtract',
+    'Get Start of Minute',
+    'Get Start of Hour',
+    'Get Start of Day',
+    'Get Start of Week',
+    'Get Start of Month',
+    'Get Start of Year',
+}
+
+enum dateUnit {
+    'sec',
+    'min',
+    'hr',
+    'days',
+    'weeks',
+    'months',
+    'yr'
+}
+
+// [Doc]: [Dates] Adjust Date: Adjust a date or get the start of a time period.
+action adjustDate(text date: 'WFDate', dateAdjustOperation operation: 'WFAdjustOperation', #dateUnit ?unit)
 
 enum holidayYear {
     '2023',

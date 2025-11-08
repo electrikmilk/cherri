@@ -10,6 +10,23 @@ action mac v15 makeDiskImage(text name: 'VolumeName', variable contents: 'WFInpu
 	"SizeToFit": true
 }
 
+enum storageUnit {
+    'bytes',
+    'KB',
+    'MB',
+    'GB',
+    'TB',
+    'PB',
+    'EB',
+    'ZB',
+    'Y'
+}
+
+// [Doc]: Make Sized Disk Image: Create a new disk image of a specific size.
+action mac v15 'makediskimage' makeSizedDiskImage(text name: 'VolumeName', variable contents: 'WFInput', #storageUnit diskSize: 'ImageSize' = qty(1, "GB"), bool ?encrypt: 'EncryptImage' = false) {
+    "SizeToFit": false
+}
+
 // [Doc]: [Device] Start Screensaver
 action mac startScreensaver()
 
