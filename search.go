@@ -26,6 +26,8 @@ func handleActionSearch() {
 	}
 
 	actionsSearch()
+
+	os.Exit(1)
 }
 
 func actionsSearch() {
@@ -70,8 +72,6 @@ func actionsSearch() {
 		fmt.Println(ansi("\nThe closest actions are:", yellow, italic, bold))
 		fmt.Println(actionSearchResults.String())
 	}
-
-	os.Exit(1)
 }
 
 func handleGlyphSearch() {

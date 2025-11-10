@@ -1652,6 +1652,8 @@ func collectActionCall() {
 func collectAction(identifier *string) (value action) {
 	if _, found := actions[*identifier]; !found {
 		checkMissingStandardInclude(identifier, true)
+		args.Args["action"] = *identifier
+		actionsSearch()
 		parserError(fmt.Sprintf("Undefined action '%s()'", *identifier))
 	}
 	advance()
