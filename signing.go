@@ -98,10 +98,17 @@ func useSigningService(service *SigningService) {
 	handle(httpErr)
 	request.Header.Set("Content-Type", "application/json")
 
-	var client = &http.Client{}
-	response, resErr := client.Do(request)
+	var client = &http.Client{
+		Timeout: time.Second * 30,
+	}
+	var response, resErr = client.Do(request)
 	handle(resErr)
 	defer response.Body.Close()
+
+	var responseContentType = response.Header.Get("Content-Type")
+	if responseContentType != "application/octet-stream" {
+		exit(fmt.Sprintf("Unsupported response type: %s", responseContentType))
+	}
 
 	if response.StatusCode != http.StatusOK {
 		signingServiceFailed = true
@@ -121,12 +128,24 @@ func useSigningService(service *SigningService) {
 	var body, readErr = io.ReadAll(response.Body)
 	handle(readErr)
 
+	if !looksLikeShortcut(body) {
+		exit("Signing server response does not look like a Shortcut file.")
+	}
+
 	var writeErr = os.WriteFile(outputPath, body, 0600)
 	handle(writeErr)
 
 	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green))
 	}
+}
+
+// looksLikeShortcut performs quick checks to make sure response is a signed Shortcut.
+func looksLikeShortcut(buf []byte) bool {
+	if len(buf) >= 4 && string(buf[:4]) == "AEA1" {
+		return true
+	}
+	return false
 }
 
 func removeUnsigned() {
