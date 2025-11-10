@@ -53,7 +53,9 @@ func generateShortcut() {
 
 	marshalPlist()
 
-	optimizePlist()
+	if !args.Using("no-optimize") {
+		optimizePlist()
+	}
 
 	if args.Using("debug") {
 		printShortcutGenDebug()
@@ -77,11 +79,9 @@ func marshalPlist() {
 }
 
 var plistLongEmptyArrayRegex = regexp.MustCompile(`<(array|dict)>\n(.*?)</(array|dict)>`)
-var plistEmptyArrayOrDictRegex = regexp.MustCompile(`(\s+)?<key>(.*?)</key>\n\t\t<(array|dict)/>`)
 
 func optimizePlist() {
 	compiled = plistLongEmptyArrayRegex.ReplaceAllString(compiled, "<$1/>")
-	compiled = plistEmptyArrayOrDictRegex.ReplaceAllString(compiled, "")
 }
 
 func resetShortcutGen() {

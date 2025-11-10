@@ -93,6 +93,10 @@ func init() {
 		Description: "Don't output ANSI escape sequences that format the output.",
 	})
 	args.Register(args.Argument{
+		Name:        "no-optimize",
+		Description: "Do not optimize the file size of the compiled Shortcut.",
+	})
+	args.Register(args.Argument{
 		Name:        "skip-sign",
 		Description: "Do not sign the compiled Shortcut.",
 	})
