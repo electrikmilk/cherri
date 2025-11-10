@@ -709,13 +709,13 @@ const (
 // makeDictionary creates a Shortcut dictionary value.
 func makeDictionary(value interface{}) (dictItems []map[string]any) {
 	for key, item := range value.(map[string]interface{}) {
-		dictItems = append(dictItems, dictionaryItemValue(key, item))
+		dictItems = append(dictItems, makeDictionaryItem(key, item))
 	}
 	return
 }
 
-// dictionaryItemValue creates an inner dictionary value.
-func dictionaryItemValue(key string, value any) map[string]any {
+// makeDictionaryItem creates an inner dictionary value.
+func makeDictionaryItem(key string, value any) map[string]any {
 	if value == nil {
 		value = ""
 	}
@@ -757,7 +757,7 @@ func dictionaryItemValue(key string, value any) map[string]any {
 			serializedType = "WFArrayParameterState"
 			var arrayValue []map[string]interface{}
 			for _, item := range value.([]interface{}) {
-				arrayValue = append(arrayValue, dictionaryItemValue("", item))
+				arrayValue = append(arrayValue, makeDictionaryItem("", item))
 			}
 			wfValue = map[string]any{
 				"Value": arrayValue,
@@ -788,10 +788,10 @@ func dictionaryItemValue(key string, value any) map[string]any {
 		wfValue = map[string]any{}
 	}
 
-	return dictionaryValue(key, itemType, serializedType, wfValue)
+	return makeDictionaryItemValue(key, itemType, serializedType, wfValue)
 }
 
-func dictionaryValue(key string, itemType dictDataType, serializedType string, wfValue map[string]any) map[string]any {
+func makeDictionaryItemValue(key string, itemType dictDataType, serializedType string, wfValue map[string]any) map[string]any {
 	var wfValueParams = map[string]any{
 		"WFSerializationType": serializedType,
 	}
