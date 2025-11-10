@@ -64,7 +64,13 @@ func generateShortcut() {
 }
 
 func marshalPlist() {
-	var marshaledPlist, plistErr = plist.MarshalIndent(shortcut, plist.XMLFormat, "\t")
+	var marshaledPlist []byte
+	var plistErr error
+	if args.Using("debug") {
+		marshaledPlist, plistErr = plist.MarshalIndent(shortcut, plist.XMLFormat, "\t")
+	} else {
+		marshaledPlist, plistErr = plist.Marshal(shortcut, plist.XMLFormat)
+	}
 	handle(plistErr)
 
 	compiled = string(marshaledPlist)
