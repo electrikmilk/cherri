@@ -45,7 +45,7 @@ func createShortcut() {
 				url:  args.Value("signing-server"),
 			})
 		case args.Using("hubsign"):
-			hubSign()
+			useHubSign()
 		default:
 			sign()
 		}
