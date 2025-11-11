@@ -72,14 +72,7 @@ type SigningService struct {
 
 // Sign the Shortcut using a signing service.
 func useSigningService(service *SigningService) {
-	if signingServiceFailed {
-		fmt.Println(ansi(fmt.Sprintf("Backing off from %s", service.name), red))
-		for i := 5; i > 0; i-- {
-			fmt.Printf("%d seconds...\r", i)
-			time.Sleep(1 * time.Second)
-		}
-		fmt.Print("\n\n")
-	}
+	handleBackoff(service)
 
 	if !args.Using("no-ansi") {
 		fmt.Println(ansi(fmt.Sprintf("Signing using %s service...", service.name), green))
@@ -88,6 +81,35 @@ func useSigningService(service *SigningService) {
 		}
 	}
 
+	var signedShortcut = requestSignedShortcut(service)
+	if len(signedShortcut) == 0 {
+		return
+	}
+
+	if !looksLikeSignedShortcut(signedShortcut) {
+		exit("Signing server response does not look like a Shortcut file.")
+	}
+
+	var writeErr = os.WriteFile(outputPath, signedShortcut, 0600)
+	handle(writeErr)
+
+	if args.Using("debug") {
+		fmt.Println(ansi("Done.", green))
+	}
+}
+
+func handleBackoff(service *SigningService) {
+	if signingServiceFailed {
+		fmt.Println(ansi(fmt.Sprintf("Backing off from %s", service.name), red))
+		for i := 5; i > 0; i-- {
+			fmt.Printf("%d seconds...\r", i)
+			time.Sleep(1 * time.Second)
+		}
+		fmt.Print("\n\n")
+	}
+}
+
+func requestSignedShortcut(service *SigningService) []byte {
 	var payload = map[string]string{
 		"shortcutName": basename,
 		"shortcut":     compiled,
@@ -117,7 +139,7 @@ func useSigningService(service *SigningService) {
 		signingServiceFailed = true
 		backoff += 10
 		fmt.Println(ansi(fmt.Sprintf("Failed to sign Shortcut (%s)", response.Status), red))
-		return
+		return []byte{}
 	}
 
 	signingServiceFailed = false
@@ -131,16 +153,7 @@ func useSigningService(service *SigningService) {
 	var body, readErr = io.ReadAll(response.Body)
 	handle(readErr)
 
-	if !looksLikeSignedShortcut(body) {
-		exit("Signing server response does not look like a Shortcut file.")
-	}
-
-	var writeErr = os.WriteFile(outputPath, body, 0600)
-	handle(writeErr)
-
-	if args.Using("debug") {
-		fmt.Println(ansi("Done.", green))
-	}
+	return body
 }
 
 // looksLikeSignedShortcut performs quick checks to make sure response is a signed Shortcut.
