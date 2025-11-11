@@ -213,7 +213,7 @@ func writeTrustedPackages() {
 	var marshaledPlist, plistErr = plist.MarshalIndent(trusted, plist.XMLFormat, "\t")
 	handle(plistErr)
 
-	var writeErr = os.WriteFile(filename, marshaledPlist, 0600)
+	var writeErr = os.WriteFile(trustedPackagesPlistPath, marshaledPlist, 0600)
 	handle(writeErr)
 }
 
