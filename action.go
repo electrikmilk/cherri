@@ -146,11 +146,6 @@ func setCurrentAction(identifier string, definition *actionDefinition) {
 	currentAction = *definition
 }
 
-func setCurrentArguments(args []actionArgument) {
-	currentArguments = args
-	currentArgumentsSize = len(args)
-}
-
 func saveCurrentAction() {
 	saveAction = currentAction
 	saveActionIdentifier = currentActionIdentifier
