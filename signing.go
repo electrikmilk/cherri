@@ -131,7 +131,7 @@ func useSigningService(service *SigningService) {
 	var body, readErr = io.ReadAll(response.Body)
 	handle(readErr)
 
-	if !looksLikeShortcut(body) {
+	if !looksLikeSignedShortcut(body) {
 		exit("Signing server response does not look like a Shortcut file.")
 	}
 
@@ -143,9 +143,9 @@ func useSigningService(service *SigningService) {
 	}
 }
 
-// looksLikeShortcut performs quick checks to make sure response is a signed Shortcut.
-func looksLikeShortcut(buf []byte) bool {
-	if len(buf) >= 4 && string(buf[:4]) == "AEA1" {
+// looksLikeSignedShortcut performs quick checks to make sure response is a signed Shortcut.
+func looksLikeSignedShortcut(buffer []byte) bool {
+	if len(buffer) >= 4 && string(buffer[:4]) == "AEA1" {
 		return true
 	}
 	return false
