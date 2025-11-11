@@ -19,7 +19,7 @@ func writeFile(filename string, debug string) {
 		fmt.Printf("Writing to %s...", debug)
 	}
 
-	writeErr := os.WriteFile(filename, []byte(compiled), 0600)
+	var writeErr = os.WriteFile(filename, []byte(compiled), 0600)
 	handle(writeErr)
 
 	if writeDebugOutput {

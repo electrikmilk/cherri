@@ -205,7 +205,7 @@ func writeTrustedPackages() {
 		handle(createErr)
 
 		defer func(f *os.File) {
-			fileCloseErr := f.Close()
+			var fileCloseErr = f.Close()
 			handle(fileCloseErr)
 		}(trustedPlistFile)
 	}

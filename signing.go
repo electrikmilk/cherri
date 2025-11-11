@@ -178,7 +178,7 @@ func removeUnsigned() {
 		fmt.Printf("Removing %s%s...", workflowName, unsignedEnd)
 	}
 
-	removeErr := os.Remove(inputPath)
+	var removeErr = os.Remove(inputPath)
 	handle(removeErr)
 
 	if args.Using("debug") {
