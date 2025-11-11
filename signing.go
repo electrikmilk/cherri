@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"slices"
 	"time"
 
 	"github.com/electrikmilk/args-parser"
@@ -106,7 +107,8 @@ func useSigningService(service *SigningService) {
 	defer response.Body.Close()
 
 	var responseContentType = response.Header.Get("Content-Type")
-	if responseContentType != "application/octet-stream" {
+	var allowedContentTypes = []string{"application/octet-stream", "application/x-plist", "application/x-apple-shortcut"}
+	if !slices.Contains(allowedContentTypes, responseContentType) {
 		exit(fmt.Sprintf("Unsupported response type: %s", responseContentType))
 	}
 
