@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/electrikmilk/args-parser"
-	"github.com/google/uuid"
 )
 
 func generateShortcut() {
@@ -150,7 +149,7 @@ func makeVariableInput(t *token, params map[string]any) {
 	var outputName = makeOutputName(t)
 	var varUUID string
 	if uuids[outputName] == "" {
-		varUUID = uuid.New().String()
+		varUUID = createUUID(&outputName)
 		uuids[outputName] = varUUID
 	} else {
 		varUUID = uuids[outputName]
@@ -832,7 +831,7 @@ func makeArrayVariable(t *token) {
 		if value == nil {
 			continue
 		}
-		var UUID = uuid.New().String()
+		var UUID = createUUID(&t.ident)
 		var valueType tokenType
 		var itemIdent string
 		switch reflect.TypeOf(value).Kind() {

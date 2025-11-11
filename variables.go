@@ -5,6 +5,7 @@
 package main
 
 import (
+	"crypto/sha1"
 	"fmt"
 	"slices"
 	"strconv"
@@ -83,7 +84,7 @@ func availableIdentifier(identifier *string) {
 }
 
 func createUUIDReference(identifier string) string {
-	var actionUUID = uuid.NewString()
+	var actionUUID = createUUID(&identifier)
 	uuids[identifier] = actionUUID
 
 	return actionUUID
@@ -180,4 +181,31 @@ func duplicateOutputName() string {
 	currentOutputName = fmt.Sprintf("%s%d", currentOutputName, duplicateDelta)
 
 	return currentOutputName
+}
+
+func createUUID(salt *string) string {
+	var deterministic = args.Using("derive-uuids")
+	if deterministic {
+		var seeds = [][]byte{
+			[]byte(workflowName),
+			[]byte(*salt),
+		}
+		return deterministicUUID(seeds...)
+	}
+
+	return uuid.New().String()
+}
+
+// deterministicUUID returns a UUID derived from the given pieces.
+func deterministicUUID(pieces ...[]byte) string {
+	var hash = sha1.New()
+	for i, piece := range pieces {
+		if i > 0 {
+			hash.Write([]byte{0x00})
+		}
+		hash.Write(piece)
+	}
+	seed := hash.Sum(nil)
+
+	return uuid.NewSHA1(uuid.NameSpaceURL, seed).String()
 }

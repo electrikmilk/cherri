@@ -15,7 +15,6 @@ import (
 	"unicode"
 
 	"github.com/electrikmilk/args-parser"
-	"github.com/google/uuid"
 )
 
 var idx int
@@ -1445,7 +1444,7 @@ func collectEndStatement() {
 func groupStatement(groupType tokenType, identifier *string) controlFlowGroup {
 	groupingIdx++
 	controlFlowGroups[groupingIdx] = controlFlowGroup{
-		uuid:       uuid.NewString(),
+		uuid:       createUUID(identifier),
 		identifier: *identifier,
 		groupType:  groupType,
 	}

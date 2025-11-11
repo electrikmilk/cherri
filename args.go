@@ -32,6 +32,10 @@ func init() {
 		Description: "Create plist file, preprocessed file, print debug and stack traces.",
 	})
 	args.Register(args.Argument{
+		Name:        "derive-uuids",
+		Description: "Output deterministic UUIDs.",
+	})
+	args.Register(args.Argument{
 		Name:         "output",
 		Short:        "o",
 		Description:  "Set custom output file path.",
