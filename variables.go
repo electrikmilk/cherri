@@ -205,7 +205,7 @@ func deterministicUUID(pieces ...[]byte) string {
 		}
 		hash.Write(piece)
 	}
-	seed := hash.Sum(nil)
+	var seed = hash.Sum(nil)
 
 	return uuid.NewSHA1(uuid.NameSpaceURL, seed).String()
 }
