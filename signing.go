@@ -98,6 +98,7 @@ func useSigningService(service *SigningService) {
 	var request, httpErr = http.NewRequest("POST", service.url, bytes.NewReader(jsonPayload))
 	handle(httpErr)
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("User-Agent", fmt.Sprintf("cherri/%s", version))
 
 	var client = &http.Client{
 		Timeout: time.Second * 30,
