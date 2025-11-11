@@ -13,10 +13,7 @@ import (
 
 	"github.com/electrikmilk/args-parser"
 	"github.com/google/uuid"
-	"howett.net/plist"
 )
-
-var compiled string
 
 func generateShortcut() {
 	if args.Using("debug") {
@@ -51,37 +48,12 @@ func generateShortcut() {
 
 	generateActions()
 
-	marshalPlist()
-
-	if !args.Using("no-optimize") {
-		optimizePlist()
-	}
-
 	if args.Using("debug") {
 		printShortcutGenDebug()
 		fmt.Println(ansi("Done.\n", green))
 	}
 
 	resetShortcutGen()
-}
-
-func marshalPlist() {
-	var marshaledPlist []byte
-	var plistErr error
-	if args.Using("debug") {
-		marshaledPlist, plistErr = plist.MarshalIndent(shortcut, plist.XMLFormat, "\t")
-	} else {
-		marshaledPlist, plistErr = plist.Marshal(shortcut, plist.XMLFormat)
-	}
-	handle(plistErr)
-
-	compiled = string(marshaledPlist)
-}
-
-var plistLongEmptyArrayRegex = regexp.MustCompile(`<(array|dict)>\n(.*?)</(array|dict)>`)
-
-func optimizePlist() {
-	compiled = plistLongEmptyArrayRegex.ReplaceAllString(compiled, "<$1/>")
 }
 
 func resetShortcutGen() {

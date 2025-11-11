@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/electrikmilk/args-parser"
+	"howett.net/plist"
 )
 
 var signFailed = false
@@ -110,9 +111,12 @@ func handleBackoff(service *SigningService) {
 }
 
 func requestSignedShortcut(service *SigningService) []byte {
+	var marshaledPlist, plistErr = plist.Marshal(shortcut, plist.XMLFormat)
+	handle(plistErr)
+
 	var payload = map[string]string{
 		"shortcutName": basename,
-		"shortcut":     compiled,
+		"shortcut":     string(marshaledPlist),
 	}
 	var jsonPayload, jsonErr = json.Marshal(payload)
 	handle(jsonErr)

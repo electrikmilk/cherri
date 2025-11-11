@@ -10,30 +10,16 @@ import (
 	"os/exec"
 
 	"github.com/electrikmilk/args-parser"
+	"howett.net/plist"
 )
-
-// writeFile writes plist in bytes to filename.
-func writeFile(filename string, debug string) {
-	var writeDebugOutput = args.Using("debug")
-	if writeDebugOutput {
-		fmt.Printf("Writing to %s...", debug)
-	}
-
-	var writeErr = os.WriteFile(filename, []byte(compiled), 0600)
-	handle(writeErr)
-
-	if writeDebugOutput {
-		fmt.Println(ansi("Done.", green))
-	}
-}
 
 // createShortcut writes the Shortcut files to disk and signs them if the unsigned argument is not unused.
 func createShortcut() {
 	var path = fmt.Sprintf("%s%s", relativePath, workflowName)
 	if args.Using("debug") {
-		writeFile(path+".plist", workflowName+".plist")
+		writeShortcut(path+".plist", workflowName+".plist")
 	}
-	writeFile(path+unsignedEnd, workflowName+unsignedEnd)
+	writeShortcut(path+unsignedEnd, workflowName+unsignedEnd)
 
 	inputPath = fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd)
 
@@ -55,6 +41,30 @@ func createShortcut() {
 		if args.Using("open") {
 			openShortcut()
 		}
+	}
+}
+
+// writeShortcut encodes shortcut by writing plist data at path.
+func writeShortcut(path string, debug string) {
+	var writeDebugOutput = args.Using("debug")
+	if writeDebugOutput {
+		fmt.Printf("Writing to %s...", debug)
+	}
+
+	var unsignedFile, unsignedFileErr = os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	handle(unsignedFileErr)
+	defer unsignedFile.Close()
+
+	var plistEncoder = plist.NewEncoder(unsignedFile)
+	if args.Using("debug") {
+		plistEncoder.Indent("\t")
+	}
+
+	var encodeErr = plistEncoder.Encode(shortcut)
+	handle(encodeErr)
+
+	if writeDebugOutput {
+		fmt.Println(ansi("Done.", green))
 	}
 }
 

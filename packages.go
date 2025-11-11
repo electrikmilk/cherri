@@ -213,8 +213,8 @@ func writeTrustedPackages() {
 	var marshaledPlist, plistErr = plist.MarshalIndent(trusted, plist.XMLFormat, "\t")
 	handle(plistErr)
 
-	compiled = string(marshaledPlist)
-	writeFile(trustedPackagesPlistPath, trustedPackagesPlistPath)
+	var writeErr = os.WriteFile(filename, marshaledPlist, 0600)
+	handle(writeErr)
 }
 
 // loadPackage loads the package in the current directory.
@@ -237,8 +237,8 @@ func writePackage() {
 	var marshaledPlist, plistErr = plist.MarshalIndent(currentPkg, plist.XMLFormat, "\t")
 	handle(plistErr)
 
-	compiled = string(marshaledPlist)
-	writeFile("info.plist", "info.plist")
+	var writeErr = os.WriteFile("info.plist", marshaledPlist, 0600)
+	handle(writeErr)
 }
 
 // tidyPackage re-installs all packages in the package in the current directory.
