@@ -58,6 +58,10 @@ func sign() {
 
 		useHubSign()
 	}
+
+	if args.Using("debug") {
+		fmt.Println(ansi("Done.", green))
+	}
 }
 
 func useHubSign() {
