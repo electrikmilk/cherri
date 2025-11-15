@@ -41,11 +41,11 @@ func decompile(b []byte) {
 	controlFlowGroups = make(map[int]controlFlowGroup)
 
 	basename = strings.ReplaceAll(basename, " ", "_")
-	outputPath = getOutputPath(fmt.Sprintf("%s%s.cherri", relativePath, basename))
+	outputPath = getOutputPath(basename + ".cherri")
 	if args.Using("no-ansi") {
 		filePath = basename + ".cherri"
 	} else {
-		filePath = getOutputPath(relativePath + basename + ".cherri")
+		filePath = outputPath
 	}
 
 	loadBasicStandardActions()

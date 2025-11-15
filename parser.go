@@ -936,9 +936,6 @@ func collectNameDefinition() {
 	if strings.Trim(workflowName, " \n\t") == "" {
 		parserError("Expected name")
 	}
-	if !args.Using("output") {
-		outputPath = relativePath + workflowName + ".shortcut"
-	}
 }
 
 func collectVersionDefinition() {

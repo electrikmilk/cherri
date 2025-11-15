@@ -8,18 +8,53 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/electrikmilk/args-parser"
 	"howett.net/plist"
 )
 
+func getOutputPath(name string) string {
+	if args.Using("output") && args.Value("output") != "" {
+		var outputPathArg = args.Value("output")
+		var outputPathEnding = end(strings.Split(outputPathArg, "/"))
+
+		if !strings.Contains(outputPathEnding, ".") {
+			var outputPathInfo, outputPathErr = os.Stat(outputPathArg)
+			if os.IsNotExist(outputPathErr) {
+				exit(fmt.Sprintf("Output path '%s' does not exist!", outputPathArg))
+			}
+			if outputPathInfo.IsDir() {
+				if outputPathArg[len(outputPathArg)-1] != '/' {
+					outputPathArg = fmt.Sprintf("%s/", outputPathArg)
+				}
+				return fmt.Sprintf("%s%s", outputPathArg, name)
+			}
+		}
+
+		var relativeOutputPath = strings.Replace(outputPathArg, outputPathEnding, "", 1)
+		if _, err := os.Stat(relativeOutputPath); os.IsNotExist(err) {
+			exit(fmt.Sprintf("Output path '%s' does not exist!", relativeOutputPath))
+		}
+
+		return outputPathArg
+	}
+
+	if relativePath == "" {
+		return name
+	}
+
+	return fmt.Sprintf("%s%s", relativePath, name)
+}
+
 // createShortcut writes the Shortcut files to disk and signs them if the unsigned argument is not unused.
 func createShortcut() {
-	var path = fmt.Sprintf("%s%s", relativePath, workflowName)
+	outputPath = getOutputPath(workflowName + ".shortcut")
+	var relativeFile = fmt.Sprintf("%s%s", relativePath, workflowName)
 	if args.Using("debug") {
-		writeShortcut(path+".plist", workflowName+".plist")
+		writeShortcut(relativeFile+".plist", workflowName+".plist")
 	}
-	writeShortcut(path+unsignedEnd, workflowName+unsignedEnd)
+	writeShortcut(relativeFile+unsignedEnd, workflowName+unsignedEnd)
 
 	inputPath = fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd)
 
