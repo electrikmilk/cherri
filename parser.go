@@ -562,8 +562,6 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		*valueType = Question
 		*value = reference
 		q.used = true
-
-		advance()
 		return
 	}
 
