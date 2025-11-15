@@ -855,6 +855,8 @@ func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary map[s
 	return
 }
 
+var numericRegex = regexp.MustCompile("^[0-9]+$")
+
 func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	var itemStringValue = decompValue(item.WFValue)
 	var itemValueType = item.WFItemType
@@ -867,8 +869,13 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 
 	switch dictDataType(itemValueType) {
 	case itemTypeNumber:
+		itemValue = decompValue(item.WFValue.(map[string]interface{}))
+		if !numericRegex.MatchString(itemValue.(string)) {
+			break
+		}
+
 		var convErr error
-		itemValue, convErr = strconv.ParseInt(decompValue(item.WFValue.(map[string]interface{})), 10, 64)
+		itemValue, convErr = strconv.ParseInt(itemValue.(string), 10, 64)
 		handle(convErr)
 	case itemTypeBool:
 		var wfValue = item.WFValue.(map[string]interface{})
