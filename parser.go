@@ -213,6 +213,9 @@ func parse() {
 	case startOfLineTokenAhead(Definition):
 		advance()
 		collectDefinition()
+	case startOfLineTokenAhead(Import):
+		var importPath = collectImport()
+		importActions(importPath)
 	case isChar('@'):
 		collectVariable(false)
 	case tokenAhead(Constant):
@@ -895,6 +898,20 @@ func collectIdentifier() string {
 	}
 
 	return identifier.String()
+}
+
+func collectImport() string {
+	skipWhitespace()
+
+	if char != '\'' {
+		parserError(fmt.Sprintf("Expected raw string ('), got: %c", char))
+	}
+
+	advance()
+
+	var path = collectRawString()
+
+	return path
 }
 
 func collectDefinition() {

@@ -29,6 +29,7 @@ const (
 	Definition     tokenType = "#define"
 	Question       tokenType = "#question"
 	Include        tokenType = "#include"
+	Import         tokenType = "#import"
 	Action         tokenType = "action"
 	Function       tokenType = "function"
 	Copy           tokenType = "copy"
