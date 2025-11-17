@@ -101,7 +101,7 @@ func importActions(identifier string) {
 		fmt.Println("Importing actions for", identifier)
 	}
 
-	defineImportedActions(importedActions)
+	defineImportedActions(identifier, importedActions)
 
 	imported = append(imported, identifier)
 	if args.Using("debug") {
@@ -109,11 +109,16 @@ func importActions(identifier string) {
 	}
 }
 
-func defineImportedActions(importedActions []actionTool) {
+func defineImportedActions(identifier string, importedActions []actionTool) {
+	var namespace = end(strings.Split(identifier, "."))
 	for _, action := range importedActions {
 		var intent = end(strings.Split(action.id.String, "."))
 		var trimIntent = strings.TrimSuffix(intent, "Intent")
-		var name = camelCase(trimIntent)
+		var name = fmt.Sprintf("%s_%s", namespace, trimIntent)
+		if args.Using("debug") {
+			fmt.Println("Action name: ", name)
+		}
+		var actionIdentifier = camelCase(name)
 
 		var outputType, outputTypeErr = getActionOutputType(action.rowId.String)
 		handle(outputTypeErr)
@@ -127,7 +132,7 @@ func defineImportedActions(importedActions []actionTool) {
 
 		var paramDefs = importParamDefinitions(action.rowId.String, action.id.String)
 
-		actions[name] = &actionDefinition{
+		actions[actionIdentifier] = &actionDefinition{
 			overrideIdentifier: action.id.String,
 			parameters:         paramDefs,
 			outputType:         outputType,
@@ -209,7 +214,7 @@ func defineParamEnums(param toolParam, enums []enumerationCase, definition param
 
 func camelCase(s string) (c string) {
 	for i, r := range s {
-		if unicode.IsSpace(r) {
+		if unicode.IsSpace(r) || r == '-' {
 			continue
 		}
 		if i != 0 && unicode.IsUpper(r) {
