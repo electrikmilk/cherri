@@ -7,6 +7,7 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"unicode"
 
 	"github.com/electrikmilk/args-parser"
 	_ "github.com/glebarez/go-sqlite"
@@ -85,8 +86,6 @@ func connectToolkitDB() {
 	toolkit = db
 }
 
-var imported []string
-
 func importActions(identifier string) {
 	if slices.Contains(imported, identifier) {
 		parserError(fmt.Sprintf("Actions and types from '%s' have already been imported.", identifier))
@@ -100,10 +99,10 @@ func importActions(identifier string) {
 
 	fmt.Println("### ACTIONS ###")
 
-	var actions, actionsErr = getActions(identifier)
+	var importedActions, actionsErr = getActions(identifier)
 	handle(actionsErr)
 
-	fmt.Println(actions)
+	defineImportedActions(importedActions)
 
 	fmt.Println("### ENUMS ###")
 
@@ -113,6 +112,34 @@ func importActions(identifier string) {
 	fmt.Println(enums)
 
 	imported = append(imported, identifier)
+}
+
+func defineImportedActions(importedActions []actionTool) {
+	for _, action := range importedActions {
+		var params, paramsErr = getActionParams(action.rowId.String)
+		handle(paramsErr)
+		fmt.Println("### PARAMS ###")
+		fmt.Println(params)
+
+		var endingIdentifier = end(strings.Split(action.id.String, "."))
+		var replaceIntent = strings.Replace(endingIdentifier, "Intent", "", 1)
+		var name = camelCase(replaceIntent)
+
+		actions[name] = &actionDefinition{
+			overrideIdentifier: action.id.String,
+		}
+	}
+}
+
+func camelCase(s string) (c string) {
+	for i, r := range s {
+		if i != 0 && unicode.IsUpper(r) {
+			c += strings.ToUpper(string(r))
+		} else {
+			c += strings.ToLower(string(r))
+		}
+	}
+	return
 }
 
 type AppInfo struct {
@@ -194,6 +221,41 @@ func getActions(idPattern string) ([]actionTool, error) {
 	}
 
 	return tools, nil
+}
+
+type toolParam struct {
+	key       sql.NullString
+	sortOrder sql.NullInt64
+}
+
+func getActionParams(toolId string) ([]toolParam, error) {
+	var query = `select key, sortOrder from Parameters WHERE toolId = ?`
+
+	var rows, err = toolkit.Query(query, toolId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var params []toolParam
+	for rows.Next() {
+		var param toolParam
+
+		if err := rows.Scan(
+			&param.key,
+			&param.sortOrder,
+		); err != nil {
+			return nil, err
+		}
+
+		params = append(params, param)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return params, nil
 }
 
 type enumerationCase struct {
