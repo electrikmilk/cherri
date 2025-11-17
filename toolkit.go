@@ -57,7 +57,7 @@ func importActions(identifier string) {
 
 	fmt.Println("### ENUMS ###")
 
-	var enums, enumsErr = getEnums("com.sindresorhus.Color-Picker.TransportType")
+	var enums, enumsErr = getEnums(identifier)
 	handle(enumsErr)
 
 	fmt.Println(enums)
@@ -159,9 +159,9 @@ type enumerationCase struct {
 }
 
 func getEnums(typeId string) ([]enumerationCase, error) {
-	var query = `select * from EnumerationCases WHERE typeId = ?`
+	var query = `select * from EnumerationCases WHERE typeId LIKE ?`
 
-	var rows, err = toolkit.Query(query, typeId)
+	var rows, err = toolkit.Query(query, typeId+".%")
 	if err != nil {
 		return nil, err
 	}
