@@ -110,7 +110,7 @@ type actionTool struct {
 func getActions(idPattern string) ([]actionTool, error) {
 	var query = `select * from Tools WHERE id LIKE ?`
 
-	var rows, err = toolkit.Query(query, fmt.Sprintf("%s.%", idPattern))
+	var rows, err = toolkit.Query(query, fmt.Sprintf("%s.\\%", idPattern))
 	if err != nil {
 		return nil, err
 	}
