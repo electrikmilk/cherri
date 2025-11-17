@@ -176,7 +176,6 @@ func initPackage() {
 	fmt.Println(ansi("Initialized Cherri package", green))
 }
 
-var internalDirectoryPath = os.ExpandEnv("$HOME/.cherri")
 var trustedPackagesPlistPath = os.ExpandEnv("$HOME/.cherri/trusted.plist")
 
 type trustedPackages struct {
@@ -186,6 +185,8 @@ type trustedPackages struct {
 var trusted trustedPackages
 
 func loadTrustedPackages() {
+	createInternalDir()
+
 	if _, statErr := os.Stat(trustedPackagesPlistPath); os.IsNotExist(statErr) {
 		return
 	}
