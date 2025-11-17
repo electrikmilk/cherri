@@ -29,10 +29,6 @@ func handleImports() {
 	}
 
 	parseImports()
-
-	if args.Using("debug") {
-		printPasteablesDebug()
-	}
 }
 
 func parseImports() {
