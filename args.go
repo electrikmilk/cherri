@@ -84,6 +84,11 @@ func init() {
 		Description: "Re-install all packages.",
 	})
 	args.Register(args.Argument{
+		Name:         "database",
+		Description:  "Custom path to SQLite database.",
+		ExpectsValue: true,
+	})
+	args.Register(args.Argument{
 		Name:         "signing-server",
 		ExpectsValue: true,
 		Description:  "Sign the compiled Shortcut using a remote signing service that runs https://github.com/scaxyz/shortcut-signing-server.",
