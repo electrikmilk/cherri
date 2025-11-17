@@ -345,7 +345,7 @@ func includePackages() {
 		return
 	}
 
-	var sortedPackages []cherriPackage
+	var sortedPackages = make([]cherriPackage, len(currentPkg.Packages))
 	copy(sortedPackages, currentPkg.Packages)
 	slices.SortFunc(sortedPackages, func(a, b cherriPackage) int {
 		return strings.Compare(a.signature(), b.signature())
