@@ -70,9 +70,6 @@ type AppInfo struct {
 }
 
 func matchApplication(identifier *string) {
-	// TODO: Match against applications folder.
-	// Look for identifier in Contents/Info.plist unmarshal
-	// or decode to get the key CFBundleIdentifier and modify it to be identifier.
 	var apps, readErr = os.ReadDir("/Applications")
 	handle(readErr)
 	for _, app := range apps {
