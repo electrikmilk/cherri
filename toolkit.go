@@ -177,7 +177,7 @@ func importParamDefinitions(toolId string, identifier string) (definitions []par
 		var enums, enumErr = getParamEnums(identifier, def.key)
 		handle(enumErr)
 
-		defineParamEnums(param, enums, def)
+		defineParamEnums(param, enums, &def)
 
 		definitions = append(definitions, def)
 	}
@@ -185,7 +185,7 @@ func importParamDefinitions(toolId string, identifier string) (definitions []par
 	return
 }
 
-func defineParamEnums(param toolParam, enums []enumerationCase, definition parameterDefinition) {
+func defineParamEnums(param toolParam, enums []enumerationCase, definition *parameterDefinition) {
 	var paramEnumerations []string
 	for _, enum := range enums {
 		if enum.locale.String != "en" {
@@ -198,16 +198,19 @@ func defineParamEnums(param toolParam, enums []enumerationCase, definition param
 		fmt.Println("Param Enum:", paramEnumerations)
 	}
 
-	if len(paramEnumerations) != 0 {
-		var enumName = param.key.String + "Types"
-		if _, found := enumerations[enumName]; !found {
-			enumerations[enumName] = paramEnumerations
-			definition.enum = enumName
-			definition.validType = String
+	if len(paramEnumerations) == 0 {
+		return
+	}
 
-			if args.Using("debug") {
-				fmt.Println("Defined enum", enumName)
-			}
+	var enumName = fmt.Sprintf("%ss", param.key.String)
+	definition.enum = enumName
+	definition.validType = String
+
+	if _, found := enumerations[enumName]; !found {
+		enumerations[enumName] = paramEnumerations
+
+		if args.Using("debug") {
+			fmt.Println("Defined enum", enumName)
 		}
 	}
 }
