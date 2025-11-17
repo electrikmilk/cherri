@@ -69,7 +69,7 @@ type AppInfo struct {
 	CFBundleIdentifier string
 }
 
-func matchApplication(identifier *string) string {
+func matchApplication(identifier *string) {
 	// TODO: Match against applications folder.
 	// Look for identifier in Contents/Info.plist unmarshal
 	// or decode to get the key CFBundleIdentifier and modify it to be identifier.
@@ -84,11 +84,12 @@ func matchApplication(identifier *string) string {
 			var decodeErr = plist.NewDecoder(bytes.NewReader(infoBytes)).Decode(&info)
 			handle(decodeErr)
 
-			return info.CFBundleIdentifier
+			*identifier = info.CFBundleIdentifier
+			return
 		}
 	}
+
 	parserError(fmt.Sprintf("Could not find '%s' in /Applications/.", *identifier))
-	return ""
 }
 
 type actionTool struct {
