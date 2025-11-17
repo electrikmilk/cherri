@@ -115,11 +115,23 @@ func defineImportedActions(importedActions []actionTool) {
 		var trimIntent = strings.TrimSuffix(intent, "Intent")
 		var name = camelCase(trimIntent)
 
+		var outputType, outputTypeErr = getActionOutputType(action.rowId.String)
+		handle(outputTypeErr)
+
+		var actionLocalization, localizeErr = getActionLocalization(action.rowId.String)
+		handle(localizeErr)
+		var doc = selfDoc{
+			title:       actionLocalization.name.String,
+			description: actionLocalization.descriptionSummary.String,
+		}
+
 		var paramDefs = importParamDefinitions(action.rowId.String, action.id.String)
 
 		actions[name] = &actionDefinition{
 			overrideIdentifier: action.id.String,
 			parameters:         paramDefs,
+			outputType:         outputType,
+			doc:                doc,
 		}
 
 		if args.Using("debug") {
@@ -363,6 +375,49 @@ func getActionParamType(toolId string, key string) (tokenType, error) {
 	}
 
 	return paramTokenType, nil
+}
+
+func getActionOutputType(toolId string) (tokenType, error) {
+	var query = `select typeIdentifier from ToolOutputTypes WHERE toolId = ? LIMIT 1`
+	var row = toolkit.QueryRow(query, toolId)
+	handle(row.Err())
+
+	var outputType string
+	var scanErr = row.Scan(&outputType)
+	handle(scanErr)
+
+	var outputTokenType tokenType
+	switch outputType {
+	case "string":
+		outputTokenType = String
+	case "int":
+		outputTokenType = Integer
+	case "decimal":
+		outputTokenType = Float
+	case "bool":
+		outputTokenType = Bool
+	}
+
+	return outputTokenType, nil
+}
+
+type actionLocalization struct {
+	name               sql.NullString
+	descriptionSummary sql.NullString
+}
+
+func getActionLocalization(toolId string) (actionLocalization, error) {
+	var query = `select name, descriptionSummary from ToolLocalizations WHERE toolId = ? and locale = 'en' LIMIT 1`
+	var row = toolkit.QueryRow(query, toolId)
+	handle(row.Err())
+
+	var localization actionLocalization
+	var scanErr = row.Scan(&localization.name, &localization.descriptionSummary)
+	if scanErr != nil {
+		return actionLocalization{}, scanErr
+	}
+
+	return localization, nil
 }
 
 type enumerationCase struct {
