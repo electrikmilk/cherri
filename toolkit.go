@@ -93,42 +93,113 @@ func importActions(identifier string) {
 		matchApplication(&identifier)
 	}
 
-	fmt.Println("### ACTIONS ###")
-
 	var importedActions, actionsErr = getActions(identifier)
 	handle(actionsErr)
 
+	if args.Using("debug") {
+		fmt.Println("### IMPORTING ACTIONS ###")
+		fmt.Println("Importing actions for", identifier)
+	}
+
 	defineImportedActions(importedActions)
 
-	fmt.Println("### ENUMS ###")
-
-	var enums, enumsErr = getEnums(identifier)
-	handle(enumsErr)
-
-	fmt.Println(enums)
-
 	imported = append(imported, identifier)
+	if args.Using("debug") {
+		fmt.Println("Imported actions from", identifier)
+	}
 }
 
 func defineImportedActions(importedActions []actionTool) {
 	for _, action := range importedActions {
-		var params, paramsErr = getActionParams(action.rowId.String)
-		handle(paramsErr)
-		fmt.Println("### PARAMS ###")
-		fmt.Println(params)
+		var intent = end(strings.Split(action.id.String, "."))
+		var trimIntent = strings.TrimSuffix(intent, "Intent")
+		var name = camelCase(trimIntent)
 
-		var endingIdentifier = end(strings.Split(action.id.String, "."))
-		var replaceIntent = strings.Replace(endingIdentifier, "Intent", "", 1)
-		var name = camelCase(replaceIntent)
+		var paramDefs = importParamDefinitions(action.rowId.String, action.id.String)
 
 		actions[name] = &actionDefinition{
 			overrideIdentifier: action.id.String,
+			parameters:         paramDefs,
+		}
+
+		if args.Using("debug") {
+			fmt.Println("Imported action:", name+"()")
+			fmt.Println("Params:", paramDefs)
+			fmt.Print("\n")
+		}
+	}
+}
+
+func importParamDefinitions(toolId string, identifier string) (definitions []parameterDefinition) {
+	var params, paramsErr = getActionParams(toolId)
+	handle(paramsErr)
+
+	var sortedParams = make([]toolParam, len(params))
+	copy(sortedParams, params)
+	slices.SortFunc(sortedParams, func(a, b toolParam) int {
+		return int(a.sortOrder.Int64 - b.sortOrder.Int64)
+	})
+
+	for _, param := range sortedParams {
+		var def = parameterDefinition{
+			key: param.key.String,
+		}
+
+		if args.Using("debug") {
+			fmt.Println("Param:", def.key)
+		}
+
+		var paramName, paramNameErr = getActionParamName(toolId, def.key)
+		handle(paramNameErr)
+		def.name = paramName
+
+		var paramTokenType, tokenTypeErr = getActionParamType(toolId, def.key)
+		handle(tokenTypeErr)
+		def.validType = paramTokenType
+
+		var enums, enumErr = getParamEnums(identifier, def.key)
+		handle(enumErr)
+
+		defineParamEnums(param, enums, def)
+
+		definitions = append(definitions, def)
+	}
+
+	return
+}
+
+func defineParamEnums(param toolParam, enums []enumerationCase, definition parameterDefinition) {
+	var paramEnumerations []string
+	for _, enum := range enums {
+		if enum.locale.String != "en" {
+			continue
+		}
+		paramEnumerations = append(paramEnumerations, enum.title.String)
+	}
+
+	if args.Using("debug") {
+		fmt.Println("Param Enum:", paramEnumerations)
+	}
+
+	if len(paramEnumerations) != 0 {
+		var enumName = param.key.String + "Types"
+		if _, found := enumerations[enumName]; !found {
+			enumerations[enumName] = paramEnumerations
+			definition.enum = enumName
+			definition.validType = String
+
+			if args.Using("debug") {
+				fmt.Println("Defined enum", enumName)
+			}
 		}
 	}
 }
 
 func camelCase(s string) (c string) {
 	for i, r := range s {
+		if unicode.IsSpace(r) {
+			continue
+		}
 		if i != 0 && unicode.IsUpper(r) {
 			c += strings.ToUpper(string(r))
 		} else {
@@ -254,6 +325,46 @@ func getActionParams(toolId string) ([]toolParam, error) {
 	return params, nil
 }
 
+func getActionParamName(toolId string, key string) (string, error) {
+	var query = `select name from ParameterLocalizations WHERE toolId = ? AND key = ? AND locale = 'en' LIMIT 1`
+	var row = toolkit.QueryRow(query, toolId, key)
+	handle(row.Err())
+
+	var paramName string
+	var scanErr = row.Scan(&paramName)
+	handle(scanErr)
+
+	paramName = camelCase(paramName)
+
+	return paramName, nil
+}
+
+func getActionParamType(toolId string, key string) (tokenType, error) {
+	var query = `select typeId from ToolParameterTypes WHERE toolId = ? AND key = ? LIMIT 1`
+	var row = toolkit.QueryRow(query, toolId, key)
+	handle(row.Err())
+
+	var paramType string
+	var scanErr = row.Scan(&paramType)
+	handle(scanErr)
+
+	var paramTokenType tokenType
+	switch paramType {
+	case "string":
+		paramTokenType = String
+	case "int":
+		paramTokenType = Integer
+	case "decimal":
+		paramTokenType = Float
+	case "bool":
+		paramTokenType = Bool
+	default:
+		paramTokenType = Variable
+	}
+
+	return paramTokenType, nil
+}
+
 type enumerationCase struct {
 	typeId             sql.NullString
 	locale             sql.NullString
@@ -266,10 +377,12 @@ type enumerationCase struct {
 	synonyms           sql.NullString
 }
 
-func getEnums(typeId string) ([]enumerationCase, error) {
-	var query = `select * from EnumerationCases WHERE typeId LIKE ?`
+func getParamEnums(identifier string, key string) ([]enumerationCase, error) {
+	var query = `select * from EnumerationCases WHERE typeId = ?`
 
-	var rows, err = toolkit.Query(query, typeId+".%")
+	var enumIdentifier = fmt.Sprintf("com.apple.shortcuts.%s.%s", identifier, key)
+
+	var rows, err = toolkit.Query(query, enumIdentifier)
 	if err != nil {
 		return nil, err
 	}
