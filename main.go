@@ -26,6 +26,8 @@ var relativePath string
 var inputPath string
 var outputPath string
 
+var internalDirectoryPath = os.ExpandEnv("$HOME/.cherri")
+
 const unsignedEnd = "_unsigned.shortcut"
 const darwin = runtime.GOOS == "darwin"
 
@@ -147,6 +149,13 @@ func handle(err error) {
 		panicDebug(err)
 	} else {
 		panic(err)
+	}
+}
+
+func createInternalDir() {
+	if _, statErr := os.Stat(internalDirectoryPath); os.IsNotExist(statErr) {
+		var intDirErr = os.Mkdir(internalDirectoryPath, 0777)
+		handle(intDirErr)
 	}
 }
 
