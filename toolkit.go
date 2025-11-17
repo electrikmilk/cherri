@@ -19,6 +19,56 @@ Reads Shortcuts ToolKit SQLite DB to define actions and their parameters for use
 
 var shortcutsDBPath = os.ExpandEnv("$HOME/Library/Shortcuts/ToolKit/Tools-active")
 var toolkit *sql.DB
+var imported []string
+
+func handleImports() {
+	var matches = copyPasteRegex.FindAllStringSubmatch(contents, -1)
+	if len(matches) == 0 {
+		return
+	}
+
+	parseImports()
+
+	if args.Using("debug") {
+		printPasteablesDebug()
+	}
+}
+
+func parseImports() {
+	pasteables = make(map[string]string)
+	for char != -1 {
+		switch {
+		case char == '"':
+			collectString()
+			advanceUntil('\n')
+		case commentAhead():
+			collectComment()
+		case startOfLineTokenAhead(Import):
+			var importPath = collectImport()
+			importActions(importPath)
+		}
+		advance()
+	}
+
+	resetParse()
+}
+
+func collectImport() string {
+	var lineRef = newLineReference()
+	skipWhitespace()
+
+	if char != '\'' {
+		parserError(fmt.Sprintf("Expected raw string ('), got: %c", char))
+	}
+
+	advance()
+
+	var path = collectRawString()
+
+	lineRef.replaceLines()
+
+	return path
+}
 
 func connectToolkitDB() {
 	if toolkit != nil {
