@@ -12,8 +12,8 @@ import (
 var shortcutsDBPath = os.ExpandEnv("$HOME/Library/Shortcuts/ToolKit/Tools-active")
 
 func init() {
-	if args.Using("database") {
-		shortcutsDBPath = args.Value("database")
+	if args.Using("toolkit") {
+		shortcutsDBPath = args.Value("toolkit")
 	}
 
 	var db, dbErr = sql.Open("sqlite", shortcutsDBPath)

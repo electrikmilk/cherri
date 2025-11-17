@@ -84,8 +84,8 @@ func init() {
 		Description: "Re-install all packages.",
 	})
 	args.Register(args.Argument{
-		Name:         "database",
-		Description:  "Custom path to SQLite database.",
+		Name:         "toolkit",
+		Description:  "Path to Shortcuts ToolKit SQLite database.",
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
