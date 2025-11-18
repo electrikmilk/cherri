@@ -728,8 +728,6 @@ func generateActionDebugDefinition() string {
 	var definitionType string
 	if currentAction.builtin {
 		definitionType = "#builtin"
-	} else {
-		definitionType = "#define"
 	}
 
 	definition.WriteString(ansi(fmt.Sprintf("%s action ", definitionType), orange))
