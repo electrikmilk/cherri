@@ -112,9 +112,17 @@ func importActions(identifier string) {
 func defineImportedActions(identifier string, importedActions []actionTool) {
 	var namespace = end(strings.Split(identifier, "."))
 	for _, action := range importedActions {
-		var intent = end(strings.Split(action.id.String, "."))
+		var idParts = strings.Split(action.id.String, ".")
+		var suffix = idParts[len(idParts)-2]
+		var intent = end(idParts)
 		var trimIntent = strings.TrimSuffix(intent, "Intent")
-		var name = fmt.Sprintf("%s_%s", namespace, trimIntent)
+
+		var name string
+		if namespace != suffix {
+			name = fmt.Sprintf("%s_%s %s", namespace, trimIntent, capitalize(suffix))
+		} else {
+			name = fmt.Sprintf("%s_%s", namespace, trimIntent)
+		}
 		if args.Using("debug") {
 			fmt.Println("Action name: ", name)
 		}
