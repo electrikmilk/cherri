@@ -177,7 +177,7 @@ func importParamDefinitions(toolId string, identifier string) (definitions []par
 		var enums, enumErr = getParamEnums(identifier, def.key)
 		handle(enumErr)
 
-		defineParamEnums(param, enums, &def)
+		defineParamEnums(def.name, param, enums, &def)
 
 		definitions = append(definitions, def)
 	}
@@ -185,7 +185,7 @@ func importParamDefinitions(toolId string, identifier string) (definitions []par
 	return
 }
 
-func defineParamEnums(param toolParam, enums []enumerationCase, definition *parameterDefinition) {
+func defineParamEnums(name string, param toolParam, enums []enumerationCase, definition *parameterDefinition) {
 	var paramEnumerations []string
 	for _, enum := range enums {
 		paramEnumerations = append(paramEnumerations, enum.title.String)
@@ -199,7 +199,7 @@ func defineParamEnums(param toolParam, enums []enumerationCase, definition *para
 		return
 	}
 
-	var enumName = fmt.Sprintf("%ss", param.key.String)
+	var enumName = fmt.Sprintf("%ss", name)
 	definition.enum = enumName
 	definition.validType = String
 
