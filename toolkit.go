@@ -188,9 +188,6 @@ func importParamDefinitions(toolId string, identifier string) (definitions []par
 func defineParamEnums(param toolParam, enums []enumerationCase, definition *parameterDefinition) {
 	var paramEnumerations []string
 	for _, enum := range enums {
-		if enum.locale.String != "en" {
-			continue
-		}
 		paramEnumerations = append(paramEnumerations, enum.title.String)
 	}
 
@@ -433,19 +430,11 @@ func getActionLocalization(toolId string) (actionLocalization, error) {
 }
 
 type enumerationCase struct {
-	typeId             sql.NullString
-	locale             sql.NullString
-	id                 sql.NullString
-	title              sql.NullString
-	subtitle           sql.NullString
-	altText            sql.NullString
-	image              sql.NullString
-	snippetPluginModel sql.NullString
-	synonyms           sql.NullString
+	title sql.NullString
 }
 
 func getParamEnums(identifier string, key string) ([]enumerationCase, error) {
-	var query = `select * from EnumerationCases WHERE typeId = ?`
+	var query = `select title from EnumerationCases WHERE typeId = ? AND locale = 'en'`
 
 	var enumIdentifier = fmt.Sprintf("com.apple.shortcuts.%s.%s", identifier, key)
 
@@ -460,15 +449,7 @@ func getParamEnums(identifier string, key string) ([]enumerationCase, error) {
 		var enum enumerationCase
 
 		if err := rows.Scan(
-			&enum.typeId,
-			&enum.locale,
-			&enum.id,
 			&enum.title,
-			&enum.subtitle,
-			&enum.altText,
-			&enum.image,
-			&enum.snippetPluginModel,
-			&enum.synonyms,
 		); err != nil {
 			return nil, err
 		}
