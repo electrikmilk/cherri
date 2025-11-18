@@ -171,13 +171,16 @@ func importParamDefinitions(toolId string, identifier string) (definitions []par
 		def.name = paramName
 
 		var paramTokenType, tokenTypeErr = getActionParamType(toolId, def.key)
+		if paramTokenType == Quantity {
+			def.qty = true
+		}
 		handle(tokenTypeErr)
 		def.validType = paramTokenType
 
 		var enums, enumErr = getParamEnums(identifier, def.key)
 		handle(enumErr)
 
-		defineParamEnums(def.name, param, enums, &def)
+		defineParamEnums(def.name, enums, &def)
 
 		definitions = append(definitions, def)
 	}
@@ -185,7 +188,7 @@ func importParamDefinitions(toolId string, identifier string) (definitions []par
 	return
 }
 
-func defineParamEnums(name string, param toolParam, enums []enumerationCase, definition *parameterDefinition) {
+func defineParamEnums(name string, enums []enumerationCase, definition *parameterDefinition) {
 	var paramEnumerations []string
 	for _, enum := range enums {
 		paramEnumerations = append(paramEnumerations, enum.title.String)
@@ -201,7 +204,9 @@ func defineParamEnums(name string, param toolParam, enums []enumerationCase, def
 
 	var enumName = fmt.Sprintf("%ss", name)
 	definition.enum = enumName
-	definition.validType = String
+	if definition.validType != Quantity {
+		definition.validType = String
+	}
 
 	if _, found := enumerations[enumName]; !found {
 		enumerations[enumName] = paramEnumerations
@@ -379,6 +384,8 @@ func getActionParamType(toolId string, key string) (tokenType, error) {
 		paramTokenType = Bool
 	case "dictionary":
 		paramTokenType = Dict
+	case "genericMeasurement":
+		paramTokenType = Quantity
 	default:
 		paramTokenType = Variable
 	}
