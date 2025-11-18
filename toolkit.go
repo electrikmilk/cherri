@@ -138,7 +138,7 @@ func defineImportedActions(identifier string, importedActions []actionTool) {
 			description: actionLocalization.descriptionSummary.String,
 		}
 
-		var paramDefs = importParamDefinitions(action.rowId.String, action.id.String)
+		var paramDefs = importParamDefinitions(name, action.rowId.String, action.id.String)
 
 		actions[actionIdentifier] = &actionDefinition{
 			overrideIdentifier: action.id.String,
@@ -155,7 +155,7 @@ func defineImportedActions(identifier string, importedActions []actionTool) {
 	}
 }
 
-func importParamDefinitions(toolId string, identifier string) (definitions []parameterDefinition) {
+func importParamDefinitions(name string, toolId string, identifier string) (definitions []parameterDefinition) {
 	var params, paramsErr = getActionParams(toolId)
 	handle(paramsErr)
 
@@ -188,7 +188,7 @@ func importParamDefinitions(toolId string, identifier string) (definitions []par
 		var enums, enumErr = getParamEnums(identifier, def.key)
 		handle(enumErr)
 
-		defineParamEnums(def.name, enums, &def)
+		defineParamEnums(name, def.name, enums, &def)
 
 		definitions = append(definitions, def)
 	}
@@ -196,7 +196,7 @@ func importParamDefinitions(toolId string, identifier string) (definitions []par
 	return
 }
 
-func defineParamEnums(name string, enums []enumerationCase, definition *parameterDefinition) {
+func defineParamEnums(identifier string, name string, enums []enumerationCase, definition *parameterDefinition) {
 	var paramEnumerations []string
 	for _, enum := range enums {
 		paramEnumerations = append(paramEnumerations, enum.title.String)
@@ -210,7 +210,7 @@ func defineParamEnums(name string, enums []enumerationCase, definition *paramete
 		return
 	}
 
-	var enumName = fmt.Sprintf("%ss", name)
+	var enumName = camelCase(fmt.Sprintf("%s_%ss", identifier, name))
 	definition.enum = enumName
 	if definition.validType != Quantity {
 		definition.validType = String
