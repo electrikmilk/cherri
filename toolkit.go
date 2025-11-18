@@ -373,11 +373,15 @@ func getActionParamType(toolId string, key string) (tokenType, error) {
 	case "string":
 		paramTokenType = String
 	case "int":
+		fallthrough
+	case "number":
 		paramTokenType = Integer
 	case "decimal":
 		paramTokenType = Float
 	case "bool":
 		paramTokenType = Bool
+	case "dictionary":
+		paramTokenType = Dict
 	default:
 		paramTokenType = Variable
 	}
