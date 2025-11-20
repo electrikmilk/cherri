@@ -194,7 +194,8 @@ func importParamDefinitions(name string, toolId string, identifier string) (defi
 
 	for _, param := range sortedParams {
 		var def = parameterDefinition{
-			key: param.key.String,
+			key:      param.key.String,
+			optional: true,
 		}
 
 		if args.Using("debug") {
