@@ -149,17 +149,14 @@ func importActions(identifier string) {
 func defineImportedActions(identifier string, importedActions []actionTool) {
 	var namespace = end(strings.Split(identifier, "."))
 	for _, action := range importedActions {
-		var idParts = strings.Split(action.id.String, ".")
-		var suffix = idParts[len(idParts)-2]
-		var intent = end(idParts)
-		var trimIntent = strings.TrimSuffix(intent, "Intent")
-
-		var name string
-		if namespace != suffix {
-			name = fmt.Sprintf("%s_%s %s", namespace, trimIntent, capitalize(suffix))
-		} else {
-			name = fmt.Sprintf("%s_%s", namespace, trimIntent)
+		var actionLocalization, localizeErr = getActionLocalization(action.rowId.String)
+		handle(localizeErr)
+		var doc = selfDoc{
+			title:       actionLocalization.name.String,
+			description: actionLocalization.descriptionSummary.String,
 		}
+
+		var name = fmt.Sprintf("%s_%s", namespace, doc.title)
 		if args.Using("debug") {
 			fmt.Println("Action name: ", name)
 		}
@@ -167,13 +164,6 @@ func defineImportedActions(identifier string, importedActions []actionTool) {
 
 		var outputType, outputTypeErr = getActionOutputType(action.rowId.String)
 		handle(outputTypeErr)
-
-		var actionLocalization, localizeErr = getActionLocalization(action.rowId.String)
-		handle(localizeErr)
-		var doc = selfDoc{
-			title:       actionLocalization.name.String,
-			description: actionLocalization.descriptionSummary.String,
-		}
 
 		var paramDefs = importParamDefinitions(name, action.rowId.String, action.id.String)
 
@@ -264,13 +254,16 @@ func defineParamEnums(identifier string, name string, enums []enumerationCase, d
 
 func camelCase(s string) (c string) {
 	for i, r := range s {
-		if unicode.IsSpace(r) || r == '-' {
+		if r == '_' {
+			c += "_"
 			continue
 		}
-		if i != 0 && unicode.IsUpper(r) {
-			c += strings.ToUpper(string(r))
-		} else {
-			c += strings.ToLower(string(r))
+		if (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+			if i != 0 && unicode.IsUpper(r) {
+				c += strings.ToUpper(string(r))
+			} else {
+				c += strings.ToLower(string(r))
+			}
 		}
 	}
 	return
