@@ -49,6 +49,7 @@ type enumerationCase struct {
 var shortcutsDBPath = os.ExpandEnv("$HOME/Library/Shortcuts/ToolKit/Tools-active")
 var toolkit *sql.DB
 var imported []string
+var toolkitLocale = "en"
 
 func handleImports() {
 	var matches = copyPasteRegex.FindAllStringSubmatch(contents, -1)
@@ -102,6 +103,10 @@ func connectToolkitDB() {
 
 	if args.Using("toolkit") {
 		shortcutsDBPath = args.Value("toolkit")
+	}
+
+	if args.Using("toolkit-locale") {
+		toolkitLocale = args.Value("toolkit-locale")
 	}
 
 	var db, dbErr = sql.Open("sqlite", shortcutsDBPath)
@@ -286,9 +291,9 @@ func matchApplication(identifier *string) (id string, err error) {
 }
 
 func getContainerId(name *string) (string, error) {
-	var query = `select containerId from ContainerMetadataLocalizations WHERE name LIKE ? and locale = 'en'`
+	var query = `select containerId from ContainerMetadataLocalizations WHERE name LIKE ? and locale = ?`
 
-	var row = toolkit.QueryRow(query, *name)
+	var row = toolkit.QueryRow(query, *name, toolkitLocale)
 	if row.Err() != nil {
 		return "", row.Err()
 	}
@@ -391,8 +396,8 @@ func getActionParams(toolId string) ([]toolParam, error) {
 }
 
 func getActionParamName(toolId string, key string) (string, error) {
-	var query = `select name from ParameterLocalizations WHERE toolId = ? AND key = ? AND locale = 'en' LIMIT 1`
-	var row = toolkit.QueryRow(query, toolId, key)
+	var query = `select name from ParameterLocalizations WHERE toolId = ? AND key = ? AND locale = ? LIMIT 1`
+	var row = toolkit.QueryRow(query, toolId, key, toolkitLocale)
 	if row.Err() != nil {
 		return "", row.Err()
 	}
@@ -467,8 +472,8 @@ func getActionOutputType(toolId string) (tokenType, error) {
 }
 
 func getActionLocalization(toolId string) (actionLocalization, error) {
-	var query = `select name, descriptionSummary from ToolLocalizations WHERE toolId = ? and locale = 'en' LIMIT 1`
-	var row = toolkit.QueryRow(query, toolId)
+	var query = `select name, descriptionSummary from ToolLocalizations WHERE toolId = ? and locale = ? LIMIT 1`
+	var row = toolkit.QueryRow(query, toolId, toolkitLocale)
 	if row.Err() != nil {
 		return actionLocalization{}, row.Err()
 	}
@@ -483,11 +488,11 @@ func getActionLocalization(toolId string) (actionLocalization, error) {
 }
 
 func getParamEnums(identifier string, key string) ([]enumerationCase, error) {
-	var query = `select title from EnumerationCases WHERE typeId = ? AND locale = 'en'`
+	var query = `select title from EnumerationCases WHERE typeId = ? AND locale = ?`
 
 	var enumIdentifier = fmt.Sprintf("com.apple.shortcuts.%s.%s", identifier, key)
 
-	var rows, err = toolkit.Query(query, enumIdentifier)
+	var rows, err = toolkit.Query(query, enumIdentifier, toolkitLocale)
 	if err != nil {
 		return nil, err
 	}

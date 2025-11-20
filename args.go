@@ -89,6 +89,12 @@ func init() {
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
+		Name:         "toolkit-locale",
+		Description:  "Set custom locale to get action data for.",
+		ExpectsValue: true,
+		DefaultValue: "en",
+	})
+	args.Register(args.Argument{
 		Name:         "signing-server",
 		ExpectsValue: true,
 		Description:  "Sign the compiled Shortcut using a remote signing service that runs https://github.com/scaxyz/shortcut-signing-server.",
