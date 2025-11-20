@@ -16,6 +16,36 @@ import (
 Reads Shortcuts ToolKit SQLite DB to define actions and their parameters for use and more.
 */
 
+type actionTool struct {
+	rowId                    sql.NullString
+	id                       sql.NullString
+	toolType                 sql.NullString
+	flags                    sql.NullInt64
+	visibilityFlags          sql.NullInt64
+	requirements             sql.NullString
+	authenticationPolicy     sql.NullString
+	customIcon               sql.NullString
+	deprecationReplacementId sql.NullString
+	sourceActionProvider     sql.NullString
+	outputTypeInstance       sql.NullString
+	sourceContainerId        sql.NullInt64
+	attributionContainerId   sql.NullInt64
+}
+
+type toolParam struct {
+	key       sql.NullString
+	sortOrder sql.NullInt64
+}
+
+type actionLocalization struct {
+	name               sql.NullString
+	descriptionSummary sql.NullString
+}
+
+type enumerationCase struct {
+	title sql.NullString
+}
+
 var shortcutsDBPath = os.ExpandEnv("$HOME/Library/Shortcuts/ToolKit/Tools-active")
 var toolkit *sql.DB
 var imported []string
@@ -289,22 +319,6 @@ func getContainerMeta(containerId *string) (string, error) {
 	return id, nil
 }
 
-type actionTool struct {
-	rowId                    sql.NullString
-	id                       sql.NullString
-	toolType                 sql.NullString
-	flags                    sql.NullInt64
-	visibilityFlags          sql.NullInt64
-	requirements             sql.NullString
-	authenticationPolicy     sql.NullString
-	customIcon               sql.NullString
-	deprecationReplacementId sql.NullString
-	sourceActionProvider     sql.NullString
-	outputTypeInstance       sql.NullString
-	sourceContainerId        sql.NullInt64
-	attributionContainerId   sql.NullInt64
-}
-
 func getActions(idPattern string) ([]actionTool, error) {
 	var query = `select * from Tools WHERE id LIKE ?`
 
@@ -344,11 +358,6 @@ func getActions(idPattern string) ([]actionTool, error) {
 	}
 
 	return tools, nil
-}
-
-type toolParam struct {
-	key       sql.NullString
-	sortOrder sql.NullInt64
 }
 
 func getActionParams(toolId string) ([]toolParam, error) {
@@ -457,11 +466,6 @@ func getActionOutputType(toolId string) (tokenType, error) {
 	return outputTokenType, nil
 }
 
-type actionLocalization struct {
-	name               sql.NullString
-	descriptionSummary sql.NullString
-}
-
 func getActionLocalization(toolId string) (actionLocalization, error) {
 	var query = `select name, descriptionSummary from ToolLocalizations WHERE toolId = ? and locale = 'en' LIMIT 1`
 	var row = toolkit.QueryRow(query, toolId)
@@ -476,10 +480,6 @@ func getActionLocalization(toolId string) (actionLocalization, error) {
 	}
 
 	return localization, nil
-}
-
-type enumerationCase struct {
-	title sql.NullString
 }
 
 func getParamEnums(identifier string, key string) ([]enumerationCase, error) {
