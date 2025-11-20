@@ -241,10 +241,6 @@ func camelCase(s string) (c string) {
 	return
 }
 
-type AppInfo struct {
-	CFBundleIdentifier string
-}
-
 func matchApplication(identifier *string) (id string, err error) {
 	var containerId, containerIdErr = getContainerId(identifier)
 	if containerIdErr != nil {
