@@ -358,7 +358,9 @@ func getActionParams(toolId string) ([]toolParam, error) {
 func getActionParamName(toolId string, key string) (string, error) {
 	var query = `select name from ParameterLocalizations WHERE toolId = ? AND key = ? AND locale = 'en' LIMIT 1`
 	var row = toolkit.QueryRow(query, toolId, key)
-	handle(row.Err())
+	if row.Err() != nil {
+		return "", row.Err()
+	}
 
 	var paramName string
 	var scanErr = row.Scan(&paramName)
@@ -372,7 +374,9 @@ func getActionParamName(toolId string, key string) (string, error) {
 func getActionParamType(toolId string, key string) (tokenType, error) {
 	var query = `select typeId from ToolParameterTypes WHERE toolId = ? AND key = ? LIMIT 1`
 	var row = toolkit.QueryRow(query, toolId, key)
-	handle(row.Err())
+	if row.Err() != nil {
+		return "", row.Err()
+	}
 
 	var paramType string
 	var scanErr = row.Scan(&paramType)
@@ -404,7 +408,9 @@ func getActionParamType(toolId string, key string) (tokenType, error) {
 func getActionOutputType(toolId string) (tokenType, error) {
 	var query = `select typeIdentifier from ToolOutputTypes WHERE toolId = ? LIMIT 1`
 	var row = toolkit.QueryRow(query, toolId)
-	handle(row.Err())
+	if row.Err() != nil {
+		return "", row.Err()
+	}
 
 	var outputType string
 	var scanErr = row.Scan(&outputType)
@@ -433,7 +439,9 @@ type actionLocalization struct {
 func getActionLocalization(toolId string) (actionLocalization, error) {
 	var query = `select name, descriptionSummary from ToolLocalizations WHERE toolId = ? and locale = 'en' LIMIT 1`
 	var row = toolkit.QueryRow(query, toolId)
-	handle(row.Err())
+	if row.Err() != nil {
+		return actionLocalization{}, row.Err()
+	}
 
 	var localization actionLocalization
 	var scanErr = row.Scan(&localization.name, &localization.descriptionSummary)
