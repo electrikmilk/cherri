@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"database/sql"
 	"fmt"
 	"os"
@@ -11,7 +10,6 @@ import (
 
 	"github.com/electrikmilk/args-parser"
 	_ "github.com/glebarez/go-sqlite"
-	"howett.net/plist"
 )
 
 /*
@@ -90,7 +88,11 @@ func importActions(identifier string) {
 	connectToolkitDB()
 
 	if !appIdentifierRegex.MatchString(identifier) {
-		matchApplication(&identifier)
+		var matchId, matchErr = matchApplication(&identifier)
+		if matchErr != nil {
+			parserError(fmt.Sprintf("Could not find any actions to import for '%s'.", identifier))
+		}
+		identifier = matchId
 	}
 
 	var importedActions, actionsErr = getActions(identifier)
@@ -243,24 +245,52 @@ type AppInfo struct {
 	CFBundleIdentifier string
 }
 
-func matchApplication(identifier *string) {
-	var apps, readErr = os.ReadDir("/Applications")
-	handle(readErr)
-	for _, app := range apps {
-		var appName = strings.Replace(app.Name(), ".app", "", 1)
-		if appName == *identifier {
-			var info AppInfo
-			var infoBytes, infoErr = os.ReadFile("/Applications/" + app.Name() + "/Contents/Info.plist")
-			handle(infoErr)
-			var decodeErr = plist.NewDecoder(bytes.NewReader(infoBytes)).Decode(&info)
-			handle(decodeErr)
-
-			*identifier = info.CFBundleIdentifier
-			return
-		}
+func matchApplication(identifier *string) (id string, err error) {
+	var containerId, containerIdErr = getContainerId(identifier)
+	if containerIdErr != nil {
+		return "", containerIdErr
 	}
 
-	parserError(fmt.Sprintf("Could not find '%s' in /Applications/.", *identifier))
+	var newId, containerMetaErr = getContainerMeta(&containerId)
+	if containerMetaErr != nil {
+		return "", containerMetaErr
+	}
+
+	return newId, nil
+}
+
+func getContainerId(name *string) (string, error) {
+	var query = `select containerId from ContainerMetadataLocalizations WHERE name LIKE ? and locale = 'en'`
+
+	var row = toolkit.QueryRow(query, *name)
+	if row.Err() != nil {
+		return "", row.Err()
+	}
+
+	var containerId string
+	var scanErr = row.Scan(&containerId)
+	if scanErr != nil {
+		return "", scanErr
+	}
+
+	return containerId, nil
+}
+
+func getContainerMeta(containerId *string) (string, error) {
+	var query = `select id from ContainerMetadata WHERE rowId LIKE ?`
+
+	var row = toolkit.QueryRow(query, *containerId)
+	if row.Err() != nil {
+		return "", row.Err()
+	}
+
+	var id string
+	var scanErr = row.Scan(&id)
+	if scanErr != nil {
+		return "", scanErr
+	}
+
+	return id, nil
 }
 
 type actionTool struct {
