@@ -886,7 +886,7 @@ func collectType(valueType *tokenType, value *any, until rune) {
 func collectIdentifier() string {
 	var identifier strings.Builder
 	for char != -1 {
-		if (char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') || char == '_' {
+		if unicode.IsLetter(char) || unicode.IsDigit(char) || char == '_' {
 			identifier.WriteRune(char)
 			advance()
 			continue

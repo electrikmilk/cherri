@@ -255,11 +255,7 @@ func defineParamEnums(identifier string, name string, enums []enumerationCase, d
 
 func camelCase(s string) (c string) {
 	for i, r := range s {
-		if r == '_' {
-			c += "_"
-			continue
-		}
-		if (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+		if r == '_' || unicode.IsDigit(r) || unicode.IsLetter(r) {
 			if i != 0 && unicode.IsUpper(r) {
 				c += strings.ToUpper(string(r))
 			} else {
