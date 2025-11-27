@@ -70,6 +70,9 @@ func parseImports() {
 		case commentAhead():
 			collectComment()
 		case startOfLineTokenAhead(Import):
+			if !darwin {
+				parserError("Imports are only supported on macOS.")
+			}
 			var importPath = collectImport()
 			importActions(importPath)
 		}
