@@ -13,6 +13,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/electrikmilk/args-parser"
 	"github.com/google/uuid"
 )
 
@@ -1976,6 +1977,26 @@ func includeStandardActions() {
 }
 
 func checkMissingStandardInclude(identifier *string, parsing bool) {
+	if !parsing && !args.Using("no-toolkit") {
+		connectToolkitDB()
+		var identifiers = strings.Split(*identifier, ".")
+		identifiers = append(identifiers[:3], identifiers[4:]...)
+		var baseIdentifier = strings.Join(identifiers, ".")
+
+		var containerId, containerErr = getContainerIdByIdentifier(&baseIdentifier)
+		if containerErr == nil {
+			var containerName, containerErr = getContainerName(&containerId)
+			importActions(baseIdentifier)
+			if containerErr == nil {
+				popLine(fmt.Sprintf("#import '%s'", containerName))
+			} else {
+				popLine(fmt.Sprintf("#import '%s'", baseIdentifier))
+			}
+
+			return
+		}
+	}
+
 	for _, actionInclude := range actionIncludes {
 		if slices.Contains(included, fmt.Sprintf("actions/%s", actionInclude)) {
 			continue

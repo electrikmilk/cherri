@@ -297,6 +297,40 @@ func getContainerId(name *string) (string, error) {
 	return containerId, nil
 }
 
+func getContainerName(containerId *string) (string, error) {
+	var query = `select name from ContainerMetadataLocalizations WHERE containerId = ? and locale = ?`
+
+	var row = toolkit.QueryRow(query, *containerId, toolkitLocale)
+	if row.Err() != nil {
+		return "", row.Err()
+	}
+
+	var name string
+	var scanErr = row.Scan(&name)
+	if scanErr != nil {
+		return "", scanErr
+	}
+
+	return name, nil
+}
+
+func getContainerIdByIdentifier(identifier *string) (string, error) {
+	var query = `select rowId from ContainerMetadata WHERE id = ?`
+
+	var row = toolkit.QueryRow(query, *identifier)
+	if row.Err() != nil {
+		return "", row.Err()
+	}
+
+	var rowId string
+	var scanErr = row.Scan(&rowId)
+	if scanErr != nil {
+		return "", scanErr
+	}
+
+	return rowId, nil
+}
+
 func getContainerMeta(containerId *string) (string, error) {
 	var query = `select id from ContainerMetadata WHERE rowId LIKE ?`
 

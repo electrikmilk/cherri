@@ -95,6 +95,10 @@ func init() {
 		DefaultValue: "en",
 	})
 	args.Register(args.Argument{
+		Name:        "no-toolkit",
+		Description: "Do not use the Shortcuts toolkit DB to decompile non-standard actions.",
+	})
+	args.Register(args.Argument{
 		Name:         "signing-server",
 		ExpectsValue: true,
 		Description:  "Sign the compiled Shortcut using a remote signing service that runs https://github.com/scaxyz/shortcut-signing-server.",
