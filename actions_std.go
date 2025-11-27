@@ -2010,15 +2010,9 @@ func checkMissingStandardInclude(identifier *string, parsing bool) {
 			mapSplitActions()
 		}
 
-		var name string
-		if actions[*identifier] == nil {
-			var actionName, found = findActionByIdentifier(identifier)
-			if !found {
-				continue
-			}
-			name = actionName
-		} else {
-			name = *identifier
+		var name, nameErr = getActionNameByIdentifier(identifier)
+		if nameErr != nil {
+			continue
 		}
 
 		var includeStatement = fmt.Sprintf("#include 'actions/%s'", actionInclude)
@@ -2030,6 +2024,19 @@ func checkMissingStandardInclude(identifier *string, parsing bool) {
 		}
 	}
 	return
+}
+
+func getActionNameByIdentifier(identifier *string) (name string, err error) {
+	if actions[*identifier] == nil {
+		var actionName, found = findActionByIdentifier(identifier)
+		if !found {
+			return "", fmt.Errorf("action name for '%s' not found", *identifier)
+		}
+		name = actionName
+	} else {
+		name = *identifier
+	}
+	return name, nil
 }
 
 func findActionByIdentifier(identifier *string) (name string, found bool) {
