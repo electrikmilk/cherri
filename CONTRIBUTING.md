@@ -102,7 +102,9 @@ Use AI as a tool to get work done faster, not to do work you have no idea how to
 
 If your model is producing too much noise (hallucination), try providing Cherri documentation as context and/or using a higher quality model. 
 
-I figure this is the same as any code generaron, copy-paste, etc, don't submit stuff you don't understand.
+I think of it as the same as any non-AI code generation, copy-paste, etc. to get stuff done; Don't submit stuff you don't understand.
+
+I use a pro-level model right now to help write some documentation, but be like me and review it first.
 
 ## Burnout
 
