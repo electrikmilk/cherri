@@ -96,6 +96,14 @@ reproduce it and what environment it may be isolated to are clearly communicated
   smart" or pretend to know everything.
 - If for some reason you need to specify a unit of measurement please add the alternative as well (e.g. in/cm).
 
+## AI
+
+Use AI as a tool to get work done faster, not to do work you have no idea how to do.
+
+If your model is producing too much noise (hallucination), try providing Cherri documentation as context and/or using a higher quality model. 
+
+I figure this is the same as any code generaron, copy-paste, etc, don't submit stuff you don't understand.
+
 ## Burnout
 
 This isn't a requirement, but a suggestion. If you've found that you've thoroughly explored a way to contribute to the
