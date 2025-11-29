@@ -17,16 +17,17 @@ import (
 )
 
 /*
-Package management through GitHub repositories
+Package management through remote Git repositories
 */
 
 var currentPkg *cherriPackage
 var visitedPackages []string
-var pkgSignatureRegex = regexp.MustCompile(`^@([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)$`)
+var pkgSignatureRegex = regexp.MustCompile(`^(https://(.*?)/)?@?([A-Za-z0-9_.-]+)/(?:cherri-)?([A-Za-z0-9_.-]+)$`)
 
 type cherriPackage struct {
 	Name     string
 	User     string
+	Uri      string
 	Archived bool
 	Packages []cherriPackage
 }
@@ -107,9 +108,12 @@ func (pkg *cherriPackage) failed(err error) {
 	fmt.Println(ansi(fmt.Sprintf("[x] %s - unable to install: %s\n", pkg.signature(), err), yellow))
 }
 
-// url returns the GitHub repository git URL of the package.
+// url returns the repository git URL of the package.
 func (pkg *cherriPackage) url() string {
-	return fmt.Sprintf("https://github.com/%s/cherri-%s.git", pkg.User, pkg.Name)
+	if pkg.Uri == "" {
+		exit("Package has no URL host (e.g. github.com)!")
+	}
+	return fmt.Sprintf("https://%s/%s/cherri-%s.git", pkg.Uri, pkg.User, pkg.Name)
 }
 
 // signature returns a formatted string of the author and name of the package.
@@ -127,7 +131,7 @@ func listPackage() {
 	if pkg, found := loadPackage("info.plist"); found {
 		printPackage(pkg)
 		if len(pkg.Packages) != 0 {
-			fmt.Println(ansi("\nDependent Packages:", green, underline))
+			fmt.Println(ansi("\nDependent packages:", green, underline))
 			for _, pkg := range pkg.Packages {
 				printPackage(&pkg)
 			}
@@ -139,13 +143,25 @@ func listPackage() {
 
 // listPackages shows the current installed packages info.
 func listPackages() {
-	fmt.Println(ansi("Installed Packages:\n", green))
+	fmt.Println(ansi("Installed packages:\n", green))
 	if pkg, found := loadPackage("info.plist"); found {
 		if len(pkg.Packages) != 0 {
 			for _, pkg := range pkg.Packages {
 				printPackage(&pkg)
 			}
 		}
+	} else {
+		initPackageError()
+	}
+}
+
+// Add host remote Git repository URI to current package.
+func addUri() {
+	if pkg, found := loadPackage("info.plist"); found {
+		currentPkg = pkg
+		currentPkg.Uri = args.Value("add-uri")
+		writePackage()
+		fmt.Println(ansi(fmt.Sprintf("Updated URI for package %s to %s", currentPkg.signature(), currentPkg.Uri), green))
 	} else {
 		initPackageError()
 	}
@@ -159,7 +175,12 @@ func printPackage(pkg *cherriPackage) {
 	fmt.Println("-", ansi(pkg.signature(), blue))
 	fmt.Println("\tName:", pkg.Name, isArchived)
 	fmt.Println("\tUser:", pkg.User)
-	fmt.Println("\tDep. Packages:", len(pkg.Packages))
+	if pkg.Uri == "" {
+		fmt.Println("\tHosted: Private")
+	} else {
+		fmt.Println("\tHosted At:", pkg.Uri)
+	}
+	fmt.Println("\tDep. packages:", len(pkg.Packages))
 	fmt.Println("\tInstall path:", pkg.path())
 }
 
@@ -235,11 +256,26 @@ func loadPackage(path string) (pkg *cherriPackage, found bool) {
 
 // writePackage writes the current package to the info.plist file in the current directory.
 func writePackage() {
-	var marshaledPlist, plistErr = plist.MarshalIndent(currentPkg, plist.XMLFormat, "\t")
-	handle(plistErr)
+	var writeDebugOutput = args.Using("debug")
+	if writeDebugOutput {
+		fmt.Printf("Writing to info.plist...")
+	}
 
-	var writeErr = os.WriteFile("info.plist", marshaledPlist, 0600)
-	handle(writeErr)
+	var info, infoErr = os.OpenFile("info.plist", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	handle(infoErr)
+	defer info.Close()
+
+	var plistEncoder = plist.NewEncoder(info)
+	if args.Using("debug") {
+		plistEncoder.Indent("\t")
+	}
+
+	var encodeErr = plistEncoder.Encode(currentPkg)
+	handle(encodeErr)
+
+	if writeDebugOutput {
+		fmt.Println(ansi("Done.", green))
+	}
 }
 
 // tidyPackage re-installs all packages in the package in the current directory.
@@ -256,12 +292,18 @@ func tidyPackage() {
 func newPackage(name string) cherriPackage {
 	var matches = pkgSignatureRegex.FindAllStringSubmatch(name, -1)
 	if len(matches) == 0 {
-		exit(fmt.Sprintf("Package must follow pattern: @{github_username}/{repo_package_name}, got: %s", name))
+		exit(fmt.Sprintf("Invalid package signature: %s\nPackage signature must follow one of these patterns:\n\nPrivate: @{author}/{package_name}\n\nor\n\nPublic Remote Git repository: https://{domain}/{username}/cherri-{package_name}", name))
 	}
-	var user = matches[0][1]
-	var pkg = matches[0][2]
+	var uri = matches[0][2]
+	var user = matches[0][3]
+	var pkg = matches[0][4]
+
+	if uri == user {
+		uri = ""
+	}
 
 	return cherriPackage{
+		Uri:  uri,
 		Name: pkg,
 		User: user,
 	}
@@ -292,7 +334,7 @@ func addPackage() {
 
 func checkTrustedPackages(newPkg *cherriPackage) {
 	if !newPkg.trusted() {
-		var packagePrompt = fmt.Sprintf("Do you trust this package?\n\nThis will download this GitHub repository and automatically include it in this project:\n%s", newPkg.url())
+		var packagePrompt = fmt.Sprintf("Do you trust this package?\n\nThis will download this remote git repository and automatically include it in this project:\n%s", newPkg.url())
 		fmt.Println(ansi(packagePrompt, yellow))
 		if !yesNo() {
 			return

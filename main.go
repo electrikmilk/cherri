@@ -65,6 +65,10 @@ func main() {
 		initPackage()
 		os.Exit(0)
 	}
+	if args.Using("add-uri") {
+		addUri()
+		os.Exit(0)
+	}
 	if args.Using("install") {
 		addPackage()
 		os.Exit(0)

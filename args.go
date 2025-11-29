@@ -58,8 +58,12 @@ func init() {
 	})
 	args.Register(args.Argument{
 		Name:         "init",
-		Description:  "Create a Cherri package. Pattern: @{github_username}/{package-name}",
+		Description:  "Create a Cherri package. Pattern: @{author}/{package_name} | https://{uri}/{author}/cherri-{package_name}",
 		ExpectsValue: true,
+	})
+	args.Register(args.Argument{
+		Name:        "add-uri",
+		Description: "Add remote Git repository URI to current package. (e.g. github.com, etc.)",
 	})
 	args.Register(args.Argument{
 		Name:         "install",

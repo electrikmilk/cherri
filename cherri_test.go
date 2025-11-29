@@ -68,11 +68,11 @@ func TestPackages(t *testing.T) {
 		handle(removeDirErr)
 	}
 
-	args.Args["init"] = "@electrikmilk/package-example"
+	args.Args["init"] = "@electrikmilk/package-test"
 	initPackage()
 	delete(args.Args, "init")
 
-	args.Args["install"] = "@electrikmilk/package-example"
+	args.Args["install"] = "https://github.com/electrikmilk/package-example"
 	input := []byte("y")
 	r, w, err := os.Pipe()
 	if err != nil {
