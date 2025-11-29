@@ -6,7 +6,6 @@ import (
 	"os"
 	"slices"
 	"strings"
-	"unicode"
 
 	"github.com/electrikmilk/args-parser"
 	_ "github.com/glebarez/go-sqlite"
@@ -139,14 +138,19 @@ func importActions(identifier string) {
 	} else {
 		appName = identifier
 		var containerId, containerErr = getContainerId(&appName)
-		handle(containerErr)
+		if containerErr != nil {
+			importFromAppErr(appName)
+		}
+
 		var containerMeta, metaErr = getContainerMeta(&containerId)
 		handle(metaErr)
 		identifier = containerMeta
 	}
 
 	var importedActions, actionsErr = getActions(identifier)
-	handle(actionsErr)
+	if actionsErr != nil {
+		importFromAppErr(identifier)
+	}
 
 	if args.Using("debug") {
 		fmt.Println("### IMPORTING ACTIONS ###")
@@ -161,6 +165,10 @@ func importActions(identifier string) {
 	}
 }
 
+func importFromAppErr(identifier string) {
+	parserError(fmt.Sprintf("Unable to import actions for '%s'. Please ensure the app is installed on your system.", identifier))
+}
+
 func defineImportedActions(identifier string, importedActions []actionTool) {
 	for _, action := range importedActions {
 		var actionLocalization, localizeErr = getActionLocalization(action.rowId.String)
@@ -170,11 +178,11 @@ func defineImportedActions(identifier string, importedActions []actionTool) {
 			description: actionLocalization.descriptionSummary.String,
 		}
 
-		var name = fmt.Sprintf("%s_%s", identifier, doc.title)
+		var name = camelCase(doc.title)
+		var actionIdentifier = fmt.Sprintf("%s_%s", camelCase(identifier), name)
 		if args.Using("debug") {
-			fmt.Println("Action name: ", name)
+			fmt.Println("Action name: ", actionIdentifier)
 		}
-		var actionIdentifier = camelCase(name)
 
 		var outputType, outputTypeErr = getActionOutputType(action.rowId.String)
 		handle(outputTypeErr)
@@ -189,7 +197,7 @@ func defineImportedActions(identifier string, importedActions []actionTool) {
 		}
 
 		if args.Using("debug") {
-			fmt.Println("Imported action:", name+"()")
+			fmt.Println("Imported action:", actionIdentifier+"()")
 			fmt.Println("Params:", paramDefs)
 			fmt.Print("\n")
 		}
@@ -252,7 +260,7 @@ func defineParamEnums(identifier string, name string, enums []enumerationCase, d
 		return
 	}
 
-	var enumName = camelCase(fmt.Sprintf("%s_%ss", identifier, name))
+	var enumName = fmt.Sprintf("%s_%ss", identifier, camelCase(name))
 	definition.enum = enumName
 	if definition.validType != Quantity {
 		definition.validType = String
@@ -265,33 +273,6 @@ func defineParamEnums(identifier string, name string, enums []enumerationCase, d
 			fmt.Println("Defined enum", enumName)
 		}
 	}
-}
-
-func camelCase(s string) (c string) {
-	for i, r := range s {
-		if r == '_' || unicode.IsDigit(r) || unicode.IsLetter(r) {
-			if i != 0 && unicode.IsUpper(r) {
-				c += strings.ToUpper(string(r))
-			} else {
-				c += strings.ToLower(string(r))
-			}
-		}
-	}
-	return
-}
-
-func matchApplication(identifier *string) (id string, err error) {
-	var containerId, containerIdErr = getContainerId(identifier)
-	if containerIdErr != nil {
-		return "", containerIdErr
-	}
-
-	var newId, containerMetaErr = getContainerMeta(&containerId)
-	if containerMetaErr != nil {
-		return "", containerMetaErr
-	}
-
-	return newId, nil
 }
 
 func getContainerId(name *string) (string, error) {

@@ -129,6 +129,26 @@ func yesNo() bool {
 	}
 }
 
+func camelCase(s string) (c string) {
+	var lastChar rune
+	for i, r := range s {
+		switch {
+		case unicode.IsLetter(r):
+			if i == 0 {
+				c += strings.ToLower(string(r))
+			} else if unicode.IsLetter(lastChar) {
+				c += strings.ToLower(string(r))
+			} else {
+				c += strings.ToUpper(string(r))
+			}
+		case r == '_' || unicode.IsDigit(r):
+			c += string(r)
+		}
+		lastChar = r
+	}
+	return
+}
+
 func scan(prompt string, store *string) {
 	fmt.Print(prompt)
 
