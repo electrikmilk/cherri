@@ -110,10 +110,11 @@ func (pkg *cherriPackage) failed(err error) {
 
 // url returns the repository git URL of the package.
 func (pkg *cherriPackage) url() string {
+	var uri = pkg.Uri
 	if pkg.Uri == "" {
-		exit("Package has no URL host (e.g. github.com)!")
+		uri = "github.com"
 	}
-	return fmt.Sprintf("https://%s/%s/cherri-%s.git", pkg.Uri, pkg.User, pkg.Name)
+	return fmt.Sprintf("https://%s/%s/cherri-%s.git", uri, pkg.User, pkg.Name)
 }
 
 // signature returns a formatted string of the author and name of the package.
