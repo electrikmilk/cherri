@@ -125,12 +125,23 @@ func importActions(identifier string) {
 
 	connectToolkitDB()
 
-	if !appIdentifierRegex.MatchString(identifier) {
-		var matchId, matchErr = matchApplication(&identifier)
-		if matchErr != nil {
-			parserError(fmt.Sprintf("Could not find any actions to import for '%s'.", identifier))
-		}
-		identifier = matchId
+	var appName string
+
+	var isBundleIdentifier = appIdentifierRegex.MatchString(identifier)
+
+	if isBundleIdentifier {
+		var containerId, containerErr = getContainerIdByIdentifier(&identifier)
+		handle(containerErr)
+		var name, nameErr = getContainerName(&containerId)
+		handle(nameErr)
+		appName = name
+	} else {
+		appName = identifier
+		var containerId, containerErr = getContainerId(&appName)
+		handle(containerErr)
+		var containerMeta, metaErr = getContainerMeta(&containerId)
+		handle(metaErr)
+		identifier = containerMeta
 	}
 
 	var importedActions, actionsErr = getActions(identifier)
@@ -141,7 +152,7 @@ func importActions(identifier string) {
 		fmt.Println("Importing actions for", identifier)
 	}
 
-	defineImportedActions(identifier, importedActions)
+	defineImportedActions(appName, importedActions)
 
 	imported = append(imported, identifier)
 	if args.Using("debug") {
@@ -150,7 +161,6 @@ func importActions(identifier string) {
 }
 
 func defineImportedActions(identifier string, importedActions []actionTool) {
-	var namespace = end(strings.Split(identifier, "."))
 	for _, action := range importedActions {
 		var actionLocalization, localizeErr = getActionLocalization(action.rowId.String)
 		handle(localizeErr)
@@ -159,7 +169,7 @@ func defineImportedActions(identifier string, importedActions []actionTool) {
 			description: actionLocalization.descriptionSummary.String,
 		}
 
-		var name = fmt.Sprintf("%s_%s", namespace, doc.title)
+		var name = fmt.Sprintf("%s_%s", identifier, doc.title)
 		if args.Using("debug") {
 			fmt.Println("Action name: ", name)
 		}
