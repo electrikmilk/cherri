@@ -126,15 +126,16 @@ func importActions(identifier string) {
 	connectToolkitDB()
 
 	var appName string
-
-	var isBundleIdentifier = appIdentifierRegex.MatchString(identifier)
-
-	if isBundleIdentifier {
+	if appIdentifierRegex.MatchString(identifier) {
 		var containerId, containerErr = getContainerIdByIdentifier(&identifier)
-		handle(containerErr)
-		var name, nameErr = getContainerName(&containerId)
-		handle(nameErr)
-		appName = name
+		if containerErr != nil {
+			appName = identifier
+		} else {
+			var name, nameErr = getContainerName(&containerId)
+			handle(nameErr)
+
+			appName = name
+		}
 	} else {
 		appName = identifier
 		var containerId, containerErr = getContainerId(&appName)
