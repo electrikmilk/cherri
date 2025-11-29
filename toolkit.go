@@ -129,7 +129,7 @@ func importActions(identifier string) {
 	if appIdentifierRegex.MatchString(identifier) {
 		var containerId, containerErr = getContainerIdByIdentifier(&identifier)
 		if containerErr != nil {
-			appName = identifier
+			appName = end(strings.Split(identifier, "."))
 		} else {
 			var name, nameErr = getContainerName(&containerId)
 			handle(nameErr)
