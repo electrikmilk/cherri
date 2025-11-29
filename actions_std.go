@@ -2121,7 +2121,7 @@ func textParts(args []actionArgument) map[string]any {
 		data["WFTextSeparator"] = "Spaces"
 	case separator == "\n":
 		data["WFTextSeparator"] = "New Lines"
-	case separator == "" && currentAction.identifier == "splitText":
+	case separator == "" && currentAction.identifier == "text.split":
 		data["WFTextSeparator"] = "Every Character"
 	default:
 		data["WFTextSeparator"] = "Custom"
