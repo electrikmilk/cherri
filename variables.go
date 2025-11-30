@@ -90,6 +90,12 @@ func createUUIDReference(identifier string) string {
 	return actionUUID
 }
 
+func wrapVariableReference(s *string) {
+	if validReference(*s) {
+		*s = fmt.Sprintf("{%s}", *s)
+	}
+}
+
 func validReference(identifier string) bool {
 	if _, found := globals[identifier]; found {
 		isInputVariable(identifier)

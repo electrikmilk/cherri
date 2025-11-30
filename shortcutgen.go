@@ -657,12 +657,6 @@ func paramValue(arg actionArgument, handleAs tokenType) any {
 	}
 }
 
-func wrapVariableReference(s *string) {
-	if validReference(*s) {
-		*s = fmt.Sprintf("{%s}", *s)
-	}
-}
-
 // isInputVariable checks if identifier is the ShortcutInput global to set the global boolean in the final plist.
 func isInputVariable(identifier string) {
 	if hasShortcutInputVariables {
