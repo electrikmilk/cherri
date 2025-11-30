@@ -287,7 +287,8 @@ func makeDictionaryValue(value *any) map[string]any {
 func variableValueModifier(token *token, reference *map[string]any) {
 	var valueType = token.valueType
 	if valueType == Variable {
-		valueType = variables[token.value.(string)].valueType
+		var variable = token.value.(varValue)
+		valueType = variable.valueType
 	}
 	switch valueType {
 	case Integer:
