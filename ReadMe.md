@@ -49,7 +49,11 @@ The primary goal is to make it practical to create large Shortcut projects (with
 
 ## Installation
 
-You can install Cherri by downloading the latest release or via the Homebrew package manager:
+You can install Cherri by downloading the latest release or via the Homebrew or Nix package managers:
+
+### Install via Homebrew
+
+If you have Homebrew installed, you can run:
 
 **Add Tap:**
 
@@ -65,13 +69,13 @@ brew install electrikmilk/cherri/cherri
 
 ### Install via Nix
 
-You can install cherri using Nix package manager. If you have Nix installed, you can run:
+If you have Nix installed, you can run:
 
 ```bash
 nix profile install github:electrikmilk/cherri
 ```
 
-Alternatively, you can use `nix-direnv` to get an isolated, [effortless dev environment](https://determinate.systems/blog/nix-direnv/) where `cherri` is available based on which directory you're in. Then you would use_flake and add cherri to flake.nix:
+Alternatively, you can use `nix-direnv` to get an isolated, [effortless dev environment](https://determinate.systems/blog/nix-direnv/) where `cherri` is available based on which directory you're in. Then you would use_flake and add Cherri to flake.nix:
 
 ```nix
 {
