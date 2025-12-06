@@ -13,7 +13,7 @@ jobs:
   build-test-linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
 
     - name: Set up Go
       uses: actions/setup-go@v3
@@ -35,7 +35,7 @@ jobs:
   build-test-macos:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
 
     - name: Set up Go
       uses: actions/setup-go@v3
@@ -53,3 +53,15 @@ jobs:
 
     - name: Package Manager Test
       run: go test -run TestPackages -v ./...
+
+  build-test-nix:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+
+    - uses: DeterminateSystems/nix-installer-action@main
+    - uses: DeterminateSystems/magic-nix-cache-action@main
+
+    # Runs tests as part of build
+    - name: Build nix package
+      run: nix build

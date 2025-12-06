@@ -34,7 +34,9 @@
 
             vendorHash = "sha256-5hACp6B2eO82pv470E/dIMbKAO1Z/PI978pSzOB7Wtk=";
 
-            doCheck = false;
+            # Only run tests that don't require network access
+            # TestDecomp is excluded due to a pre-existing bug
+            checkFlags = [ "-run" "TestCherriNoSign" ];
 
             meta = with pkgs.lib; {
               description = "A language that compiles to Apple Shortcuts";
