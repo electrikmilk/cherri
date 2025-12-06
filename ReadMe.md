@@ -63,6 +63,31 @@ brew tap electrikmilk/cherri
 brew install electrikmilk/cherri/cherri
 ```
 
+### Install via Nix
+
+You can install cherri using Nix package manager. If you have Nix installed, you can run:
+
+```bash
+nix profile install github:electrikmilk/cherri
+```
+
+Alternatively, you can use `nix-direnv` to get an isolated, [effortless dev environment](https://determinate.systems/blog/nix-direnv/) where `cherri` is available based on which directory you're in. Then you would use_flake and add cherri to flake.nix:
+
+```nix
+{
+  inputs.cherri.url = "github:electrikmilk/cherri";
+
+
+  { # outputs.packages.${system}.default = pkgs.mkShell etc - omitted for brevity
+    buildInputs = [
+      inputs.cherri.packages.${system}.cherri
+    ]
+  }
+}
+```
+
+Then run `direnv allow` in the directory with the flake.nix file.
+
 ## Usage
 
 ```bash
