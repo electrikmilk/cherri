@@ -30,3 +30,6 @@
 
 # Packages
 /packages/
+
+# Nix
+result
