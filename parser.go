@@ -550,6 +550,9 @@ func checkInlineVars(value *string) {
 }
 
 func collectReference(valueType *tokenType, value *any, until *rune) {
+	if char == '@' {
+		advance()
+	}
 	var reference = collectIdentifier()
 	var getAs string
 	var coerce string
