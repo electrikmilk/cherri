@@ -193,18 +193,18 @@ enum timeFormats {
 }
 
 // [Doc]: [Formatting] Format Date: Format a date using a standard or custom format.
-action default 'format.date' formatDate(variable date: 'WFDate', dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short", text ?customDateFormat: 'WFDateFormat') {
+action default 'format.date' formatDate(text date: 'WFDate', dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short", text ?customDateFormat: 'WFDateFormat') {
 	"WFTimeFormatStyle": "None"
 }
 
 // [Doc]: [Formatting] Format Time: Format a time using a standard or custom format.
-action 'format.date' formatTime(variable time: 'WFDate', timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short") {
+action 'format.date' formatTime(text time: 'WFDate', timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short") {
 	"WFDateFormatStyle": "None"
 }
 
 // [Doc]: [Formatting] Format Timestamp: Format a timestamp using standard formats and/or a custom date format.
 action 'format.date' formatTimestamp(
-    variable date: 'WFDate',
+    text date: 'WFDate',
     dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short",
     timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short",
     text ?customDateFormat: 'WFDateFormat'
