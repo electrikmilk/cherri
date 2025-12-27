@@ -54,6 +54,9 @@ jobs:
     - name: Package Manager Test
       run: go test -run TestPackages -v ./...
 
+    - name: MacOS Native Signing Test
+      run: go test -run TestMacOSSigning -v ./...
+
   build-test-nix:
     runs-on: ubuntu-latest
     steps:

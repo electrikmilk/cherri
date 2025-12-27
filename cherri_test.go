@@ -18,6 +18,9 @@ var currentTest string
 
 func TestCherri(_ *testing.T) {
 	args.Args["no-ansi"] = ""
+	// Use "anyone" signing mode which is more reliable on macOS 14.4+/15.x
+	// The "people-who-know-me" mode has iCloud/network dependencies that can fail
+	args.Args["share"] = "anyone"
 	var files, err = os.ReadDir("tests")
 	if err != nil {
 		fmt.Println(ansi("FAILED: unable to read tests directory", red))

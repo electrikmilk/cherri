@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/electrikmilk/args-parser"
@@ -47,21 +48,54 @@ func sign() {
 	)
 	var stdErr bytes.Buffer
 	sign.Stderr = &stdErr
-	var signErr = sign.Run()
-	if signErr != nil {
+	sign.Run()
+
+	// Check if the output file was created successfully.
+	// The macOS shortcuts sign command may print error messages to stderr
+	// but still successfully create the signed file (known macOS bug).
+	if !signedShortcutCreated(outputPath) {
 		signFailed = true
 		if args.Using("debug") {
 			fmt.Print(ansi("Failed!\n", red))
 		}
 
-		fmt.Printf("%s\n%s\n", ansi("Failed to sign Shortcut using macOS :(", orange, bold), ansi(stdErr.String(), orange))
+		// Filter out "garbage" error messages from macOS
+		var filteredErr string
+		for _, line := range strings.Split(stdErr.String(), "\n") {
+			if strings.Contains(line, "Unrecognized attribute string flag") || strings.TrimSpace(line) == "" {
+				continue
+			}
+			filteredErr += line + "\n"
+		}
+
+		fmt.Printf("%s\n%s\n", ansi("Failed to sign Shortcut using macOS :(", orange, bold), ansi(filteredErr, orange))
 
 		useHubSign()
+		return
 	}
 
 	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green))
 	}
+}
+
+// signedShortcutCreated checks if a signed shortcut file was created at the given path.
+// A valid signed shortcut starts with the "AEA1" magic bytes.
+func signedShortcutCreated(path string) bool {
+	file, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	defer file.Close()
+
+	// Read the first 4 bytes to check for the AEA1 signature
+	magic := make([]byte, 4)
+	n, err := file.Read(magic)
+	if err != nil || n < 4 {
+		return false
+	}
+
+	return string(magic) == "AEA1"
 }
 
 func useHubSign() {
