@@ -1,33 +1,91 @@
 /*
- * Portfolio - View
- * Display portfolio summary
+ * Portfolio - View (with Live Prices)
+ * Display portfolio with real-time stock prices
  */
 
 #define name "Portfolio - View"
 #define color green
 #define glyph star
 
-// For demonstration, show example portfolio
-@portfolioSummary = "📊 PORTFOLIO SUMMARY
+#include 'actions/web'
+#include 'actions/scripting'
+#include 'actions/text'
 
-Example Holdings:
+// Fetch AAPL price
+const aaplURL = "https://query1.finance.yahoo.com/v8/finance/chart/AAPL"
+const aaplData = downloadURL(aaplURL)
+const aaplChart = getValue(aaplData, "chart")
+const aaplResults = getValue(aaplChart, "result") 
+const aaplFirst = getFirstItem(aaplResults)
+const aaplMeta = getValue(aaplFirst, "meta")
+const aaplPrice = getValue(aaplMeta, "regularMarketPrice")
+
+// Fetch GOOGL price
+const googlURL = "https://query1.finance.yahoo.com/v8/finance/chart/GOOGL"
+const googlData = downloadURL(googlURL)
+const googlChart = getValue(googlData, "chart")
+const googlResults = getValue(googlChart, "result")
+const googlFirst = getFirstItem(googlResults)
+const googlMeta = getValue(googlFirst, "meta")
+const googlPrice = getValue(googlMeta, "regularMarketPrice")
+
+// Example portfolio calculations
+const aaplShares = 100
+const aaplCost = 150.25
+@aaplCurrentValue = aaplShares * aaplPrice
+@aaplCostTotal = aaplShares * aaplCost
+@aaplGain = aaplCurrentValue - aaplCostTotal
+@aaplGainPercent = (aaplGain / aaplCostTotal) * 100
+
+const googlShares = 50
+const googlCost = 135.00
+@googlCurrentValue = googlShares * googlPrice
+@googlCostTotal = googlShares * googlCost
+@googlGain = googlCurrentValue - googlCostTotal
+@googlGainPercent = (googlGain / googlCostTotal) * 100
+
+// Portfolio totals
+@totalValue = aaplCurrentValue + googlCurrentValue
+@totalCost = aaplCostTotal + googlCostTotal
+@totalGain = totalValue - totalCost
+@totalGainPercent = (totalGain / totalCost) * 100
+
+// Format numbers
+@formattedAAPLValue = formatNumber(aaplCurrentValue, 2)
+@formattedAAPLCost = formatNumber(aaplCostTotal, 2)
+@formattedAAPLGain = formatNumber(aaplGain, 2)
+@formattedAAPLGainPct = formatNumber(aaplGainPercent, 2)
+
+@formattedGOOGLValue = formatNumber(googlCurrentValue, 2)
+@formattedGOOGLCost = formatNumber(googlCostTotal, 2)
+@formattedGOOGLGain = formatNumber(googlGain, 2)
+@formattedGOOGLGainPct = formatNumber(googlGainPercent, 2)
+
+@formattedTotalValue = formatNumber(totalValue, 2)
+@formattedTotalCost = formatNumber(totalCost, 2)
+@formattedTotalGain = formatNumber(totalGain, 2)
+@formattedTotalGainPct = formatNumber(totalGainPercent, 2)
+
+// Build summary
+@summary = "📊 PORTFOLIO SUMMARY (LIVE)
+
 ━━━━━━━━━━━━━━━━━━
-AAPL: 100 shares
-Current: $187.44 × 100 = $18,744.00
-Cost:    $150.25 × 100 = $15,025.00
-Gain:    $3,719.00 (+24.75%)
+AAPL: {aaplShares} shares
+Current: ${aaplPrice} × {aaplShares} = ${formattedAAPLValue}
+Cost:    ${aaplCost} × {aaplShares} = ${formattedAAPLCost}
+Gain:    ${formattedAAPLGain} (+{formattedAAPLGainPct}%)
+
 ━━━━━━━━━━━━━━━━━━
-GOOGL: 50 shares
-Current: $142.65 × 50 = $7,132.50
-Cost:    $135.00 × 50 = $6,750.00
-Gain:    $382.50 (+5.67%)
+GOOGL: {googlShares} shares
+Current: ${googlPrice} × {googlShares} = ${formattedGOOGLValue}
+Cost:    ${googlCost} × {googlShares} = ${formattedGOOGLCost}
+Gain:    ${formattedGOOGLGain} (+{formattedGOOGLGainPct}%)
+
 ━━━━━━━━━━━━━━━━━━
+Total Value: ${formattedTotalValue}
+Total Cost:  ${formattedTotalCost}
+Gain/Loss:   ${formattedTotalGain} (+{formattedTotalGainPct}%)
 
-Total Value: $25,876.50
-Total Cost:  $21,775.00
-Gain/Loss:   $4,101.50 (+18.83%)
+✅ Fetched REAL-TIME prices from Yahoo Finance!"
 
-Note: This is a demo. Full version would
-fetch real data from storage and live prices."
-
-show(portfolioSummary)
+show(summary)

@@ -1,17 +1,54 @@
 /*
- * Portfolio - Refresh Widget
- * Update widget data cache
+ * Portfolio - Refresh Widget (with Live Prices)
+ * Fetch current prices and show portfolio status
  */
 
 #define name "Portfolio - Refresh Widget"
 #define color purple
 #define glyph star
 
-// Show notification that widget would be refreshed
-alert("Widget data refreshed!
+#include 'actions/web'
+#include 'actions/scripting'
 
-Portfolio Value: $25,876.50
-Change: +$4,101.50 (+18.83%)
+// Fetch live prices
+const aaplData = downloadURL("https://query1.finance.yahoo.com/v8/finance/chart/AAPL")
+const aaplChart = getValue(aaplData, "chart")
+const aaplResults = getValue(aaplChart, "result")
+const aaplFirst = getFirstItem(aaplResults)
+const aaplMeta = getValue(aaplFirst, "meta")
+const aaplPrice = getValue(aaplMeta, "regularMarketPrice")
 
-Note: This is a demo. Full version would
-fetch live prices and update widget cache.", "✅ Widget Refreshed")
+const googlData = downloadURL("https://query1.finance.yahoo.com/v8/finance/chart/GOOGL")
+const googlChart = getValue(googlData, "chart")
+const googlResults = getValue(googlChart, "result")
+const googlFirst = getFirstItem(googlResults)
+const googlMeta = getValue(googlFirst, "meta")
+const googlPrice = getValue(googlMeta, "regularMarketPrice")
+
+// Calculate portfolio value with live prices
+const aaplShares = 100
+const aaplCost = 150.25
+@aaplValue = aaplShares * aaplPrice
+@aaplCostTotal = aaplShares * aaplCost
+
+const googlShares = 50
+const googlCost = 135.00
+@googlValue = googlShares * googlPrice
+@googlCostTotal = googlShares * googlCost
+
+@totalValue = aaplValue + googlValue
+@totalCost = aaplCostTotal + googlCostTotal
+@totalGain = totalValue - totalCost
+@totalGainPercent = (totalGain / totalCost) * 100
+
+@formattedValue = formatNumber(totalValue, 2)
+@formattedGain = formatNumber(totalGain, 2)
+@formattedGainPct = formatNumber(totalGainPercent, 2)
+
+alert("Widget data refreshed with LIVE prices!
+
+Portfolio Value: ${formattedValue}
+Change: +${formattedGain} (+{formattedGainPct}%)
+
+AAPL: ${aaplPrice}
+GOOGL: ${googlPrice}", "✅ Widget Refreshed")
