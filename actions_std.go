@@ -1977,7 +1977,7 @@ func includeStandardActions() {
 }
 
 func checkMissingStandardInclude(identifier *string, parsing bool) {
-	if !parsing && !args.Using("no-toolkit") && darwin {
+	if !parsing && !args.Using("no-toolkit") {
 		connectToolkitDB()
 		var identifiers = strings.Split(*identifier, ".")
 		identifiers = append(identifiers[:3], identifiers[4:]...)
