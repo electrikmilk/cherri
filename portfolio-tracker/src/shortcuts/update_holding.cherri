@@ -1,0 +1,86 @@
+/*
+ * Portfolio - Update Holding
+ * Updates an existing stock holding
+ */
+
+#define name "Portfolio - Update Holding"
+#define color orange
+#define glyph pencil
+
+#include 'actions/scripting'
+#include 'actions/basic'
+#include '../lib/portfolio_data.cherri'
+
+// Load portfolio
+@portfolio = getPortfolio()
+@holdings = portfolio['holdings']
+
+// Check if empty
+@holdingCount = count(holdings)
+if holdingCount == 0 {
+    alert("Portfolio is empty.\nAdd holdings first.", "No Holdings")
+    stop()
+}
+
+// Build symbol list for selection
+@symbolList = []
+for holding in holdings {
+    @sym = holding['symbol']
+    @sh = holding['shares']
+    @cb = holding['costBasis']
+    @label = "{sym} - {sh} shares @ ${cb}"
+    @symbolList += label
+}
+
+// Let user choose
+@selected = chooseFromList(symbolList, "Select holding to update:")
+
+// Extract symbol from selection (before the " - ")
+@parts = splitText(selected, " - ")
+@symbol = getFirstItem(parts)
+
+// Find the holding
+@index = findHolding(symbol, holdings)
+@currentHolding = getListItem(holdings, index)
+
+@currentShares = currentHolding['shares']
+@currentCostBasis = currentHolding['costBasis']
+
+// Get new values
+@newSharesInput = prompt("New number of shares:", "Number", currentShares)
+@newShares = number(newSharesInput)
+
+if newShares <= 0 {
+    alert("Error: Shares must be greater than 0.", "Invalid Input")
+    stop()
+}
+
+@newCostBasisInput = prompt("New cost basis per share ($):", "Number", currentCostBasis)
+@newCostBasis = number(newCostBasisInput)
+
+if newCostBasis <= 0 {
+    alert("Error: Cost basis must be greater than 0.", "Invalid Input")
+    stop()
+}
+
+// Update the holding
+setValue(currentHolding, "shares", newShares)
+setValue(currentHolding, "costBasis", newCostBasis)
+
+// Replace in array (Shortcuts arrays are 1-indexed)
+// Need to rebuild array with updated item
+@updatedHoldings = []
+@i = 1
+for h in holdings {
+    if i == index {
+        @updatedHoldings += currentHolding
+    } else {
+        @updatedHoldings += h
+    }
+    @i = i + 1
+}
+
+setValue(portfolio, "holdings", updatedHoldings)
+savePortfolio(portfolio)
+
+alert("Updated {symbol}:\n{newShares} shares at ${newCostBasis}/share", "✅ Holding Updated")

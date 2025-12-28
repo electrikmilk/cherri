@@ -1,0 +1,66 @@
+/*
+ * Portfolio - Remove Holding
+ * Removes a stock holding from the portfolio
+ */
+
+#define name "Portfolio - Remove Holding"
+#define color red
+#define glyph trash
+
+#include 'actions/scripting'
+#include 'actions/basic'
+#include '../lib/portfolio_data.cherri'
+
+// Load portfolio
+@portfolio = getPortfolio()
+@holdings = portfolio['holdings']
+
+// Check if empty
+@holdingCount = count(holdings)
+if holdingCount == 0 {
+    alert("Portfolio is empty.\nNothing to remove.", "No Holdings")
+    stop()
+}
+
+// Build symbol list
+@symbolList = []
+for holding in holdings {
+    @sym = holding['symbol']
+    @sh = holding['shares']
+    @cb = holding['costBasis']
+    @total = sh * cb
+    @formattedTotal = formatNumber(total, 2)
+    @label = "{sym} - {sh} shares (${formattedTotal})"
+    @symbolList += label
+}
+
+// Let user choose
+@selected = chooseFromList(symbolList, "Select holding to remove:")
+
+// Extract symbol
+@parts = splitText(selected, " - ")
+@symbol = getFirstItem(parts)
+
+// Confirm deletion
+@confirmed = confirm("Remove {symbol} from portfolio?\n\nThis cannot be undone.")
+
+if !confirmed {
+    stop()
+}
+
+// Find and remove
+@index = findHolding(symbol, holdings)
+
+@updatedHoldings = []
+@i = 1
+for h in holdings {
+    if i != index {
+        @updatedHoldings += h
+    }
+    @i = i + 1
+}
+
+setValue(portfolio, "holdings", updatedHoldings)
+savePortfolio(portfolio)
+
+alert("Removed {symbol} from portfolio.", "✅ Holding Removed")

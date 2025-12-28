@@ -1,0 +1,72 @@
+/*
+ * Portfolio - Add Holding
+ * Adds a new stock holding to the portfolio
+ */
+
+#define name "Portfolio - Add Holding"
+#define color blue
+#define glyph plus
+
+#include 'actions/scripting'
+#include 'actions/basic'
+#include '../lib/portfolio_data.cherri'
+
+// Get inputs from user
+@symbolInput = prompt("Enter stock symbol (e.g., AAPL):", "Text")
+@symbol = uppercase(symbolInput)
+
+if symbol == "" {
+    alert("Error: Stock symbol is required.", "Invalid Input")
+    stop()
+}
+
+@sharesInput = prompt("Number of shares:", "Number")
+@shares = number(sharesInput)
+
+if shares <= 0 {
+    alert("Error: Shares must be greater than 0.", "Invalid Input")
+    stop()
+}
+
+@costBasisInput = prompt("Cost basis per share ($):", "Number")
+@costBasis = number(costBasisInput)
+
+if costBasis <= 0 {
+    alert("Error: Cost basis must be greater than 0.", "Invalid Input")
+    stop()
+}
+
+// Load current portfolio
+@portfolio = getPortfolio()
+@holdings = portfolio['holdings']
+
+// Check for duplicate
+@existingIndex = findHolding(symbol, holdings)
+
+if existingIndex > 0 {
+    alert("{symbol} already exists in portfolio.\nUse 'Update Holding' to modify.", "Duplicate Symbol")
+    stop()
+}
+
+// Create new holding
+@today = currentDate()
+@dateStr = formatDate(today, "yyyy-MM-dd", "Date")
+
+@newHolding = {
+    "symbol": symbol,
+    "shares": shares,
+    "costBasis": costBasis,
+    "dateAdded": dateStr
+}
+
+// Add to holdings array
+@holdings += newHolding
+setValue(portfolio, "holdings", holdings)
+
+// Save
+savePortfolio(portfolio)
+
+// Confirm
+@costTotal = shares * costBasis
+@formattedCost = formatNumber(costTotal, 2)
+alert("Added {shares} shares of {symbol} at ${costBasis}/share.\n\nTotal cost: ${formattedCost}", "✅ Holding Added")

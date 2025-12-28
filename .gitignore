@@ -17,6 +17,7 @@ cherri
 !/actions/*.cherri
 !/tests/*.cherri
 !/shortcuts/*.cherri
+!/portfolio-tracker/**/*.cherri
 /tests/*_decompiled.plist
 !stdlib.cherri
 *.prof

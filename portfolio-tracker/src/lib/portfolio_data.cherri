@@ -1,0 +1,59 @@
+/*
+ * Portfolio Data Access Layer
+ * Requires: Data Jar app installed
+ */
+
+#include 'actions/scripting'
+#include 'actions/network'
+
+/*
+ * Data Jar uses x-callback-url scheme
+ * datajar://x-callback-url/get?key=portfolio
+ *
+ * For Cherri, we'll use the "Get Value from Data Jar" action
+ * which requires a raw action definition if not built-in
+ */
+
+// Action definition for Data Jar (3rd party)
+action 'datajar.get' getDataJarValue(
+    text key: 'WFKey'
+): dictionary
+
+action 'datajar.set' setDataJarValue(
+    text key: 'WFKey',
+    variable value: 'WFValue'
+)
+
+// Get all holdings from Data Jar
+function getPortfolio(): dictionary {
+    @portfolio = getDataJarValue("portfolio")
+    if portfolio == nil {
+        // Initialize empty portfolio
+        @portfolio = {
+            "holdings": [],
+            "lastUpdated": ""
+        }
+    }
+    output portfolio
+}
+
+// Save portfolio to Data Jar
+function savePortfolio(dictionary portfolio) {
+    @now = currentDate()
+    @formatted = formatDate(now, "ISO 8601", "Date")
+    setValue(portfolio, "lastUpdated", formatted)
+    setDataJarValue("portfolio", portfolio)
+}
+
+// Find holding by symbol, returns index or -1
+function findHolding(text symbol, array holdings): number {
+    @index = 1
+    for holding in holdings {
+        @holdingSymbol = holding['symbol']
+        if holdingSymbol == symbol {
+            output index
+        }
+        @index = index + 1
+    }
+    output -1
+}

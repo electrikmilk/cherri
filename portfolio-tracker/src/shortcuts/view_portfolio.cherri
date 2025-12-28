@@ -1,0 +1,90 @@
+/*
+ * Portfolio - View
+ * Displays full portfolio summary with current prices
+ */
+
+#define name "Portfolio - View"
+#define color green
+#define glyph chartBar
+
+#include 'actions/scripting'
+#include 'actions/basic'
+#include '../lib/portfolio_data.cherri'
+#include '../lib/yahoo_api.cherri'
+#include '../lib/formatting.cherri'
+
+// Load portfolio
+@portfolio = getPortfolio()
+@holdings = portfolio['holdings']
+
+// Check if empty
+@holdingCount = count(holdings)
+if holdingCount == 0 {
+    alert("Portfolio is empty.\nAdd holdings to get started.", "No Holdings")
+    stop()
+}
+
+// Collect all symbols
+@symbols = []
+for holding in holdings {
+    @sym = holding['symbol']
+    @symbols += sym
+}
+
+// Fetch all current prices
+@prices = fetchPrices(symbols)
+
+// Calculate totals
+@totalCurrentValue = 0
+@totalCostBasis = 0
+
+@holdingDetails = ""
+
+for holding in holdings {
+    @sym = holding['symbol']
+    @shares = holding['shares']
+    @costBasis = holding['costBasis']
+
+    @currentPrice = prices[sym]
+    @currentValue = shares * currentPrice
+    @costTotal = shares * costBasis
+
+    @totalCurrentValue = totalCurrentValue + currentValue
+    @totalCostBasis = totalCostBasis + costTotal
+
+    @gainLoss = calculateGainLoss(currentValue, costTotal)
+    @gainAmount = gainLoss['amount']
+    @gainPercent = gainLoss['percent']
+
+    @formattedGain = formatCurrency(gainAmount)
+    @formattedPct = formatPercent(gainPercent)
+    @formattedCurrent = formatCurrency(currentValue)
+    @formattedCost = formatCurrency(costTotal)
+
+    @holdingDetails = "{holdingDetails}
+━━━━━━━━━━━━━━━━━━
+{sym}: {shares} shares
+Current: ${currentPrice} × {shares} = {formattedCurrent}
+Cost:    ${costBasis} × {shares} = {formattedCost}
+Gain:    {formattedGain} ({formattedPct})
+"
+}
+
+// Portfolio totals
+@totalGainLoss = calculateGainLoss(totalCurrentValue, totalCostBasis)
+@totalGainAmount = totalGainLoss['amount']
+@totalGainPercent = totalGainLoss['percent']
+
+@formattedTotalValue = formatCurrency(totalCurrentValue)
+@formattedTotalCost = formatCurrency(totalCostBasis)
+@formattedTotalGain = formatCurrency(totalGainAmount)
+@formattedTotalPct = formatPercent(totalGainPercent)
+
+@summary = "📊 PORTFOLIO SUMMARY
+
+Total Value: {formattedTotalValue}
+Total Cost:  {formattedTotalCost}
+Gain/Loss:   {formattedTotalGain} ({formattedTotalPct})
+{holdingDetails}"
+
+show(summary)

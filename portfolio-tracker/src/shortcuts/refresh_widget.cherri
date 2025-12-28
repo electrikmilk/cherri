@@ -1,0 +1,76 @@
+/*
+ * Portfolio - Refresh Widget
+ * Updates cached data for Scriptable widget
+ */
+
+#define name "Portfolio - Refresh Widget"
+#define color purple
+#define glyph arrowClockwise
+
+#include 'actions/scripting'
+#include 'actions/basic'
+#include '../lib/portfolio_data.cherri'
+#include '../lib/yahoo_api.cherri'
+#include '../lib/formatting.cherri'
+
+// Load portfolio
+@portfolio = getPortfolio()
+@holdings = portfolio['holdings']
+
+// Check if empty
+@holdingCount = count(holdings)
+if holdingCount == 0 {
+    showNotification("Portfolio is empty", "Widget Refresh")
+    stop()
+}
+
+// Collect symbols and fetch prices
+@symbols = []
+for holding in holdings {
+    @sym = holding['symbol']
+    @symbols += sym
+}
+
+@prices = fetchPrices(symbols)
+
+// Calculate totals
+@totalCurrentValue = 0
+@totalCostBasis = 0
+
+for holding in holdings {
+    @sym = holding['symbol']
+    @shares = holding['shares']
+    @costBasis = holding['costBasis']
+
+    @currentPrice = prices[sym]
+    @currentValue = shares * currentPrice
+    @costTotal = shares * costBasis
+
+    @totalCurrentValue = totalCurrentValue + currentValue
+    @totalCostBasis = totalCostBasis + costTotal
+}
+
+@totalGainLoss = totalCurrentValue - totalCostBasis
+@totalGainPercent = 0
+if totalCostBasis > 0 {
+    @totalGainPercent = (totalGainLoss / totalCostBasis) * 100
+}
+
+// Store widget data in Data Jar for Scriptable to read
+@widgetData = {
+    "portfolioValue": totalCurrentValue,
+    "portfolioChange": totalGainLoss,
+    "portfolioChangePercent": totalGainPercent,
+    "lastUpdated": currentDate(),
+    "holdings": holdings,
+    "prices": prices
+}
+
+setDataJarValue("portfolioWidget", widgetData)
+
+// Also save updated portfolio timestamp
+savePortfolio(portfolio)
+
+// Notify user
+@formattedValue = formatNumber(totalCurrentValue, 2)
+showNotification("Portfolio: ${formattedValue}", "Widget Updated ✅")

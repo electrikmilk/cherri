@@ -1,0 +1,55 @@
+/*
+ * Yahoo Finance API Integration
+ */
+
+#include 'actions/network'
+#include 'actions/scripting'
+
+// Fetch current price for a single symbol
+function fetchPrice(text symbol): number {
+    @url = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+    @response = getContentsOfURL(url)
+
+    if response == nil {
+        output 0
+    }
+
+    @chart = response['chart']
+    @results = chart['result']
+    @first = getFirstItem(results)
+    @meta = first['meta']
+    @price = meta['regularMarketPrice']
+
+    output price
+}
+
+// Fetch prices for multiple symbols
+// Returns dictionary: { "AAPL": 187.44, "GOOGL": 142.65, ... }
+function fetchPrices(array symbols): dictionary {
+    @prices = {}
+
+    for symbol in symbols {
+        @price = fetchPrice(symbol)
+        setValue(prices, symbol, price)
+    }
+
+    output prices
+}
+
+// Get previous close for calculating daily change
+function fetchPreviousClose(text symbol): number {
+    @url = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+    @response = getContentsOfURL(url)
+
+    if response == nil {
+        output 0
+    }
+
+    @chart = response['chart']
+    @results = chart['result']
+    @first = getFirstItem(results)
+    @meta = first['meta']
+    @prevClose = meta['previousClose']
+
+    output prevClose
+}
