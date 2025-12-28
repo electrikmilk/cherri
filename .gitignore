@@ -26,6 +26,7 @@ cherri
 
 # Output
 *.shortcut
+!compiled_shortcuts/*.shortcut
 *.plist
 *.xml
 
