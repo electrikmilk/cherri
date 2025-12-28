@@ -16,6 +16,7 @@ cherri
 *.cherri
 !/actions/*.cherri
 !/tests/*.cherri
+!/shortcuts/*.cherri
 /tests/*_decompiled.plist
 !stdlib.cherri
 *.prof
