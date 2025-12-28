@@ -8,7 +8,7 @@
 #define glyph plus
 
 #include 'actions/scripting'
-#include 'actions/basic'
+#include 'actions/network'
 #include '../lib/portfolio_data.cherri'
 
 // Get inputs from user

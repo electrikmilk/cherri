@@ -1,23 +1,23 @@
 /*
  * Formatting utilities
+ *
+ * Note: This library requires actions/scripting and actions/math
+ * to be included in the main shortcut file.
  */
-
-#include 'actions/scripting'
-#include 'actions/math'
 
 // Format currency with 2 decimal places
 function formatCurrency(number value): text {
     @formatted = formatNumber(value, 2)
-    output "${formatted}"
+    output("${formatted}")
 }
 
 // Format percentage with 2 decimal places and sign
 function formatPercent(number value): text {
     @formatted = formatNumber(value, 2)
     if value >= 0 {
-        output "+{formatted}%"
+        output("+{formatted}%")
     }
-    output "{formatted}%"
+    output("{formatted}%")
 }
 
 // Calculate gain/loss
@@ -34,5 +34,5 @@ function calculateGainLoss(number currentValue, number costBasis): dictionary {
         "percent": gainLossPercent
     }
 
-    output result
+    output(result)
 }

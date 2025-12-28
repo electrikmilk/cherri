@@ -1,0 +1,8 @@
+#define name "Test Basic"
+#define color blue
+#define glyph star
+
+#include 'actions/scripting'
+
+@myVar = "Hello"
+alert("{myVar}", "Test")

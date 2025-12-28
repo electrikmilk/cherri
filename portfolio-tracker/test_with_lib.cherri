@@ -1,0 +1,8 @@
+#define name "Test With Lib"
+#define color blue
+#define glyph star
+
+#include 'src/lib/portfolio_data.cherri'
+
+@portfolio = getPortfolio()
+show("Portfolio loaded")

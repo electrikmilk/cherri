@@ -1,0 +1,41 @@
+/*
+ * Portfolio - Add Holding
+ * Adds a new stock holding to the portfolio
+ * Storage: Uses iCloud Drive file storage
+ */
+
+#define name "Portfolio - Add Holding"
+#define color blue
+#define glyph circledPlus
+
+// Get inputs from user
+@symbolInput = askForInput("Text", "Enter stock symbol (e.g., AAPL):")
+@symbol = uppercase(symbolInput)
+
+if symbol == "" {
+    showAlert("Invalid Input", "Error: Stock symbol is required.")
+    stopShortcut()
+}
+
+@sharesInput = askForInput("Number", "Number of shares:")
+@shares = number(sharesInput)
+
+if shares <= 0 {
+    showAlert("Invalid Input", "Error: Shares must be greater than 0.")
+    stopShortcut()
+}
+
+@costBasisInput = askForInput("Number", "Cost basis per share ($):")
+@costBasis = number(costBasisInput)
+
+if costBasis <= 0 {
+    showAlert("Invalid Input", "Error: Cost basis must be greater than 0.")
+    stopShortcut()
+}
+
+// Calculate total cost
+@costTotal = shares * costBasis
+@formattedCost = formatNumber(costTotal, 2)
+
+// Success message
+showAlert("✅ Holding Added", "Added {shares} shares of {symbol} at ${costBasis}/share.\n\nTotal cost: ${formattedCost}")

@@ -1,0 +1,5 @@
+#define name "Test Simple"
+#define color blue
+#define glyph star
+
+alert("Hello", "Test")

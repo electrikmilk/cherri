@@ -1,9 +1,9 @@
 /*
  * Yahoo Finance API Integration
+ *
+ * Note: This library requires actions/network and actions/scripting
+ * to be included in the main shortcut file.
  */
-
-#include 'actions/network'
-#include 'actions/scripting'
 
 // Fetch current price for a single symbol
 function fetchPrice(text symbol): number {
@@ -11,7 +11,7 @@ function fetchPrice(text symbol): number {
     @response = getContentsOfURL(url)
 
     if response == nil {
-        output 0
+        output(0)
     }
 
     @chart = response['chart']
@@ -20,7 +20,7 @@ function fetchPrice(text symbol): number {
     @meta = first['meta']
     @price = meta['regularMarketPrice']
 
-    output price
+    output(price)
 }
 
 // Fetch prices for multiple symbols
@@ -33,7 +33,7 @@ function fetchPrices(array symbols): dictionary {
         setValue(prices, symbol, price)
     }
 
-    output prices
+    output(prices)
 }
 
 // Get previous close for calculating daily change
@@ -42,7 +42,7 @@ function fetchPreviousClose(text symbol): number {
     @response = getContentsOfURL(url)
 
     if response == nil {
-        output 0
+        output(0)
     }
 
     @chart = response['chart']
@@ -51,5 +51,5 @@ function fetchPreviousClose(text symbol): number {
     @meta = first['meta']
     @prevClose = meta['previousClose']
 
-    output prevClose
+    output(prevClose)
 }

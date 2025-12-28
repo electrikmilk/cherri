@@ -1,12 +1,10 @@
 /*
  * Portfolio Data Access Layer
  * Requires: Data Jar app installed
- */
-
-#include 'actions/scripting'
-#include 'actions/network'
-
-/*
+ *
+ * Note: This library requires actions/scripting and actions/network
+ * to be included in the main shortcut file.
+ *
  * Data Jar uses x-callback-url scheme
  * datajar://x-callback-url/get?key=portfolio
  *
@@ -34,7 +32,7 @@ function getPortfolio(): dictionary {
             "lastUpdated": ""
         }
     }
-    output portfolio
+    portfolio
 }
 
 // Save portfolio to Data Jar
@@ -49,11 +47,11 @@ function savePortfolio(dictionary portfolio) {
 function findHolding(text symbol, array holdings): number {
     @index = 1
     for holding in holdings {
-        @holdingSymbol = holding['symbol']
+        @holdingSymbol = text(holding['symbol'])
         if holdingSymbol == symbol {
-            output index
+            index
         }
         @index = index + 1
     }
-    output -1
+    -1
 }
