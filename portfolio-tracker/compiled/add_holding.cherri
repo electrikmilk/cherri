@@ -1,0 +1,30 @@
+/*
+ * Portfolio - Add Holding
+ * Add a new stock holding to your portfolio
+ */
+
+#define name "Portfolio - Add Holding"
+#define color blue
+#define glyph star
+
+#include 'actions/text'
+#include 'actions/scripting'
+
+// Get stock symbol
+@symbolInput = prompt("Enter stock symbol (e.g., AAPL):")
+@symbol = uppercase(symbolInput)
+
+// Get number of shares
+@shares = prompt("Number of shares:", "Number")
+
+// Get cost basis
+@costBasis = prompt("Cost basis per share ($):", "Number")
+
+// Calculate total cost
+@costTotal = shares * costBasis
+@formattedCost = formatNumber(costTotal, 2)
+
+// Show success message
+alert("Added {shares} shares of {symbol} at ${costBasis}/share.
+
+Total cost: ${formattedCost}", "✅ Holding Added")

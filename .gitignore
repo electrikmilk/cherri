@@ -29,6 +29,7 @@ cherri
 # Output
 *.shortcut
 !compiled_shortcuts/*.shortcut
+!portfolio-tracker/dist/*.shortcut
 *.plist
 *.xml
 

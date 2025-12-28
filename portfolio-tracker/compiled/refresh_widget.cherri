@@ -1,0 +1,17 @@
+/*
+ * Portfolio - Refresh Widget
+ * Update widget data cache
+ */
+
+#define name "Portfolio - Refresh Widget"
+#define color purple
+#define glyph star
+
+// Show notification that widget would be refreshed
+alert("Widget data refreshed!
+
+Portfolio Value: $25,876.50
+Change: +$4,101.50 (+18.83%)
+
+Note: This is a demo. Full version would
+fetch live prices and update widget cache.", "✅ Widget Refreshed")

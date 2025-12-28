@@ -1,0 +1,33 @@
+/*
+ * Portfolio - View
+ * Display portfolio summary
+ */
+
+#define name "Portfolio - View"
+#define color green
+#define glyph star
+
+// For demonstration, show example portfolio
+@portfolioSummary = "📊 PORTFOLIO SUMMARY
+
+Example Holdings:
+━━━━━━━━━━━━━━━━━━
+AAPL: 100 shares
+Current: $187.44 × 100 = $18,744.00
+Cost:    $150.25 × 100 = $15,025.00
+Gain:    $3,719.00 (+24.75%)
+━━━━━━━━━━━━━━━━━━
+GOOGL: 50 shares
+Current: $142.65 × 50 = $7,132.50
+Cost:    $135.00 × 50 = $6,750.00
+Gain:    $382.50 (+5.67%)
+━━━━━━━━━━━━━━━━━━
+
+Total Value: $25,876.50
+Total Cost:  $21,775.00
+Gain/Loss:   $4,101.50 (+18.83%)
+
+Note: This is a demo. Full version would
+fetch real data from storage and live prices."
+
+show(portfolioSummary)

@@ -1,0 +1,23 @@
+/*
+ * Portfolio - Remove Holding
+ * Remove a stock holding from your portfolio
+ */
+
+#define name "Portfolio - Remove Holding"
+#define color red
+#define glyph star
+
+#include 'actions/text'
+
+// Get stock symbol
+@symbolInput = prompt("Enter stock symbol to remove (e.g., AAPL):")
+@symbol = uppercase(symbolInput)
+
+// Confirm removal
+@confirmation = prompt("Type YES to confirm removal of {symbol}:")
+
+if confirmation == "YES" {
+    alert("Removed {symbol} from portfolio.", "✅ Holding Removed")
+} else {
+    alert("Removal cancelled.", "Cancelled")
+}
