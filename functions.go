@@ -134,7 +134,7 @@ func checkFunctionUsage(content string) {
 func generateFunctionsHeader() string {
 	var functionsHeader strings.Builder
 	functionsHeader.WriteString("if ShortcutInput {\n")
-	functionsHeader.WriteString("    @_cherri_empty_dictionary: dictionary\n")
+	functionsHeader.WriteString("    const _cherri_empty_dictionary = {}\n")
 	functionsHeader.WriteString("    const _cherri_dictionary_type_name = typeOf(_cherri_empty_dictionary)\n")
 	functionsHeader.WriteString("    const _cherri_inputType = typeOf(ShortcutInput)\n")
 	functionsHeader.WriteString("    if _cherri_inputType == _cherri_dictionary_type_name {\n")
