@@ -34,7 +34,6 @@ type controlFlowGroup struct {
 var controlFlowGroups map[int]controlFlowGroup
 var groupingIdx int
 
-var preParsing bool
 var isFirstCommentAction = true
 
 // resetParse will take the current lines and merge them together to create new contents,
@@ -117,8 +116,6 @@ func markBuiltins() {
 }
 
 func preParse() {
-	preParsing = true
-
 	defineToggleSetActions()
 	defineRawAction()
 	markBuiltins()
@@ -141,8 +138,6 @@ func preParse() {
 	handleFunctions()
 
 	writeProcessed()
-
-	preParsing = false
 }
 
 func writeProcessed() {
