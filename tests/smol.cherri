@@ -3,6 +3,6 @@ const current_version = "2.1.3"
 
 const response = downloadURL("https://verysmolupdater.francescoro.si/{routinehub_id}/{current_version}")
 @response_text = response.text
-if response_text {
+if @response_text {
 	showWebpage(response)
 }

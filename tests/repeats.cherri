@@ -4,12 +4,12 @@
 
 repeat i for 6 {
     @intVar2 = 5
-    if intVar == intVar2 {
+    if @intVar == @intVar2 {
         @testVar = "test2"
     }
 }
 
 @listVar = list("item 1","item 2","item 3")
-for item in listVar {
-    alert("{RepeatIndex}",item)
+for item in @listVar {
+    alert("{RepeatIndex}", @item)
 }

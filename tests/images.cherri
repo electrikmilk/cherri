@@ -1,13 +1,13 @@
 @images = selectPhotos(true)
 
-@combined = combineImages(images, "In a Grid")
+@combined = combineImages(@images, "In a Grid")
 
-@image = getFirstItem(images)
+@image = getFirstItem(@images)
 
-cropImage(image)
+cropImage(@image)
 
-resizeImage(image, "640", "480")
-resizeImageByPercent(image, "50%")
-resizeImageByLongestEdge(image, "280")
+resizeImage(@image, "640", "480")
+resizeImageByPercent(@image, "50%")
+resizeImageByLongestEdge(@image, "280")
 
-show("{combined}")
+show("{@combined}")
