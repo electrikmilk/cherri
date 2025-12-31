@@ -119,9 +119,7 @@ func makeVariableAction(t *token) {
 		"WFVariableName": t.ident,
 	}
 
-	if t.value != nil {
-		makeVariableInput(t, setVariableParams)
-	}
+	makeVariableInput(t, setVariableParams)
 
 	if t.typeof != Variable {
 		if variables[t.ident].valueType != Arr {
@@ -156,7 +154,7 @@ func makeVariableInput(t *token, params map[string]any) {
 	}
 
 	makeVariableValueAction(t, &outputName, &varUUID)
-	if t.valueType != Arr {
+	if t.valueType != Arr && t.value != nil {
 		if t.typeof == Variable && t.valueType == Variable {
 			params["WFInput"] = variableValue(t.value.(varValue))
 		} else {
@@ -674,6 +672,9 @@ const (
 
 // makeDictionary creates a Shortcut dictionary value.
 func makeDictionary(value interface{}) (dictItems []map[string]any) {
+	if value == nil {
+		return []map[string]any{}
+	}
 	for key, item := range value.(map[string]interface{}) {
 		dictItems = append(dictItems, makeDictionaryItem(key, item))
 	}
@@ -802,7 +803,7 @@ func makeOutputName(token *token) string {
 			return token.ident
 		}
 	}
-	if token.valueType == Variable {
+	if token.valueType == Variable && token.value != nil {
 		var identifier = token.value.(varValue).value.(string)
 		if validReference(identifier) {
 			return identifier
@@ -811,6 +812,10 @@ func makeOutputName(token *token) string {
 	var typeOfToken = string(token.valueType)
 	if typeOfToken == "action" {
 		typeOfToken = token.value.(action).ident
+	}
+
+	if token.valueType == "" {
+		typeOfToken = token.ident
 	}
 
 	var customOutputName = fmt.Sprintf("%s%s", strings.ToTitle(string(typeOfToken[0])), typeOfToken[1:])
