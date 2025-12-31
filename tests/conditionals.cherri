@@ -7,40 +7,40 @@ const boolVar = true
 // types of conditions
 if boolVar == true {}
 if boolVar == false {}
-if textVar == textVar2 {}
-if textVar != textVar2 {}
-if textVar {}
-if !textVar {}
-if intVar == 5 {}
-if intVar != 5 {}
-if intVar > intVar2 {}
-if intVar < 5 {}
-if intVar >= 5 {}
-if intVar <= 5 {}
-if textVar contains "string" {}
-if textVar contains textVar2 {}
-if textVar !contains textVar2 {}
-if textVar !contains "2" {}
-if textVar beginsWith "string" {}
-if textVar beginsWith textVar2 {}
-if textVar endsWith "2" {}
-if textVar endsWith textVar2 {}
-if intVar <> 5 6 {} // between
+if @textVar == @textVar2 {}
+if @textVar != @textVar2 {}
+if @textVar {}
+if !@textVar {}
+if @intVar == 5 {}
+if @intVar != 5 {}
+if @intVar > @intVar2 {}
+if @intVar < 5 {}
+if @intVar >= 5 {}
+if @intVar <= 5 {}
+if @textVar contains "string" {}
+if @textVar contains @textVar2 {}
+if @textVar !contains @textVar2 {}
+if @textVar !contains "2" {}
+if @textVar beginsWith "string" {}
+if @textVar beginsWith @textVar2 {}
+if @textVar endsWith "2" {}
+if @textVar endsWith @textVar2 {}
+if @intVar <> 5 6 {} // between
 
 // multiple conditions
-if intVar && intVar == 5 {}
-if intVar || textVar {}
-if intVar == 5 && textVar == "string" {}
-if intVar == 5 && textVar == "string" && textVar == textVar2 {}
+if @intVar && @intVar == 5 {}
+if @intVar || @textVar {}
+if @intVar == 5 && @textVar == "string" {}
+if @intVar == 5 && @textVar == "string" && @textVar == @textVar2 {}
 
 // nesting...
-if intVar > 5 {
+if @intVar > 5 {
     @intvar3 = 5
-    if intVar < 5 {
+    if @intVar < 5 {
         @intVar2 = 3
     } else {
-         if intVar > intVar2 {
-            @intVar2 = intVar
+         if @intVar > @intVar2 {
+            @intVar2 = @intVar
          }
     }
 } else {

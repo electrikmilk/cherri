@@ -6,4 +6,4 @@
 
 @message = "Hello, Cherri!"
 @title = "Alert"
-alert(message, "{title}")
+alert(@message, "{@title}")

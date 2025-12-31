@@ -108,6 +108,35 @@ func validReference(identifier string) bool {
 	return false
 }
 
+func validGlobalReference(identifier *string) bool {
+	if _, found := globals[*identifier]; found {
+		isInputVariable(*identifier)
+		return true
+	}
+
+	return false
+}
+
+// Checks if identifier is a variable that is not a constant.
+func validActionReference(identifier *string) bool {
+	if v, found := variables[*identifier]; found {
+		if !v.constant {
+			parserWarning(fmt.Sprintf("Deprecated: Prefix variable reference '%s' with @ for compilation speed and readability.", *identifier))
+		}
+		return true
+	}
+
+	return false
+}
+
+// Checks if identifier is a variable that is not a constant.
+func validVariableReference(identifier *string) bool {
+	if v, found := variables[*identifier]; !found || v.constant {
+		return false
+	}
+	return true
+}
+
 func getVariableValue(identifier string) (variableValue *varValue, found bool) {
 	if value, found := globals[identifier]; found {
 		isInputVariable(identifier)

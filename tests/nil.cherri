@@ -1,5 +1,5 @@
 @media = getFile(nil)
-setMetadata(media, nil, "Title")
+setMetadata(@media, nil, "Title")
 @media = nil
 
 repeat n for nil {
@@ -16,6 +16,6 @@ menu nil {
 }
 
 @int = 5
-if int == nil {
+if @int == nil {
 
 }

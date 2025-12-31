@@ -4,6 +4,6 @@ openShortcut("Add Song to Favorites")
 
 @intVar = 2
 
-run("Add Song to Favorites", intVar)
+run("Add Song to Favorites", @intVar)
 
 runSelf(nil)

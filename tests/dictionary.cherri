@@ -21,14 +21,14 @@ const test = "text"
 
 // Get values, keys, and values for keys...
 
-@value = getValue(dictVar, "key1")
+@value = getValue(@dictVar, "key1")
 
 // you can also access it like this with a raw string, but no variable references are allowed.
-@value = dictVar['key1']
-alert(value,"Value of key1")
+@value = @dictVar['key1']
+alert(@value,"Value of key1")
 
-@keys = getKeys(dictVar)
+@keys = getKeys(@dictVar)
 
-@values = getValues(dictVar)
+@values = getValues(@dictVar)
 
-setValue(dictVar, "key 1", value)
+setValue(@dictVar, "key 1", @value)

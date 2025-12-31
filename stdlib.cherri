@@ -4,19 +4,19 @@ Copyright (c) Cherri
 */
 
 function runJS(text _script) {
-    const _ios17bug = replaceText("#", "\u0023", _script)
+    const _ios17bug = replaceText("#", "\u0023", @_script)
     const _uri = url("data:text/html;charset=utf-8,<body/><script>{_ios17bug}</script>")
     @richURI = _uri.richtext
-    const _decoded = urlDecode(richURI)
+    const _decoded = urlDecode(@richURI)
 
     output("{_decoded}")
 }
 
 function chooseFromVCard(array _items, text _prompt) {
-    const _menuItems = "{_items}"
+    const _menuItems = "{@_items}"
     const _vcf = setName(_menuItems, "cherri_chooseFromVCard.vcf")
     @contact = _vcf.contact
-    const _chosenItem = chooseFromList(contact, _prompt)
+    const _chosenItem = chooseFromList(@contact, @_prompt)
 
     output("{_chosenItem}")
 }

@@ -7,7 +7,7 @@
 
 // Type coercion...
 @number = 5
-@text = number.text
+@text = @number.text
 
 // Inline type coercion...
-@numberText = "Number: {number.text}"
+@numberText = "Number: {@number.text}"

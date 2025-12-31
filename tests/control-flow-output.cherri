@@ -1,5 +1,5 @@
 @deviceModel = "{Device['Model']}"
-const connectionName = if deviceModel == "iPhone" {
+const connectionName = if @deviceModel == "iPhone" {
     getCellularDetail("Carrier Name")
 } else {
     getWifiDetail("Network Name")
@@ -17,14 +17,14 @@ const deviceDetail = menu "Get Device Detail" {
 show("{deviceDetail}")
 
 const repeated = repeat i for 6 {
-    number(i)
+    number(@i)
 }
 
 show("{repeated}")
 
 @items = ["Item 1", "Item 2", "Item 3"]
-const map = for item in items {
-    number(item)
+const map = for item in @items {
+    number(@item)
 }
 
 show("{map}")

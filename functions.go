@@ -134,8 +134,8 @@ func checkFunctionUsage(content string) {
 func generateFunctionsHeader() string {
 	var functionsHeader strings.Builder
 	functionsHeader.WriteString("if ShortcutInput {\n")
-	functionsHeader.WriteString("    const _cherri_empty_dictionary = {}\n")
-	functionsHeader.WriteString("    const _cherri_dictionary_type_name = typeOf(_cherri_empty_dictionary)\n")
+	functionsHeader.WriteString("    @_cherri_empty_dictionary: dictionary\n")
+	functionsHeader.WriteString("    const _cherri_dictionary_type_name = typeOf(@_cherri_empty_dictionary)\n")
 	functionsHeader.WriteString("    const _cherri_inputType = typeOf(ShortcutInput)\n")
 	functionsHeader.WriteString("    if _cherri_inputType == _cherri_dictionary_type_name {\n")
 	functionsHeader.WriteString("        const _cherri_input = getDictionary(ShortcutInput)\n")
@@ -198,7 +198,7 @@ func handleFunctionArguments(functionsHeader *strings.Builder, identifier string
 			functionsHeader.WriteString(fmt.Sprintf("const %s_array_dictionary = getDictionary(%s)\n", argumentReference, argumentReference))
 			functionsHeader.WriteString(fmt.Sprintf("                const %s_array = getValue(%s,\"array\")\n", argumentReference, argumentReference))
 			functionsHeader.WriteString(fmt.Sprintf("                for %s_array_item in %s_array {\n", argumentReference, argumentReference))
-			functionsHeader.WriteString(fmt.Sprintf("                    @%s += %s_array_item\n                }", param.name, argumentReference))
+			functionsHeader.WriteString(fmt.Sprintf("                    @%s += @%s_array_item\n                }", param.name, argumentReference))
 		default:
 			functionsHeader.WriteString(fmt.Sprintf("@%s = %s\n", param.name, argumentReference))
 		}
