@@ -374,7 +374,12 @@ func collectExpressionValue(value *any) {
 	var until = ' '
 	var refType tokenType
 	var refValue any
-	collectReference(&refType, &refValue, &until)
+	var varRef = false
+	if char == '@' {
+		advance()
+		varRef = true
+	}
+	collectReference(&refType, &refValue, &until, varRef)
 	*value = fmt.Sprintf("%s{%s}", *value, refValue.(varValue).value)
 }
 
@@ -408,6 +413,9 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*valueType = Integer
 		*value = ""
 		collectExpression(valueType, value)
+	case char == '@':
+		advance()
+		collectReference(valueType, value, &until, true)
 	case tokenAhead(Color):
 		*valueType = Color
 		collectColorValue(value)
@@ -426,7 +434,7 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	case strings.Contains(ahead, "("):
 		collectActionValue(valueType, value)
 	default:
-		collectReference(valueType, value, &until)
+		collectReference(valueType, value, &until, false)
 	}
 }
 
@@ -520,10 +528,10 @@ func collectActionValue(valueType *tokenType, value *any) {
 	*value = collectAction(&identifier)
 }
 
-var collectVarRegex = regexp.MustCompile(`\{@?(.*?)(?:\['(.*?)'])?(?:\.(.*?))?}`)
+var checkInlineVarRegex = regexp.MustCompile(`\{(.*?)(?:\['(.*?)'])?(?:\.(.*?))?}`)
 
 func checkInlineVars(value *string) {
-	var matches = collectVarRegex.FindAllStringSubmatch(*value, -1)
+	var matches = checkInlineVarRegex.FindAllStringSubmatch(*value, -1)
 	if matches == nil {
 		return
 	}
@@ -538,44 +546,61 @@ func checkInlineVars(value *string) {
 			identifier = Ask
 		}
 
+		if startsWith("@", identifier) {
+			identifier = strings.TrimPrefix(identifier, "@")
+			if !validVariableReference(&identifier) {
+				parserError(fmt.Sprintf("Undefined inline variable reference '%s'", identifier))
+			}
+			continue
+		}
+
 		if !validReference(identifier) {
-			parserError(fmt.Sprintf("Undefined inline variable reference '%s'", identifier))
+			parserError(fmt.Sprintf("Undefined inline reference '%s'", identifier))
 		}
 	}
 }
 
-func collectReference(valueType *tokenType, value *any, until *rune) {
-	if char == '@' {
-		advance()
-	}
+func collectReference(valueType *tokenType, value *any, until *rune, variable bool) {
 	var reference = collectIdentifier()
 	var getAs string
 	var coerce string
 	var prompt string
+	var constant bool
 
-	if q, found := questions[reference]; found {
-		if q.used {
-			parserError(fmt.Sprintf("Duplicate usage of import question '%s'. Import questions can only be used in one action argument.", reference))
+	if !variable {
+		if q, found := questions[reference]; found {
+			if q.used {
+				parserError(fmt.Sprintf("Multiple uses of import question '%s'. Import questions can only be used once in an action argument.", reference))
+			}
+
+			*valueType = Question
+			*value = reference
+			q.used = true
+			return
 		}
 
-		*valueType = Question
-		*value = reference
-		q.used = true
-		return
-	}
-
-	if !validReference(reference) {
-		parserError(fmt.Sprintf("Undefined reference '%s'", reference))
-	}
-
-	if reference == "Ask" && char == ':' {
-		advance()
-		skipWhitespace()
-		if char != '\'' {
-			parserError(fmt.Sprintf("Expected prompt raw string ('), got: %c", char))
+		if !validActionReference(&reference) && !validGlobalReference(&reference) {
+			parserError(fmt.Sprintf("Undefined reference '%s'", reference))
 		}
-		advance()
-		prompt = collectRawString()
+
+		if v, found := variables[reference]; found {
+			constant = v.constant
+		}
+
+		if reference == "Ask" && char == ':' {
+			advance()
+			skipWhitespace()
+			if char != '\'' {
+				parserError(fmt.Sprintf("Expected prompt raw string ('), got: %c", char))
+			}
+			advance()
+			prompt = collectRawString()
+		}
+	} else {
+		reference = strings.TrimPrefix(reference, "@")
+		if !validVariableReference(&reference) {
+			parserError(fmt.Sprintf("Undefined variable reference '%s'", reference))
+		}
 	}
 
 	if char == '[' {
@@ -604,6 +629,7 @@ func collectReference(valueType *tokenType, value *any, until *rune) {
 		coerce:       coerce,
 		getAs:        getAs,
 		prompt:       prompt,
+		constant:     constant,
 	}
 }
 

@@ -573,12 +573,13 @@ func mapInlineVars(noVarString *string) {
 	}
 }
 
+var collectInlineVarRegex = regexp.MustCompile(`\{@?(.*?)(?:\['(.*?)'])?(?:\.(.*?))?}`)
 var replaceVarRegex = regexp.MustCompile(`(\{@?.*?})`)
 
 // collectInlineVariables collects inline variables from `str` and adds them to a slice of attachmentVariable.
 // It then replaces all instances of inline variables in `str` with ObjectReplaceChar.
 func collectInlineVariables(str *string) (noVarString string) {
-	var matches = collectVarRegex.FindAllStringSubmatch(*str, -1)
+	var matches = collectInlineVarRegex.FindAllStringSubmatch(*str, -1)
 	if matches != nil {
 		for _, match := range matches {
 			var attachmentVar attachmentVariable
