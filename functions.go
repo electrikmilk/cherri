@@ -304,7 +304,7 @@ func makeFunctionCall(identifier *string, arguments *[]actionArgument) map[strin
 				var identifier = argument.value.(varValue).value.(string)
 				var variableValue, found = getVariableValue(identifier)
 				if !found {
-					parserError(fmt.Sprintf("Undefined reference '%s'", argumentValue))
+					parserError(fmt.Sprintf("Undefined reference '%s'", identifier))
 				}
 				if variableValue.valueType == Arr {
 					var wrappedArray = map[string]any{"array": fmt.Sprintf("{%s}", identifier)}
