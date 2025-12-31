@@ -803,9 +803,9 @@ func makeOutputName(token *token) string {
 		}
 	}
 	if token.valueType == Variable {
-		var identifer = token.value.(varValue).value.(string)
-		if validReference(identifer) {
-			return identifer
+		var identifier = token.value.(varValue).value.(string)
+		if validReference(identifier) {
+			return identifier
 		}
 	}
 	var typeOfToken = string(token.valueType)
