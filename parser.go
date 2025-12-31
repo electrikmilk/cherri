@@ -1550,7 +1550,7 @@ func collectArray() (array interface{}) {
 			fmt.Println(rawJSON)
 			fmt.Print("\n")
 		}
-		parserError(fmt.Sprintf("JSON error: %s", err))
+		parserError(fmt.Sprintf("JSON array error: %s", err))
 	}
 	array = array.(map[string]interface{})["array"]
 	advance()
