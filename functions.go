@@ -167,7 +167,15 @@ func generateFunctions(functionsHeader *strings.Builder) {
 
 		handleFunctionArguments(functionsHeader, identifier, function)
 
-		functionsHeader.WriteString(function.body)
+		for i, line := range strings.Split(function.body, "\n") {
+			if i == 0 {
+				tabLevel = 4
+			} else {
+				tabLevel = 3
+			}
+
+			functionsHeader.WriteString(fmt.Sprintf("%s\n", tabbedLine(line)))
+		}
 
 		if !outputActionRegex.MatchString(function.body) {
 			functionsHeader.WriteString("\noutput(nil)")
