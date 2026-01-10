@@ -149,6 +149,22 @@ func camelCase(s string) (c string) {
 	return
 }
 
+var tabLevel int
+
+// tabbedLine returns s prepended with tab characters at the current tabLevel.
+func tabbedLine(s string) string {
+	if tabLevel < 1 {
+		return s
+	}
+	var str strings.Builder
+	for i := 0; i < tabLevel; i++ {
+		str.WriteRune('\t')
+	}
+	str.WriteString(s)
+
+	return str.String()
+}
+
 func scan(prompt string, store *string) {
 	fmt.Print(prompt)
 
