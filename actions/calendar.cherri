@@ -108,7 +108,7 @@ enum dateUnit {
 }
 
 // [Doc]: [Dates] Adjust Date: Adjust a date or get the start of a time period.
-action adjustDate(text date: 'WFDate', dateAdjustOperation operation: 'WFAdjustOperation', #dateUnit ?unit)
+action adjustDate(text date: 'WFDate', dateAdjustOperation operation: 'WFAdjustOperation', #dateUnit ?unit: 'WFDuration')
 
 enum holidayYear {
     '2023',
