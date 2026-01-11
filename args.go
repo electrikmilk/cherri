@@ -62,8 +62,9 @@ func init() {
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
-		Name:        "add-uri",
-		Description: "Add remote Git repository URI to current package. (e.g. github.com, etc.)",
+		Name:         "add-uri",
+		Description:  "Add remote Git repository URI to current package. (e.g. github.com, etc.)",
+		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
 		Name:         "install",
