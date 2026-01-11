@@ -368,10 +368,13 @@ func checkEnum(param *parameterDefinition, argument *actionArgument) {
 	if enumerations[param.enum] == nil {
 		parserError(fmt.Sprintf("Undefined enum '%s'", param.enum))
 	}
+	if argument.valueType == Variable {
+		return
+	}
 	if !slices.Contains(enumerations[param.enum], value.(string)) {
 		parserError(
 			fmt.Sprintf(
-				"Invalid argument '%s' for %s.\n\n%s",
+				"Invalid value '%s' for argument '%s'.\n\n%s",
 				value,
 				param.name,
 				generateActionDefinition(*param, true),
