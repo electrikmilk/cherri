@@ -1347,6 +1347,9 @@ func checkConditionalTypes(conditional *tokenType, variableType tokenType, value
 			variableType = tokenType(variable.coerce)
 		}
 	}
+	if variableType == Expression {
+		variableType = Integer
+	}
 
 	if len(allowedConditionalTypes[*conditional]) != 0 && !slices.Contains(allowedConditionalTypes[*conditional], variableType) {
 		parserError(
