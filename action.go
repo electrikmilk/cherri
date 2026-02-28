@@ -64,6 +64,8 @@ type action struct {
 	def *actionDefinition
 	// args are each of the arguments collected between the actions' parenthesis.
 	args []actionArgument
+	// overrideIdentifier holds a per-invocation identifier override (e.g. from rawAction).
+	overrideIdentifier string
 }
 
 // checkFunc is a function that can be passed a collected actions arguments as a slice of actionArgument and the current action's definition.
@@ -1046,9 +1048,10 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 
 func makeActionValue(identifier string, arguments []actionArgument) action {
 	return action{
-		ident: identifier,
-		def:   actions[identifier],
-		args:  arguments,
+		ident:              identifier,
+		def:                actions[identifier],
+		args:               arguments,
+		overrideIdentifier: currentAction.overrideIdentifier,
 	}
 }
 

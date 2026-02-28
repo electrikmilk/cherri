@@ -91,6 +91,7 @@ func generateActions() {
 				exit(fmt.Sprintf("Undefined action '%s'", tokenAction.ident))
 			}
 			setCurrentAction(tokenAction.ident, actions[tokenAction.ident])
+			currentAction.overrideIdentifier = tokenAction.overrideIdentifier
 			makeAction(tokenAction.args, &map[string]any{})
 		case Repeat:
 			makeRepeatAction(&t)
@@ -197,6 +198,7 @@ func makeVariableValue(reference *map[string]any, valueType tokenType, value *an
 		var valuePtr = *value
 		var action = valuePtr.(action)
 		setCurrentAction(action.ident, actions[action.ident])
+		currentAction.overrideIdentifier = action.overrideIdentifier
 		makeAction(action.args, reference)
 	case Dict:
 		addStdAction("dictionary", attachReferenceToParams(&map[string]any{

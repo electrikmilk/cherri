@@ -1863,8 +1863,8 @@ func defineRawAction() {
 				validType: Dict,
 			},
 		},
-		check: func(args []actionArgument, _ *actionDefinition) {
-			actions["rawAction"].overrideIdentifier = getArgValue(args[0]).(string)
+		check: func(args []actionArgument, def *actionDefinition) {
+			def.overrideIdentifier = getArgValue(args[0]).(string)
 		},
 		make: func(args []actionArgument) map[string]any {
 			if len(args) == 1 {
