@@ -958,6 +958,10 @@ func collectEnumerationType(valueType *tokenType, quantity *bool, until rune) (e
 	if enumerations[ahead] != nil {
 		enumeration = collectUntil(until)
 		*valueType = String
+	} else if *quantity {
+		// Consume the unit type qualifier (e.g. timerDuration, dateUnit, storageUnit)
+		// even though it's not an enumeration, so the parser advances past it.
+		collectUntil(until)
 	}
 
 	if *quantity {
@@ -974,7 +978,7 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 
 		var quantity bool
 		var enumeration = collectEnumerationType(&valueType, &quantity, ' ')
-		if enumeration == "" {
+		if enumeration == "" && !quantity {
 			collectType(&valueType, &value, ' ')
 		}
 
