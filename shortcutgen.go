@@ -40,12 +40,11 @@ func generateShortcut() {
 		func() {
 			shortcut.WFWorkflowOutputContentItemClasses = generateOutputContentItems()
 		},
-		func() {
-			shortcut.WFWorkflowImportQuestions = generateImportQuestions()
-		},
 	)
 
 	generateActions()
+
+	shortcut.WFWorkflowImportQuestions = generateImportQuestions()
 
 	if args.Using("debug") {
 		printShortcutGenDebug()
@@ -61,6 +60,7 @@ func resetShortcutGen() {
 	uuids = map[string]string{}
 	variables = map[string]varValue{}
 	questions = map[string]*question{}
+	inlineQuestions = nil
 	noInput = map[string]any{}
 	definedWorkflowTypes = []string{}
 	definedQuickActions = []string{}
@@ -1148,23 +1148,27 @@ type WFQuestion struct {
 	DefaultValue any    `plist:",omitempty"`
 }
 
-func generateImportQuestions() (importQuestions []WFQuestion) {
-	if len(questions) == 0 {
-		return
-	}
+var inlineQuestions []WFQuestion
 
+func generateImportQuestions() (importQuestions []WFQuestion) {
 	for _, q := range questions {
 		if !q.used {
 			continue
 		}
-		importQuestions = append(importQuestions, WFQuestion{
+		var wfq = WFQuestion{
 			ParameterKey: q.parameter,
 			Category:     "Parameter",
 			ActionIndex:  q.actionIndex,
 			Text:         q.text,
-			DefaultValue: q.defaultValue,
-		})
+		}
+		if q.defaultValue != nil {
+			wfq.DefaultValue = *q.defaultValue
+		}
+		importQuestions = append(importQuestions, wfq)
 	}
+
+	importQuestions = append(importQuestions, inlineQuestions...)
+
 	return
 }
 

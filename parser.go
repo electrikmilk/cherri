@@ -313,6 +313,9 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 	if *valueType == Question {
 		parserError(fmt.Sprintf("Illegal reference to import question '%s'. Shortcuts does not support import questions as variable values.", *value))
 	}
+	if *valueType == InlineQuestion {
+		parserError("Inline import questions cannot be used as variable values.")
+	}
 
 	var aheadOfValue = lookAheadUntil('\n')
 	if strings.Contains(aheadOfValue, "//") || strings.Contains(aheadOfValue, "/*") {
@@ -435,6 +438,9 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	case tokenAhead(Nil):
 		*valueType = Nil
 		advanceUntil(until)
+	case tokenAhead(Question):
+		*valueType = InlineQuestion
+		collectInlineQuestion(value)
 	case strings.Contains(ahead, "("):
 		collectActionValue(valueType, value)
 	default:
@@ -738,7 +744,9 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 		valueType: valueType,
 		value:     value,
 	}
-	if !param.infinite && (valueType != Nil && value != nil) {
+	if argument.valueType == InlineQuestion {
+		questionArg(param, &argument)
+	} else if !param.infinite && (valueType != Nil && value != nil) {
 		checkArg(param, &argument)
 	}
 	return
@@ -1080,7 +1088,7 @@ type question struct {
 	parameter    string
 	actionIndex  int
 	text         string
-	defaultValue string
+	defaultValue *string
 	used         bool
 }
 
@@ -1102,14 +1110,40 @@ func collectQuestion() {
 
 	var text = collectString()
 	advance()
+	skipWhitespace()
+
+	var defaultValue *string
+	if char == '"' {
+		advance()
+		v := collectString()
+		defaultValue = &v
+	}
+
+	questions[identifier] = &question{
+		text:         text,
+		defaultValue: defaultValue,
+	}
+}
+
+func collectInlineQuestion(value *any) {
+	advance()
+	skipWhitespace()
 
 	if char != '"' {
-		parserError("Expected question default string value.")
+		parserError("Expected question prompt string after #question.")
 	}
 	advance()
+	var text = collectString()
+	skipWhitespace()
 
-	var defaultValue = collectString()
-	questions[identifier] = &question{
+	var defaultValue *string
+	if char == '"' {
+		advance()
+		v := collectString()
+		defaultValue = &v
+	}
+
+	*value = inlineQuestionValue{
 		text:         text,
 		defaultValue: defaultValue,
 	}

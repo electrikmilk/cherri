@@ -1,6 +1,10 @@
 #question name "What is your name?" "Brandon"
-#question age "What is your age?" "24"
+#question age "What is your age?"
 
 alert(name, "Name")
 
 alert(age, "Age")
+
+alert(#question "Inline prompt" "InlineDefault", "Inline Test")
+
+alert(#question "No default inline", "Another Test")

@@ -77,8 +77,14 @@ const (
 	Variable    tokenType = "variable"
 	Conditional tokenType = "conditional"
 	Enumeration tokenType = "enum"
-	Quantity    tokenType = "qty"
+	Quantity       tokenType = "qty"
+	InlineQuestion tokenType = "inlinequestion"
 )
+
+type inlineQuestionValue struct {
+	text         string
+	defaultValue *string
+}
 
 /* Operators */
 const (
