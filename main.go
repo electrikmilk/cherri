@@ -257,6 +257,9 @@ func end(slice []string) string {
 }
 
 func capitalize(s string) string {
+	if s == "" {
+		return s
+	}
 	var char = s[0]
 	var after, _ = strings.CutPrefix(s, string(char))
 	return fmt.Sprintf("%c%s", unicode.ToUpper(rune(char)), after)
