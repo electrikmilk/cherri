@@ -123,6 +123,42 @@ func TestDecomp(t *testing.T) {
 	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
 }
 
+func TestActionIdentifiers(t *testing.T) {
+	args.Args["no-ansi"] = ""
+	args.Args["skip-sign"] = ""
+	loadStandardActions()
+
+	currentTest = "tests/zz-action-identifiers.cherri"
+	os.Args[1] = currentTest
+
+	compile()
+
+	var expected = []string{
+		"is.workflow.actions.shortid",
+		"is.workflow.actions.two.parts",
+		"is.workflow.actions.text.match.getgroup",
+		"notion.id.CreatePageIntent",
+		"com.apple.facetime.facetime",
+	}
+
+	var actual []string
+	for _, a := range shortcut.WFWorkflowActions {
+		actual = append(actual, a.WFWorkflowActionIdentifier)
+	}
+
+	if len(actual) != len(expected) {
+		t.Fatalf("Expected %d actions, got %d: %v", len(expected), len(actual), actual)
+	}
+
+	for i, ident := range expected {
+		if actual[i] != ident {
+			t.Errorf("Action %d: got %q, want %q", i, actual[i], ident)
+		}
+	}
+
+	resetParser()
+}
+
 func compile() {
 	defer func() {
 		if recover() != nil {

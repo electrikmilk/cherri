@@ -1,0 +1,24 @@
+enum identifierType {
+    'Short',
+    'Override'
+}
+
+action 'shortid' shortAction(text input: 'WFInput')
+
+action 'two.parts' twoPartAction(text input: 'WFInput')
+
+action 'text.match.getgroup' threePartLower(text input: 'WFInput')
+
+action 'notion.id.CreatePageIntent' threePartUpper(text input: 'WFInput')
+
+action 'com.apple.facetime.facetime' fourPartAction(text input: 'WFInput')
+
+shortAction("a")
+
+twoPartAction("b")
+
+threePartLower("c")
+
+threePartUpper("d")
+
+fourPartAction("e")

@@ -827,7 +827,8 @@ func collectDefinedAction() {
 		advance()
 
 		var workflowIdentifier = collectRawString()
-		if len(strings.Split(workflowIdentifier, ".")) < 4 {
+		var parts = strings.Split(workflowIdentifier, ".")
+		if len(parts) < 3 || (len(parts) == 3 && workflowIdentifier == strings.ToLower(workflowIdentifier)) {
 			shortIdentifier = workflowIdentifier
 		} else {
 			overrideIdentifier = workflowIdentifier
