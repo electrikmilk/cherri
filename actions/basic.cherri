@@ -108,3 +108,9 @@ action waitToReturn()
 
 // [Doc]: [Search] Search/Spotlight: Get results from search on iOS or iPadOS, and Spotlight on macOS.
 action 'spotlightsearch' search(text query: 'WFInputText', number ?limit: 'WFSpotlightSearchLimit' = 5, array ?resultType: 'WFSpotlightSearchResultType' = ["Calendar Events","Contacts","Mail","Messages","Notes","Photos","Reminders","Voice Recordings","Bookmarks"]): array
+
+enum timeDuration {
+    'hr',
+    'min',
+    'sec'
+}

@@ -84,7 +84,7 @@ enum seekBehavior {
 }
 
 // [Doc]: [Playback] Seek: Seek the currently playing media.
-action seek(#timerDuration timeInterval: 'WFTimeInterval' = qty(0, "sec"), seekBehavior behavior: 'WFSeekBehavior' = "To Time")
+action seek(#timeDuration timeInterval: 'WFTimeInterval' = qty(0, "sec"), seekBehavior behavior: 'WFSeekBehavior' = "To Time")
 
 // [Doc]: [Playback] Play Next: Add music to play next in the queue.
 action 'addmusictoupnext' playNext(variable music: 'WFMusic') {

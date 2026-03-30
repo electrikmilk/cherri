@@ -42,12 +42,6 @@ enum editEventDetail {
     'Attachments',
 }
 
-enum timerDuration {
-    'hr',
-    'min',
-    'sec'
-}
-
 // [Doc]: [Calendars] Add Calendar: Create a calendar with `name`.
 action 'addnewcalendar' addCalendar(text name: 'CalendarName')
 
@@ -76,7 +70,7 @@ action removeReminders(variable reminders: 'WFInputReminders')
 action 'com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent' getAlarms()
 
 // [Doc]: [Timers] Start Timer: Creates a new timer.
-action 'timer.start' startTimer(#timerDuration duration: 'WFDuration' = qty(0, "min"))
+action 'timer.start' startTimer(#timeDuration duration: 'WFDuration' = qty(0, "min"))
 
 // [Doc]: [Dates] Get Dates: Get dates from input.
 action 'detect.date' getDates(variable input: 'WFInput'): array
