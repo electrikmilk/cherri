@@ -264,7 +264,11 @@ func collectUntilIgnoreStrings(ch rune) string {
 			break
 		}
 		if char == '"' {
-			insideString = prev(1) == '\\'
+			if insideString {
+				insideString = prev(1) == '\\'
+			} else {
+				insideString = true
+			}
 		}
 		collected.WriteRune(char)
 		advance()
@@ -769,7 +773,7 @@ func collectComment() {
 
 func collectMultilineComment(comment *strings.Builder) {
 	advanceTimes(2)
-	for char != 1 {
+	for char != -1 {
 		if char == '*' && next(1) == '/' {
 			break
 		}
