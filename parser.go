@@ -1115,7 +1115,7 @@ func collectQuestion() {
 	var defaultValue *string
 	if char == '"' {
 		advance()
-		v := collectString()
+		var v = collectString()
 		defaultValue = &v
 	}
 
@@ -1139,7 +1139,7 @@ func collectInlineQuestion(value *any) {
 	var defaultValue *string
 	if char == '"' {
 		advance()
-		v := collectString()
+		var v = collectString()
 		defaultValue = &v
 	}
 
