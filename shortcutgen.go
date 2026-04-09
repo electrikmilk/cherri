@@ -276,12 +276,12 @@ func makeMathValue(reference *map[string]any, expression string, expressionParts
 	return
 }
 
-func makeDictionaryValue(value *any) map[string]any {
-	return map[string]any{
-		"Value": map[string]any{
-			"WFDictionaryFieldValueItems": makeDictionary(*value),
+func makeDictionaryValue(value *any) WFDictionaryFieldValue {
+	return WFDictionaryFieldValue{
+		Value: WFDictionaryFieldValueWrapper{
+			WFDictionaryFieldValueItems: makeDictionary(*value),
 		},
-		"WFSerializationType": "WFDictionaryFieldValue",
+		WFSerializationType: "WFDictionaryFieldValue",
 	}
 }
 
@@ -334,39 +334,39 @@ func attachReferenceToParams(params *map[string]any, reference *map[string]any) 
 	return params
 }
 
-func inputValue(name string, varUUID string) map[string]any {
-	var value = make(map[string]any)
+func inputValue(name string, varUUID string) WFTextTokenAttachment {
+	var value = Value{}
 
 	if varUUID != "" {
-		value["OutputUUID"] = varUUID
+		value.OutputUUID = varUUID
 	}
 
 	if variable, found := variables[name]; found {
 		if !variable.repeatItem && (variable.constant && variable.valueType != Variable) {
-			value["OutputName"] = name
-			value["Type"] = "ActionOutput"
+			value.OutputName = name
+			value.Type = "ActionOutput"
 		} else {
-			value["VariableName"] = name
-			value["Type"] = "Variable"
+			value.VariableName = name
+			value.Type = "Variable"
 		}
 	} else if global, found := globals[name]; found {
 		isInputVariable(name)
-		value["Type"] = global.variableType
+		value.Type = global.variableType
 	} else {
-		value["OutputName"] = name
-		value["Type"] = "ActionOutput"
+		value.OutputName = name
+		value.Type = "ActionOutput"
 	}
 
-	return map[string]any{
-		"Value":               value,
-		"WFSerializationType": "WFTextTokenAttachment",
+	return WFTextTokenAttachment{
+		Value:               value,
+		WFSerializationType: "WFTextTokenAttachment",
 	}
 }
 
-func variableValue(variable varValue) map[string]any {
+func variableValue(variable varValue) WFTextTokenAttachment {
 	var identifier = variable.value.(string)
 	var variableReference varValue
-	var aggrandizements []map[string]any
+	var aggrandizements []Aggrandizement
 	if global, found := globals[identifier]; found {
 		isInputVariable(identifier)
 		variable.variableType = global.variableType
@@ -381,23 +381,23 @@ func variableValue(variable varValue) map[string]any {
 			refValueType = variableReference.valueType
 		}
 		if refValueType == Dict {
-			aggrandizements = append(aggrandizements, map[string]any{
-				"Type":          "WFDictionaryValueVariableAggrandizement",
-				"DictionaryKey": variable.getAs,
+			aggrandizements = append(aggrandizements, Aggrandizement{
+				Type:          "WFDictionaryValueVariableAggrandizement",
+				DictionaryKey: variable.getAs,
 			})
 		} else {
-			aggrandizements = append(aggrandizements, map[string]any{
-				"PropertyUserInfo": 0,
-				"Type":             "WFPropertyVariableAggrandizement",
-				"PropertyName":     variable.getAs,
+			aggrandizements = append(aggrandizements, Aggrandizement{
+				PropertyUserInfo: 0,
+				Type:             "WFPropertyVariableAggrandizement",
+				PropertyName:     variable.getAs,
 			})
 		}
 	}
 	if variable.coerce != "" {
 		if contentItem, found := contentItems[variable.coerce]; found {
-			aggrandizements = append(aggrandizements, map[string]any{
-				"Type":              "WFCoercionVariableAggrandizement",
-				"CoercionItemClass": contentItem,
+			aggrandizements = append(aggrandizements, Aggrandizement{
+				Type:              "WFCoercionVariableAggrandizement",
+				CoercionItemClass: contentItem,
 			})
 		}
 	}
@@ -405,26 +405,26 @@ func variableValue(variable varValue) map[string]any {
 	if variable.variableType != "" {
 		varType = variable.variableType
 	}
-	var varValue = make(map[string]any)
+	var varValue = Value{}
 	if variable.constant {
 		var varUUID = uuids[identifier]
-		varValue["OutputName"] = identifier
-		varValue["OutputUUID"] = varUUID
-		varValue["Type"] = "ActionOutput"
+		varValue.OutputName = identifier
+		varValue.OutputUUID = varUUID
+		varValue.Type = "ActionOutput"
 	} else {
-		varValue["VariableName"] = identifier
-		varValue["Type"] = varType
+		varValue.VariableName = identifier
+		varValue.Type = varType
 		if varType == Ask && variable.prompt != "" {
-			varValue["Prompt"] = variable.prompt
+			varValue.Prompt = variable.prompt
 		}
 	}
 	if len(aggrandizements) > 0 {
-		varValue["Aggrandizements"] = aggrandizements
+		varValue.Aggrandizements = aggrandizements
 	}
 
-	return map[string]any{
-		"Value":               varValue,
-		"WFSerializationType": "WFTextTokenAttachment",
+	return WFTextTokenAttachment{
+		Value:               varValue,
+		WFSerializationType: "WFTextTokenAttachment",
 	}
 }
 
@@ -457,13 +457,25 @@ func attachmentValues(str string) any {
 	var noVarString = collectInlineVariables(&str)
 	makeAttachmentValues()
 
-	return map[string]any{
-		"Value": map[string]any{
-			"attachmentsByRange": varPositions,
-			"string":             noVarString,
+	return WFTextTokenString{
+		Value: WFTextTokenStringValue{
+			AttachmentsByRange: convertMapToValueMap(varPositions),
+			String:             noVarString,
 		},
-		"WFSerializationType": "WFTextTokenString",
+		WFSerializationType: "WFTextTokenString",
 	}
+}
+
+func convertMapToValueMap(m map[string]any) map[string]Value {
+	result := make(map[string]Value)
+	for k, v := range m {
+		if valueMap, ok := v.(map[string]any); ok {
+			var value Value
+			mapToStruct(valueMap, &value)
+			result[k] = value
+		}
+	}
+	return result
 }
 
 func makeAttachmentValues() {
@@ -646,12 +658,12 @@ func paramValue(arg actionArgument, handleAs tokenType) any {
 		return arg.value
 	case Color:
 		var colorArgs = arg.value.([]actionArgument)
-		return map[string]any{
-			"WFColorRepresentationType": "WFColorRepresentationTypeCGColor",
-			"redComponent":              colorArgs[0].value.(float64),
-			"greenComponent":            colorArgs[1].value.(float64),
-			"blueComponent":             colorArgs[2].value.(float64),
-			"alphaComponent":            colorArgs[3].value,
+		return WFColorValue{
+			WFColorRepresentationType: "WFColorRepresentationTypeCGColor",
+			RedComponent:              colorArgs[0].value.(float64),
+			GreenComponent:            colorArgs[1].value.(float64),
+			BlueComponent:             colorArgs[2].value.(float64),
+			AlphaComponent:            colorArgs[3].value,
 		}
 	case Quantity:
 		return makeQuantityFieldValue(arg.value.([]actionArgument))
@@ -675,9 +687,9 @@ const (
 )
 
 // makeDictionary creates a Shortcut dictionary value.
-func makeDictionary(value interface{}) (dictItems []map[string]any) {
+func makeDictionary(value interface{}) (dictItems []WFDictionaryFieldValueItem) {
 	if value == nil {
-		return []map[string]any{}
+		return []WFDictionaryFieldValueItem{}
 	}
 	for key, item := range value.(map[string]interface{}) {
 		dictItems = append(dictItems, makeDictionaryItem(key, item))
@@ -686,7 +698,7 @@ func makeDictionary(value interface{}) (dictItems []map[string]any) {
 }
 
 // makeDictionaryItem creates an inner dictionary value.
-func makeDictionaryItem(key string, value any) map[string]any {
+func makeDictionaryItem(key string, value any) WFDictionaryFieldValueItem {
 	if value == nil {
 		value = ""
 	}
@@ -726,7 +738,7 @@ func makeDictionaryItem(key string, value any) map[string]any {
 		case reflect.Slice:
 			itemType = itemTypeArray
 			serializedType = "WFArrayParameterState"
-			var arrayValue []map[string]interface{}
+			var arrayValue []WFDictionaryFieldValueItem
 			for _, item := range value.([]interface{}) {
 				arrayValue = append(arrayValue, makeDictionaryItem("", item))
 			}
@@ -762,14 +774,15 @@ func makeDictionaryItem(key string, value any) map[string]any {
 	return makeDictionaryItemValue(key, itemType, serializedType, wfValue)
 }
 
-func makeDictionaryItemValue(key string, itemType dictDataType, serializedType string, wfValue map[string]any) map[string]any {
+func makeDictionaryItemValue(key string, itemType dictDataType, serializedType string, wfValue map[string]any) WFDictionaryFieldValueItem {
 	var wfValueParams = map[string]any{
 		"WFSerializationType": serializedType,
 	}
 	maps.Copy(wfValueParams, wfValue)
-	var valueData = map[string]any{
-		"WFItemType": itemType,
-		"WFValue":    wfValueParams,
+
+	var item = WFDictionaryFieldValueItem{
+		WFItemType: int(itemType),
+		WFValue:    wfValueParams,
 	}
 
 	if key != "" {
@@ -795,10 +808,10 @@ func makeDictionaryItemValue(key string, itemType dictDataType, serializedType s
 			"WFSerializationType": "WFTextTokenString",
 		}
 		maps.Copy(wfKeyParams, wfKey)
-		valueData["WFKey"] = wfKeyParams
+		item.WFKey = wfKeyParams
 	}
 
-	return valueData
+	return item
 }
 
 func makeOutputName(token *token) string {
@@ -883,11 +896,11 @@ func makeConditionalAction(t *token) {
 			}
 			if len(firstCondition.arguments) > 1 {
 				var secondArg = firstCondition.arguments[1]
-				conditionalParameter("", conditionalParams, &secondArg.valueType, secondArg.value)
+				conditionalParameterLegacy("", conditionalParams, &secondArg.valueType, secondArg.value)
 			}
 			if len(firstCondition.arguments) > 2 {
 				var thirdArg = firstCondition.arguments[2]
-				conditionalParameter("WFAnotherNumber", conditionalParams, &thirdArg.valueType, thirdArg.value)
+				conditionalParameterLegacy("WFAnotherNumber", conditionalParams, &thirdArg.valueType, thirdArg.value)
 			}
 			conditionalParams["WFCondition"] = firstCondition.condition
 			conditionalParams["WFControlFlowMode"] = startStatement
@@ -905,41 +918,103 @@ func makeConditionalAction(t *token) {
 	addStdAction("conditional", &conditionalParams)
 }
 
-var filterTemplates []map[string]any
+var filterTemplates []WFConditionParam
 
-func makeConditions(wfConditions *WFConditions) map[string]any {
-	filterTemplates = []map[string]any{}
+func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate {
+	filterTemplates = []WFConditionParam{}
 	for _, condition := range wfConditions.conditions {
-		var conditionParams = map[string]any{
-			"WFCondition": condition.condition,
-			"WFInput": map[string]any{
-				"Type":     "Variable",
-				"Variable": variableValue(condition.arguments[0].value.(varValue)),
+		var conditionParam = WFConditionParam{
+			WFCondition: condition.condition,
+			WFInput: WFInputVariable{
+				Type:     "Variable",
+				Variable: variableValue(condition.arguments[0].value.(varValue)),
 			},
 		}
 
 		if len(condition.arguments) > 1 {
 			var argumentTwo = condition.arguments[1]
-			conditionalParameter("", conditionParams, &argumentTwo.valueType, argumentTwo.value)
+			conditionalParameter("", &conditionParam, &argumentTwo.valueType, argumentTwo.value)
 		}
 		if len(condition.arguments) > 2 {
 			var argumentThree = condition.arguments[2]
-			conditionalParameter("WFAnotherNumber", conditionParams, &argumentThree.valueType, argumentThree.value)
+			conditionalParameter("WFAnotherNumber", &conditionParam, &argumentThree.valueType, argumentThree.value)
 		}
 
-		filterTemplates = append(filterTemplates, conditionParams)
+		filterTemplates = append(filterTemplates, conditionParam)
 	}
 
-	return map[string]any{
-		"Value": map[string]any{
-			"WFActionParameterFilterPrefix":    wfConditions.WFActionParameterFilterPrefix,
-			"WFActionParameterFilterTemplates": filterTemplates,
+	return WFContentPredicateTableTemplate{
+		Value: WFConditionValue{
+			WFActionParameterFilterPrefix:    wfConditions.WFActionParameterFilterPrefix,
+			WFActionParameterFilterTemplates: filterTemplates,
 		},
-		"WFSerializationType": "WFContentPredicateTableTemplate",
+		WFSerializationType: "WFContentPredicateTableTemplate",
 	}
 }
 
-func conditionalParameter(key string, conditionalParams map[string]any, typeOf *tokenType, value any) {
+func conditionalParameter(key string, conditionParam *WFConditionParam, typeOf *tokenType, value any) {
+	switch *typeOf {
+	case String:
+		paramVal := paramValue(actionArgument{
+			valueType: *typeOf,
+			value:     value,
+		}, String)
+		if key == "WFAnotherNumber" {
+			conditionParam.WFAnotherNumber = paramVal
+		} else {
+			conditionParam.WFConditionalActionString = paramVal
+		}
+	case Integer:
+		paramVal := paramValue(actionArgument{
+			valueType: *typeOf,
+			value:     value,
+		}, String)
+		if key == "WFAnotherNumber" {
+			conditionParam.WFAnotherNumber = paramVal
+		} else {
+			conditionParam.WFNumberValue = paramVal
+		}
+	case Bool:
+		var boolNumber = "0"
+		if value == true {
+			boolNumber = "1"
+		}
+		paramVal := paramValue(actionArgument{
+			valueType: Integer,
+			value:     boolNumber,
+		}, Integer)
+		if key == "WFAnotherNumber" {
+			conditionParam.WFAnotherNumber = paramVal
+		} else {
+			conditionParam.WFNumberValue = paramVal
+		}
+	case Variable:
+		conditionalParameterVariable(conditionParam, key, value)
+	}
+}
+
+func conditionalParameterVariable(conditionParam *WFConditionParam, key string, value any) {
+	var condVarValue = value.(varValue)
+	var variable = variables[condVarValue.value.(string)]
+	switch variable.valueType {
+	case Integer:
+		if key == "WFAnotherNumber" {
+			conditionParam.WFAnotherNumber = variableValue(condVarValue)
+		} else {
+			conditionParam.WFNumberValue = variableValue(condVarValue)
+		}
+	default:
+		paramVal := attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue)))
+		if key == "WFAnotherNumber" {
+			conditionParam.WFAnotherNumber = paramVal
+		} else {
+			conditionParam.WFConditionalActionString = paramVal
+		}
+	}
+}
+
+// conditionalParameterLegacy is for iOS < 18 compatibility where we still use map[string]any
+func conditionalParameterLegacy(key string, conditionalParams map[string]any, typeOf *tokenType, value any) {
 	if key == "" {
 		if *typeOf == String {
 			key = "WFConditionalActionString"
@@ -968,11 +1043,11 @@ func conditionalParameter(key string, conditionalParams map[string]any, typeOf *
 			value:     boolNumber,
 		}, Integer)
 	case Variable:
-		conditionalParameterVariable(conditionalParams, value)
+		conditionalParameterVariableLegacy(conditionalParams, value)
 	}
 }
 
-func conditionalParameterVariable(conditionalParams map[string]any, value any) {
+func conditionalParameterVariableLegacy(conditionalParams map[string]any, value any) {
 	var condVarValue = value.(varValue)
 	var variable = variables[condVarValue.value.(string)]
 	switch variable.valueType {
@@ -1077,11 +1152,11 @@ func makeRepeatEachAction(t *token) {
 }
 
 type WFQuestion struct {
-	ParameterKey string
-	Category     string
-	ActionIndex  int
-	Text         string
-	DefaultValue any
+	ParameterKey string `plist:",omitempty"`
+	Category     string `plist:",omitempty"`
+	ActionIndex  int    `plist:",omitempty"`
+	Text         string `plist:",omitempty"`
+	DefaultValue any    `plist:",omitempty"`
 }
 
 func generateImportQuestions() (importQuestions []WFQuestion) {

@@ -9,84 +9,139 @@ package main
 */
 
 type ShortcutIcon struct {
-	WFWorkflowIconGlyphNumber int64
-	WFWorkflowIconStartColor  int
+	WFWorkflowIconGlyphNumber int64 `plist:",omitempty"`
+	WFWorkflowIconStartColor  int   `plist:",omitempty"`
 }
 
 type Shortcut struct {
 	WFWorkflowIcon                       ShortcutIcon
 	WFWorkflowActions                    []ShortcutAction
-	WFQuickActionSurfaces                []string
-	WFWorkflowInputContentItemClasses    []string
-	WFWorkflowClientVersion              string
-	WFWorkflowMinimumClientVersion       int
-	WFWorkflowMinimumClientVersionString string
-	WFWorkflowImportQuestions            interface{}
-	WFWorkflowTypes                      []string
-	WFWorkflowOutputContentItemClasses   []string
-	WFWorkflowHasShortcutInputVariables  bool
-	WFWorkflowHasOutputFallback          bool
-	WFWorkflowNoInputBehavior            map[string]any
+	WFQuickActionSurfaces                []string       `plist:",omitempty"`
+	WFWorkflowInputContentItemClasses    []string       `plist:",omitempty"`
+	WFWorkflowClientVersion              string         `plist:",omitempty"`
+	WFWorkflowMinimumClientVersion       int            `plist:",omitempty"`
+	WFWorkflowMinimumClientVersionString string         `plist:",omitempty"`
+	WFWorkflowImportQuestions            interface{}    `plist:",omitempty"`
+	WFWorkflowTypes                      []string       `plist:",omitempty"`
+	WFWorkflowOutputContentItemClasses   []string       `plist:",omitempty"`
+	WFWorkflowHasShortcutInputVariables  bool           `plist:",omitempty"`
+	WFWorkflowHasOutputFallback          bool           `plist:",omitempty"`
+	WFWorkflowNoInputBehavior            map[string]any `plist:",omitempty"`
 }
 
 var shortcut Shortcut
 
 type ShortcutAction struct {
 	WFWorkflowActionIdentifier string
-	WFWorkflowActionParameters map[string]any
+	WFWorkflowActionParameters map[string]any `plist:",omitempty"`
 }
 
 type Value struct {
-	Type                        string
-	VariableName                string
-	OutputUUID                  string
-	OutputName                  string
-	Value                       any
-	Variable                    any
-	WFDictionaryFieldValueItems []WFDictionaryFieldValueItem
-	AttachmentsByRange          map[string]Value
-	String                      string
-	Aggrandizements             []Aggrandizement
-	Prompt                      string
+	Type                        string                       `plist:",omitempty"`
+	VariableName                string                       `plist:",omitempty"`
+	OutputUUID                  string                       `plist:",omitempty"`
+	OutputName                  string                       `plist:",omitempty"`
+	Value                       any                          `plist:",omitempty"`
+	Variable                    any                          `plist:",omitempty"`
+	WFDictionaryFieldValueItems []WFDictionaryFieldValueItem `plist:",omitempty"`
+	AttachmentsByRange          map[string]Value             `plist:",omitempty"`
+	String                      string                       `plist:",omitempty"`
+	Aggrandizements             []Aggrandizement             `plist:",omitempty"`
+	Prompt                      string                       `plist:",omitempty"`
 }
 
 type Aggrandizement struct {
-	Type              string
-	CoercionItemClass string
-	DictionaryKey     string
-	PropertyName      string
-	PropertyUserInfo  any
+	Type              string `plist:",omitempty"`
+	CoercionItemClass string `plist:",omitempty"`
+	DictionaryKey     string `plist:",omitempty"`
+	PropertyName      string `plist:",omitempty"`
+	PropertyUserInfo  any    `plist:",omitempty"`
 }
 
 type WFDictionaryFieldValueItem struct {
-	WFKey      any
-	WFItemType int
-	WFValue    any
+	WFKey      any `plist:",omitempty"`
+	WFItemType int `plist:",omitempty"`
+	WFValue    any `plist:",omitempty"`
 }
 
 type WFValue struct {
-	Value               any
-	String              string
-	WFSerializationType string
+	Value               any    `plist:",omitempty"`
+	String              string `plist:",omitempty"`
+	WFSerializationType string `plist:",omitempty"`
 }
 
 type WFInput struct {
-	Value Value
+	Value Value `plist:",omitempty"`
 }
 
 type WFContactFieldValue struct {
-	EntryType       int
-	SerializedEntry map[string]interface{}
+	EntryType       int                    `plist:",omitempty"`
+	SerializedEntry map[string]interface{} `plist:",omitempty"`
 }
 
 type SizeValue struct {
-	Unit      string
-	Magnitude string
+	Unit      string `plist:",omitempty"`
+	Magnitude string `plist:",omitempty"`
 }
 
 type WFMeasurementUnit struct {
-	WFNSUnitSymbol any
-	Value          SizeValue
+	WFNSUnitSymbol any       `plist:",omitempty"`
+	Value          SizeValue `plist:",omitempty"`
+}
+
+type WFTextTokenAttachment struct {
+	Value               Value  `plist:",omitempty"`
+	WFSerializationType string `plist:",omitempty"`
+}
+
+type WFTextTokenString struct {
+	Value               WFTextTokenStringValue `plist:",omitempty"`
+	WFSerializationType string                 `plist:",omitempty"`
+}
+
+type WFTextTokenStringValue struct {
+	AttachmentsByRange map[string]Value `plist:"attachmentsByRange,omitempty"`
+	String             string           `plist:"string,omitempty"`
+}
+
+type WFDictionaryFieldValue struct {
+	Value               WFDictionaryFieldValueWrapper `plist:",omitempty"`
+	WFSerializationType string                        `plist:",omitempty"`
+}
+
+type WFDictionaryFieldValueWrapper struct {
+	WFDictionaryFieldValueItems []WFDictionaryFieldValueItem `plist:",omitempty"`
+}
+
+type WFContentPredicateTableTemplate struct {
+	Value               WFConditionValue `plist:",omitempty"`
+	WFSerializationType string           `plist:",omitempty"`
+}
+
+type WFConditionValue struct {
+	WFActionParameterFilterPrefix    int                `plist:",omitempty"`
+	WFActionParameterFilterTemplates []WFConditionParam `plist:",omitempty"`
+}
+
+type WFConditionParam struct {
+	WFCondition               int             `plist:",omitempty"`
+	WFInput                   WFInputVariable `plist:",omitempty"`
+	WFConditionalActionString any             `plist:",omitempty"`
+	WFNumberValue             any             `plist:",omitempty"`
+	WFAnotherNumber           any             `plist:",omitempty"`
+}
+
+type WFInputVariable struct {
+	Type     string                `plist:",omitempty"`
+	Variable WFTextTokenAttachment `plist:",omitempty"`
+}
+
+type WFColorValue struct {
+	WFColorRepresentationType string  `plist:",omitempty"`
+	RedComponent              float64 `plist:"redComponent,omitempty"`
+	GreenComponent            float64 `plist:"greenComponent,omitempty"`
+	BlueComponent             float64 `plist:"blueComponent,omitempty"`
+	AlphaComponent            any     `plist:"alphaComponent,omitempty"`
 }
 
 var uuids map[string]string
