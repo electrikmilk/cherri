@@ -144,6 +144,59 @@ type WFColorValue struct {
 	AlphaComponent            any     `plist:"alphaComponent,omitempty"`
 }
 
+type WFActionReference struct {
+	CustomOutputName string `plist:",omitempty"`
+	UUID             string `plist:",omitempty"`
+}
+
+type WFSetVariableParams struct {
+	WFVariableName      string `plist:",omitempty"`
+	WFInput             any    `plist:",omitempty"`
+	WFSerializationType string `plist:",omitempty"`
+	CustomOutputName    string `plist:",omitempty"`
+	UUID                string `plist:",omitempty"`
+}
+
+type WFConditionalActionParams struct {
+	GroupingIdentifier        string `plist:",omitempty"`
+	WFControlFlowMode         uint64 `plist:",omitempty"`
+	WFInput                   any    `plist:",omitempty"`
+	WFCondition               int    `plist:",omitempty"`
+	WFConditionalActionString any    `plist:",omitempty"`
+	WFNumberValue             any    `plist:",omitempty"`
+	WFAnotherNumber           any    `plist:",omitempty"`
+	WFConditions              any    `plist:",omitempty"`
+	UUID                      string `plist:",omitempty"`
+}
+
+type WFMenuParams struct {
+	GroupingIdentifier string        `plist:",omitempty"`
+	WFControlFlowMode  uint64        `plist:",omitempty"`
+	WFMenuPrompt       any           `plist:",omitempty"`
+	WFMenuItems        []WFMenuItem  `plist:",omitempty"`
+	UUID               string        `plist:",omitempty"`
+}
+
+type WFMenuItem struct {
+	WFItemType int `plist:",omitempty"`
+	WFValue    any `plist:",omitempty"`
+}
+
+type WFMenuItemParams struct {
+	GroupingIdentifier       string `plist:",omitempty"`
+	WFControlFlowMode        uint64 `plist:",omitempty"`
+	WFMenuItemAttributedTitle any   `plist:",omitempty"`
+	WFMenuItemTitle          any    `plist:",omitempty"`
+}
+
+type WFRepeatParams struct {
+	GroupingIdentifier string `plist:",omitempty"`
+	WFControlFlowMode  uint64 `plist:",omitempty"`
+	WFRepeatCount      any    `plist:",omitempty"`
+	WFInput            any    `plist:",omitempty"`
+	UUID               string `plist:",omitempty"`
+}
+
 var uuids map[string]string
 
 type dictDataType int

@@ -173,14 +173,14 @@ func undefinable() bool {
 }
 
 // makeAction builds an action based on its actionDefinition and adds it to the shortcut.
-func makeAction(arguments []actionArgument, reference *map[string]any) {
+func makeAction(arguments []actionArgument, reference *WFActionReference) {
 	actionIndex++
 	// Determine identifier
 	var ident = getFullActionIdentifier()
 	// Determine parameters
 	var params = getActionParameters(arguments)
 	// Additionally add the output name and UUID of this action if provided
-	addAction(ident, attachReferenceToParams(&params, reference))
+	addAction(ident, attachReferenceToParams(params, reference))
 }
 
 // getFullActionIdentifier determines the full identifier of currentAction.

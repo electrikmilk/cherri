@@ -94,7 +94,7 @@ func generateActions() {
 			if tokenAction.ident == "rawAction" && len(tokenAction.args) > 0 {
 				currentAction.overrideIdentifier = getArgValue(tokenAction.args[0]).(string)
 			}
-			makeAction(tokenAction.args, &map[string]any{})
+			makeAction(tokenAction.args, &WFActionReference{})
 		case Repeat:
 			makeRepeatAction(&t)
 		case RepeatWithEach:
@@ -169,9 +169,9 @@ func makeVariableInput(t *token, params map[string]any) {
 }
 
 func makeVariableValueAction(token *token, customOutputName *string, varUUID *string) {
-	var reference = map[string]any{
-		"CustomOutputName": *customOutputName,
-		"UUID":             *varUUID,
+	var reference = WFActionReference{
+		CustomOutputName: *customOutputName,
+		UUID:             *varUUID,
 	}
 
 	if (token.typeof == AddTo || token.typeof == SubFrom || token.typeof == MultiplyBy || token.typeof == DivideBy) &&
@@ -184,7 +184,7 @@ func makeVariableValueAction(token *token, customOutputName *string, varUUID *st
 	makeVariableValue(&reference, token.valueType, &token.value)
 }
 
-func makeVariableValue(reference *map[string]any, valueType tokenType, value *any) {
+func makeVariableValue(reference *WFActionReference, valueType tokenType, value *any) {
 	switch valueType {
 	case Integer, Float:
 		makeIntValue(reference, value)
@@ -202,42 +202,42 @@ func makeVariableValue(reference *map[string]any, valueType tokenType, value *an
 		setCurrentAction(action.ident, actions[action.ident])
 		makeAction(action.args, reference)
 	case Dict:
-		addStdAction("dictionary", attachReferenceToParams(&map[string]any{
+		addStdAction("dictionary", attachReferenceToParams(map[string]any{
 			"WFItems": makeDictionaryValue(value),
 		}, reference))
 	}
 }
 
-func makeIntValue(reference *map[string]any, value *any) {
-	addStdAction("number", attachReferenceToParams(&map[string]any{
+func makeIntValue(reference *WFActionReference, value *any) {
+	addStdAction("number", attachReferenceToParams(map[string]any{
 		"WFNumberActionNumber": *value,
 	}, reference))
 }
 
-func makeStringValue(reference *map[string]any, value *any) {
-	addStdAction("gettext", attachReferenceToParams(&map[string]any{
+func makeStringValue(reference *WFActionReference, value *any) {
+	addStdAction("gettext", attachReferenceToParams(map[string]any{
 		"WFTextActionText": attachmentValues(fmt.Sprintf("%s", *value)),
 	}, reference))
 }
 
-func makeRawStringValue(reference *map[string]any, value *any) {
-	addStdAction("gettext", attachReferenceToParams(&map[string]any{
+func makeRawStringValue(reference *WFActionReference, value *any) {
+	addStdAction("gettext", attachReferenceToParams(map[string]any{
 		"WFTextActionText": fmt.Sprintf("%s", *value),
 	}, reference))
 }
 
-func makeBoolValue(reference *map[string]any, value *any) {
+func makeBoolValue(reference *WFActionReference, value *any) {
 	var boolValue = "0"
 	if *value == true {
 		boolValue = "1"
 	}
 
-	addStdAction("number", attachReferenceToParams(&map[string]any{
+	addStdAction("number", attachReferenceToParams(map[string]any{
 		"WFNumberActionNumber": boolValue,
 	}, reference))
 }
 
-func makeExpressionValue(reference *map[string]any, value *any) {
+func makeExpressionValue(reference *WFActionReference, value *any) {
 	var expression = fmt.Sprintf("%s", *value)
 	var expressionParts = strings.Split(expression, " ")
 	if len(expressionParts) == 3 && containsTokens(&expression, Plus, Minus, Multiply, Divide) {
@@ -245,12 +245,12 @@ func makeExpressionValue(reference *map[string]any, value *any) {
 		return
 	}
 
-	addStdAction("calculateexpression", attachReferenceToParams(&map[string]any{
+	addStdAction("calculateexpression", attachReferenceToParams(map[string]any{
 		"Input": attachmentValues(expression),
 	}, reference))
 }
 
-func makeMathValue(reference *map[string]any, expression string, expressionParts []string) {
+func makeMathValue(reference *WFActionReference, expression string, expressionParts []string) {
 	var operandOne string
 	var operandTwo string
 
@@ -267,7 +267,7 @@ func makeMathValue(reference *map[string]any, expression string, expressionParts
 		operation = "÷"
 	}
 
-	addStdAction("math", attachReferenceToParams(&map[string]any{
+	addStdAction("math", attachReferenceToParams(map[string]any{
 		"WFMathOperation": operation,
 		"WFInput":         attachmentValues(operandOne),
 		"WFMathOperand":   attachmentValues(operandTwo),
@@ -285,7 +285,7 @@ func makeDictionaryValue(value *any) WFDictionaryFieldValue {
 	}
 }
 
-func variableValueModifier(token *token, reference *map[string]any) {
+func variableValueModifier(token *token, reference *WFActionReference) {
 	var valueType = token.valueType
 	if valueType == Variable {
 		var variable = token.value.(varValue)
@@ -304,7 +304,7 @@ func variableValueModifier(token *token, reference *map[string]any) {
 		case DivideBy:
 			operation = "÷"
 		}
-		addStdAction("math", attachReferenceToParams(&map[string]any{
+		addStdAction("math", attachReferenceToParams(map[string]any{
 			"WFMathOperand": paramValue(actionArgument{
 				valueType: token.valueType,
 				value:     token.value,
@@ -319,7 +319,7 @@ func variableValueModifier(token *token, reference *map[string]any) {
 		var varInput = token.value.(string)
 		wrapVariableReference(&varInput)
 
-		addStdAction("gettext", attachReferenceToParams(&map[string]any{
+		addStdAction("gettext", attachReferenceToParams(map[string]any{
 			"WFTextActionText": paramValue(actionArgument{
 				valueType: String,
 				value:     fmt.Sprintf("{%s}%s", token.ident, varInput),
@@ -328,10 +328,14 @@ func variableValueModifier(token *token, reference *map[string]any) {
 	}
 }
 
-func attachReferenceToParams(params *map[string]any, reference *map[string]any) *map[string]any {
-	maps.Copy(*params, *reference)
-
-	return params
+func attachReferenceToParams(params map[string]any, reference *WFActionReference) *map[string]any {
+	if reference.CustomOutputName != "" {
+		params["CustomOutputName"] = reference.CustomOutputName
+	}
+	if reference.UUID != "" {
+		params["UUID"] = reference.UUID
+	}
+	return &params
 }
 
 func inputValue(name string, varUUID string) WFTextTokenAttachment {
