@@ -995,7 +995,7 @@ func conditionalParameterVariable(conditionParam *WFConditionParam, key string, 
 			conditionParam.WFNumberValue = variableValue(condVarValue)
 		}
 	default:
-		paramVal := attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue)))
+		var paramVal = attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue)))
 		if key == "WFAnotherNumber" {
 			conditionParam.WFAnotherNumber = paramVal
 		} else {
