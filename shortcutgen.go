@@ -950,21 +950,13 @@ func conditionalParameter(key string, conditionParam *WFConditionParam, typeOf *
 			valueType: *typeOf,
 			value:     value,
 		}, String)
-		if key == "WFAnotherNumber" {
-			conditionParam.WFAnotherNumber = paramVal
-		} else {
-			conditionParam.WFConditionalActionString = paramVal
-		}
+		conditionIntegerValue(conditionParam, key, paramVal)
 	case Integer:
 		var paramVal = paramValue(actionArgument{
 			valueType: *typeOf,
 			value:     value,
-		}, String)
-		if key == "WFAnotherNumber" {
-			conditionParam.WFAnotherNumber = paramVal
-		} else {
-			conditionParam.WFNumberValue = paramVal
-		}
+		}, Integer)
+		conditionIntegerValue(conditionParam, key, paramVal)
 	case Bool:
 		var boolNumber = "0"
 		if value == true {
@@ -974,11 +966,7 @@ func conditionalParameter(key string, conditionParam *WFConditionParam, typeOf *
 			valueType: Integer,
 			value:     boolNumber,
 		}, Integer)
-		if key == "WFAnotherNumber" {
-			conditionParam.WFAnotherNumber = paramVal
-		} else {
-			conditionParam.WFNumberValue = paramVal
-		}
+		conditionIntegerValue(conditionParam, key, paramVal)
 	case Variable:
 		conditionalParameterVariable(conditionParam, key, value)
 	}
@@ -989,18 +977,26 @@ func conditionalParameterVariable(conditionParam *WFConditionParam, key string, 
 	var variable = variables[condVarValue.value.(string)]
 	switch variable.valueType {
 	case Integer:
-		if key == "WFAnotherNumber" {
-			conditionParam.WFAnotherNumber = variableValue(condVarValue)
-		} else {
-			conditionParam.WFNumberValue = variableValue(condVarValue)
-		}
+		conditionIntegerValue(conditionParam, key, variableValue(condVarValue))
 	default:
 		var paramVal = attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue)))
-		if key == "WFAnotherNumber" {
-			conditionParam.WFAnotherNumber = paramVal
-		} else {
-			conditionParam.WFConditionalActionString = paramVal
-		}
+		conditionStringValue(conditionParam, key, paramVal)
+	}
+}
+
+func conditionStringValue(param *WFConditionParam, key string, value any) {
+	if key == "WFAnotherNumber" {
+		param.WFAnotherNumber = value
+	} else {
+		param.WFConditionalActionString = value
+	}
+}
+
+func conditionIntegerValue(param *WFConditionParam, key string, value any) {
+	if key == "WFAnotherNumber" {
+		param.WFAnotherNumber = value
+	} else {
+		param.WFNumberValue = value
 	}
 }
 
