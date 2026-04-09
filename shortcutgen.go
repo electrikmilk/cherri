@@ -958,9 +958,9 @@ func conditionalParameter(key string, conditionParam *WFConditionParam, typeOf *
 		}, Integer)
 		conditionIntegerValue(conditionParam, key, paramVal)
 	case Bool:
-		var boolNumber = "0"
+		var boolNumber = 0
 		if value == true {
-			boolNumber = "1"
+			boolNumber = 1
 		}
 		var paramVal = paramValue(actionArgument{
 			valueType: Integer,
@@ -1021,9 +1021,9 @@ func conditionalParameterLegacy(key string, conditionalParams map[string]any, ty
 			value:     value,
 		}, String)
 	case Bool:
-		var boolNumber = "0"
+		var boolNumber = 0
 		if value == true {
-			boolNumber = "1"
+			boolNumber = 1
 		}
 		conditionalParams[key] = paramValue(actionArgument{
 			valueType: Integer,
