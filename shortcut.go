@@ -14,19 +14,19 @@ type ShortcutIcon struct {
 }
 
 type Shortcut struct {
-	WFWorkflowIcon                       ShortcutIcon
-	WFWorkflowActions                    []ShortcutAction
-	WFQuickActionSurfaces                []string       `plist:",omitempty"`
-	WFWorkflowInputContentItemClasses    []string       `plist:",omitempty"`
-	WFWorkflowClientVersion              string         `plist:",omitempty"`
-	WFWorkflowMinimumClientVersion       int            `plist:",omitempty"`
-	WFWorkflowMinimumClientVersionString string         `plist:",omitempty"`
-	WFWorkflowImportQuestions            interface{}    `plist:",omitempty"`
-	WFWorkflowTypes                      []string       `plist:",omitempty"`
-	WFWorkflowOutputContentItemClasses   []string       `plist:",omitempty"`
-	WFWorkflowHasShortcutInputVariables  bool           `plist:",omitempty"`
-	WFWorkflowHasOutputFallback          bool           `plist:",omitempty"`
-	WFWorkflowNoInputBehavior            map[string]any `plist:",omitempty"`
+	WFWorkflowIcon                       ShortcutIcon     `plist:",omitempty"`
+	WFWorkflowActions                    []ShortcutAction `plist:",omitempty"`
+	WFQuickActionSurfaces                []string         `plist:",omitempty"`
+	WFWorkflowInputContentItemClasses    []string         `plist:",omitempty"`
+	WFWorkflowClientVersion              string           `plist:",omitempty"`
+	WFWorkflowMinimumClientVersion       int              `plist:",omitempty"`
+	WFWorkflowMinimumClientVersionString string           `plist:",omitempty"`
+	WFWorkflowImportQuestions            interface{}      `plist:",omitempty"`
+	WFWorkflowTypes                      []string         `plist:",omitempty"`
+	WFWorkflowOutputContentItemClasses   []string         `plist:",omitempty"`
+	WFWorkflowHasShortcutInputVariables  bool             `plist:",omitempty"`
+	WFWorkflowHasOutputFallback          bool             `plist:",omitempty"`
+	WFWorkflowNoInputBehavior            map[string]any   `plist:",omitempty"`
 }
 
 var shortcut Shortcut
@@ -170,11 +170,11 @@ type WFConditionalActionParams struct {
 }
 
 type WFMenuParams struct {
-	GroupingIdentifier string        `plist:",omitempty"`
-	WFControlFlowMode  uint64        `plist:",omitempty"`
-	WFMenuPrompt       any           `plist:",omitempty"`
-	WFMenuItems        []WFMenuItem  `plist:",omitempty"`
-	UUID               string        `plist:",omitempty"`
+	GroupingIdentifier string       `plist:",omitempty"`
+	WFControlFlowMode  uint64       `plist:",omitempty"`
+	WFMenuPrompt       any          `plist:",omitempty"`
+	WFMenuItems        []WFMenuItem `plist:",omitempty"`
+	UUID               string       `plist:",omitempty"`
 }
 
 type WFMenuItem struct {
@@ -183,10 +183,10 @@ type WFMenuItem struct {
 }
 
 type WFMenuItemParams struct {
-	GroupingIdentifier       string `plist:",omitempty"`
-	WFControlFlowMode        uint64 `plist:",omitempty"`
-	WFMenuItemAttributedTitle any   `plist:",omitempty"`
-	WFMenuItemTitle          any    `plist:",omitempty"`
+	GroupingIdentifier        string `plist:",omitempty"`
+	WFControlFlowMode         uint64 `plist:",omitempty"`
+	WFMenuItemAttributedTitle any    `plist:",omitempty"`
+	WFMenuItemTitle           any    `plist:",omitempty"`
 }
 
 type WFRepeatParams struct {
