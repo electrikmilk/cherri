@@ -445,7 +445,7 @@ type attachmentVariable struct {
 	coerce     string
 }
 
-var varPositions map[string]any
+var varPositions map[string]Value
 var inlineVars []inlineVar
 var varIndex []attachmentVariable
 
@@ -454,7 +454,7 @@ func attachmentValues(str string) any {
 		return str
 	}
 
-	varPositions = make(map[string]any)
+	varPositions = make(map[string]Value)
 	inlineVars = []inlineVar{}
 	varIndex = []attachmentVariable{}
 
@@ -463,23 +463,11 @@ func attachmentValues(str string) any {
 
 	return WFTextTokenString{
 		Value: WFTextTokenStringValue{
-			AttachmentsByRange: convertMapToValueMap(varPositions),
+			AttachmentsByRange: varPositions,
 			String:             noVarString,
 		},
 		WFSerializationType: "WFTextTokenString",
 	}
-}
-
-func convertMapToValueMap(m map[string]any) map[string]Value {
-	result := make(map[string]Value)
-	for k, v := range m {
-		if valueMap, ok := v.(map[string]any); ok {
-			var value Value
-			mapToStruct(valueMap, &value)
-			result[k] = value
-		}
-	}
-	return result
 }
 
 func makeAttachmentValues() {
@@ -496,22 +484,22 @@ func makeAttachmentValues() {
 		}
 		var variable = variables[stringVar.identifier]
 		var varUUID = uuids[stringVar.identifier]
-		var varValue map[string]any
+		var varValue Value
 		var varType = "Variable"
-		var aggr []map[string]string
+		var aggr []Aggrandizement
 		if storedVar.variableType != "" {
 			varType = storedVar.variableType
 		}
 		if !variable.constant {
-			varValue = map[string]any{
-				"VariableName": stringVar.identifier,
-				"Type":         varType,
+			varValue = Value{
+				VariableName: stringVar.identifier,
+				Type:         varType,
 			}
 		} else {
-			varValue = map[string]any{
-				"OutputName": stringVar.identifier,
-				"OutputUUID": varUUID,
-				"Type":       "ActionOutput",
+			varValue = Value{
+				OutputName: stringVar.identifier,
+				OutputUUID: varUUID,
+				Type:       "ActionOutput",
 			}
 		}
 
@@ -520,9 +508,9 @@ func makeAttachmentValues() {
 		}
 		if stringVar.coerce != "" {
 			if contentItem, found := contentItems[stringVar.coerce]; found {
-				aggr = append(aggr, map[string]string{
-					"Type":              "WFCoercionVariableAggrandizement",
-					"CoercionItemClass": contentItem,
+				aggr = append(aggr, Aggrandizement{
+					Type:              "WFCoercionVariableAggrandizement",
+					CoercionItemClass: contentItem,
 				})
 			} else {
 				var list = makeKeyList("Available content item types:", contentItems, stringVar.coerce)
@@ -530,7 +518,7 @@ func makeAttachmentValues() {
 			}
 		}
 		if stringVar.getAs != "" || stringVar.coerce != "" {
-			varValue["Aggrandizements"] = aggr
+			varValue.Aggrandizements = aggr
 		}
 
 		var positionsKey = fmt.Sprintf("{%d, 1}", stringVar.col)
@@ -538,26 +526,25 @@ func makeAttachmentValues() {
 	}
 }
 
-func makeAggrandizement(valueType *tokenType, variable *varValue, getAs string) map[string]string {
-	var aggrandizement = make(map[string]string)
+func makeAggrandizement(valueType *tokenType, variable *varValue, getAs string) (aggrandizement Aggrandizement) {
 	switch *valueType {
 	case Dict:
-		aggrandizement["Type"] = "WFDictionaryValueVariableAggrandizement"
+		aggrandizement.Type = "WFDictionaryValueVariableAggrandizement"
 	case Action:
 		var variableAction = *variable.value.(action).def
 		if variableAction.outputType == Dict {
-			aggrandizement["Type"] = "WFDictionaryValueVariableAggrandizement"
+			aggrandizement.Type = "WFDictionaryValueVariableAggrandizement"
 		} else {
-			aggrandizement["Type"] = "WFPropertyVariableAggrandizement"
+			aggrandizement.Type = "WFPropertyVariableAggrandizement"
 		}
 	default:
-		aggrandizement["Type"] = "WFPropertyVariableAggrandizement"
+		aggrandizement.Type = "WFPropertyVariableAggrandizement"
 	}
 
-	if aggrandizement["Type"] == "WFDictionaryValueVariableAggrandizement" {
-		aggrandizement["DictionaryKey"] = getAs
+	if aggrandizement.Type == "WFDictionaryValueVariableAggrandizement" {
+		aggrandizement.DictionaryKey = getAs
 	} else {
-		aggrandizement["PropertyName"] = getAs
+		aggrandizement.PropertyName = getAs
 	}
 
 	return aggrandizement
