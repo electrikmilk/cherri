@@ -946,7 +946,7 @@ func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate 
 func conditionalParameter(key string, conditionParam *WFConditionParam, typeOf *tokenType, value any) {
 	switch *typeOf {
 	case String:
-		paramVal := paramValue(actionArgument{
+		var paramVal = paramValue(actionArgument{
 			valueType: *typeOf,
 			value:     value,
 		}, String)
@@ -956,7 +956,7 @@ func conditionalParameter(key string, conditionParam *WFConditionParam, typeOf *
 			conditionParam.WFConditionalActionString = paramVal
 		}
 	case Integer:
-		paramVal := paramValue(actionArgument{
+		var paramVal = paramValue(actionArgument{
 			valueType: *typeOf,
 			value:     value,
 		}, String)
@@ -970,7 +970,7 @@ func conditionalParameter(key string, conditionParam *WFConditionParam, typeOf *
 		if value == true {
 			boolNumber = "1"
 		}
-		paramVal := paramValue(actionArgument{
+		var paramVal = paramValue(actionArgument{
 			valueType: Integer,
 			value:     boolNumber,
 		}, Integer)
