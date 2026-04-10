@@ -164,7 +164,7 @@ func requestSignedShortcut(service *SigningService) []byte {
 	return body
 }
 
-// looksLikeSignedShortcut performs quick checks to make sure response is a signed Shortcut.
+// looksLikeSignedShortcut performs quick checks to makeParams sure response is a signed Shortcut.
 func looksLikeSignedShortcut(buffer []byte) bool {
 	if len(buffer) >= 4 && string(buffer[:4]) == "AEA1" {
 		return true

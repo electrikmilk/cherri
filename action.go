@@ -86,9 +86,10 @@ type actionDefinition struct {
 	overrideIdentifier string
 	parameters         []parameterDefinition
 	check              checkFunc
-	make               paramsFunc
+	makeParams         paramsFunc     // makeParams overrides automatic handling of arguments for custom logic based on the arguments collected.
+	appendParams       paramsFunc     // appendParams allows for adding additional parameters based on arguments without disabling automatic handling.
+	setParams          map[string]any // setParams allows for adding additional parameters not based on arguments without affecting automatic handling.
 	decomp             func(action *ShortcutAction) (arguments []string)
-	addParams          paramsFunc
 	appIntent          appIntent
 	outputType         tokenType
 	defaultAction      bool // Default action for this identifier during decompilation.
@@ -162,14 +163,14 @@ func restoreCurrentAction() {
 
 // undefinable checks if the current action cannot be defined using only Cherri because of the way it is defined.
 func undefinable() bool {
-	if currentAction.addParams != nil {
-		var addedParams = currentAction.addParams([]actionArgument{})
+	if currentAction.appendParams != nil {
+		var addedParams = currentAction.appendParams([]actionArgument{})
 		if len(addedParams) == 0 {
 			return true
 		}
 	}
 
-	return currentAction.builtin || currentAction.make != nil || currentAction.check != nil || currentAction.decomp != nil || currentAction.appIntent != emptyAppIntent
+	return currentAction.builtin || currentAction.makeParams != nil || currentAction.check != nil || currentAction.decomp != nil || currentAction.appIntent != emptyAppIntent
 }
 
 // makeAction builds an action based on its actionDefinition and adds it to the shortcut.
@@ -219,14 +220,18 @@ var emptyAppIntent = appIntent{}
 // getActionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
 func getActionParameters(arguments []actionArgument) map[string]any {
 	var params = make(map[string]any)
-	if currentAction.addParams != nil {
-		maps.Copy(params, currentAction.addParams(arguments))
+	if currentAction.appendParams != nil {
+		maps.Copy(params, currentAction.appendParams(arguments))
+	}
+	if len(currentAction.setParams) != 0 {
+		maps.Copy(params, currentAction.setParams)
 	}
 	if currentAction.appIntent != emptyAppIntent {
 		maps.Copy(params, appIntentDescriptor(currentAction.appIntent))
 	}
-	if currentAction.make != nil {
-		return currentAction.make(arguments)
+	if currentAction.makeParams != nil {
+		maps.Copy(params, currentAction.makeParams(arguments))
+		return params
 	}
 	if currentAction.parameters != nil {
 		var argumentsSize = len(arguments)
@@ -592,7 +597,7 @@ func generateActionCode(focus parameterDefinition, showEnums bool) string {
 		actionCode.WriteString(fmt.Sprintf(": %s", ansi(string(currentAction.outputType), magenta)))
 	}
 
-	if args.Using("debug") && currentAction.addParams != nil {
+	if args.Using("debug") && currentAction.appendParams != nil {
 		actionCode.WriteString(generateActionAdditionalParams())
 	}
 
@@ -615,7 +620,10 @@ func generateActionArguments(focus parameterDefinition) (arguments []string) {
 }
 
 func generateActionAdditionalParams() string {
-	var addParams = currentAction.addParams([]actionArgument{})
+	var addParams = currentAction.appendParams([]actionArgument{})
+	if len(currentAction.setParams) != 0 {
+		maps.Copy(addParams, currentAction.setParams)
+	}
 	if len(addParams) != 0 {
 		var jsonBytes, jsonErr = json.MarshalIndent(addParams, strings.Repeat("\t", tabLevel), "\t")
 		handle(jsonErr)
@@ -849,7 +857,7 @@ func collectDefinedAction() {
 		overrideIdentifier: overrideIdentifier,
 		parameters:         arguments,
 		outputType:         outputType,
-		addParams:          addParams,
+		appendParams:       addParams,
 		defaultAction:      defaultAction,
 		macOnly:            macOnlyAction,
 		nonMacOnly:         nonMacOnlyAction,

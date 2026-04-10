@@ -1129,7 +1129,7 @@ func makeActionCallCode(action *ShortcutAction) string {
 
 	actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
 
-	if matchedAction.make != nil || matchedAction.decomp != nil {
+	if matchedAction.makeParams != nil || matchedAction.decomp != nil {
 		decompActionCustom(&actionCallCode, &matchedAction, action)
 	} else {
 		var matchedParamsSize = len(matchedAction.parameters)
@@ -1422,8 +1422,8 @@ func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefi
 	matchedValues += valueMatches
 
 	var splitActionAddParams []parameterDefinition
-	if splitAction.definition.addParams != nil {
-		for key, value := range splitAction.definition.addParams([]actionArgument{}) {
+	if splitAction.definition.appendParams != nil {
+		for key, value := range splitAction.definition.appendParams([]actionArgument{}) {
 			splitActionAddParams = append(splitActionAddParams, parameterDefinition{
 				key:          key,
 				defaultValue: value,
