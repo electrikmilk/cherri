@@ -432,7 +432,7 @@ func variableValue(variable varValue) WFTextTokenAttachment {
 	}
 }
 
-type inlineVar struct {
+type inlineVariable struct {
 	identifier string
 	col        int
 	getAs      string
@@ -446,7 +446,7 @@ type attachmentVariable struct {
 }
 
 var varPositions map[string]Value
-var inlineVars []inlineVar
+var inlineVariables []inlineVariable
 var varIndex []attachmentVariable
 
 func attachmentValues(str string) any {
@@ -455,7 +455,7 @@ func attachmentValues(str string) any {
 	}
 
 	varPositions = make(map[string]Value)
-	inlineVars = []inlineVar{}
+	inlineVariables = []inlineVariable{}
 	varIndex = []attachmentVariable{}
 
 	var noVarString = collectInlineVariables(&str)
@@ -471,58 +471,52 @@ func attachmentValues(str string) any {
 }
 
 func makeAttachmentValues() {
-	for _, stringVar := range inlineVars {
-		var storedVar varValue
-		if g, global := globals[stringVar.identifier]; global {
-			isInputVariable(stringVar.identifier)
-			storedVar = g
-			stringVar.identifier = g.value.(string)
-		} else if v, found := variables[stringVar.identifier]; found {
-			storedVar = v
-		} else {
-			exit(fmt.Sprintf("Undefined reference '%s'", stringVar.identifier))
+	for _, inlineVar := range inlineVariables {
+		var varValue, found = getVariableValue(inlineVar.identifier)
+		if !found {
+			exit(fmt.Sprintf("Undefined reference '%s'", inlineVar.identifier))
 		}
-		var variable = variables[stringVar.identifier]
-		var varUUID = uuids[stringVar.identifier]
-		var varValue Value
+
+		var attachmentValue Value
+		var aggrandizements []Aggrandizement
 		var varType = "Variable"
-		var aggr []Aggrandizement
-		if storedVar.variableType != "" {
-			varType = storedVar.variableType
+		if varValue.variableType != "" {
+			varType = varValue.variableType
 		}
-		if !variable.constant {
-			varValue = Value{
-				VariableName: stringVar.identifier,
+		if !varValue.constant {
+			attachmentValue = Value{
+				VariableName: inlineVar.identifier,
 				Type:         varType,
 			}
 		} else {
-			varValue = Value{
-				OutputName: stringVar.identifier,
+			var varUUID = uuids[inlineVar.identifier]
+			attachmentValue = Value{
+				OutputName: inlineVar.identifier,
 				OutputUUID: varUUID,
 				Type:       "ActionOutput",
 			}
 		}
 
-		if stringVar.getAs != "" {
-			aggr = append(aggr, makeAggrandizement(&variable.valueType, &variable, stringVar.getAs))
+		if inlineVar.getAs != "" {
+			aggrandizements = append(aggrandizements, makeAggrandizement(&varValue.valueType, varValue, inlineVar.getAs))
 		}
-		if stringVar.coerce != "" {
-			if contentItem, found := contentItems[stringVar.coerce]; found {
-				aggr = append(aggr, Aggrandizement{
+		if inlineVar.coerce != "" {
+			if contentItem, found := contentItems[inlineVar.coerce]; found {
+				aggrandizements = append(aggrandizements, Aggrandizement{
 					Type:              "WFCoercionVariableAggrandizement",
 					CoercionItemClass: contentItem,
 				})
 			} else {
-				var list = makeKeyList("Available content item types:", contentItems, stringVar.coerce)
-				parserError(fmt.Sprintf("Invalid content item for type coerce '%s'\n\n%s\n", stringVar.coerce, list))
+				var list = makeKeyList("Available content item types:", contentItems, inlineVar.coerce)
+				parserError(fmt.Sprintf("Invalid content item for type coerce '%s'\n\n%s\n", inlineVar.coerce, list))
 			}
 		}
-		if stringVar.getAs != "" || stringVar.coerce != "" {
-			varValue.Aggrandizements = aggr
+		if inlineVar.getAs != "" || inlineVar.coerce != "" {
+			attachmentValue.Aggrandizements = aggrandizements
 		}
 
-		var positionsKey = fmt.Sprintf("{%d, 1}", stringVar.col)
-		varPositions[positionsKey] = varValue
+		var positionsKey = fmt.Sprintf("{%d, 1}", inlineVar.col)
+		varPositions[positionsKey] = attachmentValue
 	}
 }
 
@@ -552,15 +546,15 @@ func makeAggrandizement(valueType *tokenType, variable *varValue, getAs string) 
 
 const utf16BMPThreshold = 0x10000
 
-// mapInlineVars finds occurrences of ObjectReplaceChar and adds them to inlineVars to map the inline variables in noVarString.
+// mapInlineVariables finds occurrences of ObjectReplaceChar and adds them to inlineVariables to map the inline variables in noVarString.
 // Accounts for UTF-16 characters with code units which require the inline variable position to be doubled (e.g. emoji, bold text).
-func mapInlineVars(noVarString *string) {
+func mapInlineVariables(noVarString *string) {
 	var variableIdx int
 	var charPos = 0
 
 	for _, r := range *noVarString {
 		if r == ObjectReplaceChar {
-			inlineVars = append(inlineVars, inlineVar{
+			inlineVariables = append(inlineVariables, inlineVariable{
 				identifier: varIndex[variableIdx].identifier,
 				col:        charPos,
 				getAs:      varIndex[variableIdx].getAs,
@@ -603,7 +597,7 @@ func collectInlineVariables(str *string) (noVarString string) {
 		noVarString = replaceVarRegex.ReplaceAllString(*str, ObjectReplaceCharStr)
 	}
 
-	mapInlineVars(&noVarString)
+	mapInlineVariables(&noVarString)
 	return
 }
 
