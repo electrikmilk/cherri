@@ -123,6 +123,21 @@ type WFBoolValue struct {
 	Value               bool   `plist:"Value"` // false is the zero value; omitempty would suppress it
 }
 
+type WFQuantityValue struct {
+	Magnitude any `plist:",omitempty"`
+	Unit      any `plist:",omitempty"`
+}
+
+type WFQuantityFieldValue struct {
+	Value               WFQuantityValue `plist:",omitempty"`
+	WFSerializationType string          `plist:",omitempty"`
+}
+
+type WFMenuItem struct {
+	WFItemType int `plist:",omitempty"`
+	WFValue    any `plist:",omitempty"`
+}
+
 type WFContentPredicateTableTemplate struct {
 	Value               WFConditionValue `plist:",omitempty"`
 	WFSerializationType string           `plist:",omitempty"`

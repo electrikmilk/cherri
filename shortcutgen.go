@@ -1021,11 +1021,11 @@ func makeMenuAction(t *token) {
 			}, String)
 		}
 		var menuItemParams = menus[t.ident]
-		var menuItems []map[string]any
+		var menuItems = make([]WFMenuItem, 0, len(menuItemParams))
 		for _, item := range menuItemParams {
-			menuItems = append(menuItems, map[string]any{
-				"WFItemType": 0,
-				"WFValue": paramValue(actionArgument{
+			menuItems = append(menuItems, WFMenuItem{
+				WFItemType: 0,
+				WFValue: paramValue(actionArgument{
 					valueType: item.valueType,
 					value:     item.value,
 				}, String),
