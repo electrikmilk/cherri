@@ -171,7 +171,7 @@ func checkParamIdentifiers(params map[string]interface{}) {
 			var wfConditions = paramValues["WFConditions"].(map[string]interface{})
 			var value = wfConditions["Value"].(map[string]interface{})
 			if value["WFActionParameterFilterTemplates"] != nil {
-				for _, filtertemplate := range value["WFActionParameterFilterTemplates"].(map[string]interface{}) {
+				for _, filtertemplate := range value["WFActionParameterFilterTemplates"].([]interface{}) {
 					var paramFilterTemplate = filtertemplate.(map[string]interface{})
 					checkParamIdentifiers(paramFilterTemplate["WFInput"].(map[string]interface{}))
 				}
@@ -322,6 +322,10 @@ func mapSplitActions() {
 			delete(identifierMap, identifier)
 			continue
 		}
+		sort.Slice(actions, func(i, j int) bool {
+			return actions[i].identifier < actions[j].identifier
+		})
+		identifierMap[identifier] = actions
 	}
 }
 
@@ -843,7 +847,6 @@ var numericRegex = regexp.MustCompile("^[0-9]+$")
 
 func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	var itemStringValue = decompValue(item.WFValue)
-	var itemValueType = item.WFItemType
 	var itemValueMap = item.WFValue.(map[string]interface{})
 	var itemValue any
 
@@ -851,9 +854,9 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 		return fmt.Sprintf("{%s}", itemStringValue)
 	}
 
-	switch dictDataType(itemValueType) {
+	switch dictDataType(item.WFItemType) {
 	case itemTypeNumber:
-		itemValue = decompValue(item.WFValue.(map[string]interface{}))
+		itemValue = decompValue(item.WFValue)
 		if !numericRegex.MatchString(itemValue.(string)) {
 			break
 		}
