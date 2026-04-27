@@ -738,6 +738,7 @@ func makeDictionaryItem(key string, value any) WFDictionaryFieldValueItem {
 		}
 	default:
 		exit(fmt.Sprintf("Unsupported dictionary item value type %T", value))
+		return WFDictionaryFieldValueItem{}
 	}
 	return buildDictionaryItem(key, itemType, wfValue)
 }
