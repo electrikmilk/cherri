@@ -106,6 +106,8 @@ func TestPackages(t *testing.T) {
 }
 
 func TestDecomp(t *testing.T) {
+	defer resetParser()
+
 	fmt.Println("Decompiling...")
 	args.Args["import"] = "tests/decomp-me.plist"
 	decompile(importShortcut())
@@ -117,10 +119,9 @@ func TestDecomp(t *testing.T) {
 	if code.String() != string(bytes) {
 		fmt.Println(ansi("Does not match expected!", red, bold))
 		t.Fail()
-	} else {
-		fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
+		return
 	}
-	resetParser()
+	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
 }
 
 func TestActionIdentifiers(t *testing.T) {

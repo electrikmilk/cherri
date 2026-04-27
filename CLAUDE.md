@@ -93,7 +93,7 @@ The central value-generation path is in `shortcutgen.go`:
 - **`makeDictionaryItem(key, value) WFDictionaryFieldValueItem`** — converts a Go value into a typed plist dict item using a type-switch. Returns typed structs (`WFTextTokenString`, `WFArrayValue`, `WFBoolValue`, `WFDictionaryFieldValue`) rather than `map[string]any`.
 - **`argumentValue(args, idx) any`** — wraps `paramValue`, using the current action's parameter definition to determine the expected type.
 
-For function call argument serialization specifically, use `functionCallArgValue(arg, paramType)` in `functions.go` — this produces values suitable for the function call dict (strings with `{ref}` for variables, which `makeDictionaryItem` later resolves to proper attachments).
+For function call argument serialization specifically, use `makeFunctionArgValue(arg, paramType)` in `functions.go` — this produces values suitable for the function call dict (`{ref}` strings for variables, which `makeDictionaryItem` later resolves to proper attachments).
 
 ## Action Definitions
 
@@ -127,3 +127,5 @@ The test runner calls `compile()` which calls `main()`, so `os.Args[1]` is set t
 `TestDecomp` is a diff test: it decompiles `tests/decomp-me.plist` and expects byte-for-byte equality with `tests/decomp-expected.cherri`. When decompiler output changes intentionally, regenerate the expected file.
 
 **Format correctness caveat:** `TestCherriNoSign` only verifies that compilation does not panic — it does not validate plist format. Shortcuts signing (`TestCherri` on macOS) will fail if the plist is structurally invalid, making it a stronger format check. Even a successful sign is not sufficient on its own: the resulting Shortcut must be manually opened and run in Shortcuts to confirm it behaves correctly. Automated tests cannot substitute for this manual verification step.
+
+**Sequential test isolation:** The test functions are not designed to run sequentially in the same process. The global `actions` map and related state accumulate across test functions, so running `go test` (all tests together) may produce failures that do not occur in CI. Always run tests individually with `-run`, matching how the GitLab pipeline executes them.

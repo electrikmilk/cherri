@@ -67,3 +67,15 @@ const varInput = 42
 @varVar = varInput
 const varResult = processVariable(@varVar)
 show("{varResult}")
+
+// Test multiple mixed-type variable args in one call.
+// Each @var must become a clean {ref} attachment in the function call dict,
+// not a literal-quoted string.
+function formatPair(text label, number count) {
+    output("{@label}: {@count}")
+}
+
+@pairLabel = "items"
+@pairCount = 5
+const pairResult = formatPair(@pairLabel, @pairCount)
+show("{pairResult}")
