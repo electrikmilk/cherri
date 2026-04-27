@@ -1356,7 +1356,10 @@ func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, id
 	}
 
 	sort.SliceStable(matches, func(i, j int) bool {
-		return matches[i].params > matches[j].params || matches[i].values > matches[j].values
+		if matches[i].params != matches[j].params {
+			return matches[i].params > matches[j].params
+		}
+		return matches[i].values > matches[j].values
 	})
 
 	if args.Using("debug") {
@@ -1422,6 +1425,12 @@ func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefi
 	matchedValues += valueMatches
 
 	var splitActionAddParams []parameterDefinition
+	for key, value := range splitAction.definition.appendParams {
+		splitActionAddParams = append(splitActionAddParams, parameterDefinition{
+			key:          key,
+			defaultValue: value,
+		})
+	}
 	if splitAction.definition.appendParamsFunc != nil {
 		for key, value := range splitAction.definition.appendParamsFunc([]actionArgument{}) {
 			splitActionAddParams = append(splitActionAddParams, parameterDefinition{
