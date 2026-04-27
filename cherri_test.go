@@ -25,7 +25,7 @@ func TestCherri(_ *testing.T) {
 	}
 	loadStandardActions()
 	for _, file := range files {
-		if !strings.Contains(file.Name(), ".cherri") || file.Name() == "decomp_expected.cherri" || file.Name() == "decomp_me.cherri" {
+		if !strings.Contains(file.Name(), ".cherri") || file.Name() == "decomp-expected.cherri" || file.Name() == "decomp-me.cherri" {
 			continue
 		}
 		currentTest = fmt.Sprintf("tests/%s", file.Name())
@@ -111,16 +111,16 @@ func TestDecomp(t *testing.T) {
 	decompile(importShortcut())
 
 	fmt.Println("Comparing to expected...")
-	var bytes, readErr = os.ReadFile("tests/decomp_expected.cherri")
+	var bytes, readErr = os.ReadFile("tests/decomp-expected.cherri")
 	handle(readErr)
 
 	if code.String() != string(bytes) {
 		fmt.Println(ansi("Does not match expected!", red, bold))
 		t.Fail()
-		return
+	} else {
+		fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
 	}
-
-	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
+	resetParser()
 }
 
 func TestActionIdentifiers(t *testing.T) {
@@ -198,4 +198,14 @@ func resetParser() {
 	uuids = map[string]string{}
 	functions = map[string]*function{}
 	shortcut = Shortcut{}
+	actionIndex = 0
+	code.Reset()
+	varUUIDs = nil
+	constUUIDs = nil
+	identifierMap = nil
+	currentVariableValue = ""
+	decompilingText = false
+	decompilingDictionary = false
+	macDefinition = false
+	setMacDefinition = false
 }

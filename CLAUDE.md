@@ -23,7 +23,7 @@ go run . --debug file.cherri      # also writes .plist and preprocessed file
 # Tests
 go test -run TestCherriNoSign     # compile all tests/*.cherri files, skip signing (use on non-macOS)
 go test -run TestCherri           # same but with signing (macOS only)
-go test -run TestDecomp           # decompile tests/decomp-me.plist, compare to tests/decomp_expected.cherri
+go test -run TestDecomp           # decompile tests/decomp-me.plist, compare to tests/decomp-expected.cherri
 go test -run TestActionIdentifiers # verify specific action identifier output
 
 # Search actions and glyphs (requires build)
@@ -120,10 +120,10 @@ The header intercepts `ShortcutInput`, validates it as a Cherri function call, m
 
 ## Testing
 
-Each file in `tests/*.cherri` (except `decomp_expected.cherri` and `decomp_me.cherri`) is compiled by `TestCherri`/`TestCherriNoSign`. When adding or changing a language feature, add or update a test file in `tests/`.
+Each file in `tests/*.cherri` (except `decomp-expected.cherri` and `decomp_me.cherri`) is compiled by `TestCherri`/`TestCherriNoSign`. When adding or changing a language feature, add or update a test file in `tests/`.
 
 The test runner calls `compile()` which calls `main()`, so `os.Args[1]` is set to the test file path before each run. Global state is fully reset via `resetParser()` after each test.
 
-`TestDecomp` is a diff test: it decompiles `tests/decomp-me.plist` and expects byte-for-byte equality with `tests/decomp_expected.cherri`. When decompiler output changes intentionally, regenerate the expected file.
+`TestDecomp` is a diff test: it decompiles `tests/decomp-me.plist` and expects byte-for-byte equality with `tests/decomp-expected.cherri`. When decompiler output changes intentionally, regenerate the expected file.
 
 **Format correctness caveat:** `TestCherriNoSign` only verifies that compilation does not panic — it does not validate plist format. Shortcuts signing (`TestCherri` on macOS) will fail if the plist is structurally invalid, making it a stronger format check. Even a successful sign is not sufficient on its own: the resulting Shortcut must be manually opened and run in Shortcuts to confirm it behaves correctly. Automated tests cannot substitute for this manual verification step.
