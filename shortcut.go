@@ -120,7 +120,7 @@ type WFArrayValue struct {
 
 type WFBoolValue struct {
 	WFSerializationType string `plist:",omitempty"`
-	Value               bool   `plist:"Value"` // omitempty omitted: false must serialize
+	Value               bool   `plist:"Value"` // false is the zero value; omitempty would suppress it
 }
 
 type WFContentPredicateTableTemplate struct {
