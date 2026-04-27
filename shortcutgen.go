@@ -699,7 +699,7 @@ func makeDictionaryItem(key string, value any) WFDictionaryFieldValueItem {
 	case string:
 		itemType = itemTypeText
 		if strings.ContainsAny(v, "{}") {
-			wfValue = paramValue(actionArgument{valueType: String, value: v}, String)
+			wfValue = attachmentValues(v)
 		} else {
 			wfValue = WFTextTokenString{
 				WFSerializationType: "WFTextTokenString",
@@ -755,7 +755,7 @@ func buildDictionaryItem(key string, itemType dictDataType, wfValue any) WFDicti
 
 func buildDictionaryKey(key string) any {
 	if strings.ContainsAny(key, "{}") {
-		return paramValue(actionArgument{valueType: String, value: key}, String)
+		return attachmentValues(key)
 	}
 	return WFTextTokenString{
 		WFSerializationType: "WFTextTokenString",
