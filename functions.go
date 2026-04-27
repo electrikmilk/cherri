@@ -300,7 +300,24 @@ func coerceOutputValue(value any, valueType tokenType, defaultValue any) any {
 	}
 }
 
-func functionCallArgValue(arg actionArgument, paramType tokenType) any {
+func makeFunctionCall(identifier *string, arguments *[]actionArgument) map[string]any {
+	var params = functions[*identifier].definition.parameters
+	var argumentValues = make([]any, 0, len(*arguments))
+	for i, argument := range *arguments {
+		var paramType tokenType
+		if i < len(params) {
+			paramType = params[i].validType
+		}
+		argumentValues = append(argumentValues, makeFunctionArgValue(argument, paramType))
+	}
+	return map[string]any{
+		"cherri_functions": 1,
+		"function":         *identifier,
+		"arguments":        argumentValues,
+	}
+}
+
+func makeFunctionArgValue(arg actionArgument, paramType tokenType) any {
 	switch arg.valueType {
 	case Variable:
 		var refStr = makeVariableReferenceString(arg.value.(varValue))
@@ -312,23 +329,6 @@ func functionCallArgValue(arg actionArgument, paramType tokenType) any {
 		return map[string]any{"array": arg.value}
 	default:
 		return arg.value
-	}
-}
-
-func makeFunctionCall(identifier *string, arguments *[]actionArgument) map[string]any {
-	var params = functions[*identifier].definition.parameters
-	var argumentValues = make([]any, 0, len(*arguments))
-	for i, argument := range *arguments {
-		var paramType tokenType
-		if i < len(params) {
-			paramType = params[i].validType
-		}
-		argumentValues = append(argumentValues, functionCallArgValue(argument, paramType))
-	}
-	return map[string]any{
-		"cherri_functions": 1,
-		"function":         *identifier,
-		"arguments":        argumentValues,
 	}
 }
 
