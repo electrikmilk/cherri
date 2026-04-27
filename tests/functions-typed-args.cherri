@@ -1,0 +1,69 @@
+// This tests that typed function arguments don't cause type conversion errors
+
+function processNumber(number value) {
+    output("{@value}")
+}
+
+function processText(text message) {
+    output("{@message}")
+}
+
+function processBool(bool condition) {
+    output("{@condition}")
+}
+
+function processFloat(float value) {
+    output("{@value}")
+}
+
+// Test with number literal action output
+const numInput = 42
+@numVar = numInput
+const numResult = processNumber(@numVar)
+show("{numResult}")
+
+// Test with text literal action output
+const textInput = "Hello World"
+@textVar = textInput
+const textResult = processText(@textVar)
+show("{textResult}")
+
+// Test with bool literal action output
+const boolInput = true
+@boolVar = boolInput
+const boolResult = processBool(@boolVar)
+show("{boolResult}")
+
+// Test with float literal action output
+const floatInput = 3.14
+@floatVar = floatInput
+const floatResult = processFloat(@floatVar)
+show("{floatResult}")
+
+// Test with array-typed argument
+function processArray(array items) {
+    output("{@items}")
+}
+
+@arrVar = list("a", "b", "c")
+const arrResult = processArray(@arrVar)
+show("{arrResult}")
+
+// Test with dictionary-typed argument
+function processDict(dictionary data) {
+    output("{@data}")
+}
+
+@dictVar: dictionary
+const dictResult = processDict(@dictVar)
+show("{dictResult}")
+
+// Test with variable-typed argument (no type coercion)
+function processVariable(variable val) {
+    output("{@val}")
+}
+
+const varInput = 42
+@varVar = varInput
+const varResult = processVariable(@varVar)
+show("{varResult}")

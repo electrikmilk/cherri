@@ -113,6 +113,16 @@ type WFDictionaryFieldValueWrapper struct {
 	WFDictionaryFieldValueItems []WFDictionaryFieldValueItem `plist:",omitempty"`
 }
 
+type WFArrayValue struct {
+	WFSerializationType string                       `plist:",omitempty"`
+	Value               []WFDictionaryFieldValueItem `plist:",omitempty"`
+}
+
+type WFBoolValue struct {
+	WFSerializationType string `plist:",omitempty"`
+	Value               bool   `plist:"Value"` // omitempty omitted: false must serialize
+}
+
 type WFContentPredicateTableTemplate struct {
 	Value               WFConditionValue `plist:",omitempty"`
 	WFSerializationType string           `plist:",omitempty"`

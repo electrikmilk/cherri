@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"maps"
 	"reflect"
 	"regexp"
 	"strings"
@@ -690,121 +689,78 @@ func makeDictionary(value interface{}) (dictItems []WFDictionaryFieldValueItem) 
 	return
 }
 
-// makeDictionaryItem creates an inner dictionary value.
 func makeDictionaryItem(key string, value any) WFDictionaryFieldValueItem {
 	if value == nil {
 		value = ""
 	}
 	var itemType dictDataType
-	var serializedType string
-	var wfValue = map[string]any{
-		"Value": map[string]any{
-			"string": value,
-		},
-	}
-
-	if value != "" {
-		switch reflect.TypeOf(value).Kind() {
-		case reflect.String:
-			if strings.ContainsAny(value.(string), "{}") {
-				wfValue["Value"] = paramValue(actionArgument{
-					valueType: String,
-					value:     value,
-				}, String)
-				if reflect.TypeOf(wfValue["Value"]).String() == "map[string]interface {}" {
-					for _, val := range wfValue {
-						wfValue = val.(map[string]any)
-						break
-					}
-				}
-			}
-			itemType = itemTypeText
-			serializedType = "WFTextTokenString"
-		case reflect.Int, reflect.Float64:
-			itemType = itemTypeNumber
-			serializedType = "WFTextTokenString"
-			wfValue = map[string]any{
-				"Value": map[string]any{
-					"string": fmt.Sprintf("%v", value),
-				},
-			}
-		case reflect.Slice:
-			itemType = itemTypeArray
-			serializedType = "WFArrayParameterState"
-			var arrayValue []WFDictionaryFieldValueItem
-			for _, item := range value.([]interface{}) {
-				arrayValue = append(arrayValue, makeDictionaryItem("", item))
-			}
-			wfValue = map[string]any{
-				"Value": arrayValue,
-			}
-		case reflect.Map:
-			itemType = itemTypeDict
-			serializedType = "WFDictionaryFieldValue"
-			wfValue = map[string]any{
-				"Value": map[string]any{
-					"Value": map[string]any{
-						"WFDictionaryFieldValueItems": makeDictionary(value),
-					},
-					"WFSerializationType": "WFDictionaryFieldValue",
-				},
-			}
-		case reflect.Bool:
-			itemType = itemTypeBool
-			serializedType = "WFNumberSubstitutableState"
-			wfValue = map[string]any{
-				"Value": value,
-			}
-		default:
-			exit(fmt.Sprintf("Unsupported dictionary item value type %s", reflect.TypeOf(value)))
-		}
-	} else {
+	var wfValue any
+	switch v := value.(type) {
+	case string:
 		itemType = itemTypeText
-		serializedType = "WFTextTokenString"
-		wfValue = map[string]any{}
-	}
-
-	return makeDictionaryItemValue(key, itemType, serializedType, wfValue)
-}
-
-func makeDictionaryItemValue(key string, itemType dictDataType, serializedType string, wfValue map[string]any) WFDictionaryFieldValueItem {
-	var wfValueParams = map[string]any{
-		"WFSerializationType": serializedType,
-	}
-	maps.Copy(wfValueParams, wfValue)
-
-	var item = WFDictionaryFieldValueItem{
-		WFItemType: int(itemType),
-		WFValue:    wfValueParams,
-	}
-
-	if key != "" {
-		var wfKey = map[string]any{
-			"Value": map[string]string{
-				"string": key,
+		if strings.ContainsAny(v, "{}") {
+			wfValue = paramValue(actionArgument{valueType: String, value: v}, String)
+		} else {
+			wfValue = WFTextTokenString{
+				WFSerializationType: "WFTextTokenString",
+				Value:               WFTextTokenStringValue{String: v},
+			}
+		}
+	case int, float64:
+		itemType = itemTypeNumber
+		wfValue = WFTextTokenString{
+			WFSerializationType: "WFTextTokenString",
+			Value:               WFTextTokenStringValue{String: fmt.Sprintf("%v", v)},
+		}
+	case []interface{}:
+		itemType = itemTypeArray
+		var items []WFDictionaryFieldValueItem
+		for _, item := range v {
+			items = append(items, makeDictionaryItem("", item))
+		}
+		wfValue = WFArrayValue{
+			WFSerializationType: "WFArrayParameterState",
+			Value:               items,
+		}
+	case map[string]interface{}:
+		itemType = itemTypeDict
+		wfValue = WFDictionaryFieldValue{
+			WFSerializationType: "WFDictionaryFieldValue",
+			Value: WFDictionaryFieldValueWrapper{
+				WFDictionaryFieldValueItems: makeDictionary(v),
 			},
 		}
-		if strings.ContainsAny(key, "{}") {
-			wfKey["Value"] = paramValue(actionArgument{
-				valueType: String,
-				value:     key,
-			}, String)
-			if reflect.TypeOf(wfKey["Value"]).String() == "map[string]interface {}" {
-				for _, val := range wfKey["Value"].(map[string]any) {
-					wfKey = val.(map[string]any)
-					break
-				}
-			}
+	case bool:
+		itemType = itemTypeBool
+		wfValue = WFBoolValue{
+			WFSerializationType: "WFNumberSubstitutableState",
+			Value:               v,
 		}
-
-		var wfKeyParams = map[string]any{
-			"WFSerializationType": "WFTextTokenString",
-		}
-		maps.Copy(wfKeyParams, wfKey)
-		item.WFKey = wfKeyParams
+	default:
+		exit(fmt.Sprintf("Unsupported dictionary item value type %T", value))
 	}
+	return buildDictionaryItem(key, itemType, wfValue)
+}
 
+func buildDictionaryItem(key string, itemType dictDataType, wfValue any) WFDictionaryFieldValueItem {
+	var item = WFDictionaryFieldValueItem{
+		WFItemType: int(itemType),
+		WFValue:    wfValue,
+	}
+	if key != "" {
+		item.WFKey = buildDictionaryKey(key)
+	}
 	return item
+}
+
+func buildDictionaryKey(key string) any {
+	if strings.ContainsAny(key, "{}") {
+		return paramValue(actionArgument{valueType: String, value: key}, String)
+	}
+	return WFTextTokenString{
+		WFSerializationType: "WFTextTokenString",
+		Value:               WFTextTokenStringValue{String: key},
+	}
 }
 
 func makeOutputName(token *token) string {

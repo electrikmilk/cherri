@@ -300,42 +300,36 @@ func coerceOutputValue(value any, valueType tokenType, defaultValue any) any {
 	}
 }
 
-func makeFunctionCall(identifier *string, arguments *[]actionArgument) map[string]any {
-	var argumentValues []any
-	if len(*arguments) != 0 {
-		for _, argument := range *arguments {
-			var argumentValue = fmt.Sprintf("%v", argument.value)
-			switch argument.valueType {
-			case String:
-				argumentValues = append(argumentValues, fmt.Sprintf("%s", argumentValue))
-			case Variable:
-				var identifier = argument.value.(varValue).value.(string)
-				var variableValue, found = getVariableValue(identifier)
-				if !found {
-					parserError(fmt.Sprintf("Undefined reference '%s'", identifier))
-				}
-				if variableValue.valueType == Arr {
-					var wrappedArray = map[string]any{"array": fmt.Sprintf("{%s}", identifier)}
-					argumentValues = append(argumentValues, wrappedArray)
-				} else {
-					argumentValues = append(argumentValues, fmt.Sprintf("\"{%s}\"", identifier))
-				}
-			case Arr:
-				var wrappedArray = map[string]any{"array": argument.value}
-				argumentValues = append(argumentValues, wrappedArray)
-			default:
-				argumentValues = append(argumentValues, argument.value)
-			}
+func functionCallArgValue(arg actionArgument, paramType tokenType) any {
+	switch arg.valueType {
+	case Variable:
+		var refStr = makeVariableReferenceString(arg.value.(varValue))
+		if paramType == Arr {
+			return map[string]any{"array": fmt.Sprintf("{%s}", refStr)}
 		}
+		return fmt.Sprintf("{%s}", refStr)
+	case Arr:
+		return map[string]any{"array": arg.value}
+	default:
+		return arg.value
 	}
+}
 
-	var functionCall = map[string]any{
+func makeFunctionCall(identifier *string, arguments *[]actionArgument) map[string]any {
+	var params = functions[*identifier].definition.parameters
+	var argumentValues []any
+	for i, argument := range *arguments {
+		var paramType tokenType
+		if i < len(params) {
+			paramType = params[i].validType
+		}
+		argumentValues = append(argumentValues, functionCallArgValue(argument, paramType))
+	}
+	return map[string]any{
 		"cherri_functions": 1,
 		"function":         *identifier,
 		"arguments":        argumentValues,
 	}
-
-	return functionCall
 }
 
 func printFunctionsDebug() {
