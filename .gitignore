@@ -17,6 +17,7 @@
 !/actions/*.cherri
 !/tests/*.cherri
 /tests/*_decompiled.plist
+/tests/decomp-me.cherri
 !stdlib.cherri
 *.prof
 
