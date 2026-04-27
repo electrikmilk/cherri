@@ -317,7 +317,7 @@ func functionCallArgValue(arg actionArgument, paramType tokenType) any {
 
 func makeFunctionCall(identifier *string, arguments *[]actionArgument) map[string]any {
 	var params = functions[*identifier].definition.parameters
-	var argumentValues []any
+	var argumentValues = make([]any, 0, len(*arguments))
 	for i, argument := range *arguments {
 		var paramType tokenType
 		if i < len(params) {
