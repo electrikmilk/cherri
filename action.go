@@ -1079,7 +1079,7 @@ func makeQuantityFieldValue(args []actionArgument) WFQuantityFieldValue {
 	if args[0].valueType == Variable {
 		magnitude = variableValueWithSerialization(args[0].value.(varValue), "")
 	} else {
-		magnitude = paramValue(args[0], args[0].valueType)
+		magnitude = fmt.Sprintf("%v", paramValue(args[0], args[0].valueType))
 	}
 
 	return WFQuantityFieldValue{
