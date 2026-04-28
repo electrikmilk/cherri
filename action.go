@@ -429,6 +429,9 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 			return
 		}
 		if argValueType != param.validType && param.validType != Variable && getVar.variableType != Ask {
+			if argValueType == Date && param.validType == String {
+				return
+			}
 			parserError(fmt.Sprintf("Invalid variable value %v (%s) for argument '%s' (%s).\n%s",
 				argVal,
 				argValueType,
@@ -463,6 +466,9 @@ func validActionOutput(param *parameterDefinition, value any) {
 			return
 		}
 		if actionOutputType != param.validType && param.validType != Variable {
+			if actionOutputType == Date && param.validType == String {
+				return
+			}
 			parserError(fmt.Sprintf("Invalid variable value of action '%v' (%s) for argument '%s' (%s).\n%s",
 				actionIdent+"()",
 				actionOutputType,
