@@ -102,7 +102,7 @@ enum dateUnit {
 }
 
 // [Doc]: [Dates] Adjust Date: Adjust a date or get the start of a time period.
-action adjustDate(text date: 'WFDate', dateAdjustOperation operation: 'WFAdjustOperation', #dateUnit ?unit: 'WFDuration'): date
+action adjustDate(date date: 'WFDate', dateAdjustOperation operation: 'WFAdjustOperation', #dateUnit ?unit: 'WFDuration'): date
 
 enum holidayYear {
     '2023',
@@ -187,18 +187,18 @@ enum timeFormats {
 }
 
 // [Doc]: [Formatting] Format Date: Format a date using a standard or custom format.
-action default 'format.date' formatDate(text date: 'WFDate', dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short", text ?customDateFormat: 'WFDateFormat'): text {
+action default 'format.date' formatDate(date date: 'WFDate', dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short", text ?customDateFormat: 'WFDateFormat'): text {
 	"WFTimeFormatStyle": "None"
 }
 
 // [Doc]: [Formatting] Format Time: Format a time using a standard or custom format.
-action 'format.date' formatTime(text time: 'WFDate', timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short"): text {
+action 'format.date' formatTime(date time: 'WFDate', timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short"): text {
 	"WFDateFormatStyle": "None"
 }
 
 // [Doc]: [Formatting] Format Timestamp: Format a timestamp using standard formats and/or a custom date format.
 action 'format.date' formatTimestamp(
-    text date: 'WFDate',
+    date date: 'WFDate',
     dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short",
     timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short",
     text ?customDateFormat: 'WFDateFormat'

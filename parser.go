@@ -1353,6 +1353,11 @@ func checkConditionalTypes(conditional *tokenType, variableType tokenType, value
 		if found && variableValue.valueType != Variable {
 			variableType = variableValue.valueType
 		}
+		if variableType == Action {
+			if a, ok := variableValue.value.(action); ok && a.def != nil {
+				variableType = a.def.outputType
+			}
+		}
 		if variable.coerce != "" {
 			variableType = tokenType(variable.coerce)
 		}
