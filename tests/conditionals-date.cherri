@@ -1,0 +1,3 @@
+@myDate = currentDate()
+
+if CurrentDate isToday {}

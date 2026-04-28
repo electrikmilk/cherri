@@ -1315,6 +1315,12 @@ func collectConditional() (conditional condition) {
 
 		skipWhitespace()
 
+		// Zero-argument conditions (e.g. isToday) have no comparison value;
+		// the next char will be the block opener or a logical operator.
+		if char == '{' || char == '&' || char == '|' {
+			return
+		}
+
 		var variableTwoType tokenType
 		var variableTwoValue any
 		collectValue(&variableTwoType, &variableTwoValue, ' ')
