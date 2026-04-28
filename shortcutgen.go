@@ -850,8 +850,6 @@ func makeConditionalAction(t *token) {
 				"Type":     "Variable",
 				"Variable": variableValue(firstArg.value.(varValue)),
 			}
-			// Apply the same duration-aware remap as the modern path: Shortcuts
-			// uses 1000/1001 for date-relative qty comparisons, not 2/0.
 			var conditionCode = firstCondition.condition
 			if len(firstCondition.arguments) > 1 && firstCondition.arguments[1].valueType == Quantity {
 				switch conditionCode {
@@ -861,11 +859,12 @@ func makeConditionalAction(t *token) {
 					conditionCode = 1001
 				}
 			}
+			var inputType = inputEffectiveType(firstArg.value.(varValue))
 			if len(firstCondition.arguments) > 1 {
-				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[1])
+				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[1], inputType)
 			}
 			if len(firstCondition.arguments) > 2 {
-				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[2])
+				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[2], inputType)
 			}
 			conditionalParams["WFCondition"] = conditionCode
 			conditionalParams["WFControlFlowMode"] = startStatement
@@ -885,12 +884,65 @@ func makeConditionalAction(t *token) {
 
 var filterTemplates []WFConditionParam
 
+// inputEffectiveType resolves a conditional's left-hand variable to its concrete type,
+// which determines which plist key the comparison value is written into.
+func inputEffectiveType(v varValue) tokenType {
+	var identifier = v.value.(string)
+	if global, found := globals[identifier]; found {
+		return global.valueType
+	}
+	if variable, found := variables[identifier]; found {
+		if variable.valueType == Action {
+			if a, ok := variable.value.(action); ok && a.def != nil {
+				return a.def.outputType
+			}
+		}
+		return variable.valueType
+	}
+	return String
+}
+
+func routeConditionalValue(param *WFConditionParam, val any, inputType tokenType) {
+	switch inputType {
+	case Date:
+		if param.WFDate == nil {
+			param.WFDate = val
+		} else {
+			param.WFAnotherDate = val
+		}
+	case Integer, Float:
+		if param.WFNumberValue == nil {
+			param.WFNumberValue = val
+		} else {
+			param.WFAnotherNumber = val
+		}
+	default:
+		param.WFConditionalActionString = val
+	}
+}
+
+func routeConditionalValueLegacy(params map[string]any, val any, inputType tokenType) {
+	switch inputType {
+	case Date:
+		if _, exists := params["WFDate"]; !exists {
+			params["WFDate"] = val
+		} else {
+			params["WFAnotherDate"] = val
+		}
+	case Integer, Float:
+		if _, exists := params["WFNumberValue"]; !exists {
+			params["WFNumberValue"] = val
+		} else {
+			params["WFAnotherNumber"] = val
+		}
+	default:
+		params["WFConditionalActionString"] = val
+	}
+}
+
 func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate {
 	filterTemplates = []WFConditionParam{}
 	for _, condition := range wfConditions.conditions {
-		// Shortcuts uses 1000 ("is more than N time before now") and 1001
-		// ("is within N time of now") when comparing dates by duration. The
-		// generic GreaterThan (2) and LessThan (0) codes only apply to numbers.
 		var conditionCode = condition.condition
 		if len(condition.arguments) > 1 && condition.arguments[1].valueType == Quantity {
 			switch conditionCode {
@@ -901,6 +953,7 @@ func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate 
 			}
 		}
 
+		var inputType = inputEffectiveType(condition.arguments[0].value.(varValue))
 		var conditionParam = WFConditionParam{
 			WFCondition: conditionCode,
 			WFInput: WFInputVariable{
@@ -910,10 +963,10 @@ func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate 
 		}
 
 		if len(condition.arguments) > 1 {
-			conditionalParameter(&conditionParam, condition.arguments[1])
+			conditionalParameter(&conditionParam, condition.arguments[1], inputType)
 		}
 		if len(condition.arguments) > 2 {
-			conditionalParameter(&conditionParam, condition.arguments[2])
+			conditionalParameter(&conditionParam, condition.arguments[2], inputType)
 		}
 
 		filterTemplates = append(filterTemplates, conditionParam)
@@ -928,137 +981,47 @@ func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate 
 	}
 }
 
-func conditionalParameter(param *WFConditionParam, arg actionArgument) {
+func conditionalParameter(param *WFConditionParam, arg actionArgument, inputType tokenType) {
 	switch arg.valueType {
-	case String:
-		param.WFConditionalActionString = paramValue(arg, String)
-	case Integer, Float:
-		var val = paramValue(arg, Integer)
-		if param.WFNumberValue == nil {
-			param.WFNumberValue = val
-		} else {
-			param.WFAnotherNumber = val
-		}
-	case Bool:
-		var boolNumber = 0
-		if arg.value == true {
-			boolNumber = 1
-		}
-		var val = paramValue(actionArgument{valueType: Integer, value: boolNumber}, Integer)
-		if param.WFNumberValue == nil {
-			param.WFNumberValue = val
-		} else {
-			param.WFAnotherNumber = val
-		}
-	case Date:
-		var val = paramValue(arg, String)
-		if param.WFDate == nil {
-			param.WFDate = val
-		} else {
-			param.WFAnotherDate = val
-		}
 	case Quantity:
 		param.WFDuration = makeQuantityFieldValue(arg.value.([]actionArgument))
 	case Variable:
-		conditionalParameterVariable(param, arg)
-	}
-}
-
-func conditionalParameterVariable(param *WFConditionParam, arg actionArgument) {
-	var condVarValue = arg.value.(varValue)
-	var variable = variables[condVarValue.value.(string)]
-	var val = variableValue(condVarValue)
-	// When a variable was assigned from an action, resolve the action's declared
-	// output type so the comparison value routes to the right plist key.
-	var effectiveType = variable.valueType
-	if effectiveType == Action {
-		if a, ok := variable.value.(action); ok && a.def != nil {
-			effectiveType = a.def.outputType
-		}
-	}
-	switch effectiveType {
-	case Integer, Float:
-		if param.WFNumberValue == nil {
-			param.WFNumberValue = val
-		} else {
-			param.WFAnotherNumber = val
-		}
-	case Date:
-		if param.WFDate == nil {
-			param.WFDate = val
-		} else {
-			param.WFAnotherDate = val
-		}
-	default:
-		param.WFConditionalActionString = attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue)))
-	}
-}
-
-// conditionalParameterLegacy is for iOS < 18 compatibility where we still use map[string]any
-func conditionalParameterLegacy(params map[string]any, arg actionArgument) {
-	switch arg.valueType {
-	case String:
-		params["WFConditionalActionString"] = paramValue(arg, String)
-	case Integer, Float:
-		var val = paramValue(arg, Integer)
-		if _, exists := params["WFNumberValue"]; !exists {
-			params["WFNumberValue"] = val
-		} else {
-			params["WFAnotherNumber"] = val
-		}
+		conditionalParameterVariable(param, arg, inputType)
 	case Bool:
 		var boolNumber = 0
 		if arg.value == true {
 			boolNumber = 1
 		}
-		var val = paramValue(actionArgument{valueType: Integer, value: boolNumber}, Integer)
-		if _, exists := params["WFNumberValue"]; !exists {
-			params["WFNumberValue"] = val
-		} else {
-			params["WFAnotherNumber"] = val
-		}
-	case Date:
-		var val = paramValue(arg, String)
-		if _, exists := params["WFDate"]; !exists {
-			params["WFDate"] = val
-		} else {
-			params["WFAnotherDate"] = val
-		}
-	case Quantity:
-		params["WFDuration"] = makeQuantityFieldValue(arg.value.([]actionArgument))
-	case Variable:
-		conditionalParameterVariableLegacy(params, arg)
+		routeConditionalValue(param, paramValue(actionArgument{valueType: Integer, value: boolNumber}, Integer), inputType)
+	default:
+		routeConditionalValue(param, paramValue(arg, arg.valueType), inputType)
 	}
 }
 
-func conditionalParameterVariableLegacy(params map[string]any, arg actionArgument) {
-	var condVarValue = arg.value.(varValue)
-	var variable = variables[condVarValue.value.(string)]
-	var val = variableValue(condVarValue)
-	// When a variable was assigned from an action, resolve the action's declared
-	// output type so the comparison value routes to the right plist key.
-	var effectiveType = variable.valueType
-	if effectiveType == Action {
-		if a, ok := variable.value.(action); ok && a.def != nil {
-			effectiveType = a.def.outputType
+func conditionalParameterVariable(param *WFConditionParam, arg actionArgument, inputType tokenType) {
+	routeConditionalValue(param, variableValue(arg.value.(varValue)), inputType)
+}
+
+// conditionalParameterLegacy is for iOS < 18 compatibility where we still use map[string]any
+func conditionalParameterLegacy(params map[string]any, arg actionArgument, inputType tokenType) {
+	switch arg.valueType {
+	case Quantity:
+		params["WFDuration"] = makeQuantityFieldValue(arg.value.([]actionArgument))
+	case Variable:
+		conditionalParameterVariableLegacy(params, arg, inputType)
+	case Bool:
+		var boolNumber = 0
+		if arg.value == true {
+			boolNumber = 1
 		}
-	}
-	switch effectiveType {
-	case Integer, Float:
-		if _, exists := params["WFNumberValue"]; !exists {
-			params["WFNumberValue"] = val
-		} else {
-			params["WFAnotherNumber"] = val
-		}
-	case Date:
-		if _, exists := params["WFDate"]; !exists {
-			params["WFDate"] = val
-		} else {
-			params["WFAnotherDate"] = val
-		}
+		routeConditionalValueLegacy(params, paramValue(actionArgument{valueType: Integer, value: boolNumber}, Integer), inputType)
 	default:
-		params["WFConditionalActionString"] = attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue)))
+		routeConditionalValueLegacy(params, paramValue(arg, arg.valueType), inputType)
 	}
+}
+
+func conditionalParameterVariableLegacy(params map[string]any, arg actionArgument, inputType tokenType) {
+	routeConditionalValueLegacy(params, variableValue(arg.value.(varValue)), inputType)
 }
 
 func makeMenuAction(t *token) {
