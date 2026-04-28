@@ -851,12 +851,10 @@ func makeConditionalAction(t *token) {
 				"Variable": variableValue(firstArg.value.(varValue)),
 			}
 			if len(firstCondition.arguments) > 1 {
-				var secondArg = firstCondition.arguments[1]
-				conditionalParameterLegacy("", conditionalParams, &secondArg.valueType, secondArg.value)
+				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[1])
 			}
 			if len(firstCondition.arguments) > 2 {
-				var thirdArg = firstCondition.arguments[2]
-				conditionalParameterLegacy("WFAnotherNumber", conditionalParams, &thirdArg.valueType, thirdArg.value)
+				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[2])
 			}
 			conditionalParams["WFCondition"] = firstCondition.condition
 			conditionalParams["WFControlFlowMode"] = startStatement
@@ -965,47 +963,61 @@ func conditionalParameterVariable(param *WFConditionParam, arg actionArgument) {
 }
 
 // conditionalParameterLegacy is for iOS < 18 compatibility where we still use map[string]any
-func conditionalParameterLegacy(key string, conditionalParams map[string]any, typeOf *tokenType, value any) {
-	if key == "" {
-		if *typeOf == String {
-			key = "WFConditionalActionString"
-		} else if *typeOf == Integer || *typeOf == Bool {
-			key = "WFNumberValue"
-		}
-	}
-	switch *typeOf {
+func conditionalParameterLegacy(params map[string]any, arg actionArgument) {
+	switch arg.valueType {
 	case String:
-		conditionalParams[key] = paramValue(actionArgument{
-			valueType: *typeOf,
-			value:     value,
-		}, String)
-	case Integer:
-		conditionalParams[key] = paramValue(actionArgument{
-			valueType: *typeOf,
-			value:     value,
-		}, String)
+		params["WFConditionalActionString"] = paramValue(arg, String)
+	case Integer, Float:
+		var val = paramValue(arg, Integer)
+		if _, exists := params["WFNumberValue"]; !exists {
+			params["WFNumberValue"] = val
+		} else {
+			params["WFAnotherNumber"] = val
+		}
 	case Bool:
 		var boolNumber = 0
-		if value == true {
+		if arg.value == true {
 			boolNumber = 1
 		}
-		conditionalParams[key] = paramValue(actionArgument{
-			valueType: Integer,
-			value:     boolNumber,
-		}, Integer)
+		var val = paramValue(actionArgument{valueType: Integer, value: boolNumber}, Integer)
+		if _, exists := params["WFNumberValue"]; !exists {
+			params["WFNumberValue"] = val
+		} else {
+			params["WFAnotherNumber"] = val
+		}
+	case Date:
+		var val = paramValue(arg, String)
+		if _, exists := params["WFDate"]; !exists {
+			params["WFDate"] = val
+		} else {
+			params["WFAnotherDate"] = val
+		}
+	case Quantity:
+		params["WFDuration"] = makeQuantityFieldValue(arg.value.([]actionArgument))
 	case Variable:
-		conditionalParameterVariableLegacy(conditionalParams, value)
+		conditionalParameterVariableLegacy(params, arg)
 	}
 }
 
-func conditionalParameterVariableLegacy(conditionalParams map[string]any, value any) {
-	var condVarValue = value.(varValue)
+func conditionalParameterVariableLegacy(params map[string]any, arg actionArgument) {
+	var condVarValue = arg.value.(varValue)
 	var variable = variables[condVarValue.value.(string)]
+	var val = variableValue(condVarValue)
 	switch variable.valueType {
-	case Integer:
-		conditionalParams["WFNumberValue"] = variableValue(condVarValue)
+	case Integer, Float:
+		if _, exists := params["WFNumberValue"]; !exists {
+			params["WFNumberValue"] = val
+		} else {
+			params["WFAnotherNumber"] = val
+		}
+	case Date:
+		if _, exists := params["WFDate"]; !exists {
+			params["WFDate"] = val
+		} else {
+			params["WFAnotherDate"] = val
+		}
 	default:
-		conditionalParams["WFConditionalActionString"] = attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue)))
+		params["WFConditionalActionString"] = attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue)))
 	}
 }
 
