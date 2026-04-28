@@ -888,12 +888,10 @@ func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate 
 		}
 
 		if len(condition.arguments) > 1 {
-			var argumentTwo = condition.arguments[1]
-			conditionalParameter("", &conditionParam, &argumentTwo.valueType, argumentTwo.value)
+			conditionalParameter(&conditionParam, condition.arguments[1])
 		}
 		if len(condition.arguments) > 2 {
-			var argumentThree = condition.arguments[2]
-			conditionalParameter("WFAnotherNumber", &conditionParam, &argumentThree.valueType, argumentThree.value)
+			conditionalParameter(&conditionParam, condition.arguments[2])
 		}
 
 		filterTemplates = append(filterTemplates, conditionParam)
@@ -908,60 +906,61 @@ func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate 
 	}
 }
 
-func conditionalParameter(key string, conditionParam *WFConditionParam, typeOf *tokenType, value any) {
-	switch *typeOf {
+func conditionalParameter(param *WFConditionParam, arg actionArgument) {
+	switch arg.valueType {
 	case String:
-		var paramVal = paramValue(actionArgument{
-			valueType: *typeOf,
-			value:     value,
-		}, String)
-		conditionStringValue(conditionParam, key, paramVal)
-	case Integer:
-		var paramVal = paramValue(actionArgument{
-			valueType: *typeOf,
-			value:     value,
-		}, Integer)
-		conditionIntegerValue(conditionParam, key, paramVal)
+		param.WFConditionalActionString = paramValue(arg, String)
+	case Integer, Float:
+		var val = paramValue(arg, Integer)
+		if param.WFNumberValue == nil {
+			param.WFNumberValue = val
+		} else {
+			param.WFAnotherNumber = val
+		}
 	case Bool:
 		var boolNumber = 0
-		if value == true {
+		if arg.value == true {
 			boolNumber = 1
 		}
-		var paramVal = paramValue(actionArgument{
-			valueType: Integer,
-			value:     boolNumber,
-		}, Integer)
-		conditionIntegerValue(conditionParam, key, paramVal)
+		var val = paramValue(actionArgument{valueType: Integer, value: boolNumber}, Integer)
+		if param.WFNumberValue == nil {
+			param.WFNumberValue = val
+		} else {
+			param.WFAnotherNumber = val
+		}
+	case Date:
+		var val = paramValue(arg, String)
+		if param.WFDate == nil {
+			param.WFDate = val
+		} else {
+			param.WFAnotherDate = val
+		}
+	case Quantity:
+		param.WFDuration = makeQuantityFieldValue(arg.value.([]actionArgument))
 	case Variable:
-		conditionalParameterVariable(conditionParam, key, value)
+		conditionalParameterVariable(param, arg)
 	}
 }
 
-func conditionalParameterVariable(conditionParam *WFConditionParam, key string, value any) {
-	var condVarValue = value.(varValue)
+func conditionalParameterVariable(param *WFConditionParam, arg actionArgument) {
+	var condVarValue = arg.value.(varValue)
 	var variable = variables[condVarValue.value.(string)]
+	var val = variableValue(condVarValue)
 	switch variable.valueType {
-	case Integer:
-		conditionIntegerValue(conditionParam, key, variableValue(condVarValue))
+	case Integer, Float:
+		if param.WFNumberValue == nil {
+			param.WFNumberValue = val
+		} else {
+			param.WFAnotherNumber = val
+		}
+	case Date:
+		if param.WFDate == nil {
+			param.WFDate = val
+		} else {
+			param.WFAnotherDate = val
+		}
 	default:
-		var paramVal = attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue)))
-		conditionStringValue(conditionParam, key, paramVal)
-	}
-}
-
-func conditionStringValue(param *WFConditionParam, key string, value any) {
-	if key == "WFAnotherNumber" {
-		param.WFAnotherNumber = value
-	} else {
-		param.WFConditionalActionString = value
-	}
-}
-
-func conditionIntegerValue(param *WFConditionParam, key string, value any) {
-	if key == "WFAnotherNumber" {
-		param.WFAnotherNumber = value
-	} else {
-		param.WFNumberValue = value
+		param.WFConditionalActionString = attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue)))
 	}
 }
 
