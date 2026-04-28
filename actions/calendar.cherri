@@ -187,12 +187,12 @@ enum timeFormats {
 }
 
 // [Doc]: [Formatting] Format Date: Format a date using a standard or custom format.
-action default 'format.date' formatDate(text date: 'WFDate', dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short", text ?customDateFormat: 'WFDateFormat') {
+action default 'format.date' formatDate(text date: 'WFDate', dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short", text ?customDateFormat: 'WFDateFormat'): text {
 	"WFTimeFormatStyle": "None"
 }
 
 // [Doc]: [Formatting] Format Time: Format a time using a standard or custom format.
-action 'format.date' formatTime(text time: 'WFDate', timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short") {
+action 'format.date' formatTime(text time: 'WFDate', timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short"): text {
 	"WFDateFormatStyle": "None"
 }
 
@@ -202,4 +202,4 @@ action 'format.date' formatTimestamp(
     dateFormats ?dateFormat: 'WFDateFormatStyle' = "Short",
     timeFormats ?timeFormat: 'WFTimeFormatStyle' = "Short",
     text ?customDateFormat: 'WFDateFormat'
-)
+): text

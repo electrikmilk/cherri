@@ -915,7 +915,7 @@ func conditionalParameter(key string, conditionParam *WFConditionParam, typeOf *
 			valueType: *typeOf,
 			value:     value,
 		}, String)
-		conditionIntegerValue(conditionParam, key, paramVal)
+		conditionStringValue(conditionParam, key, paramVal)
 	case Integer:
 		var paramVal = paramValue(actionArgument{
 			valueType: *typeOf,
