@@ -154,6 +154,9 @@ type WFConditionParam struct {
 	WFConditionalActionString any             `plist:",omitempty"`
 	WFNumberValue             any             `plist:",omitempty"`
 	WFAnotherNumber           any             `plist:",omitempty"`
+	WFDate                    any             `plist:",omitempty"`
+	WFAnotherDate             any             `plist:",omitempty"`
+	WFDuration                any             `plist:",omitempty"`
 }
 
 type WFInputVariable struct {
@@ -346,6 +349,7 @@ var conditions = map[tokenType]int{
 	LessThan:       0,
 	LessOrEqual:    1,
 	Between:        1003,
+	IsToday:        1002,
 }
 
 var conditionFilterPrefixes = map[tokenType]int{
@@ -354,19 +358,20 @@ var conditionFilterPrefixes = map[tokenType]int{
 }
 
 var allowedConditionalTypes = map[tokenType][]tokenType{
-	Is:             {String, Integer, Bool, Action},
-	Not:            {String, Integer, Bool, Action},
+	Is:             {String, Integer, Bool, Action, Date},
+	Not:            {String, Integer, Bool, Action, Date},
 	Any:            {},
 	Empty:          {},
 	Contains:       {String, Arr},
 	DoesNotContain: {String, Arr},
 	BeginsWith:     {String},
 	EndsWith:       {String},
-	GreaterThan:    {Integer, Float},
-	GreaterOrEqual: {Integer, Float},
-	LessThan:       {Integer, Float},
-	LessOrEqual:    {Integer, Float},
-	Between:        {Integer, Float},
+	GreaterThan:    {Integer, Float, Quantity, Date},
+	GreaterOrEqual: {Integer, Float, Date},
+	LessThan:       {Integer, Float, Quantity, Date},
+	LessOrEqual:    {Integer, Float, Date},
+	Between:        {Integer, Float, Date},
+	IsToday:        {},
 }
 
 /* Menus */
