@@ -910,7 +910,7 @@ func routeConditionalValue(param *WFConditionParam, val any, inputType tokenType
 		} else {
 			param.WFAnotherDate = val
 		}
-	case Integer, Float:
+	case Integer, Float, Bool:
 		if param.WFNumberValue == nil {
 			param.WFNumberValue = val
 		} else {
@@ -929,7 +929,7 @@ func routeConditionalValueLegacy(params map[string]any, val any, inputType token
 		} else {
 			params["WFAnotherDate"] = val
 		}
-	case Integer, Float:
+	case Integer, Float, Bool:
 		if _, exists := params["WFNumberValue"]; !exists {
 			params["WFNumberValue"] = val
 		} else {
@@ -999,7 +999,13 @@ func conditionalParameter(param *WFConditionParam, arg actionArgument, inputType
 }
 
 func conditionalParameterVariable(param *WFConditionParam, arg actionArgument, inputType tokenType) {
-	routeConditionalValue(param, variableValue(arg.value.(varValue)), inputType)
+	var condVarValue = arg.value.(varValue)
+	switch inputType {
+	case Date, Integer, Float, Bool:
+		routeConditionalValue(param, variableValue(condVarValue), inputType)
+	default:
+		routeConditionalValue(param, attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue))), inputType)
+	}
 }
 
 // conditionalParameterLegacy is for iOS < 18 compatibility where we still use map[string]any
@@ -1021,7 +1027,13 @@ func conditionalParameterLegacy(params map[string]any, arg actionArgument, input
 }
 
 func conditionalParameterVariableLegacy(params map[string]any, arg actionArgument, inputType tokenType) {
-	routeConditionalValueLegacy(params, variableValue(arg.value.(varValue)), inputType)
+	var condVarValue = arg.value.(varValue)
+	switch inputType {
+	case Date, Integer, Float, Bool:
+		routeConditionalValueLegacy(params, variableValue(condVarValue), inputType)
+	default:
+		routeConditionalValueLegacy(params, attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue))), inputType)
+	}
 }
 
 func makeMenuAction(t *token) {
