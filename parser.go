@@ -906,8 +906,10 @@ func collectType(valueType *tokenType, value *any, until rune) {
 		*valueType = Variable
 	case tokenAhead(Color):
 		*valueType = Color
+	case tokenAhead(Date):
+		*valueType = Date
 	default:
-		parserError(fmt.Sprintf("Unknown type '%s'\n\nAvailable types: \n- text\n- rawtext\n- number\n- float\n- bool\n- array\n- dictionary\n- variable\n- color", collectUntil(until)))
+		parserError(fmt.Sprintf("Unknown type '%s'\n\nAvailable types: \n- text\n- rawtext\n- number\n- float\n- bool\n- array\n- dictionary\n- variable\n- color\n- date", collectUntil(until)))
 	}
 }
 

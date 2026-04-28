@@ -76,7 +76,7 @@ action 'timer.start' startTimer(#timeDuration duration: 'WFDuration' = qty(0, "m
 action 'detect.date' getDates(variable input: 'WFInput'): array
 
 // [Doc]: [Dates] Date: Create a date value from `date`. Example: October 5, 2022.
-action date(text date: 'WFDateActionDate') {
+action date(text date: 'WFDateActionDate'): date {
 	"WFDateActionMode": "Specified Date"
 }
 
@@ -102,7 +102,7 @@ enum dateUnit {
 }
 
 // [Doc]: [Dates] Adjust Date: Adjust a date or get the start of a time period.
-action adjustDate(text date: 'WFDate', dateAdjustOperation operation: 'WFAdjustOperation', #dateUnit ?unit: 'WFDuration')
+action adjustDate(text date: 'WFDate', dateAdjustOperation operation: 'WFAdjustOperation', #dateUnit ?unit: 'WFDuration'): date
 
 enum holidayYear {
     '2023',
@@ -160,10 +160,10 @@ enum holiday {
 }
 
 // [Doc]: [Dates] Get Holiday Date: Get the date of a holiday, optionally specifically for a few past or future years.
-action 'date' getHolidayDate(holiday holiday: 'WFDateActionMode', eventOccurrenceMode ?occurrenceMode: 'WFEventOccurrenceMode' = "Next Occurrence", holidayYear ?forYear: 'WFEventOccurrenceSpecifiedYear'): text
+action 'date' getHolidayDate(holiday holiday: 'WFDateActionMode', eventOccurrenceMode ?occurrenceMode: 'WFEventOccurrenceMode' = "Next Occurrence", holidayYear ?forYear: 'WFEventOccurrenceSpecifiedYear'): date
 
 // [Doc]: [Dates] Current Date: Get the current date.
-action default 'date' currentDate() {
+action default 'date' currentDate(): date {
     "WFDateActionMode": "Current Date"
 }
 
