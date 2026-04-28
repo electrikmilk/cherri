@@ -1,3 +1,9 @@
 @myDate = currentDate()
+@myDate2 = date("April 30, 2026")
 
 if CurrentDate isToday {}
+if CurrentDate > qty(3, "hr") {} else {}
+if CurrentDate < qty(5, "min") {} else {}
+if CurrentDate == @myDate {}
+if CurrentDate > @myDate {}
+if CurrentDate <> @myDate @myDate2 {}

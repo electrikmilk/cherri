@@ -1069,17 +1069,20 @@ func makeActionValue(identifier string, arguments []actionArgument) action {
 }
 
 func makeQuantityFieldValue(args []actionArgument) WFQuantityFieldValue {
+	// Use paramValue with each arg's own valueType so this function is safe to
+	// call outside an action context (e.g. from conditional parameter handling),
+	// where currentAction.definition.parameters may be empty.
 	var magnitude any
 	if args[0].valueType == Variable {
 		magnitude = variableValueWithSerialization(args[0].value.(varValue), "")
 	} else {
-		magnitude = argumentValue(args, 0)
+		magnitude = paramValue(args[0], args[0].valueType)
 	}
 
 	return WFQuantityFieldValue{
 		Value: WFQuantityValue{
 			Magnitude: magnitude,
-			Unit:      argumentValue(args, 1),
+			Unit:      paramValue(args[1], args[1].valueType),
 		},
 		WFSerializationType: "WFQuantityFieldValue",
 	}

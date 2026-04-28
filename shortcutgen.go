@@ -850,13 +850,24 @@ func makeConditionalAction(t *token) {
 				"Type":     "Variable",
 				"Variable": variableValue(firstArg.value.(varValue)),
 			}
+			// Apply the same duration-aware remap as the modern path: Shortcuts
+			// uses 1000/1001 for date-relative qty comparisons, not 2/0.
+			var conditionCode = firstCondition.condition
+			if len(firstCondition.arguments) > 1 && firstCondition.arguments[1].valueType == Quantity {
+				switch conditionCode {
+				case conditions[GreaterThan]:
+					conditionCode = 1000
+				case conditions[LessThan]:
+					conditionCode = 1001
+				}
+			}
 			if len(firstCondition.arguments) > 1 {
 				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[1])
 			}
 			if len(firstCondition.arguments) > 2 {
 				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[2])
 			}
-			conditionalParams["WFCondition"] = firstCondition.condition
+			conditionalParams["WFCondition"] = conditionCode
 			conditionalParams["WFControlFlowMode"] = startStatement
 		} else {
 			var cond = t.value.(WFConditions)
@@ -877,8 +888,21 @@ var filterTemplates []WFConditionParam
 func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate {
 	filterTemplates = []WFConditionParam{}
 	for _, condition := range wfConditions.conditions {
+		// Shortcuts uses 1000 ("is more than N time before now") and 1001
+		// ("is within N time of now") when comparing dates by duration. The
+		// generic GreaterThan (2) and LessThan (0) codes only apply to numbers.
+		var conditionCode = condition.condition
+		if len(condition.arguments) > 1 && condition.arguments[1].valueType == Quantity {
+			switch conditionCode {
+			case conditions[GreaterThan]:
+				conditionCode = 1000
+			case conditions[LessThan]:
+				conditionCode = 1001
+			}
+		}
+
 		var conditionParam = WFConditionParam{
-			WFCondition: condition.condition,
+			WFCondition: conditionCode,
 			WFInput: WFInputVariable{
 				Type:     "Variable",
 				Variable: variableValue(condition.arguments[0].value.(varValue)).(WFTextTokenAttachment),
@@ -944,7 +968,15 @@ func conditionalParameterVariable(param *WFConditionParam, arg actionArgument) {
 	var condVarValue = arg.value.(varValue)
 	var variable = variables[condVarValue.value.(string)]
 	var val = variableValue(condVarValue)
-	switch variable.valueType {
+	// When a variable was assigned from an action, resolve the action's declared
+	// output type so the comparison value routes to the right plist key.
+	var effectiveType = variable.valueType
+	if effectiveType == Action {
+		if a, ok := variable.value.(action); ok && a.def != nil {
+			effectiveType = a.def.outputType
+		}
+	}
+	switch effectiveType {
 	case Integer, Float:
 		if param.WFNumberValue == nil {
 			param.WFNumberValue = val
@@ -1003,7 +1035,15 @@ func conditionalParameterVariableLegacy(params map[string]any, arg actionArgumen
 	var condVarValue = arg.value.(varValue)
 	var variable = variables[condVarValue.value.(string)]
 	var val = variableValue(condVarValue)
-	switch variable.valueType {
+	// When a variable was assigned from an action, resolve the action's declared
+	// output type so the comparison value routes to the right plist key.
+	var effectiveType = variable.valueType
+	if effectiveType == Action {
+		if a, ok := variable.value.(action); ok && a.def != nil {
+			effectiveType = a.def.outputType
+		}
+	}
+	switch effectiveType {
 	case Integer, Float:
 		if _, exists := params["WFNumberValue"]; !exists {
 			params["WFNumberValue"] = val
