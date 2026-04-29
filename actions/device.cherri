@@ -75,10 +75,10 @@ enum usageDuration {
 action 'com.apple.intelligenceplatform.IntelligencePlatform.IntelligencePlatformDataActionsAppIntentsExtension.CalculateAppUsageIntent' getDeviceUsage(deviceUsageType usageType: 'activityType' = "all", variable ?device: 'selectedDevice', usageDuration during: 'during' = "today", text ?startTime: 'startTime', text ?startTime: 'endTime')
 
 // [Doc]: Airplane Mode
-toggleSet 'airplanemode.set' AirplaneMode 'OnValue'
+action toggleSet 'airplanemode.set' AirplaneMode 'OnValue'
 
 // [Doc]: Orientation Lock
-toggleSet !mac 'orientationlock.set' OrientationLock 'OnValue'
+action toggleSet !mac 'orientationlock.set' OrientationLock 'OnValue'
 
 // [Doc]: [Personal Hotspot] Personal Hotspot
-toggleSet !mac 'personalhotspot.set' Hotspot
+action toggleSet !mac 'personalhotspot.set' Hotspot

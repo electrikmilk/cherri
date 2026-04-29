@@ -77,19 +77,19 @@ action 'appearance' toggleAppearance() {
 }
 
 // [Doc]: [Wireless] Bluetooth
-toggleSet 'bluetooth.set' Bluetooth 'OnValue'
+action toggleSet 'bluetooth.set' Bluetooth 'OnValue'
 
 // [Doc]: [Wireless] Wifi
-toggleSet 'wifi.set' Wifi 'OnValue'
+action toggleSet 'wifi.set' Wifi 'OnValue'
 
 // [Doc]: [Wireless] Cellular Data
-toggleSet 'cellulardata.set' CellularData 'OnValue'
+action toggleSet 'cellulardata.set' CellularData 'OnValue'
 
 // [Doc]: [Display] Night Shift
-toggleSet 'nightshift.set' NightShift 'OnValue'
+action toggleSet 'nightshift.set' NightShift 'OnValue'
 
 // [Doc]: [Display] True Tone
-toggleSet 'truetone.set' TrueTone 'OnValue'
+action toggleSet 'truetone.set' TrueTone 'OnValue'
 
 // [Doc]: Stage Manager
-toggleSet 'stagemanager.set' StageManager(bool showDock: 'showDock' = true, bool showRecentApps: 'showRecentApps' = true)
+action toggleSet 'stagemanager.set' StageManager(bool showDock: 'showDock' = true, bool showRecentApps: 'showRecentApps' = true)

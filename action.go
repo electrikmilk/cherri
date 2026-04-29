@@ -812,9 +812,6 @@ func parseActionDefinitions() {
 			collectComment()
 		case startOfLineTokenAhead(Enumeration):
 			collectEnumeration()
-		case startOfLineTokenAhead(ToggleSet):
-			advance()
-			collectToggleSetAction()
 		case startOfLineTokenAhead(Action):
 			advance()
 			collectDefinedAction()
@@ -863,6 +860,12 @@ func collectDefinedAction() {
 	var lineRef = newLineReference()
 	var doc = checkDocComment()
 
+	if tokenAhead(ToggleSet) {
+		advance()
+		collectToggleSetAction(doc)
+		return
+	}
+
 	var defaultAction bool
 	if tokenAhead(Default) {
 		defaultAction = true
@@ -897,9 +900,7 @@ func collectDefinedAction() {
 	}
 }
 
-func collectToggleSetAction() {
-	var doc = checkDocComment()
-
+func collectToggleSetAction(doc selfDoc) {
 	var m = collectActionPrefixModifiers()
 
 	skipWhitespace()
