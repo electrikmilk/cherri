@@ -390,6 +390,157 @@ var actions = map[string]*actionDefinition{
 			"Mode": "Remove",
 		},
 	},
+	"filterContacts": {
+		doc: selfDoc{
+			title:       "Filter Contacts",
+			description: "Filter contacts with optional filter predicates, sort, and limit.",
+			category:    "contacts",
+		},
+		identifier: "filter.contacts",
+		parameters: []parameterDefinition{
+			{
+				name:      "contacts",
+				validType: Variable,
+				key:       "WFContentItemInputParameter",
+			},
+			{
+				name:      "property",
+				validType: String,
+				key:       "property",
+				optional:  true,
+			},
+			{
+				name:      "operator",
+				validType: String,
+				key:       "operator",
+				enum:      "operator",
+				optional:  true,
+			},
+			{
+				name:      "values",
+				validType: String,
+				key:       "values",
+				optional:  true,
+				infinite:  true,
+			},
+		},
+		make: func(args []actionArgument) map[string]any {
+			var params = make(map[string]any)
+
+			if len(args) > 0 && args[0].valueType == Variable {
+				params["WFContentItemInputParameter"] = variableValue(args[0].value.(varValue))
+			}
+
+			if len(args) < 4 {
+				return params
+			}
+
+			var property = getArgValue(args[1]).(string)
+			var operator = getArgValue(args[2]).(string)
+
+			var operatorCode int
+			switch strings.ToLower(operator) {
+			case "is":
+				operatorCode = 4
+			case "is not":
+				operatorCode = 5
+			case "contains":
+				operatorCode = 99
+			case "does not contain":
+				operatorCode = 999
+			case "begins with":
+				operatorCode = 8
+			case "ends with":
+				operatorCode = 9
+			default:
+				operatorCode = 99
+			}
+
+			var templates []map[string]any
+			for i := 3; i < len(args); i++ {
+				if args[i].valueType == Nil || args[i].value == nil {
+					continue
+				}
+				var filterValue any
+				if args[i].valueType == Variable {
+					filterValue = paramValue(args[i], String)
+				} else {
+					filterValue = attachmentValues(args[i].value.(string))
+				}
+
+				templates = append(templates, map[string]any{
+					"Operator": operatorCode,
+					"Property": property,
+					"Removable": true,
+					"Values": map[string]any{
+						"String": filterValue,
+						"Unit":   4,
+					},
+				})
+			}
+
+			if len(templates) > 0 {
+				params["WFContentItemFilter"] = map[string]any{
+					"Value": map[string]any{
+						"WFActionParameterFilterPrefix":    0, // ANY (OR logic)
+						"WFActionParameterFilterTemplates": templates,
+						"WFContentPredicateBoundedDate":    false,
+					},
+					"WFSerializationType": "WFContentPredicateTableTemplate",
+				}
+			}
+
+			return params
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			if action.WFWorkflowActionParameters["WFContentItemInputParameter"] != nil {
+				arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFContentItemInputParameter"]))
+			}
+			if action.WFWorkflowActionParameters["WFContentItemFilter"] != nil {
+				var filter = action.WFWorkflowActionParameters["WFContentItemFilter"].(map[string]interface{})
+				if filterValue, ok := filter["Value"].(map[string]interface{}); ok {
+					if templates, ok := filterValue["WFActionParameterFilterTemplates"].([]interface{}); ok && len(templates) > 0 {
+						var firstTemplate = templates[0].(map[string]interface{})
+						arguments = append(arguments, fmt.Sprintf("\"%s\"", firstTemplate["Property"]))
+
+						var opCode int
+						switch v := firstTemplate["Operator"].(type) {
+						case float64:
+							opCode = int(v)
+						case int:
+							opCode = v
+						}
+						var opStr string
+						switch opCode {
+						case 4:
+							opStr = "is"
+						case 5:
+							opStr = "is not"
+						case 99:
+							opStr = "contains"
+						case 999:
+							opStr = "does not contain"
+						case 8:
+							opStr = "begins with"
+						case 9:
+							opStr = "ends with"
+						default:
+							opStr = "contains"
+						}
+						arguments = append(arguments, fmt.Sprintf("\"%s\"", opStr))
+
+						for _, tmpl := range templates {
+							var t = tmpl.(map[string]interface{})
+							if values, ok := t["Values"].(map[string]interface{}); ok {
+								arguments = append(arguments, decompValue(values["String"]))
+							}
+						}
+					}
+				}
+			}
+			return
+		},
+	},
 	"labelFile": {
 		doc: selfDoc{
 			title:       "Label File",
@@ -1812,7 +1963,14 @@ func defineRawAction() {
 				return map[string]any{}
 			}
 
-			var params = getArgValue(args[1]).(map[string]interface{})
+			var rawValue = getArgValue(args[1])
+			if rawValue == nil {
+				return map[string]any{}
+			}
+			params, ok := rawValue.(map[string]interface{})
+			if !ok {
+				return map[string]any{}
+			}
 			handleRawParams(params)
 
 			return params

@@ -263,12 +263,39 @@ func defineParamEnums(identifier string, name string, enums []enumerationCase, d
 		definition.validType = String
 	}
 
-	if _, found := enumerations[enumName]; !found {
-		enumerations[enumName] = paramEnumerations
-
-		if args.Using("debug") {
-			fmt.Println("Defined enum", enumName)
+	// Merge with existing .cherri-defined enum values (if any).
+	// The toolkit DB may be missing values that are valid in Apple Shortcuts
+	// (e.g. "Notes" for contactDetail). The .cherri file is the source of truth
+	// for what values Shortcuts accepts; the DB supplements it.
+	if existing, found := enumerations[enumName]; found {
+		seen := make(map[string]bool)
+		for _, v := range paramEnumerations {
+			seen[v] = true
 		}
+		for _, v := range existing {
+			if !seen[v] {
+				paramEnumerations = append(paramEnumerations, v)
+			}
+		}
+	}
+	// Also merge from the .cherri action-defined enum if it exists under the original name
+	if definition.enum != "" && definition.enum != enumName {
+		if existing, found := enumerations[definition.enum]; found {
+			seen := make(map[string]bool)
+			for _, v := range paramEnumerations {
+				seen[v] = true
+			}
+			for _, v := range existing {
+				if !seen[v] {
+					paramEnumerations = append(paramEnumerations, v)
+				}
+			}
+		}
+	}
+	enumerations[enumName] = paramEnumerations
+
+	if args.Using("debug") {
+		fmt.Println("Defined enum", enumName)
 	}
 }
 
