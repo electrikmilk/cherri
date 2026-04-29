@@ -16,6 +16,7 @@ enum contactDetail {
  'Company',
  'Job Title',
  'Department',
+ 'Notes',
  'File Extension',
  'Creation Date',
  'File Path',
@@ -26,14 +27,6 @@ enum contactDetail {
 
 // [Doc]: Get Contacts: Get contacts from input.
 action 'detect.contacts' getContacts(variable input: 'WFInput'): array
-
-// [Doc]: Filter Contacts
-action 'filter.contacts' filterContacts(
-    variable contacts: 'WFContentItemInputParameter',
-    contactDetail ?sortBy: 'WFContentItemSortProperty',
-    abcSortOrder ?sortOrder: 'WFContentItemSortOrder' = "A to Z",
-    number ?limit: 'WFContentItemLimitNumber'
-)
 
 // [Doc]: Get Detail of Contact: Get a detail about a contact.
 action 'properties.contacts' getContactDetail(variable contact: 'WFInput', contactDetail detail: 'WFContentItemPropertyName')
