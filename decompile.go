@@ -517,6 +517,8 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 	if reflect.TypeOf(value).Kind() == reflect.String {
 		if strings.Contains(value.(string), ".") {
 			number, convErr = strconv.ParseFloat(value.(string), 64)
+		} else if strings.Contains(value.(string), ",") {
+			number, convErr = strconv.ParseFloat(strings.Replace(value.(string), ",", ".", 1), 64)
 		} else if value != "" {
 			number, convErr = strconv.Atoi(value.(string))
 		}
