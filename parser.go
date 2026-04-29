@@ -116,7 +116,6 @@ func markBuiltins() {
 }
 
 func preParse() {
-	defineToggleSetActions()
 	defineRawAction()
 	markBuiltins()
 

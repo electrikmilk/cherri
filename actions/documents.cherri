@@ -132,3 +132,6 @@ action 'generatebarcode' makeQRCode(text input: 'WFText', QRCodeErrorCorrection 
 
 // [Doc]: Convert to USDZ
 action 'com.apple.HydraUSDAppIntents.ConvertToUSDZ' convertToUSDZ(variable file)
+
+// [Doc]: [Files & Folders] Get Folder Contents: Get contents of a folder.
+action 'file.getfoldercontents' getFolderContents(variable folder: 'WFFolder', bool ?recursive: 'Recursive' = false)

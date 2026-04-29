@@ -70,3 +70,26 @@ action default !mac v16.2 'posters.get' getAllWallpapers(): array
 action !mac v16.2 'posters.get' getWallpaper() {
 	"WFPosterType": "Current"
 }
+
+// [Doc]: [Appearance] Toggle Appearance
+action 'appearance' toggleAppearance() {
+    "operation": "toggle"
+}
+
+// [Doc]: [Wireless] Bluetooth
+toggleSet 'bluetooth.set' Bluetooth 'OnValue'
+
+// [Doc]: [Wireless] Wifi
+toggleSet 'wifi.set' Wifi 'OnValue'
+
+// [Doc]: [Wireless] Cellular Data
+toggleSet 'cellulardata.set' CellularData 'OnValue'
+
+// [Doc]: [Display] Night Shift
+toggleSet 'nightshift.set' NightShift 'OnValue'
+
+// [Doc]: [Display] True Tone
+toggleSet 'truetone.set' TrueTone 'OnValue'
+
+// [Doc]: Stage Manager
+toggleSet 'stagemanager.set' StageManager(bool showDock: 'showDock' = true, bool showRecentApps: 'showRecentApps' = true)

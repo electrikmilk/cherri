@@ -65,3 +65,8 @@ action 'detect.emailaddress' getEmails(text input: 'WFInput'): array
 
 // [Doc]: [Email] Select Email Address: Prompt the user to select an email address from their contacts.
 action 'selectemail' selectEmailAddress()
+
+// [Doc]: Remove Contact Detail: Remove a detail from a contact.
+action 'setters.contacts' removeContactDetail(variable contact: 'WFInput', contactDetail detail: 'WFContentItemPropertyName') {
+    "Mode": "Remove"
+}

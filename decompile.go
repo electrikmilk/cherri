@@ -53,10 +53,7 @@ func decompile(b []byte) {
 	mapVariables()
 	mapSplitActions()
 	mapIdentifiers()
-	waitFor(
-		mapControlFlowOutputs,
-		defineToggleSetActions,
-	)
+	mapControlFlowOutputs()
 
 	defineName()
 	decompileIcon()

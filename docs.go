@@ -30,7 +30,6 @@ type actionCategory struct {
 }
 
 func generateDocs() {
-	defineToggleSetActions()
 	defineRawAction()
 	loadActionsByCategory()
 	var cat = args.Value("docs")

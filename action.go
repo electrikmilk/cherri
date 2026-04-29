@@ -94,7 +94,6 @@ type actionDefinition struct {
 	nonMacOnly         bool
 	minVersion         float64
 	maxVersion         float64
-	setKey             string
 	builtin            bool // builtin is based on if the action was in the actions map when it was first initialized.
 }
 
@@ -813,6 +812,9 @@ func parseActionDefinitions() {
 			collectComment()
 		case startOfLineTokenAhead(Enumeration):
 			collectEnumeration()
+		case startOfLineTokenAhead(ToggleSet):
+			advance()
+			collectToggleSetAction()
 		case startOfLineTokenAhead(Action):
 			advance()
 			collectDefinedAction()
@@ -820,6 +822,41 @@ func parseActionDefinitions() {
 		advance()
 	}
 	tokens = []token{}
+}
+
+type actionPrefixModifiers struct {
+	macOnly            bool
+	nonMacOnly         bool
+	minVersion         float64
+	maxVersion         float64
+	shortIdentifier    string
+	overrideIdentifier string
+}
+
+func collectActionPrefixModifiers() (m actionPrefixModifiers) {
+	if tokenAhead(Mac) {
+		m.macOnly = true
+		advance()
+	} else if tokenAhead(NonMac) {
+		m.nonMacOnly = true
+		advance()
+	}
+
+	m.minVersion, m.maxVersion = collectVersionLimitsDefinition()
+
+	if char == '\'' {
+		advance()
+		var workflowIdentifier = collectRawString()
+		var parts = strings.Split(workflowIdentifier, ".")
+		if len(parts) < 3 || (len(parts) == 3 && workflowIdentifier == strings.ToLower(workflowIdentifier)) {
+			m.shortIdentifier = workflowIdentifier
+		} else {
+			m.overrideIdentifier = workflowIdentifier
+		}
+		advance()
+	}
+
+	return
 }
 
 func collectDefinedAction() {
@@ -832,36 +869,11 @@ func collectDefinedAction() {
 		advance()
 	}
 
-	var macOnlyAction bool
-	var nonMacOnlyAction bool
-	if tokenAhead(Mac) {
-		macOnlyAction = true
-		advance()
-	} else if tokenAhead(NonMac) {
-		nonMacOnlyAction = true
-		advance()
-	}
-
-	var minVersion, maxVersion = collectVersionLimitsDefinition()
-
-	var shortIdentifier string
-	var overrideIdentifier string
-	if char == '\'' {
-		advance()
-
-		var workflowIdentifier = collectRawString()
-		var parts = strings.Split(workflowIdentifier, ".")
-		if len(parts) < 3 || (len(parts) == 3 && workflowIdentifier == strings.ToLower(workflowIdentifier)) {
-			shortIdentifier = workflowIdentifier
-		} else {
-			overrideIdentifier = workflowIdentifier
-		}
-		advance()
-	}
+	var m = collectActionPrefixModifiers()
 
 	var identifier, arguments, outputType = collectActionDefinition('\n')
-	if shortIdentifier == "" {
-		shortIdentifier = strings.ToLower(identifier)
+	if m.shortIdentifier == "" {
+		m.shortIdentifier = strings.ToLower(identifier)
 	}
 
 	advance()
@@ -871,17 +883,93 @@ func collectDefinedAction() {
 	lineRef.replaceLines()
 
 	actions[identifier] = &actionDefinition{
-		identifier:         shortIdentifier,
-		overrideIdentifier: overrideIdentifier,
+		identifier:         m.shortIdentifier,
+		overrideIdentifier: m.overrideIdentifier,
 		parameters:         arguments,
 		outputType:         outputType,
 		appendParams:       setParams,
 		defaultAction:      defaultAction,
-		macOnly:            macOnlyAction,
-		nonMacOnly:         nonMacOnlyAction,
-		minVersion:         minVersion,
-		maxVersion:         maxVersion,
+		macOnly:            m.macOnly,
+		nonMacOnly:         m.nonMacOnly,
+		minVersion:         m.minVersion,
+		maxVersion:         m.maxVersion,
 		doc:                doc,
+	}
+}
+
+func collectToggleSetAction() {
+	var doc = checkDocComment()
+
+	var m = collectActionPrefixModifiers()
+
+	skipWhitespace()
+	var name = collectIdentifier()
+	skipWhitespace()
+
+	var setKey = "state"
+	if char == '\'' {
+		advance()
+		setKey = collectRawString()
+		advance()
+		skipWhitespace()
+	}
+
+	var extraParams []parameterDefinition
+	if char == '(' {
+		advance()
+		if char != ')' {
+			extraParams = collectParameterDefinitions()
+		} else {
+			advance()
+		}
+		skipWhitespace()
+	}
+
+	var extraBody = collectAdditionalParams()
+
+	var docTitle = doc.title
+	if docTitle == "" {
+		docTitle = name
+	}
+
+	var toggleAppendParams = maps.Clone(extraBody)
+	if toggleAppendParams == nil {
+		toggleAppendParams = map[string]any{}
+	}
+	toggleAppendParams["operation"] = "toggle"
+
+	var toggleDoc = doc
+	toggleDoc.title = "Toggle " + docTitle
+	actions["toggle"+name] = &actionDefinition{
+		doc:                toggleDoc,
+		identifier:         m.shortIdentifier,
+		overrideIdentifier: m.overrideIdentifier,
+		parameters:         extraParams,
+		appendParams:       toggleAppendParams,
+		macOnly:            m.macOnly,
+		nonMacOnly:         m.nonMacOnly,
+		minVersion:         m.minVersion,
+		maxVersion:         m.maxVersion,
+	}
+
+	var setAppendParams = maps.Clone(extraBody)
+	if setAppendParams == nil {
+		setAppendParams = map[string]any{}
+	}
+	var setParameters = append([]parameterDefinition{{name: "status", validType: Bool, key: setKey}}, extraParams...)
+	var setDoc = doc
+	setDoc.title = "Set " + docTitle
+	actions["set"+name] = &actionDefinition{
+		doc:                setDoc,
+		identifier:         m.shortIdentifier,
+		overrideIdentifier: m.overrideIdentifier,
+		parameters:         setParameters,
+		appendParams:       setAppendParams,
+		defaultAction:      true,
+		macOnly:            m.macOnly,
+		nonMacOnly:         m.nonMacOnly,
+		minVersion:         m.minVersion,
+		maxVersion:         m.maxVersion,
 	}
 }
 

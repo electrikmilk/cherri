@@ -76,3 +76,6 @@ action 'openpasswords' searchPasswords(text query: 'WFShowPasswordsSearchTerm')
 
 // [Doc]: [System] Dismiss Siri: Dismisses Siri.
 action dismissSiri()
+
+// [Doc]: [System] Return to Home Screen: Returns to the device home screen.
+action !mac returnToHomescreen()

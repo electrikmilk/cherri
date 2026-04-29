@@ -31,6 +31,7 @@ const (
 	Include        tokenType = "#include"
 	Import         tokenType = "#import"
 	Action         tokenType = "action"
+	ToggleSet      tokenType = "toggleSet"
 	Function       tokenType = "function"
 	Copy           tokenType = "copy"
 	Paste          tokenType = "paste"
