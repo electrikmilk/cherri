@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"maps"
 	"reflect"
 	"regexp"
 	"strings"
@@ -92,7 +91,7 @@ func generateActions() {
 			}
 			setCurrentAction(tokenAction.ident, actions[tokenAction.ident])
 			if tokenAction.ident == "rawAction" && len(tokenAction.args) > 0 {
-				currentAction.overrideIdentifier = getArgValue(tokenAction.args[0]).(string)
+				currentAction.definition.overrideIdentifier = getArgValue(tokenAction.args[0]).(string)
 			}
 			makeAction(tokenAction.args, &WFActionReference{})
 		case Repeat:
@@ -111,7 +110,7 @@ func generateActions() {
 
 func makeCommentAction(comment string) {
 	if args.Using("comments") {
-		addStdAction("comment", &map[string]any{
+		addStdAction("comment", map[string]any{
 			"WFCommentActionText": comment,
 		})
 	}
@@ -126,11 +125,11 @@ func makeVariableAction(t *token) {
 
 	if t.typeof != Variable {
 		if variables[t.ident].valueType != Arr {
-			addStdAction("setvariable", &setVariableParams)
+			addStdAction("setvariable", setVariableParams)
 			return
 		}
 
-		addStdAction("appendvariable", &setVariableParams)
+		addStdAction("appendvariable", setVariableParams)
 		return
 	}
 
@@ -139,7 +138,7 @@ func makeVariableAction(t *token) {
 			return
 		}
 	}
-	addStdAction("setvariable", &setVariableParams)
+	addStdAction("setvariable", setVariableParams)
 
 	if t.valueType == Arr {
 		makeArrayVariable(t)
@@ -328,14 +327,14 @@ func variableValueModifier(token *token, reference *WFActionReference) {
 	}
 }
 
-func attachReferenceToParams(params map[string]any, reference *WFActionReference) *map[string]any {
+func attachReferenceToParams(params map[string]any, reference *WFActionReference) map[string]any {
 	if reference.CustomOutputName != "" {
 		params["CustomOutputName"] = reference.CustomOutputName
 	}
 	if reference.UUID != "" {
 		params["UUID"] = reference.UUID
 	}
-	return &params
+	return params
 }
 
 func inputValue(name string, varUUID string) WFTextTokenAttachment {
@@ -611,11 +610,11 @@ func collectInlineVariables(str *string) (noVarString string) {
 
 func argumentValue(args []actionArgument, idx int) any {
 	var actionParameter parameterDefinition
-	if len(currentAction.parameters) <= idx {
+	if len(currentAction.definition.parameters) <= idx {
 		// First parameter is likely infinite
-		actionParameter = currentAction.parameters[0]
+		actionParameter = currentAction.definition.parameters[0]
 	} else {
-		actionParameter = currentAction.parameters[idx]
+		actionParameter = currentAction.definition.parameters[idx]
 	}
 	var arg actionArgument
 	if len(args) <= idx {
@@ -660,6 +659,8 @@ func paramValue(arg actionArgument, handleAs tokenType) any {
 		}
 	case Quantity:
 		return makeQuantityFieldValue(arg.value.([]actionArgument))
+	case RawString:
+		return arg.value.(string)
 	default:
 		return attachmentValues(arg.value.(string))
 	}
@@ -690,121 +691,85 @@ func makeDictionary(value interface{}) (dictItems []WFDictionaryFieldValueItem) 
 	return
 }
 
-// makeDictionaryItem creates an inner dictionary value.
 func makeDictionaryItem(key string, value any) WFDictionaryFieldValueItem {
 	if value == nil {
 		value = ""
 	}
 	var itemType dictDataType
-	var serializedType string
-	var wfValue = map[string]any{
-		"Value": map[string]any{
-			"string": value,
-		},
-	}
-
-	if value != "" {
-		switch reflect.TypeOf(value).Kind() {
-		case reflect.String:
-			if strings.ContainsAny(value.(string), "{}") {
-				wfValue["Value"] = paramValue(actionArgument{
-					valueType: String,
-					value:     value,
-				}, String)
-				if reflect.TypeOf(wfValue["Value"]).String() == "map[string]interface {}" {
-					for _, val := range wfValue {
-						wfValue = val.(map[string]any)
-						break
-					}
-				}
-			}
-			itemType = itemTypeText
-			serializedType = "WFTextTokenString"
-		case reflect.Int, reflect.Float64:
-			itemType = itemTypeNumber
-			serializedType = "WFTextTokenString"
-			wfValue = map[string]any{
-				"Value": map[string]any{
-					"string": fmt.Sprintf("%v", value),
-				},
-			}
-		case reflect.Slice:
-			itemType = itemTypeArray
-			serializedType = "WFArrayParameterState"
-			var arrayValue []WFDictionaryFieldValueItem
-			for _, item := range value.([]interface{}) {
-				arrayValue = append(arrayValue, makeDictionaryItem("", item))
-			}
-			wfValue = map[string]any{
-				"Value": arrayValue,
-			}
-		case reflect.Map:
-			itemType = itemTypeDict
-			serializedType = "WFDictionaryFieldValue"
-			wfValue = map[string]any{
-				"Value": map[string]any{
-					"Value": map[string]any{
-						"WFDictionaryFieldValueItems": makeDictionary(value),
-					},
-					"WFSerializationType": "WFDictionaryFieldValue",
-				},
-			}
-		case reflect.Bool:
-			itemType = itemTypeBool
-			serializedType = "WFNumberSubstitutableState"
-			wfValue = map[string]any{
-				"Value": value,
-			}
-		default:
-			exit(fmt.Sprintf("Unsupported dictionary item value type %s", reflect.TypeOf(value)))
-		}
-	} else {
+	var wfValue any
+	switch v := value.(type) {
+	case string:
 		itemType = itemTypeText
-		serializedType = "WFTextTokenString"
-		wfValue = map[string]any{}
-	}
-
-	return makeDictionaryItemValue(key, itemType, serializedType, wfValue)
-}
-
-func makeDictionaryItemValue(key string, itemType dictDataType, serializedType string, wfValue map[string]any) WFDictionaryFieldValueItem {
-	var wfValueParams = map[string]any{
-		"WFSerializationType": serializedType,
-	}
-	maps.Copy(wfValueParams, wfValue)
-
-	var item = WFDictionaryFieldValueItem{
-		WFItemType: int(itemType),
-		WFValue:    wfValueParams,
-	}
-
-	if key != "" {
-		var wfKey = map[string]any{
-			"Value": map[string]string{
-				"string": key,
+		if strings.ContainsAny(v, "{}") {
+			wfValue = attachmentValues(v)
+		} else {
+			wfValue = WFTextTokenString{
+				WFSerializationType: "WFTextTokenString",
+				Value:               WFTextTokenStringValue{String: v},
+			}
+		}
+	case int, float64:
+		itemType = itemTypeNumber
+		wfValue = WFTextTokenString{
+			WFSerializationType: "WFTextTokenString",
+			Value:               WFTextTokenStringValue{String: fmt.Sprintf("%v", v)},
+		}
+	case []interface{}:
+		itemType = itemTypeArray
+		var items []WFDictionaryFieldValueItem
+		for _, item := range v {
+			items = append(items, makeDictionaryItem("", item))
+		}
+		wfValue = WFArrayValue{
+			WFSerializationType: "WFArrayParameterState",
+			Value:               items,
+		}
+	case map[string]interface{}:
+		itemType = itemTypeDict
+		// Shortcuts wraps nested dict items in two WFDictionaryFieldValue layers:
+		// the outer marks the value type, the inner holds the items. Top-level
+		// dict actions use only one layer (handled by makeDictionaryValue).
+		wfValue = WFDictionaryFieldValue{
+			WFSerializationType: "WFDictionaryFieldValue",
+			Value: WFDictionaryFieldValue{
+				WFSerializationType: "WFDictionaryFieldValue",
+				Value: WFDictionaryFieldValueWrapper{
+					WFDictionaryFieldValueItems: makeDictionary(v),
+				},
 			},
 		}
-		if strings.ContainsAny(key, "{}") {
-			wfKey["Value"] = paramValue(actionArgument{
-				valueType: String,
-				value:     key,
-			}, String)
-			if reflect.TypeOf(wfKey["Value"]).String() == "map[string]interface {}" {
-				for _, val := range wfKey["Value"].(map[string]any) {
-					wfKey = val.(map[string]any)
-					break
-				}
-			}
+	case bool:
+		itemType = itemTypeBool
+		wfValue = WFBoolValue{
+			WFSerializationType: "WFNumberSubstitutableState",
+			Value:               v,
 		}
-
-		var wfKeyParams = map[string]any{
-			"WFSerializationType": "WFTextTokenString",
-		}
-		maps.Copy(wfKeyParams, wfKey)
-		item.WFKey = wfKeyParams
+	default:
+		exit(fmt.Sprintf("Unsupported dictionary item value type %T", value))
+		return WFDictionaryFieldValueItem{}
 	}
+	return buildDictionaryItem(key, itemType, wfValue)
+}
 
+func buildDictionaryItem(key string, itemType dictDataType, wfValue any) WFDictionaryFieldValueItem {
+	var item = WFDictionaryFieldValueItem{
+		WFItemType: int(itemType),
+		WFValue:    wfValue,
+	}
+	if key != "" {
+		item.WFKey = buildDictionaryKey(key)
+	}
 	return item
+}
+
+func buildDictionaryKey(key string) any {
+	if strings.ContainsAny(key, "{}") {
+		return attachmentValues(key)
+	}
+	return WFTextTokenString{
+		WFSerializationType: "WFTextTokenString",
+		Value:               WFTextTokenStringValue{String: key},
+	}
 }
 
 func makeOutputName(token *token) string {
@@ -864,7 +829,7 @@ func makeArrayVariable(t *token) {
 			value:     value,
 		}, &itemIdent, &UUID)
 
-		addStdAction("appendvariable", &map[string]any{
+		addStdAction("appendvariable", map[string]any{
 			"WFInput":        inputValue(itemIdent, UUID),
 			"WFVariableName": t.ident,
 		})
@@ -887,15 +852,23 @@ func makeConditionalAction(t *token) {
 				"Type":     "Variable",
 				"Variable": variableValue(firstArg.value.(varValue)),
 			}
+			var conditionCode = firstCondition.condition
+			if len(firstCondition.arguments) > 1 && firstCondition.arguments[1].valueType == Quantity {
+				switch conditionCode {
+				case conditions[GreaterThan]:
+					conditionCode = 1000
+				case conditions[LessThan]:
+					conditionCode = 1001
+				}
+			}
+			var inputType = inputEffectiveType(firstArg.value.(varValue))
 			if len(firstCondition.arguments) > 1 {
-				var secondArg = firstCondition.arguments[1]
-				conditionalParameterLegacy("", conditionalParams, &secondArg.valueType, secondArg.value)
+				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[1], inputType)
 			}
 			if len(firstCondition.arguments) > 2 {
-				var thirdArg = firstCondition.arguments[2]
-				conditionalParameterLegacy("WFAnotherNumber", conditionalParams, &thirdArg.valueType, thirdArg.value)
+				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[2], inputType)
 			}
-			conditionalParams["WFCondition"] = firstCondition.condition
+			conditionalParams["WFCondition"] = conditionCode
 			conditionalParams["WFControlFlowMode"] = startStatement
 		} else {
 			var cond = t.value.(WFConditions)
@@ -908,16 +881,83 @@ func makeConditionalAction(t *token) {
 		conditionalParams["WFControlFlowMode"] = endStatement
 	}
 
-	addStdAction("conditional", &conditionalParams)
+	addStdAction("conditional", conditionalParams)
 }
 
 var filterTemplates []WFConditionParam
 
+// inputEffectiveType resolves a conditional's left-hand variable to its concrete type,
+// which determines which plist key the comparison value is written into.
+func inputEffectiveType(v varValue) tokenType {
+	var identifier = v.value.(string)
+	if global, found := globals[identifier]; found {
+		return global.valueType
+	}
+	if variable, found := variables[identifier]; found {
+		if variable.valueType == Action {
+			if a, ok := variable.value.(action); ok && a.def != nil {
+				return a.def.outputType
+			}
+		}
+		return variable.valueType
+	}
+	return String
+}
+
+func routeConditionalValue(param *WFConditionParam, val any, inputType tokenType) {
+	switch inputType {
+	case Date:
+		if param.WFDate == nil {
+			param.WFDate = val
+		} else {
+			param.WFAnotherDate = val
+		}
+	case Integer, Float, Bool:
+		if param.WFNumberValue == nil {
+			param.WFNumberValue = val
+		} else {
+			param.WFAnotherNumber = val
+		}
+	default:
+		param.WFConditionalActionString = val
+	}
+}
+
+func routeConditionalValueLegacy(params map[string]any, val any, inputType tokenType) {
+	switch inputType {
+	case Date:
+		if _, exists := params["WFDate"]; !exists {
+			params["WFDate"] = val
+		} else {
+			params["WFAnotherDate"] = val
+		}
+	case Integer, Float, Bool:
+		if _, exists := params["WFNumberValue"]; !exists {
+			params["WFNumberValue"] = val
+		} else {
+			params["WFAnotherNumber"] = val
+		}
+	default:
+		params["WFConditionalActionString"] = val
+	}
+}
+
 func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate {
 	filterTemplates = []WFConditionParam{}
 	for _, condition := range wfConditions.conditions {
+		var conditionCode = condition.condition
+		if len(condition.arguments) > 1 && condition.arguments[1].valueType == Quantity {
+			switch conditionCode {
+			case conditions[GreaterThan]:
+				conditionCode = 1000
+			case conditions[LessThan]:
+				conditionCode = 1001
+			}
+		}
+
+		var inputType = inputEffectiveType(condition.arguments[0].value.(varValue))
 		var conditionParam = WFConditionParam{
-			WFCondition: condition.condition,
+			WFCondition: conditionCode,
 			WFInput: WFInputVariable{
 				Type:     "Variable",
 				Variable: variableValue(condition.arguments[0].value.(varValue)).(WFTextTokenAttachment),
@@ -925,12 +965,10 @@ func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate 
 		}
 
 		if len(condition.arguments) > 1 {
-			var argumentTwo = condition.arguments[1]
-			conditionalParameter("", &conditionParam, &argumentTwo.valueType, argumentTwo.value)
+			conditionalParameter(&conditionParam, condition.arguments[1], inputType)
 		}
 		if len(condition.arguments) > 2 {
-			var argumentThree = condition.arguments[2]
-			conditionalParameter("WFAnotherNumber", &conditionParam, &argumentThree.valueType, argumentThree.value)
+			conditionalParameter(&conditionParam, condition.arguments[2], inputType)
 		}
 
 		filterTemplates = append(filterTemplates, conditionParam)
@@ -945,105 +983,58 @@ func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate 
 	}
 }
 
-func conditionalParameter(key string, conditionParam *WFConditionParam, typeOf *tokenType, value any) {
-	switch *typeOf {
-	case String:
-		var paramVal = paramValue(actionArgument{
-			valueType: *typeOf,
-			value:     value,
-		}, String)
-		conditionIntegerValue(conditionParam, key, paramVal)
-	case Integer:
-		var paramVal = paramValue(actionArgument{
-			valueType: *typeOf,
-			value:     value,
-		}, Integer)
-		conditionIntegerValue(conditionParam, key, paramVal)
+func conditionalParameter(param *WFConditionParam, arg actionArgument, inputType tokenType) {
+	switch arg.valueType {
+	case Quantity:
+		param.WFDuration = makeQuantityFieldValue(arg.value.([]actionArgument))
+	case Variable:
+		conditionalParameterVariable(param, arg, inputType)
 	case Bool:
 		var boolNumber = 0
-		if value == true {
+		if arg.value == true {
 			boolNumber = 1
 		}
-		var paramVal = paramValue(actionArgument{
-			valueType: Integer,
-			value:     boolNumber,
-		}, Integer)
-		conditionIntegerValue(conditionParam, key, paramVal)
-	case Variable:
-		conditionalParameterVariable(conditionParam, key, value)
-	}
-}
-
-func conditionalParameterVariable(conditionParam *WFConditionParam, key string, value any) {
-	var condVarValue = value.(varValue)
-	var variable = variables[condVarValue.value.(string)]
-	switch variable.valueType {
-	case Integer:
-		conditionIntegerValue(conditionParam, key, variableValue(condVarValue))
+		routeConditionalValue(param, paramValue(actionArgument{valueType: Integer, value: boolNumber}, Integer), inputType)
 	default:
-		var paramVal = attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue)))
-		conditionStringValue(conditionParam, key, paramVal)
+		routeConditionalValue(param, paramValue(arg, arg.valueType), inputType)
 	}
 }
 
-func conditionStringValue(param *WFConditionParam, key string, value any) {
-	if key == "WFAnotherNumber" {
-		param.WFAnotherNumber = value
-	} else {
-		param.WFConditionalActionString = value
-	}
-}
-
-func conditionIntegerValue(param *WFConditionParam, key string, value any) {
-	if key == "WFAnotherNumber" {
-		param.WFAnotherNumber = value
-	} else {
-		param.WFNumberValue = value
+func conditionalParameterVariable(param *WFConditionParam, arg actionArgument, inputType tokenType) {
+	var condVarValue = arg.value.(varValue)
+	switch inputType {
+	case Date, Integer, Float, Bool:
+		routeConditionalValue(param, variableValue(condVarValue), inputType)
+	default:
+		routeConditionalValue(param, attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue))), inputType)
 	}
 }
 
 // conditionalParameterLegacy is for iOS < 18 compatibility where we still use map[string]any
-func conditionalParameterLegacy(key string, conditionalParams map[string]any, typeOf *tokenType, value any) {
-	if key == "" {
-		if *typeOf == String {
-			key = "WFConditionalActionString"
-		} else if *typeOf == Integer || *typeOf == Bool {
-			key = "WFNumberValue"
-		}
-	}
-	switch *typeOf {
-	case String:
-		conditionalParams[key] = paramValue(actionArgument{
-			valueType: *typeOf,
-			value:     value,
-		}, String)
-	case Integer:
-		conditionalParams[key] = paramValue(actionArgument{
-			valueType: *typeOf,
-			value:     value,
-		}, String)
+func conditionalParameterLegacy(params map[string]any, arg actionArgument, inputType tokenType) {
+	switch arg.valueType {
+	case Quantity:
+		params["WFDuration"] = makeQuantityFieldValue(arg.value.([]actionArgument))
+	case Variable:
+		conditionalParameterVariableLegacy(params, arg, inputType)
 	case Bool:
 		var boolNumber = 0
-		if value == true {
+		if arg.value == true {
 			boolNumber = 1
 		}
-		conditionalParams[key] = paramValue(actionArgument{
-			valueType: Integer,
-			value:     boolNumber,
-		}, Integer)
-	case Variable:
-		conditionalParameterVariableLegacy(conditionalParams, value)
+		routeConditionalValueLegacy(params, paramValue(actionArgument{valueType: Integer, value: boolNumber}, Integer), inputType)
+	default:
+		routeConditionalValueLegacy(params, paramValue(arg, arg.valueType), inputType)
 	}
 }
 
-func conditionalParameterVariableLegacy(conditionalParams map[string]any, value any) {
-	var condVarValue = value.(varValue)
-	var variable = variables[condVarValue.value.(string)]
-	switch variable.valueType {
-	case Integer:
-		conditionalParams["WFNumberValue"] = variableValue(condVarValue)
+func conditionalParameterVariableLegacy(params map[string]any, arg actionArgument, inputType tokenType) {
+	var condVarValue = arg.value.(varValue)
+	switch inputType {
+	case Date, Integer, Float, Bool:
+		routeConditionalValueLegacy(params, variableValue(condVarValue), inputType)
 	default:
-		conditionalParams["WFConditionalActionString"] = attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue)))
+		routeConditionalValueLegacy(params, attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue))), inputType)
 	}
 }
 
@@ -1064,11 +1055,11 @@ func makeMenuAction(t *token) {
 			}, String)
 		}
 		var menuItemParams = menus[t.ident]
-		var menuItems []map[string]any
+		var menuItems = make([]WFMenuItem, 0, len(menuItemParams))
 		for _, item := range menuItemParams {
-			menuItems = append(menuItems, map[string]any{
-				"WFItemType": 0,
-				"WFValue": paramValue(actionArgument{
+			menuItems = append(menuItems, WFMenuItem{
+				WFItemType: 0,
+				WFValue: paramValue(actionArgument{
 					valueType: item.valueType,
 					value:     item.value,
 				}, String),
@@ -1078,11 +1069,11 @@ func makeMenuAction(t *token) {
 		menuParams["WFMenuItems"] = menuItems
 	}
 
-	addStdAction("choosefrommenu", &menuParams)
+	addStdAction("choosefrommenu", menuParams)
 }
 
 func makeMenuItemAction(t *token) {
-	addStdAction("choosefrommenu", &map[string]any{
+	addStdAction("choosefrommenu", map[string]any{
 		"GroupingIdentifier": t.ident,
 		"WFControlFlowMode":  statementPart,
 		"WFMenuItemAttributedTitle": paramValue(actionArgument{
@@ -1115,7 +1106,7 @@ func makeRepeatAction(t *token) {
 		}, Integer)
 	}
 
-	addStdAction("repeat.count", &repeatParams)
+	addStdAction("repeat.count", repeatParams)
 }
 
 func makeRepeatEachAction(t *token) {
@@ -1137,7 +1128,7 @@ func makeRepeatEachAction(t *token) {
 		}, Integer)
 	}
 
-	addStdAction("repeat.each", &repeatEachParams)
+	addStdAction("repeat.each", repeatEachParams)
 }
 
 type WFQuestion struct {

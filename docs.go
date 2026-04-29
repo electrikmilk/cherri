@@ -99,8 +99,8 @@ func generateCategory(category string) actionCategory {
 			continue
 		}
 
-		currentAction = *def
-		currentActionIdentifier = name
+		currentAction.definition = *def
+		currentAction.identifier = name
 		var definition = generateActionDefinition(parameterDefinition{}, true)
 
 		if def.doc.subcategory != "" {

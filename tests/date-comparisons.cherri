@@ -1,0 +1,25 @@
+@today = currentDate()
+@formatted = formatDate(@today)
+@adjusted = adjustDate(@today, "Add", qty(5, "days"))
+@specifiedDate = date("April 16, 2026")
+
+// text input: comparison routes to WFConditionalActionString
+if @formatted == @today {} else {}
+
+// date input: comparison (text var) routes to WFDate
+if @adjusted < @formatted {} else {}
+
+// date input: comparison (date var) routes to WFDate
+if @adjusted == @today {} else {}
+if @adjusted > @today {} else {}
+
+// date input: between two dates routes to WFDate + WFAnotherDate
+if @adjusted <> @today @adjusted {} else {}
+
+// date input with holiday date
+@holiday = getHolidayDate("Christmas Day")
+if @holiday == @today {} else {}
+if @holiday > @adjusted {} else {}
+
+// date input: specified date comparison
+if @specifiedDate == @today {} else {}

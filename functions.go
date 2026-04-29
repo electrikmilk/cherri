@@ -35,6 +35,7 @@ type function struct {
 	definition actionDefinition
 	body       string
 	used       bool
+	callCount  int // incremented each call to produce unique _cherri_call variable names
 }
 
 // functions is a map of all the functions that have been defined.
@@ -134,8 +135,8 @@ func checkFunctionUsage(content string) {
 func generateFunctionsHeader() string {
 	var functionsHeader strings.Builder
 	functionsHeader.WriteString("if ShortcutInput {\n")
-	functionsHeader.WriteString("    @_cherri_empty_dictionary: dictionary\n")
-	functionsHeader.WriteString("    const _cherri_dictionary_type_name = typeOf(@_cherri_empty_dictionary)\n")
+	functionsHeader.WriteString("    const _cherri_empty_dictionary = {}\n")
+	functionsHeader.WriteString("    const _cherri_dictionary_type_name = typeOf(_cherri_empty_dictionary)\n")
 	functionsHeader.WriteString("    const _cherri_inputType = typeOf(ShortcutInput)\n")
 	functionsHeader.WriteString("    if _cherri_inputType == _cherri_dictionary_type_name {\n")
 	functionsHeader.WriteString("        const _cherri_input = getDictionary(ShortcutInput)\n")
@@ -235,12 +236,13 @@ func makeFunctionRef(identifier *string) any {
 	if paramsSize != 0 {
 		advance()
 		arguments = collectArguments()
+		currentAction.arguments = arguments
 
-		currentArgumentsSize = len(arguments)
 		checkAction()
 	}
 
-	var variableIdentifier = fmt.Sprintf("_%s_cherri_call", *identifier)
+	function.callCount++
+	var variableIdentifier = fmt.Sprintf("_%s_cherri_call_%d", *identifier, function.callCount)
 	var functionCall = makeFunctionCall(identifier, &arguments)
 	insertReference(variableIdentifier, Dict, functionCall, true)
 
@@ -257,7 +259,7 @@ func makeFunctionRef(identifier *string) any {
 	})
 
 	if function.definition.outputType != "" {
-		var outputIdentifier = fmt.Sprintf("_%s_cherri_call_output", *identifier)
+		var outputIdentifier = fmt.Sprintf("_%s_cherri_call_%d_output", *identifier, function.callCount)
 		insertReference(outputIdentifier, Action, runSelfAction, true)
 
 		return coerceOutputValue(outputIdentifier, function.definition.outputType, runSelfAction)
@@ -301,41 +303,35 @@ func coerceOutputValue(value any, valueType tokenType, defaultValue any) any {
 }
 
 func makeFunctionCall(identifier *string, arguments *[]actionArgument) map[string]any {
-	var argumentValues []any
-	if len(*arguments) != 0 {
-		for _, argument := range *arguments {
-			var argumentValue = fmt.Sprintf("%v", argument.value)
-			switch argument.valueType {
-			case String:
-				argumentValues = append(argumentValues, fmt.Sprintf("%s", argumentValue))
-			case Variable:
-				var identifier = argument.value.(varValue).value.(string)
-				var variableValue, found = getVariableValue(identifier)
-				if !found {
-					parserError(fmt.Sprintf("Undefined reference '%s'", identifier))
-				}
-				if variableValue.valueType == Arr {
-					var wrappedArray = map[string]any{"array": fmt.Sprintf("{%s}", identifier)}
-					argumentValues = append(argumentValues, wrappedArray)
-				} else {
-					argumentValues = append(argumentValues, fmt.Sprintf("\"{%s}\"", identifier))
-				}
-			case Arr:
-				var wrappedArray = map[string]any{"array": argument.value}
-				argumentValues = append(argumentValues, wrappedArray)
-			default:
-				argumentValues = append(argumentValues, argument.value)
-			}
+	var params = functions[*identifier].definition.parameters
+	var argumentValues = make([]any, 0, len(*arguments))
+	for i, argument := range *arguments {
+		var paramType tokenType
+		if i < len(params) {
+			paramType = params[i].validType
 		}
+		argumentValues = append(argumentValues, makeFunctionArgValue(argument, paramType))
 	}
-
-	var functionCall = map[string]any{
+	return map[string]any{
 		"cherri_functions": 1,
 		"function":         *identifier,
 		"arguments":        argumentValues,
 	}
+}
 
-	return functionCall
+func makeFunctionArgValue(arg actionArgument, paramType tokenType) any {
+	switch arg.valueType {
+	case Variable:
+		var refStr = makeVariableReferenceString(arg.value.(varValue))
+		if paramType == Arr {
+			return map[string]any{"array": fmt.Sprintf("{%s}", refStr)}
+		}
+		return fmt.Sprintf("{%s}", refStr)
+	case Arr:
+		return map[string]any{"array": arg.value}
+	default:
+		return arg.value
+	}
 }
 
 func printFunctionsDebug() {

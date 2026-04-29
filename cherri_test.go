@@ -25,7 +25,7 @@ func TestCherri(_ *testing.T) {
 	}
 	loadStandardActions()
 	for _, file := range files {
-		if !strings.Contains(file.Name(), ".cherri") || file.Name() == "decomp_expected.cherri" || file.Name() == "decomp_me.cherri" {
+		if !strings.Contains(file.Name(), ".cherri") || file.Name() == "decomp-expected.cherri" || file.Name() == "decomp-me.cherri" {
 			continue
 		}
 		currentTest = fmt.Sprintf("tests/%s", file.Name())
@@ -106,12 +106,14 @@ func TestPackages(t *testing.T) {
 }
 
 func TestDecomp(t *testing.T) {
+	defer resetParser()
+
 	fmt.Println("Decompiling...")
 	args.Args["import"] = "tests/decomp-me.plist"
 	decompile(importShortcut())
 
 	fmt.Println("Comparing to expected...")
-	var bytes, readErr = os.ReadFile("tests/decomp_expected.cherri")
+	var bytes, readErr = os.ReadFile("tests/decomp-expected.cherri")
 	handle(readErr)
 
 	if code.String() != string(bytes) {
@@ -119,8 +121,49 @@ func TestDecomp(t *testing.T) {
 		t.Fail()
 		return
 	}
-
 	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
+}
+
+// TestRoundTrip decompiles compiler-generated plists to verify the full compile→decompile
+// pipeline. The _unsigned.shortcut files are produced by TestCherriNoSign; individual
+// sub-tests skip gracefully when the file is absent rather than failing.
+//
+// Run independently:
+//
+//	go test -run TestCherriNoSign && go test -run TestRoundTrip
+func TestRoundTrip(t *testing.T) {
+	args.Args["no-ansi"] = ""
+
+	// Chosen because their plist structures are within the decompiler's action handlers.
+	var candidates = []string{
+		"tests/calc_unsigned.shortcut",
+		"tests/numbers_unsigned.shortcut",
+		"tests/repeats_unsigned.shortcut",
+		"tests/conditionals_unsigned.shortcut",
+		"tests/dictionary_unsigned.shortcut",
+		"tests/variables_unsigned.shortcut",
+	}
+
+	for _, plistPath := range candidates {
+		t.Run(plistPath, func(t *testing.T) {
+			defer resetParser()
+
+			if _, statErr := os.Stat(plistPath); os.IsNotExist(statErr) {
+				t.Skipf("compile output absent — run TestCherriNoSign first: %s", plistPath)
+			}
+
+			// Direct decompiler output to /dev/null so no .cherri files land in
+			// tests/, which would be picked up and compiled by TestCherriNoSign.
+			args.Args["output"] = os.DevNull
+			args.Args["import"] = plistPath
+			decompile(importShortcut())
+			delete(args.Args, "output")
+
+			if code.Len() == 0 {
+				t.Errorf("decompile of %s produced empty output", plistPath)
+			}
+		})
+	}
 }
 
 func TestActionIdentifiers(t *testing.T) {
@@ -269,4 +312,19 @@ func resetParser() {
 	uuids = map[string]string{}
 	functions = map[string]*function{}
 	shortcut = Shortcut{}
+	actionIndex = 0
+	code.Reset()
+	varUUIDs = nil
+	constUUIDs = nil
+	identifierMap = nil
+	currentVariableValue = ""
+	decompilingText = false
+	decompilingDictionary = false
+	macDefinition = false
+	setMacDefinition = false
+	appIds = nil
+	pasteables = nil
+	usedEnums = nil
+	usingFunctions = false
+	currentCategory = ""
 }

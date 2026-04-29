@@ -36,5 +36,8 @@ var"
 
 // add to variable
 @stringVar += "test"
+@intVar -= 2
+@intVar *= 3
+@intVar /= 2
 
 @emptyVar = @stringVar

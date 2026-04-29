@@ -11,7 +11,7 @@ const location = location(Ask)
 	"key": "",
 	"key2": "value",
 	"key3": false,
-	"key4": "{int}",
+	"key4": "{@int}",
 	"key5": {
 		"key": "test",
 		"key1": 5
@@ -22,25 +22,32 @@ const location = location(Ask)
 	]
 }
 @str = "me"
-@var = "5 {str}"
+@var = "5 {@str}"
 
-if int == 0 {
+if @int == 0 {
 	alert("Title", "Message")
 } else {
 	nothing()
-	if int == 1 {
+	if @int == 1 {
 	}
 }
 @list = list("Item 1", "Item 2")
 
-if str == "me" {
+if @str == "me" {
 }
 
-if var == str && int == 2 {
+if @var == @str && @int == 2 {
 }
 
 menu "Prompt" {
 item "Item 1":
 }
 alert("Title", "Message")
-show(var)
+show(@var)
+
+repeat _ for 3 {
+}
+
+for _ in @list {
+}
+@val = @dict['key2']

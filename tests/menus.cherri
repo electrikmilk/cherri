@@ -4,7 +4,7 @@ const cherri_icon = embedFile("assets/cherri_icon.png")
 
 @items = []
 repeat i for 3 {
-    @items += makeVCard("Title {i}", "Subtitle {i}", cherri_icon)
+    @items += makeVCard("Title {@i}", "Subtitle {@i}", cherri_icon)
 }
 @menuItems = "{@items}"
 @vcf = setName(@menuItems, "menu.vcf")

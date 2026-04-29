@@ -82,7 +82,7 @@ action mac resizeWindow(variable window: 'WFWindow', windowSize configuration: '
 action mac runShellScript(text script: 'Script', variable input: 'Input', text ?shell: 'Shell' = "/bin/zsh", text ?inputMode: 'InputMode' = "to stdin")
 
 // [Doc]: [Scripts] Run Apple Script
-action mac runAppleScript(variable input: 'Input', text script: 'Script')
+action mac runAppleScript(rawtext script: 'Script', variable input: 'Input')
 
 // [Doc]: [Scripts] Run JavaScript for Automation
 action mac 'runjavascriptforautomation' runJSAutomation(variable input: 'Input', text script: 'Script')

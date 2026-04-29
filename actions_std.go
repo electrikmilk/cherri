@@ -1590,7 +1590,7 @@ var actions = map[string]*actionDefinition{
 		check: func(args []actionArgument, _ *actionDefinition) {
 			var contactDetail = args[1].value.(string)
 			var contactDetailKey = strings.ReplaceAll(contactDetail, " ", "")
-			currentAction.parameters[2].key = "WFContactContentItem" + contactDetailKey
+			currentAction.definition.parameters[2].key = "WFContactContentItem" + contactDetailKey
 		},
 		appendParams: map[string]any{
 			"Mode": "Set",
@@ -1982,7 +1982,7 @@ func getActionNameByIdentifier(identifier *string) (name string, err error) {
 
 func findActionByIdentifier(identifier *string) (name string, found bool) {
 	for actionName, action := range actions {
-		currentAction = *action
+		currentAction.definition = *action
 		var actionIdentifier = getFullActionIdentifier()
 		if *identifier == actionIdentifier {
 			return actionName, true

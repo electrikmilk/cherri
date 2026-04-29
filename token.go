@@ -106,6 +106,7 @@ const (
 	LessThan       tokenType = "<"
 	LessOrEqual    tokenType = "<="
 	Between        tokenType = "<>"
+	IsToday        tokenType = "isToday"
 	Plus           tokenType = "+"
 	Minus          tokenType = "-"
 	Multiply       tokenType = "*"

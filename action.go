@@ -24,18 +24,15 @@ var stdLib embed.FS
 //go:embed actions
 var stdActions embed.FS
 
-// currentAction holds the current action definition between functions.
-var currentAction actionDefinition
-var saveAction actionDefinition
+// actionReference holds the state for a single action being parsed or generated.
+type actionReference struct {
+	definition actionDefinition
+	identifier string
+	arguments  []actionArgument
+}
 
-var currentActionIdentifier string
-var saveActionIdentifier string
-
-var currentArguments []actionArgument
-var saveArguments []actionArgument
-
-var currentArgumentsSize int
-var saveArgumentsSize int
+var currentAction actionReference
+var savedAction actionReference
 
 // parameterDefinition is used to define an actions parameters and to check against collected argument values.
 type parameterDefinition struct {
@@ -143,34 +140,28 @@ var actionIndex int
 
 // setCurrentAction sets the current action identifier and definition for use between functions.
 func setCurrentAction(identifier string, definition *actionDefinition) {
-	currentActionIdentifier = identifier
-	currentAction = *definition
+	currentAction.identifier = identifier
+	currentAction.definition = *definition
 }
 
 func saveCurrentAction() {
-	saveAction = currentAction
-	saveActionIdentifier = currentActionIdentifier
-	saveArguments = currentArguments
-	saveArgumentsSize = currentArgumentsSize
+	savedAction = currentAction
 }
 
 func restoreCurrentAction() {
-	currentAction = saveAction
-	currentActionIdentifier = saveActionIdentifier
-	currentArguments = saveArguments
-	currentArgumentsSize = saveArgumentsSize
+	currentAction = savedAction
 }
 
 // undefinable checks if the current action cannot be defined using only Cherri because of the way it is defined.
 func undefinable() bool {
-	if currentAction.appendParamsFunc != nil {
-		var addedParams = currentAction.appendParamsFunc([]actionArgument{})
+	if currentAction.definition.appendParamsFunc != nil {
+		var addedParams = currentAction.definition.appendParamsFunc([]actionArgument{})
 		if len(addedParams) == 0 {
 			return true
 		}
 	}
 
-	return currentAction.builtin || currentAction.makeParams != nil || currentAction.check != nil || currentAction.decomp != nil || currentAction.appIntent != emptyAppIntent
+	return currentAction.definition.builtin || currentAction.definition.makeParams != nil || currentAction.definition.check != nil || currentAction.definition.decomp != nil || currentAction.definition.appIntent != emptyAppIntent
 }
 
 // makeAction builds an action based on its actionDefinition and adds it to the shortcut.
@@ -184,33 +175,33 @@ func makeAction(arguments []actionArgument, reference *WFActionReference) {
 	addAction(ident, attachReferenceToParams(params, reference))
 }
 
-// getFullActionIdentifier determines the full identifier of currentAction.
+// getFullActionIdentifier determines the full identifier of currentAction.definition.
 func getFullActionIdentifier() (ident string) {
-	if currentAction.overrideIdentifier != "" {
-		return currentAction.overrideIdentifier
+	if currentAction.definition.overrideIdentifier != "" {
+		return currentAction.definition.overrideIdentifier
 	}
 
 	ident = "is.workflow.actions"
-	if currentAction.appIdentifier != "" {
-		ident = currentAction.appIdentifier
+	if currentAction.definition.appIdentifier != "" {
+		ident = currentAction.definition.appIdentifier
 	}
-	if currentAction.identifier != "" {
-		ident = fmt.Sprintf("%s.%s", ident, currentAction.identifier)
+	if currentAction.definition.identifier != "" {
+		ident = fmt.Sprintf("%s.%s", ident, currentAction.definition.identifier)
 	} else {
-		ident = fmt.Sprintf("%s.%s", ident, strings.ToLower(currentActionIdentifier))
+		ident = fmt.Sprintf("%s.%s", ident, strings.ToLower(currentAction.identifier))
 	}
 	return
 }
 
-// getActionIdentifier determines the identifier of currentAction.
+// getActionIdentifier determines the identifier of currentAction.definition.
 func getActionIdentifier() (ident string) {
-	if currentAction.appIdentifier != "" {
-		ident = fmt.Sprintf("%s.", currentAction.appIdentifier)
+	if currentAction.definition.appIdentifier != "" {
+		ident = fmt.Sprintf("%s.", currentAction.definition.appIdentifier)
 	}
-	if currentAction.identifier != "" {
-		ident = fmt.Sprintf("%s%s", ident, currentAction.identifier)
+	if currentAction.definition.identifier != "" {
+		ident = fmt.Sprintf("%s%s", ident, currentAction.definition.identifier)
 	} else {
-		ident = fmt.Sprintf("%s%s", ident, strings.ToLower(currentActionIdentifier))
+		ident = fmt.Sprintf("%s%s", ident, strings.ToLower(currentAction.identifier))
 	}
 	return
 }
@@ -220,22 +211,21 @@ var emptyAppIntent = appIntent{}
 // getActionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
 func getActionParameters(arguments []actionArgument) map[string]any {
 	var params = make(map[string]any)
-	if currentAction.appendParamsFunc != nil {
-		maps.Copy(params, currentAction.appendParamsFunc(arguments))
+	if currentAction.definition.appendParamsFunc != nil {
+		maps.Copy(params, currentAction.definition.appendParamsFunc(arguments))
 	}
-	if len(currentAction.appendParams) != 0 {
-		maps.Copy(params, currentAction.appendParams)
+	if len(currentAction.definition.appendParams) != 0 {
+		maps.Copy(params, currentAction.definition.appendParams)
 	}
-	if currentAction.appIntent != emptyAppIntent {
-		maps.Copy(params, appIntentDescriptor(currentAction.appIntent))
+	if currentAction.definition.appIntent != emptyAppIntent {
+		maps.Copy(params, appIntentDescriptor(currentAction.definition.appIntent))
 	}
-	if currentAction.makeParams != nil {
-		maps.Copy(params, currentAction.makeParams(arguments))
+	if currentAction.definition.makeParams != nil {
+		maps.Copy(params, currentAction.definition.makeParams(arguments))
 		return params
 	}
-	if currentAction.parameters != nil {
-		var argumentsSize = len(arguments)
-		if argumentsSize == 0 {
+	if currentAction.definition.parameters != nil {
+		if len(arguments) == 0 {
 			return params
 		}
 		makeActionParams(arguments, params)
@@ -246,7 +236,7 @@ func getActionParameters(arguments []actionArgument) map[string]any {
 
 func makeActionParams(arguments []actionArgument, params map[string]any) {
 	var argumentsSize = len(arguments)
-	for i, param := range currentAction.parameters {
+	for i, param := range currentAction.definition.parameters {
 		if argumentsSize <= i {
 			return
 		}
@@ -263,16 +253,16 @@ func makeActionParams(arguments []actionArgument, params map[string]any) {
 }
 
 // addStdAction is an alias of addAction that simply prepends the shortcuts bundle identifier to ident.
-func addStdAction(ident string, params *map[string]any) {
+func addStdAction(ident string, params map[string]any) {
 	addAction(fmt.Sprintf("is.workflow.actions.%s", ident), params)
 }
 
 // addAction adds an action to the shortcut.
-func addAction(identifier string, params *map[string]any) {
+func addAction(identifier string, params map[string]any) {
 	shortcut.WFWorkflowActions = append(shortcut.WFWorkflowActions,
 		ShortcutAction{
 			WFWorkflowActionIdentifier: identifier,
-			WFWorkflowActionParameters: *params,
+			WFWorkflowActionParameters: params,
 		},
 	)
 }
@@ -280,11 +270,11 @@ func addAction(identifier string, params *map[string]any) {
 // checkAction checks the parsed arguments provided for an action and if it can be used based on definitions set.
 // If an action has a check function defined this will be called and provided the parsed arguments.
 func checkAction() {
-	if len(currentAction.parameters) > 0 {
+	if len(currentAction.definition.parameters) > 0 {
 		checkRequiredArgs()
 	}
-	if currentAction.check != nil {
-		currentAction.check(currentArguments, &currentAction)
+	if currentAction.definition.check != nil {
+		currentAction.definition.check(currentAction.arguments, &currentAction.definition)
 	}
 
 	checkActionVersion()
@@ -292,53 +282,53 @@ func checkAction() {
 }
 
 func checkActionVersion() {
-	if currentAction.minVersion != 0 && currentAction.minVersion > iosVersion {
+	if currentAction.definition.minVersion != 0 && currentAction.definition.minVersion > iosVersion {
 		parserError(
-			fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentActionIdentifier, math.Ceil(iosVersion)),
+			fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentAction.identifier, math.Ceil(iosVersion)),
 		)
 	}
-	if currentAction.maxVersion != 0 {
-		if currentAction.maxVersion < iosVersion {
+	if currentAction.definition.maxVersion != 0 {
+		if currentAction.definition.maxVersion < iosVersion {
 			parserError(
-				fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentActionIdentifier, math.Ceil(iosVersion)),
+				fmt.Sprintf("Action '%s()' is not available in set minimum version '%.1f'", currentAction.identifier, math.Ceil(iosVersion)),
 			)
 		} else {
-			parserWarning(fmt.Sprintf("Action '%s()' has been deprecated as it was removed or significantly modified.", currentActionIdentifier))
+			parserWarning(fmt.Sprintf("Action '%s()' has been deprecated as it was removed or significantly modified.", currentAction.identifier))
 		}
 	}
 }
 
 func checkMacActionUsage() {
 	if isMac, found := definitions["mac"]; found {
-		if !isMac.(bool) && currentAction.macOnly {
+		if !isMac.(bool) && currentAction.definition.macOnly {
 			parserError(
-				fmt.Sprintf("macOS action '%s()' in non-macOS Shortcut.", currentActionIdentifier),
+				fmt.Sprintf("macOS action '%s()' in non-macOS Shortcut.", currentAction.identifier),
 			)
-		} else if isMac.(bool) && currentAction.nonMacOnly {
+		} else if isMac.(bool) && currentAction.definition.nonMacOnly {
 			parserError(
-				fmt.Sprintf("Non-macOS action '%s()' in macOS-only Shortcut.", currentActionIdentifier),
+				fmt.Sprintf("Non-macOS action '%s()' in macOS-only Shortcut.", currentAction.identifier),
 			)
 		}
 	}
 }
 
 func checkInfiniteArgs(startIdx int) {
-	for i, arg := range currentArguments {
+	for i, arg := range currentAction.arguments {
 		if i < startIdx {
 			continue
 		}
-		checkArg(&currentAction.parameters[startIdx], &arg)
+		checkArg(&currentAction.definition.parameters[startIdx], &arg)
 	}
 }
 
 // checkRequiredArgs checks if all required arguments for an action have a value.
 func checkRequiredArgs() {
-	for i, param := range currentAction.parameters {
+	for i, param := range currentAction.definition.parameters {
 		if param.infinite {
 			checkInfiniteArgs(i)
 			continue
 		}
-		if currentArgumentsSize < i+1 && !param.optional && param.defaultValue == nil {
+		if len(currentAction.arguments) <= i && !param.optional && param.defaultValue == nil {
 			var argIndex = i + 1
 			var suffix string
 			switch argIndex {
@@ -439,6 +429,9 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 			return
 		}
 		if argValueType != param.validType && param.validType != Variable && getVar.variableType != Ask {
+			if argValueType == Date && param.validType == String {
+				return
+			}
 			parserError(fmt.Sprintf("Invalid variable value %v (%s) for argument '%s' (%s).\n%s",
 				argVal,
 				argValueType,
@@ -473,6 +466,9 @@ func validActionOutput(param *parameterDefinition, value any) {
 			return
 		}
 		if actionOutputType != param.validType && param.validType != Variable {
+			if actionOutputType == Date && param.validType == String {
+				return
+			}
 			parserError(fmt.Sprintf("Invalid variable value of action '%v' (%s) for argument '%s' (%s).\n%s",
 				actionIdent+"()",
 				actionOutputType,
@@ -589,9 +585,9 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 
 func generateActionPlatform() (platformStr string) {
 	var platform string
-	if currentAction.nonMacOnly {
+	if currentAction.definition.nonMacOnly {
 		platform = "iOS/iPadOS"
-	} else if currentAction.macOnly {
+	} else if currentAction.definition.macOnly {
 		platform = "macOS"
 	}
 	if platform != "" {
@@ -618,16 +614,16 @@ func generateActionCode(focus parameterDefinition, showEnums bool) string {
 		actionCode.WriteString(generateActionDebugDefinition())
 	}
 
-	actionCode.WriteString(fmt.Sprintf("%s(", ansi(currentActionIdentifier, blue, bold)))
+	actionCode.WriteString(fmt.Sprintf("%s(", ansi(currentAction.identifier, blue, bold)))
 
 	actionCode.WriteString(strings.Join(generateActionArguments(focus), ", "))
 	actionCode.WriteRune(')')
 
-	if currentAction.outputType != "" {
-		actionCode.WriteString(fmt.Sprintf(": %s", ansi(string(currentAction.outputType), magenta)))
+	if currentAction.definition.outputType != "" {
+		actionCode.WriteString(fmt.Sprintf(": %s", ansi(string(currentAction.definition.outputType), magenta)))
 	}
 
-	if args.Using("debug") && (currentAction.appendParamsFunc != nil || currentAction.appendParams != nil) {
+	if args.Using("debug") && (currentAction.definition.appendParamsFunc != nil || currentAction.definition.appendParams != nil) {
 		actionCode.WriteString(generateActionAdditionalParams())
 	}
 
@@ -639,7 +635,7 @@ func generateActionCode(focus parameterDefinition, showEnums bool) string {
 }
 
 func generateActionArguments(focus parameterDefinition) (arguments []string) {
-	for _, param := range currentAction.parameters {
+	for _, param := range currentAction.definition.parameters {
 		if param.name == focus.name || focus.name == "" {
 			arguments = append(arguments, generateActionParamDefinition(param))
 		} else {
@@ -651,11 +647,11 @@ func generateActionArguments(focus parameterDefinition) (arguments []string) {
 
 func generateActionAdditionalParams() string {
 	var additionalParams = make(map[string]any)
-	if len(currentAction.appendParams) != 0 {
-		maps.Copy(additionalParams, currentAction.appendParams)
+	if len(currentAction.definition.appendParams) != 0 {
+		maps.Copy(additionalParams, currentAction.definition.appendParams)
 	}
-	if currentAction.appendParamsFunc != nil {
-		var appendedParams = currentAction.appendParamsFunc([]actionArgument{})
+	if currentAction.definition.appendParamsFunc != nil {
+		var appendedParams = currentAction.definition.appendParamsFunc([]actionArgument{})
 		if len(appendedParams) != 0 {
 			maps.Copy(additionalParams, appendedParams)
 		}
@@ -668,12 +664,12 @@ func generateActionAdditionalParams() string {
 
 func generateActionDoc() string {
 	var actionDoc strings.Builder
-	var docTitle = currentAction.doc.title
-	if currentAction.doc.title == "" {
+	var docTitle = currentAction.definition.doc.title
+	if docTitle == "" {
 		if args.Using("no-ansi") {
-			docTitle = fmt.Sprintf("`%s()`", currentActionIdentifier)
+			docTitle = fmt.Sprintf("`%s()`", currentAction.identifier)
 		} else {
-			docTitle = fmt.Sprintf("%s()", currentActionIdentifier)
+			docTitle = fmt.Sprintf("%s()", currentAction.identifier)
 		}
 	}
 	if args.Using("no-ansi") {
@@ -682,18 +678,18 @@ func generateActionDoc() string {
 	actionDoc.WriteString(fmt.Sprintf("%s\n", ansi(docTitle, bold, underline)))
 	actionDoc.WriteRune('\n')
 
-	if currentAction.doc.warning != "" {
+	if currentAction.definition.doc.warning != "" {
 		if args.Using("no-ansi") {
-			actionDoc.WriteString(fmt.Sprintf("{: .warning }\n%s\n\n", currentAction.doc.warning))
+			actionDoc.WriteString(fmt.Sprintf("{: .warning }\n%s\n\n", currentAction.definition.doc.warning))
 		} else {
-			actionDoc.WriteString(ansi(fmt.Sprintf("Warning: %s", currentAction.doc.warning), yellow, bold, underline))
+			actionDoc.WriteString(ansi(fmt.Sprintf("Warning: %s", currentAction.definition.doc.warning), yellow, bold, underline))
 			actionDoc.WriteRune('\n')
 			actionDoc.WriteRune('\n')
 		}
 	}
 
-	if currentAction.doc.description != "" {
-		actionDoc.WriteString(fmt.Sprintf("%s\n\n", ansi(currentAction.doc.description, italic)))
+	if currentAction.definition.doc.description != "" {
+		actionDoc.WriteString(fmt.Sprintf("%s\n\n", ansi(currentAction.definition.doc.description, italic)))
 	}
 
 	return actionDoc.String()
@@ -704,7 +700,7 @@ var usedEnums []string
 func generateActionParamEnums(focus parameterDefinition) string {
 	var definition strings.Builder
 	usedEnums = []string{}
-	for _, param := range currentAction.parameters {
+	for _, param := range currentAction.definition.parameters {
 		if param.enum == "" || (focus.name != "" && focus.name != param.name) || slices.Contains(usedEnums, param.enum) {
 			continue
 		}
@@ -771,30 +767,30 @@ func generateActionParamDefinition(param parameterDefinition) string {
 func generateActionDebugDefinition() string {
 	var definition strings.Builder
 	var definitionType string
-	if currentAction.builtin {
+	if currentAction.definition.builtin {
 		definitionType = "#builtin"
 	}
 
 	definition.WriteString(ansi(fmt.Sprintf("%s action ", definitionType), orange))
 
-	if currentAction.defaultAction {
+	if currentAction.definition.defaultAction {
 		definition.WriteString(ansi("default ", yellow))
 	}
-	if currentAction.macOnly {
+	if currentAction.definition.macOnly {
 		definition.WriteString(ansi("mac ", orange))
-	} else if currentAction.nonMacOnly {
+	} else if currentAction.definition.nonMacOnly {
 		definition.WriteString(ansi("!mac ", orange))
 	}
-	if currentAction.minVersion != 0 {
-		definition.WriteString(ansi(fmt.Sprintf("v%1.f> ", currentAction.minVersion), cyan))
+	if currentAction.definition.minVersion != 0 {
+		definition.WriteString(ansi(fmt.Sprintf("v%1.f> ", currentAction.definition.minVersion), cyan))
 	}
-	if currentAction.maxVersion != 0 {
-		definition.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.maxVersion), red, underline))
+	if currentAction.definition.maxVersion != 0 {
+		definition.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.definition.maxVersion), red, underline))
 		definition.WriteRune(' ')
 	}
 
-	if currentAction.identifier != "" || currentAction.appIdentifier != "" {
-		setCurrentAction(currentActionIdentifier, &currentAction)
+	if currentAction.identifier != "" || currentAction.definition.appIdentifier != "" {
+		setCurrentAction(currentAction.identifier, &currentAction.definition)
 		definition.WriteString(ansi(fmt.Sprintf("'%s' ", getActionIdentifier()), red))
 	}
 
@@ -1090,19 +1086,19 @@ func makeActionValue(identifier string, arguments []actionArgument) action {
 	}
 }
 
-func makeQuantityFieldValue(args []actionArgument) map[string]any {
+func makeQuantityFieldValue(args []actionArgument) WFQuantityFieldValue {
 	var magnitude any
 	if args[0].valueType == Variable {
 		magnitude = variableValueWithSerialization(args[0].value.(varValue), "")
 	} else {
-		magnitude = argumentValue(args, 0)
+		magnitude = fmt.Sprintf("%v", paramValue(args[0], args[0].valueType))
 	}
 
-	return map[string]any{
-		"Value": map[string]any{
-			"Magnitude": magnitude,
-			"Unit":      argumentValue(args, 1),
+	return WFQuantityFieldValue{
+		Value: WFQuantityValue{
+			Magnitude: magnitude,
+			Unit:      paramValue(args[1], args[1].valueType),
 		},
-		"WFSerializationType": "WFQuantityFieldValue",
+		WFSerializationType: "WFQuantityFieldValue",
 	}
 }

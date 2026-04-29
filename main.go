@@ -6,7 +6,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"os"
 	"runtime"
@@ -15,6 +14,7 @@ import (
 	"unicode"
 
 	"github.com/electrikmilk/args-parser"
+	"howett.net/plist"
 )
 
 var filePath string
@@ -336,13 +336,13 @@ func panicDebug(err error) {
 
 // Converts a map[string]interface{} to a matching struct data type.
 func mapToStruct(data any, structure any) {
-	var jsonStr, marshalErr = json.Marshal(data)
+	var plistBytes, marshalErr = plist.Marshal(data, plist.XMLFormat)
 	handle(marshalErr)
 
-	var jsonErr = json.Unmarshal(jsonStr, &structure)
-	if jsonErr != nil {
+	var _, unmarshalErr = plist.Unmarshal(plistBytes, structure)
+	if unmarshalErr != nil {
 		fmt.Println("Tried to map to struct, but it was not a struct!", data)
-		handle(jsonErr)
+		handle(unmarshalErr)
 	}
 }
 

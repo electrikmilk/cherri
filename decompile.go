@@ -74,7 +74,7 @@ func decompile(b []byte) {
 // mapIdentifiers creates a map of variable identifiers and UUIDs that are assigned throughout the Shortcut.
 func mapIdentifiers() {
 	for _, action := range shortcut.WFWorkflowActions {
-		currentActionIdentifier = action.WFWorkflowActionIdentifier
+		currentAction.identifier = action.WFWorkflowActionIdentifier
 		var params = action.WFWorkflowActionParameters
 		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
 			continue
@@ -124,7 +124,7 @@ func mapControlFlowOutputs() {
 // Map out variables in the Shortcut and their UUIDs for later checks.
 func mapVariables() {
 	for _, action := range shortcut.WFWorkflowActions {
-		currentActionIdentifier = action.WFWorkflowActionIdentifier
+		currentAction.identifier = action.WFWorkflowActionIdentifier
 		var params = action.WFWorkflowActionParameters
 		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
 			var varName = params["WFVariableName"].(string)
@@ -171,7 +171,7 @@ func checkParamIdentifiers(params map[string]interface{}) {
 			var wfConditions = paramValues["WFConditions"].(map[string]interface{})
 			var value = wfConditions["Value"].(map[string]interface{})
 			if value["WFActionParameterFilterTemplates"] != nil {
-				for _, filtertemplate := range value["WFActionParameterFilterTemplates"].(map[string]interface{}) {
+				for _, filtertemplate := range value["WFActionParameterFilterTemplates"].([]interface{}) {
 					var paramFilterTemplate = filtertemplate.(map[string]interface{})
 					checkParamIdentifiers(paramFilterTemplate["WFInput"].(map[string]interface{}))
 				}
@@ -322,6 +322,10 @@ func mapSplitActions() {
 			delete(identifierMap, identifier)
 			continue
 		}
+		sort.Slice(actions, func(i, j int) bool {
+			return actions[i].identifier < actions[j].identifier
+		})
+		identifierMap[identifier] = actions
 	}
 }
 
@@ -518,7 +522,12 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 		}
 		handle(convErr)
 	} else {
-		number = int(value.(uint64))
+		switch v := value.(type) {
+		case uint64:
+			number = int(v)
+		case float64:
+			number = v
+		}
 	}
 
 	currentVariableValue = decompValue(number)
@@ -549,8 +558,13 @@ func decompBasicExpression(action *ShortcutAction) {
 }
 
 func decompExpression(action *ShortcutAction) {
-	var input = action.WFWorkflowActionParameters["Input"].(map[string]interface{})
-	var expression = strings.Trim(decompValue(input["Value"]), "\"")
+	var raw = action.WFWorkflowActionParameters["Input"]
+	var expression string
+	if s, ok := raw.(string); ok {
+		expression = s
+	} else {
+		expression = strings.Trim(decompValue(raw.(map[string]interface{})["Value"]), "\"")
+	}
 	var varRegex = regexp.MustCompile(`{(.*?)}`)
 	currentVariableValue = varRegex.ReplaceAllString(expression, "$1")
 
@@ -843,7 +857,6 @@ var numericRegex = regexp.MustCompile("^[0-9]+$")
 
 func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	var itemStringValue = decompValue(item.WFValue)
-	var itemValueType = item.WFItemType
 	var itemValueMap = item.WFValue.(map[string]interface{})
 	var itemValue any
 
@@ -851,9 +864,9 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 		return fmt.Sprintf("{%s}", itemStringValue)
 	}
 
-	switch dictDataType(itemValueType) {
+	switch dictDataType(item.WFItemType) {
 	case itemTypeNumber:
-		itemValue = decompValue(item.WFValue.(map[string]interface{}))
+		itemValue = decompValue(item.WFValue)
 		if !numericRegex.MatchString(itemValue.(string)) {
 			break
 		}
@@ -944,7 +957,7 @@ func decompValueObject(value map[string]interface{}) string {
 			var variableName = value["VariableName"].(string)
 			sanitizeIdentifier(&variableName)
 
-			return variableName
+			return fmt.Sprintf("@%s", variableName)
 		}
 
 		var variableValue = value["Variable"].(map[string]interface{})
@@ -1034,6 +1047,8 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 					variableName = name
 				}
 			}
+		} else {
+			variableName = fmt.Sprintf("@%s", variableName)
 		}
 
 		if len(attachment.Aggrandizements) != 0 {
