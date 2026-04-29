@@ -863,6 +863,7 @@ func collectDefinedAction() {
 	if tokenAhead(ToggleSet) {
 		advance()
 		collectToggleSetAction(doc)
+		lineRef.replaceLines()
 		return
 	}
 
