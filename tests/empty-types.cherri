@@ -1,8 +1,10 @@
 // compile-only: empty type declaration syntax
 
 @string: text
+@string = ""
 @integer: number
-@array = []
+@integer = 0
 @array: array
+@array = []
 @data: dictionary
 @data = {}
