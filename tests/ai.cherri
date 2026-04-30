@@ -1,22 +1,35 @@
-/* Large Language Models */
+/* Apple Intelligence */
 
 // compile-only: non-deterministic AI output
-askLLM("How many r's are in strawberry?", "Apple Intelligence on Device", true, "Text")
-askDeviceLLM("How many r's are in strawberry?")
-askCloudLLM("How many r's are in strawberry?")
-askChatGPT("How many r's are in strawberry?")
+const llmResult = askLLM("How many r's are in strawberry?", "Apple Intelligence on Device", true, "Text")
+show("{llmResult}")
+const deviceResult = askDeviceLLM("How many r's are in strawberry?")
+show("{deviceResult}")
+const cloudResult = askCloudLLM("How many r's are in strawberry?")
+show("{cloudResult}")
+const chatGPTResult = askChatGPT("How many r's are in strawberry?")
+show("{chatGPTResult}")
 
 /* Image Playground */
 
-generateImage("Two cherries on a stem")
-generateImage("Two cherries on a stem", nil, "chatgpt_oil_painting")
+const image1 = generateImage("Two cherries on a stem")
+quicklook(image1)
+const image2 = generateImage("Two cherries on a stem", nil, "chatgpt_oil_painting")
+quicklook(image2)
 
 /* Writing Tools */
 
-adjustTextTone("Hey buddy, what's up?", "professional")
-generateList("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
-generateTable("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
-generateProofread("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
-generateRewrite("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
-generateSummary("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
-generateKeyPoints("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
+const toneResult = adjustTextTone("Hey buddy, what's up?", "professional")
+show("{toneResult}")
+const listResult = generateList("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
+show("{listResult}")
+const tableResult = generateTable("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
+show("{tableResult}")
+const proofResult = generateProofread("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
+show("{proofResult}")
+const rewriteResult = generateRewrite("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
+show("{rewriteResult}")
+const summaryResult = generateSummary("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
+show("{summaryResult}")
+const keyPointsResult = generateKeyPoints("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
+show("{keyPointsResult}")
