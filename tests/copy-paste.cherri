@@ -12,3 +12,5 @@ const clip = getClipboard()
 if @clipStr != "cherri-test" {
     alert("❌ FAIL: clipboard round-trip — got {@clipStr}, expected 'cherri-test'")
 }
+
+show("✅ All tests passed")
