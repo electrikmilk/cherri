@@ -273,7 +273,7 @@ The header intercepts `ShortcutInput`, validates it as a Cherri function call, m
 
 ## Testing
 
-Each file in `tests/*.cherri` (except `decomp-expected.cherri` and `decomp_me.cherri`) is compiled by `TestCherri`/`TestCherriNoSign`. When adding or changing a language feature, add or update a test file in `tests/`. Group tests by domain (e.g. `web.cherri`, `shortcuts.cherri`) rather than one file per action. Test files do not need explicit `#include` statements — all standard library action categories are auto-injected during suite runs; includes are only needed when running a file individually with `go run .`.
+Each file in `tests/*.cherri` (except `decomp-expected.cherri` and `decomp-me.cherri`) is compiled by `TestCherri`/`TestCherriNoSign`. When adding or changing a language feature, add or update a test file in `tests/`. Group tests by domain (e.g. `web.cherri`, `shortcuts.cherri`) rather than one file per action. Test files do not need explicit `#include` statements — all standard library action categories are auto-injected during suite runs; includes are only needed when running a file individually with `go run .`.
 
 The test runner calls `compile()` which calls `main()`, so `os.Args[1]` is set to the test file path before each run. Global state is fully reset via `resetParser()` after each test.
 
