@@ -6,4 +6,3 @@
 @array: array
 @data: dictionary
 @data = {}
-show("✅ All tests passed")

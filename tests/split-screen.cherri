@@ -10,4 +10,3 @@ menu "Choose App" {
 alert("","Split Screen?")
 
 splitApps("notes","maps","thirdByTwo")
-show("✅ All tests passed")

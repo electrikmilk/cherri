@@ -3,4 +3,3 @@
 #include 'include.cherri'
 
 alert(@textVar,"Alert")
-show("✅ All tests passed")

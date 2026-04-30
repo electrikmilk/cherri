@@ -5,4 +5,3 @@
 @MB = convertMeasurement(@bytes,"Information Storage","MB")
 
 alert("2000000 bytes in mb is {@MB}","Result")
-show("✅ All tests passed")

@@ -8,4 +8,3 @@
 @message = "Hello, Cherri!"
 @title = "Alert"
 alert(@message, "{@title}")
-show("✅ All tests passed")

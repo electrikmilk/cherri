@@ -21,4 +21,3 @@ menu nil {
 if @int == nil {
 
 }
-show("✅ All tests passed")

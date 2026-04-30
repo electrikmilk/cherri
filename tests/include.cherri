@@ -3,4 +3,3 @@
 #include 'definitions.cherri'
 
 @textVar = "test"
-show("✅ All tests passed")

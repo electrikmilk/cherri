@@ -14,4 +14,3 @@ repeat i for 6 {
 
 @choice = chooseFromVCard(@items, "Prompt")
 show("{@choice}")
-show("✅ All tests passed")

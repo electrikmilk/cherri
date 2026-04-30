@@ -20,4 +20,3 @@ generateProofread("The types in Cherri are text, raw text, number, dictionary, a
 generateRewrite("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
 generateSummary("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
 generateKeyPoints("The types in Cherri are text, raw text, number, dictionary, array, float, and variable. Enumerations can be used as types and expect a text value matching one of the enumerations permutations.")
-show("✅ All tests passed")

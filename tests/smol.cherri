@@ -8,4 +8,3 @@ const response = downloadURL("https://verysmolupdater.francescoro.si/{routinehub
 if @response_text {
 	showWebpage(response)
 }
-show("✅ All tests passed")

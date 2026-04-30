@@ -13,4 +13,3 @@ resizeImageByPercent(@image, "50%")
 resizeImageByLongestEdge(@image, "280")
 
 show("{@combined}")
-show("✅ All tests passed")

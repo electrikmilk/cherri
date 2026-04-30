@@ -11,4 +11,3 @@ action 'com.apple.facetime.facetime' callOnFaceTime(
 )
 
 callOnFaceTime(Ask, "Audio")
-show("✅ All tests passed")

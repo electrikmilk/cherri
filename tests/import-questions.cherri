@@ -6,4 +6,3 @@
 alert(name, "Name")
 
 alert(age, "Age")
-show("✅ All tests passed")

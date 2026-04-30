@@ -9,4 +9,3 @@
 #define noinput getclipboard
 #define name Test
 #define version 26
-show("✅ All tests passed")

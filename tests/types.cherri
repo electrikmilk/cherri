@@ -7,4 +7,3 @@
 @collection: array
 @ref: variable
 @real: float
-show("✅ All tests passed")

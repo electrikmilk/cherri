@@ -9,5 +9,3 @@ openShortcut("shortcuts")
 run("shortcuts", @intVar)
 
 runSelf(nil)
-
-show("✅ All tests passed")
