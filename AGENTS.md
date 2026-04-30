@@ -409,3 +409,7 @@ Minimal Go definition:
 ```
 
 Use `argumentValue(args, i)` or `paramValue(arg, type)` inside `makeParams` to convert collected arguments to plist values. Use `appendParamsFunc` instead of `makeParams` when you want automatic parameter handling to still apply but need to inject extra keys based on argument values.
+
+**Return types matter for testability:** Always declare `: type` on action output in DSL definitions when the action returns a value — omitting it causes the result to have type `''`, which prevents comparisons in test code and breaks type inference downstream. For actions that return values of varying type (e.g. `getValue`), `: text` is usually correct since the Shortcuts runtime coerces as needed.
+
+**`variable` parameter type for numeric actions:** Use `variable` instead of `number` when an action accepts any numeric input (integers and floats). The Cherri type checker rejects float literals and float-typed variables for `number` parameters. Only use `number` when the action genuinely only makes sense with integers. Float literals must be assigned to a variable before being passed to a `variable`-typed parameter — they cannot be passed inline.
