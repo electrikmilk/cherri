@@ -1,8 +1,5 @@
-// if/else output: branches must be action calls, not bare literals.
-// uppercase() is deterministic and works as a branch value.
-// text() outputs a literal string value into a control flow output block.
-// Interpolate the result into a typed variable before comparing — the
-// control flow output const has type '' and can't be used directly with !=.
+/* Control flow output */
+
 @x = 5
 const bigger = if @x > 3 {
     text("yes")
