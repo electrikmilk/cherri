@@ -93,4 +93,19 @@ const varInput = 42
 @varVar = varInput
 const varResult = processVariable(@varVar)
 
+// Default argument value: omitting the arg uses the declared default
+function greetDefault(text name, text salutation = "Hello"): text {
+    output("{@salutation}, {@name}!")
+}
+
+const defaultGreet = greetDefault("World")
+if defaultGreet != "Hello, World!" {
+    alert("❌ FAIL: default arg omitted — got {defaultGreet}, expected 'Hello, World!'")
+}
+
+const overriddenGreet = greetDefault("World", "Hi")
+if overriddenGreet != "Hi, World!" {
+    alert("❌ FAIL: default arg overridden — got {overriddenGreet}, expected 'Hi, World!'")
+}
+
 show("✅ All tests passed")
