@@ -93,7 +93,7 @@ if @val { @r = "right" }
 if @r != "right" { alert("❌ FAIL: has value") }
 
 @r = "wrong"
-@empty: text
+@empty = nil
 if !@empty { @r = "right" }
 if @r != "right" { alert("❌ FAIL: is empty") }
 
