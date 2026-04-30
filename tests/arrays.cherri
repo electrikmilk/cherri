@@ -31,7 +31,7 @@ if !random {
 }
 
 // += append: verify the appended item becomes the last
-@mutable = list("x", "y")
+@mutable = ["x", "y"]
 @mutable += "z"
 const appended = getLastItem(@mutable)
 if appended != "z" {
