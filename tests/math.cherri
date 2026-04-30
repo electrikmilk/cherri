@@ -1,0 +1,39 @@
+// round/ceil/floor require variable input — assign float literals to variables first
+@f1 = 3.7
+const rounded = round(@f1)
+if rounded != 4 {
+    alert("❌ FAIL: round — got {rounded}, expected '4'")
+}
+
+@f2 = 3.1
+const ceiled = ceil(@f2)
+if ceiled != 4 {
+    alert("❌ FAIL: ceil — got {ceiled}, expected '4'")
+}
+
+@f3 = 3.9
+const floored = floor(@f3)
+if floored != 3 {
+    alert("❌ FAIL: floor — got {floored}, expected '3'")
+}
+
+// calculate x^2: 4^2 = 16
+const squared = calculate('x^2', 4)
+if squared != 16 {
+    alert("❌ FAIL: calculate x^2 — got {squared}, expected '16'")
+}
+
+// calculate √x: √9 = 3
+const rooted = calculate('√x', 9)
+if rooted != 3 {
+    alert("❌ FAIL: calculate √x — got {rooted}, expected '3'")
+}
+
+// statistic: compile-only (no declared return type in action definition)
+@nums = list("2", "4", "6", "8", "10")
+statistic("Sum", @nums)
+statistic("Average", @nums)
+statistic("Minimum", @nums)
+statistic("Maximum", @nums)
+
+show("✅ All tests passed")

@@ -16,7 +16,7 @@ action 'getvalueforkey' getValues(dictionary dictionary: 'WFInput'): array {
 }
 
 // [Doc]: [Dictionaries] Get Value from Dictionary: For constants only, otherwise `dictionary['key']` syntax should be used.
-action 'getvalueforkey' getValue(dictionary dictionary: 'WFInput', text key: 'WFDictionaryKey') {
+action 'getvalueforkey' getValue(dictionary dictionary: 'WFInput', text key: 'WFDictionaryKey'): text {
 	"WFGetDictionaryValueType": "Value"
 }
 

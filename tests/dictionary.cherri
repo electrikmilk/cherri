@@ -1,10 +1,9 @@
 @dict = {"name": "Alice", "score": 99, "active": true}
 
-// getValue — no declared return type, so interpolate into a typed variable first
+// getValue
 const name = getValue(@dict, "name")
-@nameStr = "{name}"
-if @nameStr != "Alice" {
-    alert("❌ FAIL: getValue — got {@nameStr}, expected 'Alice'")
+if name != "Alice" {
+    alert("❌ FAIL: getValue — got {name}, expected 'Alice'")
 }
 
 // bracket syntax shorthand
@@ -14,21 +13,19 @@ if @nameAltStr != "Alice" {
     alert("❌ FAIL: dict['key'] — got {@nameAltStr}, expected 'Alice'")
 }
 
-// setValue round-trip — setValue returns :dictionary so getValue on its result is fine
+// setValue round-trip
 const updated = setValue(@dict, "name", "Bob")
 const newName = getValue(updated, "name")
-@newNameStr = "{newName}"
-if @newNameStr != "Bob" {
-    alert("❌ FAIL: setValue — got {@newNameStr}, expected 'Bob'")
+if newName != "Bob" {
+    alert("❌ FAIL: setValue — got {newName}, expected 'Bob'")
 }
 
-// getDictionary from raw JSON string — getDictionary returns :dictionary
+// getDictionary from raw JSON string
 @json = '{"key": "hello", "num": 7}'
 const parsed = getDictionary(@json)
 const parsedVal = getValue(parsed, "key")
-@parsedValStr = "{parsedVal}"
-if @parsedValStr != "hello" {
-    alert("❌ FAIL: getDictionary/getValue — got {@parsedValStr}, expected 'hello'")
+if parsedVal != "hello" {
+    alert("❌ FAIL: getDictionary/getValue — got {parsedVal}, expected 'hello'")
 }
 
 // getKeys returns :array (has value check works for any type)

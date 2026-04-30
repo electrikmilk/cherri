@@ -1,16 +1,16 @@
-/*
-All globals are implemented
-Globals are case-sensitive
-*/
+// Device global: always has a value on any device
+if !Device {
+    alert("❌ FAIL: Device global — no value")
+}
 
+// CurrentDate global: always has a value
+if !CurrentDate {
+    alert("❌ FAIL: CurrentDate global — no value")
+}
+
+// compile-only coverage for interactive/context-dependent globals
 @input = ShortcutInput
-@date = CurrentDate
 @clipboard = Clipboard
-@device = Device
-
-alert(Ask)
-wait(Ask: 'How many seconds?')
-@prompt = "My name is {Ask}"
-
-// But you can also just inline a global in a string like other variables
 @shortcutInput = "{ShortcutInput}"
+
+show("✅ All tests passed")

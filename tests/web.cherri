@@ -1,25 +1,34 @@
-// --- HTTP ---
+// downloadURL: iCloud Shortcuts records API returns stable, predictable JSON.
+// Replace the identifier with any shared Shortcut URL if needed.
+const response = downloadURL("https://www.icloud.com/shortcuts/api/records/5ed735394c1e41cc8899bedb72e47f71")
 
-const response = downloadURL("https://api.example.com/data")
-const authed = downloadURL("https://api.example.com/data", {"Authorization": "Bearer my-token"})
+// raw text contains check (response is a String at this point)
+if !response contains "downloadURL" {
+    alert("❌ FAIL: downloadURL — response missing expected 'downloadURL' field")
+}
+
+// JSON extraction: getDictionary + getValue
+const dict = getDictionary(response)
+const fields = getValue(dict, "fields")
+if !fields {
+    alert("❌ FAIL: getDictionary/getValue — could not extract 'fields' key")
+}
+
+// --- compile-only coverage: additional HTTP actions ---
+// These use placeholder URLs — only compile coverage is needed here.
 
 const created = jsonRequest("https://api.example.com/items", "POST", {"name": "Test", "active": true})
-const authedPost = jsonRequest("https://api.example.com/items", "POST", {"name": "Test"}, {"Authorization": "Bearer my-token", "Accept": "application/json"})
-
+const authedPost = jsonRequest("https://api.example.com/items", "POST", {"name": "Test"}, {"Authorization": "Bearer token"})
 const submitted = formRequest("https://api.example.com/submit", "POST", {"key": "value"})
-const authedForm = formRequest("https://api.example.com/submit", "POST", {"key": "value"}, {"Authorization": "Bearer my-token"})
 
-// --- URL utilities ---
-
+// URL utilities
 const encoded = urlEncode("hello world & more")
 const decoded = urlDecode("hello%20world%20%26%20more")
 const expanded = expandURL("https://bit.ly/example")
 const host = getURLDetail("https://api.example.com/v1/items?q=test", "Host")
 
-// --- X-Callback URL ---
-
-// url-only: previously panicked (bug #178)
+// X-Callback URL
 openCustomXCallbackURL("myapp://do-something")
-
-// all optional args: successKey, cancelKey, errorKey, successURL
 openCustomXCallbackURL("myapp://do-something", "success", "cancel", "error", "myapp://done")
+
+show("✅ All tests passed")

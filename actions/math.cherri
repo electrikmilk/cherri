@@ -53,16 +53,16 @@ enum rounding {
 }
 
 // [Doc]: [Rounding] Round: Rounds number to specified rounding place.
-action default round(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
+action default round(variable number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place"): number {
 	"WFRoundMode": "Normal"
 }
 
 // [Doc]: [Rounding] Round Up: Always round a number up to a specified rounding place.
-action 'round' ceil(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
+action 'round' ceil(variable number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place"): number {
 	"WFRoundMode": "Always Round Up"
 }
 
 // [Doc]: [Rounding] Round Down: Always round a number down to a specified rounding place.
-action 'round' floor(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place") {
+action 'round' floor(variable number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place"): number {
 	"WFRoundMode": "Always Round Down"
 }

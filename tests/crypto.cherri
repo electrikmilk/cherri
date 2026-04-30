@@ -1,0 +1,32 @@
+@input = "hello"
+
+// SHA256 is deterministic for a known input
+const sha256 = hash(@input, "SHA256")
+if sha256 != "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824" {
+    alert("❌ FAIL: hash SHA256 — got {sha256}")
+}
+
+// SHA1 of "hello"
+const sha1 = hash(@input, "SHA1")
+if sha1 != "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d" {
+    alert("❌ FAIL: hash SHA1 — got {sha1}")
+}
+
+// base64 encode
+const encoded = base64Encode(@input)
+if encoded != "aGVsbG8=" {
+    alert("❌ FAIL: base64Encode — got {encoded}, expected 'aGVsbG8='")
+}
+
+// base64 decode round-trip
+@b64 = "aGVsbG8="
+const decoded = base64Decode(@b64)
+if decoded != "hello" {
+    alert("❌ FAIL: base64Decode — got {decoded}, expected 'hello'")
+}
+
+// SHA512 and MD5: compile-only coverage (MD5 is hash default)
+const sha512 = hash(@input, "SHA512")
+const md5 = hash(@input)
+
+show("✅ All tests passed")

@@ -1,32 +1,46 @@
 /* Test variable interpolation with UTF-16 multi-byte characters */
 
-// Test 1: Variable after emoji
-@testVar1 = "value1"
-@result1 = "✅ Emoji before: {@testVar1}"
-show("{@result1}")
+// variable after emoji
+@v1 = "value1"
+@r1 = "✅ Emoji before: {@v1}"
+if @r1 != "✅ Emoji before: value1" {
+    alert("❌ FAIL: emoji before variable — got {@r1}")
+}
 
-// Test 2: Multiple emojis before variable
-@testVar2 = "value2"
-@result2 = "✅ 📝 🎉 Multiple emojis: {@testVar2}"
-show("{@result2}")
+// multiple emojis before variable
+@v2 = "value2"
+@r2 = "✅ 📝 🎉 Multiple emojis: {@v2}"
+if @r2 != "✅ 📝 🎉 Multiple emojis: value2" {
+    alert("❌ FAIL: multiple emojis before variable — got {@r2}")
+}
 
-// Test 3: Variable at start (no emojis)
-@testVar3 = "value3"
-@result3 = "{@testVar3} at the beginning"
-show("{@result3}")
+// variable at start (no emojis)
+@v3 = "value3"
+@r3 = "{@v3} at the beginning"
+if @r3 != "value3 at the beginning" {
+    alert("❌ FAIL: variable at start — got {@r3}")
+}
 
-// Test 4: Multiple variables with emojis in between
-@testVar4a = "first"
-@testVar4b = "second"
-@result4 = "{@testVar4a} ✅ middle emoji ✅ {@testVar4b}"
-show("{@result4}")
+// two variables with emoji between them
+@v4a = "first"
+@v4b = "second"
+@r4 = "{@v4a} ✅ mid ✅ {@v4b}"
+if @r4 != "first ✅ mid ✅ second" {
+    alert("❌ FAIL: two variables with emoji — got {@r4}")
+}
 
-// Test 5: Complex emojis (4-byte UTF-8, 2 UTF-16 code units)
-@testVar6 = "test"
-@result6 = "𝐁𝐨𝐥𝐝 text {@testVar6}"  // Mathematical bold characters
-show("{@result6}")
+// 4-byte UTF-8 characters (mathematical bold, 2 UTF-16 code units each)
+@v5 = "test"
+@r5 = "𝐁𝐨𝐥𝐝 {@v5}"
+if @r5 != "𝐁𝐨𝐥𝐝 test" {
+    alert("❌ FAIL: 4-byte UTF-8 before variable — got {@r5}")
+}
 
-// Test 6: Mixed ASCII, emoji, and variables
-@testVar7 = "mixed"
-@result7 = "ASCII ✅ emoji 123 numbers {@testVar7} end"
-show("{@result7}")
+// mixed ASCII, emoji, number, variable
+@v6 = "mixed"
+@r6 = "ASCII ✅ 123 {@v6} end"
+if @r6 != "ASCII ✅ 123 mixed end" {
+    alert("❌ FAIL: mixed context — got {@r6}")
+}
+
+show("✅ All tests passed")
