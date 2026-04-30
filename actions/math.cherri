@@ -42,27 +42,37 @@ enum statisticOperations {
 // [Doc]: Statistic: Perform a statistical operation on `input`.
 action 'statistics' statistic(statisticOperations operation: 'WFStatisticsOperation', variable input: 'WFInput')
 
-enum rounding {
- 'Ones Place',
- 'Tens Place',
- 'Hundreds Place',
- 'Thousands',
- 'Ten Thousands',
- 'Hundred Thousands',
- 'Millions',
+enum roundingPlace {
+ 'Millions'
+ 'Hundred Thousands'
+ 'Ten Thousands'
+ 'Thousands'
+ 'Hundreds'
+ 'Tens'
+ 'Integer'
+ 'Tenths'
+ 'Hundredths'
+ 'Thousandths'
+ 'Ten-Thousandths'
+ 'Hundred-Thousandths'
+ 'Millionths'
+ 'Ten-Millionths'
+ 'Hundred-Millionths'
+ 'Billionths'
+ '10^'
 }
 
 // [Doc]: [Rounding] Round: Rounds number to specified rounding place.
-action default round(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place"): number {
+action default round(number number: 'WFInput', roundingPlace ?roundTo: 'WFRoundTo' = "Integer"): number {
 	"WFRoundMode": "Normal"
 }
 
 // [Doc]: [Rounding] Round Up: Always round a number up to a specified rounding place.
-action 'round' ceil(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place"): number {
+action 'round' ceil(number number: 'WFInput', roundingPlace ?roundTo: 'WFRoundTo' = "Integer"): number {
 	"WFRoundMode": "Always Round Up"
 }
 
 // [Doc]: [Rounding] Round Down: Always round a number down to a specified rounding place.
-action 'round' floor(number number: 'WFInput', rounding ?roundTo: 'WFRoundTo' = "Ones Place"): number {
+action 'round' floor(number number: 'WFInput', roundingPlace ?roundTo: 'WFRoundTo' = "Integer"): number {
 	"WFRoundMode": "Always Round Down"
 }
