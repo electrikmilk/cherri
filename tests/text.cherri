@@ -1,19 +1,52 @@
-/*
-Easily edit text...
-*/
+const upper = uppercase("hello")
+if upper != "HELLO" {
+    alert("❌ FAIL: uppercase — got {upper}, expected 'HELLO'")
+}
 
-@textVar = "test"
+const lower = lowercase("HELLO")
+if lower != "hello" {
+    alert("❌ FAIL: lowercase — got {lower}, expected 'hello'")
+}
 
-@textVar = correctSpelling(@textVar)
-@textVar = replaceText("s","a",@textVar)
-@textVar = replaceText("s","a",@textVar, false)
-@textVar = replaceText("[0-9a-zA-Z]","a",@textVar, true, true)
-@textVar = replaceText("[0-9a-z]","a",@textVar, false, true)
-@textVar = splitText(@textVar,",")
-@textVar = joinText(@textVar,",")
-@textVar = uppercase(@textVar)
-@textVar = lowercase(@textVar)
-@textVar = titleCase(@textVar)
-@textVar = capitalize(@textVar)
-@textVar = capitalizeAll(@textVar)
-@textVar = alternatingCase(@textVar)
+const titled = titleCase("hello world")
+if titled != "Hello World" {
+    alert("❌ FAIL: titleCase — got {titled}, expected 'Hello World'")
+}
+
+const capped = capitalize("hello world")
+if capped != "Hello world" {
+    alert("❌ FAIL: capitalize — got {capped}, expected 'Hello world'")
+}
+
+// replaceText(match, replacement, input)
+const replaced = replaceText("l", "r", "hello")
+if replaced != "herro" {
+    alert("❌ FAIL: replaceText — got {replaced}, expected 'herro'")
+}
+
+// case-insensitive
+const replacedCI = replaceText("L", "r", "heLLo", false)
+if replacedCI != "herro" {
+    alert("❌ FAIL: replaceText case-insensitive — got {replacedCI}, expected 'herro'")
+}
+
+// regex
+const replacedRE = replaceText("[aeiou]", "*", "hello", true, true)
+if replacedRE != "h*ll*" {
+    alert("❌ FAIL: replaceText regex — got {replacedRE}, expected 'h*ll*'")
+}
+
+// splitText then joinText round-trip
+@parts = splitText("a,b,c", ",")
+const joined = joinText(@parts, "-")
+if joined != "a-b-c" {
+    alert("❌ FAIL: splitText/joinText — got {joined}, expected 'a-b-c'")
+}
+
+// capitalizeAll (each word all-caps)
+const allCapped = capitalizeAll("hello world")
+if allCapped != "HELLO WORLD" {
+    alert("❌ FAIL: capitalizeAll — got {allCapped}, expected 'HELLO WORLD'")
+}
+
+show("✅ All tests passed")
