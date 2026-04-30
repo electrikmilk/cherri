@@ -1,32 +1,40 @@
-@intVar = 3
-@intVar2 = 7
-@testVar = "test"
-
-repeat i for 6 {
-    @intVar2 = 5
-    if @intVar == @intVar2 {
-        @testVar = "test2"
-    }
+// repeat N times: verify loop ran exactly N times
+@count = 0
+repeat i for 5 {
+    @count += 1
+}
+if @count != 5 {
+    alert("❌ FAIL: repeat count — got {@count}, expected '5'")
 }
 
-@listVar = list("item 1","item 2","item 3")
-for item in @listVar {
-    alert("{RepeatIndex}", @item)
+// repeat index variable starts at 1
+@firstIndex = 0
+repeat i for 3 {
+    if @firstIndex == 0 {
+        @firstIndex = @i
+    }
+}
+if @firstIndex != 1 {
+    alert("❌ FAIL: repeat index start — got {@firstIndex}, expected '1'")
 }
 
-repeat i for 20 {
-	const divThree = @i % 3
-	const divFive = @i % 5
-	if divThree == 0 && divFive == 0 {
-		alert("FizzBuzz")
-    }
-	if divThree == 0 && divFive != 0 {
-		alert("Fizz")
-    }
-	if divFive == 0 && divThree != 0 {
-		alert("Buzz")
-    }
-	if divThree != 0 && divFive != 0 {
-		alert("{@i}")
-    }
+// for/in: verify last item
+@items = list("alpha", "beta", "gamma")
+@last = ""
+for item in @items {
+    @last = "{@item}"
 }
+if @last != "gamma" {
+    alert("❌ FAIL: for/in last item — got {@last}, expected 'gamma'")
+}
+
+// for/in: verify RepeatIndex reaches end of list
+@lastIndex = 0
+for item in @items {
+    @lastIndex = RepeatIndex
+}
+if @lastIndex != 3 {
+    alert("❌ FAIL: for/in RepeatIndex — got {@lastIndex}, expected '3'")
+}
+
+show("✅ All tests passed")

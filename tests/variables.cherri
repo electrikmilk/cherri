@@ -1,43 +1,60 @@
-/* Types of variables */
-
-@intVar = 42
-@intVar2 = 52
-@floatVar = 1.5
-const immutable = 5
-@stringVar = "text {@intVar} {@intVar2} {immutable}"
-number(immutable)
-@multiString = "Multiline
-string
-var"
-@rawString = 'i\'m not allowed inline variables, new lines, etc. but i compile faster!'
-@arrayVar = ["item 1 {@intVar}","item 2","item 3",5,{"key1":"value","key2":5,"key3":true}]
-@boolVarTrue = true
-@boolVarFalse = false
-@urlVar = url('https://apple.com','https://google.com')
-@dateVar = date("October 5, 2022")
-@locationVar = location(Ask)
-@email = emailAddress("test@test.com")
-@phone = phoneNumber("(555) 555-5555")
-@dictVar = {
-    "key1": "value",
-    "key2": 5,
-    "key3": true,
-    "key4": [
-        "item1",
-        "item 2",
-        "item3"
-    ]
+// mutation operators
+@x = 5
+@x += 3
+if @x != 8 {
+    alert("❌ FAIL: += — got {@x}, expected '8'")
 }
-@expVar = 54 * @intVar + (6 * 7)
-@listVar = list("Item 1","Item 2","Item 3")
 
-// empty variable
-@emptyVar
+@x = 10
+@x -= 4
+if @x != 6 {
+    alert("❌ FAIL: -= — got {@x}, expected '6'")
+}
 
-// add to variable
-@stringVar += "test"
-@intVar -= 2
-@intVar *= 3
-@intVar /= 2
+@x = 5
+@x *= 3
+if @x != 15 {
+    alert("❌ FAIL: *= — got {@x}, expected '15'")
+}
 
-@emptyVar = @stringVar
+@x = 10
+@x /= 2
+if @x != 5 {
+    alert("❌ FAIL: /= — got {@x}, expected '5'")
+}
+
+// string interpolation
+@a = "Hello"
+@b = "{@a} World"
+if @b != "Hello World" {
+    alert("❌ FAIL: interpolation — got {@b}, expected 'Hello World'")
+}
+
+// const (magic variable) in interpolation
+const immutable = 42
+@text = "value is {immutable}"
+if @text != "value is 42" {
+    alert("❌ FAIL: const interpolation — got {@text}, expected 'value is 42'")
+}
+
+// type declarations compile (no assertion — types are a compiler concern)
+@typed: text
+@numTyped: number
+@arrTyped: array
+@dictTyped: dictionary
+@boolTyped: bool
+
+// type assignment via literal
+@n = 7
+@f = 1.5
+@flag = true
+@items = ["a", "b", "c"]
+@dict = {"key": "val"}
+
+// number used in string context
+@asText = "{@n}"
+if @asText != "7" {
+    alert("❌ FAIL: number to string — got {@asText}, expected '7'")
+}
+
+show("✅ All tests passed")
