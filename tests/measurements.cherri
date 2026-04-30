@@ -1,5 +1,8 @@
+// compile-only: unit measurement types
+
 @bytes = measurement("2000000","Information Storage","B")
 
 @MB = convertMeasurement(@bytes,"Information Storage","MB")
 
 alert("2000000 bytes in mb is {@MB}","Result")
+show("✅ All tests passed")

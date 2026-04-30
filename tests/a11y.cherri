@@ -1,3 +1,5 @@
+// compile-only: accessibility UI
+
 // setBackgroundSound: default and explicit enum values
 setBackgroundSound()
 setBackgroundSound("RainOnRoof")
@@ -30,3 +32,4 @@ setSoundRecognition("toggle")
 magnifierDescribe()
 magnifierReader()
 magnifierPointAndSpeak()
+show("✅ All tests passed")

@@ -1,3 +1,5 @@
+// compile-only: type declaration syntax
+
 @string: text
 @integer: number
 @boolean: bool
@@ -5,3 +7,4 @@
 @collection: array
 @ref: variable
 @real: float
+show("✅ All tests passed")

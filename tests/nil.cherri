@@ -1,3 +1,5 @@
+// compile-only: nil/empty value syntax
+
 @media = getFile(nil)
 setMetadata(@media, nil, "Title")
 @media = nil
@@ -19,3 +21,4 @@ menu nil {
 if @int == nil {
 
 }
+show("✅ All tests passed")

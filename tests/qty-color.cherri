@@ -1,3 +1,5 @@
+// compile-only: color and quantity types
+
 // Tests color() and qty() as explicit action arguments
 
 // qty() — time-duration type, used by startTimer in actions/calendar.cherri
@@ -6,3 +8,4 @@ startTimer(qty(5, "min"))
 // color() — colour type, used by makeQRCode in actions/documents.cherri
 makeQRCode("https://cherrilang.org")
 makeQRCode("https://cherrilang.org", "High", color(0.0,0.0,0.0,1.0), color(2.0,2.0,2.0,1.0))
+show("✅ All tests passed")

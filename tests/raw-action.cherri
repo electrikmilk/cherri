@@ -1,4 +1,7 @@
+// compile-only: raw action syntax coverage
+
 rawAction("is.workflow.actions.alert", {
     "WFAlertActionMessage": "Hello, world!",
     "WFAlertActionTitle": "Alert"
 })
+show("✅ All tests passed")

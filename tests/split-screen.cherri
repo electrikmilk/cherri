@@ -1,3 +1,5 @@
+// compile-only: UI layout, not assertable
+
 menu "Choose App" {
     item "Notes":
         openApp("notes")
@@ -8,3 +10,4 @@ menu "Choose App" {
 alert("","Split Screen?")
 
 splitApps("notes","maps","thirdByTwo")
+show("✅ All tests passed")

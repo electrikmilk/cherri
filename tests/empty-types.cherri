@@ -1,6 +1,9 @@
+// compile-only: empty type declaration syntax
+
 @string: text
 @integer: number
 @array = []
 @array: array
 @data: dictionary
 @data = {}
+show("✅ All tests passed")

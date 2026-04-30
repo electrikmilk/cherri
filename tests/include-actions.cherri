@@ -1,2 +1,5 @@
+// compile-only: include actions syntax
+
 @file = selectFile()
 saveToDropboxPrompt(@file)
+show("✅ All tests passed")

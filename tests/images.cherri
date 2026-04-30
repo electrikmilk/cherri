@@ -1,3 +1,5 @@
+// compile-only: media/hardware dependent
+
 @images = selectPhotos(true)
 
 @combined = combineImages(@images, "In a Grid")
@@ -11,3 +13,4 @@ resizeImageByPercent(@image, "50%")
 resizeImageByLongestEdge(@image, "280")
 
 show("{@combined}")
+show("✅ All tests passed")

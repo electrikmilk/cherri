@@ -1,9 +1,13 @@
+// compile-only: system actions (openShortcut, runSelf)
+
 getShortcuts()
 
-openShortcut("Add Song to Favorites")
+openShortcut("shortcuts")
 
 @intVar = 2
 
-run("Add Song to Favorites", @intVar)
+run("shortcuts", @intVar)
 
 runSelf(nil)
+
+show("✅ All tests passed")

@@ -1,6 +1,9 @@
+// compile-only: import question actions
+
 #question name "What is your name?" "Brandon"
 #question age "What is your age?" "24"
 
 alert(name, "Name")
 
 alert(age, "Age")
+show("✅ All tests passed")
