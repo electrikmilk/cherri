@@ -431,6 +431,9 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 			if argValueType == Date && param.validType == String {
 				return
 			}
+			if argValueType == Float && param.validType == Integer {
+				return
+			}
 			parserError(fmt.Sprintf("Invalid variable value %v (%s) for argument '%s' (%s).\n%s",
 				argVal,
 				argValueType,
@@ -443,6 +446,9 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 	case argValueType == Nil:
 	case param.validType == String && argument.valueType == RawString:
 	case argValueType != param.validType:
+		if argValueType == Float && param.validType == Integer {
+			return
+		}
 		if argValueType == String {
 			argVal = "\"" + argVal.(string) + "\""
 		}
