@@ -12,6 +12,14 @@ if @result != "Value: 100" {
     alert("❌ FAIL: inline .text — got {@result}, expected 'Value: 100'")
 }
 
+// .number coercion via string interpolation produces a number-typed variable
+@n2: number
+@asText = "42"
+@n2 = @asText.number
+if @n2 != 42 {
+    alert("❌ FAIL: .text — got {@n2}, expected 42")
+}
+
 // Device global with .text coercion (compile coverage — value varies by device)
 @deviceOS = Device['OS']
 @versionText = "{Device['System Version'].text}"
