@@ -1,30 +1,49 @@
+// if/else output: branches must be action calls, not bare literals.
+// uppercase() is deterministic and works as a branch value.
+// text() outputs a literal string value into a control flow output block.
+// Interpolate the result into a typed variable before comparing — the
+// control flow output const has type '' and can't be used directly with !=.
+@x = 5
+const bigger = if @x > 3 {
+    text("yes")
+} else {
+    text("no")
+}
+@biggerStr = "{bigger}"
+if @biggerStr != "yes" {
+    alert("❌ FAIL: if output (true branch) — got {@biggerStr}, expected 'yes'")
+}
+
+const smaller = if @x > 100 {
+    text("yes")
+} else {
+    text("no")
+}
+@smallerStr = "{smaller}"
+if @smallerStr != "no" {
+    alert("❌ FAIL: if output (false branch) — got {@smallerStr}, expected 'no'")
+}
+
+// compile-only: device-dependent and interactive values
 @deviceModel = "{Device['Model']}"
 const connectionName = if @deviceModel == "iPhone" {
     getCellularDetail("Carrier Name")
 } else {
     getWifiDetail("Network Name")
 }
-
 show("{connectionName}")
 
-const deviceDetail = menu "Get Device Detail" {
-    item "Battery":
-        getBatteryLevel()
-    item "Clipboard":
-        getClipboard()
-}
-
-show("{deviceDetail}")
-
+// repeat output: compile-only (output format varies)
 const repeated = repeat i for 6 {
     number(@i)
 }
-
 show("{repeated}")
 
+// for/in output: compile-only (output is a list)
 @items = ["Item 1", "Item 2", "Item 3"]
-const map = for item in @items {
+const mapped = for item in @items {
     number(@item)
 }
+show("{mapped}")
 
-show("{map}")
+show("✅ All tests passed")

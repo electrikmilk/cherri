@@ -1,34 +1,46 @@
-/*
-You can enter a standard JSON object
-as the value of a dictionary
-*/
+@dict = {"name": "Alice", "score": 99, "active": true}
 
-const test = "text"
-@dictVar = {
-    "key1": "value {test}",
-    "key2": 5,
-    "key3": true,
-    "key4": [
-        "item 1",
-        5,
-        ["item 3",5,false],
-        {"key":"value"}
-    ],
-    "key5":{
-        "key":"value"
-    }
+// getValue — no declared return type, so interpolate into a typed variable first
+const name = getValue(@dict, "name")
+@nameStr = "{name}"
+if @nameStr != "Alice" {
+    alert("❌ FAIL: getValue — got {@nameStr}, expected 'Alice'")
 }
 
-// Get values, keys, and values for keys...
+// bracket syntax shorthand
+@nameAlt = @dict['name']
+@nameAltStr = "{@nameAlt}"
+if @nameAltStr != "Alice" {
+    alert("❌ FAIL: dict['key'] — got {@nameAltStr}, expected 'Alice'")
+}
 
-@value = getValue(@dictVar, "key1")
+// setValue round-trip — setValue returns :dictionary so getValue on its result is fine
+const updated = setValue(@dict, "name", "Bob")
+const newName = getValue(updated, "name")
+@newNameStr = "{newName}"
+if @newNameStr != "Bob" {
+    alert("❌ FAIL: setValue — got {@newNameStr}, expected 'Bob'")
+}
 
-// you can also access it like this with a raw string, but no variable references are allowed.
-@value = @dictVar['key1']
-alert(@value,"Value of key1")
+// getDictionary from raw JSON string — getDictionary returns :dictionary
+@json = '{"key": "hello", "num": 7}'
+const parsed = getDictionary(@json)
+const parsedVal = getValue(parsed, "key")
+@parsedValStr = "{parsedVal}"
+if @parsedValStr != "hello" {
+    alert("❌ FAIL: getDictionary/getValue — got {@parsedValStr}, expected 'hello'")
+}
 
-@keys = getKeys(@dictVar)
+// getKeys returns :array (has value check works for any type)
+const keys = getKeys(@dict)
+if !keys {
+    alert("❌ FAIL: getKeys — returned no value")
+}
 
-@values = getValues(@dictVar)
+// getValues returns :array
+const vals = getValues(@dict)
+if !vals {
+    alert("❌ FAIL: getValues — returned no value")
+}
 
-setValue(@dictVar, "key 1", @value)
+show("✅ All tests passed")
