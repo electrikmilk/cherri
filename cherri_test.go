@@ -18,6 +18,7 @@ var currentTest string
 
 func TestCherri(_ *testing.T) {
 	args.Args["no-ansi"] = ""
+	args.Args["comments"] = ""
 	var files, err = os.ReadDir("tests")
 	if err != nil {
 		fmt.Println(ansi("FAILED: unable to read tests directory", red))
