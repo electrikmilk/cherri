@@ -28,6 +28,39 @@ if parsedVal != "hello" {
     alert("❌ FAIL: getDictionary/getValue — got {parsedVal}, expected 'hello'")
 }
 
+// nested dictionary: child dict and mixed array as values
+@nested = {
+    "meta": {
+        "author": "Cherri",
+        "version": 1
+    },
+    "tags": ["compiler", "dsl", "shortcuts"],
+    "config": {
+        "debug": false,
+        "maxDepth": 3
+    }
+}
+
+// getDictionary() converts a child value to a typed :dictionary before further getValue calls
+const metaRaw = getValue(@nested, "meta")
+const meta = getDictionary(metaRaw)
+const author = getValue(meta, "author")
+if author != "Cherri" {
+    alert("❌ FAIL: nested dict child getValue — got {author}, expected 'Cherri'")
+}
+
+const configRaw = getValue(@nested, "config")
+const config = getDictionary(configRaw)
+const maxDepth = getValue(config, "maxDepth")
+if maxDepth != "3" {
+    alert("❌ FAIL: nested dict second child — got {maxDepth}, expected '3'")
+}
+
+const tags = getValue(@nested, "tags")
+if !tags {
+    alert("❌ FAIL: nested dict array value — tags missing")
+}
+
 // getKeys returns :array (has value check works for any type)
 const keys = getKeys(@dict)
 if !keys {
