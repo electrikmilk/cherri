@@ -21,7 +21,8 @@ if encoded != "aGVsbG8=" {
 // base64 decode round-trip
 @b64 = "aGVsbG8="
 const decoded = base64Decode(@b64)
-if decoded != "hello" {
+const decodedStr = "{decoded}"
+if decodedStr != "hello" {
     alert("❌ FAIL: base64Decode — got {decoded}, expected 'hello'")
 }
 
