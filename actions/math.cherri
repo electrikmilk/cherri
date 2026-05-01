@@ -25,7 +25,7 @@ action 'math' calculate(
     number operandOne: 'WFInput',
     number ?operandTwo: 'WFMathOperand'
 ): number {
-	"WFMathOperation": "..."
+	"WFMathOperation": "…"
 }
 
 enum statisticOperations {
