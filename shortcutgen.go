@@ -138,6 +138,10 @@ func makeVariableAction(t *token) {
 			return
 		}
 	}
+
+	if _, hasInput := setVariableParams["WFInput"]; !hasInput {
+		addStdAction("nothing", map[string]any{})
+	}
 	addStdAction("setvariable", setVariableParams)
 
 	if t.valueType == Arr {
