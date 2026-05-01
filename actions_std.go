@@ -1122,7 +1122,7 @@ var actions = map[string]*actionDefinition{
 	"list": {
 		doc: selfDoc{
 			title:       "List",
-			description: "Create a list.",
+			description: "Create an immutable array of text.",
 			category:    "scripting",
 			subcategory: "Lists",
 		},
