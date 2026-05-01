@@ -547,7 +547,7 @@ var actions = map[string]*actionDefinition{
 	"getFileFromFolder": {
 		doc: selfDoc{
 			title:       "Get File From Folder",
-			description: "Get a file from a folder.",
+			description: "Get a file from a folder. Prepend path with a `~` to access the home folder on macOS.",
 			category:    "documents",
 			subcategory: "Files & Folders",
 		},
