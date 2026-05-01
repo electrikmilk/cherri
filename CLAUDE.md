@@ -299,6 +299,13 @@ Files that cannot be behaviorally asserted (interactive UI, hardware-dependent, 
 
 **Comparison type constraints:** The `!=` / `==` operators (and other conditionals) require the left-side value to have a declared type in `{text, number, bool, action, date}`. A `const` bound to an action with no declared return type gets type `''` and cannot be used directly in a comparison — add `: type` to the action definition, or assign to a mutable variable via interpolation: `@s = "{const}"`. Constants and globals *can* be used directly on the left side when their type is known.
 
+**Runtime type coercion — `: variable` vs `: text` on action return types:** Declaring `: text` on an action is a compile-time annotation only. Shortcuts has its own runtime type system: many actions that logically produce text actually return a generic variable reference at runtime that requires explicit casting before string comparison in conditions. Two categories:
+
+- **True text producers** — text-transformation actions (`uppercase`, `replaceText`, `hash`, `base64Encode`, `formatDate`, `downloadURL`) return typed text the Shortcuts runtime accepts directly in conditions: `if result != "expected"`.
+- **Container readers and decoders** — actions that extract values from dicts/lists (`getValue`, `getFirstItem`, `getLastItem`, `getListItem`, `getRandomItem`) and decode actions (`base64Decode`) return generic variable references. Declare these `: variable` and cast before comparison using `.text` coercion: `if result.text != "expected"`, or via string interpolation: `const s = "{result}"; if s != "expected"`.
+
+The `.text` suffix on a const (`result.text`) works in conditions and is preferred over the interpolation workaround. Only fall back to interpolation when `.text` is unavailable (e.g. the value must be stored in a mutable variable for repeated use).
+
 **Conditional left-side must be a variable or const, not a literal:** `if 5 == 5` causes a compile panic — always put a variable or const on the left: `@n = 5; if @n == 5`.
 
 **`contains` only works for text and arrays:** The `contains` / `!contains` operators are not valid for dictionaries. To check if a key exists in a dict, use `getValue(dict, key)` and check `if !result`.

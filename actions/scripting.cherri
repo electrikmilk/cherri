@@ -16,7 +16,7 @@ action 'getvalueforkey' getValues(dictionary dictionary: 'WFInput'): array {
 }
 
 // [Doc]: [Dictionaries] Get Value from Dictionary: For constants only, otherwise `dictionary['key']` syntax should be used.
-action 'getvalueforkey' getValue(dictionary dictionary: 'WFInput', text key: 'WFDictionaryKey'): text {
+action 'getvalueforkey' getValue(dictionary dictionary: 'WFInput', text key: 'WFDictionaryKey'): variable {
 	"WFGetDictionaryValueType": "Value"
 }
 
@@ -38,22 +38,22 @@ action chooseFromList(
 )
 
 // [Doc]: [Lists] Get First Item: Get first item in a list.
-action 'getitemfromlist' getFirstItem(variable list: 'WFInput'): text {
+action 'getitemfromlist' getFirstItem(variable list: 'WFInput'): variable {
 	"WFItemSpecifier": "First Item"
 }
 
 // [Doc]: [Lists] Get Last Item: Get the last item in a list.
-action 'getitemfromlist' getLastItem(variable list: 'WFInput'): text {
+action 'getitemfromlist' getLastItem(variable list: 'WFInput'): variable {
 	"WFItemSpecifier": "Last Item"
 }
 
 // [Doc]: [Lists] Get Random Item: Get random item from list.
-action 'getitemfromlist' getRandomItem(variable list: 'WFInput'): text {
+action 'getitemfromlist' getRandomItem(variable list: 'WFInput'): variable {
 	"WFItemSpecifier": "Random Item"
 }
 
 // [Doc]: [Lists] Get List Item: Get item from `list` at `index`. Keep in mind Shortcuts starts counting indexes at 1.
-action 'getitemfromlist' getListItem(variable list: 'WFInput', number index: 'WFItemIndex'): text {
+action 'getitemfromlist' getListItem(variable list: 'WFInput', number index: 'WFItemIndex'): variable {
 	"WFItemSpecifier": "Item At Index"
 }
 
