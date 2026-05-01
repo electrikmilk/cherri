@@ -1478,6 +1478,7 @@ func collectEndStatement() {
 		value:     controlFlowGroup.identifier,
 	})
 	groupingIdx--
+	addNothing()
 }
 
 // groupStatement creates a grouping UUID for a statement and adds to the statement groupings.
