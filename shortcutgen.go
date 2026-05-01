@@ -998,7 +998,7 @@ func conditionalParameter(param *WFConditionParam, arg actionArgument, inputType
 		}
 		routeConditionalValue(param, paramValue(actionArgument{valueType: Integer, value: boolNumber}, Integer), inputType)
 	case Integer, Float:
-		param.WFNumberValue = paramValue(arg, arg.valueType)
+		routeConditionalValue(param, paramValue(arg, arg.valueType), Integer)
 	default:
 		routeConditionalValue(param, paramValue(arg, arg.valueType), inputType)
 	}
@@ -1028,7 +1028,7 @@ func conditionalParameterLegacy(params map[string]any, arg actionArgument, input
 		}
 		routeConditionalValueLegacy(params, paramValue(actionArgument{valueType: Integer, value: boolNumber}, Integer), inputType)
 	case Integer, Float:
-		params["WFNumberValue"] = paramValue(arg, arg.valueType)
+		routeConditionalValueLegacy(params, paramValue(arg, arg.valueType), Integer)
 	default:
 		routeConditionalValueLegacy(params, paramValue(arg, arg.valueType), inputType)
 	}
