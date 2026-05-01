@@ -381,6 +381,11 @@ func variableValueWithSerialization(variable varValue, serializationType string)
 	if global, found := globals[identifier]; found {
 		isInputVariable(identifier)
 		variable.variableType = global.variableType
+		if global.variableType == "Variable" {
+			if displayName, ok := global.value.(string); ok {
+				identifier = displayName
+			}
+		}
 	} else if v, found := variables[identifier]; found {
 		variableReference = v
 		variable.constant = v.constant
