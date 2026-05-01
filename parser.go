@@ -312,9 +312,6 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 	if *valueType == Question {
 		parserError(fmt.Sprintf("Illegal reference to import question '%s'. Shortcuts does not support import questions as variable values.", *value))
 	}
-	if value == nil {
-		addNothing()
-	}
 
 	var aheadOfValue = lookAheadUntil('\n')
 	if strings.Contains(aheadOfValue, "//") || strings.Contains(aheadOfValue, "/*") {
