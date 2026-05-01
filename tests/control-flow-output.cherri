@@ -37,7 +37,7 @@ const repeated = repeat i for 6 {
 show("{repeated}")
 
 // for/in output: compile-only (output is a list)
-@items = ["Item 1", "Item 2", "Item 3"]
+@items = ["1", "2", "3"]
 const mapped = for item in @items {
     number(@item)
 }
