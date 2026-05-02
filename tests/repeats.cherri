@@ -4,7 +4,7 @@ repeat i for 5 {
     @count += 1
 }
 if @count != 5 {
-    alert("❌ FAIL: repeat count — got {@count}, expected '5'")
+    mustOutput("❌ FAIL: repeat count — got {@count}, expected '5'", "❌ FAIL: repeat count — got {@count}, expected '5'")
 }
 
 // repeat index variable starts at 1
@@ -15,7 +15,7 @@ repeat i for 3 {
     }
 }
 if @firstIndex != 1 {
-    alert("❌ FAIL: repeat index start — got {@firstIndex}, expected '1'")
+    mustOutput("❌ FAIL: repeat index start — got {@firstIndex}, expected '1'", "❌ FAIL: repeat index start — got {@firstIndex}, expected '1'")
 }
 
 // for/in: verify last item
@@ -25,7 +25,7 @@ for item in @items {
     @last = "{@item}"
 }
 if @last != "gamma" {
-    alert("❌ FAIL: for/in last item — got {@last}, expected 'gamma'")
+    mustOutput("❌ FAIL: for/in last item — got {@last}, expected 'gamma'", "❌ FAIL: for/in last item — got {@last}, expected 'gamma'")
 }
 
 // for/in: verify RepeatIndex reaches end of list
@@ -34,7 +34,7 @@ for item in @items {
     @lastIndex = RepeatIndex
 }
 if @lastIndex != 3 {
-    alert("❌ FAIL: for/in RepeatIndex — got {@lastIndex}, expected '3'")
+    mustOutput("❌ FAIL: for/in RepeatIndex — got {@lastIndex}, expected '3'", "❌ FAIL: for/in RepeatIndex — got {@lastIndex}, expected '3'")
 }
 
 show("✅ All tests passed")

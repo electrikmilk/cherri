@@ -1,11 +1,11 @@
 // Device global: always has a value on any device
 if !Device {
-    alert("❌ FAIL: Device global — no value")
+    mustOutput("❌ FAIL: Device global — no value", "❌ FAIL: Device global — no value")
 }
 
 // CurrentDate global: always has a value
 if !CurrentDate {
-    alert("❌ FAIL: CurrentDate global — no value")
+    mustOutput("❌ FAIL: CurrentDate global — no value", "❌ FAIL: CurrentDate global — no value")
 }
 
 // compile-only coverage for interactive/context-dependent globals

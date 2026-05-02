@@ -10,7 +10,7 @@ paste carbon
 const clip = getClipboard()
 @clipStr = "{clip}"
 if @clipStr != "cherri-test" {
-    alert("❌ FAIL: clipboard round-trip — got {@clipStr}, expected 'cherri-test'")
+    mustOutput("❌ FAIL: clipboard round-trip — got {@clipStr}, expected 'cherri-test'", "❌ FAIL: clipboard round-trip — got {@clipStr}, expected 'cherri-test'")
 }
 
 show("✅ All tests passed")

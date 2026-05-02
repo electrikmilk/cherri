@@ -3,31 +3,31 @@
 // getFirstItem
 const first = getFirstItem(@items)
 if first.text != "alpha" {
-    alert("❌ FAIL: getFirstItem — got {first}, expected 'alpha'")
+    mustOutput("❌ FAIL: getFirstItem — got {first}, expected 'alpha'", "❌ FAIL: getFirstItem — got {first}, expected 'alpha'")
 }
 
 // getLastItem
 const last = getLastItem(@items)
 if last.text != "delta" {
-    alert("❌ FAIL: getLastItem — got {last}, expected 'delta'")
+    mustOutput("❌ FAIL: getLastItem — got {last}, expected 'delta'", "❌ FAIL: getLastItem — got {last}, expected 'delta'")
 }
 
 // getListItem: Shortcuts indexes from 1
 const second = getListItem(@items, 2)
 if second.text != "beta" {
-    alert("❌ FAIL: getListItem — got {second}, expected 'beta'")
+    mustOutput("❌ FAIL: getListItem — got {second}, expected 'beta'", "❌ FAIL: getListItem — got {second}, expected 'beta'")
 }
 
 // getListItems: items 2–3 → has value (output is a list, not directly comparable)
 const slice = getListItems(@items, 2, 3)
 if !slice {
-    alert("❌ FAIL: getListItems — returned no value")
+    mustOutput("❌ FAIL: getListItems — returned no value", "❌ FAIL: getListItems — returned no value")
 }
 
 // getRandomItem: non-deterministic, only assert has value
 const random = getRandomItem(@items)
 if !random {
-    alert("❌ FAIL: getRandomItem — returned no value")
+    mustOutput("❌ FAIL: getRandomItem — returned no value", "❌ FAIL: getRandomItem — returned no value")
 }
 
 // += append: verify the appended item becomes the last
@@ -35,18 +35,18 @@ if !random {
 @mutable += "z"
 const appended = getLastItem(@mutable)
 if appended.text != "z" {
-    alert("❌ FAIL: += append — got {appended}, expected 'z'")
+    mustOutput("❌ FAIL: += append — got {appended}, expected 'z'", "❌ FAIL: += append — got {appended}, expected 'z'")
 }
 
 // += append multiple times, verify order is preserved
 @mutable += "w"
 const afterSecond = getLastItem(@mutable)
 if afterSecond.text != "w" {
-    alert("❌ FAIL: += second append — got {afterSecond}, expected 'w'")
+    mustOutput("❌ FAIL: += second append — got {afterSecond}, expected 'w'", "❌ FAIL: += second append — got {afterSecond}, expected 'w'")
 }
 const stillZ = getListItem(@mutable, 3)
 if stillZ.text != "z" {
-    alert("❌ FAIL: prior item after append — got {stillZ}, expected 'z'")
+    mustOutput("❌ FAIL: prior item after append — got {stillZ}, expected 'z'", "❌ FAIL: prior item after append — got {stillZ}, expected 'z'")
 }
 
 show("✅ All tests passed")

@@ -14,7 +14,7 @@ function fibonacci(number n): text {
 
 const fib = fibonacci(7)
 if fib != "13" {
-    alert("❌ FAIL: fibonacci(7) — got {fib}, expected '13'")
+    mustOutput("❌ FAIL: fibonacci(7) — got {fib}, expected '13'", "❌ FAIL: fibonacci(7) — got {fib}, expected '13'")
 }
 
 // Typed text argument
@@ -24,7 +24,7 @@ function greet(text name): text {
 
 const greeting = greet("World")
 if greeting != "Hello, World!" {
-    alert("❌ FAIL: greet — got {greeting}, expected 'Hello, World!'")
+    mustOutput("❌ FAIL: greet — got {greeting}, expected 'Hello, World!'", "❌ FAIL: greet — got {greeting}, expected 'Hello, World!'")
 }
 
 // Mixed typed arguments
@@ -36,7 +36,7 @@ function formatPair(text label, number count): text {
 @pairCount = 5
 const pair = formatPair(@pairLabel, @pairCount)
 if pair != "items: 5" {
-    alert("❌ FAIL: formatPair — got {pair}, expected 'items: 5'")
+    mustOutput("❌ FAIL: formatPair — got {pair}, expected 'items: 5'", "❌ FAIL: formatPair — got {pair}, expected 'items: 5'")
 }
 
 // Number typed argument
@@ -47,7 +47,7 @@ function double(number value): text {
 
 const doubled = double(21)
 if doubled != "42" {
-    alert("❌ FAIL: double — got {doubled}, expected '42'")
+    mustOutput("❌ FAIL: double — got {doubled}, expected '42'", "❌ FAIL: double — got {doubled}, expected '42'")
 }
 
 // Bool typed argument (compile coverage — output format varies)
@@ -100,12 +100,12 @@ function greetDefault(text name, text salutation = "Hello"): text {
 
 const defaultGreet = greetDefault("World")
 if defaultGreet != "Hello, World!" {
-    alert("❌ FAIL: default arg omitted — got {defaultGreet}, expected 'Hello, World!'")
+    mustOutput("❌ FAIL: default arg omitted — got {defaultGreet}, expected 'Hello, World!'", "❌ FAIL: default arg omitted — got {defaultGreet}, expected 'Hello, World!'")
 }
 
 const overriddenGreet = greetDefault("World", "Hi")
 if overriddenGreet != "Hi, World!" {
-    alert("❌ FAIL: default arg overridden — got {overriddenGreet}, expected 'Hi, World!'")
+    mustOutput("❌ FAIL: default arg overridden — got {overriddenGreet}, expected 'Hi, World!'", "❌ FAIL: default arg overridden — got {overriddenGreet}, expected 'Hi, World!'")
 }
 
 show("✅ All tests passed")

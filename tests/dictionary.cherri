@@ -3,21 +3,21 @@
 // getValue
 const name = getValue(@dict, "name")
 if name.text != "Alice" {
-    alert("❌ FAIL: getValue — got {name}, expected 'Alice'")
+    mustOutput("❌ FAIL: getValue — got {name}, expected 'Alice'", "❌ FAIL: getValue — got {name}, expected 'Alice'")
 }
 
 // bracket syntax shorthand
 @nameAlt = @dict['name']
 @nameAltStr = "{@nameAlt}"
 if @nameAltStr != "Alice" {
-    alert("❌ FAIL: dict['key'] — got {@nameAltStr}, expected 'Alice'")
+    mustOutput("❌ FAIL: dict['key'] — got {@nameAltStr}, expected 'Alice'", "❌ FAIL: dict['key'] — got {@nameAltStr}, expected 'Alice'")
 }
 
 // setValue round-trip
 const updated = setValue(@dict, "name", "Bob")
 const newName = "{updated['name']}"
 if newName != "Bob" {
-    alert("❌ FAIL: setValue — got {newName}, expected 'Bob'")
+    mustOutput("❌ FAIL: setValue — got {newName}, expected 'Bob'", "❌ FAIL: setValue — got {newName}, expected 'Bob'")
 }
 
 // getDictionary from raw JSON string
@@ -25,7 +25,7 @@ if newName != "Bob" {
 const parsed = getDictionary(@json)
 const parsedVal = "{parsed['key']}"
 if parsedVal != "hello" {
-    alert("❌ FAIL: getDictionary/getValue — got {parsedVal}, expected 'hello'")
+    mustOutput("❌ FAIL: getDictionary/getValue — got {parsedVal}, expected 'hello'", "❌ FAIL: getDictionary/getValue — got {parsedVal}, expected 'hello'")
 }
 
 // nested dictionary: child dict and mixed array as values
@@ -46,31 +46,31 @@ const metaRaw = getValue(@nested, "meta")
 const meta = getDictionary(metaRaw)
 @author = "{meta['author']}"
 if @author != "Cherri" {
-    alert("❌ FAIL: nested dict child getValue — got {author}, expected 'Cherri'")
+    mustOutput("❌ FAIL: nested dict child getValue — got {author}, expected 'Cherri'", "❌ FAIL: nested dict child getValue — got {author}, expected 'Cherri'")
 }
 
 const configRaw = getValue(@nested, "config")
 const config = getDictionary(configRaw)
 const maxDepth = "{config['maxDepth']}"
 if maxDepth != "3" {
-    alert("❌ FAIL: nested dict second child — got {maxDepth}, expected '3'")
+    mustOutput("❌ FAIL: nested dict second child — got {maxDepth}, expected '3'", "❌ FAIL: nested dict second child — got {maxDepth}, expected '3'")
 }
 
 const tags = getValue(@nested, "tags")
 if !tags {
-    alert("❌ FAIL: nested dict array value — tags missing")
+    mustOutput("❌ FAIL: nested dict array value — tags missing", "❌ FAIL: nested dict array value — tags missing")
 }
 
 // getKeys returns :array (has value check works for any type)
 const keys = getKeys(@dict)
 if !keys {
-    alert("❌ FAIL: getKeys — returned no value")
+    mustOutput("❌ FAIL: getKeys — returned no value", "❌ FAIL: getKeys — returned no value")
 }
 
 // getValues returns :array
 const vals = getValues(@dict)
 if !vals {
-    alert("❌ FAIL: getValues — returned no value")
+    mustOutput("❌ FAIL: getValues — returned no value", "❌ FAIL: getValues — returned no value")
 }
 
 show("✅ All tests passed")

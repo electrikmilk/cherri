@@ -1,52 +1,52 @@
 const upper = uppercase("hello")
 if upper != "HELLO" {
-    alert("❌ FAIL: uppercase — got {upper}, expected 'HELLO'")
+    mustOutput("❌ FAIL: uppercase — got {upper}, expected 'HELLO'", "❌ FAIL: uppercase — got {upper}, expected 'HELLO'")
 }
 
 const lower = lowercase("HELLO")
 if lower != "hello" {
-    alert("❌ FAIL: lowercase — got {lower}, expected 'hello'")
+    mustOutput("❌ FAIL: lowercase — got {lower}, expected 'hello'", "❌ FAIL: lowercase — got {lower}, expected 'hello'")
 }
 
 const titled = titleCase("hello world")
 if titled != "Hello World" {
-    alert("❌ FAIL: titleCase — got {titled}, expected 'Hello World'")
+    mustOutput("❌ FAIL: titleCase — got {titled}, expected 'Hello World'", "❌ FAIL: titleCase — got {titled}, expected 'Hello World'")
 }
 
 const capped = capitalize("hello world")
 if capped != "Hello world" {
-    alert("❌ FAIL: capitalize — got {capped}, expected 'Hello world'")
+    mustOutput("❌ FAIL: capitalize — got {capped}, expected 'Hello world'", "❌ FAIL: capitalize — got {capped}, expected 'Hello world'")
 }
 
 // replaceText(match, replacement, input)
 const replaced = replaceText("l", "r", "hello")
 if replaced != "herro" {
-    alert("❌ FAIL: replaceText — got {replaced}, expected 'herro'")
+    mustOutput("❌ FAIL: replaceText — got {replaced}, expected 'herro'", "❌ FAIL: replaceText — got {replaced}, expected 'herro'")
 }
 
 // case-insensitive
 const replacedCI = replaceText("L", "r", "heLLo", false)
 if replacedCI != "herro" {
-    alert("❌ FAIL: replaceText case-insensitive — got {replacedCI}, expected 'herro'")
+    mustOutput("❌ FAIL: replaceText case-insensitive — got {replacedCI}, expected 'herro'", "❌ FAIL: replaceText case-insensitive — got {replacedCI}, expected 'herro'")
 }
 
 // regex
 const replacedRE = replaceText("[aeiou]", "*", "hello", true, true)
 if replacedRE != "h*ll*" {
-    alert("❌ FAIL: replaceText regex — got {replacedRE}, expected 'h*ll*'")
+    mustOutput("❌ FAIL: replaceText regex — got {replacedRE}, expected 'h*ll*'", "❌ FAIL: replaceText regex — got {replacedRE}, expected 'h*ll*'")
 }
 
 // splitText then joinText round-trip
 @parts = splitText("a,b,c", ",")
 const joined = joinText(@parts, "-")
 if joined != "a-b-c" {
-    alert("❌ FAIL: splitText/joinText — got {joined}, expected 'a-b-c'")
+    mustOutput("❌ FAIL: splitText/joinText — got {joined}, expected 'a-b-c'", "❌ FAIL: splitText/joinText — got {joined}, expected 'a-b-c'")
 }
 
 // capitalizeAll (each word capitalized)
 const allCapitalized = capitalizeAll("hello world")
 if allCapitalized != "Hello World" {
-    alert("❌ FAIL: capitalizeAll — got {allCapitalized}, expected 'Hello World'")
+    mustOutput("❌ FAIL: capitalizeAll — got {allCapitalized}, expected 'Hello World'", "❌ FAIL: capitalizeAll — got {allCapitalized}, expected 'Hello World'")
 }
 
 show("✅ All tests passed")

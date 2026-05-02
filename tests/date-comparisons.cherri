@@ -5,26 +5,26 @@
 
 @r = "wrong"
 if @past < @future { @r = "right" }
-if @r != "right" { alert("❌ FAIL: date < (past < future)") }
+if @r != "right" { mustOutput("❌ FAIL: date < (past < future)", "❌ FAIL: date < (past < future)") }
 
 @r = "wrong"
 if @future > @past { @r = "right" }
-if @r != "right" { alert("❌ FAIL: date > (future > past)") }
+if @r != "right" { mustOutput("❌ FAIL: date > (future > past)", "❌ FAIL: date > (future > past)") }
 
 @r = "wrong"
 if @past == @same { @r = "right" }
-if @r != "right" { alert("❌ FAIL: date == (same date)") }
+if @r != "right" { mustOutput("❌ FAIL: date == (same date)", "❌ FAIL: date == (same date)") }
 
 @r = "wrong"
 if @past != @future { @r = "right" }
-if @r != "right" { alert("❌ FAIL: date !=") }
+if @r != "right" { mustOutput("❌ FAIL: date !=", "❌ FAIL: date !=") }
 
 // between: @past is between an earlier and later date
 @earlier = date("January 1, 2000")
 @later = date("December 31, 2025")
 @r = "wrong"
 if @past <> @earlier @later { @r = "right" }
-if @r != "right" { alert("❌ FAIL: date between") }
+if @r != "right" { mustOutput("❌ FAIL: date between", "❌ FAIL: date between") }
 
 // Dynamic date: compile-only coverage (value varies at runtime)
 @today = currentDate()

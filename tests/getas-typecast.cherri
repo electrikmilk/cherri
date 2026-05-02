@@ -2,14 +2,14 @@
 @num = 42
 @asText = "{@num.text}"
 if @asText != "42" {
-    alert("❌ FAIL: .text — got {@asText}, expected '42'")
+    mustOutput("❌ FAIL: .text — got {@asText}, expected '42'", "❌ FAIL: .text — got {@asText}, expected '42'")
 }
 
 // inline .text in string interpolation
 @n = 100
 @result = "Value: {@n.text}"
 if @result != "Value: 100" {
-    alert("❌ FAIL: inline .text — got {@result}, expected 'Value: 100'")
+    mustOutput("❌ FAIL: inline .text — got {@result}, expected 'Value: 100'", "❌ FAIL: inline .text — got {@result}, expected 'Value: 100'")
 }
 
 // .number coercion via string interpolation produces a number-typed variable
@@ -17,7 +17,7 @@ if @result != "Value: 100" {
 @asText = "42"
 @n2 = @asText.number
 if @n2 != 42 {
-    alert("❌ FAIL: .text — got {@n2}, expected 42")
+    mustOutput("❌ FAIL: .text — got {@n2}, expected 42", "❌ FAIL: .text — got {@n2}, expected 42")
 }
 
 // Device global with .text coercion (compile coverage — value varies by device)

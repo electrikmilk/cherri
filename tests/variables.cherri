@@ -2,39 +2,39 @@
 @x = 5
 @x += 3
 if @x != 8 {
-    alert("❌ FAIL: += — got {@x}, expected '8'")
+    mustOutput("❌ FAIL: += — got {@x}, expected '8'", "❌ FAIL: += — got {@x}, expected '8'")
 }
 
 @x = 10
 @x -= 4
 if @x != 6 {
-    alert("❌ FAIL: -= — got {@x}, expected '6'")
+    mustOutput("❌ FAIL: -= — got {@x}, expected '6'", "❌ FAIL: -= — got {@x}, expected '6'")
 }
 
 @x = 5
 @x *= 3
 if @x != 15 {
-    alert("❌ FAIL: *= — got {@x}, expected '15'")
+    mustOutput("❌ FAIL: *= — got {@x}, expected '15'", "❌ FAIL: *= — got {@x}, expected '15'")
 }
 
 @x = 10
 @x /= 2
 if @x != 5 {
-    alert("❌ FAIL: /= — got {@x}, expected '5'")
+    mustOutput("❌ FAIL: /= — got {@x}, expected '5'", "❌ FAIL: /= — got {@x}, expected '5'")
 }
 
 // string interpolation
 @a = "Hello"
 @b = "{@a} World"
 if @b != "Hello World" {
-    alert("❌ FAIL: interpolation — got {@b}, expected 'Hello World'")
+    mustOutput("❌ FAIL: interpolation — got {@b}, expected 'Hello World'", "❌ FAIL: interpolation — got {@b}, expected 'Hello World'")
 }
 
 // const (magic variable) in interpolation
 const immutable = 42
 @text = "value is {immutable}"
 if @text != "value is 42" {
-    alert("❌ FAIL: const interpolation — got {@text}, expected 'value is 42'")
+    mustOutput("❌ FAIL: const interpolation — got {@text}, expected 'value is 42'", "❌ FAIL: const interpolation — got {@text}, expected 'value is 42'")
 }
 
 // type declarations compile (no assertion — types are a compiler concern)
@@ -54,7 +54,7 @@ if @text != "value is 42" {
 // number used in string context
 @asText = "{@n}"
 if @asText != "7" {
-    alert("❌ FAIL: number to string — got {@asText}, expected '7'")
+    mustOutput("❌ FAIL: number to string — got {@asText}, expected '7'", "❌ FAIL: number to string — got {@asText}, expected '7'")
 }
 
 show("✅ All tests passed")

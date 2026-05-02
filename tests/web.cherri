@@ -7,14 +7,14 @@ const response = downloadURL(API_URL)
 // raw text contains check (response is a String at this point)
 @responseText = "{response}"
 if @responseText !contains "downloadURL" {
-    alert("❌ FAIL: downloadURL — response missing expected 'downloadURL' field")
+    mustOutput("❌ FAIL: downloadURL — response missing expected 'downloadURL' field", "❌ FAIL: downloadURL — response missing expected 'downloadURL' field")
 }
 
 // JSON extraction: getDictionary + getValue
 const dict = getDictionary(response)
 const fields = getValue(dict, "fields")
 if !fields {
-    alert("❌ FAIL: getDictionary/getValue — could not extract 'fields' key")
+    mustOutput("❌ FAIL: getDictionary/getValue — could not extract 'fields' key", "❌ FAIL: getDictionary/getValue — could not extract 'fields' key")
 }
 
 // --- compile-only coverage: additional HTTP actions ---

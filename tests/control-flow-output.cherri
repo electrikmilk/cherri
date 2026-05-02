@@ -8,7 +8,7 @@ const bigger = if @x > 3 {
 }
 @biggerStr = "{bigger}"
 if @biggerStr != "yes" {
-    alert("❌ FAIL: if output (true branch) — got {@biggerStr}, expected 'yes'")
+    mustOutput("❌ FAIL: if output (true branch) — got {@biggerStr}, expected 'yes'", "❌ FAIL: if output (true branch) — got {@biggerStr}, expected 'yes'")
 }
 
 const smaller = if @x > 100 {
@@ -18,7 +18,7 @@ const smaller = if @x > 100 {
 }
 @smallerStr = "{smaller}"
 if @smallerStr != "no" {
-    alert("❌ FAIL: if output (false branch) — got {@smallerStr}, expected 'no'")
+    mustOutput("❌ FAIL: if output (false branch) — got {@smallerStr}, expected 'no'", "❌ FAIL: if output (false branch) — got {@smallerStr}, expected 'no'")
 }
 
 // compile-only: device-dependent and interactive values

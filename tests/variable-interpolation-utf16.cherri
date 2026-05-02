@@ -4,21 +4,21 @@
 @v1 = "value1"
 @r1 = "✅ Emoji before: {@v1}"
 if @r1 != "✅ Emoji before: value1" {
-    alert("❌ FAIL: emoji before variable — got {@r1}")
+    mustOutput("❌ FAIL: emoji before variable — got {@r1}", "❌ FAIL: emoji before variable — got {@r1}")
 }
 
 // multiple emojis before variable
 @v2 = "value2"
 @r2 = "✅ 📝 🎉 Multiple emojis: {@v2}"
 if @r2 != "✅ 📝 🎉 Multiple emojis: value2" {
-    alert("❌ FAIL: multiple emojis before variable — got {@r2}")
+    mustOutput("❌ FAIL: multiple emojis before variable — got {@r2}", "❌ FAIL: multiple emojis before variable — got {@r2}")
 }
 
 // variable at start (no emojis)
 @v3 = "value3"
 @r3 = "{@v3} at the beginning"
 if @r3 != "value3 at the beginning" {
-    alert("❌ FAIL: variable at start — got {@r3}")
+    mustOutput("❌ FAIL: variable at start — got {@r3}", "❌ FAIL: variable at start — got {@r3}")
 }
 
 // two variables with emoji between them
@@ -26,21 +26,21 @@ if @r3 != "value3 at the beginning" {
 @v4b = "second"
 @r4 = "{@v4a} ✅ mid ✅ {@v4b}"
 if @r4 != "first ✅ mid ✅ second" {
-    alert("❌ FAIL: two variables with emoji — got {@r4}")
+    mustOutput("❌ FAIL: two variables with emoji — got {@r4}", "❌ FAIL: two variables with emoji — got {@r4}")
 }
 
 // 4-byte UTF-8 characters (mathematical bold, 2 UTF-16 code units each)
 @v5 = "test"
 @r5 = "𝐁𝐨𝐥𝐝 {@v5}"
 if @r5 != "𝐁𝐨𝐥𝐝 test" {
-    alert("❌ FAIL: 4-byte UTF-8 before variable — got {@r5}")
+    mustOutput("❌ FAIL: 4-byte UTF-8 before variable — got {@r5}", "❌ FAIL: 4-byte UTF-8 before variable — got {@r5}")
 }
 
 // mixed ASCII, emoji, number, variable
 @v6 = "mixed"
 @r6 = "ASCII ✅ 123 {@v6} end"
 if @r6 != "ASCII ✅ 123 mixed end" {
-    alert("❌ FAIL: mixed context — got {@r6}")
+    mustOutput("❌ FAIL: mixed context — got {@r6}", "❌ FAIL: mixed context — got {@r6}")
 }
 
 show("✅ All tests passed")
