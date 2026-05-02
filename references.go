@@ -67,7 +67,7 @@ func extractParameterReferences(index int, identifier string, params map[string]
 
 		sanitizeIdentifier(&ref.identifier)
 
-		if skipDuplicateReference(ref) {
+		if skipDuplicateReference(ref) || ref.value == nil {
 			continue
 		}
 
@@ -78,8 +78,7 @@ func extractParameterReferences(index int, identifier string, params map[string]
 
 func skipDuplicateReference(ref extractedReference) bool {
 	for _, existingRef := range extractedReferences {
-		existingIdentifier := existingRef.identifier
-		if existingIdentifier == ref.identifier {
+		if existingRef.identifier == ref.identifier {
 			return true
 		}
 	}
