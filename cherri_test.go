@@ -204,6 +204,7 @@ func TestActionIdentifiers(t *testing.T) {
 }
 
 func TestRawActionVariableValue(t *testing.T) {
+	resetParser()
 	args.Args["no-ansi"] = ""
 	args.Args["skip-sign"] = ""
 	loadStandardActions()
@@ -263,6 +264,123 @@ rawAction("is.workflow.actions.notification", {
 	}
 	if attachment.VariableName != "msg" {
 		t.Fatalf("Expected variable name msg, got %q", attachment.VariableName)
+	}
+}
+
+func TestRawActionNestedDictionaryValue(t *testing.T) {
+	resetParser()
+	args.Args["no-ansi"] = ""
+	args.Args["skip-sign"] = ""
+	loadStandardActions()
+	defer func() {
+		delete(args.Args, "no-ansi")
+		delete(args.Args, "skip-sign")
+		resetParser()
+	}()
+
+	var source = `rawAction("is.workflow.actions.downloadurl", {
+    "WFURL": "https://example.com",
+    "WFHTTPMethod": "GET",
+    "WFHTTPHeaders": {
+        "Authorization": "Bearer my-token",
+        "Content-Type": "text/markdown"
+    }
+})
+`
+	var testFile = filepath.Join(t.TempDir(), "raw-action-nested-dictionary.cherri")
+	var writeErr = os.WriteFile(testFile, []byte(source), 0o600)
+	if writeErr != nil {
+		t.Fatal(writeErr)
+	}
+
+	currentTest = testFile
+	os.Args = []string{"cherri", testFile}
+	compile()
+
+	if len(shortcut.WFWorkflowActions) != 1 {
+		t.Fatalf("Expected 1 action, got %d", len(shortcut.WFWorkflowActions))
+	}
+
+	var params = shortcut.WFWorkflowActions[0].WFWorkflowActionParameters
+	var rawHeaders, found = params["WFHTTPHeaders"]
+	if !found {
+		t.Fatal("Expected WFHTTPHeaders raw action parameter")
+	}
+
+	var headersValue, isDictionary = rawHeaders.(WFDictionaryFieldValue)
+	if !isDictionary {
+		t.Fatalf("Expected WFHTTPHeaders to be WFDictionaryFieldValue, got %T", rawHeaders)
+	}
+
+	if headersValue.WFSerializationType != "WFDictionaryFieldValue" {
+		t.Fatalf("Expected WFHTTPHeaders serialization type WFDictionaryFieldValue, got %q", headersValue.WFSerializationType)
+	}
+
+	var wrapper, ok = headersValue.Value.(WFDictionaryFieldValueWrapper)
+	if !ok {
+		t.Fatalf("Expected WFHTTPHeaders value wrapper, got %T", headersValue.Value)
+	}
+
+	if len(wrapper.WFDictionaryFieldValueItems) != 2 {
+		t.Fatalf("Expected 2 header items, got %d", len(wrapper.WFDictionaryFieldValueItems))
+	}
+}
+
+func TestRawActionRequestVariableAttachment(t *testing.T) {
+	resetParser()
+	args.Args["no-ansi"] = ""
+	args.Args["skip-sign"] = ""
+	loadStandardActions()
+	defer func() {
+		delete(args.Args, "no-ansi")
+		delete(args.Args, "skip-sign")
+		resetParser()
+	}()
+
+	var source = `const markdown = text("hello")
+
+rawAction("is.workflow.actions.downloadurl", {
+    "WFURL": "https://example.com",
+    "WFHTTPMethod": "POST",
+    "WFHTTPBodyType": "File",
+    "WFRequestVariable": "${@markdown}"
+})
+`
+	var testFile = filepath.Join(t.TempDir(), "raw-action-request-variable.cherri")
+	var writeErr = os.WriteFile(testFile, []byte(source), 0o600)
+	if writeErr != nil {
+		t.Fatal(writeErr)
+	}
+
+	currentTest = testFile
+	os.Args = []string{"cherri", testFile}
+	compile()
+
+	if len(shortcut.WFWorkflowActions) != 2 {
+		t.Fatalf("Expected 2 actions, got %d", len(shortcut.WFWorkflowActions))
+	}
+
+	var params = shortcut.WFWorkflowActions[1].WFWorkflowActionParameters
+	var rawValue, found = params["WFRequestVariable"]
+	if !found {
+		t.Fatal("Expected WFRequestVariable raw action parameter")
+	}
+
+	var requestValue, isAttachment = rawValue.(WFTextTokenAttachment)
+	if !isAttachment {
+		t.Fatalf("Expected WFRequestVariable to be WFTextTokenAttachment, got %T", rawValue)
+	}
+
+	if requestValue.WFSerializationType != "WFTextTokenAttachment" {
+		t.Fatalf("Expected WFRequestVariable serialization type WFTextTokenAttachment, got %q", requestValue.WFSerializationType)
+	}
+
+	if requestValue.Value.Type != "ActionOutput" {
+		t.Fatalf("Expected WFRequestVariable Value.Type ActionOutput, got %q", requestValue.Value.Type)
+	}
+
+	if requestValue.Value.OutputName != "markdown" {
+		t.Fatalf("Expected WFRequestVariable OutputName markdown, got %q", requestValue.Value.OutputName)
 	}
 }
 

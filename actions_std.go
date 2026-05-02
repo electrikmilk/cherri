@@ -1776,14 +1776,50 @@ func defineRawAction() {
 
 func handleRawParams(params map[string]any) {
 	for key, value := range params {
-		if reflect.TypeOf(value).Kind() != reflect.String || !strings.ContainsAny(value.(string), "{}") {
-			continue
+		params[key] = normalizeRawActionParamValue(value)
+	}
+}
+
+func normalizeRawActionParamValue(value any) any {
+	if value == nil {
+		return nil
+	}
+
+	switch v := value.(type) {
+	case string:
+		if !strings.ContainsAny(v, "{}") {
+			return value
 		}
-		if useAttachmentAsVariableValueRegex.MatchString(value.(string)) {
-			params[key] = rawActionVariableValue(value.(string))
-			continue
+		if useAttachmentAsVariableValueRegex.MatchString(v) {
+			return rawActionVariableValue(v)
 		}
-		params[key] = attachmentValues(value.(string))
+		return attachmentValues(v)
+	case map[string]any:
+		var normalized any = normalizeRawActionDictionary(v)
+		return makeDictionaryValue(&normalized)
+	case []any:
+		return makeRawActionArrayValue(v)
+	default:
+		return value
+	}
+}
+
+func normalizeRawActionDictionary(value map[string]any) map[string]any {
+	var normalized = make(map[string]any, len(value))
+	for key, item := range value {
+		normalized[key] = normalizeRawActionParamValue(item)
+	}
+	return normalized
+}
+
+func makeRawActionArrayValue(value []any) WFArrayValue {
+	var items = make([]WFDictionaryFieldValueItem, 0, len(value))
+	for _, item := range value {
+		items = append(items, makeDictionaryItem("", normalizeRawActionParamValue(item)))
+	}
+	return WFArrayValue{
+		WFSerializationType: "WFArrayParameterState",
+		Value:               items,
 	}
 }
 
