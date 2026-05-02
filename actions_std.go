@@ -1746,7 +1746,7 @@ var focusModes = map[string]focusMode{
 	},
 }
 
-var useAttachmentAsVariableValueRegex = regexp.MustCompile(`^\$\{[a-zA-Z0-9]+}$`)
+var useAttachmentAsVariableValueRegex = regexp.MustCompile(`^\$\{@?.*}$`)
 
 func defineRawAction() {
 	actions["rawAction"] = &actionDefinition{
@@ -1780,13 +1780,31 @@ func handleRawParams(params map[string]any) {
 			continue
 		}
 		if useAttachmentAsVariableValueRegex.MatchString(value.(string)) {
-			params[key] = variableValue(varValue{
-				value: strings.Trim(value.(string), "${}"),
-			})
+			params[key] = rawActionVariableValue(value.(string))
 			continue
 		}
 		params[key] = attachmentValues(value.(string))
 	}
+}
+
+func rawActionVariableValue(value string) any {
+	var matches = collectInlineVarRegex.FindStringSubmatch(strings.TrimPrefix(value, "$"))
+	if len(matches) < 2 {
+		return attachmentValues(value)
+	}
+
+	var variable = varValue{
+		valueType: Variable,
+		value:     matches[1],
+	}
+	if len(matches) > 2 {
+		variable.getAs = matches[2]
+	}
+	if len(matches) > 3 {
+		variable.coerce = matches[3]
+	}
+
+	return variableValue(variable)
 }
 
 var actionIncludes = []string{

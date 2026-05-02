@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -200,6 +201,69 @@ func TestActionIdentifiers(t *testing.T) {
 	}
 
 	resetParser()
+}
+
+func TestRawActionVariableValue(t *testing.T) {
+	args.Args["no-ansi"] = ""
+	args.Args["skip-sign"] = ""
+	loadStandardActions()
+	defer func() {
+		delete(args.Args, "no-ansi")
+		delete(args.Args, "skip-sign")
+		resetParser()
+	}()
+
+	var source = `@msg = text("hello world")
+
+rawAction("is.workflow.actions.notification", {
+    "WFNotificationActionTitle": "${@msg}",
+    "WFNotificationActionBody": "body"
+})
+`
+	var testFile = filepath.Join(t.TempDir(), "raw-action-variable-value.cherri")
+	var writeErr = os.WriteFile(testFile, []byte(source), 0o600)
+	if writeErr != nil {
+		t.Fatal(writeErr)
+	}
+
+	currentTest = testFile
+	os.Args = []string{"cherri", testFile}
+	compile()
+
+	if len(shortcut.WFWorkflowActions) < 3 {
+		t.Fatalf("Expected at least 3 actions, got %d", len(shortcut.WFWorkflowActions))
+	}
+
+	var params = shortcut.WFWorkflowActions[2].WFWorkflowActionParameters
+	var rawValue, found = params["WFNotificationActionTitle"]
+	if !found {
+		t.Fatal("Expected WFNotificationActionTitle raw action parameter")
+	}
+
+	var titleValue, isAttachment = rawValue.(WFTextTokenAttachment)
+	if isAttachment {
+		if titleValue.Value.VariableName != "msg" {
+			t.Fatalf("Expected variable name msg, got %q", titleValue.Value.VariableName)
+		}
+		return
+	}
+
+	var titleTextValue, isTextToken = rawValue.(WFTextTokenString)
+	if !isTextToken {
+		t.Fatalf("Expected WFNotificationActionTitle to be WFTextTokenString or WFTextTokenAttachment, got %T", rawValue)
+	}
+
+	if titleTextValue.Value.String != ObjectReplaceCharStr {
+		t.Fatalf("Expected raw action variable value string %q, got %q", ObjectReplaceCharStr, titleTextValue.Value.String)
+	}
+
+	var attachment, attachmentFound = titleTextValue.Value.AttachmentsByRange["{0, 1}"]
+	if !attachmentFound {
+		t.Fatalf("Expected raw action variable attachment at {0, 1}, got %v", titleTextValue.Value.AttachmentsByRange)
+	}
+	if attachment.VariableName != "msg" {
+		t.Fatalf("Expected variable name msg, got %q", attachment.VariableName)
+	}
 }
 
 func compile() {
