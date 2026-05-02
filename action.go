@@ -244,7 +244,7 @@ func makeActionParams(arguments []actionArgument, params map[string]any) {
 			continue
 		}
 
-		if arguments[i].valueType == MediaReference {
+		if arguments[i].valueType == Reference {
 			params[param.key] = references[arguments[i].value.(string)]
 			continue
 		}
@@ -450,7 +450,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		}
 	case argValueType == Question:
 	case argValueType == Nil:
-	case argValueType == MediaReference:
+	case argValueType == Reference:
 	case param.validType == String && argument.valueType == RawString:
 	case argValueType != param.validType:
 		if argValueType == Float && param.validType == Integer {
@@ -521,8 +521,8 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 		return
 	}
 
-	if argument.valueType == MediaReference && !param.ref {
-		parserError(fmt.Sprintf("Media references '%s' are not allowed for argument '%s'.\n%s", argument.value, param.name, generateActionDefinition(*param, false)))
+	if argument.valueType == Reference && !param.ref {
+		parserError(fmt.Sprintf("Reference '%s' not allowed for argument '%s'.\n%s", argument.value, param.name, generateActionDefinition(*param, false)))
 	}
 
 	if param.enum != "" {

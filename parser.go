@@ -184,7 +184,7 @@ func printParsingDebug() {
 	fmt.Println(enumerations)
 	fmt.Print("\n")
 
-	fmt.Println(ansi("## MEDIA REFERENCES ##", bold))
+	fmt.Println(ansi("## REFERENCES ##", bold))
 	fmt.Println(references)
 	fmt.Print("\n")
 
@@ -212,9 +212,9 @@ func parse() {
 	case startOfLineTokenAhead(Definition):
 		advance()
 		collectDefinition()
-	case startOfLineTokenAhead(MediaReference):
+	case startOfLineTokenAhead(Reference):
 		advance()
-		collectMediaReference()
+		collectEncodedReference()
 	case isChar('@'):
 		collectVariable(false)
 	case tokenAhead(Constant):
@@ -590,7 +590,7 @@ func collectReference(valueType *tokenType, value *any, until *rune, variable bo
 		}
 
 		if _, found := references[reference]; found {
-			*valueType = MediaReference
+			*valueType = Reference
 			*value = reference
 			return
 		}
@@ -1128,20 +1128,20 @@ func collectQuestion() {
 	}
 }
 
-func collectMediaReference() {
+func collectEncodedReference() {
 	var identifier = collectIdentifier()
 	if _, found := references[identifier]; found {
-		parserError(fmt.Sprintf("Duplicate declaration of media reference '%s'.", identifier))
+		parserError(fmt.Sprintf("Duplicate declaration of reference '%s'.", identifier))
 	}
 	if validReference(identifier) {
-		parserError(fmt.Sprintf("Media reference identifier conflicts with defined variable, constant or global '%s'.", identifier))
+		parserError(fmt.Sprintf("Reference identifier conflicts with defined variable, constant or global '%s'.", identifier))
 	}
 	advance()
 
 	var hash = collectUntil('\n')
 	var ref, err = decodeReferenceHash(hash)
 	if err != nil {
-		parserError(fmt.Sprintf("Failed to decode media reference hash: %v\n\nCollected hash: %s", err, hash))
+		parserError(fmt.Sprintf("Failed to decode reference hash: %v\n\nCollected hash: %s", err, hash))
 	}
 	references[identifier] = ref
 }

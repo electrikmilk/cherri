@@ -10,8 +10,8 @@ import (
 	"howett.net/plist"
 )
 
-// extractedMediaReference holds the state for a single extracted reference.
-type extractedMediaReference struct {
+// extractedReference holds the state for a single extracted reference.
+type extractedReference struct {
 	action     string
 	identifier string
 	index      int
@@ -19,12 +19,12 @@ type extractedMediaReference struct {
 }
 
 // extractedReferences holds references extracted from a workflow.
-var extractedReferences []extractedMediaReference
+var extractedReferences []extractedReference
 
 // references holds parsed references.
 var references = make(map[string]map[string]any)
 
-// extractReferences extracts input references from a workflow with unique identifiers and outputs hash identifier media reference syntax.
+// extractReferences extracts input references from a workflow with unique identifiers and outputs reference syntax.
 func extractReferences(b []byte) {
 	var _, marshalIndexedErr = plist.Unmarshal(b, &shortcut)
 	handle(marshalIndexedErr)
@@ -40,14 +40,14 @@ func extractReferences(b []byte) {
 		fmt.Println(ansi("Extracted References:\n", green, bold))
 	}
 	for _, ref := range extractedReferences {
-		printMediaReference(&ref)
+		printReference(&ref)
 	}
 }
 
 // extractParameterReferences extracts references from a workflow action parameter.
 func extractParameterReferences(index int, identifier string, params map[string]interface{}) {
 	for _, value := range params {
-		var ref = extractedMediaReference{
+		var ref = extractedReference{
 			action: identifier,
 			index:  index + 1,
 		}
@@ -76,7 +76,7 @@ func extractParameterReferences(index int, identifier string, params map[string]
 	return
 }
 
-func skipDuplicateReference(ref extractedMediaReference) bool {
+func skipDuplicateReference(ref extractedReference) bool {
 	for _, existingRef := range extractedReferences {
 		existingIdentifier := existingRef.identifier
 		if existingIdentifier == ref.identifier {
@@ -100,7 +100,7 @@ type FileLocation struct {
 }
 
 // extractFileReference extracts a file reference from a workflow action parameter.
-func extractFileReference(ref *extractedMediaReference, values map[string]interface{}) (file WFFile) {
+func extractFileReference(ref *extractedReference, values map[string]interface{}) (file WFFile) {
 	mapToStruct(values, &file)
 	ref.identifier = file.DisplayName
 	return
@@ -113,14 +113,14 @@ type WFMediaItem struct {
 }
 
 // extractMediaReference extracts a media reference from a workflow action parameter.
-func extractMediaReference(ref *extractedMediaReference, values map[string]interface{}) (media WFMediaItem) {
+func extractMediaReference(ref *extractedReference, values map[string]interface{}) (media WFMediaItem) {
 	mapToStruct(values, &media)
 	ref.identifier = media.ItemName
 	return
 }
 
 // makeReferenceHash returns a unique hash for a reference.
-func makeReferenceHash(ref *extractedMediaReference) string {
+func makeReferenceHash(ref *extractedReference) string {
 	var jsonBytes, marshalErr = json.Marshal(ref.value)
 	handle(marshalErr)
 
@@ -144,12 +144,12 @@ func decodeReferenceHash(hash string) (ref map[string]any, err error) {
 }
 
 // makeRefCode returns the reference in Cherri reference syntax.
-func makeRefCode(ref *extractedMediaReference) string {
+func makeRefCode(ref *extractedReference) string {
 	return fmt.Sprintf("#ref %s %s\n", ref.identifier, makeReferenceHash(ref))
 }
 
-// printMediaReference prints a media reference to stdout.
-func printMediaReference(ref *extractedMediaReference) {
+// printReference prints a reference to stdout.
+func printReference(ref *extractedReference) {
 	if args.Using("debug") {
 		fmt.Println(ansi(fmt.Sprintf("%s (Action %d, %s)\n", ref.identifier, ref.index, ref.action), bold))
 	}
