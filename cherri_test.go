@@ -203,6 +203,21 @@ func TestActionIdentifiers(t *testing.T) {
 	resetParser()
 }
 
+func TestCapitalizeEmptyString(t *testing.T) {
+	if got := capitalize(""); got != "" {
+		t.Fatalf("expected empty string, got %q", got)
+	}
+}
+
+func TestSanitizeIdentifierWhitespaceOnly(t *testing.T) {
+	identifier := " "
+	sanitizeIdentifier(&identifier)
+
+	if identifier != "" {
+		t.Fatalf("expected sanitized identifier to be empty, got %q", identifier)
+	}
+}
+
 func compile() {
 	defer func() {
 		if recover() != nil {

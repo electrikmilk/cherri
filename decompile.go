@@ -33,7 +33,6 @@ func decompile(b []byte) {
 	var _, marshalIndexedErr = plist.Unmarshal(b, &shortcut)
 	handle(marshalIndexedErr)
 
-	specialCharsRegex = regexp.MustCompile("[^a-zA-Z0-9_]+")
 	variables = make(map[string]varValue)
 	uuids = make(map[string]string)
 	controlFlowGroups = make(map[int]controlFlowGroup)
@@ -272,6 +271,9 @@ func mapUUID(uuid string, varName string) {
 
 // sanitizeIdentifier strips special characters and replaces dashes with underscores.
 func sanitizeIdentifier(identifier *string) {
+	if specialCharsRegex == nil {
+		specialCharsRegex = regexp.MustCompile("[^a-zA-Z0-9_]+")
+	}
 	if strings.Contains(*identifier, " ") {
 		var words = strings.Split(strings.TrimSpace(*identifier), " ")
 		for i, word := range words {
