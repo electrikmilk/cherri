@@ -203,6 +203,76 @@ func TestActionIdentifiers(t *testing.T) {
 	resetParser()
 }
 
+func TestInlineQuestions(t *testing.T) {
+	args.Args["no-ansi"] = ""
+	args.Args["skip-sign"] = ""
+	loadStandardActions()
+
+	currentTest = "tests/import-questions.cherri"
+	os.Args[1] = currentTest
+
+	compile()
+
+	importQuestions, ok := shortcut.WFWorkflowImportQuestions.([]WFQuestion)
+	if !ok {
+		t.Fatalf("WFWorkflowImportQuestions is not []WFQuestion, got %T", shortcut.WFWorkflowImportQuestions)
+	}
+
+	if len(importQuestions) != 4 {
+		t.Fatalf("Expected 4 import questions, got %d", len(importQuestions))
+	}
+
+	var foundLegacyWithDefault, foundLegacyNoDefault bool
+	var foundInlineWithDefault, foundInlineNoDefault bool
+
+	for _, q := range importQuestions {
+		switch q.Text {
+		case "What is your name?":
+			foundLegacyWithDefault = true
+			if q.DefaultValue == nil {
+				t.Error("Legacy question 'What is your name?' should have DefaultValue 'Brandon'")
+			} else if q.DefaultValue != "Brandon" {
+				t.Errorf("Legacy question default: got %v, want 'Brandon'", q.DefaultValue)
+			}
+		case "What is your age?":
+			foundLegacyNoDefault = true
+			if q.DefaultValue != nil {
+				t.Errorf("Legacy question 'What is your age?' should have no DefaultValue, got %v", q.DefaultValue)
+			}
+		case "Inline prompt":
+			foundInlineWithDefault = true
+			if q.DefaultValue == nil {
+				t.Error("Inline question 'Inline prompt' should have DefaultValue 'InlineDefault'")
+			} else if q.DefaultValue != "InlineDefault" {
+				t.Errorf("Inline question default: got %v, want 'InlineDefault'", q.DefaultValue)
+			}
+			if q.Category != "Parameter" {
+				t.Errorf("Inline question category: got %q, want 'Parameter'", q.Category)
+			}
+		case "No default inline":
+			foundInlineNoDefault = true
+			if q.DefaultValue != nil {
+				t.Errorf("Inline question 'No default inline' should have no DefaultValue, got %v", q.DefaultValue)
+			}
+		}
+	}
+
+	if !foundLegacyWithDefault {
+		t.Error("Missing legacy question 'What is your name?'")
+	}
+	if !foundLegacyNoDefault {
+		t.Error("Missing legacy question 'What is your age?'")
+	}
+	if !foundInlineWithDefault {
+		t.Error("Missing inline question 'Inline prompt'")
+	}
+	if !foundInlineNoDefault {
+		t.Error("Missing inline question 'No default inline'")
+	}
+
+	resetParser()
+}
+
 func compile() {
 	defer func() {
 		if recover() != nil {
@@ -228,6 +298,7 @@ func resetParser() {
 	clientVersion = "900"
 	iosVersion = 26.0
 	questions = map[string]*question{}
+	inlineQuestions = nil
 	hasShortcutInputVariables = false
 	tabLevel = 0
 	definedWorkflowTypes = []string{}

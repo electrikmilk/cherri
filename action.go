@@ -239,7 +239,7 @@ func makeActionParams(arguments []actionArgument, params map[string]any) {
 		if argumentsSize <= i {
 			return
 		}
-		if arguments[i].valueType == Nil || param.key == "" {
+		if arguments[i].valueType == Nil || arguments[i].valueType == InlineQuestion || param.key == "" {
 			continue
 		}
 
@@ -541,13 +541,25 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 
 // questionArg checks if the argument references a question so that it can update the question to point to the current action's argument.
 func questionArg(param *parameterDefinition, argument *actionArgument) {
-	if argument.valueType != Question {
-		return
-	}
-	var identifier = argument.value.(string)
-	if question, found := questions[identifier]; found {
-		question.parameter = param.key
-		question.actionIndex = actionIndex
+	if argument.valueType == Question {
+		var identifier = argument.value.(string)
+		if question, found := questions[identifier]; found {
+			question.parameter = param.key
+			question.actionIndex = actionIndex
+			argument.value = ""
+		}
+	} else if argument.valueType == InlineQuestion {
+		var q = argument.value.(inlineQuestionValue)
+		var wfq = WFQuestion{
+			ParameterKey: param.key,
+			Category:     "Parameter",
+			ActionIndex:  actionIndex,
+			Text:         q.text,
+		}
+		if q.defaultValue != nil {
+			wfq.DefaultValue = *q.defaultValue
+		}
+		inlineQuestions = append(inlineQuestions, wfq)
 		argument.value = ""
 	}
 }
