@@ -4,9 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"os"
 	"reflect"
-	"strings"
 
 	"github.com/electrikmilk/args-parser"
 	"howett.net/plist"
@@ -38,24 +36,12 @@ func extractReferences(b []byte) {
 		extractParameterReferences(i, action.WFWorkflowActionIdentifier, action.WFWorkflowActionParameters)
 	}
 
-	if args.Using("output") {
-		writeRefsToFile()
-	} else {
-		for _, ref := range extractedReferences {
-			printMediaReference(&ref)
-		}
+	if args.Using("debug") {
+		fmt.Println(ansi("Extracted References:\n", green, bold))
 	}
-}
-
-// writeRefsToFile writes extracted references to a file determined by the --output flag.
-func writeRefsToFile() {
-	var refsFile strings.Builder
 	for _, ref := range extractedReferences {
-		refsFile.WriteString(makeRefCode(&ref))
+		printMediaReference(&ref)
 	}
-
-	var writeRefsErr = os.WriteFile(args.Value("output"), []byte(refsFile.String()), 0644)
-	handle(writeRefsErr)
 }
 
 // extractParameterReferences extracts references from a workflow action parameter.
@@ -168,12 +154,12 @@ func makeRefCode(ref *extractedMediaReference) string {
 func printMediaReference(ref *extractedMediaReference) {
 	if args.Using("debug") {
 		fmt.Println(ansi(fmt.Sprintf("%s (Action %d, %s)\n", ref.identifier, ref.index, ref.action), bold))
-		fmt.Println(ansi(fmt.Sprintf("Value: %v", ref.value), green))
 	}
 
-	fmt.Println(ansi(makeRefCode(ref), magenta))
+	fmt.Println(makeRefCode(ref))
 
 	if args.Using("debug") {
+		fmt.Println(ansi(fmt.Sprintf("Encodes: %v\n", ref.value), red))
 		fmt.Println(ansi("---\n", dim))
 	}
 }
