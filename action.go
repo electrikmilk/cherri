@@ -243,6 +243,11 @@ func makeActionParams(arguments []actionArgument, params map[string]any) {
 			continue
 		}
 
+		if arguments[i].valueType == MediaReference {
+			params[param.key] = references[arguments[i].value.(string)]
+			continue
+		}
+
 		if param.validType == Variable {
 			params[param.key] = variableValue(arguments[i].value.(varValue))
 		} else {
