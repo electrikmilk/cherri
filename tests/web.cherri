@@ -1,9 +1,12 @@
+const API_URL = "https://www.icloud.com/shortcuts/api/records/5ed735394c1e41cc8899bedb72e47f71"
+
 // downloadURL: iCloud Shortcuts records API returns stable, predictable JSON.
 // Replace the identifier with any shared Shortcut URL if needed.
-const response = downloadURL("https://www.icloud.com/shortcuts/api/records/5ed735394c1e41cc8899bedb72e47f71")
+const response = downloadURL(API_URL)
 
 // raw text contains check (response is a String at this point)
-if !response contains "downloadURL" {
+@responseText = "{response}"
+if @responseText !contains "downloadURL" {
     alert("❌ FAIL: downloadURL — response missing expected 'downloadURL' field")
 }
 
@@ -17,15 +20,15 @@ if !fields {
 // --- compile-only coverage: additional HTTP actions ---
 // These use placeholder URLs — only compile coverage is needed here.
 
-const created = jsonRequest("https://api.example.com/items", "POST", {"name": "Test", "active": true})
-const authedPost = jsonRequest("https://api.example.com/items", "POST", {"name": "Test"}, {"Authorization": "Bearer token"})
-const submitted = formRequest("https://api.example.com/submit", "POST", {"key": "value"})
+const created = jsonRequest("{API_URL}", "POST", {"name": "Test", "active": true})
+const authedPost = jsonRequest("{API_URL}", "POST", {"name": "Test"}, {"Authorization": "Bearer token"})
+const submitted = formRequest("{API_URL}", "POST", {"key": "value"})
 
 // URL utilities
 const encoded = urlEncode("hello world & more")
 const decoded = urlDecode("hello%20world%20%26%20more")
 const expanded = expandURL("https://bit.ly/example")
-const host = getURLDetail("https://api.example.com/v1/items?q=test", "Host")
+const host = getURLDetail("{API_URL}", "Host")
 
 // X-Callback URL
 openCustomXCallbackURL("myapp://do-something")
