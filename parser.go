@@ -589,6 +589,12 @@ func collectReference(valueType *tokenType, value *any, until *rune, variable bo
 			return
 		}
 
+		if _, found := references[reference]; found {
+			*valueType = MediaReference
+			*value = reference
+			return
+		}
+
 		if !validActionReference(&reference) && !validGlobalReference(&reference) {
 			parserError(fmt.Sprintf("Undefined reference '%s'", reference))
 		}

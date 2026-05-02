@@ -444,6 +444,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		}
 	case argValueType == Question:
 	case argValueType == Nil:
+	case argValueType == MediaReference:
 	case param.validType == String && argument.valueType == RawString:
 	case argValueType != param.validType:
 		if argValueType == Float && param.validType == Integer {
