@@ -135,8 +135,6 @@ func decodeReferenceHash(hash string) (ref map[string]any, err error) {
 		return nil, fmt.Errorf("could not decode hashed JSON: %s", decodeErr)
 	}
 
-	fmt.Println(string(decodedBytes))
-
 	var unmarshalErr = json.Unmarshal(decodedBytes, &ref)
 	if unmarshalErr != nil {
 		return nil, fmt.Errorf("could not unmarshal decoded JSON: %s", unmarshalErr)
