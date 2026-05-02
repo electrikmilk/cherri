@@ -1104,7 +1104,7 @@ func collectQuestion() {
 		parserError(fmt.Sprintf("Duplicate declaration of import question '%s'.", identifier))
 	}
 	if validReference(identifier) {
-		parserError(fmt.Sprintf("Import question conflicts with defined variable or global '%s'.", identifier))
+		parserError(fmt.Sprintf("Import question conflicts with defined variable, constant or global '%s'.", identifier))
 	}
 	advance()
 
