@@ -184,6 +184,10 @@ func printParsingDebug() {
 	fmt.Println(enumerations)
 	fmt.Print("\n")
 
+	fmt.Println(ansi("## MEDIA REFERENCES ##", bold))
+	fmt.Println(references)
+	fmt.Print("\n")
+
 	fmt.Println(ansi("## VARIABLES ##", bold))
 	printVariables()
 	fmt.Print("\n")
@@ -208,6 +212,9 @@ func parse() {
 	case startOfLineTokenAhead(Definition):
 		advance()
 		collectDefinition()
+	case startOfLineTokenAhead(MediaReference):
+		advance()
+		collectMediaReference()
 	case isChar('@'):
 		collectVariable(false)
 	case tokenAhead(Constant):
@@ -1113,6 +1120,24 @@ func collectQuestion() {
 		text:         text,
 		defaultValue: defaultValue,
 	}
+}
+
+func collectMediaReference() {
+	var identifier = collectIdentifier()
+	if _, found := references[identifier]; found {
+		parserError(fmt.Sprintf("Duplicate declaration of media reference '%s'.", identifier))
+	}
+	if validReference(identifier) {
+		parserError(fmt.Sprintf("Media reference identifier conflicts with defined variable, constant or global '%s'.", identifier))
+	}
+	advance()
+
+	var hash = collectUntil('\n')
+	var ref, err = decodeReferenceHash(hash)
+	if err != nil {
+		parserError(fmt.Sprintf("Failed to decode media reference hash: %v\n\nCollected hash: %s", err, hash))
+	}
+	references[identifier] = ref
 }
 
 var repeatItemIndex = 1

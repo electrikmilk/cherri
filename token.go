@@ -30,6 +30,7 @@ const (
 	Question       tokenType = "#question"
 	Include        tokenType = "#include"
 	Import         tokenType = "#import"
+	MediaReference tokenType = "#ref"
 	Action         tokenType = "action"
 	ToggleSet      tokenType = "toggleSet"
 	Function       tokenType = "function"

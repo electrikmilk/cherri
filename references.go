@@ -24,7 +24,7 @@ type extractedMediaReference struct {
 var extractedReferences []extractedMediaReference
 
 // references holds parsed references.
-var references = make(map[string]string)
+var references = make(map[string]map[string]any)
 
 // extractReferences extracts input references from a workflow with unique identifiers and outputs hash identifier media reference syntax.
 func extractReferences(b []byte) {
@@ -101,16 +101,16 @@ func skipDuplicateReference(ref extractedMediaReference) bool {
 }
 
 type WFFile struct {
-	Filename     string       `plist:"filename,omitempty"`
-	DisplayName  string       `plist:"displayName,omitempty"`
-	FileLocation FileLocation `plist:"fileLocation,omitempty"`
+	Filename     string       `json:"filename,omitempty" plist:"filename,omitempty"`
+	DisplayName  string       `json:"displayName,omitempty" plist:"displayName,omitempty"`
+	FileLocation FileLocation `json:"fileLocation,omitempty" plist:"fileLocation,omitempty"`
 }
 
 type FileLocation struct {
 	WFFileLocationType   string
-	CrossDeviceItemID    string `plist:"crossDeviceItemID,omitempty"`
-	FileProviderDomainID string `plist:"fileProviderDomainID"`
-	RelativeSubpath      string `plist:"relativeSubpath"`
+	CrossDeviceItemID    string `json:"crossDeviceItemID,omitempty" plist:"crossDeviceItemID,omitempty"`
+	FileProviderDomainID string `json:"fileProviderDomainID" plist:"fileProviderDomainID"`
+	RelativeSubpath      string `json:"relativeSubpath" plist:"relativeSubpath"`
 }
 
 // extractFileReference extracts a file reference from a workflow action parameter.
@@ -121,9 +121,9 @@ func extractFileReference(ref *extractedMediaReference, values map[string]interf
 }
 
 type WFMediaItem struct {
-	PersistentIdentifier uint64 `plist:"persistentIdentifier"`
-	ItemName             string `plist:"itemName"`
-	Type                 string `plist:"type"`
+	PersistentIdentifier uint64 `json:"persistentIdentifier" plist:"persistentIdentifier"`
+	ItemName             string `json:"itemName" plist:"itemName"`
+	Type                 string `json:"type" plist:"type"`
 }
 
 // extractMediaReference extracts a media reference from a workflow action parameter.
@@ -139,6 +139,24 @@ func makeReferenceHash(ref *extractedMediaReference) string {
 	handle(marshalErr)
 
 	return base64.StdEncoding.EncodeToString(jsonBytes)
+}
+
+// decodeReferenceHash decodes a reference hash into a map to later insert into a Shortcut action parameter.
+func decodeReferenceHash(hash string) (ref map[string]any, err error) {
+	ref = make(map[string]any)
+	var decodedBytes, decodeErr = base64.StdEncoding.DecodeString(hash)
+	if decodeErr != nil {
+		return nil, fmt.Errorf("could not decode hashed JSON: %s", decodeErr)
+	}
+
+	fmt.Println(string(decodedBytes))
+
+	var unmarshalErr = json.Unmarshal(decodedBytes, &ref)
+	if unmarshalErr != nil {
+		return nil, fmt.Errorf("could not unmarshal decoded JSON: %s", unmarshalErr)
+	}
+
+	return ref, nil
 }
 
 // makeRefCode returns the reference in Cherri reference syntax.
