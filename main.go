@@ -91,8 +91,15 @@ func main() {
 	}
 
 	if args.Using("import") && args.Value("import") != "" {
-		var shortcutBytes = importShortcut()
+		var shortcutBytes = importShortcut(args.Value("import"))
 		decompile(shortcutBytes)
+
+		os.Exit(0)
+	}
+
+	if args.Using("extract") && args.Value("extract") != "" {
+		var shortcutBytes = importShortcut(args.Value("extract"))
+		extractReferences(shortcutBytes)
 
 		os.Exit(0)
 	}

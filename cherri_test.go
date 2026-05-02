@@ -111,7 +111,7 @@ func TestDecomp(t *testing.T) {
 
 	fmt.Println("Decompiling...")
 	args.Args["import"] = "tests/decomp-me.plist"
-	decompile(importShortcut())
+	decompile(importShortcut(args.Value("import")))
 
 	fmt.Println("Comparing to expected...")
 	var bytes, readErr = os.ReadFile("tests/decomp-expected.cherri")
@@ -157,7 +157,7 @@ func TestRoundTrip(t *testing.T) {
 			// tests/, which would be picked up and compiled by TestCherriNoSign.
 			args.Args["output"] = os.DevNull
 			args.Args["import"] = plistPath
-			decompile(importShortcut())
+			decompile(importShortcut(args.Value("import")))
 			delete(args.Args, "output")
 
 			if code.Len() == 0 {
