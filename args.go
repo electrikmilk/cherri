@@ -57,6 +57,11 @@ func init() {
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
+		Name:         "extract",
+		Description:  "[BETA] Extract file and other media references from a Shortcut for re-use in code.",
+		ExpectsValue: true,
+	})
+	args.Register(args.Argument{
 		Name:         "init",
 		Description:  "Create a Cherri package. Pattern: @{author}/{package_name} | https://{uri}/{author}/cherri-{package_name}",
 		ExpectsValue: true,
