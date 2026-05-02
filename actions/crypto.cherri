@@ -8,7 +8,7 @@ action default 'base64encode' base64Encode(variable encodeInput: 'WFInput'): tex
 }
 
 // [Doc]: Base 64 Decode: Base 64 decodes input.
-action 'base64encode' base64Decode(variable input: 'WFInput'): text {
+action 'base64encode' base64Decode(variable input: 'WFInput'): variable {
 	"WFEncodeMode": "Decode"
 }
 

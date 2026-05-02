@@ -1122,7 +1122,7 @@ var actions = map[string]*actionDefinition{
 	"list": {
 		doc: selfDoc{
 			title:       "List",
-			description: "Create a list.",
+			description: "Create an immutable array of text.",
 			category:    "scripting",
 			subcategory: "Lists",
 		},
@@ -1200,10 +1200,12 @@ var actions = map[string]*actionDefinition{
 				return
 			}
 			xCallbackParams = make(map[string]any)
-			if len(args) == 4 {
+			if len(args) >= 4 {
 				if args[1].value.(string) != "" || args[2].value.(string) != "" || args[3].value.(string) != "" {
 					xCallbackParams["WFXCallbackCustomCallbackEnabled"] = true
 				}
+			}
+			if len(args) == 5 {
 				if args[4].value.(string) != "" {
 					xCallbackParams["WFXCallbackCustomSuccessURLEnabled"] = true
 				}

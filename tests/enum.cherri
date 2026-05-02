@@ -1,3 +1,5 @@
+// compile-only: enum type syntax
+
 enum callType {
     'Audio',
     'Video'

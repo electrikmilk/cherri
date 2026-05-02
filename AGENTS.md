@@ -273,17 +273,44 @@ The header intercepts `ShortcutInput`, validates it as a Cherri function call, m
 
 ## Testing
 
-Each file in `tests/*.cherri` (except `decomp-expected.cherri` and `decomp_me.cherri`) is compiled by `TestCherri`/`TestCherriNoSign`. When adding or changing a language feature, add or update a test file in `tests/`.
+Each file in `tests/*.cherri` (except `decomp-expected.cherri` and `decomp-me.cherri`) is compiled by `TestCherri`/`TestCherriNoSign`. When adding or changing a language feature, add or update a test file in `tests/`. Group tests by domain (e.g. `web.cherri`, `shortcuts.cherri`) rather than one file per action. Test files do not need explicit `#include` statements — all standard library action categories are auto-injected during suite runs; includes are only needed when running a file individually with `go run .`.
 
 The test runner calls `compile()` which calls `main()`, so `os.Args[1]` is set to the test file path before each run. Global state is fully reset via `resetParser()` after each test.
 
 `TestDecomp` is a diff test: it decompiles `tests/decomp-me.plist` and expects byte-for-byte equality with `tests/decomp-expected.cherri`. When decompiler output changes intentionally, regenerate the expected file.
 
-**Format correctness caveat:** `TestCherriNoSign` only verifies that compilation does not panic — it does not validate plist format. Shortcuts signing (`TestCherri` on macOS) will fail if the plist is structurally invalid, making it a stronger format check. Even a successful sign is not sufficient on its own: the resulting Shortcut must be manually opened and run in Shortcuts to confirm it behaves correctly. Automated tests cannot substitute for this manual verification step.
-
-**Required on macOS after compiler changes:** Any change that affects plist output (modifications to `shortcutgen.go`, `shortcut.go`, `action.go`, `actions_std.go`, or `actions/*.cherri`) must be verified by running `go test -run TestCherri` on macOS before the change is considered complete. The sign command is the only automated check that confirms the generated plist is structurally accepted by the Shortcuts runtime. `TestCherriNoSign` passing is not sufficient.
+**Verification hierarchy:** On macOS, always run `go test -run TestCherri` as the final automated check — it is never sufficient to stop at `TestCherriNoSign`. `TestCherriNoSign` only confirms compilation does not panic; it does not validate plist structure. The signing step in `TestCherri` is the only automated confirmation that the generated plist is structurally accepted by the Shortcuts runtime. Use `TestCherriNoSign` only for rapid iteration or on non-macOS hosts. After `TestCherri` passes, the user performs the final verification: open the compiled `.shortcut` in QuickLook and import it into the Shortcuts app to confirm it runs correctly — this step cannot be automated.
 
 **Sequential test isolation:** The test functions are not designed to run sequentially in the same process. The global `actions` map and related state accumulate across test functions, so running `go test` (all tests together) may produce failures that do not occur in CI. Always run tests individually with `-run`, matching how the GitLab pipeline executes them.
+
+**Dual-purpose test files:** Test files are designed to both compile clean in CI *and* run in the Shortcuts app to verify runtime behavior. Each assertable test file follows this pattern:
+
+```ruby
+// run assertion inline — no helper function needed
+const result = someAction("input")
+if result != "expected" {
+    alert("❌ FAIL: someAction — got {result}, expected 'expected'")
+}
+
+show("✅ All tests passed")  // only executes if no alert() fired
+```
+
+Files that cannot be behaviorally asserted (interactive UI, hardware-dependent, non-deterministic) begin with `// compile-only: <reason>` and still end with `show("✅ All tests passed")`.
+
+**Comparison type constraints:** The `!=` / `==` operators (and other conditionals) require the left-side value to have a declared type in `{text, number, bool, action, date}`. A `const` bound to an action with no declared return type gets type `''` and cannot be used directly in a comparison — add `: type` to the action definition, or assign to a mutable variable via interpolation: `@s = "{const}"`. Constants and globals *can* be used directly on the left side when their type is known.
+
+**Runtime type coercion — `: variable` vs `: text` on action return types:** Declaring `: text` on an action is a compile-time annotation only. Shortcuts has its own runtime type system: many actions that logically produce text actually return a generic variable reference at runtime that requires explicit casting before string comparison in conditions. Two categories:
+
+- **True text producers** — text-transformation actions (`uppercase`, `replaceText`, `hash`, `base64Encode`, `formatDate`) return typed text the Shortcuts runtime accepts directly in conditions: `if result != "expected"`. Note: `downloadURL` returns a generic variable reference despite being a network action — treat it as a container reader.
+- **Container readers and decoders** — actions that extract values from dicts/lists (`getValue`, `getFirstItem`, `getLastItem`, `getListItem`, `getRandomItem`) and decode actions (`base64Decode`) return generic variable references. Declare these `: variable` and cast before comparison using `.text` coercion: `if result.text != "expected"`, or via string interpolation: `const s = "{result}"; if s != "expected"`.
+
+The `.text` suffix on a const (`result.text`) works in conditions and is preferred over the interpolation workaround. Only fall back to interpolation when `.text` is unavailable (e.g. the value must be stored in a mutable variable for repeated use).
+
+**Conditional left-side must be a variable or const, not a literal:** `if 5 == 5` causes a compile panic — always put a variable or const on the left: `@n = 5; if @n == 5`.
+
+**`contains` only works for text and arrays:** The `contains` / `!contains` operators are not valid for dictionaries. To check if a key exists in a dict, use `getValue(dict, key)` and check `if !result`.
+
+**Control flow output blocks require action calls, not bare literals:** Inside `const result = if ... { }` blocks, every branch must call an action. Use `text("literal value")` (the `gettext` action aliased in `actions/basic.cherri`) to output a plain string: `const r = if @x > 3 { text("yes") } else { text("no") }`. The result const has type `''` regardless — assign to a mutable variable via interpolation before comparing: `@s = "{r}"; if @s != "yes"`.
 
 ## Feature Verification Against Shortcuts Plist
 
@@ -374,7 +401,7 @@ Use Go in `actions_std.go` when you need any of:
 
 - Custom parameter construction (`makeParams`) — the function receives `[]actionArgument` and returns `map[string]any`; it **fully replaces** automatic handling
 - Argument validation beyond type-checking (`check`)
-- Dynamic extra parameters without disabling automatic handling (`appendParamsFunc`)
+- Dynamic extra parameters without disabling automatic handling (`appendParamsFunc`) — use this to inject derived plist keys (e.g. boolean enable-flags like `WFXCallbackCustomCallbackEnabled`) computed from argument values. Every `args[i]` access inside this func must be guarded by a `len(args)` check that covers index `i` (e.g. `if len(args) >= 5 { args[4]... }`).
 - Decompiler support (`decomp`)
 
 Minimal Go definition:
@@ -389,3 +416,7 @@ Minimal Go definition:
 ```
 
 Use `argumentValue(args, i)` or `paramValue(arg, type)` inside `makeParams` to convert collected arguments to plist values. Use `appendParamsFunc` instead of `makeParams` when you want automatic parameter handling to still apply but need to inject extra keys based on argument values.
+
+**Return types matter for testability:** Always declare `: type` on action output in DSL definitions when the action returns a value — omitting it causes the result to have type `''`, which prevents comparisons in test code and breaks type inference downstream. For actions that return values of varying type (e.g. `getValue`), `: text` is usually correct since the Shortcuts runtime coerces as needed.
+
+**Float is accepted for `number` parameters:** The type checker allows float literals and float-typed variables wherever `number` is expected — you do not need `variable` type to accept floats. Use `number` for any action that takes a numeric value (integer or float); reserve `variable` for genuinely pass-through parameters where type is meaningless.

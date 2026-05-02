@@ -1,4 +1,5 @@
-function fibonacci(number n) {
+// Recursive function: fibonacci(7) = 13
+function fibonacci(number n): text {
     if @n <= 1 {
         output("{@n}")
     } else {
@@ -11,5 +12,100 @@ function fibonacci(number n) {
     }
 }
 
-const output = fibonacci(7)
-show("{output}")
+const fib = fibonacci(7)
+if fib != "13" {
+    mustOutput("❌ FAIL: fibonacci(7) — got {fib}, expected '13'", "❌ FAIL: fibonacci(7) — got {fib}, expected '13'")
+}
+
+// Typed text argument
+function greet(text name): text {
+    output("Hello, {@name}!")
+}
+
+const greeting = greet("World")
+if greeting != "Hello, World!" {
+    mustOutput("❌ FAIL: greet — got {greeting}, expected 'Hello, World!'", "❌ FAIL: greet — got {greeting}, expected 'Hello, World!'")
+}
+
+// Mixed typed arguments
+function formatPair(text label, number count): text {
+    output("{@label}: {@count}")
+}
+
+@pairLabel = "items"
+@pairCount = 5
+const pair = formatPair(@pairLabel, @pairCount)
+if pair != "items: 5" {
+    mustOutput("❌ FAIL: formatPair — got {pair}, expected 'items: 5'", "❌ FAIL: formatPair — got {pair}, expected 'items: 5'")
+}
+
+// Number typed argument
+function double(number value): text {
+    const result = @value * 2
+    output("{result}")
+}
+
+const doubled = double(21)
+if doubled != "42" {
+    mustOutput("❌ FAIL: double — got {doubled}, expected '42'", "❌ FAIL: double — got {doubled}, expected '42'")
+}
+
+// Bool typed argument (compile coverage — output format varies)
+function processBool(bool condition) {
+    output("{@condition}")
+}
+
+const boolInput = true
+@boolVar = boolInput
+const boolResult = processBool(@boolVar)
+
+// Float typed argument (compile coverage)
+function processFloat(float value) {
+    output("{@value}")
+}
+
+const floatInput = 3.14
+@floatVar = floatInput
+const floatResult = processFloat(@floatVar)
+
+// Array typed argument (compile coverage)
+function processArray(array items) {
+    output("{@items}")
+}
+
+@arrVar = list("a", "b", "c")
+const arrResult = processArray(@arrVar)
+
+// Dictionary typed argument (compile coverage)
+function processDict(dictionary data) {
+    output("{@data}")
+}
+
+@dictVar: dictionary
+const dictResult = processDict(@dictVar)
+
+// Variable typed argument (no coercion, compile coverage)
+function processVariable(variable val) {
+    output("{@val}")
+}
+
+const varInput = 42
+@varVar = varInput
+const varResult = processVariable(@varVar)
+
+// Default argument value: omitting the arg uses the declared default
+function greetDefault(text name, text salutation = "Hello"): text {
+    output("{@salutation}, {@name}!")
+}
+
+const defaultGreet = greetDefault("World")
+if defaultGreet != "Hello, World!" {
+    mustOutput("❌ FAIL: default arg omitted — got {defaultGreet}, expected 'Hello, World!'", "❌ FAIL: default arg omitted — got {defaultGreet}, expected 'Hello, World!'")
+}
+
+const overriddenGreet = greetDefault("World", "Hi")
+if overriddenGreet != "Hi, World!" {
+    mustOutput("❌ FAIL: default arg overridden — got {overriddenGreet}, expected 'Hi, World!'", "❌ FAIL: default arg overridden — got {overriddenGreet}, expected 'Hi, World!'")
+}
+
+show("✅ All tests passed")

@@ -1,3 +1,0 @@
-const modulus = 2 % 8
-
-show("{modulus}")

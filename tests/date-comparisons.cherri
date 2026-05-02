@@ -1,25 +1,48 @@
+// Specified dates: fully assertable relational facts using variable-to-variable comparisons
+@past = date("January 1, 2020")
+@future = date("December 31, 2030")
+@same = date("January 1, 2020")
+
+@r = "wrong"
+if @past < @future { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: date < (past < future)", "❌ FAIL: date < (past < future)") }
+
+@r = "wrong"
+if @future > @past { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: date > (future > past)", "❌ FAIL: date > (future > past)") }
+
+@r = "wrong"
+if @past == @same { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: date == (same date)", "❌ FAIL: date == (same date)") }
+
+@r = "wrong"
+if @past != @future { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: date !=", "❌ FAIL: date !=") }
+
+// between: @past is between an earlier and later date
+@earlier = date("January 1, 2000")
+@later = date("December 31, 2025")
+@r = "wrong"
+if @past <> @earlier @later { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: date between", "❌ FAIL: date between") }
+
+// Dynamic date: compile-only coverage (value varies at runtime)
 @today = currentDate()
 @formatted = formatDate(@today)
 @adjusted = adjustDate(@today, "Add", qty(5, "days"))
-@specifiedDate = date("April 16, 2026")
-
-// text input: comparison routes to WFConditionalActionString
-if @formatted == @today {} else {}
-
-// date input: comparison (text var) routes to WFDate
-if @adjusted < @formatted {} else {}
-
-// date input: comparison (date var) routes to WFDate
-if @adjusted == @today {} else {}
 if @adjusted > @today {} else {}
+if @adjusted < @today {} else {}
 
-// date input: between two dates routes to WFDate + WFAnotherDate
-if @adjusted <> @today @adjusted {} else {}
+// isToday and qty comparisons (from conditionals-date.cherri)
+if CurrentDate isToday {}
+if CurrentDate > qty(3, "hr") {} else {}
+if CurrentDate < qty(5, "min") {} else {}
+if CurrentDate == @today {}
+if CurrentDate > @today {}
+if CurrentDate <> @today @adjusted {}
 
-// date input with holiday date
+// Holiday date (compile-only)
 @holiday = getHolidayDate("Christmas Day")
 if @holiday == @today {} else {}
-if @holiday > @adjusted {} else {}
 
-// date input: specified date comparison
-if @specifiedDate == @today {} else {}
+show("✅ All tests passed")

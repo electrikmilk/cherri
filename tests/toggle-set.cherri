@@ -1,3 +1,5 @@
+// compile-only: system settings
+
 setNightShift(false)
 toggleNightShift()
 setTrueTone(false)
