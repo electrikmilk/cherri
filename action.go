@@ -42,6 +42,7 @@ type parameterDefinition struct {
 	defaultValue any
 	enum         string
 	qty          bool
+	ref          bool
 	optional     bool
 	infinite     bool
 	literal      bool
@@ -520,6 +521,10 @@ func checkArg(param *parameterDefinition, argument *actionArgument) {
 		return
 	}
 
+	if argument.valueType == MediaReference && !param.ref {
+		parserError(fmt.Sprintf("Media references '%s' are not allowed for argument '%s'.\n%s", argument.value, param.name, generateActionDefinition(*param, false)))
+	}
+
 	if param.enum != "" {
 		checkEnum(param, argument)
 	}
@@ -728,9 +733,13 @@ func generateActionParamDefinition(param parameterDefinition) string {
 		argType = fmt.Sprintf("%s ", param.validType)
 	} else {
 		argType = fmt.Sprintf("%s ", param.enum)
-		if param.qty {
-			argType = fmt.Sprintf("#%s(qty)", argType)
+		if args.Using("debug") && param.qty {
+			argType = fmt.Sprintf("#%s", argType)
 		}
+	}
+	if param.ref {
+		fmt.Println(param.name)
+		argType = fmt.Sprintf("&%s", argType)
 	}
 	definition.WriteString(ansi(argType, magenta))
 
@@ -1096,6 +1105,11 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 		var valueType tokenType
 		var value any
 
+		var acceptsRef bool
+		if isChar('&') {
+			acceptsRef = true
+		}
+
 		var quantity bool
 		var enumeration = collectEnumerationType(&valueType, &quantity, ' ')
 		if enumeration == "" {
@@ -1158,6 +1172,7 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			defaultValue: defaultValue,
 			enum:         enumeration,
 			qty:          quantity,
+			ref:          acceptsRef,
 			literal:      literal,
 		})
 

@@ -29,20 +29,20 @@ action 'avairyeditphoto' markup(variable document: 'WFDocument')
 action 'file.getlink' getFileLink(variable file: 'WFFile')
 
 // [Doc]: [Files & Folders] Append File: Append text to a file.
-action default 'file.append' appendToFile(text filePath: 'WFFilePath', text text: 'WFInput') {
+action default 'file.append' appendToFile(text filePath: 'WFFilePath', &variable text: 'WFInput') {
 	"WFAppendFileWriteMode": "Append"
 }
 
 // [Doc]: [Files & Folders] Prepend File: Prepend text to a file.
-action 'file.append' prependToFile(text filePath: 'WFFilePath', text text: 'WFInput') {
+action 'file.append' prependToFile(text filePath: 'WFFilePath', &variable text: 'WFInput') {
 	"WFAppendFileWriteMode": "Prepend"
 }
 
-// [Doc]: [Files & Folders] Create Folder: Create a folder.
-action 'file.createfolder' createFolder(text path: 'WFFilePath') // TODO: Writing to locations other than the Shortcuts folder.
+// [Doc]: [Files & Folders] Create Folder: Create a folder within the Shortcuts folder or within a `#ref` to a folder.
+action 'file.createfolder' createFolder(text path: 'WFFilePath', &variable ?folder: 'WFFolder')
 
 // [Doc]: [Files & Folders] Delete Files: Delete a file or multiple files.
-action 'file.delete' deleteFiles(variable input: 'WFInput', bool ?immediately: 'WFDeleteImmediatelyDelete' = false)
+action 'file.delete' deleteFiles(&variable input: 'WFInput', bool ?immediately: 'WFDeleteImmediatelyDelete' = false)
 
 // [Doc]: [Files & Folders] Select File: Prompt the user to select one or optionally multiple files.
 action default 'file.select' selectFile(bool ?selectMultiple: 'SelectMultiple' = false)
@@ -52,17 +52,17 @@ action 'file.select' selectFolder(bool ?selectMultiple: 'SelectMultiple' = false
 	"WFPickingMode": "Folders"
 }
 
-// [Doc]: [Files & Folders] Get File: Get file from a path in the Shortcuts folder.
-action default 'documentpicker.open' getFile(text path: 'WFGetFilePath', bool ?errorIfNotFound: 'WFFileErrorIfNotFound' = true) // TODO: Writing to locations other than the Shortcuts folder.
+// [Doc]: [Files & Folders] Get File: Get file from a path in the Shortcuts folder or within a `#ref` to a folder.
+action default 'documentpicker.open' getFile(text path: 'WFGetFilePath', &variable ?folder: 'WFFile', bool ?errorIfNotFound: 'WFFileErrorIfNotFound' = true)
 
 // [Doc]: [Files & Folders] Open File: Open a file.
-action 'openin' openFile(variable file: 'WFInput', bool ?askWhenRun: 'WFOpenInAskWhenRun' = false)
+action 'openin' openFile(&variable file: 'WFInput', bool ?askWhenRun: 'WFOpenInAskWhenRun' = false)
 
 // [Doc]: [Files & Folders] Get Parent Directory: Get the parent directory of the input directory.
-action getParentDirectory(variable input: 'WFInput')
+action getParentDirectory(&variable input: 'WFInput')
 
 // [Doc]: [Files & Folders] File: Insert a `#ref` to a file.
-action 'file' file(variable file: 'WFFile'): variable
+action 'file' file(&variable file: 'WFFile'): variable
 
 enum fileDetail {
     'File Size',
@@ -79,17 +79,20 @@ action 'properties.files' getFileDetail(variable file: 'WFFolder', fileDetail de
 // [Doc]: [Files & Folders] Get Selected
 action 'finder.getselectedfiles' getSelectedFiles()
 
+// [Doc]: [Files & Folders] Get Folder Contents: Get contents of a folder.
+action 'file.getfoldercontents' getFolderContents(&variable folder: 'WFFolder', bool ?recursive: 'Recursive' = false)
+
 // [Doc]: [Files & Folders] Reveal in Finder
-action 'file.reveal' reveal(variable files: 'WFFile')
+action 'file.reveal' reveal(&variable files: 'WFFile')
 
 // [Doc]: [Files & Folders] Rename File
-action 'file.rename' rename(variable file: 'WFFile', text newName: 'WFNewFilename')
+action 'file.rename' rename(&variable file: 'WFFile', text newName: 'WFNewFilename')
 
 // [Doc]: [Files & Folders] Save File Prompt: Prompt the user to choose a location to save the file.
 action default 'documentpicker.save' saveFilePrompt(variable file: 'WFInput', bool ?overwrite: 'WFSaveFileOverwrite' = false)
 
 // [Doc]: [Files & Folders] Save File: Save contents to a file at the specified path.
-action 'documentpicker.save' saveFile(text path: 'WFFileDestinationPath', variable content: 'WFInput', bool ?overwrite: 'WFSaveFileOverwrite' = false) {
+action 'documentpicker.save' saveFile(text path: 'WFFileDestinationPath', &variable content: 'WFInput', bool ?overwrite: 'WFSaveFileOverwrite' = false) {
 	"WFAskWhereToSave": false
 }
 
@@ -107,7 +110,7 @@ enum fileSizeFormat {
 }
 
 // [Doc]: [Files & Folders] File Size: Returns the size of a file.
-action 'format.filesize' fileSize(variable file: 'WFFileSize', fileSizeFormat format: 'WFFileSizeFormat') {
+action 'format.filesize' fileSize(text file: 'WFFileSize', fileSizeFormat format: 'WFFileSizeFormat') {
     "WFFileSizeIncludeUnits": false
 }
 
@@ -135,6 +138,3 @@ action 'generatebarcode' makeQRCode(text input: 'WFText', QRCodeErrorCorrection 
 
 // [Doc]: Convert to USDZ
 action 'com.apple.HydraUSDAppIntents.ConvertToUSDZ' convertToUSDZ(variable file)
-
-// [Doc]: [Files & Folders] Get Folder Contents: Get contents of a folder.
-action 'file.getfoldercontents' getFolderContents(variable folder: 'WFFolder', bool ?recursive: 'Recursive' = false)
