@@ -97,8 +97,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	if args.Using("extract") && args.Value("extract") != "" {
-		var shortcutBytes = importShortcut(args.Value("extract"))
+	if args.Using("refs") && args.Value("refs") != "" {
+		var shortcutBytes = importShortcut(args.Value("refs"))
 		extractReferences(shortcutBytes)
 
 		os.Exit(0)

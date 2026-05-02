@@ -57,8 +57,8 @@ func init() {
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
-		Name:         "extract",
-		Description:  "[BETA] Extract file and other media references from a Shortcut for re-use in code.",
+		Name:         "refs",
+		Description:  "Encode device content references from a Shortcut for re-use in Cherri code.",
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
