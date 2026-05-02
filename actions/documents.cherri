@@ -61,6 +61,9 @@ action 'openin' openFile(variable file: 'WFInput', bool ?askWhenRun: 'WFOpenInAs
 // [Doc]: [Files & Folders] Get Parent Directory: Get the parent directory of the input directory.
 action getParentDirectory(variable input: 'WFInput')
 
+// [Doc]: [Files & Folders] File: Insert a `#ref` to a file.
+action 'file' file(variable file: 'WFFile'): variable
+
 enum fileDetail {
     'File Size',
     'File Extension',
