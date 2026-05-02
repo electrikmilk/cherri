@@ -1204,8 +1204,6 @@ var actions = map[string]*actionDefinition{
 				if args[1].value.(string) != "" || args[2].value.(string) != "" || args[3].value.(string) != "" {
 					xCallbackParams["WFXCallbackCustomCallbackEnabled"] = true
 				}
-			}
-			if len(args) == 4 {
 				if args[4].value.(string) != "" {
 					xCallbackParams["WFXCallbackCustomSuccessURLEnabled"] = true
 				}
