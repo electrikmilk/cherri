@@ -43,10 +43,10 @@ if joined != "a-b-c" {
     alert("❌ FAIL: splitText/joinText — got {joined}, expected 'a-b-c'")
 }
 
-// capitalizeAll (each word all-caps)
-const allCapped = capitalizeAll("hello world")
-if allCapped != "HELLO WORLD" {
-    alert("❌ FAIL: capitalizeAll — got {allCapped}, expected 'HELLO WORLD'")
+// capitalizeAll (each word capitalized)
+const allCapitalized = capitalizeAll("hello world")
+if allCapitalized != "Hello World" {
+    alert("❌ FAIL: capitalizeAll — got {allCapitalized}, expected 'Hello World'")
 }
 
 show("✅ All tests passed")
