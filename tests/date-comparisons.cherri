@@ -30,19 +30,19 @@ if @r != "right" { mustOutput("❌ FAIL: date between", "❌ FAIL: date between"
 @today = currentDate()
 @formatted = formatDate(@today)
 @adjusted = adjustDate(@today, "Add", qty(5, "days"))
-if @adjusted > @today {} else {}
-if @adjusted < @today {} else {}
+if @adjusted > @today {}
+if @adjusted < @today {}
 
 // isToday and qty comparisons (from conditionals-date.cherri)
 if CurrentDate isToday {}
-if CurrentDate > qty(3, "hr") {} else {}
-if CurrentDate < qty(5, "min") {} else {}
+if CurrentDate > qty(3, "hr") {}
+if CurrentDate < qty(5, "min") {}
 if CurrentDate == @today {}
 if CurrentDate > @today {}
 if CurrentDate <> @today @adjusted {}
 
 // Holiday date (compile-only)
 @holiday = getHolidayDate("Christmas Day")
-if @holiday == @today {} else {}
+if @holiday == @today {}
 
 show("✅ All tests passed")
