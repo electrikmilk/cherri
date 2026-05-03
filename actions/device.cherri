@@ -72,6 +72,11 @@ action v16.2 'getbatterylevel' isCharging(): bool {
 	"Subject": "Is Charging"
 }
 
+// [Doc]: [Battery] Charge Limit: Returns the current charge limit of the device battery.
+action v26 'getbatterylevel' getChargeLimit(): number {
+	"Subject": "Charge Limit"
+}
+
 enum deviceUsageType {
     'all',
     'app',
