@@ -21,7 +21,7 @@ action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail')
 // [Doc]: Get On-Screen Content: Get the content currently on-screen.
 action getOnScreenContent()
 
-// [Doc]: Get Orientation: Get the current orientation of the device.
+// [Doc]: [Display] Get Orientation: Get the current orientation of the device.
 action 'com.apple.ShortcutsActions.GetOrientationAction' getOrientation(): text
 
 // [Doc]: Lock Screen: Lock the device screen.
@@ -74,11 +74,26 @@ enum usageDuration {
 // [Doc]: [Screen Time] Get Website & App Activity
 action 'com.apple.intelligenceplatform.IntelligencePlatform.IntelligencePlatformDataActionsAppIntentsExtension.CalculateAppUsageIntent' getDeviceUsage(deviceUsageType usageType: 'activityType' = "all", variable ?device: 'selectedDevice', usageDuration during: 'during' = "today", text ?startTime: 'startTime', text ?startTime: 'endTime')
 
-// [Doc]: Airplane Mode
+// [Doc]: [Connectivity] Airplane Mode
 action toggleSet 'airplanemode.set' AirplaneMode 'OnValue'
 
-// [Doc]: Orientation Lock
+// [Doc]: [Connectivity] Bluetooth
+action toggleSet 'bluetooth.set' Bluetooth 'OnValue'
+
+// [Doc]: [Connectivity] Wifi
+action toggleSet 'wifi.set' Wifi 'OnValue'
+
+// [Doc]: [Connectivity] Cellular Data
+action toggleSet 'cellulardata.set' CellularData 'OnValue'
+
+// [Doc]: [Display] Set Brightness
+action setBrightness(float brightness: 'WFBrightness')
+
+// [Doc]: [Display] Orientation Lock
 action toggleSet !mac 'orientationlock.set' OrientationLock 'OnValue'
+
+// [Doc]: Set Volume
+action setVolume(float volume: 'WFVolume')
 
 // [Doc]: [Personal Hotspot] Personal Hotspot
 action toggleSet !mac 'personalhotspot.set' Hotspot
