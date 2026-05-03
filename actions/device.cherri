@@ -38,6 +38,21 @@ action v17 reboot() {
 // [Doc]: Vibrate Device: Vibrate the device. Only applies to Apple devices with the haptic engine.
 action !mac vibrate()
 
+// [Doc]: Turn On Flashlight: Turn on the flashlight on the device with optional brightness setting.
+action 'flashlight' flashlightOn(float brightness: 'WFFlashlightLevel' = 0.5) {
+    "state": 1
+}
+
+// [Doc]: Turn Off Flashlight: Turn off the flashlight on the device.
+action 'flashlight' flashlightOff() {
+    "state": 0
+}
+
+// [Doc]: Toggle On Flashlight: Toggle the flashlight on the device with optional brightness setting.
+action 'flashlight' toggleFlashlight(float brightness: 'WFFlashlightLevel' = 0.5) {
+    "operation": "toggle"
+}
+
 // [Doc]: Show Control Center: Open the control center on the device.
 action 'com.apple.ShortcutsActions.ShowControlCenterAction' showControlCenter()
 
