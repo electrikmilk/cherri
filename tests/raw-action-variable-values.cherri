@@ -7,11 +7,12 @@ rawAction("is.workflow.actions.notification", {
 
 const markdown = text("hello")
 
+@token = "Egr3efFge2ef424t..."
 rawAction("is.workflow.actions.downloadurl", {
     "WFURL": "https://example.com",
     "WFHTTPMethod": "GET",
     "WFHTTPHeaders": {
-        "Authorization": "Bearer my-token",
+        "Authorization": "Bearer {@token}",
         "Content-Type": "text/markdown"
     }
 })
