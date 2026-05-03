@@ -1,4 +1,4 @@
-@msg = text("hello world")
+@msg = "hello world"
 
 rawAction("is.workflow.actions.notification", {
     "WFNotificationActionTitle": "${@msg}",
