@@ -1793,8 +1793,8 @@ func normalizeRawActionParamValue(value any) any {
 			return value
 		}
 		if useAttachmentAsVariableValueRegex.MatchString(v) {
-			params[key] = variableValue(varValue{
-				value: strings.Trim(value.(string), "${@}"),
+			return variableValue(varValue{
+				value: strings.Trim(v, "${@}"),
 			})
 		}
 		return attachmentValues(v)
@@ -1825,26 +1825,6 @@ func makeRawActionArrayValue(value []any) WFArrayValue {
 		WFSerializationType: "WFArrayParameterState",
 		Value:               items,
 	}
-}
-
-func rawActionVariableValue(value string) any {
-	var matches = collectInlineVarRegex.FindStringSubmatch(strings.TrimPrefix(value, "$"))
-	if len(matches) < 2 {
-		return attachmentValues(value)
-	}
-
-	var variable = varValue{
-		valueType: Variable,
-		value:     matches[1],
-	}
-	if len(matches) > 2 {
-		variable.getAs = matches[2]
-	}
-	if len(matches) > 3 {
-		variable.coerce = matches[3]
-	}
-
-	return variableValue(variable)
 }
 
 var actionIncludes = []string{
