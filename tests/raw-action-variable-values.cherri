@@ -5,7 +5,7 @@ rawAction("is.workflow.actions.notification", {
     "WFNotificationActionBody": "body"
 })
 
-const markdown = text("hello")
+const markdown = "hello"
 
 @token = "Egr3efFge2ef424t..."
 rawAction("is.workflow.actions.downloadurl", {
