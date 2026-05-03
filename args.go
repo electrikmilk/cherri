@@ -57,6 +57,11 @@ func init() {
 		ExpectsValue: true,
 	})
 	args.Register(args.Argument{
+		Name:         "refs",
+		Description:  "Encode device content references from a Shortcut for re-use in Cherri code.",
+		ExpectsValue: true,
+	})
+	args.Register(args.Argument{
 		Name:         "init",
 		Description:  "Create a Cherri package. Pattern: @{author}/{package_name} | https://{uri}/{author}/cherri-{package_name}",
 		ExpectsValue: true,

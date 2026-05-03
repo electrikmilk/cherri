@@ -1,0 +1,162 @@
+package main
+
+import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"reflect"
+
+	"github.com/electrikmilk/args-parser"
+	"howett.net/plist"
+)
+
+// extractedReference holds the state for a single extracted reference.
+type extractedReference struct {
+	action     string
+	identifier string
+	index      int
+	value      any
+}
+
+// extractedReferences holds references extracted from a workflow.
+var extractedReferences []extractedReference
+
+// references holds parsed references.
+var references = make(map[string]map[string]any)
+
+// extractReferences extracts input references from a workflow with unique identifiers and outputs reference syntax.
+func extractReferences(b []byte) {
+	var _, marshalIndexedErr = plist.Unmarshal(b, &shortcut)
+	handle(marshalIndexedErr)
+
+	for i, action := range shortcut.WFWorkflowActions {
+		if len(action.WFWorkflowActionParameters) == 0 {
+			continue
+		}
+		extractParameterReferences(i, action.WFWorkflowActionIdentifier, action.WFWorkflowActionParameters)
+	}
+
+	if args.Using("debug") {
+		fmt.Println(ansi("Extracted References:\n", green, bold))
+	}
+	for _, ref := range extractedReferences {
+		printReference(&ref)
+	}
+}
+
+// extractParameterReferences extracts references from a workflow action parameter.
+func extractParameterReferences(index int, identifier string, params map[string]interface{}) {
+	for _, value := range params {
+		var ref = extractedReference{
+			action: identifier,
+			index:  index + 1,
+		}
+		if value == nil || reflect.TypeOf(value).Kind() != reflect.Map {
+			continue
+		}
+		var valueMap = value.(map[string]interface{})
+		if valueMap["fileLocation"] != nil {
+			ref.value = extractFileReference(&ref, valueMap)
+		}
+		if valueMap["persistentIdentifier"] != nil {
+			ref.value = extractMediaReference(&ref, valueMap)
+		}
+		if valueMap["CustomOutputName"] != nil {
+			ref.identifier = valueMap["CustomOutputName"].(string)
+		}
+
+		sanitizeIdentifier(&ref.identifier)
+
+		if skipDuplicateReference(ref) || ref.value == nil {
+			continue
+		}
+
+		extractedReferences = append(extractedReferences, ref)
+	}
+	return
+}
+
+func skipDuplicateReference(ref extractedReference) bool {
+	for _, existingRef := range extractedReferences {
+		if existingRef.identifier == ref.identifier {
+			return true
+		}
+	}
+	return false
+}
+
+type WFFile struct {
+	Filename     string       `json:"filename,omitempty" plist:"filename,omitempty"`
+	DisplayName  string       `json:"displayName,omitempty" plist:"displayName,omitempty"`
+	FileLocation FileLocation `json:"fileLocation,omitempty" plist:"fileLocation,omitempty"`
+}
+
+type FileLocation struct {
+	WFFileLocationType   string
+	CrossDeviceItemID    string `json:"crossDeviceItemID,omitempty" plist:"crossDeviceItemID,omitempty"`
+	FileProviderDomainID string `json:"fileProviderDomainID" plist:"fileProviderDomainID"`
+	RelativeSubpath      string `json:"relativeSubpath" plist:"relativeSubpath"`
+}
+
+// extractFileReference extracts a file reference from a workflow action parameter.
+func extractFileReference(ref *extractedReference, values map[string]interface{}) (file WFFile) {
+	mapToStruct(values, &file)
+	ref.identifier = file.DisplayName
+	return
+}
+
+type WFMediaItem struct {
+	PersistentIdentifier uint64 `json:"persistentIdentifier" plist:"persistentIdentifier"`
+	ItemName             string `json:"itemName" plist:"itemName"`
+	Type                 string `json:"type" plist:"type"`
+}
+
+// extractMediaReference extracts a media reference from a workflow action parameter.
+func extractMediaReference(ref *extractedReference, values map[string]interface{}) (media WFMediaItem) {
+	mapToStruct(values, &media)
+	ref.identifier = media.ItemName
+	return
+}
+
+// makeReferenceHash returns a unique hash for a reference.
+func makeReferenceHash(ref *extractedReference) string {
+	var jsonBytes, marshalErr = json.Marshal(ref.value)
+	handle(marshalErr)
+
+	return base64.StdEncoding.EncodeToString(jsonBytes)
+}
+
+// decodeReferenceHash decodes a reference hash into a map to later insert into a Shortcut action parameter.
+func decodeReferenceHash(hash string) (ref map[string]any, err error) {
+	ref = make(map[string]any)
+	var decodedBytes, decodeErr = base64.StdEncoding.DecodeString(hash)
+	if decodeErr != nil {
+		return nil, fmt.Errorf("could not decode hashed JSON: %s", decodeErr)
+	}
+
+	var unmarshalErr = json.Unmarshal(decodedBytes, &ref)
+	if unmarshalErr != nil {
+		return nil, fmt.Errorf("could not unmarshal decoded JSON: %s", unmarshalErr)
+	}
+
+	return ref, nil
+}
+
+// makeRefCode returns the reference in Cherri reference syntax.
+func makeRefCode(ref *extractedReference) string {
+	return fmt.Sprintf("#ref %s %s\n", ref.identifier, makeReferenceHash(ref))
+}
+
+// printReference prints a reference to stdout.
+func printReference(ref *extractedReference) {
+	if args.Using("debug") {
+		fmt.Println(ansi(fmt.Sprintf("%s (Action %d, %s)\n", ref.identifier, ref.index, ref.action), bold))
+	}
+
+	fmt.Println(makeRefCode(ref))
+
+	if args.Using("debug") {
+		fmt.Println(ansi(fmt.Sprintf("Encodes: %v\n", ref.value), red))
+		fmt.Println(ansi("---\n", dim))
+	}
+}

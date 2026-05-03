@@ -184,6 +184,10 @@ func printParsingDebug() {
 	fmt.Println(enumerations)
 	fmt.Print("\n")
 
+	fmt.Println(ansi("## REFERENCES ##", bold))
+	fmt.Println(references)
+	fmt.Print("\n")
+
 	fmt.Println(ansi("## VARIABLES ##", bold))
 	printVariables()
 	fmt.Print("\n")
@@ -208,6 +212,9 @@ func parse() {
 	case startOfLineTokenAhead(Definition):
 		advance()
 		collectDefinition()
+	case startOfLineTokenAhead(Reference):
+		advance()
+		collectEncodedReference()
 	case isChar('@'):
 		collectVariable(false)
 	case tokenAhead(Constant):
@@ -579,6 +586,12 @@ func collectReference(valueType *tokenType, value *any, until *rune, variable bo
 			*valueType = Question
 			*value = reference
 			q.used = true
+			return
+		}
+
+		if _, found := references[reference]; found {
+			*valueType = Reference
+			*value = reference
 			return
 		}
 
@@ -1091,7 +1104,7 @@ func collectQuestion() {
 		parserError(fmt.Sprintf("Duplicate declaration of import question '%s'.", identifier))
 	}
 	if validReference(identifier) {
-		parserError(fmt.Sprintf("Import question conflicts with defined variable or global '%s'.", identifier))
+		parserError(fmt.Sprintf("Import question conflicts with defined variable, constant or global '%s'.", identifier))
 	}
 	advance()
 
@@ -1113,6 +1126,24 @@ func collectQuestion() {
 		text:         text,
 		defaultValue: defaultValue,
 	}
+}
+
+func collectEncodedReference() {
+	var identifier = collectIdentifier()
+	if _, found := references[identifier]; found {
+		parserError(fmt.Sprintf("Duplicate declaration of reference '%s'.", identifier))
+	}
+	if validReference(identifier) {
+		parserError(fmt.Sprintf("Reference identifier conflicts with defined variable, constant or global '%s'.", identifier))
+	}
+	advance()
+
+	var hash = collectUntil('\n')
+	var ref, err = decodeReferenceHash(hash)
+	if err != nil {
+		parserError(fmt.Sprintf("Failed to decode reference hash: %v\n\nCollected hash: %s", err, hash))
+	}
+	references[identifier] = ref
 }
 
 var repeatItemIndex = 1
