@@ -61,7 +61,7 @@ action removeEvents(variable events: 'WFInputEvents', bool ?includeFutureEvents:
 action 'showlist' openRemindersList(variable list: 'WFList')
 
 // [Doc]: [Reminders] Add Quick Reminder
-action 'is.workflow.actions.addquickreminder' addQuickReminder()
+action 'addquickreminder' addQuickReminder()
 
 // [Doc]: [Reminders] Remove Reminders
 action removeReminders(variable reminders: 'WFInputReminders')
