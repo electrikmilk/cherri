@@ -2,12 +2,6 @@
 Settings Actions
 */
 
-// [Doc]: [Device] Set Brightness
-action setBrightness(float brightness: 'WFBrightness')
-
-// [Doc]: [Device] Set Volume
-action setVolume(float volume: 'WFVolume')
-
 enum FocusUntil {
     'Turned Off'
     'Time'
@@ -75,15 +69,6 @@ action !mac v16.2 'posters.get' getWallpaper() {
 action 'appearance' toggleAppearance() {
     "operation": "toggle"
 }
-
-// [Doc]: [Wireless] Bluetooth
-action toggleSet 'bluetooth.set' Bluetooth 'OnValue'
-
-// [Doc]: [Wireless] Wifi
-action toggleSet 'wifi.set' Wifi 'OnValue'
-
-// [Doc]: [Wireless] Cellular Data
-action toggleSet 'cellulardata.set' CellularData 'OnValue'
 
 // [Doc]: [Display] Night Shift
 action toggleSet 'nightshift.set' NightShift 'OnValue'

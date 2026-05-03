@@ -738,7 +738,6 @@ func generateActionParamDefinition(param parameterDefinition) string {
 		}
 	}
 	if param.ref {
-		fmt.Println(param.name)
 		argType = fmt.Sprintf("&%s", argType)
 	}
 	definition.WriteString(ansi(argType, magenta))
