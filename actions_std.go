@@ -1793,7 +1793,9 @@ func normalizeRawActionParamValue(value any) any {
 			return value
 		}
 		if useAttachmentAsVariableValueRegex.MatchString(v) {
-			return rawActionVariableValue(v)
+			params[key] = variableValue(varValue{
+				value: strings.Trim(value.(string), "${@}"),
+			})
 		}
 		return attachmentValues(v)
 	case map[string]any:
