@@ -1,3 +1,5 @@
+// compile-only: include file syntax
+
 #include 'definitions.cherri'
 
 @textVar = "test"

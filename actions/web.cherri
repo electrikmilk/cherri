@@ -108,7 +108,7 @@ enum HTTPMethod {
 }
 
 // [Doc]: [HTTP] Download URL: Download the contents of a URL.
-action default downloadURL(text url: 'WFURL', dictionary! ?headers: 'WFHTTPHeaders') {
+action default downloadURL(text url: 'WFURL', dictionary! ?headers: 'WFHTTPHeaders'): variable {
 	"WFHTTPMethod": "GET"
 }
 

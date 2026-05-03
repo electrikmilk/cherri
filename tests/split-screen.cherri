@@ -1,3 +1,5 @@
+// compile-only: UI layout, not assertable
+
 menu "Choose App" {
     item "Notes":
         openApp("notes")

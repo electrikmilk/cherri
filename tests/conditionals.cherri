@@ -1,48 +1,100 @@
-@intVar = 56
-@intVar2 = 42
-@textVar = "string1"
-@textVar2 = "string2"
-const boolVar = true
+// == numbers: variable on left, literal on right
+@five = 5
+@r = "wrong"
+if @five == 5 { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: == (numbers)", "❌ FAIL: == (numbers)") }
 
-// types of conditions
-if boolVar == true {}
-if boolVar == false {}
-if @textVar == @textVar2 {}
-if @textVar != @textVar2 {}
-if @textVar {}
-if !@textVar {}
-if @intVar == 5 {}
-if @intVar != 5 {}
-if @intVar > @intVar2 {}
-if @intVar < 5 {}
-if @intVar >= 5 {}
-if @intVar <= 5 {}
-if @textVar contains "string" {}
-if @textVar contains @textVar2 {}
-if @textVar !contains @textVar2 {}
-if @textVar !contains "2" {}
-if @textVar beginsWith "string" {}
-if @textVar beginsWith @textVar2 {}
-if @textVar endsWith "2" {}
-if @textVar endsWith @textVar2 {}
-if @intVar <> 5 6 {} // between
+// != strings
+@strA = "a"
+@strB = "b"
+@r = "wrong"
+if @strA != @strB { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: !=", "❌ FAIL: !=") }
 
-// multiple conditions
-if @intVar && @intVar == 5 {}
-if @intVar || @textVar {}
-if @intVar == 5 && @textVar == "string" {}
-if @intVar == 5 && @textVar == "string" && @textVar == @textVar2 {}
+// >
+@r = "wrong"
+if @five > 3 { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: >", "❌ FAIL: >") }
 
-// nesting...
-if @intVar > 5 {
-    @intvar3 = 5
-    if @intVar < 5 {
-        @intVar2 = 3
-    } else {
-         if @intVar > @intVar2 {
-            @intVar2 = @intVar
-         }
-    }
-} else {
-    @intVar2 = 8
-}
+// <
+@three = 3
+@r = "wrong"
+if @three < 5 { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: <", "❌ FAIL: <") }
+
+// >=
+@r = "wrong"
+if @five >= 5 { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: >=", "❌ FAIL: >=") }
+
+// <=
+@r = "wrong"
+if @three <= 3 { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: <=", "❌ FAIL: <=") }
+
+// contains
+@text = "hello world"
+@r = "wrong"
+if @text contains "world" { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: contains", "❌ FAIL: contains") }
+
+// !contains
+@r = "wrong"
+if @text !contains "xyz" { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: !contains", "❌ FAIL: !contains") }
+
+// beginsWith
+@r = "wrong"
+if @text beginsWith "hello" { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: beginsWith", "❌ FAIL: beginsWith") }
+
+// endsWith
+@r = "wrong"
+if @text endsWith "world" { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: endsWith", "❌ FAIL: endsWith") }
+
+// between (<>)
+@n = 5
+@r = "wrong"
+if @n <> 1 10 { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: between", "❌ FAIL: between") }
+
+// else branch executes when condition is false
+@one = 1
+@r = "wrong"
+if @one > 10 {} else { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: else", "❌ FAIL: else") }
+
+// && (all conditions)
+@r = "wrong"
+@x = 5
+if @x > 3 && @x < 10 { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: &&", "❌ FAIL: &&") }
+
+// || (any condition)
+@r = "wrong"
+if @x > 100 || @x == 5 { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: ||", "❌ FAIL: ||") }
+
+// bool == true/false
+@flag = true
+@r = "wrong"
+if @flag == true { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: bool == true", "❌ FAIL: bool == true") }
+
+@r = "wrong"
+if @flag == false {} else { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: bool == false (else)", "❌ FAIL: bool == false (else)") }
+
+// has value / is empty
+@r = "wrong"
+@val = "something"
+if @val { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: has value", "❌ FAIL: has value") }
+
+@r = "wrong"
+@empty = nil
+if !@empty { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: is empty", "❌ FAIL: is empty") }
+
+show("✅ All tests passed")

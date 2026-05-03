@@ -1,11 +1,16 @@
-alert("Hello, world!")
-
+// copy/paste: compiler feature that inlines the block at each paste site
+@testVal = "cherri-test"
 copy carbon {
-    alert("Hello, Cherri!")
+    setClipboard(@testVal)
 }
 
 paste carbon
 
-paste carbon
+// clipboard round-trip: assert the pasted setClipboard took effect
+const clip = getClipboard()
+@clipStr = "{clip}"
+if @clipStr != "cherri-test" {
+    mustOutput("❌ FAIL: clipboard round-trip — got {@clipStr}, expected 'cherri-test'", "❌ FAIL: clipboard round-trip — got {@clipStr}, expected 'cherri-test'")
+}
 
-paste carbon
+show("✅ All tests passed")

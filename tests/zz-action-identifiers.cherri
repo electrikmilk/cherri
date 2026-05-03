@@ -1,3 +1,5 @@
+// compile-only: action identifier output verification
+
 enum identifierType {
     'Short',
     'Override'

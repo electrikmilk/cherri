@@ -1,5 +1,6 @@
 /* Hello, World! */
 
+// compile-only: basic alert and shortcut definitions
 #define color yellow
 #define glyph smileyFace
 #define name Hello, Cherri!

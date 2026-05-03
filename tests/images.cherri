@@ -1,3 +1,5 @@
+// compile-only: media/hardware dependent
+
 @images = selectPhotos(true)
 
 @combined = combineImages(@images, "In a Grid")

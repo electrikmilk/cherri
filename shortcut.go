@@ -144,7 +144,7 @@ type WFContentPredicateTableTemplate struct {
 }
 
 type WFConditionValue struct {
-	WFActionParameterFilterPrefix    int                `plist:",omitempty"`
+	WFActionParameterFilterPrefix    int
 	WFActionParameterFilterTemplates []WFConditionParam `plist:",omitempty"`
 }
 

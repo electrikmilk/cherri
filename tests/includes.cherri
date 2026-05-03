@@ -1,3 +1,5 @@
+// compile-only: include file syntax
+
 #include 'include.cherri'
 
 alert(@textVar,"Alert")

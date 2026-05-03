@@ -3,7 +3,7 @@ Location Actions
 */
 
 // [Doc]: Location: Create a location value.
-action default location(variable location: 'WFLocation')
+action default location(text location: 'WFLocation')
 
 // [Doc]: Current Location: Get current user location.
 action 'location' currentLocation() {

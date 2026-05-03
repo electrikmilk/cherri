@@ -138,6 +138,10 @@ func makeVariableAction(t *token) {
 			return
 		}
 	}
+
+	if _, hasInput := setVariableParams["WFInput"]; !hasInput {
+		addStdAction("nothing", map[string]any{})
+	}
 	addStdAction("setvariable", setVariableParams)
 
 	if t.valueType == Arr {
@@ -377,6 +381,11 @@ func variableValueWithSerialization(variable varValue, serializationType string)
 	if global, found := globals[identifier]; found {
 		isInputVariable(identifier)
 		variable.variableType = global.variableType
+		if global.variableType == "Variable" {
+			if displayName, ok := global.value.(string); ok {
+				identifier = displayName
+			}
+		}
 	} else if v, found := variables[identifier]; found {
 		variableReference = v
 		variable.constant = v.constant
@@ -856,8 +865,8 @@ func makeConditionalAction(t *token) {
 	case If:
 		conditionalParams["WFControlFlowMode"] = startStatement
 
-		if iosVersion < 18 {
-			var cond = t.value.(WFConditions)
+		var cond = t.value.(WFConditions)
+		if len(cond.conditions) == 1 || iosVersion < 18 {
 			var firstCondition = cond.conditions[0]
 			var firstArg = firstCondition.arguments[0]
 			conditionalParams["WFInput"] = map[string]any{
@@ -881,9 +890,7 @@ func makeConditionalAction(t *token) {
 				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[2], inputType)
 			}
 			conditionalParams["WFCondition"] = conditionCode
-			conditionalParams["WFControlFlowMode"] = startStatement
 		} else {
-			var cond = t.value.(WFConditions)
 			conditionalParams["WFConditions"] = makeConditions(&cond)
 		}
 	case Else:
@@ -1007,6 +1014,8 @@ func conditionalParameter(param *WFConditionParam, arg actionArgument, inputType
 			boolNumber = 1
 		}
 		routeConditionalValue(param, paramValue(actionArgument{valueType: Integer, value: boolNumber}, Integer), inputType)
+	case Integer, Float:
+		routeConditionalValue(param, paramValue(arg, arg.valueType), Integer)
 	default:
 		routeConditionalValue(param, paramValue(arg, arg.valueType), inputType)
 	}
@@ -1035,6 +1044,8 @@ func conditionalParameterLegacy(params map[string]any, arg actionArgument, input
 			boolNumber = 1
 		}
 		routeConditionalValueLegacy(params, paramValue(actionArgument{valueType: Integer, value: boolNumber}, Integer), inputType)
+	case Integer, Float:
+		routeConditionalValueLegacy(params, paramValue(arg, arg.valueType), Integer)
 	default:
 		routeConditionalValueLegacy(params, paramValue(arg, arg.valueType), inputType)
 	}

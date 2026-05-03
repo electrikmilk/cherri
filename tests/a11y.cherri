@@ -1,3 +1,5 @@
+// compile-only: accessibility UI
+
 // setBackgroundSound: default and explicit enum values
 setBackgroundSound()
 setBackgroundSound("RainOnRoof")

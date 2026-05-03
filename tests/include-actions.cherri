@@ -1,2 +1,4 @@
+// compile-only: include actions syntax
+
 @file = selectFile()
 saveToDropboxPrompt(@file)

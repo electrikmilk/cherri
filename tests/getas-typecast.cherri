@@ -1,13 +1,28 @@
-// Get as...
-@deviceOS = Device['OS']
-@versionNumber = Device['System Version'].text
+// .text coercion via string interpolation produces a String-typed variable
+@num = 42
+@asText = "{@num.text}"
+if @asText != "42" {
+    mustOutput("❌ FAIL: .text — got {@asText}, expected '42'", "❌ FAIL: .text — got {@asText}, expected '42'")
+}
 
-// Inline get as...
+// inline .text in string interpolation
+@n = 100
+@result = "Value: {@n.text}"
+if @result != "Value: 100" {
+    mustOutput("❌ FAIL: inline .text — got {@result}, expected 'Value: 100'", "❌ FAIL: inline .text — got {@result}, expected 'Value: 100'")
+}
+
+// .number coercion via string interpolation produces a number-typed variable
+@n2: number
+@asText = "42"
+@n2 = @asText.number
+if @n2 != 42 {
+    mustOutput("❌ FAIL: .text — got {@n2}, expected 42", "❌ FAIL: .text — got {@n2}, expected 42")
+}
+
+// Device global with .text coercion (compile coverage — value varies by device)
+@deviceOS = Device['OS']
+@versionText = "{Device['System Version'].text}"
 @osVersion = "{Device['OS']} {Device['System Version']}"
 
-// Type coercion...
-@number = 5
-@text = @number.text
-
-// Inline type coercion...
-@numberText = "Number: {@number.text}"
+show("✅ All tests passed")

@@ -25,7 +25,7 @@ action 'math' calculate(
     number operandOne: 'WFInput',
     number ?operandTwo: 'WFMathOperand'
 ): number {
-	"WFMathOperation": "..."
+	"WFMathOperation": "…"
 }
 
 enum statisticOperations {
@@ -63,16 +63,16 @@ enum roundingPlace {
 }
 
 // [Doc]: [Rounding] Round: Rounds number to specified rounding place.
-action default round(number number: 'WFInput', roundingPlace ?roundTo: 'WFRoundTo' = "Integer") {
+action default round(number number: 'WFInput', roundingPlace ?roundTo: 'WFRoundTo' = "Integer"): number {
 	"WFRoundMode": "Normal"
 }
 
 // [Doc]: [Rounding] Round Up: Always round a number up to a specified rounding place.
-action 'round' ceil(number number: 'WFInput', roundingPlace ?roundTo: 'WFRoundTo' = "Integer") {
+action 'round' ceil(number number: 'WFInput', roundingPlace ?roundTo: 'WFRoundTo' = "Integer"): number {
 	"WFRoundMode": "Always Round Up"
 }
 
 // [Doc]: [Rounding] Round Down: Always round a number down to a specified rounding place.
-action 'round' floor(number number: 'WFInput', roundingPlace ?roundTo: 'WFRoundTo' = "Integer") {
+action 'round' floor(number number: 'WFInput', roundingPlace ?roundTo: 'WFRoundTo' = "Integer"): number {
 	"WFRoundMode": "Always Round Down"
 }

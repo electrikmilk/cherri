@@ -1,3 +1,5 @@
+// compile-only: color and quantity types
+
 // Tests color() and qty() as explicit action arguments
 
 // qty() — time-duration type, used by startTimer in actions/calendar.cherri

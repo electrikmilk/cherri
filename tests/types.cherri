@@ -1,3 +1,5 @@
+// compile-only: type declaration syntax
+
 @string: text
 @integer: number
 @boolean: bool
