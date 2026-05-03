@@ -56,6 +56,9 @@ action !mac 'flashlight' toggleFlashlight(float brightness: 'WFFlashlightLevel' 
 // [Doc]: Show Control Center: Open the control center on the device.
 action 'com.apple.ShortcutsActions.ShowControlCenterAction' showControlCenter()
 
+// [Doc]: [Battery] Low Power Mode
+action toggleSet !mac 'lowpowermode.set' LowPowerMode 'OnValue'
+
 // [Doc]: [Battery] Get Battery Level: Get the current level of charge of the device battery.
 action default getBatteryLevel()
 
