@@ -39,9 +39,8 @@ type ShortcutRecordValue struct {
 var importPath string
 
 // Imports a Shortcut for decompilation based on path given.
-func importShortcut() (shortcutBytes []byte) {
-	importPath = args.Value("import")
-
+func importShortcut(path string) (shortcutBytes []byte) {
+	importPath = path
 	var icloudURLRegex = regexp.MustCompile(`^https://(?:www.)?icloud\.com/shortcuts/.+$`)
 	if icloudURLRegex.MatchString(importPath) {
 		shortcutBytes = downloadShortcut()

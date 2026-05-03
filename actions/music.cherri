@@ -23,7 +23,7 @@ enum repeatMode {
 }
 
 // [Doc]: Play Music: Set music to play with modes for shuffle and repeat.
-action playMusic(variable music: 'WFMediaItems', shuffleMode ?shuffle: 'WFPlayMusicActionShuffle', repeatMode ?repeat: 'WFPlayMusicActionRepeat')
+action playMusic(&variable music: 'WFMediaItems', shuffleMode ?shuffle: 'WFPlayMusicActionShuffle', repeatMode ?repeat: 'WFPlayMusicActionRepeat')
 
 enum musicDetail {
 	'Title',
