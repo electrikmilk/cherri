@@ -753,6 +753,18 @@ func makeDictionaryItem(key string, value any) WFDictionaryFieldValueItem {
 			WFSerializationType: "WFNumberSubstitutableState",
 			Value:               v,
 		}
+	case WFTextTokenAttachment, WFTextTokenString:
+		itemType = itemTypeText
+		wfValue = v
+	case WFDictionaryFieldValue:
+		itemType = itemTypeDict
+		wfValue = v
+	case WFArrayValue:
+		itemType = itemTypeArray
+		wfValue = v
+	case WFBoolValue:
+		itemType = itemTypeBool
+		wfValue = v
 	default:
 		exit(fmt.Sprintf("Unsupported dictionary item value type %T", value))
 		return WFDictionaryFieldValueItem{}

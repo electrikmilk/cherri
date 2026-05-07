@@ -1,0 +1,25 @@
+@msg = "hello world"
+
+rawAction("is.workflow.actions.notification", {
+    "WFNotificationActionTitle": "${@msg}",
+    "WFNotificationActionBody": "body"
+})
+
+const markdown = "hello"
+
+@token = "Egr3efFge2ef424t..."
+rawAction("is.workflow.actions.downloadurl", {
+    "WFURL": "https://example.com",
+    "WFHTTPMethod": "GET",
+    "WFHTTPHeaders": {
+        "Authorization": "Bearer {@token}",
+        "Content-Type": "text/markdown"
+    }
+})
+
+rawAction("is.workflow.actions.downloadurl", {
+    "WFURL": "https://example.com",
+    "WFHTTPMethod": "POST",
+    "WFHTTPBodyType": "File",
+    "WFRequestVariable": "${markdown}"
+})
