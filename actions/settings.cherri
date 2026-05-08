@@ -39,8 +39,8 @@ action 'dnd.set' toggleDND() {
 // [Doc]: [Notifications] Get Focus Mode: Get the current Focus Mode.
 action 'dnd.getfocus' getFocusMode()
 
-// [Doc]: [Multitasking] Set Multitasking Mode
-action v26 'com.apple.ShortcutsActions.SetMultitaskingModeAction' setMultitaskingMode(bool automaticallyShowAndHideDock = true)
+// [Doc]: [Multitasking] Get Multitasking Mode: Get the current multitasking mode.
+action v26 'com.apple.ShortcutsActions.GetMultitaskingModeAction' getMultitaskingMode(): text
 
 // [Doc]: [Appearance] Set Appearance to Light
 action 'appearance' lightMode() {

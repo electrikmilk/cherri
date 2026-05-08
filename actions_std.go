@@ -38,10 +38,16 @@ var toggleAlarmIntent = appIntent{
 	appIntentIdentifier: "ToggleAlarmIntent",
 }
 
-var createShortcutiCloudLink = appIntent{
+var createShortcutiCloudLinkIntent = appIntent{
 	name:                "Shortcuts",
 	bundleIdentifier:    "com.apple.shortcuts",
 	appIntentIdentifier: "CreateShortcutiCloudLinkAction",
+}
+
+var setMultitaskingModeIntent = appIntent{
+	name:                "ShortcutsActions",
+	bundleIdentifier:    "com.apple.ShortcutsActions",
+	appIntentIdentifier: "SetMultitaskingModeAction",
 }
 
 // actions is the data structure that determines every action the compiler knows about.
@@ -1221,7 +1227,7 @@ var actions = map[string]*actionDefinition{
 		},
 		appIdentifier: "com.apple.shortcuts",
 		identifier:    "CreateShortcutiCloudLinkAction",
-		appIntent:     createShortcutiCloudLink,
+		appIntent:     createShortcutiCloudLinkIntent,
 		parameters: []parameterDefinition{
 			{
 				name:      "shortcut",
@@ -1551,6 +1557,59 @@ var actions = map[string]*actionDefinition{
 		appendParams: map[string]any{
 			"Mode": "Set",
 		},
+	},
+	"setWindowedMultitasking": {
+		doc: selfDoc{
+			title:       "Set Windowed Multitasking Mode",
+			description: "Set the multitasking mode to windowed. Applies to iPadOS and macOS only.",
+			category:    "settings",
+			subcategory: "Multitasking",
+		},
+		appIdentifier: "com.apple.ShortcutsActions",
+		identifier:    "SetMultitaskingModeAction",
+		defaultAction: true,
+		appIntent:     setMultitaskingModeIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "automaticallyShowAndHideDock",
+				validType: Bool,
+				key:       "automaticallyShowAndHideDock",
+				optional:  true,
+			},
+		},
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			return appendSetMultitaskingModeParam("Windowed Apps", "windowedApps", "macwindow.on.rectangle")
+		},
+		minVersion: 26,
+	},
+	"setStageManagerMultitasking": {
+		doc: selfDoc{
+			title:       "Set Stage Manager Multitasking Mode",
+			description: "Set the multitasking mode to Stage Manager. Applies to iPadOS and macOS only.",
+			category:    "settings",
+			subcategory: "Multitasking",
+		},
+		appIdentifier: "com.apple.ShortcutsActions",
+		identifier:    "SetMultitaskingModeAction",
+		parameters: []parameterDefinition{
+			{
+				name:      "automaticallyShowAndHideDock",
+				validType: Bool,
+				key:       "automaticallyShowAndHideDock",
+				optional:  true,
+			},
+			{
+				name:      "showRecentApps",
+				validType: Bool,
+				key:       "showRecentApps",
+				optional:  true,
+			},
+		},
+		appIntent: setMultitaskingModeIntent,
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			return appendSetMultitaskingModeParam("Stage Manager", "stageManager", "squares.leading.rectangle")
+		},
+		minVersion: 26,
 	},
 	"setFocusMode": {
 		doc: selfDoc{
@@ -2169,6 +2228,24 @@ func makeAllAppsAction(args []actionArgument) (params map[string]any) {
 	}
 
 	return
+}
+
+func appendSetMultitaskingModeParam(title, identifier, symbol string) map[string]any {
+	return map[string]any{
+		"mode": map[string]any{
+			"identifier": identifier,
+			"subtitle": map[string]string{
+				"key": title,
+			},
+			"symbol": map[string]string{
+				"systemName": symbol,
+			},
+			"title": map[string]string{
+				"key": title,
+			},
+			"value": identifier,
+		},
+	}
 }
 
 func decompAppAction(key string, action *ShortcutAction) (arguments []string) {
