@@ -1866,6 +1866,12 @@ func skipWhitespace() {
 	}
 }
 
+func skipInlineWhitespace() {
+	for char == ' ' || char == '\t' {
+		advance()
+	}
+}
+
 func printVariables() {
 	for identifier, v := range variables {
 		if v.constant {

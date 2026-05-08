@@ -923,28 +923,25 @@ func collectDefinedAction() {
 
 func collectToggleSetAction(doc selfDoc) {
 	var m = collectActionPrefixModifiers()
-
-	skipWhitespace()
 	var name = collectIdentifier()
-	skipWhitespace()
+	skipInlineWhitespace()
 
 	var setKey = "state"
 	if char == '\'' {
 		advance()
 		setKey = collectRawString()
-		advance()
-		skipWhitespace()
 	}
 
 	var extraParams []parameterDefinition
 	if char == '(' {
 		advance()
 		if char != ')' {
+			skipWhitespace()
 			extraParams = collectParameterDefinitions()
 		} else {
 			advance()
 		}
-		skipWhitespace()
+		skipInlineWhitespace()
 	}
 
 	var extraBody = collectAdditionalParams()
