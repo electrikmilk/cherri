@@ -729,10 +729,7 @@ func makeDictionaryItem(key string, value any) WFDictionaryFieldValueItem {
 		for _, item := range v {
 			items = append(items, makeDictionaryItem("", item))
 		}
-		wfValue = WFArrayValue{
-			WFSerializationType: "WFArrayParameterState",
-			Value:               items,
-		}
+		wfValue = makeArrayValue(items)
 	case map[string]interface{}:
 		itemType = itemTypeDict
 		// Shortcuts wraps nested dict items in two WFDictionaryFieldValue layers:
@@ -790,6 +787,13 @@ func buildDictionaryKey(key string) any {
 	return WFTextTokenString{
 		WFSerializationType: "WFTextTokenString",
 		Value:               WFTextTokenStringValue{String: key},
+	}
+}
+
+func makeArrayValue(items []WFDictionaryFieldValueItem) WFArrayValue {
+	return WFArrayValue{
+		WFSerializationType: "WFArrayParameterState",
+		Value:               items,
 	}
 }
 
