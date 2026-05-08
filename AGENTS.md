@@ -420,3 +420,21 @@ Use `argumentValue(args, i)` or `paramValue(arg, type)` inside `makeParams` to c
 **Return types matter for testability:** Always declare `: type` on action output in DSL definitions when the action returns a value — omitting it causes the result to have type `''`, which prevents comparisons in test code and breaks type inference downstream. For actions that return values of varying type (e.g. `getValue`), `: text` is usually correct since the Shortcuts runtime coerces as needed.
 
 **Float is accepted for `number` parameters:** The type checker allows float literals and float-typed variables wherever `number` is expected — you do not need `variable` type to accept floats. Use `number` for any action that takes a numeric value (integer or float); reserve `variable` for genuinely pass-through parameters where type is meaningless.
+
+## Parser Internals
+
+Non-obvious behaviors that affect pre-parse collectors and action DSL parsing.
+
+**`isChar()` and `tokenAhead()` advance the cursor as a side effect.** `isChar(ch)` advances if `char == ch`. `tokenAhead(token)` calls `advanceTimes(len(token))` on a match. This means condition evaluation in `switch` cases changes `char`. For example, `commentAhead()` calls `isChar('/')`, so when `collectComment()` is entered, `char` is already the second character of the prefix (`/` or `*`).
+
+**`collectRawString()` advances past its own closing `'`.** The function emits `advance()` after the loop breaks on `'`. Callers must not add a redundant advance — `char` is already on the character that follows the closing quote.
+
+**`collectActionPrefixModifiers()` leaves `char` at the first letter of the name.** The `advance()` in the Mac/!mac branch skips the space after the modifier, and the `advance()` at the end of the `if char == '\''` block skips the space after the closing `'shortIdentifier'` quote. No skip is needed before `collectIdentifier()` in callers.
+
+**`skipWhitespace()` skips newlines and can cross file boundaries.** During `parseActionDefinitions()`, previously erased lines appear as empty strings in `lines[]`, which join to form `\n\n...` in the combined source. `skipWhitespace()` advances through all of these, potentially landing in the next action category file. `replaceLines()` then erases lines up to the current `lineIdx`, which can silently destroy content the main `parse()` loop needs. Use `skipInlineWhitespace()` (spaces and tabs only) whenever optional parts must appear on the same source line as the parent construct.
+
+**Pre-parse loops (`parseActionDefinitions`, `parseFunctions`, `parseIncludes`, `parseCopyPastes`) have no default error handler.** Unrecognized characters are silently skipped. A bug that causes a silent no-op in these loops will surface as an "Illegal character" crash in the main `parse()` loop, which does have a default error case.
+
+**`replaceLines()` erases from `lineRef.start` to `lineIdx` at the moment of the call.** If any cursor advance in a collector moves `lineIdx` past the end of the construct being collected (e.g. via `skipWhitespace()` crossing into the next file), those extra lines are silently erased. This is the root class of cross-file erasure bugs — guard against it by using `skipInlineWhitespace()` instead of `skipWhitespace()` when searching for optional same-line parts.
+
+**DSL toggle-set syntax:** `action toggleSet [modifiers] ['shortIdentifier'] name ['setKey'] [(params)] [{body}]` — all optional parts must be on the same line as the name.
