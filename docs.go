@@ -30,6 +30,7 @@ type actionCategory struct {
 }
 
 func generateDocs() {
+	markBuiltins()
 	defineRawAction()
 	loadActionsByCategory()
 	var cat = args.Value("docs")
