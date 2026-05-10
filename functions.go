@@ -57,13 +57,6 @@ func handleFunctions() {
 
 	usingFunctions = isUsingFunctions()
 	if usingFunctions {
-		if _, found := actions["getDictionary"]; !found {
-			lines = append([]string{"#include 'actions/scripting'\n"}, lines...)
-			resetParse()
-			handleIncludes()
-			handleActionDefinitions()
-		}
-
 		var functionsHeader = generateFunctionsHeader()
 		lines = append([]string{functionsHeader}, lines...)
 

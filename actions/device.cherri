@@ -120,3 +120,12 @@ action setVolume(float volume: 'WFVolume')
 
 // [Doc]: [Personal Hotspot] Personal Hotspot
 action toggleSet !mac 'personalhotspot.set' Hotspot
+
+// [Doc]: [Passwords] Search Passwords: Searches passwords in the Passwords app.
+action 'openpasswords' searchPasswords(text query: 'WFShowPasswordsSearchTerm')
+
+// [Doc]: [System] Dismiss Siri: Dismisses Siri.
+action dismissSiri()
+
+// [Doc]: [System] Return to Home Screen: Returns to the device home screen.
+action !mac returnToHomescreen()

@@ -760,7 +760,7 @@ var actions = map[string]*actionDefinition{
 		doc: selfDoc{
 			title:       "Open App",
 			description: "Open an app.",
-			category:    "scripting",
+			category:    "device",
 			subcategory: "Apps",
 		},
 		defaultAction: true,
@@ -795,7 +795,7 @@ var actions = map[string]*actionDefinition{
 		doc: selfDoc{
 			title:       "Hide App",
 			description: "Hide an app.",
-			category:    "scripting",
+			category:    "device",
 			subcategory: "Apps",
 		},
 		identifier:    "hide.app",
@@ -830,7 +830,7 @@ var actions = map[string]*actionDefinition{
 		doc: selfDoc{
 			title:       "Hide Apps",
 			description: "Hide multiple apps. Allows exception.",
-			category:    "scripting",
+			category:    "device",
 			subcategory: "Apps",
 		},
 		identifier: "hide.app",
@@ -853,9 +853,9 @@ var actions = map[string]*actionDefinition{
 	},
 	"quitApp": {
 		doc: selfDoc{
-			title:       "Qut App",
+			title:       "Quit App",
 			description: "Quit an app.",
-			category:    "scripting",
+			category:    "device",
 			subcategory: "Apps",
 		},
 		identifier:    "quit.app",
@@ -890,7 +890,7 @@ var actions = map[string]*actionDefinition{
 		doc: selfDoc{
 			title:       "Quit All Apps",
 			description: "Quits all apps. Allows exceptions.",
-			category:    "scripting",
+			category:    "device",
 			subcategory: "Apps",
 		},
 		identifier: "quit.app",
@@ -916,7 +916,7 @@ var actions = map[string]*actionDefinition{
 			title:       "Kill App",
 			description: "Kill an app.",
 			warning:     "This will not ask to save changes!",
-			category:    "scripting",
+			category:    "device",
 			subcategory: "Apps",
 		},
 		identifier: "quit.app",
@@ -954,7 +954,7 @@ var actions = map[string]*actionDefinition{
 			title:       "Kill All Apps",
 			description: "Kills all apps. Allows exceptions.",
 			warning:     "This will quit all the apps running on the device without asking to save changes!",
-			category:    "scripting",
+			category:    "device",
 			subcategory: "Apps",
 		},
 		identifier: "quit.app",
@@ -980,7 +980,7 @@ var actions = map[string]*actionDefinition{
 		doc: selfDoc{
 			title:       "Split Apps",
 			description: "Split apps across the screen.",
-			category:    "scripting",
+			category:    "device",
 			subcategory: "Apps",
 		},
 		identifier: "splitscreen",
@@ -1129,7 +1129,7 @@ var actions = map[string]*actionDefinition{
 		doc: selfDoc{
 			title:       "List",
 			description: "Create an immutable array of text.",
-			category:    "scripting",
+			category:    "basic",
 			subcategory: "Lists",
 		},
 		parameters: []parameterDefinition{
@@ -1307,7 +1307,7 @@ var actions = map[string]*actionDefinition{
 	"convertMeasurement": {
 		doc: selfDoc{
 			title:       "Convert Measurement",
-			category:    "scripting",
+			category:    "math",
 			subcategory: "Measurement",
 		},
 		identifier: "measurement.convert",
@@ -1373,7 +1373,7 @@ var actions = map[string]*actionDefinition{
 	"measurement": {
 		doc: selfDoc{
 			title:       "Create Measurement",
-			category:    "scripting",
+			category:    "math",
 			subcategory: "Measurement",
 		},
 		identifier: "measurement.create",
@@ -1825,7 +1825,6 @@ var actionIncludes = []string{
 	"network",
 	"pdf",
 	"photos",
-	"scripting",
 	"settings",
 	"sharing",
 	"shortcuts",

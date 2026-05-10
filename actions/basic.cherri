@@ -29,6 +29,12 @@ enum language {
 	'vn-VN',
 }
 
+enum timeDuration {
+    'hr',
+    'min',
+    'sec'
+}
+
 // [Doc]: Stop Shortcut: Stops the shortcut.
 action 'exit' stop()
 
@@ -95,8 +101,17 @@ action 'notification' showNotification(
     variable ?attachment: 'WFInput'
 )
 
-// [Doc]: Number: Create a number value.
+// [Doc]: [Numbers] Number: Create a number value.
 action number(variable number: 'WFNumberActionNumber'): number
+
+// [Doc]: [Numbers] Format Number: Format number based on decimal place.
+action 'format.number' formatNumber(number number: 'WFNumber', number ?decimalPlaces: 'WFNumberFormatDecimalPlaces' = 2): number
+
+// [Doc]: [Numbers] Get Numbers: Get numbers from input.
+action 'detect.number' getNumbers(variable input: 'WFInput'): number
+
+// [Doc]: [Numbers] Random Number: Returns a random number between `min` and `max`.
+action 'number.random' randomNumber(number min: 'WFRandomNumberMinimum', number max: 'WFRandomNumberMaximum'): number
 
 action 'gettext' text(text text: 'WFTextActionText'): text
 
@@ -109,8 +124,62 @@ action waitToReturn()
 // [Doc]: [Search] Search/Spotlight: Get results from search on iOS or iPadOS, and Spotlight on macOS.
 action 'spotlightsearch' search(text query: 'WFInputText', number ?limit: 'WFSpotlightSearchLimit' = 5, array ?resultType: 'WFSpotlightSearchResultType' = ["Calendar Events","Contacts","Mail","Messages","Notes","Photos","Reminders","Voice Recordings","Bookmarks"]): array
 
-enum timeDuration {
-    'hr',
-    'min',
-    'sec'
+// [Doc]: [Dictionaries] Get Dictionary: Get the dictionary from `input`.
+action 'detect.dictionary' getDictionary(variable input: 'WFInput'): dictionary
+
+// [Doc]: [Dictionaries] Get Keys from Dictionary: Get only the keys from the `dictionary`.
+action 'getvalueforkey' getKeys(dictionary dictionary: 'WFInput'): array {
+	"WFGetDictionaryValueType": "All Keys"
+}
+
+// [Doc]: [Dictionaries] Get Values from Dictionary: Get only the values from the `dictionary`.
+action 'getvalueforkey' getValues(dictionary dictionary: 'WFInput'): array {
+	"WFGetDictionaryValueType": "All Values"
+}
+
+// [Doc]: [Dictionaries] Get Value from Dictionary: For constants only, otherwise `dictionary['key']` syntax should be used.
+action 'getvalueforkey' getValue(dictionary dictionary: 'WFInput', text key: 'WFDictionaryKey'): variable {
+	"WFGetDictionaryValueType": "Value"
+}
+
+// [Doc]: [Dictionaries] Set Value in Dictionary: Set the value of `key` to `value` in `dictionary`.
+action 'setvalueforkey' setValue(variable dictionary: 'WFDictionary', text key: 'WFDictionaryKey', text value: 'WFDictionaryValue'): dictionary
+
+// [Doc]: [Items] Get Name: Get the name of an item.
+action 'getitemname' getName(variable item: 'WFInput')
+
+// [Doc]: [Items] Set Name: Set the name of an item.
+action 'setitemname' setName(variable item: 'WFInput', text name: 'WFName', bool ?includeFileExtension: 'WFDontIncludeFileExtension' = false)
+
+// [Doc]: [Lists] Choose from List: Prompts the user to choose from a list.
+action chooseFromList(
+    variable list: 'WFInput',
+    text ?prompt: 'WFChooseFromListActionPrompt',
+    bool ?selectMultiple: 'WFChooseFromListActionSelectMultiple' = false,
+    bool ?selectAll: 'WFChooseFromListActionSelectAll' = false
+)
+
+// [Doc]: [Lists] Get First Item: Get first item in a list.
+action 'getitemfromlist' getFirstItem(variable list: 'WFInput'): variable {
+	"WFItemSpecifier": "First Item"
+}
+
+// [Doc]: [Lists] Get Last Item: Get the last item in a list.
+action 'getitemfromlist' getLastItem(variable list: 'WFInput'): variable {
+	"WFItemSpecifier": "Last Item"
+}
+
+// [Doc]: [Lists] Get Random Item: Get random item from list.
+action 'getitemfromlist' getRandomItem(variable list: 'WFInput'): variable {
+	"WFItemSpecifier": "Random Item"
+}
+
+// [Doc]: [Lists] Get List Item: Get item from `list` at `index`. Keep in mind Shortcuts starts counting indexes at 1.
+action 'getitemfromlist' getListItem(variable list: 'WFInput', number index: 'WFItemIndex'): variable {
+	"WFItemSpecifier": "Item At Index"
+}
+
+// [Doc]: [Lists] Get List Items: Get items from a `list` between two indexes. Keep in mind Shortcuts starts counting indexes at 1.
+action 'getitemfromlist' getListItems(variable list: 'WFInput', number start: 'WFItemRangeStart', number end: 'WFItemRangeEnd'): array {
+	"WFItemSpecifier": "Items in Range"
 }
