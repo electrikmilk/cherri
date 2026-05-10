@@ -66,7 +66,7 @@ comment('explicit comment action — always included in the Shortcut')
 ### Includes
 
 ```ruby
-#include 'actions/scripting'   // standard library category
+#include 'actions/device'   // standard library category
 #include 'path/to/file.cherri' // arbitrary file
 ```
 
