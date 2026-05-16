@@ -50,6 +50,18 @@ var setMultitaskingModeIntent = appIntent{
 	appIntentIdentifier: "SetMultitaskingModeAction",
 }
 
+var openHealthViewIntent = appIntent{
+	name:                "健康",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenViewIntent",
+}
+
+var openHealthDataTypeIntent = appIntent{
+	name:                "健康",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenDataTypeIntent",
+}
+
 // actions is the data structure that determines every action the compiler knows about.
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
@@ -1236,6 +1248,64 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"openHealthView": {
+		doc: selfDoc{
+			title:       "Open Health View",
+			description: "Open a Health category view.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenViewIntent",
+		appIntent:     openHealthViewIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "identifier",
+				validType: String,
+			},
+			{
+				name:      "title",
+				validType: String,
+				optional:  true,
+			},
+			{
+				name:      "symbol",
+				validType: String,
+				optional:  true,
+			},
+		},
+		makeParams: healthTargetParams,
+		decomp:     decompHealthTarget,
+	},
+	"openHealthData": {
+		doc: selfDoc{
+			title:       "Open Health Data",
+			description: "Open a Health data type.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenDataTypeIntent",
+		appIntent:     openHealthDataTypeIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "identifier",
+				validType: String,
+			},
+			{
+				name:      "title",
+				validType: String,
+				optional:  true,
+			},
+			{
+				name:      "symbol",
+				validType: String,
+				optional:  true,
+			},
+		},
+		makeParams: healthTargetParams,
+		decomp:     decompHealthTarget,
+	},
 	"getWindows": {
 		doc: selfDoc{
 			title:       "Get Windows",
@@ -1815,6 +1885,7 @@ var actionIncludes = []string{
 	"device",
 	"documents",
 	"dropbox",
+	"health",
 	"images",
 	"location",
 	"intelligence",
@@ -1916,7 +1987,9 @@ func checkMissingStandardInclude(identifier *string, parsing bool) {
 		lines = append([]string{fmt.Sprintf("#include 'actions/%s'\n", actionInclude)}, lines...)
 		resetParse()
 		handleIncludes()
+		currentCategory = actionInclude
 		handleActionDefinitions()
+		currentCategory = ""
 
 		if !parsing {
 			mapSplitActions()
@@ -2027,7 +2100,10 @@ func textParts(args []actionArgument) map[string]any {
 		"Show-text": true,
 	}
 
-	var separator = getArgValue(args[1])
+	var separator any = "\n"
+	if len(args) > 1 {
+		separator = getArgValue(args[1])
+	}
 	switch {
 	case separator == " ":
 		data["WFTextSeparator"] = "Spaces"
@@ -2055,18 +2131,97 @@ func decompTextParts(action *ShortcutAction) (arguments []string) {
 	arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["text"]))
 
 	var glue string
+	var hasCustomSeparator bool
 	if action.WFWorkflowActionParameters["WFTextSeparator"] != nil {
 		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextSeparator"])
 	}
 	if action.WFWorkflowActionParameters["WFTextCustomSeparator"] != nil {
 		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextCustomSeparator"])
+		hasCustomSeparator = true
 	}
 
-	if glue != "" {
+	if glue != "" || hasCustomSeparator {
 		arguments = append(arguments, fmt.Sprintf("\"%s\"", glueToChar(glue)))
 	}
 
 	return
+}
+
+func healthTargetParams(args []actionArgument) map[string]any {
+	var identifier = healthTargetString(args, 0, "")
+	var title = healthTargetString(args, 1, identifier)
+	var symbol = healthTargetString(args, 2, "heart.fill")
+
+	return map[string]any{
+		"target": map[string]any{
+			"identifier": identifier,
+			"subtitle": map[string]any{
+				"key": title,
+			},
+			"symbol": map[string]any{
+				"systemName": symbol,
+			},
+			"title": map[string]any{
+				"key": title,
+			},
+		},
+	}
+}
+
+func healthTargetString(args []actionArgument, idx int, fallback string) string {
+	if len(args) <= idx || args[idx].value == nil {
+		return fallback
+	}
+
+	var value, ok = getArgValue(args[idx]).(string)
+	if !ok || value == "" {
+		return fallback
+	}
+
+	return value
+}
+
+func decompHealthTarget(action *ShortcutAction) (arguments []string) {
+	var target, ok = action.WFWorkflowActionParameters["target"].(map[string]interface{})
+	if !ok {
+		return
+	}
+
+	var identifier = healthTargetParam(target, "identifier")
+	if identifier == "" {
+		return
+	}
+	arguments = append(arguments, fmt.Sprintf("\"%s\"", escapeString(identifier)))
+
+	var title = healthTargetNestedParam(target, "title", "key")
+	if title != "" {
+		arguments = append(arguments, fmt.Sprintf("\"%s\"", escapeString(title)))
+	}
+
+	var symbol = healthTargetNestedParam(target, "symbol", "systemName")
+	if symbol != "" {
+		arguments = append(arguments, fmt.Sprintf("\"%s\"", escapeString(symbol)))
+	}
+
+	return
+}
+
+func healthTargetParam(target map[string]interface{}, key string) string {
+	var value, ok = target[key].(string)
+	if !ok {
+		return ""
+	}
+
+	return value
+}
+
+func healthTargetNestedParam(target map[string]interface{}, key string, nestedKey string) string {
+	var value, ok = target[key].(map[string]interface{})
+	if !ok {
+		return ""
+	}
+
+	return healthTargetParam(value, nestedKey)
 }
 
 var appIds map[string]string

@@ -1,0 +1,20 @@
+const high = prompt("Systolic", "Number")
+const low = prompt("Diastolic", "Number")
+
+rawAction("is.workflow.actions.health.quantity.log", {
+    "WFQuantitySampleQuantity": {
+        "Value": {
+            "Magnitude": "${high}",
+            "Unit": "mmHg"
+        },
+        "WFSerializationType": "WFQuantityFieldValue"
+    },
+    "WFQuantitySampleAdditionalQuantity": {
+        "Value": {
+            "Magnitude": "${low}",
+            "Unit": "mmHg"
+        },
+        "WFSerializationType": "WFQuantityFieldValue"
+    },
+    "WFQuantitySampleType": "Systolic Blood Pressure"
+})

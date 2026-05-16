@@ -101,6 +101,26 @@ cherri file.cherri
 Run `cherri` without any arguments to see all options and usage. For development, use the `--debug` (or `-d`) option to print
 stack traces, debug information, and output a `.plist` file.
 
+### Health samples and workouts
+
+Use the Health standard actions to log quantity samples, find samples, open Health views, and log workouts. Quantity values are written with `qty(value, "unit")`:
+
+```ruby
+#include 'actions/health'
+
+const high = prompt("Systolic", "Number")
+const low = prompt("Diastolic", "Number")
+
+logBloodPressure(qty(high, "mmHg"), qty(low, "mmHg"))
+logHealthQuantity(qty(72, "count/min"), "Heart Rate")
+const steps = logHealthQuantity(qty(20, "count"), "Steps", CurrentDate)
+findHealthSamples(steps)
+logHealthCategory("Acne", "Present", nil, CurrentDate, CurrentDate)
+logWorkout("Basketball", qty(500, "Cal"))
+```
+
+Imported Shortcuts that contain supported Health actions are converted to standard Health calls when possible.
+
 ## Why another Shortcuts language?
 
 Because it's fun :)

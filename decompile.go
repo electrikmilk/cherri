@@ -265,6 +265,9 @@ func mapUUID(uuid string, varName string) {
 	if _, found := uuids[uuid]; !found {
 		outputName = varName
 		sanitizeIdentifier(&outputName)
+		if outputName == "" {
+			outputName = "output"
+		}
 		uuids[uuid] = checkDuplicateOutputName(outputName)
 	}
 }
@@ -939,6 +942,10 @@ func escapeString(value string) string {
 }
 
 func decompValueObject(value map[string]interface{}) string {
+	if isRawActionSerializedValue(value, rawActionQuantityFieldValueSerializationType) {
+		return decompQuantityFieldValue(value)
+	}
+
 	if v, found := value["Value"]; found {
 		if reflect.TypeOf(v).Kind() == reflect.Map {
 			value = v.(map[string]interface{})
@@ -984,6 +991,18 @@ func decompValueObject(value map[string]interface{}) string {
 	}
 
 	return decompObjectValue(value)
+}
+
+func decompQuantityFieldValue(value map[string]interface{}) string {
+	var quantityValue, ok = value["Value"].(map[string]interface{})
+	if !ok {
+		return "qty(0, \"\")"
+	}
+
+	var magnitude = decompValue(quantityValue["Magnitude"])
+	var unit = decompValue(quantityValue["Unit"])
+
+	return fmt.Sprintf("qty(%s, %s)", strings.Trim(magnitude, "\""), unit)
 }
 
 func decompObjectValue(valueObj any) string {
@@ -1142,6 +1161,7 @@ func makeActionCallCode(action *ShortcutAction) string {
 		popLine(fmt.Sprintf("#define mac %v", macDefinition))
 		setMacDefinition = true
 	}
+	ensureStandardActionInclude(action, &matchedAction)
 
 	actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
 
@@ -1157,6 +1177,64 @@ func makeActionCallCode(action *ShortcutAction) string {
 	actionCallCode.WriteString(")")
 
 	return actionCallCode.String()
+}
+
+func ensureStandardActionInclude(action *ShortcutAction, definition *actionDefinition) {
+	var category = definition.doc.category
+	if category == "" {
+		category = standardActionCategory(action.WFWorkflowActionIdentifier)
+	}
+	if definition.builtin && category == "" {
+		return
+	}
+	if category == "" || category == "basic" {
+		return
+	}
+
+	var includeStatement = fmt.Sprintf("#include 'actions/%s'", category)
+	if strings.Contains(code.String(), includeStatement) {
+		return
+	}
+
+	popLine(includeStatement)
+}
+
+var standardActionLineRegex = regexp.MustCompile(`(?m)^action\s+(?:default\s+)?(?:!?(?:mac|nonmac)\s+)?(?:v[0-9.]+\s+)?(?:toggleSet\s+)?(?:'([^']+)'\s+)?([A-Za-z_][A-Za-z0-9_]*)`)
+
+func standardActionCategory(identifier string) string {
+	for _, actionInclude := range actionIncludes {
+		var actionFileBytes, readErr = stdActions.ReadFile(fmt.Sprintf("actions/%s.cherri", actionInclude))
+		if readErr != nil {
+			continue
+		}
+
+		var actionLines = standardActionLineRegex.FindAllStringSubmatch(string(actionFileBytes), -1)
+		for _, actionLine := range actionLines {
+			if len(actionLine) < 3 {
+				continue
+			}
+
+			var shortcutIdentifier = standardActionFullIdentifier(actionLine[1], actionLine[2])
+			if identifier == shortcutIdentifier {
+				return actionInclude
+			}
+		}
+	}
+
+	return ""
+}
+
+func standardActionFullIdentifier(rawIdentifier string, actionName string) string {
+	if rawIdentifier == "" {
+		return fmt.Sprintf("is.workflow.actions.%s", strings.ToLower(actionName))
+	}
+
+	var parts = strings.Split(rawIdentifier, ".")
+	if len(parts) < 3 || (len(parts) == 3 && rawIdentifier == strings.ToLower(rawIdentifier)) {
+		return fmt.Sprintf("is.workflow.actions.%s", rawIdentifier)
+	}
+
+	return rawIdentifier
 }
 
 // checkOutputType determines if action output is a constant or a variable.
@@ -1292,16 +1370,84 @@ func processRawParameters(params map[string]any) map[string]any {
 	for key, value := range params {
 		if key == UUID || key == "CustomOutputName" {
 			delete(params, key)
+			continue
 		}
 
-		if reflect.TypeOf(value).Kind() == reflect.Map {
-			decompilingDictionary = true
-			params[key] = decompValueObject(value.(map[string]interface{}))
-			decompilingDictionary = false
+		if value != nil && reflect.TypeOf(value).Kind() == reflect.Map {
+			params[key] = decompRawParameterValue(value)
 		}
 	}
 
 	return params
+}
+
+func decompRawParameterValue(value any) any {
+	if value == nil || reflect.TypeOf(value).Kind() != reflect.Map {
+		return value
+	}
+
+	var valueMap = value.(map[string]interface{})
+	if isRawActionSerializedValue(valueMap, rawActionQuantityFieldValueSerializationType) {
+		return decompRawActionQuantityFieldValue(valueMap)
+	}
+
+	decompilingDictionary = true
+	var decompiledValue = decompValueObject(valueMap)
+	decompilingDictionary = false
+	return decompiledValue
+}
+
+func decompRawActionQuantityFieldValue(value map[string]interface{}) map[string]any {
+	var quantityValue = map[string]any{}
+	var valueMap, ok = value["Value"].(map[string]interface{})
+	if ok {
+		if magnitude, found := valueMap["Magnitude"]; found {
+			quantityValue["Magnitude"] = decompRawActionQuantityComponent(magnitude)
+		}
+		if unit, found := valueMap["Unit"]; found {
+			quantityValue["Unit"] = decompRawActionQuantityComponent(unit)
+		}
+	}
+
+	return map[string]any{
+		"Value":               quantityValue,
+		"WFSerializationType": rawActionQuantityFieldValueSerializationType,
+	}
+}
+
+func decompRawActionQuantityComponent(value any) any {
+	if isRawActionVariableReference(value) {
+		var identifier = strings.Trim(decompValue(value), "\"")
+		return fmt.Sprintf("${%s}", identifier)
+	}
+
+	return value
+}
+
+func isRawActionVariableReference(value any) bool {
+	if value == nil || reflect.TypeOf(value).Kind() != reflect.Map {
+		return false
+	}
+
+	var valueMap = value.(map[string]interface{})
+	if wrappedValue, found := valueMap["Value"]; found && wrappedValue != nil && reflect.TypeOf(wrappedValue).Kind() == reflect.Map {
+		valueMap = wrappedValue.(map[string]interface{})
+	}
+
+	var valueType, ok = valueMap["Type"].(string)
+	if !ok {
+		return false
+	}
+	if valueType == "ActionOutput" || valueType == "Variable" {
+		return true
+	}
+	for _, global := range globals {
+		if valueType == global.variableType {
+			return true
+		}
+	}
+
+	return false
 }
 
 func matchAction(action *ShortcutAction) (name string, definition actionDefinition) {
@@ -1438,6 +1584,12 @@ func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefi
 	matchedValues += valueMatches
 
 	var splitActionAddParams []parameterDefinition
+	for key, value := range splitAction.definition.appendParams {
+		splitActionAddParams = append(splitActionAddParams, parameterDefinition{
+			key:          key,
+			defaultValue: value,
+		})
+	}
 	if splitAction.definition.appendParamsFunc != nil {
 		for key, value := range splitAction.definition.appendParamsFunc([]actionArgument{}) {
 			splitActionAddParams = append(splitActionAddParams, parameterDefinition{
@@ -1460,10 +1612,22 @@ func scoreActionParams(splitActionParams *[]parameterDefinition, parameters map[
 			continue
 		}
 		if value, found := parameters[param.key]; found {
-			matchedParams++
-			if len(param.enum) > 0 && slices.Contains(getEnum(param.enum), fmt.Sprintf("%s", value)) {
-				matchedValues++
+			if param.validType == Quantity {
+				matchedParams++
+				if slices.Contains(getEnum(param.enum), quantityFieldUnit(value)) {
+					matchedValues++
+				}
+				continue
 			}
+			if len(param.enum) > 0 && slices.Contains(getEnum(param.enum), fmt.Sprintf("%s", value)) {
+				matchedParams++
+				matchedValues++
+				continue
+			}
+			if len(param.enum) > 0 {
+				continue
+			}
+			matchedParams++
 			if param.defaultValue != nil {
 				var defaultValue = fmt.Sprintf("%v", param.defaultValue)
 				var rawValue = strings.Trim(decompValue(value), "\"")
@@ -1474,6 +1638,29 @@ func scoreActionParams(splitActionParams *[]parameterDefinition, parameters map[
 		}
 	}
 	return
+}
+
+func quantityFieldUnit(value any) string {
+	if value == nil || reflect.TypeOf(value).Kind() != reflect.Map {
+		return ""
+	}
+
+	var valueMap = value.(map[string]interface{})
+	if !isRawActionSerializedValue(valueMap, rawActionQuantityFieldValueSerializationType) {
+		return ""
+	}
+
+	var quantityValue, quantityOK = valueMap["Value"].(map[string]interface{})
+	if !quantityOK {
+		return ""
+	}
+
+	var unit, unitOK = quantityValue["Unit"].(string)
+	if !unitOK {
+		return ""
+	}
+
+	return unit
 }
 
 func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
