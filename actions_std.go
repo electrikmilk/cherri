@@ -50,6 +50,12 @@ var setMultitaskingModeIntent = appIntent{
 	appIntentIdentifier: "SetMultitaskingModeAction",
 }
 
+var getPhysicalActivityIntent = appIntent{
+	name:                "ShortcutsActions",
+	bundleIdentifier:    "com.apple.ShortcutsActions",
+	appIntentIdentifier: "GetPhysicalActivity",
+}
+
 var openHealthViewIntent = appIntent{
 	name:                "健康",
 	bundleIdentifier:    "com.apple.Health",
@@ -60,6 +66,42 @@ var openHealthDataTypeIntent = appIntent{
 	name:                "健康",
 	bundleIdentifier:    "com.apple.Health",
 	appIntentIdentifier: "OpenDataTypeIntent",
+}
+
+var openHealthCategoryIntent = appIntent{
+	name:                "健康",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenCategoryIntent",
+}
+
+var openHealthRecordsIntent = appIntent{
+	name:                "健康",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenRecordsIntent",
+}
+
+var openHealthSearchIntent = appIntent{
+	name:                "健康",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenSearchIntent",
+}
+
+var openHealthSleepScheduleIntent = appIntent{
+	name:                "健康",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenSleepScheduleIntentV2",
+}
+
+var openHealthSleepScheduleLegacyIntent = appIntent{
+	name:                "健康",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenSleepScheduleIntent",
+}
+
+var openHealthTabIntent = appIntent{
+	name:                "健康",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenTabIntent",
 }
 
 // actions is the data structure that determines every action the compiler knows about.
@@ -1305,6 +1347,146 @@ var actions = map[string]*actionDefinition{
 		},
 		makeParams: healthTargetParams,
 		decomp:     decompHealthTarget,
+	},
+	"openHealthCategory": {
+		doc: selfDoc{
+			title:       "Open Health Category",
+			description: "Open a Health category.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenCategoryIntent",
+		appIntent:     openHealthCategoryIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "identifier",
+				validType: String,
+			},
+			{
+				name:      "title",
+				validType: String,
+				optional:  true,
+			},
+			{
+				name:      "symbol",
+				validType: String,
+				optional:  true,
+			},
+		},
+		makeParams: healthTargetParams,
+		decomp:     decompHealthTarget,
+	},
+	"openHealthRecords": {
+		doc: selfDoc{
+			title:       "Open Health Records",
+			description: "Open a Health records section.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenRecordsIntent",
+		appIntent:     openHealthRecordsIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "identifier",
+				validType: String,
+			},
+			{
+				name:      "title",
+				validType: String,
+				optional:  true,
+			},
+			{
+				name:      "symbol",
+				validType: String,
+				optional:  true,
+			},
+		},
+		makeParams: healthTargetParams,
+		decomp:     decompHealthTarget,
+	},
+	"openHealthSearch": {
+		doc: selfDoc{
+			title:       "Search in Health",
+			description: "Open Health and search for text.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenSearchIntent",
+		appIntent:     openHealthSearchIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "query",
+				validType: String,
+				key:       "searchPhrase",
+			},
+		},
+	},
+	"openSleepSchedule": {
+		doc: selfDoc{
+			title:       "Open Sleep Schedule",
+			description: "Open the sleep schedule in Health.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenSleepScheduleIntentV2",
+		defaultAction: true,
+		appIntent:     openHealthSleepScheduleIntent,
+	},
+	"openSleepScheduleLegacy": {
+		doc: selfDoc{
+			title:       "Open Sleep Schedule",
+			description: "Open the sleep schedule in Health using the older Health intent.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenSleepScheduleIntent",
+		appIntent:     openHealthSleepScheduleLegacyIntent,
+	},
+	"openHealthTab": {
+		doc: selfDoc{
+			title:       "Open Health Tab",
+			description: "Open a tab in Health.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenTabIntent",
+		appIntent:     openHealthTabIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "identifier",
+				validType: String,
+			},
+			{
+				name:      "title",
+				validType: String,
+				optional:  true,
+			},
+			{
+				name:      "symbol",
+				validType: String,
+				optional:  true,
+			},
+		},
+		makeParams: healthTargetParams,
+		decomp:     decompHealthTarget,
+	},
+	"getPhysicalActivity": {
+		doc: selfDoc{
+			title:       "Get Physical Activity",
+			description: "Get the current physical activity detected by the system.",
+			category:    "health",
+			subcategory: "Activity",
+		},
+		appIdentifier: "com.apple.ShortcutsActions",
+		identifier:    "GetPhysicalActivity",
+		appIntent:     getPhysicalActivityIntent,
+		outputType:    String,
 	},
 	"getWindows": {
 		doc: selfDoc{

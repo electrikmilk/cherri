@@ -260,6 +260,17 @@ enum healthCategorySampleType {
     'Audio Exposure Event',
 }
 
+enum physicalActivity {
+    'Unknown',
+    'Stationary',
+    'Walking',
+    'Running',
+    'Cycling',
+    'In a Stationary Vehicle',
+    'In a Moving Vehicle',
+    'Moving',
+}
+
 // [Doc]: [Samples] Log Health Quantity: Log a quantity sample to Health.
 action 'health.quantity.log' logHealthQuantity(
     #healthQuantityUnit quantity: 'WFQuantitySampleQuantity',
@@ -290,8 +301,17 @@ action 'filter.health.quantity' findHealthSamples(
     variable input: 'WFContentItemInputParameter'
 ): array
 
+// [Doc]: [Samples] Get Details of Health Sample: Get a detail from a Health sample.
+action 'properties.health.quantity' getHealthSampleDetail(
+    variable sample: 'WFInput',
+    text detail: 'WFContentItemPropertyName'
+)
+
 // [Doc]: [Workouts] Log Workout: Log a workout to Health.
 action 'health.workout.log' logWorkout(
     text workoutType: 'WFWorkoutReadableActivityType',
-    #healthQuantityUnit ?calories: 'WFWorkoutCaloriesQuantity'
+    #healthQuantityUnit ?calories: 'WFWorkoutCaloriesQuantity',
+    variable ?date: 'WFWorkoutDate',
+    #healthQuantityUnit ?duration: 'WFWorkoutDuration',
+    #healthQuantityUnit ?distance: 'WFWorkoutDistanceQuantity'
 )

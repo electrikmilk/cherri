@@ -292,17 +292,44 @@ func TestHealthQuantityActions(t *testing.T) {
 	if findCompiledAction("is.workflow.actions.filter.health.quantity", "WFContentItemInputParameter") == nil {
 		t.Fatal("expected find health samples action")
 	}
+	if findCompiledAction("is.workflow.actions.properties.health.quantity", "WFContentItemPropertyName") == nil {
+		t.Fatal("expected get health sample detail action")
+	}
 	if findCompiledAction("com.apple.Health.OpenViewIntent", "target") == nil {
 		t.Fatal("expected open health view action")
 	}
 	if findCompiledAction("com.apple.Health.OpenDataTypeIntent", "target") == nil {
 		t.Fatal("expected open health data action")
 	}
+	if findCompiledAction("com.apple.Health.OpenCategoryIntent", "target") == nil {
+		t.Fatal("expected open health category action")
+	}
+	if findCompiledAction("com.apple.Health.OpenRecordsIntent", "target") == nil {
+		t.Fatal("expected open health records action")
+	}
+	if findCompiledAction("com.apple.Health.OpenSearchIntent", "searchPhrase") == nil {
+		t.Fatal("expected open health search action")
+	}
+	if findCompiledAction("com.apple.Health.OpenSleepScheduleIntentV2", "AppIntentDescriptor") == nil {
+		t.Fatal("expected open sleep schedule action")
+	}
+	if findCompiledAction("com.apple.Health.OpenTabIntent", "target") == nil {
+		t.Fatal("expected open health tab action")
+	}
 	if findCompiledAction("is.workflow.actions.health.workout.log", "WFWorkoutCaloriesQuantity") == nil {
 		t.Fatal("expected log workout action")
 	}
+	if findCompiledAction("is.workflow.actions.health.workout.log", "WFWorkoutDuration") == nil {
+		t.Fatal("expected log workout duration")
+	}
+	if findCompiledAction("is.workflow.actions.health.workout.log", "WFWorkoutDistanceQuantity") == nil {
+		t.Fatal("expected log workout distance")
+	}
 	if findCompiledAction("is.workflow.actions.health.quantity.log", "WFCategorySampleEnumeration") == nil {
 		t.Fatal("expected log health category action")
+	}
+	if findCompiledAction("com.apple.ShortcutsActions.GetPhysicalActivity", "AppIntentDescriptor") == nil {
+		t.Fatal("expected get physical activity action")
 	}
 }
 
