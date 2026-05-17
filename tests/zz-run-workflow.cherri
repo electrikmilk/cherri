@@ -1,0 +1,5 @@
+// compile-only: regression test for run() emitting the WFWorkflow dict
+
+@input = "hello"
+
+run("Other Shortcut", @input)
