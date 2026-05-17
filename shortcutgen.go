@@ -203,6 +203,13 @@ func makeVariableValue(reference *WFActionReference, valueType tokenType, value 
 		var valuePtr = *value
 		var action = valuePtr.(action)
 		setCurrentAction(action.ident, actions[action.ident])
+		// Mirrors the rawAction identifier override in generateActions' bare
+		// case Action — without it, `@var = rawAction(id, ...)` and
+		// `const X = rawAction(id, ...)` lose the bundle ID and emit
+		// is.workflow.actions.rawaction instead.
+		if action.ident == "rawAction" && len(action.args) > 0 {
+			currentAction.definition.overrideIdentifier = getArgValue(action.args[0]).(string)
+		}
 		makeAction(action.args, reference)
 	case Dict:
 		addStdAction("dictionary", attachReferenceToParams(map[string]any{
