@@ -986,8 +986,11 @@ func decompValueObject(value map[string]interface{}) string {
 		}
 
 		return fmt.Sprintf("Ask: \"%s\"", value["Prompt"])
-	case globals[ShortcutInput].variableType:
-		return ShortcutInput
+	}
+	for name, global := range globals {
+		if value["Type"] == global.variableType {
+			return name
+		}
 	}
 
 	return decompObjectValue(value)
@@ -1286,33 +1289,54 @@ func actionIdentifierEnd(identifier string) string {
 }
 
 func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
-	for i, param := range matchedAction.parameters {
+	type decompArgument struct {
+		value   string
+		present bool
+	}
+
+	var arguments []decompArgument
+	var lastPresent = -1
+	for _, param := range matchedAction.parameters {
 		if param.key == "" {
 			continue
 		}
 
-		var argValue string
+		var argument decompArgument
 		if value, found := action.WFWorkflowActionParameters[param.key]; found {
-			argValue = decompValue(value)
+			argument.value = decompValue(value)
+			argument.present = true
 		} else if !param.optional {
-			argValue = makeDefaultValue(param)
+			argument.value = makeDefaultValue(param)
+			argument.present = true
 		}
 
 		switch param.validType {
 		case Integer:
-			if startsWith(Ask, argValue) {
+			if startsWith(Ask, argument.value) {
 				break
 			}
-			argValue = strings.Trim(argValue, "\"")
+			argument.value = strings.Trim(argument.value, "\"")
 		}
 
-		if argValue != "" {
-			if i == 0 {
-				actionCallCode.WriteString(argValue)
-			} else {
-				actionCallCode.WriteString(fmt.Sprintf(", %s", argValue))
-			}
+		arguments = append(arguments, argument)
+		if argument.present {
+			lastPresent = len(arguments) - 1
 		}
+	}
+
+	if lastPresent == -1 {
+		return
+	}
+
+	for i, argument := range arguments[:lastPresent+1] {
+		if i > 0 {
+			actionCallCode.WriteString(", ")
+		}
+		if argument.value == "" {
+			actionCallCode.WriteString("nil")
+			continue
+		}
+		actionCallCode.WriteString(argument.value)
 	}
 }
 

@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -330,6 +331,48 @@ func TestHealthQuantityActions(t *testing.T) {
 	}
 	if findCompiledAction("com.apple.ShortcutsActions.GetPhysicalActivity", "AppIntentDescriptor") == nil {
 		t.Fatal("expected get physical activity action")
+	}
+}
+
+func TestHealthDecompileRoundTrip(t *testing.T) {
+	defer resetParser()
+	delete(args.Args, "import")
+	delete(args.Args, "output")
+	args.Args["no-ansi"] = ""
+	args.Args["skip-sign"] = ""
+	loadStandardActions()
+
+	currentTest = "tests/health.cherri"
+	os.Args[1] = currentTest
+	compile()
+
+	resetParser()
+	var decompiledPath = fmt.Sprintf("%s/health-decompiled.cherri", t.TempDir())
+	args.Args["no-ansi"] = ""
+	args.Args["output"] = decompiledPath
+	decompile(importShortcut("tests/health_unsigned.shortcut"))
+	delete(args.Args, "output")
+
+	var decompiled, readErr = os.ReadFile(decompiledPath)
+	if readErr != nil {
+		t.Fatalf("failed to read decompiled health file: %v", readErr)
+	}
+	var decompiledCode = string(decompiled)
+	var expectedLines = []string{
+		`logHealthQuantity(qty(20, "count"), "Steps", CurrentDate)`,
+		`logWorkout("Basketball", qty(500, "Cal"), CurrentDate, qty(30, "min"), qty(1, "km"))`,
+		`logHealthCategory("Acne", "Present", nil, CurrentDate, CurrentDate)`,
+	}
+	for _, expectedLine := range expectedLines {
+		if !strings.Contains(decompiledCode, expectedLine) {
+			t.Fatalf("expected decompiled health code to contain %q, got:\n%s", expectedLine, decompiledCode)
+		}
+	}
+
+	var cmd = exec.Command("go", "run", ".", decompiledPath, "--skip-sign", "--no-ansi")
+	var output, cmdErr = cmd.CombinedOutput()
+	if cmdErr != nil {
+		t.Fatalf("expected decompiled health code to compile, got %v:\n%s", cmdErr, output)
 	}
 }
 

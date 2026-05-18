@@ -305,7 +305,7 @@ action 'filter.health.quantity' findHealthSamples(
 action 'properties.health.quantity' getHealthSampleDetail(
     variable sample: 'WFInput',
     text detail: 'WFContentItemPropertyName'
-)
+): variable
 
 // [Doc]: [Workouts] Log Workout: Log a workout to Health.
 action 'health.workout.log' logWorkout(
