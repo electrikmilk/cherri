@@ -112,10 +112,10 @@ const high = prompt("Systolic", "Number")
 const low = prompt("Diastolic", "Number")
 
 logBloodPressure(qty(high, "mmHg"), qty(low, "mmHg"))
-logHealthQuantity(qty(72, "count/min"), "Heart Rate")
-const steps = logHealthQuantity(qty(20, "count"), "Steps", CurrentDate)
+logHealthQuantitySample(qty(72, "count/min"), "Heart Rate")
+const steps = logHealthQuantitySample(qty(20, "count"), "Steps", CurrentDate)
 findHealthSamples(steps)
-logHealthCategory("Acne", "Present", nil, CurrentDate, CurrentDate)
+logHealthCategorySample("Acne", "Present", nil, CurrentDate, CurrentDate)
 logWorkout("Basketball", qty(500, "Cal"))
 ```
 

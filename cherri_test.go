@@ -359,9 +359,9 @@ func TestHealthDecompileRoundTrip(t *testing.T) {
 	}
 	var decompiledCode = string(decompiled)
 	var expectedLines = []string{
-		`logHealthQuantity(qty(20, "count"), "Steps", CurrentDate)`,
+		`logHealthQuantitySample(qty(20, "count"), "Steps", CurrentDate)`,
 		`logWorkout("Basketball", qty(500, "Cal"), CurrentDate, qty(30, "min"), qty(1, "km"))`,
-		`logHealthCategory("Acne", "Present", nil, CurrentDate, CurrentDate)`,
+		`logHealthCategorySample("Acne", "Present", nil, CurrentDate, CurrentDate)`,
 	}
 	for _, expectedLine := range expectedLines {
 		if !strings.Contains(decompiledCode, expectedLine) {

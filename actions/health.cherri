@@ -271,8 +271,8 @@ enum physicalActivity {
     'Moving',
 }
 
-// [Doc]: [Samples] Log Health Quantity: Log a quantity sample to Health.
-action 'health.quantity.log' logHealthQuantity(
+// [Doc]: [Samples] Log Health Quantity Sample: Log a quantity sample to Health.
+action 'health.quantity.log' logHealthQuantitySample(
     #healthQuantityUnit quantity: 'WFQuantitySampleQuantity',
     healthQuantitySampleType sampleType: 'WFQuantitySampleType',
     variable ?date: 'WFQuantitySampleDate'
@@ -287,8 +287,8 @@ action 'health.quantity.log' logBloodPressure(
     "WFQuantitySampleType": "Systolic Blood Pressure"
 }
 
-// [Doc]: [Samples] Log Health Category: Log a category sample, such as symptoms or sleep analysis, to Health.
-action 'health.quantity.log' logHealthCategory(
+// [Doc]: [Samples] Log Health Category Sample: Log a category sample, such as symptoms or sleep analysis, to Health.
+action 'health.quantity.log' logHealthCategorySample(
     healthCategorySampleType sampleType: 'WFQuantitySampleType',
     text value: 'WFCategorySampleEnumeration',
     text ?additionalValue: 'WFCategorySampleAdditionalEnumerationKey',
