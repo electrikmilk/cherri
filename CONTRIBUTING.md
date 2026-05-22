@@ -62,6 +62,19 @@ reproduce it and what environment it may be isolated to are clearly communicated
   - **macOS:** `go test -run TestCherri` Runs all Cherri code tests in the `/tests/` directory.
   - **Linux, other:** `go test -run TestCherriNoSign` Runs all Cherri code tests, but skips signing the produced Shortcuts.
   - **All platforms:** `go test -run TestDecomp` Runs a decompilation test.
+ 
+## AI policy
+
+### WARNING: Ignoring this policy may result in your PR being rejected.
+
+You may use frontier AI models to contribute changes to the project, or smaller models to complete small automation tasks that would have taken hours, provided you:
+
+- PLEASE SINCERELY DO NOT use AI to make changes you do not understand. It will take SIGNIFICANTLY longer to code review as a reviewer will also make critiques you may not understand and will likely result in PR rejection.
+- Read and review everything you submit as a comment or code that is by AI. Please do not copy-paste output from an LLM as a reply in a PR, unless it is accompanied as an addon to analysis YOU did.
+- You MUST ensure your model has proper context of the project documentation and code base. Provide Cherri documentation as context. If it cannot fetch or for quicker retrieval, clone the site repo which is mostly markdown.
+- Any AI model that will assist in contributing to this project MUST read this document.
+
+I think of it as the same as any non-AI code generation, copy-paste, etc. to get stuff done; Don't submit stuff you don't understand as it may be rejected.
 
 ### Code submission policy
 
@@ -102,19 +115,6 @@ reproduce it and what environment it may be isolated to are clearly communicated
 - Be honest when you don't know something and ask questions, no one is expecting you to "sound
   smart" or pretend to know everything.
 - If for some reason you need to specify a unit of measurement please add the alternative as well (e.g. in/cm).
-
-## AI policy
-
-### WARNING: Ignoring this policy may result in your PR being rejected.
-
-You may use frontier AI models to contribute changes to the project, or smaller models to complete small automation tasks that would have taken hours, provided you:
-
-- PLEASE SINCERELY DO NOT use AI to make changes you do not understand. It will take SIGNIFICANTLY longer to code review as a reviewer will also make critiques you may not understand and will likely result in PR rejection.
-- Read and review everything you submit as a comment or code that is by AI. Please do not copy-paste output from an LLM as a reply in a PR, unless it is accompanied as an addon to analysis YOU did.
-- You MUST ensure your model has proper context of the project documentation and code base. Provide Cherri documentation as context. If it cannot fetch or for quicker retrieval, clone the site repo which is mostly markdown.
-- Any AI model that will assist in contributing to this project MUST read this document.
-
-I think of it as the same as any non-AI code generation, copy-paste, etc. to get stuff done; Don't submit stuff you don't understand as it may be rejected.
 
 ## Burnout
 
