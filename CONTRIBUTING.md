@@ -2,6 +2,8 @@
 
 Before making any contributions, familiarize yourself with how the Cherri programming language generally works for issues, and how the compiler works on a deeper level for PRs.
 
+Please submit an issue rather than making a PR if you are unsure how to make the changes, as it will take significantly longer to review.
+
 [Read language documentation](https://cherrilang.org/language/)
 
 [Read compiler documentation](https://cherrilang.org/compiler/)
@@ -112,7 +114,7 @@ You may use frontier AI models to contribute changes to the project, or smaller 
 - You MUST ensure your model has proper context of the project documentation and code base. Provide Cherri documentation as context. If it cannot fetch or for quicker retrieval, clone the site repo which is mostly markdown.
 - Any AI model that will assist in contributing to this project MUST read this document.
 
-I think of it as the same as any non-AI code generation, copy-paste, etc. to get stuff done; Don't submit stuff you don't understand as it will be obvious and may be rejected. It is still YOUR code.
+I think of it as the same as any non-AI code generation, copy-paste, etc. to get stuff done; Don't submit stuff you don't understand as it may be rejected.
 
 ## Burnout
 
