@@ -1147,14 +1147,15 @@ func collectEncodedReference() {
 }
 
 var repeatItemIndex = 1
+var repeatIndexDepth = 1
 
 func collectRepeat(identifier string) {
 	reachable()
 	var group = groupStatement(Repeat, &identifier)
 
 	var index string
-	if repeatItemIndex > 1 {
-		index = fmt.Sprintf(" %d", repeatItemIndex)
+	if repeatIndexDepth > 1 {
+		index = fmt.Sprintf(" %d", repeatIndexDepth)
 	}
 	var repeatIndexIdentifier = collectIdentifier()
 
@@ -1195,6 +1196,8 @@ func collectRepeat(identifier string) {
 		value:        repeatIndexIdentifier,
 		repeatItem:   true,
 	}
+
+	repeatIndexDepth++
 }
 
 func collectRepeatEach(identifier string) {
@@ -1487,7 +1490,11 @@ func collectEndStatement() {
 
 	var controlFlowGroup = controlFlowGroups[groupingIdx]
 	if controlFlowGroup.groupType == Repeat || controlFlowGroup.groupType == RepeatWithEach {
-		repeatItemIndex--
+		if controlFlowGroup.groupType == RepeatWithEach {
+			repeatItemIndex--
+		} else {
+			repeatIndexDepth--
+		}
 		reachable()
 	}
 
