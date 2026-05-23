@@ -370,6 +370,20 @@ func inputValue(name string, varUUID string) WFTextTokenAttachment {
 	}
 }
 
+// globalDisplayName translates a Cherri global identifier to the spaced
+// Shortcuts display name stored in its varValue (e.g. RepeatIndex → "Repeat Index").
+// The globals check is required because mutable user variables also store
+// variableType "Variable" — the two maps are the only discriminator.
+// Returns identifier unchanged for non-globals or globals without a "Variable" type.
+func globalDisplayName(identifier string, v varValue) string {
+	if _, isGlobal := globals[identifier]; isGlobal && v.variableType == "Variable" {
+		if name, ok := v.value.(string); ok {
+			return name
+		}
+	}
+	return identifier
+}
+
 func variableValue(variable varValue) any {
 	return variableValueWithSerialization(variable, "WFTextTokenAttachment")
 }
@@ -381,11 +395,7 @@ func variableValueWithSerialization(variable varValue, serializationType string)
 	if global, found := globals[identifier]; found {
 		isInputVariable(identifier)
 		variable.variableType = global.variableType
-		if global.variableType == "Variable" {
-			if displayName, ok := global.value.(string); ok {
-				identifier = displayName
-			}
-		}
+		identifier = globalDisplayName(identifier, global)
 	} else if v, found := variables[identifier]; found {
 		variableReference = v
 		variable.constant = v.constant
@@ -501,7 +511,7 @@ func makeAttachmentValues() {
 		}
 		if !varValue.constant {
 			attachmentValue = Value{
-				VariableName: inlineVar.identifier,
+				VariableName: globalDisplayName(inlineVar.identifier, *varValue),
 				Type:         varType,
 			}
 		} else {

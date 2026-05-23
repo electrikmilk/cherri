@@ -37,4 +37,69 @@ if @lastIndex != 3 {
     mustOutput("❌ FAIL: for/in RepeatIndex — got {@lastIndex}, expected '3'", "❌ FAIL: for/in RepeatIndex — got {@lastIndex}, expected '3'")
 }
 
+// for/in: verify RepeatItem reaches end of list
+@lastItem = ""
+for item in @items {
+    @lastItem = RepeatItem
+}
+if @lastItem != "gamma" {
+    mustOutput("❌ FAIL: for/in RepeatItem — got {@lastItem}, expected 'gamma'", "❌ FAIL: for/in RepeatIndex — got {@lastItem}, expected 'gamma'")
+}
+
+// nested for/in: inner item via string interpolation (exercises Repeat Item N plist name)
+@nestedItems = list("x", "y")
+@innerLast = ""
+for outer in @items {
+    for inner in @nestedItems {
+        @innerLast = "{@inner}"
+    }
+}
+if @innerLast != "y" {
+    mustOutput("❌ FAIL: nested for/in inner item — got {@innerLast}, expected 'y'", "❌ FAIL: nested for/in inner item — got {@innerLast}, expected 'y'")
+}
+
+// nested for/in: outer item accessible inside inner body
+@outerCapture = ""
+for outer2 in @items {
+    for inner2 in @nestedItems {
+        @outerCapture = "{@outer2}"
+    }
+}
+if @outerCapture != "gamma" {
+    mustOutput("❌ FAIL: nested for/in outer item — got {@outerCapture}, expected 'gamma'", "❌ FAIL: nested for/in outer item — got {@outerCapture}, expected 'gamma'")
+}
+
+// nested repeat: inner index variable injected as Repeat Index 2 (direct reference)
+@innerRepeatIdx = 0
+repeat i2 for 2 {
+    repeat j for 3 {
+        @innerRepeatIdx = @j
+    }
+}
+if @innerRepeatIdx != 3 {
+    mustOutput("❌ FAIL: nested repeat inner index — got {@innerRepeatIdx}, expected '3'", "❌ FAIL: nested repeat inner index — got {@innerRepeatIdx}, expected '3'")
+}
+
+// nested repeat: inner index via string interpolation (exercises Repeat Index N in makeAttachmentValues)
+@innerIdxStr = ""
+repeat i3 for 2 {
+    repeat k for 3 {
+        @innerIdxStr = "{@k}"
+    }
+}
+if @innerIdxStr != "3" {
+    mustOutput("❌ FAIL: nested repeat inner index interpolation — got {@innerIdxStr}, expected '3'", "❌ FAIL: nested repeat inner index interpolation — got {@innerIdxStr}, expected '3'")
+}
+
+// nested for/in: outer RepeatIndex accessible inside inner body
+@outerIdxCapture = 0
+for outer3 in @items {
+    for inner3 in @nestedItems {
+        @outerIdxCapture = RepeatIndex
+    }
+}
+if @outerIdxCapture != 3 {
+    mustOutput("❌ FAIL: nested for/in outer RepeatIndex — got {@outerIdxCapture}, expected '3'", "❌ FAIL: nested for/in outer RepeatIndex — got {@outerIdxCapture}, expected '3'")
+}
+
 show("✅ All tests passed")

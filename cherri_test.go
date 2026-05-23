@@ -553,4 +553,6 @@ func resetParser() {
 	usedEnums = nil
 	usingFunctions = false
 	currentCategory = ""
+	repeatItemIndex = 1
+	repeatIndexDepth = 1
 }

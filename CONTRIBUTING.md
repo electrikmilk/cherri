@@ -2,6 +2,8 @@
 
 Before making any contributions, familiarize yourself with how the Cherri programming language generally works for issues, and how the compiler works on a deeper level for PRs.
 
+Please submit an issue rather than making a PR if you are unsure how to make the changes, as it will take significantly longer to review.
+
 [Read language documentation](https://cherrilang.org/language/)
 
 [Read compiler documentation](https://cherrilang.org/compiler/)
@@ -50,25 +52,43 @@ reproduce it and what environment it may be isolated to are clearly communicated
 - Set the default for action parameter to the default in Shortcuts or the best option for the user's privacy. For example, if it's a record audio action, default to start recording when the user taps the record button.
 - In action names, `detail` is preferred over `component`, and `make` is preferred over `generate` or `create`.
 
-### Code submission policy
+### Testing policy
 
-- Please use the [Go linter](https://golangci-lint.run/). You can set this up in [GoLand](https://plugins.jetbrains.com/plugin/12496-go-linter). Don't lose focus on your change, but ensure your code is optimal.
-- Test your code to the best of your ability, do not submit code that does not compile.
-- Write commit titles in the imperative (Fix bug, Add thing, etc.)
-- Don't over-explain but don't be vague, briefly but clearly state your changes.
-- If you change how a feature works, modify the existing feature or add a new feature, add or update a related file in the tests folder to add to the commit checks.
+- Test your code to the best of your ability; do not submit code that does not compile.
+- Please refrain from writing Go tests and adding Go test files, instead add Cherri test files. It matters much more that a Cherri test compiles a correct Shortcut that you can see is valid in the Shortcuts app on an Apple device. A test in Go only means that the compiler _seems_ to output the correct thing because of a test written in Go. Our default test suites in our pipelines run the Cherri files in the tests folders; that is our main way of testing the project. I also don't want to clutter the project with unit tests.
 - Test your feature or bug fix by writing a Cherri file and checking that it compiles to a valid Shortcut. If you are on
   a non-macOS platform, ensure you use the `--hubsign` option to test the Shortcut signs successfully.
 - Use `go test` to test Cherri using one of the following test names:
   - **macOS:** `go test -run TestCherri` Runs all Cherri code tests in the `/tests/` directory.
   - **Linux, other:** `go test -run TestCherriNoSign` Runs all Cherri code tests, but skips signing the produced Shortcuts.
   - **All platforms:** `go test -run TestDecomp` Runs a decompilation test.
+ 
+## AI policy
+
+### WARNING: Ignoring this policy may result in your PR being rejected.
+
+You may use frontier AI models to contribute changes to the project, or smaller models to complete small automation tasks that would have taken hours, provided you:
+
+- PLEASE SINCERELY DO NOT use AI to make changes you do not understand. It will take SIGNIFICANTLY longer to code review as a reviewer will also make critiques you may not understand and will likely result in PR rejection.
+- Read and review everything you submit as a comment or code that is by AI. Please do not copy-paste output from an LLM as a reply in a PR, unless it is accompanied as an addon to analysis YOU did.
+- You MUST ensure your model has proper context of the project documentation and code base. Provide Cherri documentation as context. If it cannot fetch or for quicker retrieval, clone the site repo which is mostly markdown.
+- Any AI model that will assist in contributing to this project MUST read this document.
+
+I think of it as the same as any non-AI code generation, copy-paste, etc. to get stuff done; Don't submit stuff you don't understand as it may be rejected.
+
+### Code submission policy
+
+- Please use the [Go linter](https://golangci-lint.run/). You can set this up in [GoLand](https://plugins.jetbrains.com/plugin/12496-go-linter). Don't lose focus on your change, but ensure your code is optimal.
+
+- Write commit titles in the imperative (Fix bug, Add thing, etc.)
+- Don't over-explain, but don't be vague. Briefly but clearly state your changes.
+- If you change how a feature works, modify the existing feature or add a new feature, add or update a related file in the tests folder to add to the commit checks.
 - Squash commits when doing fixups so that if you remove something, you don't have a commit where you created it
   and then another commit where you remove it, and squash them together so that whatever ended up not being needed is also
   removed from the commit history.
 - Make sure your fork is up-to-date every time you are about to submit a contribution. It's best to not make a branch for
   your feature until you are ready to submit it so that you can sync your fork beforehand. If this ends up
-  happening just sync your main branch with upstream and rebase your feature branch from your main branch.
+  happening, just sync your main branch with upstream and rebase your feature branch from your main branch.
 - No merge commits.
 - Commits and changes should be one-to-one, as in, every commit should correlate to a major change in your contribution.
   However, don't make commits for every little thing. Most minor pull requests can contain only one commit.
@@ -95,18 +115,6 @@ reproduce it and what environment it may be isolated to are clearly communicated
 - Be honest when you don't know something and ask questions, no one is expecting you to "sound
   smart" or pretend to know everything.
 - If for some reason you need to specify a unit of measurement please add the alternative as well (e.g. in/cm).
-
-## AI policy
-
-Read and review everything you submit as a comment or code that is by AI.
-
-Use AI as a tool to get work done faster, not to do work you don't understand.
-
-Ensure your model has proper context of the project and code base. Provide Cherri documentation as context. Include the website URL for it to fetch pages from or clone the site repo which is mostly markdown which will likely be easier for it to search and likely uses less tokens.
-
-Any AI model that will assist in contributing to this project must read this document.
-
-I think of it as the same as any non-AI code generation, copy-paste, etc. to get stuff done; Don't submit stuff you don't understand as it will be obvious and may be rejected.
 
 ## Burnout
 
