@@ -2055,14 +2055,16 @@ func decompTextParts(action *ShortcutAction) (arguments []string) {
 	arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["text"]))
 
 	var glue string
+	var hasCustomSeparator bool
 	if action.WFWorkflowActionParameters["WFTextSeparator"] != nil {
 		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextSeparator"])
 	}
 	if action.WFWorkflowActionParameters["WFTextCustomSeparator"] != nil {
 		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextCustomSeparator"])
+		hasCustomSeparator = true
 	}
 
-	if glue != "" {
+	if glue != "" || hasCustomSeparator {
 		arguments = append(arguments, fmt.Sprintf("\"%s\"", glueToChar(glue)))
 	}
 
