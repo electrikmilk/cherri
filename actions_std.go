@@ -50,6 +50,60 @@ var setMultitaskingModeIntent = appIntent{
 	appIntentIdentifier: "SetMultitaskingModeAction",
 }
 
+var getPhysicalActivityIntent = appIntent{
+	name:                "ShortcutsActions",
+	bundleIdentifier:    "com.apple.ShortcutsActions",
+	appIntentIdentifier: "GetPhysicalActivity",
+}
+
+var openHealthViewIntent = appIntent{
+	name:                "Health",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenViewIntent",
+}
+
+var openHealthDataTypeIntent = appIntent{
+	name:                "Health",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenDataTypeIntent",
+}
+
+var openHealthCategoryIntent = appIntent{
+	name:                "Health",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenCategoryIntent",
+}
+
+var openHealthRecordsIntent = appIntent{
+	name:                "Health",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenRecordsIntent",
+}
+
+var openHealthSearchIntent = appIntent{
+	name:                "Health",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenSearchIntent",
+}
+
+var openHealthSleepScheduleIntent = appIntent{
+	name:                "Health",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenSleepScheduleIntentV2",
+}
+
+var openHealthSleepScheduleLegacyIntent = appIntent{
+	name:                "Health",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenSleepScheduleIntent",
+}
+
+var openHealthTabIntent = appIntent{
+	name:                "Health",
+	bundleIdentifier:    "com.apple.Health",
+	appIntentIdentifier: "OpenTabIntent",
+}
+
 // actions is the data structure that determines every action the compiler knows about.
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
@@ -1236,6 +1290,204 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 	},
+	"openHealthView": {
+		doc: selfDoc{
+			title:       "Open Health View",
+			description: "Open a Health category view.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenViewIntent",
+		appIntent:     openHealthViewIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "identifier",
+				validType: String,
+			},
+			{
+				name:      "title",
+				validType: String,
+				optional:  true,
+			},
+			{
+				name:      "symbol",
+				validType: String,
+				optional:  true,
+			},
+		},
+		makeParams: healthTargetParams,
+		decomp:     decompHealthTarget,
+	},
+	"openHealthData": {
+		doc: selfDoc{
+			title:       "Open Health Data",
+			description: "Open a Health data type.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenDataTypeIntent",
+		appIntent:     openHealthDataTypeIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "identifier",
+				validType: String,
+			},
+			{
+				name:      "title",
+				validType: String,
+				optional:  true,
+			},
+			{
+				name:      "symbol",
+				validType: String,
+				optional:  true,
+			},
+		},
+		makeParams: healthTargetParams,
+		decomp:     decompHealthTarget,
+	},
+	"openHealthCategory": {
+		doc: selfDoc{
+			title:       "Open Health Category",
+			description: "Open a Health category.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenCategoryIntent",
+		appIntent:     openHealthCategoryIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "identifier",
+				validType: String,
+			},
+			{
+				name:      "title",
+				validType: String,
+				optional:  true,
+			},
+			{
+				name:      "symbol",
+				validType: String,
+				optional:  true,
+			},
+		},
+		makeParams: healthTargetParams,
+		decomp:     decompHealthTarget,
+	},
+	"openHealthRecords": {
+		doc: selfDoc{
+			title:       "Open Health Records",
+			description: "Open a Health records section.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenRecordsIntent",
+		appIntent:     openHealthRecordsIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "identifier",
+				validType: String,
+			},
+			{
+				name:      "title",
+				validType: String,
+				optional:  true,
+			},
+			{
+				name:      "symbol",
+				validType: String,
+				optional:  true,
+			},
+		},
+		makeParams: healthTargetParams,
+		decomp:     decompHealthTarget,
+	},
+	"openHealthSearch": {
+		doc: selfDoc{
+			title:       "Search in Health",
+			description: "Open Health and search for text.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenSearchIntent",
+		appIntent:     openHealthSearchIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "query",
+				validType: String,
+				key:       "searchPhrase",
+			},
+		},
+	},
+	"openSleepSchedule": {
+		doc: selfDoc{
+			title:       "Open Sleep Schedule",
+			description: "Open the sleep schedule in Health.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenSleepScheduleIntentV2",
+		defaultAction: true,
+		appIntent:     openHealthSleepScheduleIntent,
+	},
+	"openSleepScheduleLegacy": {
+		doc: selfDoc{
+			title:       "Open Sleep Schedule",
+			description: "Open the sleep schedule in Health using the older Health intent.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenSleepScheduleIntent",
+		appIntent:     openHealthSleepScheduleLegacyIntent,
+	},
+	"openHealthTab": {
+		doc: selfDoc{
+			title:       "Open Health Tab",
+			description: "Open a tab in Health.",
+			category:    "health",
+			subcategory: "Navigation",
+		},
+		appIdentifier: "com.apple.Health",
+		identifier:    "OpenTabIntent",
+		appIntent:     openHealthTabIntent,
+		parameters: []parameterDefinition{
+			{
+				name:      "identifier",
+				validType: String,
+			},
+			{
+				name:      "title",
+				validType: String,
+				optional:  true,
+			},
+			{
+				name:      "symbol",
+				validType: String,
+				optional:  true,
+			},
+		},
+		makeParams: healthTargetParams,
+		decomp:     decompHealthTarget,
+	},
+	"getPhysicalActivity": {
+		doc: selfDoc{
+			title:       "Get Physical Activity",
+			description: "Get the current physical activity detected by the system.",
+			category:    "health",
+			subcategory: "Activity",
+		},
+		appIdentifier: "com.apple.ShortcutsActions",
+		identifier:    "GetPhysicalActivity",
+		appIntent:     getPhysicalActivityIntent,
+		outputType:    String,
+	},
 	"getWindows": {
 		doc: selfDoc{
 			title:       "Get Windows",
@@ -1815,6 +2067,7 @@ var actionIncludes = []string{
 	"device",
 	"documents",
 	"dropbox",
+	"health",
 	"images",
 	"location",
 	"intelligence",
@@ -1916,7 +2169,9 @@ func checkMissingStandardInclude(identifier *string, parsing bool) {
 		lines = append([]string{fmt.Sprintf("#include 'actions/%s'\n", actionInclude)}, lines...)
 		resetParse()
 		handleIncludes()
+		currentCategory = actionInclude
 		handleActionDefinitions()
+		currentCategory = ""
 
 		if !parsing {
 			mapSplitActions()
@@ -2027,7 +2282,10 @@ func textParts(args []actionArgument) map[string]any {
 		"Show-text": true,
 	}
 
-	var separator = getArgValue(args[1])
+	var separator any = "\n"
+	if len(args) > 1 {
+		separator = getArgValue(args[1])
+	}
 	switch {
 	case separator == " ":
 		data["WFTextSeparator"] = "Spaces"
@@ -2067,6 +2325,83 @@ func decompTextParts(action *ShortcutAction) (arguments []string) {
 	}
 
 	return
+}
+
+func healthTargetParams(args []actionArgument) map[string]any {
+	var identifier = healthTargetString(args, 0, "")
+	var title = healthTargetString(args, 1, identifier)
+	var symbol = healthTargetString(args, 2, "heart.fill")
+
+	return map[string]any{
+		"target": map[string]any{
+			"identifier": identifier,
+			"subtitle": map[string]any{
+				"key": title,
+			},
+			"symbol": map[string]any{
+				"systemName": symbol,
+			},
+			"title": map[string]any{
+				"key": title,
+			},
+		},
+	}
+}
+
+func healthTargetString(args []actionArgument, idx int, fallback string) string {
+	if len(args) <= idx || args[idx].value == nil {
+		return fallback
+	}
+
+	var value, ok = getArgValue(args[idx]).(string)
+	if !ok || value == "" {
+		return fallback
+	}
+
+	return value
+}
+
+func decompHealthTarget(action *ShortcutAction) (arguments []string) {
+	var target, ok = action.WFWorkflowActionParameters["target"].(map[string]interface{})
+	if !ok {
+		return
+	}
+
+	var identifier = healthTargetParam(target, "identifier")
+	if identifier == "" {
+		return
+	}
+	arguments = append(arguments, fmt.Sprintf("\"%s\"", escapeString(identifier)))
+
+	var title = healthTargetNestedParam(target, "title", "key")
+	if title != "" {
+		arguments = append(arguments, fmt.Sprintf("\"%s\"", escapeString(title)))
+	}
+
+	var symbol = healthTargetNestedParam(target, "symbol", "systemName")
+	if symbol != "" {
+		arguments = append(arguments, fmt.Sprintf("\"%s\"", escapeString(symbol)))
+	}
+
+	return
+}
+
+func healthTargetParam(target map[string]interface{}, key string) string {
+	var value, ok = target[key].(string)
+	if !ok {
+		return ""
+	}
+
+	return value
+}
+
+func healthTargetNestedParam(target map[string]interface{}, key string, nestedKey string) string {
+	var value, ok = target[key].(map[string]interface{})
+	if !ok {
+		return ""
+	}
+
+	return healthTargetParam(value, nestedKey)
 }
 
 var appIds map[string]string

@@ -6,6 +6,7 @@ import (
 )
 
 var rawActionVariableValueRegex = regexp.MustCompile(`^\$\{@?.*}$`)
+var rawActionQuantityFieldValueSerializationType = "WFQuantityFieldValue"
 
 func defineRawAction() {
 	actions["rawAction"] = &actionDefinition{
@@ -51,11 +52,14 @@ func normalizeRawActionParamValue(value any) any {
 		}
 		if rawActionVariableValueRegex.MatchString(v) {
 			return variableValue(varValue{
-				value: strings.Trim(v, "${@}"),
+				value: rawActionVariableIdentifier(v),
 			})
 		}
 		return attachmentValues(v)
 	case map[string]any:
+		if isRawActionSerializedValue(v, rawActionQuantityFieldValueSerializationType) {
+			return makeRawActionQuantityFieldValue(v)
+		}
 		var normalized any = normalizeRawActionDictionary(v)
 		return makeDictionaryValue(&normalized)
 	case []any:
@@ -65,12 +69,51 @@ func normalizeRawActionParamValue(value any) any {
 	}
 }
 
+func rawActionVariableIdentifier(value string) string {
+	var identifier = strings.TrimPrefix(strings.TrimSuffix(value, "}"), "${")
+	return strings.TrimPrefix(identifier, "@")
+}
+
+func isRawActionSerializedValue(value map[string]any, serializationType string) bool {
+	var valueSerializationType, ok = value["WFSerializationType"].(string)
+	return ok && valueSerializationType == serializationType
+}
+
 func normalizeRawActionDictionary(value map[string]any) map[string]any {
 	var normalized = make(map[string]any, len(value))
 	for key, item := range value {
 		normalized[key] = normalizeRawActionParamValue(item)
 	}
 	return normalized
+}
+
+func makeRawActionQuantityFieldValue(value map[string]any) WFQuantityFieldValue {
+	var quantityValue = WFQuantityValue{}
+	var rawValue, ok = value["Value"].(map[string]any)
+	if ok {
+		if magnitude, found := rawValue["Magnitude"]; found {
+			quantityValue.Magnitude = normalizeRawActionQuantityValue(magnitude)
+		}
+		if unit, found := rawValue["Unit"]; found {
+			quantityValue.Unit = normalizeRawActionQuantityValue(unit)
+		}
+	}
+
+	return WFQuantityFieldValue{
+		Value:               quantityValue,
+		WFSerializationType: rawActionQuantityFieldValueSerializationType,
+	}
+}
+
+func normalizeRawActionQuantityValue(value any) any {
+	var stringValue, ok = value.(string)
+	if !ok || !rawActionVariableValueRegex.MatchString(stringValue) {
+		return value
+	}
+
+	return variableValueWithSerialization(varValue{
+		value: rawActionVariableIdentifier(stringValue),
+	}, "")
 }
 
 func makeRawActionArrayValue(value []any) WFArrayValue {

@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -201,6 +202,115 @@ func TestActionIdentifiers(t *testing.T) {
 	}
 
 	resetParser()
+}
+
+func TestHealthDecompileRoundTrip(t *testing.T) {
+	defer resetParser()
+	delete(args.Args, "import")
+	delete(args.Args, "output")
+	args.Args["no-ansi"] = ""
+	args.Args["skip-sign"] = ""
+	loadStandardActions()
+
+	currentTest = "tests/health.cherri"
+	os.Args[1] = currentTest
+	compile()
+
+	resetParser()
+	var decompiledPath = fmt.Sprintf("%s/health-decompiled.cherri", t.TempDir())
+	args.Args["no-ansi"] = ""
+	args.Args["output"] = decompiledPath
+	decompile(importShortcut("tests/health_unsigned.shortcut"))
+	delete(args.Args, "output")
+
+	var decompiled, readErr = os.ReadFile(decompiledPath)
+	if readErr != nil {
+		t.Fatalf("failed to read decompiled health file: %v", readErr)
+	}
+	var decompiledCode = string(decompiled)
+	var expectedLines = []string{
+		`logHealthQuantitySample(qty(20, "count"), "Steps", CurrentDate)`,
+		`logWorkout("Basketball", qty(500, "Cal"), CurrentDate, qty(30, "min"), qty(1, "km"))`,
+		`logHealthCategorySample("Acne", "Present", nil, CurrentDate, CurrentDate)`,
+	}
+	for _, expectedLine := range expectedLines {
+		if !strings.Contains(decompiledCode, expectedLine) {
+			t.Fatalf("expected decompiled health code to contain %q, got:\n%s", expectedLine, decompiledCode)
+		}
+	}
+
+	var cmd = exec.Command("go", "run", ".", decompiledPath, "--skip-sign", "--no-ansi")
+	var output, cmdErr = cmd.CombinedOutput()
+	if cmdErr != nil {
+		t.Fatalf("expected decompiled health code to compile, got %v:\n%s", cmdErr, output)
+	}
+}
+
+func TestDecompileRawActionQuantityFieldValue(t *testing.T) {
+	defer resetParser()
+	uuids = map[string]string{
+		"high-uuid": "high",
+		"low-uuid":  "low",
+	}
+	var action = ShortcutAction{
+		WFWorkflowActionIdentifier: "is.workflow.actions.health.quantity.log",
+		WFWorkflowActionParameters: map[string]any{
+			"UUID": "action-uuid",
+			"WFQuantitySampleQuantity": map[string]any{
+				"Value": map[string]any{
+					"Magnitude": map[string]any{
+						"OutputName": "high",
+						"OutputUUID": "high-uuid",
+						"Type":       "ActionOutput",
+					},
+					"Unit": "mmHg",
+				},
+				"WFSerializationType": "WFQuantityFieldValue",
+			},
+			"WFQuantitySampleAdditionalQuantity": map[string]any{
+				"Value": map[string]any{
+					"Magnitude": map[string]any{
+						"OutputName": "low",
+						"OutputUUID": "low-uuid",
+						"Type":       "ActionOutput",
+					},
+					"Unit": "mmHg",
+				},
+				"WFSerializationType": "WFQuantityFieldValue",
+			},
+			"WFQuantitySampleType": "Systolic Blood Pressure",
+		},
+	}
+
+	var rawAction = makeRawAction(&action)
+	if !strings.Contains(rawAction, `"Magnitude": "${high}"`) {
+		t.Fatalf("expected decompiled raw action to reference high, got:\n%s", rawAction)
+	}
+	if !strings.Contains(rawAction, `"Magnitude": "${low}"`) {
+		t.Fatalf("expected decompiled raw action to reference low, got:\n%s", rawAction)
+	}
+	if !strings.Contains(rawAction, `"WFSerializationType": "WFQuantityFieldValue"`) {
+		t.Fatalf("expected decompiled raw action to keep quantity serialization, got:\n%s", rawAction)
+	}
+}
+
+func TestScoreActionParamsSkipsInvalidEnumValue(t *testing.T) {
+	enumerations["testHTTPMethod"] = []string{"POST", "PUT", "PATCH", "DELETE"}
+	defer delete(enumerations, "testHTTPMethod")
+
+	var parameters = []parameterDefinition{
+		{
+			key:  "WFHTTPMethod",
+			enum: "testHTTPMethod",
+		},
+	}
+	var matchedParams, matchedValues = scoreActionParams(&parameters, map[string]any{
+		"WFHTTPMethod": "GET",
+	})
+
+	if matchedParams != 0 || matchedValues != 0 {
+		t.Fatalf("expected invalid enum value not to match, got params=%d values=%d", matchedParams, matchedValues)
+	}
 }
 
 func TestCapitalizeEmptyString(t *testing.T) {
