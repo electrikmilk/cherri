@@ -209,6 +209,21 @@ func TestCapitalizeEmptyString(t *testing.T) {
 	}
 }
 
+func TestDecompileTextPartsKeepsEmptyCustomSeparator(t *testing.T) {
+	defer resetParser()
+	var arguments = decompTextParts(&ShortcutAction{
+		WFWorkflowActionParameters: map[string]any{
+			"text":                  "items",
+			"WFTextSeparator":       "Custom",
+			"WFTextCustomSeparator": "",
+		},
+	})
+
+	if len(arguments) != 2 || arguments[1] != `""` {
+		t.Fatalf("expected empty custom separator argument, got %#v", arguments)
+	}
+}
+
 func TestSanitizeIdentifierWhitespaceOnly(t *testing.T) {
 	identifier := " "
 	sanitizeIdentifier(&identifier)
