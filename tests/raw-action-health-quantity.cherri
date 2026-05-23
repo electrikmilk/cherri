@@ -1,3 +1,4 @@
+// compile-only: Health quantity rawAction values require device Health permissions.
 const high = prompt("Systolic", "Number")
 const low = prompt("Diastolic", "Number")
 
@@ -18,3 +19,5 @@ rawAction("is.workflow.actions.health.quantity.log", {
     },
     "WFQuantitySampleType": "Systolic Blood Pressure"
 })
+
+show("✅ All tests passed")

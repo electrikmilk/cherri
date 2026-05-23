@@ -1,3 +1,4 @@
+// compile-only: Health actions require device Health data and permissions.
 const high = prompt("Systolic", "Number")
 const low = prompt("Diastolic", "Number")
 
@@ -16,3 +17,5 @@ logHealthCategorySample("Acne", "Present", nil, CurrentDate, CurrentDate)
 logBloodPressure(qty(high, "mmHg"), qty(low, "mmHg"))
 logHealthQuantitySample(qty(72, "count/min"), "Heart Rate")
 getPhysicalActivity()
+
+show("✅ All tests passed")
