@@ -57,49 +57,49 @@ var getPhysicalActivityIntent = appIntent{
 }
 
 var openHealthViewIntent = appIntent{
-	name:                "健康",
+	name:                "Health",
 	bundleIdentifier:    "com.apple.Health",
 	appIntentIdentifier: "OpenViewIntent",
 }
 
 var openHealthDataTypeIntent = appIntent{
-	name:                "健康",
+	name:                "Health",
 	bundleIdentifier:    "com.apple.Health",
 	appIntentIdentifier: "OpenDataTypeIntent",
 }
 
 var openHealthCategoryIntent = appIntent{
-	name:                "健康",
+	name:                "Health",
 	bundleIdentifier:    "com.apple.Health",
 	appIntentIdentifier: "OpenCategoryIntent",
 }
 
 var openHealthRecordsIntent = appIntent{
-	name:                "健康",
+	name:                "Health",
 	bundleIdentifier:    "com.apple.Health",
 	appIntentIdentifier: "OpenRecordsIntent",
 }
 
 var openHealthSearchIntent = appIntent{
-	name:                "健康",
+	name:                "Health",
 	bundleIdentifier:    "com.apple.Health",
 	appIntentIdentifier: "OpenSearchIntent",
 }
 
 var openHealthSleepScheduleIntent = appIntent{
-	name:                "健康",
+	name:                "Health",
 	bundleIdentifier:    "com.apple.Health",
 	appIntentIdentifier: "OpenSleepScheduleIntentV2",
 }
 
 var openHealthSleepScheduleLegacyIntent = appIntent{
-	name:                "健康",
+	name:                "Health",
 	bundleIdentifier:    "com.apple.Health",
 	appIntentIdentifier: "OpenSleepScheduleIntent",
 }
 
 var openHealthTabIntent = appIntent{
-	name:                "健康",
+	name:                "Health",
 	bundleIdentifier:    "com.apple.Health",
 	appIntentIdentifier: "OpenTabIntent",
 }
@@ -2313,16 +2313,14 @@ func decompTextParts(action *ShortcutAction) (arguments []string) {
 	arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["text"]))
 
 	var glue string
-	var hasCustomSeparator bool
 	if action.WFWorkflowActionParameters["WFTextSeparator"] != nil {
 		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextSeparator"])
 	}
 	if action.WFWorkflowActionParameters["WFTextCustomSeparator"] != nil {
 		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextCustomSeparator"])
-		hasCustomSeparator = true
 	}
 
-	if glue != "" || hasCustomSeparator {
+	if glue != "" {
 		arguments = append(arguments, fmt.Sprintf("\"%s\"", glueToChar(glue)))
 	}
 

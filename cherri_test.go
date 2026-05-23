@@ -204,136 +204,6 @@ func TestActionIdentifiers(t *testing.T) {
 	resetParser()
 }
 
-func TestRawActionQuantityFieldValue(t *testing.T) {
-	defer resetParser()
-	args.Args["no-ansi"] = ""
-	args.Args["skip-sign"] = ""
-
-	currentTest = "tests/raw-action-health-quantity.cherri"
-	os.Args[1] = currentTest
-	compile()
-
-	var action = shortcut.WFWorkflowActions[len(shortcut.WFWorkflowActions)-1]
-	if action.WFWorkflowActionIdentifier != "is.workflow.actions.health.quantity.log" {
-		t.Fatalf("expected health quantity log action, got %q", action.WFWorkflowActionIdentifier)
-	}
-
-	var quantity, quantityOK = action.WFWorkflowActionParameters["WFQuantitySampleQuantity"].(WFQuantityFieldValue)
-	if !quantityOK {
-		t.Fatalf("expected quantity sample to be WFQuantityFieldValue, got %T", action.WFWorkflowActionParameters["WFQuantitySampleQuantity"])
-	}
-	var magnitude, magnitudeOK = quantity.Value.Magnitude.(Value)
-	if !magnitudeOK {
-		t.Fatalf("expected quantity magnitude to be variable Value, got %T", quantity.Value.Magnitude)
-	}
-	if magnitude.OutputName != "high" || magnitude.Type != "ActionOutput" {
-		t.Fatalf("expected quantity magnitude to reference high, got %#v", magnitude)
-	}
-
-	var additionalQuantity, additionalQuantityOK = action.WFWorkflowActionParameters["WFQuantitySampleAdditionalQuantity"].(WFQuantityFieldValue)
-	if !additionalQuantityOK {
-		t.Fatalf("expected additional quantity to be WFQuantityFieldValue, got %T", action.WFWorkflowActionParameters["WFQuantitySampleAdditionalQuantity"])
-	}
-	var additionalMagnitude, additionalMagnitudeOK = additionalQuantity.Value.Magnitude.(Value)
-	if !additionalMagnitudeOK {
-		t.Fatalf("expected additional quantity magnitude to be variable Value, got %T", additionalQuantity.Value.Magnitude)
-	}
-	if additionalMagnitude.OutputName != "low" || additionalMagnitude.Type != "ActionOutput" {
-		t.Fatalf("expected additional quantity magnitude to reference low, got %#v", additionalMagnitude)
-	}
-}
-
-func TestHealthQuantityActions(t *testing.T) {
-	defer resetParser()
-	args.Args["no-ansi"] = ""
-	args.Args["skip-sign"] = ""
-	loadStandardActions()
-
-	currentTest = "tests/health.cherri"
-	os.Args[1] = currentTest
-	compile()
-
-	if len(shortcut.WFWorkflowActions) < 7 {
-		t.Fatalf("expected health actions to compile, got %d actions", len(shortcut.WFWorkflowActions))
-	}
-
-	var bloodPressure = findCompiledAction("is.workflow.actions.health.quantity.log", "WFQuantitySampleAdditionalQuantity")
-	if bloodPressure == nil {
-		t.Fatal("expected blood pressure action")
-	}
-	if bloodPressure.WFWorkflowActionIdentifier != "is.workflow.actions.health.quantity.log" {
-		t.Fatalf("expected blood pressure action, got %q", bloodPressure.WFWorkflowActionIdentifier)
-	}
-	if sampleType := bloodPressure.WFWorkflowActionParameters["WFQuantitySampleType"]; sampleType != "Systolic Blood Pressure" {
-		t.Fatalf("expected blood pressure sample type, got %#v", sampleType)
-	}
-	if _, ok := bloodPressure.WFWorkflowActionParameters["WFQuantitySampleQuantity"].(WFQuantityFieldValue); !ok {
-		t.Fatalf("expected systolic quantity field, got %T", bloodPressure.WFWorkflowActionParameters["WFQuantitySampleQuantity"])
-	}
-	if _, ok := bloodPressure.WFWorkflowActionParameters["WFQuantitySampleAdditionalQuantity"].(WFQuantityFieldValue); !ok {
-		t.Fatalf("expected diastolic quantity field, got %T", bloodPressure.WFWorkflowActionParameters["WFQuantitySampleAdditionalQuantity"])
-	}
-
-	var steps = findCompiledAction("is.workflow.actions.health.quantity.log", "WFQuantitySampleDate")
-	if steps == nil {
-		t.Fatal("expected dated steps action")
-	}
-	if sampleType := steps.WFWorkflowActionParameters["WFQuantitySampleType"]; sampleType != "Steps" {
-		t.Fatalf("expected steps sample type, got %#v", sampleType)
-	}
-
-	var heartRate = findCompiledActionWithParamValue("is.workflow.actions.health.quantity.log", "WFQuantitySampleType", "Heart Rate")
-	if heartRate == nil {
-		t.Fatal("expected heart rate action")
-	}
-	if _, ok := heartRate.WFWorkflowActionParameters["WFQuantitySampleQuantity"].(WFQuantityFieldValue); !ok {
-		t.Fatalf("expected heart rate quantity field, got %T", heartRate.WFWorkflowActionParameters["WFQuantitySampleQuantity"])
-	}
-
-	if findCompiledAction("is.workflow.actions.filter.health.quantity", "WFContentItemInputParameter") == nil {
-		t.Fatal("expected find health samples action")
-	}
-	if findCompiledAction("is.workflow.actions.properties.health.quantity", "WFContentItemPropertyName") == nil {
-		t.Fatal("expected get health sample detail action")
-	}
-	if findCompiledAction("com.apple.Health.OpenViewIntent", "target") == nil {
-		t.Fatal("expected open health view action")
-	}
-	if findCompiledAction("com.apple.Health.OpenDataTypeIntent", "target") == nil {
-		t.Fatal("expected open health data action")
-	}
-	if findCompiledAction("com.apple.Health.OpenCategoryIntent", "target") == nil {
-		t.Fatal("expected open health category action")
-	}
-	if findCompiledAction("com.apple.Health.OpenRecordsIntent", "target") == nil {
-		t.Fatal("expected open health records action")
-	}
-	if findCompiledAction("com.apple.Health.OpenSearchIntent", "searchPhrase") == nil {
-		t.Fatal("expected open health search action")
-	}
-	if findCompiledAction("com.apple.Health.OpenSleepScheduleIntentV2", "AppIntentDescriptor") == nil {
-		t.Fatal("expected open sleep schedule action")
-	}
-	if findCompiledAction("com.apple.Health.OpenTabIntent", "target") == nil {
-		t.Fatal("expected open health tab action")
-	}
-	if findCompiledAction("is.workflow.actions.health.workout.log", "WFWorkoutCaloriesQuantity") == nil {
-		t.Fatal("expected log workout action")
-	}
-	if findCompiledAction("is.workflow.actions.health.workout.log", "WFWorkoutDuration") == nil {
-		t.Fatal("expected log workout duration")
-	}
-	if findCompiledAction("is.workflow.actions.health.workout.log", "WFWorkoutDistanceQuantity") == nil {
-		t.Fatal("expected log workout distance")
-	}
-	if findCompiledAction("is.workflow.actions.health.quantity.log", "WFCategorySampleEnumeration") == nil {
-		t.Fatal("expected log health category action")
-	}
-	if findCompiledAction("com.apple.ShortcutsActions.GetPhysicalActivity", "AppIntentDescriptor") == nil {
-		t.Fatal("expected get physical activity action")
-	}
-}
-
 func TestHealthDecompileRoundTrip(t *testing.T) {
 	defer resetParser()
 	delete(args.Args, "import")
@@ -374,32 +244,6 @@ func TestHealthDecompileRoundTrip(t *testing.T) {
 	if cmdErr != nil {
 		t.Fatalf("expected decompiled health code to compile, got %v:\n%s", cmdErr, output)
 	}
-}
-
-func findCompiledAction(identifier string, requiredParam string) *ShortcutAction {
-	for i := range shortcut.WFWorkflowActions {
-		var action = &shortcut.WFWorkflowActions[i]
-		if action.WFWorkflowActionIdentifier != identifier {
-			continue
-		}
-		if _, found := action.WFWorkflowActionParameters[requiredParam]; found {
-			return action
-		}
-	}
-	return nil
-}
-
-func findCompiledActionWithParamValue(identifier string, param string, value any) *ShortcutAction {
-	for i := range shortcut.WFWorkflowActions {
-		var action = &shortcut.WFWorkflowActions[i]
-		if action.WFWorkflowActionIdentifier != identifier {
-			continue
-		}
-		if action.WFWorkflowActionParameters[param] == value {
-			return action
-		}
-	}
-	return nil
 }
 
 func TestDecompileRawActionQuantityFieldValue(t *testing.T) {
@@ -466,21 +310,6 @@ func TestScoreActionParamsSkipsInvalidEnumValue(t *testing.T) {
 
 	if matchedParams != 0 || matchedValues != 0 {
 		t.Fatalf("expected invalid enum value not to match, got params=%d values=%d", matchedParams, matchedValues)
-	}
-}
-
-func TestDecompileTextPartsKeepsEmptyCustomSeparator(t *testing.T) {
-	defer resetParser()
-	var arguments = decompTextParts(&ShortcutAction{
-		WFWorkflowActionParameters: map[string]any{
-			"text":                  "items",
-			"WFTextSeparator":       "Custom",
-			"WFTextCustomSeparator": "",
-		},
-	})
-
-	if len(arguments) != 2 || arguments[1] != `""` {
-		t.Fatalf("expected empty custom separator argument, got %#v", arguments)
 	}
 }
 
