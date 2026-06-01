@@ -522,4 +522,5 @@ var glyphs = map[string]int{
 	"rhombus":                    62500,
 	"shield":                     62501,
 	"shazam":                 61796,
+	"paintbrushPointed":      61749,
 }
