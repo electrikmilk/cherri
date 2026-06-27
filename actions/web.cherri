@@ -136,7 +136,7 @@ action 'downloadurl' jsonRequest(
 action 'downloadurl' fileRequest(
     text url: 'WFURL',
     HTTPMethod ?method: 'WFHTTPMethod',
-    dictionary! ?body: 'WFRequestVariable',
+    variable ?body: 'WFRequestVariable',
     dictionary! ?headers: 'WFHTTPHeaders',
 ) {
     "WFHTTPBodyType": "File"
