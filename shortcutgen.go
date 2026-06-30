@@ -1171,7 +1171,10 @@ func makeRepeatEachAction(t *token) {
 type WFQuestion struct {
 	ParameterKey string `plist:",omitempty"`
 	Category     string `plist:",omitempty"`
-	ActionIndex  int    `plist:",omitempty"`
+	// NOT omitempty: index 0 is a valid target (the question's action is often the
+	// first action). Omitting it leaves the question unbound, so Shortcuts silently
+	// skips the import prompt.
+	ActionIndex  int    ``
 	Text         string `plist:",omitempty"`
 	DefaultValue any    `plist:",omitempty"`
 }
