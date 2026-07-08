@@ -23,3 +23,11 @@ rawAction("is.workflow.actions.downloadurl", {
     "WFHTTPBodyType": "File",
     "WFRequestVariable": "${markdown}"
 })
+
+// a #ref usable as a rawAction() dict value, same as decompiling a Shortcut whose raw action
+// parameter couldn't be represented as Cherri source would produce
+#ref exampleOpaqueValue eyJFeGFtcGxlTGFiZWwiOiJleGFtcGxlIiwiRXhhbXBsZVNlcmlhbGl6ZWREYXRhIjp7Il9fY2hlcnJpRGF0YSI6IlkyaGxjbkpwSUc5d1lYRjFaU0J5WldabGNtVnVZMlVnZEdWemRBPT0ifX0=
+
+rawAction("is.workflow.actions.homeaccessory", {
+    "WFHomeTriggerActionSets": "${exampleOpaqueValue}"
+})
