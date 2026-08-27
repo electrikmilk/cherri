@@ -219,7 +219,7 @@ Use `cherri --action=actionName` to look up a specific action's signature.
 | `parser.go` | Source parsing cursor, token emission, `initParse`/`preParse`/`parse` |
 | `decompile.go` | Reverse: `.plist` → `.cherri` source |
 | `actions/` | Standard library actions written in Cherri (embedded via `go:embed`) |
-| `stdlib.cherri` | Standard library Cherri code (also embedded) |
+| `stdfunc.cherri` | Standard library Cherri code (also embedded) |
 
 ## Type System
 

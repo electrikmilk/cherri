@@ -1,11 +1,13 @@
-// compile-only: stdlib actions, interactive at runtime
+// compile-only: stdfunc functions, interactive at runtime
 
-#include 'stdlib'
+#include 'stdfunc'
 
 const returnStr = "Hello, World"
 
-@jsResult = runJS("document.body.append(document.createTextNode('{returnStr}'));")
-show("{@jsResult}")
+const jsResult = runJS("document.body.append(document.createTextNode('{returnStr}'));")
+if jsResult != returnStr {
+    mustOutput("❌ FAIL: JS returned unexpected value")
+}
 
 @items = []
 repeat i for 6 {

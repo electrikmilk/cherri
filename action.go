@@ -18,8 +18,8 @@ import (
 	"github.com/electrikmilk/args-parser"
 )
 
-//go:embed stdlib.cherri
-var stdLib embed.FS
+//go:embed stdfunc.cherri
+var stdFuncs embed.FS
 
 //go:embed actions
 var stdActions embed.FS

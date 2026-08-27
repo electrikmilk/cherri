@@ -19,7 +19,7 @@
 /tests/decomp-me.cherri
 *_decompiled.plist
 *_processed.cherri
-!stdlib.cherri
+!stdfunc.cherri
 *.prof
 
 # Development
