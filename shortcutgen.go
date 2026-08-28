@@ -409,7 +409,7 @@ func variableValueWithSerialization(variable varValue, serializationType string)
 		if variable.valueType == Variable && variableReference.valueType != "" {
 			refValueType = variableReference.valueType
 		}
-		if refValueType == Dict {
+		if getAsAggrandizementType(refValueType, &variableReference) == "WFDictionaryValueVariableAggrandizement" {
 			aggrandizements = append(aggrandizements, Aggrandizement{
 				Type:          "WFDictionaryValueVariableAggrandizement",
 				DictionaryKey: variable.getAs,
@@ -549,20 +549,25 @@ func makeAttachmentValues() {
 	}
 }
 
-func makeAggrandizement(valueType *tokenType, variable *varValue, getAs string) (aggrandizement Aggrandizement) {
-	switch *valueType {
-	case Dict:
-		aggrandizement.Type = "WFDictionaryValueVariableAggrandizement"
-	case Action:
-		var variableAction = *variable.value.(action).def
-		if variableAction.outputType == Dict {
-			aggrandizement.Type = "WFDictionaryValueVariableAggrandizement"
-		} else {
-			aggrandizement.Type = "WFPropertyVariableAggrandizement"
+// getAsAggrandizementType resolves whether a base['key'] access reads a dictionary
+// key or a fixed content-item property (file size, name...). An action-typed base
+// is resolved through its definition's output type so that a dictionary returned
+// by e.g. getDictionary() reads a key. Every reference context (assignment,
+// condition, interpolation) must make this call so the paths cannot disagree.
+func getAsAggrandizementType(baseType tokenType, base *varValue) string {
+	if baseType == Action && base != nil {
+		if collectedAction, ok := base.value.(action); ok && collectedAction.def != nil {
+			baseType = collectedAction.def.outputType
 		}
-	default:
-		aggrandizement.Type = "WFPropertyVariableAggrandizement"
 	}
+	if baseType == Dict {
+		return "WFDictionaryValueVariableAggrandizement"
+	}
+	return "WFPropertyVariableAggrandizement"
+}
+
+func makeAggrandizement(valueType *tokenType, variable *varValue, getAs string) (aggrandizement Aggrandizement) {
+	aggrandizement.Type = getAsAggrandizementType(*valueType, variable)
 
 	if aggrandizement.Type == "WFDictionaryValueVariableAggrandizement" {
 		aggrandizement.DictionaryKey = getAs
