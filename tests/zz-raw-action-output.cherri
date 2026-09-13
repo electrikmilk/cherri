@@ -1,0 +1,10 @@
+// compile-only: regression test for output-capture rawAction preserving bundle ID
+
+const Outputs = rawAction("com.alexhay.ToolboxProForShortcuts.GetAudioOutputsIntent", {
+    "AppIntentDescriptor": ""
+})
+
+@picked = rawAction("dk.simonbs.DataJar.SetValueIntent", {
+    "key": "test",
+    "value": "hello"
+})
