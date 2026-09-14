@@ -25,5 +25,3 @@ action v16.4 'com.apple.shortcuts.SearchShortcutsAction' searchShortcuts(text qu
 // [Doc]: Make Shortcut: Create a shortcut.
 action v16.4 'com.apple.shortcuts.CreateWorkflowAction' makeShortcut(text name, bool ?open: 'OpenWhenRun' = true)
 
-// [Doc]: Run Shortcut: Run Shortcut with name `shortcutName`, providing it with `input`.
-action 'runworkflow' run(text shortcutName: 'WFWorkflowName', variable input: 'WFInput')
