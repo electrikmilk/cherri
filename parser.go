@@ -998,12 +998,13 @@ func collectColorDefinition() {
 	if color, found := colors[collectColor]; found {
 		iconColor = color
 	} else {
-		var list = "Available icon colors:\n"
+		var list strings.Builder
+		list.WriteString("Available icon colors:\n")
 		for c := range colors {
-			list += fmt.Sprintf("- %s\n", c)
+			list.WriteString(fmt.Sprintf("- %s\n", c))
 		}
 
-		parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s", collectColor, list))
+		parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s", collectColor, list.String()))
 	}
 }
 
