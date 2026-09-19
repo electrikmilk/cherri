@@ -30,6 +30,7 @@ func generateShortcut() {
 		WFWorkflowMinimumClientVersionString: "900",
 		WFQuickActionSurfaces:                definedQuickActions,
 		WFWorkflowNoInputBehavior:            noInput,
+		WFWorkflowTriggers:                   automationTriggers,
 	}
 
 	waitFor(

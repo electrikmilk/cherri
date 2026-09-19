@@ -31,6 +31,7 @@ const (
 	Include        tokenType = "#include"
 	Import         tokenType = "#import"
 	Reference      tokenType = "#ref"
+	Trigger        tokenType = "#trigger"
 	Action         tokenType = "action"
 	ToggleSet      tokenType = "toggleSet"
 	Function       tokenType = "function"
