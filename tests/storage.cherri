@@ -1,0 +1,19 @@
+storeValue("Key", "Value")
+
+@getShortcutKey = getStoredValue("Key")
+alert(@getShortcutKey, "Key:")
+
+deleteStoredValue("Key")
+
+@getShortcutKey = getStoredValue("Key")
+alert(@getShortcutKey, "Key:")
+
+storeValue("Global Key", "Global Value", true)
+
+@getGlobalKey = getStoredValue("Global Key", true)
+alert(@getGlobalKey, "Global Key:")
+
+deleteStoredValue("Global Key", true)
+
+@getGlobalKey = getStoredValue("Global Key", true)
+alert(@getGlobalKey, "Global Key:")

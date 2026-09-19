@@ -1,0 +1,12 @@
+/*
+Storage actions (v27+)
+*/
+
+// Store Content: Store content by a key, optionally globally or specific to the Shortcut.
+action v27 'setstoredcontent' storeValue(text key: 'WFStoredContentKey', text value: 'WFInput', bool ?global: 'WFStoredContentGlobalValue' = false)
+
+// Get Stored Content: Get previously stored content, optionally globally or specific to the Shortcut.
+action v27 'getstoredcontent' getStoredValue(text key: 'WFStoredContentKey', bool ?global: 'WFStoredContentGlobalValue' = false)
+
+// Delete Stored Content: Delete previously stored content, optionally globally or specific to the Shortcut.
+action v27 'deletestoredcontent' deleteStoredValue(text key: 'WFStoredContentKey', bool ?global: 'WFStoredContentGlobalValue' = false)
