@@ -11,29 +11,35 @@ enum generativeResultType {
     'Dictionary',
 }
 
-enum LLMModel {
-    'Private Cloud Compute'
+enum Model {
+    'Apple Intelligence'
+    'Apple Intelligence Pro'
     'Apple Intelligence on Device',
     'ChatGPT',
 }
 
-// [Doc]: [Language Models] Ask LLM: Ask a specific LLM using a prompt. Follow up will open a follow-up prompt to the model.
-action v26 askLLM(
-    text prompt: 'WFLLMPrompt',
-    LLMModel ?model: 'WFLLMModel' = "Private Cloud Compute",
-    bool ?followUp: 'FollowUp' = false,
-    generativeResultType ?resultType: 'WFGenerativeResultType' = "Automatic"
-)
-
-// [Doc]: [Language Models] Ask Private Cloud Compute LLM: Ask a private cloud compute LLM using a prompt. Follow up will open a follow-up prompt to the model.
-action v26 'askllm' askCloudLLM(
+// [Doc]: [Language Models] Ask Cloud Model: Ask a Private Cloud AI model using a prompt. Follow up will open a follow-up prompt to the model. Allow search uses Broad World Knowledge, allowing the model to search the web for up-to-date information.
+action v27 'askllm' askModel(
     text prompt: 'WFLLMPrompt',
     bool ?followUp: 'FollowUp' = false,
-    generativeResultType ?resultType: 'WFGenerativeResultType' = "Automatic"
-)
+    bool ?allowSearch: 'WFAllowWebSearch' = false,
+    generativeResultType ?resultType: 'WFGenerativeResultType' = "Automatic",
+) {
+    "WFLLMModel": "Apple Intelligence"
+}
 
-// [Doc]: [Language Models] Ask On-Device LLM: Ask an On-Device LLM using a prompt. Follow up will open a follow-up prompt to the model.
-action v26 'askllm' askDeviceLLM(
+// [Doc]: [Language Models] Ask Cloud Pro Model: Ask a Private Cloud Pro AI model with increased reasoning using a prompt. May require subscription. Follow up will open a follow-up prompt to the model. Allow search uses Broad World Knowledge, allowing the model to search the web for up-to-date information.
+action v27 'askllm' askProModel(
+    text prompt: 'WFLLMPrompt',
+    bool ?followUp: 'FollowUp' = false,
+    bool ?allowSearch: 'WFAllowWebSearch' = false,
+    generativeResultType ?resultType: 'WFGenerativeResultType' = "Automatic",
+) {
+    "WFLLMModel": "Apple Intelligence Pro"
+}
+
+// [Doc]: [Language Models] Ask On-Device Model: Ask an On-Device LLM using a prompt. Follow up will open a follow-up prompt to the model.
+action v26 'askllm' askDeviceModel(
     text prompt: 'WFLLMPrompt',
     bool ?followUp: 'FollowUp' = false,
     generativeResultType ?resultType: 'WFGenerativeResultType' = "Automatic"
@@ -49,6 +55,31 @@ action v26 'askllm' askChatGPT(
 ) {
     "WFLLMModel": "ChatGPT"
 }
+
+// Deprecated: iOS 27 changed the name of Cloud models.
+
+enum LLMModel {
+    'Private Cloud Compute'
+    'Apple Intelligence on Device',
+    'ChatGPT',
+}
+
+// [Doc]: [Language Models] Ask Private Cloud Compute LLM: Ask a private cloud compute LLM using a prompt. Follow up will open a follow-up prompt to the model.
+action v26< 'askllm' askCloudLLM(
+    text prompt: 'WFLLMPrompt',
+    bool ?followUp: 'FollowUp' = false,
+    generativeResultType ?resultType: 'WFGenerativeResultType' = "Automatic"
+) {
+    "WFLLMModel": "Private Cloud Compute"
+}
+
+// [Doc]: [Language Models] Ask LLM: Ask a Cloud AI model using a prompt. Follow up will open a follow-up prompt to the model.
+action v26< askLLM(
+    text prompt: 'WFLLMPrompt',
+    LLMModel ?model: 'WFLLMModel' = "Private Cloud Compute",
+    bool ?followUp: 'FollowUp' = false,
+    generativeResultType ?resultType: 'WFGenerativeResultType' = "Automatic"
+)
 
 enum textTone {
     'friendly',

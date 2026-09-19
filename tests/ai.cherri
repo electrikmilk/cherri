@@ -1,12 +1,12 @@
 /* Apple Intelligence */
 
 // compile-only: non-deterministic AI output
-const llmResult = askLLM("How many r's are in strawberry?", "Apple Intelligence on Device", true, "Text")
-show("{llmResult}")
-const deviceResult = askDeviceLLM("How many r's are in strawberry?")
+const modelResult = askModel("How many r's are in strawberry?")
+show("{modelResult}")
+const deviceResult = askDeviceModel("How many r's are in strawberry?")
 show("{deviceResult}")
-const cloudResult = askCloudLLM("How many r's are in strawberry?")
-show("{cloudResult}")
+const cloudProResult = askProModel("How many r's are in strawberry?", false, true)
+show("{cloudProResult}")
 const chatGPTResult = askChatGPT("How many r's are in strawberry?")
 show("{chatGPTResult}")
 
