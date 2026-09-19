@@ -1828,6 +1828,7 @@ var actionIncludes = []string{
 	"settings",
 	"sharing",
 	"shortcuts",
+	"storage",
 	"text",
 	"translation",
 	"web",
