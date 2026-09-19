@@ -75,7 +75,7 @@ If you have Nix installed, you can run:
 nix profile install github:electrikmilk/cherri
 ```
 
-Alternatively, you can use `nix-direnv` to get an isolated, [effortless dev environment](https://determinate.systems/blog/nix-direnv/) where `cherri` is available based on which directory you're in. Then you would use_flake and add Cherri to flake.nix:
+Alternatively, you can use `nix-direnv` to get an isolated, [effortless dev environment](https://determinate.systems/blog/nix-direnv/) where `cherri` is available based on which directory you're in. Then you would `use_flake` and add Cherri to `flake.nix`:
 
 ```nix
 {
@@ -90,7 +90,7 @@ Alternatively, you can use `nix-direnv` to get an isolated, [effortless dev envi
 }
 ```
 
-Then run `direnv allow` in the directory with the flake.nix file.
+Then run `direnv allow` in the directory with the `flake.nix` file.
 
 ## Usage
 
