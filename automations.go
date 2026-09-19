@@ -29,11 +29,20 @@ var triggerIdentifiers = map[string]string{
 
 var validScreenshotLocations = []string{"photos", "files", "clipboard"}
 var validStageManagerTypes = []string{"on", "off", "both"}
+var validWifiConnectionTypes = []string{"joined", "disconnected", "both"}
+var validBluetoothConnectionTypes = []string{"connect", "disconnect", "both"}
 
 func checkTriggerIdentifier(identifier string) {
 	if triggerIdentifiers[identifier] == "" {
 		var list = makeKeyList("Available triggers:", triggerIdentifiers, identifier)
 		parserError(fmt.Sprintf("Invalid trigger identifier '%s'\n\n%s", identifier, list))
+	}
+}
+
+func checkTriggerValue(validValues []string, value string) {
+	if !slices.Contains(validValues, value) {
+		var list = makeValueList("Available values:", validValues, value)
+		parserError(fmt.Sprintf("Invalid trigger param value '%s'\n\n%s", value, list))
 	}
 }
 
@@ -60,11 +69,8 @@ func collectTrigger() {
 		var screenshotLocations = strings.Split(paramValue, ",")
 		for i, location := range screenshotLocations {
 			var trimmedLocation = strings.TrimSpace(location)
-			if slices.Contains(validScreenshotLocations, trimmedLocation) {
-				screenshotLocations[i] = trimmedLocation
-			} else {
-				parserError("Invalid screenshot location (not photos, files, or clipboard): " + trimmedLocation)
-			}
+			checkTriggerValue(validScreenshotLocations, trimmedLocation)
+			screenshotLocations[i] = trimmedLocation
 		}
 
 		triggerParams["ScreenshotLocations"] = screenshotLocations
@@ -78,10 +84,16 @@ func collectTrigger() {
 		triggerParams["WFBatteryLevel"] = batteryLevelFloat - 0.01
 	case "stageManager":
 		var stageManagerType = collectUntil('\n')
-		if slices.Contains(validStageManagerTypes, stageManagerType) {
-			parserError("Invalid stage manager type (not on, off, or both): " + stageManagerType)
-		}
+		checkTriggerValue(validStageManagerTypes, stageManagerType)
 		triggerParams["WFStageManagerType"] = stageManagerType
+	case "wifi":
+		var connectionType = collectUntil('\n')
+		checkTriggerValue(validWifiConnectionTypes, connectionType)
+		triggerParams["WFConnectionType"] = connectionType
+	case "bluetooth":
+		var connectionType = collectUntil('\n')
+		checkTriggerValue(validBluetoothConnectionTypes, connectionType)
+		triggerParams["WFBluetoothConnectionType"] = connectionType
 	}
 
 	var triggerUUID = createUUID(&collectIdentifier)
