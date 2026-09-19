@@ -162,6 +162,8 @@ func printParsingDebug() {
 	printTokens(tokens)
 	fmt.Print("\n")
 
+	printAutomationsDebug()
+
 	fmt.Println(ansi("## DEFINITIONS ##", bold))
 	fmt.Println("Name: " + workflowName)
 	fmt.Println("Color:", iconColor)
@@ -212,6 +214,9 @@ func parse() {
 	case startOfLineTokenAhead(Definition):
 		advance()
 		collectDefinition()
+	case startOfLineTokenAhead(Trigger):
+		advance()
+		collectTrigger()
 	case startOfLineTokenAhead(Reference):
 		advance()
 		collectEncodedReference()

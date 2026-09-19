@@ -27,6 +27,7 @@ type Shortcut struct {
 	WFWorkflowHasShortcutInputVariables  bool
 	WFWorkflowHasOutputFallback          bool
 	WFWorkflowNoInputBehavior            map[string]any
+	WFWorkflowTriggers                   []AutomationTrigger
 }
 
 var shortcut Shortcut
