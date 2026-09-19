@@ -1956,6 +1956,23 @@ func makeKeyList(title string, list map[string]string, value string) string {
 	return formattedList.String()
 }
 
+func makeValueList(title string, list []string, value string) string {
+	var formattedList strings.Builder
+	formattedList.WriteString("\033[0m")
+	formattedList.WriteString(fmt.Sprintf("%s\n", title))
+	for _, item := range list {
+		var matchedItem = item
+		var matched, result = matchString(&item, &value)
+		if matched {
+			matchedItem = result
+		}
+		formattedList.WriteString(fmt.Sprintf("- %s\n", matchedItem))
+	}
+	formattedList.WriteString("\033[0m")
+
+	return formattedList.String()
+}
+
 func parserError(message string) {
 	lines = strings.Split(contents, "\n")
 	var errorFilename, errorLine, errorCol = delinquentFile()
