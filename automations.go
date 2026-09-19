@@ -17,7 +17,7 @@ var automationTriggers []AutomationTrigger
 
 var triggerIdentifiers = map[string]string{
 	"bluetooth":    "WFBluetoothTrigger",
-	"wifi":         "WFWiFiTrigger",
+	"wifi":         "WFWifiTrigger",
 	"stageManager": "WFStageManagerTrigger",
 	"display":      "WFExternalDisplayTrigger",
 	"app":          "WFAppInFocusTrigger",
