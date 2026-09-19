@@ -24,13 +24,12 @@ var triggerIdentifiers = map[string]string{
 	"screenshot":   "WFScreenshotTrigger",
 	"battery":      "WFBatteryLevelTrigger",
 	"charging":     "WFPlugInTrigger",
-	"focus":        "WFUserFocusActivityTrigger",
 }
 
 var validScreenshotLocations = []string{"photos", "files", "clipboard"}
 var validStageManagerTypes = []string{"on", "off", "both"}
 var validWifiConnectionTypes = []string{"joined", "disconnected", "both"}
-var validBluetoothConnectionTypes = []string{"connect", "disconnect", "both"}
+var validConnectionTypes = []string{"connect", "disconnect", "both"}
 
 func checkTriggerIdentifier(identifier string) {
 	if triggerIdentifiers[identifier] == "" {
@@ -92,8 +91,25 @@ func collectTrigger() {
 		triggerParams["WFConnectionType"] = connectionType
 	case "bluetooth":
 		var connectionType = collectUntil('\n')
-		checkTriggerValue(validBluetoothConnectionTypes, connectionType)
+		checkTriggerValue(validConnectionTypes, connectionType)
 		triggerParams["WFBluetoothConnectionType"] = connectionType
+	case "display":
+		var connectionType = collectUntil('\n')
+		checkTriggerValue(validConnectionTypes, connectionType)
+		triggerParams["WFConnectionType"] = connectionType
+	case "charging":
+		var chargingType = collectUntil('\n')
+		checkTriggerValue(validConnectionTypes, chargingType)
+		triggerParams["WFConnectionType"] = chargingType
+	case "app":
+		var appIdentifier = collectUntil('\n')
+
+		triggerParams["WFSelectedApps"] = map[string]any{
+			"AppIntentDescriptor": map[string]string{
+				"TeamIdentifier":   "0000000000",
+				"BundleIdentifier": replaceAppID(appIdentifier),
+			},
+		}
 	}
 
 	var triggerUUID = createUUID(&collectIdentifier)
