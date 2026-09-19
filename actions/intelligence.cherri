@@ -65,7 +65,7 @@ enum LLMModel {
 }
 
 // [Doc]: [Language Models] Ask Private Cloud Compute LLM: Ask a private cloud compute LLM using a prompt. Follow up will open a follow-up prompt to the model.
-action v26< 'askllm' askCloudLLM(
+action v26 v26< 'askllm' askCloudLLM(
     text prompt: 'WFLLMPrompt',
     bool ?followUp: 'FollowUp' = false,
     generativeResultType ?resultType: 'WFGenerativeResultType' = "Automatic"
@@ -74,7 +74,7 @@ action v26< 'askllm' askCloudLLM(
 }
 
 // [Doc]: [Language Models] Ask LLM: Ask a Cloud AI model using a prompt. Follow up will open a follow-up prompt to the model.
-action v26< askLLM(
+action v26 v26< askLLM(
     text prompt: 'WFLLMPrompt',
     LLMModel ?model: 'WFLLMModel' = "Private Cloud Compute",
     bool ?followUp: 'FollowUp' = false,
