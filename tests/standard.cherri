@@ -5,8 +5,8 @@
 const returnStr = "Hello, World"
 
 const jsResult = runJS("document.body.append(document.createTextNode('{returnStr}'));")
-if jsResult != returnStr {
-    mustOutput("❌ FAIL: JS returned unexpected value")
+if jsResult.text != returnStr {
+    mustOutput("❌ FAIL: JS returned unexpected value", "❌ FAIL: JS returned unexpected value")
 }
 
 @items = []
