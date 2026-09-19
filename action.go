@@ -618,14 +618,6 @@ func generateActionCode(focus parameterDefinition, showEnums bool) string {
 		actionCode.WriteString(generateActionDebugDefinition())
 	}
 
-	if currentAction.definition.minVersion != 0 {
-		actionCode.WriteString(ansi(fmt.Sprintf("v%1.f> ", currentAction.definition.minVersion), cyan))
-	}
-	if currentAction.definition.maxVersion != 0 {
-		actionCode.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.definition.maxVersion), red, underline))
-		actionCode.WriteRune(' ')
-	}
-
 	actionCode.WriteString(fmt.Sprintf("%s(", ansi(currentAction.identifier, blue, bold)))
 
 	actionCode.WriteString(strings.Join(generateActionArguments(focus), ", "))
@@ -795,6 +787,13 @@ func generateActionDebugDefinition() string {
 		definition.WriteString(ansi("mac ", orange))
 	} else if currentAction.definition.nonMacOnly {
 		definition.WriteString(ansi("!mac ", orange))
+	}
+	if currentAction.definition.minVersion != 0 {
+		definition.WriteString(ansi(fmt.Sprintf("v%1.f> ", currentAction.definition.minVersion), cyan))
+	}
+	if currentAction.definition.maxVersion != 0 {
+		definition.WriteString(ansi(fmt.Sprintf("v%1.f<", currentAction.definition.maxVersion), red, underline))
+		definition.WriteRune(' ')
 	}
 
 	if currentAction.identifier != "" || currentAction.definition.appIdentifier != "" {
