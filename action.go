@@ -13,6 +13,7 @@ import (
 	"reflect"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/electrikmilk/args-parser"
@@ -583,8 +584,27 @@ func generateActionDefinition(focus parameterDefinition, showEnums bool) string 
 	definition.WriteString(generateActionDoc())
 	definition.WriteString(generateActionCode(focus, showEnums))
 	definition.WriteString(generateActionPlatform())
+	definition.WriteString(generateActionVersion())
 
 	return definition.String()
+}
+
+func generateActionVersion() (versionStr string) {
+	var note string
+	switch {
+	case currentAction.definition.maxVersion != 0:
+		note = fmt.Sprintf("Deprecated as of version %s.", formatVersionNumber(currentAction.definition.maxVersion))
+	case currentAction.definition.minVersion != 0:
+		note = fmt.Sprintf("Requires version %s or later.", formatVersionNumber(currentAction.definition.minVersion))
+	default:
+		return
+	}
+
+	return ansi(fmt.Sprintf("\n\n**%s**", note), yellow)
+}
+
+func formatVersionNumber(version float64) string {
+	return strconv.FormatFloat(version, 'f', -1, 64)
 }
 
 func generateActionPlatform() (platformStr string) {
