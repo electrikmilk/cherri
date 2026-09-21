@@ -750,9 +750,9 @@ func generateActionParamDefinition(param parameterDefinition) string {
 	var definition strings.Builder
 	var argType string
 	if param.enum == "" {
-		argType = fmt.Sprintf("%s ", param.validType)
+		argType = fmt.Sprintf("%s", param.validType)
 	} else {
-		argType = fmt.Sprintf("%s ", param.enum)
+		argType = fmt.Sprintf("%s", param.enum)
 		if args.Using("debug") && param.qty {
 			argType = fmt.Sprintf("#%s", argType)
 		}
@@ -760,7 +760,10 @@ func generateActionParamDefinition(param parameterDefinition) string {
 	if param.ref {
 		argType = fmt.Sprintf("&%s", argType)
 	}
-	definition.WriteString(ansi(argType, magenta))
+	if param.literal {
+		argType += "!"
+	}
+	definition.WriteString(ansi(argType+" ", magenta))
 
 	if param.infinite {
 		definition.WriteString("...")
