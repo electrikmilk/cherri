@@ -28,6 +28,17 @@ if parsedVal != "hello" {
     mustOutput("❌ FAIL: getDictionary/getValue — got {parsedVal}, expected 'hello'", "❌ FAIL: getDictionary/getValue — got {parsedVal}, expected 'hello'")
 }
 
+// bracket key on a getDictionary()-typed variable, outside string interpolation:
+// assignment and condition contexts must read the key, not a content-item property
+@parsedVar = getDictionary(@json)
+@bracketAssign = @parsedVar['key']
+if @bracketAssign.text != "hello" {
+    mustOutput("❌ FAIL: dict['key'] assignment — got {@bracketAssign}, expected 'hello'", "❌ FAIL: dict['key'] assignment — got {@bracketAssign}, expected 'hello'")
+}
+if @parsedVar['key'].text != "hello" {
+    mustOutput("❌ FAIL: dict['key'] in condition — expected 'hello'", "❌ FAIL: dict['key'] in condition — expected 'hello'")
+}
+
 // nested dictionary: child dict and mixed array as values
 @nested = {
     "meta": {
