@@ -207,6 +207,13 @@ func makeVariableValue(reference *WFActionReference, valueType tokenType, value 
 		var valuePtr = *value
 		var action = valuePtr.(action)
 		setCurrentAction(action.ident, actions[action.ident])
+		// Mirror the bare-action path in generateShortcut: a rawAction's
+		// identifier is passed as its first argument and must override the
+		// default. Without this, a captured `const x = rawAction(...)` emits
+		// the phantom identifier "is.workflow.actions.rawaction".
+		if action.ident == "rawAction" && len(action.args) > 0 {
+			currentAction.definition.overrideIdentifier = getArgValue(action.args[0]).(string)
+		}
 		makeAction(action.args, reference)
 	case Dict:
 		addStdAction("dictionary", attachReferenceToParams(map[string]any{
