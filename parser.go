@@ -2005,20 +2005,12 @@ func (v *valueList) validate(value *string) {
 }
 
 func makeKeyList(title string, list map[string]string, value string) string {
-	var formattedList strings.Builder
-	formattedList.WriteString("\033[0m")
-	formattedList.WriteString(fmt.Sprintf("%s\n", title))
+	var keys = make([]string, 0, len(list))
 	for key := range list {
-		var matchedKey = key
-		var matched, result = matchString(&key, &value)
-		if matched {
-			matchedKey = result
-		}
-		formattedList.WriteString(fmt.Sprintf("- %s\n", matchedKey))
+		keys = append(keys, key)
 	}
-	formattedList.WriteString("\033[0m")
 
-	return formattedList.String()
+	return makeValueList(title, keys, value)
 }
 
 func makeValueList(title string, list []string, value string) string {
