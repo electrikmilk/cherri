@@ -196,7 +196,8 @@ func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
 func findOriginalLine(errorLine *int) {
 	for l, line := range strings.Split(originalContents, "\n") {
 		if line == lines[lineIdx] {
-			*errorLine = l
+			*errorLine = l + 1
+			break
 		}
 	}
 }
