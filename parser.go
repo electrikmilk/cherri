@@ -2048,30 +2048,32 @@ func parserError(message string) {
 	}
 }
 
+// excerptError prints the error message followed by a colored excerpt of the source around it, underlining the offending character.
 func excerptError(message string, errorFilename string, errorLine int, errorCol int) {
-	fmt.Print("\033[31m")
-	fmt.Println("\n" + ansi(message, bold))
-	fmt.Printf("\n\033[2m----- \033[0m%s:%d:%d\n", errorFilename, errorLine, errorCol)
+	fmt.Printf("\n%s\n", ansi(message, red, bold))
+	fmt.Printf("\n%s%s:%d:%d\n", ansi("----- ", dim), errorFilename, errorLine, errorCol)
+
 	if len(lines) > (lineIdx-1) && errorLine != 1 {
-		fmt.Printf("\033[2m%d | %s\033[0m\n", errorLine-1, lines[lineIdx-1])
+		fmt.Println(ansi(fmt.Sprintf("%d | %s", errorLine-1, lines[lineIdx-1]), dim))
 	}
+
 	if len(lines) > lineIdx {
-		fmt.Printf("\033[31m\033[1m%d | ", errorLine)
+		var currentLine strings.Builder
+		currentLine.WriteString(fmt.Sprintf("%d | ", errorLine))
 		for c, chr := range strings.Split(lines[lineIdx], "") {
 			if c == idx {
-				fmt.Print(ansi(chr, underline))
+				currentLine.WriteString(ansi(chr, underline))
 			} else {
-				fmt.Print(chr)
+				currentLine.WriteString(chr)
 			}
 		}
-		fmt.Print("\033[0m\n")
+		fmt.Println(ansi(currentLine.String(), red, bold))
 	}
-	var spaces string
-	for i := 0; i < (lineCharIdx + 4); i++ {
-		spaces += " "
-	}
-	fmt.Println("\033[31m" + spaces + "^\033[0m")
+
+	var spaces = strings.Repeat(" ", lineCharIdx+4)
+	fmt.Println(ansi(fmt.Sprintf("%s^", spaces), red))
+
 	if len(lines) > (lineIdx + 1) {
-		fmt.Printf("\033[2m%d | %s\n-----\033[0m\n\n", errorLine+1, lines[lineIdx+1])
+		fmt.Print(ansi(fmt.Sprintf("%d | %s\n-----\n\n", errorLine+1, lines[lineIdx+1]), dim))
 	}
 }
