@@ -1175,7 +1175,7 @@ func makeRepeatEachAction(t *token) {
 type WFQuestion struct {
 	ParameterKey string `plist:",omitempty"`
 	Category     string `plist:",omitempty"`
-	ActionIndex  int    `plist:",omitempty"`
+	ActionIndex  int
 	Text         string `plist:",omitempty"`
 	DefaultValue any    `plist:",omitempty"`
 }
