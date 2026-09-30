@@ -63,7 +63,17 @@ func decompile(b []byte) {
 		printDecompDebug()
 	}
 
-	var writeErr = os.WriteFile(outputPath, []byte(code.String()), 0600)
+	var finalCode = code.String()
+	if len(extractedReferences) > 0 {
+		var refsCode strings.Builder
+		for _, ref := range extractedReferences {
+			refsCode.WriteString(makeRefCode(&ref))
+		}
+		refsCode.WriteString("\n")
+		finalCode = refsCode.String() + finalCode
+	}
+
+	var writeErr = os.WriteFile(outputPath, []byte(finalCode), 0600)
 	handle(writeErr)
 }
 
@@ -1279,7 +1289,7 @@ func makeRawAction(action *ShortcutAction) string {
 		return fmt.Sprintf("rawAction(\"%s\")", action.WFWorkflowActionIdentifier)
 	}
 
-	var rawParams = processRawParameters(action.WFWorkflowActionParameters)
+	var rawParams = processRawParameters(action, action.WFWorkflowActionParameters)
 	var jb, jsonErr = json.MarshalIndent(rawParams, strings.Repeat("\t", tabLevel), "\t")
 	handle(jsonErr)
 
@@ -1288,20 +1298,70 @@ func makeRawAction(action *ShortcutAction) string {
 	return fmt.Sprintf("rawAction(%s)", arguments)
 }
 
-func processRawParameters(params map[string]any) map[string]any {
+func processRawParameters(action *ShortcutAction, params map[string]any) map[string]any {
 	for key, value := range params {
 		if key == UUID || key == "CustomOutputName" {
 			delete(params, key)
+			continue
 		}
 
 		if reflect.TypeOf(value).Kind() == reflect.Map {
 			decompilingDictionary = true
-			params[key] = decompValueObject(value.(map[string]interface{}))
+			var decompiled = decompValueObject(value.(map[string]interface{}))
 			decompilingDictionary = false
+
+			if decompiled == "" {
+				params[key] = fmt.Sprintf("${%s}", registerOpaqueReference(action.WFWorkflowActionIdentifier, key, value))
+				continue
+			}
+
+			params[key] = decompiled
 		}
 	}
 
 	return params
+}
+
+// registerOpaqueReference preserves a raw action parameter value that decompValueObject could not
+// represent as Cherri source (e.g. an app-specific structure like a HomeKit scene selection) by
+// capturing it as a #ref declaration instead of silently discarding it. Returns the reference
+// identifier to use as a `${identifier}` placeholder in the emitted rawAction dict.
+func registerOpaqueReference(actionIdentifier string, key string, value any) string {
+	var namespace = actionIdentifier
+	if i := strings.LastIndex(namespace, "."); i != -1 {
+		namespace = namespace[i+1:]
+	}
+	var baseIdentifier = fmt.Sprintf("%s_%s", namespace, key)
+	sanitizeIdentifier(&baseIdentifier)
+
+	var identifier = baseIdentifier
+	for suffix := 2; ; suffix++ {
+		var collision = false
+		for _, existing := range extractedReferences {
+			if existing.identifier != identifier {
+				continue
+			}
+			if reflect.DeepEqual(existing.value, value) {
+				return identifier
+			}
+			collision = true
+			break
+		}
+		if !collision {
+			break
+		}
+		identifier = fmt.Sprintf("%s%d", baseIdentifier, suffix)
+	}
+
+	extractedReferences = append(extractedReferences, extractedReference{
+		action:     actionIdentifier,
+		identifier: identifier,
+		value:      value,
+	})
+
+	decompWarning(fmt.Sprintf("Could not decompile parameter '%s' of action '%s' to Cherri source — it has been preserved as reference '%s' instead. Verify #ref %s at the top of the file was carried over correctly.", key, actionIdentifier, identifier, identifier))
+
+	return identifier
 }
 
 func matchAction(action *ShortcutAction) (name string, definition actionDefinition) {

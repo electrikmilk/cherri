@@ -118,9 +118,69 @@ func extractMediaReference(ref *extractedReference, values map[string]interface{
 	return
 }
 
+// referenceDataMarker tags a base64 string in a reference hash as having come from a plist <data>
+// (raw bytes) element, since JSON has no native binary type and would otherwise round-trip it back
+// as an indistinguishable <string>. Only relevant to opaque, app-defined structures (e.g. a raw
+// action parameter that decompValueObject couldn't otherwise represent); the existing file/media
+// reference structs never contain raw byte fields.
+const referenceDataMarker = "__cherriData"
+
+// markBinaryData recursively wraps []byte leaves in value so their type survives being
+// JSON-marshaled into a reference hash.
+func markBinaryData(value any) any {
+	switch v := value.(type) {
+	case []byte:
+		return map[string]any{referenceDataMarker: base64.StdEncoding.EncodeToString(v)}
+	case map[string]any:
+		var marked = make(map[string]any, len(v))
+		for key, item := range v {
+			marked[key] = markBinaryData(item)
+		}
+		return marked
+	case []any:
+		var marked = make([]any, len(v))
+		for i, item := range v {
+			marked[i] = markBinaryData(item)
+		}
+		return marked
+	default:
+		return value
+	}
+}
+
+// unmarkBinaryData reverses markBinaryData after a reference hash has been JSON-decoded, turning
+// marked base64 strings back into []byte so they serialize as a plist <data> element again.
+func unmarkBinaryData(value any) any {
+	switch v := value.(type) {
+	case map[string]any:
+		if len(v) == 1 {
+			if encoded, found := v[referenceDataMarker]; found {
+				if s, ok := encoded.(string); ok {
+					if decoded, decodeErr := base64.StdEncoding.DecodeString(s); decodeErr == nil {
+						return decoded
+					}
+				}
+			}
+		}
+		var unmarked = make(map[string]any, len(v))
+		for key, item := range v {
+			unmarked[key] = unmarkBinaryData(item)
+		}
+		return unmarked
+	case []any:
+		var unmarked = make([]any, len(v))
+		for i, item := range v {
+			unmarked[i] = unmarkBinaryData(item)
+		}
+		return unmarked
+	default:
+		return value
+	}
+}
+
 // makeReferenceHash returns a unique hash for a reference.
 func makeReferenceHash(ref *extractedReference) string {
-	var jsonBytes, marshalErr = json.Marshal(ref.value)
+	var jsonBytes, marshalErr = json.Marshal(markBinaryData(ref.value))
 	handle(marshalErr)
 
 	return base64.StdEncoding.EncodeToString(jsonBytes)
@@ -137,6 +197,10 @@ func decodeReferenceHash(hash string) (ref map[string]any, err error) {
 	var unmarshalErr = json.Unmarshal(decodedBytes, &ref)
 	if unmarshalErr != nil {
 		return nil, fmt.Errorf("could not unmarshal decoded JSON: %s", unmarshalErr)
+	}
+
+	for key, value := range ref {
+		ref[key] = unmarkBinaryData(value)
 	}
 
 	return ref, nil

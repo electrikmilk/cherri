@@ -50,8 +50,14 @@ func normalizeRawActionParamValue(value any) any {
 			return value
 		}
 		if rawActionVariableValueRegex.MatchString(v) {
+			var inner = strings.Trim(v, "${@}")
+			if !strings.Contains(v, "@") {
+				if ref, found := references[inner]; found {
+					return ref
+				}
+			}
 			return variableValue(varValue{
-				value: strings.Trim(v, "${@}"),
+				value: inner,
 			})
 		}
 		return attachmentValues(v)
