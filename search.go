@@ -112,6 +112,10 @@ func matchString(subject *string, search *string) (matched bool, result string) 
 
 	if strings.Contains(strings.ToLower(*subject), strings.ToLower(*search)) {
 		matched = true
+		if args.Using("no-ansi") {
+			result = *subject
+			return
+		}
 		var capitalized = capitalize(*search)
 		var lowercase = strings.ToLower(*search)
 		switch {
