@@ -2061,7 +2061,7 @@ func excerptError(message string, errorFilename string, errorLine int, errorCol 
 		var currentLine strings.Builder
 		currentLine.WriteString(fmt.Sprintf("%d | ", errorLine))
 		for c, chr := range strings.Split(lines[lineIdx], "") {
-			if c == idx {
+			if c == lineCharIdx {
 				currentLine.WriteString(ansi(chr, underline))
 			} else {
 				currentLine.WriteString(chr)
