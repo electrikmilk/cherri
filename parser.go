@@ -998,40 +998,33 @@ func collectVersionDefinition() {
 }
 
 func collectColorDefinition() {
-	var collectColor = collectUntil('\n')
-	collectColor = strings.ToLower(collectColor)
+	var collectColor = strings.ToLower(collectUntil('\n'))
 	if color, found := colors[collectColor]; found {
 		iconColor = color
-	} else {
-		var list strings.Builder
-		list.WriteString("Available icon colors:\n")
-		for c := range colors {
-			list.WriteString(fmt.Sprintf("- %s\n", c))
-		}
-
-		parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s", collectColor, list.String()))
+		return
 	}
+
+	var colorNames = make([]string, 0, len(colors))
+	for name := range colors {
+		colorNames = append(colorNames, name)
+	}
+
+	var list = makeValueList("Available icon colors:", colorNames, collectColor)
+	parserError(fmt.Sprintf("Invalid icon color '%s'\n\n%s", collectColor, list))
 }
 
 func collectTypeValues(typeName string, valueTypes map[string]string, slice *[]string) {
-	var collectedTypes = collectUntil('\n')
-	if collectedTypes == "" {
+	if lookAheadUntil('\n') == "" {
 		parserError("Expected type")
 	}
-	var definedTypes = strings.Split(collectedTypes, ",")
-	for _, definedType := range definedTypes {
-		definedType = strings.Trim(definedType, " ")
-		if _, found := valueTypes[definedType]; !found {
-			var list = makeKeyList(fmt.Sprintf("Available %s types:", typeName), workflowTypes, definedType)
-			parserError(fmt.Sprintf("Invalid %s type '%s'\n\n%s", typeName, definedType, list))
-			return
-		}
+
+	var list = valueList{name: fmt.Sprintf("%s type", typeName), mapList: &valueTypes}
+	for _, definedType := range list.parseList('\n') {
 		if slices.Contains(*slice, definedType) {
 			continue
 		}
-		*slice = append(*slice, fmt.Sprintf("%v", valueTypes[definedType]))
+		*slice = append(*slice, definedType)
 	}
-	return
 }
 
 func collectGlyphDefinition() {
@@ -1937,6 +1930,78 @@ func parserWarning(message string) {
 	}
 
 	fmt.Println(warning + "\n")
+}
+
+// valueList represents a list of values to parse, with built-in validation.
+type valueList struct {
+	name   string // name for the type of values (lowercase)
+	plural string // plural form of name to use (optional)
+
+	// either list or mapList can be set, but not both
+	list    *[]string
+	mapList *map[string]string
+
+	values []string // collected values
+}
+
+// parseList reads one or more comma-separated values up to `until`, validating
+// each as soon as it's collected so a bad value is reported where it sits
+// rather than after the cursor has already skipped past the whole list.
+func (v *valueList) parseList(until rune) []string {
+	if v.plural == "" {
+		v.plural = fmt.Sprintf("%ss", v.name)
+	}
+
+	for {
+		var stop = until
+		if strings.Contains(lookAheadUntil(until), ",") {
+			stop = ','
+		}
+
+		var collectedValue = strings.TrimSpace(collectUntil(stop))
+		v.validate(&collectedValue)
+
+		if v.mapList != nil {
+			collectedValue = (*v.mapList)[collectedValue]
+		}
+		v.values = append(v.values, collectedValue)
+
+		if char != ',' {
+			break
+		}
+		advance()
+	}
+
+	return v.values
+}
+
+// parse reads a single validated value. Indexing [0] is safe because
+// parseList never returns without appending at least once; an invalid value
+// terminates the program in validate before parseList can return.
+func (v *valueList) parse(until rune) string {
+	return v.parseList(until)[0]
+}
+
+func (v *valueList) validate(value *string) {
+	var match bool
+	if v.mapList != nil {
+		_, match = (*v.mapList)[*value]
+	} else {
+		match = slices.Contains(*v.list, *value)
+	}
+
+	if match {
+		return
+	}
+
+	var list string
+	if v.mapList != nil {
+		list = makeKeyList(fmt.Sprintf("Available %s:", v.plural), *v.mapList, *value)
+	} else {
+		list = makeValueList(fmt.Sprintf("Available %s:", v.plural), *v.list, *value)
+	}
+
+	parserError(fmt.Sprintf("Invalid %s '%s'\n\n%s", v.name, *value, list))
 }
 
 func makeKeyList(title string, list map[string]string, value string) string {

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"slices"
 	"strconv"
 	"strings"
 )
@@ -38,13 +37,6 @@ func checkTriggerIdentifier(identifier string) {
 	}
 }
 
-func checkTriggerValue(validValues []string, value string) {
-	if !slices.Contains(validValues, value) {
-		var list = makeValueList("Available values:", validValues, value)
-		parserError(fmt.Sprintf("Invalid trigger param value '%s'\n\n%s", value, list))
-	}
-}
-
 func collectTrigger() {
 	if !strings.Contains(lookAheadUntil('\n'), " ") {
 		var collectIdentifier = collectUntil('\n')
@@ -64,15 +56,8 @@ func collectTrigger() {
 	var triggerParams = make(map[string]any)
 	switch collectIdentifier {
 	case "screenshot":
-		var paramValue = collectUntil('\n')
-		var screenshotLocations = strings.Split(paramValue, ",")
-		for i, location := range screenshotLocations {
-			var trimmedLocation = strings.TrimSpace(location)
-			checkTriggerValue(validScreenshotLocations, trimmedLocation)
-			screenshotLocations[i] = trimmedLocation
-		}
-
-		triggerParams["ScreenshotLocations"] = screenshotLocations
+		var list = valueList{name: "screenshot location", list: &validScreenshotLocations}
+		triggerParams["ScreenshotLocations"] = list.parseList('\n')
 	case "battery":
 		var batteryLevel = collectUntil('\n')
 		var batteryLevelFloat, err = strconv.ParseFloat(batteryLevel, 64)
@@ -82,25 +67,20 @@ func collectTrigger() {
 		// -0.01 is to Compensate for battery level being required to be an actual decimal value.
 		triggerParams["WFBatteryLevel"] = batteryLevelFloat - 0.01
 	case "stageManager":
-		var stageManagerType = collectUntil('\n')
-		checkTriggerValue(validStageManagerTypes, stageManagerType)
-		triggerParams["WFStageManagerType"] = stageManagerType
+		var list = valueList{name: "stage manager type", list: &validStageManagerTypes}
+		triggerParams["WFStageManagerType"] = list.parse('\n')
 	case "wifi":
-		var connectionType = collectUntil('\n')
-		checkTriggerValue(validWifiConnectionTypes, connectionType)
-		triggerParams["WFConnectionType"] = connectionType
+		var list = valueList{name: "wifi connection type", list: &validWifiConnectionTypes}
+		triggerParams["WFConnectionType"] = list.parse('\n')
 	case "bluetooth":
-		var connectionType = collectUntil('\n')
-		checkTriggerValue(validConnectionTypes, connectionType)
-		triggerParams["WFBluetoothConnectionType"] = connectionType
+		var list = valueList{name: "bluetooth connection type", list: &validConnectionTypes}
+		triggerParams["WFBluetoothConnectionType"] = list.parse('\n')
 	case "display":
-		var connectionType = collectUntil('\n')
-		checkTriggerValue(validConnectionTypes, connectionType)
-		triggerParams["WFConnectionType"] = connectionType
+		var list = valueList{name: "display connection type", list: &validConnectionTypes}
+		triggerParams["WFConnectionType"] = list.parse('\n')
 	case "charging":
-		var chargingType = collectUntil('\n')
-		checkTriggerValue(validConnectionTypes, chargingType)
-		triggerParams["WFConnectionType"] = chargingType
+		var list = valueList{name: "charging connection type", list: &validConnectionTypes}
+		triggerParams["WFConnectionType"] = list.parse('\n')
 	case "app":
 		var appIdentifier = collectUntil('\n')
 
