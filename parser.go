@@ -2016,7 +2016,7 @@ func makeKeyList(title string, list map[string]string, value string) string {
 func makeValueList(title string, list []string, value string) string {
 	var formattedList strings.Builder
 	formattedList.WriteString("\033[0m")
-	formattedList.WriteString(fmt.Sprintf("%s\n", title))
+	formattedList.WriteString(ansi(fmt.Sprintf("%s\n", title), yellow, italic, bold))
 	for _, item := range list {
 		var matchedItem = item
 		var matched, result = matchString(&item, &value)
