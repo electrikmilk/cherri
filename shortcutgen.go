@@ -43,12 +43,13 @@ func generateShortcut() {
 		func() {
 			shortcut.WFWorkflowOutputContentItemClasses = generateOutputContentItems()
 		},
-		func() {
-			shortcut.WFWorkflowImportQuestions = generateImportQuestions()
-		},
 	)
 
 	generateActions()
+
+	// Must run after generateActions(): question.actionIndex is only populated
+	// once each action referencing it has actually been generated.
+	shortcut.WFWorkflowImportQuestions = generateImportQuestions()
 
 	if args.Using("debug") {
 		printShortcutGenDebug()
