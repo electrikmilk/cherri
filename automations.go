@@ -19,7 +19,6 @@ var triggerIdentifiers = map[string]string{
 	"wifi":         "WFWifiTrigger",
 	"stageManager": "WFStageManagerTrigger",
 	"display":      "WFExternalDisplayTrigger",
-	"app":          "WFAppInFocusTrigger",
 	"screenshot":   "WFScreenshotTrigger",
 	"battery":      "WFBatteryLevelTrigger",
 	"charging":     "WFPlugInTrigger",
@@ -81,15 +80,6 @@ func collectTrigger() {
 	case "charging":
 		var list = valueList{name: "charging connection type", list: &validConnectionTypes}
 		triggerParams["WFConnectionType"] = list.parse('\n')
-	case "app":
-		var appIdentifier = collectUntil('\n')
-
-		triggerParams["WFSelectedApps"] = map[string]any{
-			"AppIntentDescriptor": map[string]string{
-				"TeamIdentifier":   "0000000000",
-				"BundleIdentifier": replaceAppID(appIdentifier),
-			},
-		}
 	}
 
 	var triggerUUID = createUUID(&collectIdentifier)
