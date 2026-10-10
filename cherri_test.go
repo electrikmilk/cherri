@@ -203,6 +203,48 @@ func TestActionIdentifiers(t *testing.T) {
 	resetParser()
 }
 
+func TestRunWorkflowEmitsWFWorkflowDict(t *testing.T) {
+	args.Args["no-ansi"] = ""
+	args.Args["skip-sign"] = ""
+	loadStandardActions()
+
+	currentTest = "tests/zz-run-workflow.cherri"
+	os.Args[1] = currentTest
+
+	compile()
+
+	var found bool
+	for _, a := range shortcut.WFWorkflowActions {
+		if a.WFWorkflowActionIdentifier != "is.workflow.actions.runworkflow" {
+			continue
+		}
+		found = true
+		var params = a.WFWorkflowActionParameters
+		var raw, ok = params["WFWorkflow"]
+		if !ok {
+			t.Fatal("runworkflow action missing WFWorkflow dict")
+		}
+		var workflow, isMap = raw.(map[string]any)
+		if !isMap {
+			t.Fatalf("WFWorkflow is not a map: %T", raw)
+		}
+		if name, _ := workflow["workflowName"].(string); name != "Other Shortcut" {
+			t.Errorf("workflowName: got %q, want %q", name, "Other Shortcut")
+		}
+		if isSelf, _ := workflow["isSelf"].(bool); isSelf {
+			t.Error("isSelf: got true, want false")
+		}
+		if _, hasID := workflow["workflowIdentifier"]; !hasID {
+			t.Error("workflowIdentifier missing")
+		}
+	}
+	if !found {
+		t.Fatal("no runworkflow action emitted")
+	}
+
+	resetParser()
+}
+
 func TestCapitalizeEmptyString(t *testing.T) {
 	if got := capitalize(""); got != "" {
 		t.Fatalf("expected empty string, got %q", got)
