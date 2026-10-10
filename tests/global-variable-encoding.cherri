@@ -1,0 +1,21 @@
+// compile-only: built-in globals (ShortcutInput, Clipboard, CurrentDate,
+// Device, Ask) must not pick up a VariableName anywhere they're referenced.
+// Native Shortcuts identifies them by Type alone; a VariableName makes
+// Shortcuts treat them as a reference to a missing user-defined variable
+// instead of the actual global, so the global's value never reaches the
+// action. Covers the three places that encode a variable reference:
+// a Variable-typed action argument, a conditional's input value, and an
+// inline interpolation.
+
+#include 'actions/contacts'
+
+// Variable-typed action argument (action.go, makeActionParams)
+const numbers = getPhoneNumbers(ShortcutInput)
+
+// Conditional input value (shortcutgen.go, variableValueWithSerialization)
+if ShortcutInput {
+	nothing()
+}
+
+// Inline interpolation (shortcutgen.go, makeAttachmentValues)
+text("Clipboard was: {Clipboard}")
