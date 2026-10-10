@@ -30,6 +30,7 @@ func defineRawAction() {
 
 			return params
 		},
+		outputType: Variable,
 	}
 }
 

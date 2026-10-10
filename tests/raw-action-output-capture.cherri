@@ -1,0 +1,8 @@
+const result = rawAction("is.workflow.actions.gettext", {
+    "WFTextActionText": "hello"
+})
+if result.text != "hello" {
+    alert("❌ FAIL: rawAction output capture — got {result.text}, expected 'hello'")
+}
+
+show("✅ All tests passed")
