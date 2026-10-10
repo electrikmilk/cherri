@@ -203,6 +203,37 @@ func TestActionIdentifiers(t *testing.T) {
 	resetParser()
 }
 
+func TestRawActionOutputCapturePreservesIdentifier(t *testing.T) {
+	args.Args["no-ansi"] = ""
+	args.Args["skip-sign"] = ""
+	loadStandardActions()
+
+	currentTest = "tests/zz-raw-action-output.cherri"
+	os.Args[1] = currentTest
+
+	compile()
+
+	var wantIdentifiers = map[string]bool{
+		"com.alexhay.ToolboxProForShortcuts.GetAudioOutputsIntent": false,
+		"dk.simonbs.DataJar.SetValueIntent":                        false,
+	}
+	for _, a := range shortcut.WFWorkflowActions {
+		if _, ok := wantIdentifiers[a.WFWorkflowActionIdentifier]; ok {
+			wantIdentifiers[a.WFWorkflowActionIdentifier] = true
+		}
+		if a.WFWorkflowActionIdentifier == "is.workflow.actions.rawaction" {
+			t.Errorf("output-capture rawAction collapsed to is.workflow.actions.rawaction (lost bundle ID)")
+		}
+	}
+	for ident, found := range wantIdentifiers {
+		if !found {
+			t.Errorf("expected action with identifier %q, not emitted", ident)
+		}
+	}
+
+	resetParser()
+}
+
 func TestCapitalizeEmptyString(t *testing.T) {
 	if got := capitalize(""); got != "" {
 		t.Fatalf("expected empty string, got %q", got)
