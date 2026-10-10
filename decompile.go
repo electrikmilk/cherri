@@ -15,6 +15,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf16"
 
 	"github.com/electrikmilk/args-parser"
 	"howett.net/plist"
@@ -1025,11 +1026,26 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 	var originalString = *attachmentString
 	var attachmentChars = strings.Split(*attachmentString, "")
 
+	// Shortcuts encodes attachmentsByRange positions as UTF-16 code-unit
+	// offsets, but attachmentChars is indexed by rune. Non-BMP characters
+	// (e.g. emoji) occupy two UTF-16 code units yet a single rune, so an
+	// attachment after one would overflow attachmentChars. Precompute the
+	// offset-to-rune-index mapping to place each attachment correctly.
+	var runeIndexForUTF16 = make(map[int]int)
+	var utf16Offset int
+	for i, char := range attachmentChars {
+		runeIndexForUTF16[utf16Offset] = i
+		utf16Offset += len(utf16.Encode([]rune(char)))
+	}
+
 	for attachmentRange, a := range attachments {
 		var attachmentRanges = strings.Split(attachmentRange, ",")
 		var attachmentPosition = strings.TrimPrefix(attachmentRanges[0], "{")
 		var position, convErr = strconv.Atoi(attachmentPosition)
 		handle(convErr)
+		if runeIndex, ok := runeIndexForUTF16[position]; ok {
+			position = runeIndex
+		}
 
 		var attachment Value
 		mapToStruct(a, &attachment)
