@@ -26,7 +26,7 @@ func TestCherri(_ *testing.T) {
 	}
 	loadStandardActions()
 	for _, file := range files {
-		if !strings.Contains(file.Name(), ".cherri") || file.Name() == "decomp-expected.cherri" || file.Name() == "decomp-me.cherri" {
+		if !strings.Contains(file.Name(), ".cherri") || file.Name() == "decomp-expected.cherri" || file.Name() == "decomp-me.cherri" || file.Name() == "decomp-faithful-expected.cherri" {
 			continue
 		}
 		currentTest = fmt.Sprintf("tests/%s", file.Name())
@@ -104,6 +104,30 @@ func TestPackages(t *testing.T) {
 	args.Args["remove"] = "@electrikmilk/package-example"
 	removePackage()
 	delete(args.Args, "remove")
+}
+
+// TestDecompFaithful verifies the --faithful flag forces every action through
+// the rawAction() fallback instead of matching known Cherri actions, using
+// the same fixture as TestDecomp so the two outputs are directly comparable.
+func TestDecompFaithful(t *testing.T) {
+	defer resetParser()
+	defer delete(args.Args, "faithful")
+
+	fmt.Println("Decompiling (faithful)...")
+	args.Args["faithful"] = ""
+	args.Args["import"] = "tests/decomp-me.plist"
+	decompile(importShortcut(args.Value("import")))
+
+	fmt.Println("Comparing to expected...")
+	var bytes, readErr = os.ReadFile("tests/decomp-faithful-expected.cherri")
+	handle(readErr)
+
+	if code.String() != string(bytes) {
+		fmt.Println(ansi("Does not match expected!", red, bold))
+		t.Fail()
+		return
+	}
+	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
 }
 
 func TestDecomp(t *testing.T) {
