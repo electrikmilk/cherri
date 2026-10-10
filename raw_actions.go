@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var rawActionVariableValueRegex = regexp.MustCompile(`^\$\{@?.*}$`)
+var rawActionVariableValueRegex = regexp.MustCompile(`^\$\{@?(.*)}$`)
 
 func defineRawAction() {
 	actions["rawAction"] = &actionDefinition{
@@ -49,9 +49,9 @@ func normalizeRawActionParamValue(value any) any {
 		if !strings.ContainsAny(v, "{}") {
 			return value
 		}
-		if rawActionVariableValueRegex.MatchString(v) {
+		if m := rawActionVariableValueRegex.FindStringSubmatch(v); m != nil {
 			return variableValue(varValue{
-				value: strings.Trim(v, "${@}"),
+				value: m[1],
 			})
 		}
 		return attachmentValues(v)
