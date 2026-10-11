@@ -6,8 +6,10 @@
 // action. Covers the three places that encode a variable reference:
 // a Variable-typed action argument, a conditional's input value, and an
 // inline interpolation.
-
-#include 'actions/contacts'
+//
+// No #include needed here — the full test suite auto-injects every standard
+// library category. An explicit include is only required when compiling
+// this file individually with `go run .`.
 
 // Variable-typed action argument (action.go, makeActionParams)
 const numbers = getPhoneNumbers(ShortcutInput)
