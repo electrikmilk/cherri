@@ -826,7 +826,11 @@ func makeOutputName(token *token) string {
 	}
 	var typeOfToken = string(token.valueType)
 	if typeOfToken == "action" {
-		typeOfToken = token.value.(action).ident
+		var actionCall = token.value.(action)
+		typeOfToken = actionCall.ident
+		if actionDef, found := actions[actionCall.ident]; found && actionDef.outputName != "" {
+			return checkDuplicateOutputName(actionDef.outputName)
+		}
 	}
 
 	if token.valueType == "" {
