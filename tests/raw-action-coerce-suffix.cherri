@@ -1,0 +1,20 @@
+// compile-only: verifies that ${var.coerce} and ${var['key']} suffixes in
+// rawAction dict parameters are correctly parsed into aggrandizements rather
+// than being treated as a variable named "var.coerce" or "var['key']".
+// No #include needed — the full test suite auto-injects every standard
+// library category. An explicit include is only required when compiling
+// this file individually with `go run .`.
+
+// .coerce suffix — maps to WFCoercionVariableAggrandizement
+const result = getClipboard()
+rawAction("is.workflow.actions.gettext", {
+    "WFTextActionText": "${result.text}"
+})
+
+// ['key'] suffix — maps to WFDictionaryValueVariableAggrandizement
+@data = {"status": "ok"}
+rawAction("is.workflow.actions.gettext", {
+    "WFTextActionText": "${data['status']}"
+})
+
+show("✅ All tests passed")

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var rawActionVariableValueRegex = regexp.MustCompile(`^\$\{@?(.*)}$`)
+var rawActionVariableValueRegex = regexp.MustCompile(`^\$\{@?(.*?)(?:\['(.*?)'])?(?:\.(.*?))?}$`)
 
 func defineRawAction() {
 	actions["rawAction"] = &actionDefinition{
@@ -50,9 +50,14 @@ func normalizeRawActionParamValue(value any) any {
 			return value
 		}
 		if m := rawActionVariableValueRegex.FindStringSubmatch(v); m != nil {
-			return variableValue(varValue{
-				value: m[1],
-			})
+			var vv = varValue{value: m[1]}
+			if len(m) > 2 && m[2] != "" {
+				vv.getAs = m[2]
+			}
+			if len(m) > 3 && m[3] != "" {
+				vv.coerce = m[3]
+			}
+			return variableValue(vv)
 		}
 		return attachmentValues(v)
 	case map[string]any:
