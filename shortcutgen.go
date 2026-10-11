@@ -144,6 +144,18 @@ func makeVariableAction(t *token) {
 		}
 	}
 
+	// Array values are never carried in WFInput — they're built via the
+	// appendvariable chain in makeArrayVariable below — so the absence of
+	// WFInput here does not mean "no value" the way it does for other types.
+	// Only t.value == nil means that. A real array literal (`@x = [...]`)
+	// must skip the nothing-placeholder/empty-setvariable prologue entirely
+	// and go straight to the append chain; only a genuinely bare `@x: array`
+	// declaration (t.value == nil) should get that prologue.
+	if t.valueType == Arr && t.value != nil {
+		makeArrayVariable(t)
+		return
+	}
+
 	if _, hasInput := setVariableParams["WFInput"]; !hasInput {
 		addStdAction("nothing", map[string]any{})
 	}
