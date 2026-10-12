@@ -900,11 +900,11 @@ func collectControlFlowOutput(identifier *string, constant *bool) (identified bo
 func collectType(valueType *tokenType, value *any, until rune) {
 	switch {
 	case tokenAhead(String):
+		// Left nil (like arrays) so a bare `@x: text` is a compile-time type
+		// declaration only, instead of becoming an empty Text action at runtime.
 		*valueType = String
-		*value = ""
 	case tokenAhead(RawString):
 		*valueType = RawString
-		*value = ""
 	case tokenAhead(Integer):
 		*valueType = Integer
 		*value = "0"

@@ -122,6 +122,26 @@ func makeCommentAction(comment string) {
 }
 
 func makeVariableAction(t *token) {
+	// A bare text declaration (`@x: text`) only tells the compiler the
+	// variable's type. Shortcuts reads an unset variable as empty text, so
+	// emitting an empty Text action plus a setvariable for it just adds a
+	// blank "Text" action the user never wrote. An explicit `@x = ""` still
+	// carries a value and is emitted normally.
+	if t.typeof == Variable && (t.valueType == String || t.valueType == RawString) && t.value == nil {
+		return
+	}
+
+	// `@arr += "{text}"` appends a variable that is already text, so wrapping
+	// it in a Text action first only adds a redundant intermediate action.
+	if identifier, ok := bareTextReference(t); ok {
+		addStdAction("appendvariable", map[string]any{
+			"WFInput":             variableValue(varValue{value: identifier}),
+			"WFVariableName":      t.ident,
+			"WFSerializationType": "WFTextTokenAttachment",
+		})
+		return
+	}
+
 	var setVariableParams = map[string]any{
 		"WFVariableName": t.ident,
 	}
@@ -188,6 +208,58 @@ func makeVariableInput(t *token, params map[string]any) {
 
 		params["WFSerializationType"] = "WFTextTokenAttachment"
 	}
+}
+
+var loneInlineVarRegex = regexp.MustCompile(`^\{@?(\w+)}$`)
+
+// bareTextReference reports whether `t` is an append (`+=`) onto an array whose
+// value is exactly one `{variable}` interpolation of something that is already
+// text, and returns that variable's identifier.
+//
+// The text-only restriction is deliberate: `"{n}"` on a number is also how
+// Cherri coerces to text, and passing the bare reference through would change
+// the appended item's type. Suffixes (`['key']`, `.coerce`) are left to the
+// normal path for the same reason.
+func bareTextReference(t *token) (identifier string, ok bool) {
+	if t.typeof != AddTo || t.valueType != String {
+		return
+	}
+	if target, found := variables[t.ident]; !found || target.valueType != Arr {
+		return
+	}
+
+	var str, isString = t.value.(string)
+	if !isString {
+		return
+	}
+	var match = loneInlineVarRegex.FindStringSubmatch(str)
+	if match == nil {
+		return
+	}
+
+	var referenced, found = getVariableValue(match[1])
+	if !found || !isTextValued(referenced) {
+		return
+	}
+
+	return match[1], true
+}
+
+// isTextValued reports whether a variable is known to hold text, either by its
+// declared type or because it is bound to an action whose output is text.
+func isTextValued(v *varValue) bool {
+	switch v.valueType {
+	case String, RawString:
+		return true
+	case Action:
+		if call, isAction := v.value.(action); isAction {
+			if definition, found := actions[call.ident]; found {
+				return definition.outputType == String
+			}
+		}
+	}
+
+	return false
 }
 
 func makeVariableValueAction(token *token, customOutputName *string, varUUID *string) {
