@@ -144,14 +144,20 @@ func makeVariableAction(t *token) {
 		}
 	}
 
-	// Array values are never carried in WFInput — they're built via the
-	// appendvariable chain in makeArrayVariable below — so the absence of
-	// WFInput here does not mean "no value" the way it does for other types.
-	// Only t.value == nil means that. A real array literal (`@x = [...]`)
-	// must skip the nothing-placeholder/empty-setvariable prologue entirely
-	// and go straight to the append chain; only a genuinely bare `@x: array`
-	// declaration (t.value == nil) should get that prologue.
-	if t.valueType == Arr && t.value != nil {
+	// Array variables are entirely handled by makeArrayVariable, for both
+	// a populated literal (`@x = [...]`, which builds a list action + a
+	// setvariable wired to it) and a bare declaration (`@x: array`, which
+	// makeArrayVariable leaves as a no-op). The nothing-placeholder +
+	// empty-setvariable prologue below exists so a bare *scalar*
+	// declaration's variable reads back as empty instead of silently
+	// inheriting whatever the previous action output. Arrays don't need
+	// that: Shortcuts creates an array variable fresh on its first real
+	// write (appendvariable or this setvariable-from-list), so a bare
+	// `@x: array` with no value yet needs no runtime footprint at all —
+	// emitting the nothing+setvariable pair for it only produced a
+	// "Set Variable to Input" action that doesn't represent anything the
+	// user wrote.
+	if t.valueType == Arr {
 		makeArrayVariable(t)
 		return
 	}
@@ -160,10 +166,6 @@ func makeVariableAction(t *token) {
 		addStdAction("nothing", map[string]any{})
 	}
 	addStdAction("setvariable", setVariableParams)
-
-	if t.valueType == Arr {
-		makeArrayVariable(t)
-	}
 }
 
 func makeVariableInput(t *token, params map[string]any) {
