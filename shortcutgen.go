@@ -854,42 +854,53 @@ func makeOutputName(token *token) string {
 	return checkDuplicateOutputName(customOutputName)
 }
 
+// makeArrayVariable builds an array literal (`@x = ["a", "b"]`) as a single
+// native `is.workflow.actions.list` action — the same action the list()
+// function call produces (see the "list" entry in actions_std.go) — followed
+// by one setvariable referencing that list action's output. This previously
+// built the array via a per-item gettext+appendvariable chain instead of the
+// native List action, which both looked nothing like what the Shortcuts app
+// itself produces and dropped a setvariable's worth of clarity for every
+// item. Reusing actions["list"].makeParams keeps this from drifting out of
+// sync with list()'s own item-encoding logic.
 func makeArrayVariable(t *token) {
 	if t.value == nil {
 		return
 	}
+
+	var listArgs []actionArgument
 	for _, value := range t.value.([]interface{}) {
 		if value == nil {
 			continue
 		}
-		var UUID = createUUID(&t.ident)
-		var valueType tokenType
-		var itemIdent string
+		var itemType tokenType
 		switch reflect.TypeOf(value).Kind() {
 		case reflect.String:
-			valueType = String
-			itemIdent = "Text"
+			itemType = String
 		case reflect.Float64:
-			valueType = Integer
-			itemIdent = "Number"
+			itemType = Integer
 		case reflect.Map:
-			valueType = Dict
-			itemIdent = "Dictionary"
+			itemType = Dict
 		default:
 			exit(fmt.Sprintf("Invalid array value '%v' (%s)", value, reflect.TypeOf(value)))
 		}
-		makeVariableValueAction(&token{
-			typeof:    valueType,
-			ident:     itemIdent,
-			valueType: valueType,
-			value:     value,
-		}, &itemIdent, &UUID)
-
-		addStdAction("appendvariable", map[string]any{
-			"WFInput":        inputValue(itemIdent, UUID),
-			"WFVariableName": t.ident,
-		})
+		listArgs = append(listArgs, actionArgument{valueType: itemType, value: value})
 	}
+
+	var outputName = checkDuplicateOutputName("List")
+	var listUUID = createUUID(&outputName)
+	uuids[outputName] = listUUID
+
+	var listParams = actions["list"].makeParams(listArgs)
+	listParams["CustomOutputName"] = outputName
+	listParams["UUID"] = listUUID
+	addStdAction("list", listParams)
+
+	addStdAction("setvariable", map[string]any{
+		"WFInput":             inputValue(outputName, listUUID),
+		"WFVariableName":      t.ident,
+		"WFSerializationType": "WFTextTokenAttachment",
+	})
 }
 
 func makeConditionalAction(t *token) {
