@@ -12,4 +12,18 @@
 const quickMenuItems = quickMenu("Title: Example 1\nSub: SFSymbol with default colours\nIcon: waveform.circle.fill\n\nTitle: Example 2\nSub: SFSymbol with weight, scale & emoji colours\nIcon: globe.thin,🟢,⚪️\nScale: Small\n\nTitle: Example 3\nSub: SFSymbol with hex colours and mask\nIcon: gamecontroller.fill, #f12711, #FDC830\nMask: circle\n\nTitle: Example 4\nSub: SFSymbol with transparent background and emoji icon colour\nIcon: touchid,none,teal\nScale: large\n\nTitle: Example 5\nSub: Emoji icon with transparent background\nIcon: 🥰,none\n\nTitle: Example 6\nSub: Emoji icon with scale and no mask\nIcon: 🐭,🟠\nScale: Small\nMask: none")
 const quickMenuChoice = chooseFromList(quickMenuItems, "Which one?")
 
+// Quick Menu with the menu text held in a Text action and passed in as a variable — the shape
+// Shortcuts produces when the text is built up elsewhere and wired into the action.
+const menuText = text("Title: Dictate\nSub: Speak your tasks\nIcon: mic.fill\n\nTitle: Type\nSub: Manually enter your tasks\nIcon: keyboard")
+const quickMenuFromVariable = quickMenu(menuText)
+const variableChoice = chooseFromList(quickMenuFromVariable)
+
+// Load Menu Set — the set is an entity resolved by its set ID, which belongs to one Menu Box
+// library. The IDs below are from the author's device and only need to compile, not resolve.
+const toggleMenu = loadMenuSet("toggle", "AAFE6B19-CEBD-4DC2-A580-879298CBA9B1")
+const toggleChoice = chooseFromList(toggleMenu)
+
+const inputSourceMenu = loadMenuSet("ThingsGPT — Input Source", "E092F845-188B-4F16-98FE-D78AE33788C3", false)
+const inputSourceChoice = chooseFromList(inputSourceMenu)
+
 show("✅ All tests passed")

@@ -24,7 +24,66 @@ func menuBoxIntent(appIntentIdentifier string) appIntent {
 	}
 }
 
+// menuBoxSetEntity builds the menu set entity Menu Box expects. Shortcuts resolves it by
+// identifier (the set's UUID, which is device-specific); the title and subtitle are only the
+// name shown on the parameter chip in the editor.
+func menuBoxSetEntity(name string, identifier string) map[string]any {
+	return map[string]any{
+		"title":      map[string]string{"key": name},
+		"subtitle":   map[string]string{"key": name},
+		"identifier": identifier,
+	}
+}
+
 func init() {
+	actions["loadMenuSet"] = &actionDefinition{
+		doc: selfDoc{
+			title: "Load Menu Set",
+			description: "Loads the menu items of a saved menu set, for use with Choose From List. The set is " +
+				"identified by its name and its set ID (long-press the set in Menu Box to copy the ID). " +
+				"Set IDs belong to one Menu Box library, so a literal ID will not resolve on another person's device. " +
+				"From the Menu Box app.",
+			category:    "thirdparty",
+			subcategory: "Menu Box",
+		},
+		appIdentifier: menuBoxBundleIdentifier,
+		identifier:    "ChooseMenuSetIntent",
+		appIntent:     menuBoxIntent("ChooseMenuSetIntent"),
+		nonMacOnly:    true,
+		parameters: []parameterDefinition{
+			{
+				name:      "setName",
+				validType: String,
+				literal:   true,
+			},
+			{
+				name:      "setID",
+				validType: String,
+				literal:   true,
+			},
+			{
+				name:      "loadAlternate",
+				validType: Bool,
+				key:       "loadAlt",
+				optional:  true,
+			},
+		},
+		makeParams: func(args []actionArgument) map[string]any {
+			var params = map[string]any{
+				"menuSet": menuBoxSetEntity(argumentValue(args, 0).(string), argumentValue(args, 1).(string)),
+			}
+			// Shortcuts only writes loadAlt once the toggle has been touched, so an omitted argument
+			// leaves the key out entirely.
+			if len(args) > 2 {
+				params["loadAlt"] = argumentValue(args, 2)
+			}
+
+			return params
+		},
+		outputType: Variable,
+		outputName: "Menu Items",
+	}
+
 	actions["quickMenu"] = &actionDefinition{
 		doc: selfDoc{
 			title: "Quick Menu",
