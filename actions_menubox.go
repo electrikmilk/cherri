@@ -4,7 +4,11 @@
 
 package main
 
-import "strings"
+import (
+	"fmt"
+	"regexp"
+	"strings"
+)
 
 // Actions from Menu Box (dev.alexhay.MenuBox) — a third-party App Intents extension for
 // building custom menus. Like the Actions app, every intent shares one signing team and
@@ -67,12 +71,100 @@ func menuBoxWeightEntity(weight string, symbol string) map[string]any {
 	}
 }
 
+// menuBoxColourPreset is one entry of the native colour list Menu Box offers for symbol and
+// background colours. Shortcuts identifies a preset by its lowercase hex and shows its name.
+type menuBoxColourPreset struct {
+	name string
+	hex  string
+}
+
+var menuBoxColourPresets = []menuBoxColourPreset{
+	{"Yellow", "#ffcc01"},
+	{"Pink", "#ff2d55"},
+	{"White", "#ffffff"},
+	{"Indigo", "#5856d7"},
+	{"Purple", "#af52de"},
+	{"Grey", "#808080"},
+	{"Red", "#ff3a2f"},
+	{"Green", "#33c759"},
+	{"Orange", "#ff9502"},
+	{"Blue", "#017aff"},
+	{"Black", "#000000"},
+	{"Teal", "#5ac8fa"},
+}
+
+// menuBoxHexColour matches a six digit hex colour, which Menu Box reads with or without the
+// leading #. The value is passed through exactly as written.
+var menuBoxHexColour = regexp.MustCompile(`^#?[0-9a-fA-F]{6}$`)
+
+// menuBoxFindColourPreset looks a preset up by name, ignoring case. Menu Box's own docs accept
+// "Gray" as well as "Grey" for its Quick Menu colour names, so both resolve to the Grey preset.
+func menuBoxFindColourPreset(name string) (menuBoxColourPreset, bool) {
+	if strings.EqualFold(name, "gray") {
+		name = "grey"
+	}
+	for _, preset := range menuBoxColourPresets {
+		if strings.EqualFold(preset.name, name) {
+			return preset, true
+		}
+	}
+
+	return menuBoxColourPreset{}, false
+}
+
+// menuBoxColourEntity builds the preset colour entity. Every preset shares the same circle
+// preview symbol and is identified by its hex.
+func menuBoxColourEntity(preset menuBoxColourPreset) map[string]any {
+	return map[string]any{
+		"title":      map[string]string{"key": preset.name},
+		"subtitle":   map[string]string{"key": preset.name},
+		"symbol":     map[string]string{"systemName": "circle.fill"},
+		"identifier": preset.hex,
+	}
+}
+
+// menuBoxApplyColour writes one colour slot (symbol or background). A preset name fills the
+// slot's entity key; anything else is a hex and fills the hex key. The hex key always wins over
+// the entity at runtime, so a preset also writes an empty hex to keep the preset in effect.
+func menuBoxApplyColour(params map[string]any, value string, entityKey string, hexKey string) {
+	if preset, found := menuBoxFindColourPreset(value); found {
+		params[entityKey] = menuBoxColourEntity(preset)
+		params[hexKey] = ""
+
+		return
+	}
+
+	params[hexKey] = value
+}
+
+// menuBoxCheckColour rejects a colour that is neither a preset name nor a six digit hex, since
+// Menu Box would silently ignore it.
+func menuBoxCheckColour(args []actionArgument, idx int, label string) {
+	if !menuBoxArgSet(args, idx) {
+		return
+	}
+
+	var value, isString = getArgValue(args[idx]).(string)
+	if !isString {
+		return
+	}
+	if _, found := menuBoxFindColourPreset(value); found || menuBoxHexColour.MatchString(value) {
+		return
+	}
+
+	var names []string
+	for _, preset := range menuBoxColourPresets {
+		names = append(names, preset.name)
+	}
+	parserError(fmt.Sprintf("Invalid %s '%s'. Use a six digit hex such as 00ff00 or one of: %s", label, value, strings.Join(names, ", ")))
+}
+
 func init() {
 	enumerations["menuBoxSymbolWeight"] = []string{"ultralight", "thin", "light", "regular", "medium", "semibold", "bold", "heavy", "black"}
 	enumerations["menuBoxSymbolScale"] = []string{"small", "medium", "large"}
-	// Menu Box spells its rounded-rectangle mask in camelCase, unlike the Quick Menu markup.
-	// There is no "none" here: an untouched Mask row writes no key, so omitting the argument is
-	// how a symbol gets no mask.
+	// Menu Box masks icons to a rounded rectangle by default, so omitting the argument gives a
+	// rounded rectangle, not an unmasked icon. The "none" option has not been seen in a device
+	// export yet, so it is left out until its raw value is confirmed.
 	enumerations["menuBoxSymbolMask"] = []string{"circle", "roundRect"}
 
 	actions["loadMenuSet"] = &actionDefinition{
@@ -127,7 +219,11 @@ func init() {
 		doc: selfDoc{
 			title: "Create Menu Item From Symbol",
 			description: "Creates a menu item with an SF Symbol icon, for use with Choose From List or Add To Menu Set. " +
-				"The symbol and weight are literal values. From the Menu Box app.",
+				"The symbol, weight, scale, mask and colours are literal values. A colour is either the name of one of " +
+				"Menu Box's preset colours (Yellow, Pink, White, Indigo, Purple, Grey, Red, Green, Orange, Blue, Black, Teal) " +
+				"or a six digit hex with or without the leading `#`. A background colour is hidden while " +
+				"`transparentBackground` is on. Turn `renderIcon` off to skip rendering the icon until the item is added " +
+				"to a Menu Set, which speeds up the shortcut when you are building a set. From the Menu Box app.",
 			category:    "thirdparty",
 			subcategory: "Menu Box",
 		},
@@ -181,6 +277,28 @@ func init() {
 				literal:   true,
 				optional:  true,
 			},
+			{
+				name:      "symbolColour",
+				validType: String,
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "backgroundColour",
+				validType: String,
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "renderIcon",
+				validType: Bool,
+				key:       "renderIcon",
+				optional:  true,
+			},
+		},
+		check: func(args []actionArgument, _ *actionDefinition) {
+			menuBoxCheckColour(args, 7, "symbol colour")
+			menuBoxCheckColour(args, 8, "background colour")
 		},
 		makeParams: func(args []actionArgument) map[string]any {
 			var symbol = argumentValue(args, 1).(string)
@@ -202,6 +320,25 @@ func init() {
 			}
 			if menuBoxArgSet(args, 6) {
 				params["mask"] = argumentValue(args, 6)
+			}
+
+			// Setting either colour switches Menu Box to its custom colours. A slot left unset is
+			// written as an empty hex, the shape Shortcuts produces once the pre-filled hex is cleared.
+			var symbolColourSet = menuBoxArgSet(args, 7)
+			var backgroundColourSet = menuBoxArgSet(args, 8)
+			if symbolColourSet || backgroundColourSet {
+				params["colourChoices"] = "custom"
+				params["symbolColourHex"] = ""
+				params["bgColourHex"] = ""
+			}
+			if symbolColourSet {
+				menuBoxApplyColour(params, argumentValue(args, 7).(string), "symbolColourList", "symbolColourHex")
+			}
+			if backgroundColourSet {
+				menuBoxApplyColour(params, argumentValue(args, 8).(string), "bgColourList", "bgColourHex")
+			}
+			if menuBoxArgSet(args, 9) {
+				params["renderIcon"] = argumentValue(args, 9)
 			}
 
 			return params
