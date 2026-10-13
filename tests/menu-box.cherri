@@ -1,0 +1,15 @@
+// compile-only: interactive UI and iOS/iPadOS-only third-party actions (Menu Box,
+// dev.alexhay.MenuBox) — nothing here is deterministic enough to assert at runtime.
+//
+// Exercises the first-class Menu Box action definitions (actions_menubox.go) rather than
+// the rawAction() escape hatch. One section per action so each can be debugged in isolation.
+
+#define name MENU BOX TEST
+#define color purple
+
+// Quick Menu — marked-up text in, menu items out. Covers SF Symbols with default, emoji and hex
+// colours, a mask, a scale, transparent backgrounds, and emoji icons.
+const quickMenuItems = quickMenu("Title: Example 1\nSub: SFSymbol with default colours\nIcon: waveform.circle.fill\n\nTitle: Example 2\nSub: SFSymbol with weight, scale & emoji colours\nIcon: globe.thin,🟢,⚪️\nScale: Small\n\nTitle: Example 3\nSub: SFSymbol with hex colours and mask\nIcon: gamecontroller.fill, #f12711, #FDC830\nMask: circle\n\nTitle: Example 4\nSub: SFSymbol with transparent background and emoji icon colour\nIcon: touchid,none,teal\nScale: large\n\nTitle: Example 5\nSub: Emoji icon with transparent background\nIcon: 🥰,none\n\nTitle: Example 6\nSub: Emoji icon with scale and no mask\nIcon: 🐭,🟠\nScale: Small\nMask: none")
+const quickMenuChoice = chooseFromList(quickMenuItems, "Which one?")
+
+show("✅ All tests passed")
