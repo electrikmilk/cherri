@@ -1,0 +1,45 @@
+// A bare `@x: text` declaration is compile-time only (no empty Text action), and
+// `@arr += "{text}"` appends the text variable directly (no wrapper Text action).
+
+// bare text declaration, defined by a later assignment
+@name: text
+@name = "hello"
+if @name != "hello" {
+    alert("❌ FAIL: bare text declaration — got {@name}, expected 'hello'")
+}
+
+// an explicit empty literal is still a real write
+@explicit = ""
+if @explicit {
+    alert("❌ FAIL: explicit empty text — expected no value, got {@explicit}")
+}
+
+// lone text variable appended inside a loop
+@words = ["alpha", "beta"]
+@collected: array
+for word in @words {
+    @collected += "{word}"
+}
+
+const total = count(@collected)
+if total != 2 {
+    alert("❌ FAIL: append count — got {total}, expected 2")
+}
+
+const first = getFirstItem(@collected)
+if first.text != "alpha" {
+    alert("❌ FAIL: append first item — got {first}, expected 'alpha'")
+}
+
+// interpolation with surrounding text still builds a real Text action
+@decorated: array
+for word in @words {
+    @decorated += "word: {word}"
+}
+
+const decoratedFirst = getFirstItem(@decorated)
+if decoratedFirst.text != "word: alpha" {
+    alert("❌ FAIL: decorated append — got {decoratedFirst}, expected 'word: alpha'")
+}
+
+show("✅ All tests passed")
