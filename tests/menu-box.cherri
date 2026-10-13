@@ -97,4 +97,38 @@ const fieldsSymbolChoice = chooseFromList(fieldsSymbolItem)
 const fieldsSymbolDetails = text("{fieldsSymbolChoice['field1']}\n{fieldsSymbolChoice['field2']}\n{fieldsSymbolChoice['field3']}\n{fieldsSymbolChoice['field4']}")
 alert(fieldsSymbolDetails)
 
+// Create Menu Item From Emoji — title and emoji only, then each parameter on its own. Transparent
+// Background is on by default for emoji, so a background colour needs it turned off to show.
+const emojiItem = createMenuItemFromEmoji("Emoji", "😀")
+const emojiChoice = chooseFromList(emojiItem)
+
+const subtitleEmojiItem = createMenuItemFromEmoji("With subtitle", "😀", "emoji test subtitle")
+const subtitleEmojiChoice = chooseFromList(subtitleEmojiItem)
+
+const largeEmojiItem = createMenuItemFromEmoji("Large", "😀", nil, "large")
+const largeEmojiChoice = chooseFromList(largeEmojiItem)
+
+const circleEmojiItem = createMenuItemFromEmoji("Circle mask", "😀", nil, "large", false, "circle")
+const circleEmojiChoice = chooseFromList(circleEmojiItem)
+
+const roundRectEmojiItem = createMenuItemFromEmoji("Rounded rectangle mask", "😀", nil, "large", false, "roundRect")
+const roundRectEmojiChoice = chooseFromList(roundRectEmojiItem)
+
+const noMaskEmojiItem = createMenuItemFromEmoji("No mask", "😀", nil, nil, nil, "none")
+const noMaskEmojiChoice = chooseFromList(noMaskEmojiItem)
+
+const backgroundEmojiItem = createMenuItemFromEmoji("Magenta background", "🔥", nil, nil, false, "roundRect", "ff00ff")
+const backgroundEmojiChoice = chooseFromList(backgroundEmojiItem)
+
+const letterEmojiItem = createMenuItemFromEmoji("Letter", "A", nil, nil, false, "roundRect")
+const letterEmojiChoice = chooseFromList(letterEmojiItem)
+
+const noRenderEmojiItem = createMenuItemFromEmoji("Render off", "😀", nil, nil, nil, nil, nil, false)
+const noRenderEmojiChoice = chooseFromList(noRenderEmojiItem)
+
+const fieldsEmojiItem = createMenuItemFromEmoji("Fields", "😀", nil, nil, nil, nil, nil, nil, "Field one test", "F2 test", "F3 test", "F4 test")
+const fieldsEmojiChoice = chooseFromList(fieldsEmojiItem)
+const fieldsEmojiDetails = text("{fieldsEmojiChoice['title']}\n{fieldsEmojiChoice['field1']}\n{fieldsEmojiChoice['field2']}\n{fieldsEmojiChoice['field3']}\n{fieldsEmojiChoice['field4']}")
+alert(fieldsEmojiDetails)
+
 show("✅ All tests passed")

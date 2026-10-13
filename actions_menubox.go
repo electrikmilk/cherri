@@ -367,6 +367,112 @@ func init() {
 		outputName: "Menu Item",
 	}
 
+	actions["createMenuItemFromEmoji"] = &actionDefinition{
+		doc: selfDoc{
+			title: "Create Menu Item From Emoji",
+			description: "Creates a menu item with an emoji icon, for use with Choose From List or Add To Menu Set. " +
+				"The emoji should be a single emoji, letter or digit. Transparent Background is on by default for " +
+				"emoji, so a `backgroundColour` (a six digit hex with or without the leading `#`) is ignored until " +
+				"`transparentBackground` is turned off. The mask defaults to none. Fields 1 to 4 hold data that " +
+				"isn't shown in the menu but can be read from the chosen item. Turn `renderIcon` off to skip " +
+				"rendering the icon until the item is added to a Menu Set. From the Menu Box app.",
+			category:    "thirdparty",
+			subcategory: "Menu Box",
+		},
+		appIdentifier: menuBoxBundleIdentifier,
+		identifier:    "CreateEmojiItemIntent",
+		appIntent:     menuBoxIntent("CreateEmojiItemIntent"),
+		nonMacOnly:    true,
+		parameters: append([]parameterDefinition{
+			{
+				name:      "title",
+				validType: String,
+				key:       "title",
+			},
+			{
+				name:      "emoji",
+				validType: String,
+				key:       "emoji",
+			},
+			{
+				name:      "subtitle",
+				validType: String,
+				key:       "subtitle",
+				optional:  true,
+			},
+			{
+				name:      "scale",
+				validType: String,
+				key:       "scale",
+				enum:      "menuBoxIconScale",
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "transparentBackground",
+				validType: Bool,
+				key:       "transparentBG",
+				optional:  true,
+			},
+			{
+				name:      "mask",
+				validType: String,
+				key:       "mask",
+				enum:      "menuBoxIconMask",
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "backgroundColour",
+				validType: String,
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "renderIcon",
+				validType: Bool,
+				key:       "renderIcon",
+				optional:  true,
+			},
+		}, menuBoxDataFieldParameters()...),
+		check: func(args []actionArgument, _ *actionDefinition) {
+			menuBoxCheckColour(args, 6, "background colour")
+		},
+		makeParams: func(args []actionArgument) map[string]any {
+			var params = map[string]any{
+				"title": argumentValue(args, 0),
+				"emoji": argumentValue(args, 1),
+			}
+			if menuBoxArgSet(args, 2) {
+				params["subtitle"] = argumentValue(args, 2)
+			}
+			if menuBoxArgSet(args, 3) {
+				params["scale"] = argumentValue(args, 3)
+			}
+			if menuBoxArgSet(args, 4) {
+				params["transparentBG"] = argumentValue(args, 4)
+			}
+			if menuBoxArgSet(args, 5) {
+				params["mask"] = argumentValue(args, 5)
+			}
+
+			// A background colour switches Menu Box to its custom colours, the only part of them an
+			// emoji has. Emoji items have no colour picker, so a preset name is written as its hex.
+			if menuBoxArgSet(args, 6) {
+				params["colourChoice"] = "custom"
+				menuBoxApplyColour(params, argumentValue(args, 6).(string), "bgColourHex")
+			}
+			if menuBoxArgSet(args, 7) {
+				params["renderIcon"] = argumentValue(args, 7)
+			}
+			menuBoxApplyDataFields(params, args, 8)
+
+			return params
+		},
+		outputType: Variable,
+		outputName: "Menu Item",
+	}
+
 	actions["quickMenu"] = &actionDefinition{
 		doc: selfDoc{
 			title: "Quick Menu",
