@@ -26,4 +26,15 @@ const toggleChoice = chooseFromList(toggleMenu)
 const inputSourceMenu = loadMenuSet("ThingsGPT — Input Source", "E092F845-188B-4F16-98FE-D78AE33788C3", false)
 const inputSourceChoice = chooseFromList(inputSourceMenu)
 
+// Create Menu Item From Symbol — every parameter we have a verified key for, then the minimum
+// (title and symbol only), then one with the subtitle skipped to set only the weight.
+const symbolItem = createMenuItemFromSymbol("create A Menu From Sf Symbol Title Example", "microphone", "create a menu from SF symbols subtitle example", "regular", "large", true)
+const symbolChoice = chooseFromList(symbolItem)
+
+const minimalSymbolItem = createMenuItemFromSymbol("Minimal", "star")
+const minimalSymbolChoice = chooseFromList(minimalSymbolItem)
+
+const boldSymbolItem = createMenuItemFromSymbol("Bold", "heart.fill", nil, "bold")
+const boldSymbolChoice = chooseFromList(boldSymbolItem)
+
 show("✅ All tests passed")
