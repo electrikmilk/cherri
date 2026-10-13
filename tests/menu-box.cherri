@@ -37,4 +37,17 @@ const minimalSymbolChoice = chooseFromList(minimalSymbolItem)
 const boldSymbolItem = createMenuItemFromSymbol("Bold", "heart.fill", nil, "bold")
 const boldSymbolChoice = chooseFromList(boldSymbolItem)
 
+// Scale and mask — each value is a separate key on the action, so one item per value.
+const smallSymbolItem = createMenuItemFromSymbol("Small", "microphone", nil, nil, "small")
+const smallSymbolChoice = chooseFromList(smallSymbolItem)
+
+const mediumSymbolItem = createMenuItemFromSymbol("Medium", "microphone", nil, nil, "medium")
+const mediumSymbolChoice = chooseFromList(mediumSymbolItem)
+
+const circleSymbolItem = createMenuItemFromSymbol("Circle mask", "microphone", nil, nil, "medium", true, "circle")
+const circleSymbolChoice = chooseFromList(circleSymbolItem)
+
+const roundRectSymbolItem = createMenuItemFromSymbol("Rounded rectangle mask", "microphone", nil, nil, "medium", true, "roundRect")
+const roundRectSymbolChoice = chooseFromList(roundRectSymbolItem)
+
 show("✅ All tests passed")

@@ -70,6 +70,10 @@ func menuBoxWeightEntity(weight string, symbol string) map[string]any {
 func init() {
 	enumerations["menuBoxSymbolWeight"] = []string{"ultralight", "thin", "light", "regular", "medium", "semibold", "bold", "heavy", "black"}
 	enumerations["menuBoxSymbolScale"] = []string{"small", "medium", "large"}
+	// Menu Box spells its rounded-rectangle mask in camelCase, unlike the Quick Menu markup.
+	// There is no "none" here: an untouched Mask row writes no key, so omitting the argument is
+	// how a symbol gets no mask.
+	enumerations["menuBoxSymbolMask"] = []string{"circle", "roundRect"}
 
 	actions["loadMenuSet"] = &actionDefinition{
 		doc: selfDoc{
@@ -169,6 +173,14 @@ func init() {
 				key:       "transparentBG",
 				optional:  true,
 			},
+			{
+				name:      "mask",
+				validType: String,
+				key:       "mask",
+				enum:      "menuBoxSymbolMask",
+				literal:   true,
+				optional:  true,
+			},
 		},
 		makeParams: func(args []actionArgument) map[string]any {
 			var symbol = argumentValue(args, 1).(string)
@@ -187,6 +199,9 @@ func init() {
 			}
 			if menuBoxArgSet(args, 5) {
 				params["transparentBG"] = argumentValue(args, 5)
+			}
+			if menuBoxArgSet(args, 6) {
+				params["mask"] = argumentValue(args, 6)
 			}
 
 			return params
