@@ -18,6 +18,13 @@ const menuText = text("Title: Dictate\nSub: Speak your tasks\nIcon: mic.fill\n\n
 const quickMenuFromVariable = quickMenu(menuText)
 const variableChoice = chooseFromList(quickMenuFromVariable)
 
+// Menu Item properties — a chosen item exposes its title, ID and data fields. Confirmed on device
+// that a plain property reference works without any extra user info on the aggrandizement.
+const dataMenuItems = quickMenu("Title: With data\nSub: Has a field\nField1: Example text")
+const dataMenuChoice = chooseFromList(dataMenuItems)
+const dataMenuDetails = text("{dataMenuChoice['title']}\n{dataMenuChoice['id']}\n{dataMenuChoice['field1']}")
+alert(dataMenuDetails)
+
 // Load Menu Set — the set is an entity resolved by its set ID, which belongs to one Menu Box
 // library. The IDs below are from the author's device and only need to compile, not resolve.
 const toggleMenu = loadMenuSet("toggle", "AAFE6B19-CEBD-4DC2-A580-879298CBA9B1")
