@@ -149,13 +149,36 @@ func menuBoxCheckColour(args []actionArgument, idx int, label string) {
 	parserError(fmt.Sprintf("Invalid %s '%s'. Use a six digit hex such as 00ff00 or one of: %s", label, value, strings.Join(names, ", ")))
 }
 
+// menuBoxApplyDataFields writes the optional data fields (Field 1 to 4). Add Data is the switch that
+// reveals them in the editor, so it is written whenever any field is, as Shortcuts does.
+func menuBoxApplyDataFields(params map[string]any, args []actionArgument, firstIdx int) {
+	for offset, key := range []string{"f1", "f2", "f3", "f4"} {
+		if menuBoxArgSet(args, firstIdx+offset) {
+			params["addData"] = true
+			params[key] = argumentValue(args, firstIdx+offset)
+		}
+	}
+}
+
+func menuBoxDataFieldParameters() []parameterDefinition {
+	var fields []parameterDefinition
+	for _, name := range []string{"field1", "field2", "field3", "field4"} {
+		fields = append(fields, parameterDefinition{
+			name:      name,
+			validType: String,
+			optional:  true,
+		})
+	}
+
+	return fields
+}
+
 func init() {
 	enumerations["menuBoxSymbolWeight"] = []string{"ultralight", "thin", "light", "regular", "medium", "semibold", "bold", "heavy", "black"}
-	enumerations["menuBoxSymbolScale"] = []string{"small", "medium", "large"}
-	// Menu Box masks icons to a rounded rectangle by default, so omitting the argument gives a
-	// rounded rectangle, not an unmasked icon. The "none" option has not been seen in a device
-	// export yet, so it is left out until its raw value is confirmed.
-	enumerations["menuBoxSymbolMask"] = []string{"circle", "roundRect"}
+	enumerations["menuBoxIconScale"] = []string{"small", "medium", "large"}
+	// "none" is the default mask and is only written when set explicitly, which is how its raw
+	// value was seen in a device export (Create Menu Item From Emoji).
+	enumerations["menuBoxIconMask"] = []string{"none", "circle", "roundRect"}
 
 	actions["loadMenuSet"] = &actionDefinition{
 		doc: selfDoc{
@@ -251,7 +274,7 @@ func init() {
 				name:      "scale",
 				validType: String,
 				key:       "scale",
-				enum:      "menuBoxSymbolScale",
+				enum:      "menuBoxIconScale",
 				literal:   true,
 				optional:  true,
 			},
@@ -265,7 +288,7 @@ func init() {
 				name:      "mask",
 				validType: String,
 				key:       "mask",
-				enum:      "menuBoxSymbolMask",
+				enum:      "menuBoxIconMask",
 				literal:   true,
 				optional:  true,
 			},
@@ -287,6 +310,10 @@ func init() {
 				key:       "renderIcon",
 				optional:  true,
 			},
+			{name: "field1", validType: String, optional: true},
+			{name: "field2", validType: String, optional: true},
+			{name: "field3", validType: String, optional: true},
+			{name: "field4", validType: String, optional: true},
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			menuBoxCheckColour(args, 7, "symbol colour")
@@ -332,6 +359,7 @@ func init() {
 			if menuBoxArgSet(args, 9) {
 				params["renderIcon"] = argumentValue(args, 9)
 			}
+			menuBoxApplyDataFields(params, args, 10)
 
 			return params
 		},

@@ -87,4 +87,14 @@ const graySymbolChoice = chooseFromList(grayBackgroundSymbolItem)
 const noRenderSymbolItem = createMenuItemFromSymbol("Render off", "microphone", nil, nil, nil, nil, nil, nil, nil, false)
 const noRenderSymbolChoice = chooseFromList(noRenderSymbolItem)
 
+// Mask none is the raw value Menu Box writes when None is chosen explicitly, and Fields 1 to 4 carry
+// data that is read back from the chosen item (Add Data is written for them automatically).
+const noMaskSymbolItem = createMenuItemFromSymbol("No mask", "microphone", nil, nil, "medium", true, "none")
+const noMaskSymbolChoice = chooseFromList(noMaskSymbolItem)
+
+const fieldsSymbolItem = createMenuItemFromSymbol("Fields", "microphone", nil, nil, nil, nil, nil, nil, nil, nil, "Field one test", "F2 test", "F3 test", "F4 test")
+const fieldsSymbolChoice = chooseFromList(fieldsSymbolItem)
+const fieldsSymbolDetails = text("{fieldsSymbolChoice['field1']}\n{fieldsSymbolChoice['field2']}\n{fieldsSymbolChoice['field3']}\n{fieldsSymbolChoice['field4']}")
+alert(fieldsSymbolDetails)
+
 show("✅ All tests passed")
