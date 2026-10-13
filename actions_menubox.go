@@ -212,7 +212,8 @@ func init() {
 				"The symbol, weight, scale, mask and colours are literal values. A colour is either the name of one of " +
 				"Menu Box's preset colours (Yellow, Pink, White, Indigo, Purple, Grey, Red, Green, Orange, Blue, Black, Teal) " +
 				"or a six digit hex with or without the leading `#`. A preset is written as its hex. With no colours " +
-				"the item is a blue symbol on a white rounded square. A background colour is hidden while " +
+				"the item is a blue symbol on a white rounded square, and a symbol colour alone also sits on white. " +
+				"A background colour is hidden while " +
 				"`transparentBackground` is on. Turn `renderIcon` off to skip rendering the icon until the item is added " +
 				"to a Menu Set, which speeds up the shortcut when you are building a set. From the Menu Box app.",
 			category:    "thirdparty",

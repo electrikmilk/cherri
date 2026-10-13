@@ -70,8 +70,7 @@ const greenHexSymbolChoice = chooseFromList(greenHexSymbolItem)
 const presetBackgroundSymbolItem = createMenuItemFromSymbol("Red on Blue", "microphone", nil, nil, "medium", false, "roundRect", "Red", "Blue")
 const presetBackgroundSymbolChoice = chooseFromList(presetBackgroundSymbolItem)
 
-// No background colour with Transparent Background off — Menu Box's docs say an omitted colour
-// falls back to white on blue for an SF Symbol, but the action's own behaviour is unconfirmed.
+// No background colour with Transparent Background off — confirmed on device: the tile is white.
 const noBackgroundSymbolItem = createMenuItemFromSymbol("Red, no background", "microphone", nil, nil, "medium", false, "roundRect", "Red")
 const noBackgroundSymbolChoice = chooseFromList(noBackgroundSymbolItem)
 
