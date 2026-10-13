@@ -72,7 +72,7 @@ func menuBoxWeightEntity(weight string, symbol string) map[string]any {
 }
 
 // menuBoxColourPreset is one entry of the native colour list Menu Box offers for symbol and
-// background colours. Shortcuts identifies a preset by its lowercase hex and shows its name.
+// background colours.
 type menuBoxColourPreset struct {
 	name string
 	hex  string
@@ -112,24 +112,14 @@ func menuBoxFindColourPreset(name string) (menuBoxColourPreset, bool) {
 	return menuBoxColourPreset{}, false
 }
 
-// menuBoxColourEntity builds the preset colour entity. Every preset shares the same circle
-// preview symbol and is identified by its hex.
-func menuBoxColourEntity(preset menuBoxColourPreset) map[string]any {
-	return map[string]any{
-		"title":      map[string]string{"key": preset.name},
-		"subtitle":   map[string]string{"key": preset.name},
-		"symbol":     map[string]string{"systemName": "circle.fill"},
-		"identifier": preset.hex,
-	}
-}
-
-// menuBoxApplyColour writes one colour slot (symbol or background). A preset name fills the
-// slot's entity key; anything else is a hex and fills the hex key. The hex key always wins over
-// the entity at runtime, so a preset also writes an empty hex to keep the preset in effect.
-func menuBoxApplyColour(params map[string]any, value string, entityKey string, hexKey string) {
+// menuBoxApplyColour writes one colour slot (symbol or background) as a hex. A preset name is
+// written as that preset's hex because Menu Box ignores its own preset entity: with both hex fields
+// empty, every preset in the picker rendered the default blue, even in a shortcut built by hand in
+// the Shortcuts app. The same colour as a hex renders correctly, so the hex is the path that works.
+// Anything else is already a hex and is passed through exactly as written.
+func menuBoxApplyColour(params map[string]any, value string, hexKey string) {
 	if preset, found := menuBoxFindColourPreset(value); found {
-		params[entityKey] = menuBoxColourEntity(preset)
-		params[hexKey] = ""
+		params[hexKey] = strings.TrimPrefix(preset.hex, "#")
 
 		return
 	}
@@ -221,7 +211,8 @@ func init() {
 			description: "Creates a menu item with an SF Symbol icon, for use with Choose From List or Add To Menu Set. " +
 				"The symbol, weight, scale, mask and colours are literal values. A colour is either the name of one of " +
 				"Menu Box's preset colours (Yellow, Pink, White, Indigo, Purple, Grey, Red, Green, Orange, Blue, Black, Teal) " +
-				"or a six digit hex with or without the leading `#`. A background colour is hidden while " +
+				"or a six digit hex with or without the leading `#`. A preset is written as its hex. With no colours " +
+				"the item is a blue symbol on a white rounded square. A background colour is hidden while " +
 				"`transparentBackground` is on. Turn `renderIcon` off to skip rendering the icon until the item is added " +
 				"to a Menu Set, which speeds up the shortcut when you are building a set. From the Menu Box app.",
 			category:    "thirdparty",
@@ -332,10 +323,10 @@ func init() {
 				params["bgColourHex"] = ""
 			}
 			if symbolColourSet {
-				menuBoxApplyColour(params, argumentValue(args, 7).(string), "symbolColourList", "symbolColourHex")
+				menuBoxApplyColour(params, argumentValue(args, 7).(string), "symbolColourHex")
 			}
 			if backgroundColourSet {
-				menuBoxApplyColour(params, argumentValue(args, 8).(string), "bgColourList", "bgColourHex")
+				menuBoxApplyColour(params, argumentValue(args, 8).(string), "bgColourHex")
 			}
 			if menuBoxArgSet(args, 9) {
 				params["renderIcon"] = argumentValue(args, 9)

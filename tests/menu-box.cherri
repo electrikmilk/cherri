@@ -57,9 +57,10 @@ const circleSymbolChoice = chooseFromList(circleSymbolItem)
 const roundRectSymbolItem = createMenuItemFromSymbol("Rounded rectangle mask", "microphone", nil, nil, "medium", true, "roundRect")
 const roundRectSymbolChoice = chooseFromList(roundRectSymbolItem)
 
-// Colours — a colour is a preset name or a hex, and a hex beats a preset in Menu Box, so each slot
-// takes exactly one of them. Transparent Background hides the background colour, so the background
-// items turn it off to be visible.
+// Colours — a colour is a preset name or a hex. Presets are written as their hex, because Menu Box
+// ignores every preset entity (a Menu Box bug, reproduced in a hand-built shortcut) while the hex
+// renders. Transparent Background hides the background colour, so the background items turn it off
+// to be visible.
 const redSymbolItem = createMenuItemFromSymbol("Red preset", "microphone", nil, nil, "medium", true, "roundRect", "Red")
 const redSymbolChoice = chooseFromList(redSymbolItem)
 
@@ -77,7 +78,8 @@ const noBackgroundSymbolChoice = chooseFromList(noBackgroundSymbolItem)
 const hexBackgroundSymbolItem = createMenuItemFromSymbol("Green on magenta", "microphone", nil, nil, "medium", false, "roundRect", "#00ff00", "ff00ff")
 const hexBackgroundSymbolChoice = chooseFromList(hexBackgroundSymbolItem)
 
-// Menu Box's own docs accept either spelling for grey, so both resolve to the Grey preset.
+// Menu Box's own docs accept either spelling for grey, so both resolve to the Grey preset. This one
+// rendered default blue as a preset entity because of the Menu Box bug, so it is now written as hex.
 const grayBackgroundSymbolItem = createMenuItemFromSymbol("Gray", "microphone", nil, nil, "medium", true, "roundRect", "Gray")
 const graySymbolChoice = chooseFromList(grayBackgroundSymbolItem)
 
