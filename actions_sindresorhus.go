@@ -54,7 +54,7 @@ func init() {
 		appIdentifier: sindresorhusBundleIdentifier,
 		identifier:    "RandomBooleanIntent",
 		appIntent:     sindresorhusIntent("RandomBooleanIntent"),
-		outputType:    Variable,
+		outputType:    Bool,
 		outputName:    "Random Boolean",
 	}
 
@@ -70,7 +70,7 @@ func init() {
 		appIdentifier: sindresorhusBundleIdentifier,
 		identifier:    "IsOnlineIntent",
 		appIntent:     sindresorhusIntent("IsOnlineIntent"),
-		outputType:    Variable,
+		outputType:    Bool,
 		outputName:    "Is Online",
 	}
 

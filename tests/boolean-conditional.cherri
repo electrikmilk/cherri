@@ -1,0 +1,32 @@
+// compile-only: Actions app Boolean outputs are non-deterministic (random/connectivity).
+// A bare `if @x` on a Boolean-typed variable must compile to the "Name coerced to text, is true"
+// shape that Shortcuts needs to resolve it; bare conditionals on other types keep "has any value".
+
+#define name Boolean Conditional
+
+@isOnline = isDeviceOnline()
+@randBool = randomBoolean()
+
+// single bare Boolean conditional, with and without else
+if @isOnline {
+    show("online")
+}
+
+if @randBool {
+    show("heads")
+} else {
+    show("tails")
+}
+
+// multiple conditions take the WFConditions path instead of the single-condition path
+if @isOnline && @randBool {
+    show("online and heads")
+}
+
+// non-Boolean bare conditionals must keep meaning "has any value"
+@text = "something"
+if @text {
+    show("has text")
+}
+
+show("✅ All tests passed")

@@ -989,11 +989,18 @@ func makeConditionalAction(t *token) {
 		if len(cond.conditions) == 1 || iosVersion < 18 {
 			var firstCondition = cond.conditions[0]
 			var firstArg = firstCondition.arguments[0]
+			var inputType = inputEffectiveType(firstArg.value.(varValue))
+			var inputVariable = variableValue(firstArg.value.(varValue))
+			var conditionCode = firstCondition.condition
+			if isBareBooleanCondition(firstCondition, inputType) {
+				inputVariable = booleanNameInput(inputVariable.(WFTextTokenAttachment))
+				conditionCode = conditions[Is]
+				conditionalParams["WFConditionalActionString"] = booleanTrueString
+			}
 			conditionalParams["WFInput"] = map[string]any{
 				"Type":     "Variable",
-				"Variable": variableValue(firstArg.value.(varValue)),
+				"Variable": inputVariable,
 			}
-			var conditionCode = firstCondition.condition
 			if len(firstCondition.arguments) > 1 && firstCondition.arguments[1].valueType == Quantity {
 				switch conditionCode {
 				case conditions[GreaterThan]:
@@ -1002,7 +1009,6 @@ func makeConditionalAction(t *token) {
 					conditionCode = 1001
 				}
 			}
-			var inputType = inputEffectiveType(firstArg.value.(varValue))
 			if len(firstCondition.arguments) > 1 {
 				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[1], inputType)
 			}
@@ -1024,6 +1030,27 @@ func makeConditionalAction(t *token) {
 }
 
 var filterTemplates []WFConditionParam
+
+const booleanTrueString = "true"
+
+// isBareBooleanCondition reports whether a conditional is a bare `if @x` (no comparison value)
+// on a Boolean-typed input. Shortcuts is supposed to treat that as "is true", but it renders
+// as an unresolved "is +" and demands a value (a long-standing Shortcuts bug).
+func isBareBooleanCondition(c condition, inputType tokenType) bool {
+	return inputType == Bool && len(c.arguments) == 1 && c.condition == conditions[Any]
+}
+
+// booleanNameInput coerces a Boolean variable reference to its Name, which turns it into text so
+// the conditional can compare it with "true". This is the same shape Shortcuts writes when the
+// workaround is applied by hand in the editor.
+func booleanNameInput(attachment WFTextTokenAttachment) WFTextTokenAttachment {
+	attachment.Value.Aggrandizements = append(attachment.Value.Aggrandizements, Aggrandizement{
+		Type:             "WFPropertyVariableAggrandizement",
+		PropertyName:     "Name",
+		PropertyUserInfo: "WFItemName",
+	})
+	return attachment
+}
 
 // inputEffectiveType resolves a conditional's left-hand variable to its concrete type,
 // which determines which plist key the comparison value is written into.
@@ -1095,12 +1122,19 @@ func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate 
 		}
 
 		var inputType = inputEffectiveType(condition.arguments[0].value.(varValue))
+		var inputVariable = variableValue(condition.arguments[0].value.(varValue)).(WFTextTokenAttachment)
 		var conditionParam = WFConditionParam{
 			WFCondition: conditionCode,
 			WFInput: WFInputVariable{
 				Type:     "Variable",
-				Variable: variableValue(condition.arguments[0].value.(varValue)).(WFTextTokenAttachment),
+				Variable: inputVariable,
 			},
+		}
+
+		if isBareBooleanCondition(condition, inputType) {
+			conditionParam.WFCondition = conditions[Is]
+			conditionParam.WFInput.Variable = booleanNameInput(inputVariable)
+			conditionParam.WFConditionalActionString = booleanTrueString
 		}
 
 		if len(condition.arguments) > 1 {
