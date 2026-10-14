@@ -175,6 +175,58 @@ func menuBoxDataFieldParameters() []parameterDefinition {
 	return fields
 }
 
+// menuBoxImageParameters lists the parameters the two image actions share, in call order. Only the image
+// source differs between them: Create Menu Item From Image takes a file and Create Menu Item From Base64
+// takes a base64 string, which are two modes of the one Shortcuts action (Image Type) with mutually
+// exclusive inputs. Cherri can't tell a file variable from a text variable at compile time, so each
+// mode is its own action and the mode is implied rather than passed.
+func menuBoxImageParameters(source parameterDefinition) []parameterDefinition {
+	return append([]parameterDefinition{
+		{
+			name:      "title",
+			validType: String,
+			key:       "title",
+		},
+		source,
+		{
+			name:      "subtitle",
+			validType: String,
+			key:       "subtitle",
+			optional:  true,
+		},
+		{
+			name:      "mask",
+			validType: String,
+			key:       "mask",
+			enum:      "menuBoxIconMask",
+			literal:   true,
+			optional:  true,
+		},
+	}, menuBoxDataFieldParameters()...)
+}
+
+// menuBoxMakeImageParams builds the parameters for either image action. The image is used as it is, so
+// unlike the symbol and emoji actions there is no scale, background or render option, only the mask.
+// Image Type is always written: Shortcuts leaves it out while it is untouched, but it was seen as
+// "file" and "base64" in device exports, so writing it doesn't rely on Menu Box's default. The data
+// fields use field1 to field4 (as the symbol action does, not the emoji action's f1 to f4).
+func menuBoxMakeImageParams(args []actionArgument, sourceKey string, imageType string) map[string]any {
+	var params = map[string]any{
+		"title":     argumentValue(args, 0),
+		sourceKey:   argumentValue(args, 1),
+		"imageType": imageType,
+	}
+	if menuBoxArgSet(args, 2) {
+		params["subtitle"] = argumentValue(args, 2)
+	}
+	if menuBoxArgSet(args, 3) {
+		params["mask"] = argumentValue(args, 3)
+	}
+	menuBoxApplyDataFields(params, args, 4, []string{"field1", "field2", "field3", "field4"})
+
+	return params
+}
+
 func init() {
 	enumerations["menuBoxSymbolWeight"] = []string{"ultralight", "thin", "light", "regular", "medium", "semibold", "bold", "heavy", "black"}
 	enumerations["menuBoxIconScale"] = []string{"small", "medium", "large"}
@@ -470,6 +522,63 @@ func init() {
 			menuBoxApplyDataFields(params, args, 8, []string{"f1", "f2", "f3", "f4"})
 
 			return params
+		},
+		outputType: Variable,
+		outputName: "Menu Item",
+	}
+
+	actions["createMenuItemFromImage"] = &actionDefinition{
+		doc: selfDoc{
+			title: "Create Menu Item From Image",
+			description: "Creates a menu item whose icon is an image file, for use with Choose From List or Add To Menu Set. " +
+				"The image must be a variable holding an image or file, such as the output of Get File, Select Photos or " +
+				"Base64 Decode. A file picked straight in the Shortcuts editor is saved as a reference tied to one " +
+				"person's iCloud account, so it can't be written from code. The image is used as it is: the only thing " +
+				"you can change is the `mask`, which defaults to none. Fields 1 to 4 hold data that isn't shown in " +
+				"the menu but can be read from the chosen item. To use a base64 string instead, see " +
+				"`createMenuItemFromBase64`. From the Menu Box app.",
+			category:    "thirdparty",
+			subcategory: "Menu Box",
+		},
+		appIdentifier: menuBoxBundleIdentifier,
+		identifier:    "CreateImageItemIntent",
+		appIntent:     menuBoxIntent("CreateImageItemIntent"),
+		nonMacOnly:    true,
+		parameters: menuBoxImageParameters(parameterDefinition{
+			name:      "image",
+			validType: Variable,
+			key:       "imageFile",
+		}),
+		makeParams: func(args []actionArgument) map[string]any {
+			return menuBoxMakeImageParams(args, "imageFile", "file")
+		},
+		outputType: Variable,
+		outputName: "Menu Item",
+	}
+
+	actions["createMenuItemFromBase64"] = &actionDefinition{
+		doc: selfDoc{
+			title: "Create Menu Item From Base64",
+			description: "Creates a menu item whose icon is a base64 encoded image, for use with Choose From List or " +
+				"Add To Menu Set. The string is plain base64 with no `data:` prefix, and can be text or a variable such " +
+				"as the output of a Text or Base64 Encode action. Menu Box stores icons this way itself, so a Menu Set " +
+				"export holds the same string. The image is used as it is: the only thing you can change is the `mask`, " +
+				"which defaults to none. Fields 1 to 4 hold data that isn't shown in the menu but can be read from the " +
+				"chosen item. To use an image file instead, see `createMenuItemFromImage`. From the Menu Box app.",
+			category:    "thirdparty",
+			subcategory: "Menu Box",
+		},
+		appIdentifier: menuBoxBundleIdentifier,
+		identifier:    "CreateImageItemIntent",
+		appIntent:     menuBoxIntent("CreateImageItemIntent"),
+		nonMacOnly:    true,
+		parameters: menuBoxImageParameters(parameterDefinition{
+			name:      "base64",
+			validType: String,
+			key:       "base64",
+		}),
+		makeParams: func(args []actionArgument) map[string]any {
+			return menuBoxMakeImageParams(args, "base64", "base64")
 		},
 		outputType: Variable,
 		outputName: "Menu Item",
