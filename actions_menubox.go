@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -59,9 +60,35 @@ var menuBoxNameOperators = map[string]int{
 }
 
 // menuBoxFindOrders maps the order names used in Cherri to the display strings Shortcuts stores for them.
+// The labels depend on the sort: Name offers A to Z and Z to A, the date sorts offer Latest First and
+// Oldest First (see menuBoxFindOrderSort).
 var menuBoxFindOrders = map[string]string{
 	"latestFirst": "Latest First",
 	"oldestFirst": "Oldest First",
+	"aToZ":        "A to Z",
+	"zToA":        "Z to A",
+}
+
+// menuBoxFindOrderSort records which sorts each order belongs to, because Shortcuts only offers the
+// matching pair for the chosen sort.
+var menuBoxFindOrderSort = map[string][]string{
+	"latestFirst": {"dateCreated", "dateModified"},
+	"oldestFirst": {"dateCreated", "dateModified"},
+	"aToZ":        {"name"},
+	"zToA":        {"name"},
+}
+
+// menuBoxFindOrdersFor lists the orders that apply to a sort, in a stable order for error messages.
+func menuBoxFindOrdersFor(sortBy string) []string {
+	var orders []string
+	for order, sorts := range menuBoxFindOrderSort {
+		if slices.Contains(sorts, sortBy) {
+			orders = append(orders, order)
+		}
+	}
+	slices.Sort(orders)
+
+	return orders
 }
 
 // menuBoxFilterTemplate builds one row of a Find filter. Removable is always true for rows added in the editor.
@@ -300,9 +327,9 @@ func init() {
 	enumerations["menuBoxLoadSortBy"] = []string{"title", "subtitle", "field1", "field2", "field3", "field4", "dateCreated", "dateModified"}
 	enumerations["menuBoxLoadOrder"] = []string{"ascending", "descending"}
 	enumerations["menuBoxNameOperator"] = []string{"is", "beginsWith", "contains"}
-	// Random is capitalised because that is how Shortcuts writes it, unlike the date properties.
-	enumerations["menuBoxFindSortBy"] = []string{"dateCreated", "dateModified", "Random"}
-	enumerations["menuBoxFindOrder"] = []string{"latestFirst", "oldestFirst"}
+	// Random is capitalised because that is how Shortcuts writes it, unlike the name and date properties.
+	enumerations["menuBoxFindSortBy"] = []string{"name", "dateCreated", "dateModified", "Random"}
+	enumerations["menuBoxFindOrder"] = []string{"latestFirst", "oldestFirst", "aToZ", "zToA"}
 
 	actions["loadMenuSet"] = &actionDefinition{
 		doc: selfDoc{
@@ -580,8 +607,9 @@ func init() {
 				"created. `name` is matched with `nameOperator` (contains, the default, beginsWith or is). `itemTitle` matches " +
 				"sets with an item whose title contains it. `createdDate` takes a date from a Date action and matches sets " +
 				"created exactly then. Filters are combined with all by default, or any with `matchAny`. Results are " +
-				"sorted by `sortBy` (dateCreated, dateModified or Random) in `order` (latestFirst or oldestFirst, which Random " +
-				"does not use), and `limit` caps how many are returned. Pass a previous Find's output as `input` to filter " +
+				"sorted by `sortBy` (name, dateCreated, dateModified or Random) in `order` (aToZ or zToA for name, latestFirst " +
+				"or oldestFirst for the dates, which Random does not use), and `limit` caps how many are returned. Pass a " +
+				"previous Find's output as `input` to filter " +
 				"that list instead of every set. Only one filter per property is possible here; use `rawAction()` for more. " +
 				"From the Menu Box app.",
 			category:    "thirdparty",
@@ -650,9 +678,21 @@ func init() {
 			if menuBoxArgSet(args, 1) && !menuBoxArgSet(args, 0) {
 				parserError("nameOperator needs a name to match.")
 			}
+			if !menuBoxArgSet(args, 6) {
+				return
+			}
+			// The Order row only appears once a sort is chosen.
+			if !menuBoxArgSet(args, 5) {
+				parserError("order needs a sortBy to apply to.")
+			}
+			var sortBy = argumentValue(args, 5).(string)
 			// Random has no direction; the Order row disappears for it in Shortcuts.
-			if menuBoxArgSet(args, 6) && menuBoxArgSet(args, 5) && argumentValue(args, 5).(string) == "Random" {
+			if sortBy == "Random" {
 				parserError("order does not apply when sorting by Random.")
+			}
+			var order = argumentValue(args, 6).(string)
+			if !slices.Contains(menuBoxFindOrderSort[order], sortBy) {
+				parserError(fmt.Sprintf("order '%s' does not apply when sorting by %s, use %s.", order, sortBy, strings.Join(menuBoxFindOrdersFor(sortBy), " or ")))
 			}
 		},
 		makeParams: func(args []actionArgument) map[string]any {

@@ -40,6 +40,12 @@ const foundAny = findMenuSets("ThingsGPT", "contains", "alpha", createdAfter, tr
 const foundRandom = findMenuSets(nil, nil, nil, nil, nil, "Random")
 const foundEverything = findMenuSets()
 
+// Sort by Name, whose Order offers A to Z (the default) and Z to A rather than the date labels. The
+// device export wrote both strings once the Order had been touched, and nothing when it was not.
+const foundNameSorted = findMenuSets(nil, nil, nil, nil, nil, "name")
+const foundNameZToA = findMenuSets(nil, nil, nil, nil, nil, "name", "zToA")
+const foundNameAToZ = findMenuSets(nil, nil, nil, nil, nil, "name", "aToZ")
+
 // Anything below that writes to the library stays off.
 @writeSwitch = 0
 if @writeSwitch == 1 {
