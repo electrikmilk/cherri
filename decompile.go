@@ -1143,9 +1143,17 @@ func makeActionCallCode(action *ShortcutAction) string {
 		setMacDefinition = true
 	}
 
+	// makeParams builds parameters in ways the parameter definitions can't describe, so without a decomp
+	// there is no way to read the arguments back. Calling a nil decomp panics, so fall back to a raw
+	// action. That keeps the identifier and simple parameters, but nested dictionaries (an app intent
+	// descriptor, a filter) are not recovered by makeRawAction yet.
+	if matchedAction.makeParams != nil && matchedAction.decomp == nil {
+		return makeRawAction(action)
+	}
+
 	actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
 
-	if matchedAction.makeParams != nil || matchedAction.decomp != nil {
+	if matchedAction.decomp != nil {
 		decompActionCustom(&actionCallCode, &matchedAction, action)
 	} else {
 		var matchedParamsSize = len(matchedAction.parameters)

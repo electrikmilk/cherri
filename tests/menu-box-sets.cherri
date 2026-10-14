@@ -1,0 +1,100 @@
+// compile-only: iOS/iPadOS-only third-party actions (Menu Box, dev.alexhay.MenuBox) that read
+// and write the author's real Menu Box library. Import Menu Sets, Create Menu Set and Add To Menu
+// Set change that library when they run, so anything that writes sits behind a switch that is never
+// turned on and only needs to compile.
+//
+// Exercises the set-level Menu Box actions (actions_menubox.go). The set and tag IDs below are from
+// the author's device and only need to compile, not resolve.
+
+#define name MENU BOX SETS TEST
+#define color purple
+
+// Export Menu Set — read-only, so it is safe to run.
+const exportedSet = exportMenuSet("Output Options", "45ED4600-26EF-4B42-B1EC-F55B5055A3A6")
+
+// Load Menu Set with an alternate set — read-only as well.
+const loadedWithAlternate = loadMenuSet("Output Options", "45ED4600-26EF-4B42-B1EC-F55B5055A3A6", true, "toggle", "AAFE6B19-CEBD-4DC2-A580-879298CBA9B1")
+
+// Load Menu Set with every Sort By option, each with an alternate set as in the device export. Passing
+// nil skips an optional argument, which must leave its key out.
+const sortTitle = loadMenuSet("Output Options", "45ED4600-26EF-4B42-B1EC-F55B5055A3A6", true, "toggle", "AAFE6B19-CEBD-4DC2-A580-879298CBA9B1", "title")
+const sortSubtitle = loadMenuSet("Output Options", "45ED4600-26EF-4B42-B1EC-F55B5055A3A6", true, "toggle", "AAFE6B19-CEBD-4DC2-A580-879298CBA9B1", "subtitle")
+const sortField1 = loadMenuSet("Output Options", "45ED4600-26EF-4B42-B1EC-F55B5055A3A6", true, "toggle", "AAFE6B19-CEBD-4DC2-A580-879298CBA9B1", "field1")
+const sortField2 = loadMenuSet("Output Options", "45ED4600-26EF-4B42-B1EC-F55B5055A3A6", true, "toggle", "AAFE6B19-CEBD-4DC2-A580-879298CBA9B1", "field2")
+const sortField3 = loadMenuSet("Output Options", "45ED4600-26EF-4B42-B1EC-F55B5055A3A6", true, "toggle", "AAFE6B19-CEBD-4DC2-A580-879298CBA9B1", "field3")
+const sortField4 = loadMenuSet("Output Options", "45ED4600-26EF-4B42-B1EC-F55B5055A3A6", true, "toggle", "AAFE6B19-CEBD-4DC2-A580-879298CBA9B1", "field4")
+const sortCreated = loadMenuSet("Output Options", "45ED4600-26EF-4B42-B1EC-F55B5055A3A6", true, "toggle", "AAFE6B19-CEBD-4DC2-A580-879298CBA9B1", "dateCreated")
+const sortModified = loadMenuSet("Output Options", "45ED4600-26EF-4B42-B1EC-F55B5055A3A6", true, "toggle", "AAFE6B19-CEBD-4DC2-A580-879298CBA9B1", "dateModified")
+const sortOnly = loadMenuSet("Output Options", "45ED4600-26EF-4B42-B1EC-F55B5055A3A6", nil, nil, nil, "title")
+
+// Order — descending is written, ascending is the default and leaves the key out.
+const sortDescending = loadMenuSet("Output Options", "45ED4600-26EF-4B42-B1EC-F55B5055A3A6", true, "toggle", "AAFE6B19-CEBD-4DC2-A580-879298CBA9B1", "dateModified", "descending")
+const sortAscending = loadMenuSet("Output Options", "45ED4600-26EF-4B42-B1EC-F55B5055A3A6", nil, nil, nil, "title", "ascending")
+
+// Find Menu Sets — read-only. The dates come from a Date action, wired in as a variable the way the
+// editor stores them. Each filter takes its operator in the argument beside it.
+const createdAfter = currentDate()
+const foundByName = findMenuSets("Things", "beginsWith")
+const foundAll = findMenuSets("ThingsGPT", nil, "alpha", createdAfter, nil, nil, nil, nil, nil, false, "dateCreated", "latestFirst", 7)
+const foundAny = findMenuSets("ThingsGPT", "contains", "alpha", createdAfter, nil, nil, nil, nil, nil, true, "dateModified", "oldestFirst", nil, foundAll)
+const foundRandom = findMenuSets(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "Random")
+const foundEverything = findMenuSets()
+
+// Sort by Name, whose Order offers A to Z (the default) and Z to A rather than the date labels. The
+// device export wrote both strings once the Order had been touched, and nothing when it was not.
+const foundNameSorted = findMenuSets(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "name")
+const foundNameZToA = findMenuSets(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "name", "zToA")
+const foundNameAToZ = findMenuSets(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "name", "aToZ")
+
+// Every Name operator, each written from a device export. Contains is the default.
+const nameIs = findMenuSets("Things", "is")
+const nameIsNot = findMenuSets("Things", "isNot")
+const nameContains = findMenuSets("Things", "contains")
+const nameBeginsWith = findMenuSets("Things", "beginsWith")
+const nameEndsWith = findMenuSets("Things", "endsWith")
+const nameDefault = findMenuSets("Things")
+
+// Every date operator on both date properties. Exactly is the default.
+const createdExactly = findMenuSets(nil, nil, nil, createdAfter, "exactly")
+const createdNotExactly = findMenuSets(nil, nil, nil, createdAfter, "notExactly")
+const createdAfterDate = findMenuSets(nil, nil, nil, createdAfter, "after")
+const createdOnOrAfter = findMenuSets(nil, nil, nil, createdAfter, "onOrAfter")
+const createdBefore = findMenuSets(nil, nil, nil, createdAfter, "before")
+const createdOnOrBefore = findMenuSets(nil, nil, nil, createdAfter, "onOrBefore")
+const createdDefault = findMenuSets(nil, nil, nil, createdAfter)
+const modifiedExactly = findMenuSets(nil, nil, nil, nil, nil, createdAfter, "exactly")
+const modifiedNotExactly = findMenuSets(nil, nil, nil, nil, nil, createdAfter, "notExactly")
+const modifiedAfter = findMenuSets(nil, nil, nil, nil, nil, createdAfter, "after")
+const modifiedOnOrAfter = findMenuSets(nil, nil, nil, nil, nil, createdAfter, "onOrAfter")
+const modifiedBefore = findMenuSets(nil, nil, nil, nil, nil, createdAfter, "before")
+const modifiedOnOrBefore = findMenuSets(nil, nil, nil, nil, nil, createdAfter, "onOrBefore")
+const modifiedDefault = findMenuSets(nil, nil, nil, nil, nil, createdAfter)
+
+// Every Item Count operator. The count is stored as a string, and Is is the default.
+const countIs = findMenuSets(nil, nil, nil, nil, nil, nil, nil, 3, "is")
+const countIsNot = findMenuSets(nil, nil, nil, nil, nil, nil, nil, 3, "isNot")
+const countGreater = findMenuSets(nil, nil, nil, nil, nil, nil, nil, 3, "greaterThan")
+const countGreaterOrEqual = findMenuSets(nil, nil, nil, nil, nil, nil, nil, 3, "greaterThanOrEqual")
+const countLess = findMenuSets(nil, nil, nil, nil, nil, nil, nil, 3, "lessThan")
+const countLessOrEqual = findMenuSets(nil, nil, nil, nil, nil, nil, nil, 3, "lessThanOrEqual")
+const countDefault = findMenuSets(nil, nil, nil, nil, nil, nil, nil, 3)
+const countZero = findMenuSets(nil, nil, nil, nil, nil, nil, nil, 0, "greaterThan")
+
+// Anything below that writes to the library stays off.
+@writeSwitch = 0
+if @writeSwitch == 1 {
+    // Import Menu Sets — the Export output goes in as a bare variable, with Overwrite Existing on.
+    importMenuSets(exportedSet, true)
+
+    // And with the toggle never touched, which must leave the key out.
+    importMenuSets(exportedSet)
+
+    // Create Menu Set (Add To Menu Set, Set Type new) — with overwrite and a tag, then bare.
+    createMenuSet(exportedSet, "create menu item test name", true, "example", "140C7ABF-A581-46B3-B026-B1A581542D19")
+    createMenuSet(loadedWithAlternate, "created from a loaded set")
+
+    // Add To Menu Set (Set Type existing) — found by name alone.
+    addToMenuSet(loadedWithAlternate, "ThingsGPT — Image Source")
+}
+
+show("✅ All tests passed")
