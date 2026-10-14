@@ -51,12 +51,34 @@ func menuBoxQueryIntent(appIntentIdentifier string) appIntent {
 	return intent
 }
 
-// menuBoxNameOperators maps a text filter operator to the number Shortcuts writes for it, each read from
-// a device export. Other operators exist in the editor but have not been captured yet.
+// The numbers Shortcuts writes for each filter operator, all read from device exports. Dates and counts
+// share one comparison scheme (0 is less, 1 less or equal, 2 greater, 3 greater or equal, 4 equal, 5 not
+// equal); text has its own, with contains at 99. Date Modified reuses the date numbers, which the export
+// showed for four of its six operators.
 var menuBoxNameOperators = map[string]int{
 	"is":         4,
-	"beginsWith": 8,
+	"isNot":      5,
 	"contains":   99,
+	"beginsWith": 8,
+	"endsWith":   9,
+}
+
+var menuBoxDateOperators = map[string]int{
+	"exactly":    4,
+	"notExactly": 5,
+	"after":      2,
+	"onOrAfter":  3,
+	"before":     0,
+	"onOrBefore": 1,
+}
+
+var menuBoxCountOperators = map[string]int{
+	"is":                 4,
+	"isNot":              5,
+	"greaterThan":        2,
+	"greaterThanOrEqual": 3,
+	"lessThan":           0,
+	"lessThanOrEqual":    1,
 }
 
 // menuBoxFindOrders maps the order names used in Cherri to the display strings Shortcuts stores for them.
@@ -89,6 +111,47 @@ func menuBoxFindOrdersFor(sortBy string) []string {
 	slices.Sort(orders)
 
 	return orders
+}
+
+// Argument positions of Find Menu Sets. Each filter sits next to its operator.
+const (
+	menuBoxFindArgName = iota
+	menuBoxFindArgNameOperator
+	menuBoxFindArgItemTitle
+	menuBoxFindArgCreated
+	menuBoxFindArgCreatedOperator
+	menuBoxFindArgModified
+	menuBoxFindArgModifiedOperator
+	menuBoxFindArgItemCount
+	menuBoxFindArgItemCountOperator
+	menuBoxFindArgMatchAny
+	menuBoxFindArgSortBy
+	menuBoxFindArgOrder
+	menuBoxFindArgLimit
+	menuBoxFindArgInput
+)
+
+// menuBoxFindFilter describes one row of the Find filter: the property Shortcuts names it by, the
+// arguments holding its value and operator, and the key its value is stored under.
+type menuBoxFindFilter struct {
+	property        string
+	valueKey        string
+	valueArg        int
+	valueName       string
+	operatorArg     int
+	operatorName    string
+	operators       map[string]int
+	defaultOperator string
+}
+
+// menuBoxFindFilters lists the filter rows in the order they are written. Menu Item Titles only offers
+// contains, so it has no operator argument.
+var menuBoxFindFilters = []menuBoxFindFilter{
+	{"name", "String", menuBoxFindArgName, "name", menuBoxFindArgNameOperator, "nameOperator", menuBoxNameOperators, "contains"},
+	{"menuItemTitles", "String", menuBoxFindArgItemTitle, "itemTitle", -1, "", menuBoxNameOperators, "contains"},
+	{"dateCreated", "Date", menuBoxFindArgCreated, "createdDate", menuBoxFindArgCreatedOperator, "createdOperator", menuBoxDateOperators, "exactly"},
+	{"dateModified", "Date", menuBoxFindArgModified, "modifiedDate", menuBoxFindArgModifiedOperator, "modifiedOperator", menuBoxDateOperators, "exactly"},
+	{"itemCount", "Number", menuBoxFindArgItemCount, "itemCount", menuBoxFindArgItemCountOperator, "itemCountOperator", menuBoxCountOperators, "is"},
 }
 
 // menuBoxFilterTemplate builds one row of a Find filter. Removable is always true for rows added in the editor.
@@ -326,7 +389,9 @@ func init() {
 	// Every Sort By option of Load Menu Set, each read from its own device export.
 	enumerations["menuBoxLoadSortBy"] = []string{"title", "subtitle", "field1", "field2", "field3", "field4", "dateCreated", "dateModified"}
 	enumerations["menuBoxLoadOrder"] = []string{"ascending", "descending"}
-	enumerations["menuBoxNameOperator"] = []string{"is", "beginsWith", "contains"}
+	enumerations["menuBoxNameOperator"] = []string{"is", "isNot", "contains", "beginsWith", "endsWith"}
+	enumerations["menuBoxDateOperator"] = []string{"exactly", "notExactly", "after", "onOrAfter", "before", "onOrBefore"}
+	enumerations["menuBoxCountOperator"] = []string{"is", "isNot", "greaterThan", "greaterThanOrEqual", "lessThan", "lessThanOrEqual"}
 	// Random is capitalised because that is how Shortcuts writes it, unlike the name and date properties.
 	enumerations["menuBoxFindSortBy"] = []string{"name", "dateCreated", "dateModified", "Random"}
 	enumerations["menuBoxFindOrder"] = []string{"latestFirst", "oldestFirst", "aToZ", "zToA"}
@@ -603,15 +668,17 @@ func init() {
 	actions["findMenuSets"] = &actionDefinition{
 		doc: selfDoc{
 			title: "Find Menu Sets",
-			description: "Finds menu sets, optionally filtered by name, by the titles of the items inside them, and by date " +
-				"created. `name` is matched with `nameOperator` (contains, the default, beginsWith or is). `itemTitle` matches " +
-				"sets with an item whose title contains it. `createdDate` takes a date from a Date action and matches sets " +
-				"created exactly then. Filters are combined with all by default, or any with `matchAny`. Results are " +
+			description: "Finds menu sets, optionally filtered by name, by the titles of the items inside them, by date " +
+				"created, by date modified and by how many items they hold. Each filter takes an operator beside it: " +
+				"`nameOperator` (is, isNot, contains, the default, beginsWith or endsWith), `createdOperator` and " +
+				"`modifiedOperator` (exactly, the default, notExactly, after, onOrAfter, before or onOrBefore) and " +
+				"`itemCountOperator` (is, the default, isNot, greaterThan, greaterThanOrEqual, lessThan or lessThanOrEqual). " +
+				"`itemTitle` matches sets with an item whose title contains it. `createdDate` and `modifiedDate` take a " +
+				"date from a Date action. Filters are combined with all by default, or any with `matchAny`. Results are " +
 				"sorted by `sortBy` (name, dateCreated, dateModified or Random) in `order` (aToZ or zToA for name, latestFirst " +
 				"or oldestFirst for the dates, which Random does not use), and `limit` caps how many are returned. Pass a " +
-				"previous Find's output as `input` to filter " +
-				"that list instead of every set. Only one filter per property is possible here; use `rawAction()` for more. " +
-				"From the Menu Box app.",
+				"previous Find's output as `input` to filter that list instead of every set. Only one filter per property " +
+				"is possible here; use `rawAction()` for more. From the Menu Box app.",
 			category:    "thirdparty",
 			subcategory: "Menu Box",
 		},
@@ -620,77 +687,41 @@ func init() {
 		appIntent:     menuBoxQueryIntent("MenuSetAppEntity"),
 		nonMacOnly:    true,
 		parameters: []parameterDefinition{
-			{
-				name:      "name",
-				validType: String,
-				literal:   true,
-				optional:  true,
-			},
-			{
-				name:      "nameOperator",
-				validType: String,
-				enum:      "menuBoxNameOperator",
-				literal:   true,
-				optional:  true,
-			},
-			{
-				name:      "itemTitle",
-				validType: String,
-				literal:   true,
-				optional:  true,
-			},
-			{
-				name:      "createdDate",
-				validType: Variable,
-				optional:  true,
-			},
-			{
-				name:      "matchAny",
-				validType: Bool,
-				optional:  true,
-			},
-			{
-				name:      "sortBy",
-				validType: String,
-				enum:      "menuBoxFindSortBy",
-				literal:   true,
-				optional:  true,
-			},
-			{
-				name:      "order",
-				validType: String,
-				enum:      "menuBoxFindOrder",
-				literal:   true,
-				optional:  true,
-			},
-			{
-				name:      "limit",
-				validType: Integer,
-				optional:  true,
-			},
-			{
-				name:      "input",
-				validType: Variable,
-				optional:  true,
-			},
+			{name: "name", validType: String, literal: true, optional: true},
+			{name: "nameOperator", validType: String, enum: "menuBoxNameOperator", literal: true, optional: true},
+			{name: "itemTitle", validType: String, literal: true, optional: true},
+			{name: "createdDate", validType: Variable, optional: true},
+			{name: "createdOperator", validType: String, enum: "menuBoxDateOperator", literal: true, optional: true},
+			{name: "modifiedDate", validType: Variable, optional: true},
+			{name: "modifiedOperator", validType: String, enum: "menuBoxDateOperator", literal: true, optional: true},
+			{name: "itemCount", validType: Integer, literal: true, optional: true},
+			{name: "itemCountOperator", validType: String, enum: "menuBoxCountOperator", literal: true, optional: true},
+			{name: "matchAny", validType: Bool, optional: true},
+			{name: "sortBy", validType: String, enum: "menuBoxFindSortBy", literal: true, optional: true},
+			{name: "order", validType: String, enum: "menuBoxFindOrder", literal: true, optional: true},
+			{name: "limit", validType: Integer, optional: true},
+			{name: "input", validType: Variable, optional: true},
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
-			if menuBoxArgSet(args, 1) && !menuBoxArgSet(args, 0) {
-				parserError("nameOperator needs a name to match.")
+			// An operator without a value would be a row Shortcuts shows empty, which nobody means to write.
+			for _, filter := range menuBoxFindFilters {
+				if filter.operatorArg >= 0 && menuBoxArgSet(args, filter.operatorArg) && !menuBoxArgSet(args, filter.valueArg) {
+					parserError(fmt.Sprintf("%s needs %s to compare against.", filter.operatorName, filter.valueName))
+				}
 			}
-			if !menuBoxArgSet(args, 6) {
+			if !menuBoxArgSet(args, menuBoxFindArgOrder) {
 				return
 			}
 			// The Order row only appears once a sort is chosen.
-			if !menuBoxArgSet(args, 5) {
+			if !menuBoxArgSet(args, menuBoxFindArgSortBy) {
 				parserError("order needs a sortBy to apply to.")
 			}
-			var sortBy = argumentValue(args, 5).(string)
+			var sortBy = argumentValue(args, menuBoxFindArgSortBy).(string)
 			// Random has no direction; the Order row disappears for it in Shortcuts.
 			if sortBy == "Random" {
 				parserError("order does not apply when sorting by Random.")
 			}
-			var order = argumentValue(args, 6).(string)
+			var order = argumentValue(args, menuBoxFindArgOrder).(string)
 			if !slices.Contains(menuBoxFindOrderSort[order], sortBy) {
 				parserError(fmt.Sprintf("order '%s' does not apply when sorting by %s, use %s.", order, sortBy, strings.Join(menuBoxFindOrdersFor(sortBy), " or ")))
 			}
@@ -699,23 +730,25 @@ func init() {
 			var params = map[string]any{}
 
 			var templates []map[string]any
-			if menuBoxArgSet(args, 0) {
-				var operator = "contains"
-				if menuBoxArgSet(args, 1) {
-					operator = argumentValue(args, 1).(string)
+			for _, filter := range menuBoxFindFilters {
+				if !menuBoxArgSet(args, filter.valueArg) {
+					continue
 				}
-				templates = append(templates, menuBoxFilterTemplate("name", menuBoxNameOperators[operator], map[string]any{"Unit": 4, "String": argumentValue(args, 0)}))
-			}
-			if menuBoxArgSet(args, 2) {
-				templates = append(templates, menuBoxFilterTemplate("menuItemTitles", menuBoxNameOperators["contains"], map[string]any{"Unit": 4, "String": argumentValue(args, 2)}))
-			}
-			if menuBoxArgSet(args, 3) {
-				templates = append(templates, menuBoxFilterTemplate("dateCreated", 4, map[string]any{"Unit": 4, "Date": argumentValue(args, 3)}))
+				var operator = filter.defaultOperator
+				if filter.operatorArg >= 0 && menuBoxArgSet(args, filter.operatorArg) {
+					operator = argumentValue(args, filter.operatorArg).(string)
+				}
+				var value = argumentValue(args, filter.valueArg)
+				if filter.valueKey == "Number" {
+					// A count is stored as a string, as the device export showed.
+					value = fmt.Sprint(value)
+				}
+				templates = append(templates, menuBoxFilterTemplate(filter.property, filter.operators[operator], map[string]any{"Unit": 4, filter.valueKey: value}))
 			}
 			if len(templates) > 0 {
 				// All is 1 and Any is 0, as seen in device exports.
 				var prefix = 1
-				if menuBoxArgSet(args, 4) && argumentValue(args, 4) == true {
+				if menuBoxArgSet(args, menuBoxFindArgMatchAny) && argumentValue(args, menuBoxFindArgMatchAny) == true {
 					prefix = 0
 				}
 				params["WFContentItemFilter"] = map[string]any{
@@ -728,18 +761,18 @@ func init() {
 				}
 			}
 
-			if menuBoxArgSet(args, 5) {
-				params["WFContentItemSortProperty"] = argumentValue(args, 5)
+			if menuBoxArgSet(args, menuBoxFindArgSortBy) {
+				params["WFContentItemSortProperty"] = argumentValue(args, menuBoxFindArgSortBy)
 			}
-			if menuBoxArgSet(args, 6) {
-				params["WFContentItemSortOrder"] = menuBoxFindOrders[argumentValue(args, 6).(string)]
+			if menuBoxArgSet(args, menuBoxFindArgOrder) {
+				params["WFContentItemSortOrder"] = menuBoxFindOrders[argumentValue(args, menuBoxFindArgOrder).(string)]
 			}
-			if menuBoxArgSet(args, 7) {
+			if menuBoxArgSet(args, menuBoxFindArgLimit) {
 				params["WFContentItemLimitEnabled"] = true
-				params["WFContentItemLimitNumber"] = argumentValue(args, 7)
+				params["WFContentItemLimitNumber"] = argumentValue(args, menuBoxFindArgLimit)
 			}
-			if menuBoxArgSet(args, 8) {
-				params["WFContentItemInputParameter"] = argumentValue(args, 8)
+			if menuBoxArgSet(args, menuBoxFindArgInput) {
+				params["WFContentItemInputParameter"] = argumentValue(args, menuBoxFindArgInput)
 			}
 
 			return params
