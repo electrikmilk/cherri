@@ -95,7 +95,9 @@ const noMaskSymbolChoice = chooseFromList(noMaskSymbolItem)
 const fieldsSymbolItem = createMenuItemFromSymbol("Fields", "microphone", nil, nil, nil, nil, nil, nil, nil, nil, "Field one test", "F2 test", "F3 test", "F4 test")
 const fieldsSymbolChoice = chooseFromList(fieldsSymbolItem)
 const fieldsSymbolDetails = text("{fieldsSymbolChoice['field1']}\n{fieldsSymbolChoice['field2']}\n{fieldsSymbolChoice['field3']}\n{fieldsSymbolChoice['field4']}")
-alert(fieldsSymbolDetails)
+if fieldsSymbolDetails != "Field one test\nF2 test\nF3 test\nF4 test" {
+    alert("❌ FAIL: Symbol fields — got {fieldsSymbolDetails}")
+}
 
 // Create Menu Item From Emoji — title and emoji only, then each parameter on its own. Transparent
 // Background is on by default for emoji, so a background colour needs it turned off to show.
@@ -129,6 +131,8 @@ const noRenderEmojiChoice = chooseFromList(noRenderEmojiItem)
 const fieldsEmojiItem = createMenuItemFromEmoji("Fields", "😀", nil, nil, nil, nil, nil, nil, "Field one test", "F2 test", "F3 test", "F4 test")
 const fieldsEmojiChoice = chooseFromList(fieldsEmojiItem)
 const fieldsEmojiDetails = text("{fieldsEmojiChoice['title']}\n{fieldsEmojiChoice['field1']}\n{fieldsEmojiChoice['field2']}\n{fieldsEmojiChoice['field3']}\n{fieldsEmojiChoice['field4']}")
-alert(fieldsEmojiDetails)
+if fieldsEmojiDetails != "Fields\nField one test\nF2 test\nF3 test\nF4 test" {
+    alert("❌ FAIL: Emoji fields — got {fieldsEmojiDetails}")
+}
 
 show("✅ All tests passed")

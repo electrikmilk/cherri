@@ -149,10 +149,12 @@ func menuBoxCheckColour(args []actionArgument, idx int, label string) {
 	parserError(fmt.Sprintf("Invalid %s '%s'. Use a six digit hex such as 00ff00 or one of: %s", label, value, strings.Join(names, ", ")))
 }
 
-// menuBoxApplyDataFields writes the optional data fields (Field 1 to 4). Add Data is the switch that
-// reveals them in the editor, so it is written whenever any field is, as Shortcuts does.
-func menuBoxApplyDataFields(params map[string]any, args []actionArgument, firstIdx int) {
-	for offset, key := range []string{"f1", "f2", "f3", "f4"} {
+// menuBoxApplyDataFields writes the optional data fields (Field 1 to 4) under the given keys. Add Data
+// is the switch that reveals them in the editor, so it is written whenever any field is, as Shortcuts
+// does. The keys differ per intent: the emoji action uses f1 to f4 and the symbol action field1 to
+// field4, so they are passed in rather than assumed to match.
+func menuBoxApplyDataFields(params map[string]any, args []actionArgument, firstIdx int, keys []string) {
+	for offset, key := range keys {
 		if menuBoxArgSet(args, firstIdx+offset) {
 			params["addData"] = true
 			params[key] = argumentValue(args, firstIdx+offset)
@@ -359,7 +361,7 @@ func init() {
 			if menuBoxArgSet(args, 9) {
 				params["renderIcon"] = argumentValue(args, 9)
 			}
-			menuBoxApplyDataFields(params, args, 10)
+			menuBoxApplyDataFields(params, args, 10, []string{"field1", "field2", "field3", "field4"})
 
 			return params
 		},
@@ -465,7 +467,7 @@ func init() {
 			if menuBoxArgSet(args, 7) {
 				params["renderIcon"] = argumentValue(args, 7)
 			}
-			menuBoxApplyDataFields(params, args, 8)
+			menuBoxApplyDataFields(params, args, 8, []string{"f1", "f2", "f3", "f4"})
 
 			return params
 		},
