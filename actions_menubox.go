@@ -41,6 +41,69 @@ func menuBoxSetEntity(name string, identifier string) map[string]any {
 	}
 }
 
+// menuBoxQueryIntent builds the descriptor for an entity query such as Find Menu Sets. Shortcuts marks
+// these as requiring the app to be installed.
+func menuBoxQueryIntent(appIntentIdentifier string) appIntent {
+	var intent = menuBoxIntent(appIntentIdentifier)
+	intent.requiresAppInstallation = true
+
+	return intent
+}
+
+// menuBoxNameOperators maps a text filter operator to the number Shortcuts writes for it, each read from
+// a device export. Other operators exist in the editor but have not been captured yet.
+var menuBoxNameOperators = map[string]int{
+	"is":         4,
+	"beginsWith": 8,
+	"contains":   99,
+}
+
+// menuBoxFindOrders maps the order names used in Cherri to the display strings Shortcuts stores for them.
+var menuBoxFindOrders = map[string]string{
+	"latestFirst": "Latest First",
+	"oldestFirst": "Oldest First",
+}
+
+// menuBoxFilterTemplate builds one row of a Find filter. Removable is always true for rows added in the editor.
+func menuBoxFilterTemplate(property string, operator int, values map[string]any) map[string]any {
+	return map[string]any{
+		"Property":  property,
+		"Operator":  operator,
+		"Values":    values,
+		"Removable": true,
+	}
+}
+
+// menuBoxExistingSetEntity builds the entity Add To Menu Set uses to point at a set that already
+// exists. Unlike menuBoxSetEntity it has no identifier: the set is found by its name alone, carried
+// in "value", so it resolves on any device that has a set with that name.
+func menuBoxExistingSetEntity(name string) map[string]any {
+	return map[string]any{
+		"value":    name,
+		"title":    map[string]string{"key": name},
+		"subtitle": map[string]string{"key": name},
+	}
+}
+
+// menuBoxTagEntity builds the tag entity Menu Box expects. Like a set, a tag is resolved by its
+// identifier (a UUID that belongs to one library); the symbol is always the tag glyph.
+func menuBoxTagEntity(name string, identifier string) map[string]any {
+	return map[string]any{
+		"title":      map[string]string{"key": name},
+		"subtitle":   map[string]string{"key": name},
+		"symbol":     map[string]string{"systemName": "tag"},
+		"identifier": identifier,
+	}
+}
+
+// menuBoxCheckPair rejects half of a name and ID pair. An entity needs both to resolve, so giving
+// only one is always a mistake.
+func menuBoxCheckPair(args []actionArgument, firstIdx int, label string) {
+	if menuBoxArgSet(args, firstIdx) != menuBoxArgSet(args, firstIdx+1) {
+		parserError(fmt.Sprintf("The %s needs both its name and its ID, or neither.", label))
+	}
+}
+
 // menuBoxArgSet reports whether an optional argument was actually provided, treating a skipped
 // position (nil) the same as an omitted one so its key is left out of the action.
 func menuBoxArgSet(args []actionArgument, idx int) bool {
@@ -233,11 +296,20 @@ func init() {
 	// "none" is the default mask and is only written when set explicitly, which is how its raw
 	// value was seen in a device export (Create Menu Item From Emoji).
 	enumerations["menuBoxIconMask"] = []string{"none", "circle", "roundRect"}
+	// Every Sort By option of Load Menu Set, each read from its own device export.
+	enumerations["menuBoxLoadSortBy"] = []string{"title", "subtitle", "field1", "field2", "field3", "field4", "dateCreated", "dateModified"}
+	enumerations["menuBoxLoadOrder"] = []string{"ascending", "descending"}
+	enumerations["menuBoxNameOperator"] = []string{"is", "beginsWith", "contains"}
+	// Random is capitalised because that is how Shortcuts writes it, unlike the date properties.
+	enumerations["menuBoxFindSortBy"] = []string{"dateCreated", "dateModified", "Random"}
+	enumerations["menuBoxFindOrder"] = []string{"latestFirst", "oldestFirst"}
 
 	actions["loadMenuSet"] = &actionDefinition{
 		doc: selfDoc{
 			title: "Load Menu Set",
-			description: "Loads the menu items of a saved menu set, for use with Choose From List. The set is " +
+			description: "Loads the menu items of a saved menu set, for use with Choose From List, optionally sorted by " +
+				"`sortBy` (title, subtitle, field1 to field4, dateCreated or dateModified) in `order` (ascending, the default, or " +
+				"descending). The set is " +
 				"identified by its name and its set ID (long-press the set in Menu Box to copy the ID). " +
 				"Set IDs belong to one Menu Box library, so a literal ID will not resolve on another person's device. " +
 				"From the Menu Box app.",
@@ -265,6 +337,35 @@ func init() {
 				key:       "loadAlt",
 				optional:  true,
 			},
+			{
+				name:      "alternateSetName",
+				validType: String,
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "alternateSetID",
+				validType: String,
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "sortBy",
+				validType: String,
+				enum:      "menuBoxLoadSortBy",
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "order",
+				validType: String,
+				enum:      "menuBoxLoadOrder",
+				literal:   true,
+				optional:  true,
+			},
+		},
+		check: func(args []actionArgument, _ *actionDefinition) {
+			menuBoxCheckPair(args, 3, "alternate set")
 		},
 		makeParams: func(args []actionArgument) map[string]any {
 			var params = map[string]any{
@@ -272,14 +373,339 @@ func init() {
 			}
 			// Shortcuts only writes loadAlt once the toggle has been touched, so an omitted argument
 			// leaves the key out entirely.
-			if len(args) > 2 {
+			if menuBoxArgSet(args, 2) {
 				params["loadAlt"] = argumentValue(args, 2)
+			}
+			if menuBoxArgSet(args, 3) {
+				params["alternateSet"] = menuBoxSetEntity(argumentValue(args, 3).(string), argumentValue(args, 4).(string))
+			}
+			if menuBoxArgSet(args, 5) {
+				params["sortBy"] = argumentValue(args, 5)
+			}
+			// Ascending is the default and an untouched Order leaves the key out of an export, so only
+			// descending is written. That keeps the raw spelling of ascending out of the plist, since it
+			// has never been seen.
+			if menuBoxArgSet(args, 6) && argumentValue(args, 6).(string) == "descending" {
+				params["order"] = "descending"
 			}
 
 			return params
 		},
 		outputType: Variable,
 		outputName: "Menu Items",
+	}
+
+	actions["exportMenuSet"] = &actionDefinition{
+		doc: selfDoc{
+			title: "Export Menu Set",
+			description: "Exports a saved menu set as Menu Set Data, which Import Menu Sets reads back in. The set is " +
+				"identified by its name and its set ID (long-press the set in Menu Box to copy the ID). " +
+				"Set IDs belong to one Menu Box library, so a literal ID will not resolve on another person's device. " +
+				"From the Menu Box app.",
+			category:    "thirdparty",
+			subcategory: "Menu Box",
+		},
+		appIdentifier: menuBoxBundleIdentifier,
+		// Unlike the other intents this one has no "Intent" suffix, exactly as Shortcuts writes it.
+		identifier: "ExportMenuSets",
+		appIntent:  menuBoxIntent("ExportMenuSets"),
+		nonMacOnly: true,
+		parameters: []parameterDefinition{
+			{
+				name:      "setName",
+				validType: String,
+				literal:   true,
+			},
+			{
+				name:      "setID",
+				validType: String,
+				literal:   true,
+			},
+		},
+		makeParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"menuSets": menuBoxSetEntity(argumentValue(args, 0).(string), argumentValue(args, 1).(string)),
+			}
+		},
+		outputType: Variable,
+		outputName: "Menu Set Data",
+	}
+
+	actions["importMenuSets"] = &actionDefinition{
+		doc: selfDoc{
+			title: "Import Menu Sets",
+			description: "Imports menu sets from Menu Set Data, such as the output of Export Menu Set. " +
+				"The data is passed as a variable or constant, not as a text literal. " +
+				"`overwrite` replaces sets that already exist in your library, so use it with care. " +
+				"From the Menu Box app.",
+			category:    "thirdparty",
+			subcategory: "Menu Box",
+		},
+		appIdentifier: menuBoxBundleIdentifier,
+		identifier:    "ImportMenuSetsIntent",
+		appIntent:     menuBoxIntent("ImportMenuSetsIntent"),
+		nonMacOnly:    true,
+		parameters: []parameterDefinition{
+			{
+				// A variable, because the Export output is a generic variable and Shortcuts stores it
+				// as a bare attachment, as seen in a device export.
+				name:      "menuSetData",
+				validType: Variable,
+				key:       "exports",
+			},
+			{
+				name:      "overwrite",
+				validType: Bool,
+				key:       "shouldOverwrite",
+				optional:  true,
+			},
+		},
+		makeParams: func(args []actionArgument) map[string]any {
+			var params = map[string]any{
+				"exports": argumentValue(args, 0),
+			}
+			// Written only once the toggle has been touched, like every other Menu Box switch.
+			if menuBoxArgSet(args, 1) {
+				params["shouldOverwrite"] = argumentValue(args, 1)
+			}
+
+			return params
+		},
+	}
+
+	// Menu Box's Add To Menu Set is one intent with a Set Type switch, "new" or "existing", that reveals
+	// different parameters. It is split in two here, like the two image actions, so each one only
+	// offers the parameters that have been seen with its mode.
+	actions["createMenuSet"] = &actionDefinition{
+		doc: selfDoc{
+			title: "Create Menu Set",
+			description: "Creates a new menu set from menu items, such as the output of Quick Menu or Load Menu Set. " +
+				"This is Menu Box's Add To Menu Set action with Set Type set to new. " +
+				"`overwrite` replaces a set that already has the same name, so use it with care. " +
+				"An optional tag is identified by its name and its tag ID, which belongs to one Menu Box library, " +
+				"so a literal ID will not resolve on another person's device. From the Menu Box app.",
+			category:    "thirdparty",
+			subcategory: "Menu Box",
+		},
+		appIdentifier: menuBoxBundleIdentifier,
+		identifier:    "CreateMenuSetIntent",
+		appIntent:     menuBoxIntent("CreateMenuSetIntent"),
+		nonMacOnly:    true,
+		parameters: []parameterDefinition{
+			{
+				name:      "menuItems",
+				validType: Variable,
+			},
+			{
+				name:      "setName",
+				validType: String,
+			},
+			{
+				name:      "overwrite",
+				validType: Bool,
+				key:       "shouldOverwrite",
+				optional:  true,
+			},
+			{
+				name:      "tagName",
+				validType: String,
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "tagID",
+				validType: String,
+				literal:   true,
+				optional:  true,
+			},
+		},
+		check: func(args []actionArgument, _ *actionDefinition) {
+			menuBoxCheckPair(args, 3, "tag")
+		},
+		makeParams: func(args []actionArgument) map[string]any {
+			var params = map[string]any{
+				"setType":   "new",
+				"menuItems": argumentValue(args, 0),
+				"setName":   argumentValue(args, 1),
+			}
+			// Written only once the toggle has been touched, like every other Menu Box switch.
+			if menuBoxArgSet(args, 2) {
+				params["shouldOverwrite"] = argumentValue(args, 2)
+			}
+			if menuBoxArgSet(args, 3) {
+				params["tags"] = menuBoxTagEntity(argumentValue(args, 3).(string), argumentValue(args, 4).(string))
+			}
+
+			return params
+		},
+	}
+
+	actions["addToMenuSet"] = &actionDefinition{
+		doc: selfDoc{
+			title: "Add To Menu Set",
+			description: "Adds menu items to a menu set that already exists, such as the output of Quick Menu or " +
+				"Load Menu Set. This is Menu Box's Add To Menu Set action with Set Type set to existing. " +
+				"The set is found by its name, so unlike Load Menu Set no set ID is needed. From the Menu Box app.",
+			category:    "thirdparty",
+			subcategory: "Menu Box",
+		},
+		appIdentifier: menuBoxBundleIdentifier,
+		identifier:    "CreateMenuSetIntent",
+		appIntent:     menuBoxIntent("CreateMenuSetIntent"),
+		nonMacOnly:    true,
+		parameters: []parameterDefinition{
+			{
+				name:      "menuItems",
+				validType: Variable,
+			},
+			{
+				name:      "setName",
+				validType: String,
+				literal:   true,
+			},
+		},
+		makeParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"setType":         "existing",
+				"menuItems":       argumentValue(args, 0),
+				"existingSetName": menuBoxExistingSetEntity(argumentValue(args, 1).(string)),
+			}
+		},
+	}
+
+	actions["findMenuSets"] = &actionDefinition{
+		doc: selfDoc{
+			title: "Find Menu Sets",
+			description: "Finds menu sets, optionally filtered by name, by the titles of the items inside them, and by date " +
+				"created. `name` is matched with `nameOperator` (contains, the default, beginsWith or is). `itemTitle` matches " +
+				"sets with an item whose title contains it. `createdDate` takes a date from a Date action and matches sets " +
+				"created exactly then. Filters are combined with all by default, or any with `matchAny`. Results are " +
+				"sorted by `sortBy` (dateCreated, dateModified or Random) in `order` (latestFirst or oldestFirst, which Random " +
+				"does not use), and `limit` caps how many are returned. Pass a previous Find's output as `input` to filter " +
+				"that list instead of every set. Only one filter per property is possible here; use `rawAction()` for more. " +
+				"From the Menu Box app.",
+			category:    "thirdparty",
+			subcategory: "Menu Box",
+		},
+		appIdentifier: menuBoxBundleIdentifier,
+		identifier:    "MenuSetAppEntity",
+		appIntent:     menuBoxQueryIntent("MenuSetAppEntity"),
+		nonMacOnly:    true,
+		parameters: []parameterDefinition{
+			{
+				name:      "name",
+				validType: String,
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "nameOperator",
+				validType: String,
+				enum:      "menuBoxNameOperator",
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "itemTitle",
+				validType: String,
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "createdDate",
+				validType: Variable,
+				optional:  true,
+			},
+			{
+				name:      "matchAny",
+				validType: Bool,
+				optional:  true,
+			},
+			{
+				name:      "sortBy",
+				validType: String,
+				enum:      "menuBoxFindSortBy",
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "order",
+				validType: String,
+				enum:      "menuBoxFindOrder",
+				literal:   true,
+				optional:  true,
+			},
+			{
+				name:      "limit",
+				validType: Integer,
+				optional:  true,
+			},
+			{
+				name:      "input",
+				validType: Variable,
+				optional:  true,
+			},
+		},
+		check: func(args []actionArgument, _ *actionDefinition) {
+			if menuBoxArgSet(args, 1) && !menuBoxArgSet(args, 0) {
+				parserError("nameOperator needs a name to match.")
+			}
+			// Random has no direction; the Order row disappears for it in Shortcuts.
+			if menuBoxArgSet(args, 6) && menuBoxArgSet(args, 5) && argumentValue(args, 5).(string) == "Random" {
+				parserError("order does not apply when sorting by Random.")
+			}
+		},
+		makeParams: func(args []actionArgument) map[string]any {
+			var params = map[string]any{}
+
+			var templates []map[string]any
+			if menuBoxArgSet(args, 0) {
+				var operator = "contains"
+				if menuBoxArgSet(args, 1) {
+					operator = argumentValue(args, 1).(string)
+				}
+				templates = append(templates, menuBoxFilterTemplate("name", menuBoxNameOperators[operator], map[string]any{"Unit": 4, "String": argumentValue(args, 0)}))
+			}
+			if menuBoxArgSet(args, 2) {
+				templates = append(templates, menuBoxFilterTemplate("menuItemTitles", menuBoxNameOperators["contains"], map[string]any{"Unit": 4, "String": argumentValue(args, 2)}))
+			}
+			if menuBoxArgSet(args, 3) {
+				templates = append(templates, menuBoxFilterTemplate("dateCreated", 4, map[string]any{"Unit": 4, "Date": argumentValue(args, 3)}))
+			}
+			if len(templates) > 0 {
+				// All is 1 and Any is 0, as seen in device exports.
+				var prefix = 1
+				if menuBoxArgSet(args, 4) && argumentValue(args, 4) == true {
+					prefix = 0
+				}
+				params["WFContentItemFilter"] = map[string]any{
+					"Value": map[string]any{
+						"WFActionParameterFilterPrefix":    prefix,
+						"WFContentPredicateBoundedDate":    false,
+						"WFActionParameterFilterTemplates": templates,
+					},
+					"WFSerializationType": "WFContentPredicateTableTemplate",
+				}
+			}
+
+			if menuBoxArgSet(args, 5) {
+				params["WFContentItemSortProperty"] = argumentValue(args, 5)
+			}
+			if menuBoxArgSet(args, 6) {
+				params["WFContentItemSortOrder"] = menuBoxFindOrders[argumentValue(args, 6).(string)]
+			}
+			if menuBoxArgSet(args, 7) {
+				params["WFContentItemLimitEnabled"] = true
+				params["WFContentItemLimitNumber"] = argumentValue(args, 7)
+			}
+			if menuBoxArgSet(args, 8) {
+				params["WFContentItemInputParameter"] = argumentValue(args, 8)
+			}
+
+			return params
+		},
+		outputType: Variable,
+		outputName: "Menu Sets",
 	}
 
 	actions["createMenuItemFromSymbol"] = &actionDefinition{

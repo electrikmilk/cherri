@@ -78,6 +78,9 @@ type appIntent struct {
 	// teamIdentifier is the signing team ID for third-party App Intent providers (e.g. Actions app).
 	// First-party Apple intents leave this empty and fall back to Apple's placeholder team ID.
 	teamIdentifier string
+	// requiresAppInstallation marks an intent Shortcuts only offers while its app is installed. It was
+	// seen on Menu Box's Find query and is written into the descriptor as ActionRequiresAppInstallation.
+	requiresAppInstallation bool
 }
 
 // actionDefinition defines an action, what it expects and has functions for checking the arguments and creating the parameters.
@@ -841,13 +844,18 @@ func appIntentDescriptor(intent appIntent) map[string]any {
 		// Apple first-party intents use this placeholder team ID.
 		teamIdentifier = "0000000000"
 	}
+	var descriptor = map[string]any{
+		"TeamIdentifier":      teamIdentifier,
+		"BundleIdentifier":    intent.bundleIdentifier,
+		"Name":                intent.name,
+		"AppIntentIdentifier": intent.appIntentIdentifier,
+	}
+	if intent.requiresAppInstallation {
+		descriptor["ActionRequiresAppInstallation"] = true
+	}
+
 	return map[string]any{
-		"AppIntentDescriptor": map[string]string{
-			"TeamIdentifier":      teamIdentifier,
-			"BundleIdentifier":    intent.bundleIdentifier,
-			"Name":                intent.name,
-			"AppIntentIdentifier": intent.appIntentIdentifier,
-		},
+		"AppIntentDescriptor": descriptor,
 	}
 }
 
