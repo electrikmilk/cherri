@@ -443,7 +443,12 @@ func variableValueWithSerialization(variable varValue, serializationType string)
 		varValue.OutputUUID = varUUID
 		varValue.Type = "ActionOutput"
 	} else {
-		varValue.VariableName = identifier
+		// Built-in globals (ExtensionInput, Clipboard, CurrentDate, DeviceDetails, Ask) are
+		// identified by Type alone in native shortcuts; a VariableName makes Shortcuts treat
+		// them as a missing named variable.
+		if varType == "Variable" {
+			varValue.VariableName = identifier
+		}
 		varValue.Type = varType
 		if varType == Ask && variable.prompt != "" {
 			varValue.Prompt = variable.prompt
@@ -518,6 +523,9 @@ func makeAttachmentValues() {
 			attachmentValue = Value{
 				VariableName: globalDisplayName(inlineVar.identifier, *varValue),
 				Type:         varType,
+			}
+			if varType != "Variable" {
+				attachmentValue.VariableName = ""
 			}
 		} else {
 			var varUUID = uuids[inlineVar.identifier]
