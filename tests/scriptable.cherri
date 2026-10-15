@@ -1,0 +1,35 @@
+// compile-only: Scriptable actions run a script in a third-party app that is not installed in CI, so there is nothing to assert on.
+@runActions = "no"
+
+// Reference values come from device exports of every action and option below.
+if @runActions == "yes" {
+    // A bare Run Script, which Shortcuts writes as just the script name.
+    runScriptableScript("ShortcutsArchiveManager")
+
+    const note = text("hello")
+
+    // Parameter is the only input that takes a variable and is passed to args.shortcutParameter.
+    runScriptableScript("ShortcutsArchiveManager", note)
+
+    // One item is written as a bare value, two or more as a list.
+    runScriptableScript("ShortcutsArchiveManager", nil, ["a", "b"], ["url.com"])
+    runScriptableScript("ShortcutsArchiveManager", nil, ["a"], ["url.com", "other.com"])
+
+    // The script can come from a variable or be picked at runtime, and a list item can be a variable.
+    const link = url("apple.com")
+    const scriptName = text("MyScript")
+    runScriptableScript(scriptName, scriptName, ["a"], ["url.com", "{link}"])
+    runScriptableScript(Ask)
+
+    // Every option at once, with both toggles flipped from their defaults.
+    runScriptableScript("FlappyCherry", note, nil, nil, nil, nil, true, false)
+
+    // Inline scripts take their code in a raw string so braces are not read as variables.
+    runScriptableInlineScript('Script.complete()')
+    runScriptableInlineScript('const x = {a: 1}; Script.setShortcutOutput(x)', note)
+
+    refreshAllScriptableWidgets()
+    createScriptableFileBookmark("create bookmark name", note)
+}
+
+show("✅ All tests passed")
