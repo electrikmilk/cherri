@@ -100,6 +100,8 @@ type actionDefinition struct {
 }
 
 var enumerations = map[string][]string{
+	"messagesTapbacks":              {"Love", "Like", "Dislike", "Laugh At", "Emphasize", "Question"},
+	"messagesInboxes":               {"Messages", "Unknown Senders", "Spam", "Recently Deleted", "Unread", "Drafts", "Send Later"},
 	"measurementUnitType":           {"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"},
 	"inputType":                     {"Text", "Number", "URL", "Date", "Time", "Date and Time"},
 	"appSplitRatio":                 {"half", "thirdByTwo"},
