@@ -1,0 +1,39 @@
+// compile-only: stress test mixing native actions, Actions app (com.sindresorhus.Actions)
+// App Intent-based actions, a conditional, variable chains, a repeat-each loop, and
+// list construction. Exercises the first-class com.sindresorhus.Actions action
+// definitions (actions_sindresorhus.go) rather than the rawAction() escape hatch —
+// verifies each intent's AppIntentDescriptor, parameters, and output capture.
+
+#define name STRESS TEST SHORTCUT #2
+#define color darkgray
+
+const clipText = getClipboard()
+
+const staticText = text("HELLO from the stress test! This text action checks that \"double quotes\", apostrophes (it's fine), semicolons; and [brackets] all survive the round trip.")
+
+@uuid = generateUUID()
+@randBool = randomBoolean()
+@isOnline = isDeviceOnline()
+
+if @isOnline {
+    @battState = getBatteryState()
+    @compactNum = formatNumberCompact(42)
+}
+
+@cunty = transformText("slugify", "Slutify")
+@truncated = truncateNumber(42, 2)
+@randText = randomText()
+
+@items: array
+@items = ["Max Verstappen", "is going to win ", "The Singapore Gran Prix"]
+
+@trimmed: text
+@outputLines: array
+for item in @items {
+    @trimmed = trimTextWhitespace("{item}")
+    @outputLines += "{trimmed}"
+}
+
+@queensGambit = formatTextList("{@outputLines}")
+
+show("✅ All tests passed")
