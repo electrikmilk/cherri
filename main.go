@@ -105,7 +105,6 @@ func main() {
 	}
 
 	if args.Using("action") {
-		markBuiltins()
 		defineRawAction()
 		loadStandardActions()
 		handleActionSearch()

@@ -96,8 +96,7 @@ type actionDefinition struct {
 	nonMacOnly         bool
 	minVersion         float64
 	maxVersion         float64
-	builtin            bool // builtin is based on if the action was in the actions map when it was first initialized.
-	definedInCherri    bool // definedInCherri is set once a Cherri definition owns this entry, which is how a second Cherri definition of the same name is detected as a duplicate.
+	definedInCherri    bool // definedInCherri is false for an action defined only in Go, and is how a second Cherri definition of the same name is detected as a duplicate.
 }
 
 var enumerations = map[string][]string{
@@ -790,7 +789,7 @@ func generateActionParamDefinition(param parameterDefinition) string {
 func generateActionDebugDefinition() string {
 	var definition strings.Builder
 	var definitionType string
-	if currentAction.definition.builtin {
+	if !currentAction.definition.definedInCherri {
 		definitionType = "#builtin"
 	}
 
