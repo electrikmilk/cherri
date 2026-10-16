@@ -154,18 +154,6 @@ func restoreCurrentAction() {
 	currentAction = savedAction
 }
 
-// undefinable checks if the current action cannot be defined using only Cherri because of the way it is defined.
-func undefinable() bool {
-	if currentAction.definition.appendParamsFunc != nil {
-		var addedParams = currentAction.definition.appendParamsFunc([]actionArgument{})
-		if len(addedParams) == 0 {
-			return true
-		}
-	}
-
-	return currentAction.definition.builtin || currentAction.definition.makeParams != nil || currentAction.definition.check != nil || currentAction.definition.decomp != nil || currentAction.definition.appIntent != emptyAppIntent
-}
-
 // makeAction builds an action based on its actionDefinition and adds it to the shortcut.
 func makeAction(arguments []actionArgument, reference *WFActionReference) {
 	actionIndex++
