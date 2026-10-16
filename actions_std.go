@@ -54,38 +54,6 @@ var setMultitaskingModeIntent = appIntent{
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
 	"createAlarm": {
-		doc: selfDoc{
-			title:       "Create Alarm",
-			description: "Creates an alarm at a specific time with a name, snooze allowance, and applicable weekdays.",
-			category:    "calendar",
-			subcategory: "Alarms",
-		},
-		appIdentifier: "com.apple.mobiletimer-framework",
-		identifier:    "MobileTimerIntents.MTCreateAlarmIntent",
-		parameters: []parameterDefinition{
-			{
-				name:      "name",
-				validType: String,
-				key:       "name",
-			},
-			{
-				name:      "time",
-				validType: String,
-				key:       "dateComponents",
-			},
-			{
-				name:         "allowsSnooze",
-				validType:    Bool,
-				key:          "allowsSnooze",
-				defaultValue: true,
-				optional:     true,
-			},
-			{
-				name:      "repeatWeekdays",
-				validType: Arr,
-				optional:  true,
-			},
-		},
 		appIntent: appIntent{
 			name:                "Clock",
 			bundleIdentifier:    "com.apple.clock",

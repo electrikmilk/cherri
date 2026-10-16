@@ -66,6 +66,9 @@ action 'addquickreminder' addQuickReminder()
 // [Doc]: [Reminders] Remove Reminders
 action removeReminders(variable reminders: 'WFInputReminders')
 
+// [Doc]: [Alarms] Create Alarm: Creates an alarm at a specific time with a name, snooze allowance, and applicable weekdays.
+action 'com.apple.mobiletimer-framework.MobileTimerIntents.MTCreateAlarmIntent' createAlarm(text name, text time: 'dateComponents', bool ?allowsSnooze = true, array ?repeatWeekdays: '')
+
 // [Doc]: [Alarms] Get Alarms: Returns all of the alarms on the device.
 action 'com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent' getAlarms()
 
