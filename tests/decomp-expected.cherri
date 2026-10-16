@@ -1,7 +1,9 @@
 #include 'actions/location'
+#include 'actions/calendar'
 #define color red
 #define glyph apple
 
+startTimer(qty(5, "min"))
 const hello = prompt("Hello?")
 @confirm = prompt("What do you want?", "Number")
 const location = location(Ask)
@@ -51,3 +53,4 @@ repeat _ for 3 {
 for _ in @list {
 }
 @val = @dict['key2']
+startTimer(qty(@int, "sec"))
