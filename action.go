@@ -75,6 +75,9 @@ type appIntent struct {
 	name                string
 	bundleIdentifier    string
 	appIntentIdentifier string
+	// teamIdentifier is the signing team ID for third-party App Intent providers (e.g. Actions app).
+	// First-party Apple intents leave this empty and fall back to Apple's placeholder team ID.
+	teamIdentifier string
 }
 
 // actionDefinition defines an action, what it expects and has functions for checking the arguments and creating the parameters.
@@ -91,6 +94,7 @@ type actionDefinition struct {
 	decomp             func(action *ShortcutAction) (arguments []string)
 	appIntent          appIntent
 	outputType         tokenType
+	outputName         string // outputName is the human-readable output label the app itself declares (shown on the magic variable chip), used in place of the generic title-cased action name when set.
 	defaultAction      bool // Default action for this identifier during decompilation.
 	macOnly            bool
 	nonMacOnly         bool
@@ -832,9 +836,14 @@ func generateActionDebugDefinition() string {
 }
 
 func appIntentDescriptor(intent appIntent) map[string]any {
+	var teamIdentifier = intent.teamIdentifier
+	if teamIdentifier == "" {
+		// Apple first-party intents use this placeholder team ID.
+		teamIdentifier = "0000000000"
+	}
 	return map[string]any{
 		"AppIntentDescriptor": map[string]string{
-			"TeamIdentifier":      "0000000000",
+			"TeamIdentifier":      teamIdentifier,
 			"BundleIdentifier":    intent.bundleIdentifier,
 			"Name":                intent.name,
 			"AppIntentIdentifier": intent.appIntentIdentifier,

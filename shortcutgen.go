@@ -144,14 +144,28 @@ func makeVariableAction(t *token) {
 		}
 	}
 
+	// Array variables are entirely handled by makeArrayVariable, for both
+	// a populated literal (`@x = [...]`, which builds a list action + a
+	// setvariable wired to it) and a bare declaration (`@x: array`, which
+	// makeArrayVariable leaves as a no-op). The nothing-placeholder +
+	// empty-setvariable prologue below exists so a bare *scalar*
+	// declaration's variable reads back as empty instead of silently
+	// inheriting whatever the previous action output. Arrays don't need
+	// that: Shortcuts creates an array variable fresh on its first real
+	// write (appendvariable or this setvariable-from-list), so a bare
+	// `@x: array` with no value yet needs no runtime footprint at all —
+	// emitting the nothing+setvariable pair for it only produced a
+	// "Set Variable to Input" action that doesn't represent anything the
+	// user wrote.
+	if t.valueType == Arr {
+		makeArrayVariable(t)
+		return
+	}
+
 	if _, hasInput := setVariableParams["WFInput"]; !hasInput {
 		addStdAction("nothing", map[string]any{})
 	}
 	addStdAction("setvariable", setVariableParams)
-
-	if t.valueType == Arr {
-		makeArrayVariable(t)
-	}
 }
 
 func makeVariableInput(t *token, params map[string]any) {
@@ -826,7 +840,11 @@ func makeOutputName(token *token) string {
 	}
 	var typeOfToken = string(token.valueType)
 	if typeOfToken == "action" {
-		typeOfToken = token.value.(action).ident
+		var actionCall = token.value.(action)
+		typeOfToken = actionCall.ident
+		if actionDef, found := actions[actionCall.ident]; found && actionDef.outputName != "" {
+			return checkDuplicateOutputName(actionDef.outputName)
+		}
 	}
 
 	if token.valueType == "" {
@@ -838,42 +856,53 @@ func makeOutputName(token *token) string {
 	return checkDuplicateOutputName(customOutputName)
 }
 
+// makeArrayVariable builds an array literal (`@x = ["a", "b"]`) as a single
+// native `is.workflow.actions.list` action — the same action the list()
+// function call produces (see the "list" entry in actions_std.go) — followed
+// by one setvariable referencing that list action's output. This previously
+// built the array via a per-item gettext+appendvariable chain instead of the
+// native List action, which both looked nothing like what the Shortcuts app
+// itself produces and dropped a setvariable's worth of clarity for every
+// item. Reusing actions["list"].makeParams keeps this from drifting out of
+// sync with list()'s own item-encoding logic.
 func makeArrayVariable(t *token) {
 	if t.value == nil {
 		return
 	}
+
+	var listArgs []actionArgument
 	for _, value := range t.value.([]interface{}) {
 		if value == nil {
 			continue
 		}
-		var UUID = createUUID(&t.ident)
-		var valueType tokenType
-		var itemIdent string
+		var itemType tokenType
 		switch reflect.TypeOf(value).Kind() {
 		case reflect.String:
-			valueType = String
-			itemIdent = "Text"
+			itemType = String
 		case reflect.Float64:
-			valueType = Integer
-			itemIdent = "Number"
+			itemType = Integer
 		case reflect.Map:
-			valueType = Dict
-			itemIdent = "Dictionary"
+			itemType = Dict
 		default:
 			exit(fmt.Sprintf("Invalid array value '%v' (%s)", value, reflect.TypeOf(value)))
 		}
-		makeVariableValueAction(&token{
-			typeof:    valueType,
-			ident:     itemIdent,
-			valueType: valueType,
-			value:     value,
-		}, &itemIdent, &UUID)
-
-		addStdAction("appendvariable", map[string]any{
-			"WFInput":        inputValue(itemIdent, UUID),
-			"WFVariableName": t.ident,
-		})
+		listArgs = append(listArgs, actionArgument{valueType: itemType, value: value})
 	}
+
+	var outputName = checkDuplicateOutputName("List")
+	var listUUID = createUUID(&outputName)
+	uuids[outputName] = listUUID
+
+	var listParams = actions["list"].makeParams(listArgs)
+	listParams["CustomOutputName"] = outputName
+	listParams["UUID"] = listUUID
+	addStdAction("list", listParams)
+
+	addStdAction("setvariable", map[string]any{
+		"WFInput":             inputValue(outputName, listUUID),
+		"WFVariableName":      t.ident,
+		"WFSerializationType": "WFTextTokenAttachment",
+	})
 }
 
 func makeConditionalAction(t *token) {
