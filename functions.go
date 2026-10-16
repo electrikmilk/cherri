@@ -97,7 +97,10 @@ func isUsingFunctions() bool {
 
 func collectFunctionDefinition() {
 	var lineRef = newLineReference()
-	var identifier, arguments, outputType = collectActionDefinition('{')
+	var definition actionDefinition
+	var identifier = collectIdentifier()
+	checkDuplicateFunctionDeclaration(identifier)
+	collectActionSignature(&definition, '{')
 
 	advanceUntilExpect('{', 3)
 	advance()
@@ -107,11 +110,8 @@ func collectFunctionDefinition() {
 	lineRef.replaceLines()
 
 	functions[identifier] = &function{
-		definition: actionDefinition{
-			parameters: arguments,
-			outputType: outputType,
-		},
-		body: body,
+		definition: definition,
+		body:       body,
 	}
 }
 

@@ -97,6 +97,7 @@ type actionDefinition struct {
 	minVersion         float64
 	maxVersion         float64
 	builtin            bool // builtin is based on if the action was in the actions map when it was first initialized.
+	definedInCherri    bool // definedInCherri is set once a Cherri definition owns this entry, which is how a second Cherri definition of the same name is detected as a duplicate.
 }
 
 var enumerations = map[string][]string{
@@ -868,39 +869,54 @@ func parseActionDefinitions() {
 	tokens = []token{}
 }
 
-type actionPrefixModifiers struct {
-	macOnly            bool
-	nonMacOnly         bool
-	minVersion         float64
-	maxVersion         float64
-	shortIdentifier    string
-	overrideIdentifier string
-}
-
-func collectActionPrefixModifiers() (m actionPrefixModifiers) {
+func collectActionPrefixModifiers(definition *actionDefinition) {
 	if tokenAhead(Mac) {
-		m.macOnly = true
+		definition.macOnly = true
 		advance()
 	} else if tokenAhead(NonMac) {
-		m.nonMacOnly = true
+		definition.nonMacOnly = true
 		advance()
 	}
 
-	m.minVersion, m.maxVersion = collectVersionLimitsDefinition()
+	definition.minVersion, definition.maxVersion = collectVersionLimitsDefinition()
 
 	if char == '\'' {
 		advance()
 		var workflowIdentifier = collectRawString()
 		var parts = strings.Split(workflowIdentifier, ".")
 		if len(parts) < 3 || (len(parts) == 3 && workflowIdentifier == strings.ToLower(workflowIdentifier)) {
-			m.shortIdentifier = workflowIdentifier
+			definition.identifier = workflowIdentifier
 		} else {
-			m.overrideIdentifier = workflowIdentifier
+			definition.overrideIdentifier = workflowIdentifier
 		}
 		advance()
 	}
+}
 
-	return
+// internalDefinition returns the compiler-defined entry for name if a Cherri definition has not taken it over yet.
+func internalDefinition(name string) *actionDefinition {
+	var existing = actions[name]
+	if existing == nil || existing.definedInCherri {
+		return nil
+	}
+
+	return existing
+}
+
+// defineAction stores a definition collected from Cherri, keeping the logic of a compiler-defined action of the same name
+// so that only the declaration has to be written in Cherri.
+func defineAction(name string, definition *actionDefinition) {
+	var internal = internalDefinition(name)
+	if internal != nil {
+		definition.check = internal.check
+		definition.makeParams = internal.makeParams
+		definition.appendParamsFunc = internal.appendParamsFunc
+		definition.decomp = internal.decomp
+		definition.appIntent = internal.appIntent
+	}
+
+	definition.definedInCherri = true
+	actions[name] = definition
 }
 
 func collectDefinedAction() {
@@ -914,42 +930,33 @@ func collectDefinedAction() {
 		return
 	}
 
-	var defaultAction bool
+	var definition = &actionDefinition{doc: doc}
 	if tokenAhead(Default) {
-		defaultAction = true
+		definition.defaultAction = true
 		advance()
 	}
 
-	var m = collectActionPrefixModifiers()
+	collectActionPrefixModifiers(definition)
 
-	var identifier, arguments, outputType = collectActionDefinition('\n')
-	if m.shortIdentifier == "" {
-		m.shortIdentifier = strings.ToLower(identifier)
+	var identifier = collectIdentifier()
+	checkDuplicateActionDeclaration(identifier)
+	collectActionSignature(definition, '\n')
+	if definition.identifier == "" {
+		definition.identifier = strings.ToLower(identifier)
 	}
 
 	advance()
 
-	var setParams = collectAdditionalParams()
+	definition.appendParams = collectAdditionalParams()
 
 	lineRef.replaceLines()
 
-	actions[identifier] = &actionDefinition{
-		identifier:         m.shortIdentifier,
-		overrideIdentifier: m.overrideIdentifier,
-		parameters:         arguments,
-		outputType:         outputType,
-		appendParams:       setParams,
-		defaultAction:      defaultAction,
-		macOnly:            m.macOnly,
-		nonMacOnly:         m.nonMacOnly,
-		minVersion:         m.minVersion,
-		maxVersion:         m.maxVersion,
-		doc:                doc,
-	}
+	defineAction(identifier, definition)
 }
 
 func collectToggleSetAction(doc selfDoc) {
-	var m = collectActionPrefixModifiers()
+	var shared actionDefinition
+	collectActionPrefixModifiers(&shared)
 	var name = collectIdentifier()
 	skipInlineWhitespace()
 
@@ -984,39 +991,24 @@ func collectToggleSetAction(doc selfDoc) {
 	}
 	toggleAppendParams["operation"] = "toggle"
 
-	var toggleDoc = doc
-	toggleDoc.title = "Toggle " + docTitle
-	actions["toggle"+name] = &actionDefinition{
-		doc:                toggleDoc,
-		identifier:         m.shortIdentifier,
-		overrideIdentifier: m.overrideIdentifier,
-		parameters:         extraParams,
-		appendParams:       toggleAppendParams,
-		macOnly:            m.macOnly,
-		nonMacOnly:         m.nonMacOnly,
-		minVersion:         m.minVersion,
-		maxVersion:         m.maxVersion,
-	}
+	var toggleDefinition = shared
+	toggleDefinition.doc = doc
+	toggleDefinition.doc.title = "Toggle " + docTitle
+	toggleDefinition.parameters = extraParams
+	toggleDefinition.appendParams = toggleAppendParams
+	defineAction("toggle"+name, &toggleDefinition)
 
 	var setAppendParams = maps.Clone(extraBody)
 	if setAppendParams == nil {
 		setAppendParams = map[string]any{}
 	}
-	var setParameters = append([]parameterDefinition{{name: "status", validType: Bool, key: setKey}}, extraParams...)
-	var setDoc = doc
-	setDoc.title = "Set " + docTitle
-	actions["set"+name] = &actionDefinition{
-		doc:                setDoc,
-		identifier:         m.shortIdentifier,
-		overrideIdentifier: m.overrideIdentifier,
-		parameters:         setParameters,
-		appendParams:       setAppendParams,
-		defaultAction:      true,
-		macOnly:            m.macOnly,
-		nonMacOnly:         m.nonMacOnly,
-		minVersion:         m.minVersion,
-		maxVersion:         m.maxVersion,
-	}
+	var setDefinition = shared
+	setDefinition.doc = doc
+	setDefinition.doc.title = "Set " + docTitle
+	setDefinition.parameters = append([]parameterDefinition{{name: "status", validType: Bool, key: setKey}}, extraParams...)
+	setDefinition.appendParams = setAppendParams
+	setDefinition.defaultAction = true
+	defineAction("set"+name, &setDefinition)
 }
 
 func collectAdditionalParams() (params map[string]interface{}) {
@@ -1079,19 +1071,33 @@ func collectVersionLimitsDefinition() (minVersion float64, maxVersion float64) {
 	return minVersion, maxVersion
 }
 
-func collectActionDefinition(until rune) (identifier string, arguments []parameterDefinition, outputType tokenType) {
-	identifier = collectIdentifier()
-	if _, found := functions[identifier]; found {
-		parserError(fmt.Sprintf("Duplicate declaration of function '%s()'", identifier))
-	}
+func checkDuplicateFunctionDeclaration(identifier string) {
+	checkDuplicateFunction(identifier)
 	if _, found := actions[identifier]; found {
 		parserError(fmt.Sprintf("Duplicate declaration of action '%s()'", identifier))
 	}
+}
 
+// checkDuplicateActionDeclaration allows an action to be declared over a compiler-defined action, which is how
+// declarations in Cherri attach to internal logic.
+func checkDuplicateActionDeclaration(identifier string) {
+	checkDuplicateFunction(identifier)
+	if _, found := actions[identifier]; found && internalDefinition(identifier) == nil {
+		parserError(fmt.Sprintf("Duplicate declaration of action '%s()'", identifier))
+	}
+}
+
+func checkDuplicateFunction(identifier string) {
+	if _, found := functions[identifier]; found {
+		parserError(fmt.Sprintf("Duplicate declaration of function '%s()'", identifier))
+	}
+}
+
+func collectActionSignature(definition *actionDefinition, until rune) {
 	if next(1) != ')' {
 		advance()
 		skipWhitespace()
-		arguments = collectParameterDefinitions()
+		definition.parameters = collectParameterDefinitions()
 	} else {
 		advanceTimes(2)
 	}
@@ -1099,10 +1105,8 @@ func collectActionDefinition(until rune) (identifier string, arguments []paramet
 	if tokenAhead(Colon) {
 		skipWhitespace()
 		var value any
-		collectType(&outputType, &value, until)
+		collectType(&definition.outputType, &value, until)
 	}
-
-	return
 }
 
 func collectEnumerationType(valueType *tokenType, quantity *bool, until rune) (enumeration string) {
