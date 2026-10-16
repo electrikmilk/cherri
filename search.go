@@ -19,9 +19,6 @@ func handleActionSearch() {
 	if args.Value("action") == "" {
 		for identifier, definition := range actions {
 			setCurrentAction(identifier, definition)
-			if !args.Using("debug") && undefinable() {
-				continue
-			}
 			printActionDebugInfo()
 			fmt.Println(generateActionDefinition(parameterDefinition{}, true))
 			fmt.Print("\n---\n")
