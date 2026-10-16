@@ -109,15 +109,8 @@ func initParse() {
 	}
 }
 
-func markBuiltins() {
-	for _, action := range actions {
-		action.builtin = true
-	}
-}
-
 func preParse() {
 	defineRawAction()
-	markBuiltins()
 
 	if pkg, found := loadPackage("info.plist"); found {
 		currentPkg = pkg
