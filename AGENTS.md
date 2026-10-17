@@ -4,6 +4,8 @@ This file provides guidance to agents when working with code in this repository.
 
 You must read `CONTRIBUTING.md` at the start of every session.
 
+Agents must co-author every commit they make, using a `Co-Authored-By` trailer that names the model that wrote the changes.
+
 ## What This Is
 
 Language documentation: check `~/cherrilang.org` for a local copy first, otherwise fall back to https://cherrilang.org/language/
