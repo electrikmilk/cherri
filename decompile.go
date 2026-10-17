@@ -214,7 +214,7 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 
 		switch valueTwo := wfValue["Value"].(type) {
 		case map[string]interface{}:
-			if itemsValue, isMap := valueTwo["Value"].(map[string]interface{}); isMap {
+			if itemsValue, isMap := valueTwo["Value"].(map[string]interface{}); isMap && itemsValue["WFDictionaryFieldValueItems"] != nil {
 				var dictionaryItems []WFDictionaryFieldValueItem
 				mapToStruct(itemsValue["WFDictionaryFieldValueItems"], &dictionaryItems)
 				mapDictionaryValueIdentifiers(dictionaryItems)
@@ -912,7 +912,10 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	case itemTypeDict:
 		var dictionaryItems []WFDictionaryFieldValueItem
 		var value = itemValueMap["Value"].(map[string]interface{})
-		mapToStruct(value["Value"].(map[string]interface{})["WFDictionaryFieldValueItems"], &dictionaryItems)
+		var fieldValueItems = value["Value"].(map[string]interface{})["WFDictionaryFieldValueItems"]
+		if fieldValueItems != nil {
+			mapToStruct(fieldValueItems, &dictionaryItems)
+		}
 		itemValue = decompDictionaryItems(dictionaryItems)
 	default:
 		itemValue = itemStringValue
