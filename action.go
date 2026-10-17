@@ -96,7 +96,7 @@ type actionDefinition struct {
 	nonMacOnly         bool
 	minVersion         float64
 	maxVersion         float64
-	definedInCherri    bool // definedInCherri is false for an action defined only in Go, and is how a second Cherri definition of the same name is detected as a duplicate.
+	parsed             bool // parsed is false for an action defined only in Go, and is how a second Cherri definition of the same name is detected as a duplicate.
 }
 
 var enumerations = map[string][]string{
@@ -789,7 +789,7 @@ func generateActionParamDefinition(param parameterDefinition) string {
 func generateActionDebugDefinition() string {
 	var definition strings.Builder
 	var definitionType string
-	if !currentAction.definition.definedInCherri {
+	if !currentAction.definition.parsed {
 		definitionType = "#builtin"
 	}
 
@@ -883,7 +883,7 @@ func collectActionPrefixModifiers(definition *actionDefinition) {
 // internalDefinition returns the compiler-defined entry for name if a Cherri definition has not taken it over yet.
 func internalDefinition(name string) *actionDefinition {
 	var existing = actions[name]
-	if existing == nil || existing.definedInCherri {
+	if existing == nil || existing.parsed {
 		return nil
 	}
 
@@ -902,7 +902,7 @@ func defineAction(name string, definition *actionDefinition) {
 		definition.appIntent = internal.appIntent
 	}
 
-	definition.definedInCherri = true
+	definition.parsed = true
 	actions[name] = definition
 }
 
