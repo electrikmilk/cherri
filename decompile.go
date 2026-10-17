@@ -214,6 +214,9 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 			var valueTwo = wfValue["Value"].(map[string]interface{})
 			if valueTwo != nil && valueTwo["Value"] != nil && reflect.TypeOf(valueTwo["Value"]).Kind() == reflect.Map {
 				var itemsValue = valueTwo["Value"].(map[string]interface{})
+				if itemsValue["WFDictionaryFieldValueItems"] == nil {
+					continue
+				}
 
 				var dictionaryItems []WFDictionaryFieldValueItem
 				mapToStruct(itemsValue["WFDictionaryFieldValueItems"], &dictionaryItems)
@@ -885,7 +888,11 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	case itemTypeDict:
 		var dictionaryItems []WFDictionaryFieldValueItem
 		var value = itemValueMap["Value"].(map[string]interface{})
-		mapToStruct(value["Value"].(map[string]interface{})["WFDictionaryFieldValueItems"], &dictionaryItems)
+		var fieldValueItems = value["Value"].(map[string]interface{})["WFDictionaryFieldValueItems"]
+		// An empty nested dictionary has no WFDictionaryFieldValueItems.
+		if fieldValueItems != nil {
+			mapToStruct(fieldValueItems, &dictionaryItems)
+		}
 		itemValue = decompDictionaryItems(dictionaryItems)
 	default:
 		itemValue = itemStringValue
