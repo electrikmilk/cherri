@@ -1125,6 +1125,42 @@ var actions = map[string]*actionDefinition{
 			return
 		},
 	},
+	"run": {
+		doc: selfDoc{
+			title:       "Run Shortcut",
+			description: "Run Shortcut with name `shortcutName`, providing it with `input`.",
+			category:    "shortcuts",
+		},
+		identifier: "runworkflow",
+		parameters: []parameterDefinition{
+			{
+				name:      "shortcutName",
+				key:       "WFWorkflowName",
+				validType: String,
+			},
+			{
+				name:      "input",
+				key:       "WFInput",
+				validType: Variable,
+				optional:  true,
+			},
+		},
+		// The runtime requires a WFWorkflow dict to bind the target shortcut;
+		// without it the action silently halts every subsequent action.
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return nil
+			}
+			var name = getArgValue(args[0]).(string)
+			return map[string]any{
+				"WFWorkflow": map[string]any{
+					"workflowIdentifier": uuid.New().String(),
+					"isSelf":             false,
+					"workflowName":       name,
+				},
+			}
+		},
+	},
 	"list": {
 		doc: selfDoc{
 			title:       "List",
