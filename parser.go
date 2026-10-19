@@ -1497,10 +1497,14 @@ func collectEndStatement() {
 		reachable()
 	}
 
-	if controlFlowGroup.identifier == "" {
-		addNothing()
-	}
-
+	// Closing an unnamed if/repeat/repeat.each block used to bracket the
+	// EndClosure token with addNothing() placeholders on both sides, on the
+	// theory that otherwise the next action could silently inherit the
+	// block's last action as an implicit magic-variable input. Shortcuts
+	// doesn't do that: an action only receives another action's output when
+	// something actually wires a magic-variable chip into it — there's no
+	// positional/implicit chaining to guard against, so neither nothing
+	// action represented anything the user wrote.
 	variables[controlFlowGroup.identifier] = varValue{
 		constant: true,
 	}
@@ -1512,7 +1516,6 @@ func collectEndStatement() {
 		value:     controlFlowGroup.identifier,
 	})
 	groupingIdx--
-	addNothing()
 }
 
 // groupStatement creates a grouping UUID for a statement and adds to the statement groupings.
