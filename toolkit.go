@@ -341,7 +341,10 @@ func getContainerMeta(containerId *string) (string, error) {
 }
 
 func getActions(idPattern string) ([]actionTool, error) {
-	var query = `select * from Tools WHERE id LIKE ?`
+	// Name the columns, since macOS 27 added resourceURL and pythonName to Tools between existing columns.
+	var query = `select rowId, id, toolType, flags, visibilityFlags, requirements, authenticationPolicy, customIcon,
+		deprecationReplacementId, sourceActionProvider, outputTypeInstance, sourceContainerId, attributionContainerId
+		from Tools WHERE id LIKE ?`
 
 	var rows, err = toolkit.Query(query, idPattern+".%")
 	if err != nil {
