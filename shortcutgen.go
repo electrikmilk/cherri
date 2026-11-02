@@ -122,6 +122,26 @@ func makeCommentAction(comment string) {
 }
 
 func makeVariableAction(t *token) {
+	// A bare text declaration (`@x: text`) only tells the compiler the
+	// variable's type. Shortcuts reads an unset variable as empty text, so
+	// emitting an empty Text action plus a setvariable for it just adds a
+	// blank "Text" action the user never wrote. An explicit `@x = ""` still
+	// carries a value and is emitted normally.
+	if t.typeof == Variable && (t.valueType == String || t.valueType == RawString) && t.value == nil {
+		return
+	}
+
+	// `@arr += "{text}"` appends a variable that is already text, so wrapping
+	// it in a Text action first only adds a redundant intermediate action.
+	if identifier, ok := bareTextReference(t); ok {
+		addStdAction("appendvariable", map[string]any{
+			"WFInput":             variableValue(varValue{value: identifier}),
+			"WFVariableName":      t.ident,
+			"WFSerializationType": "WFTextTokenAttachment",
+		})
+		return
+	}
+
 	var setVariableParams = map[string]any{
 		"WFVariableName": t.ident,
 	}
@@ -144,14 +164,28 @@ func makeVariableAction(t *token) {
 		}
 	}
 
+	// Array variables are entirely handled by makeArrayVariable, for both
+	// a populated literal (`@x = [...]`, which builds a list action + a
+	// setvariable wired to it) and a bare declaration (`@x: array`, which
+	// makeArrayVariable leaves as a no-op). The nothing-placeholder +
+	// empty-setvariable prologue below exists so a bare *scalar*
+	// declaration's variable reads back as empty instead of silently
+	// inheriting whatever the previous action output. Arrays don't need
+	// that: Shortcuts creates an array variable fresh on its first real
+	// write (appendvariable or this setvariable-from-list), so a bare
+	// `@x: array` with no value yet needs no runtime footprint at all —
+	// emitting the nothing+setvariable pair for it only produced a
+	// "Set Variable to Input" action that doesn't represent anything the
+	// user wrote.
+	if t.valueType == Arr {
+		makeArrayVariable(t)
+		return
+	}
+
 	if _, hasInput := setVariableParams["WFInput"]; !hasInput {
 		addStdAction("nothing", map[string]any{})
 	}
 	addStdAction("setvariable", setVariableParams)
-
-	if t.valueType == Arr {
-		makeArrayVariable(t)
-	}
 }
 
 func makeVariableInput(t *token, params map[string]any) {
@@ -174,6 +208,58 @@ func makeVariableInput(t *token, params map[string]any) {
 
 		params["WFSerializationType"] = "WFTextTokenAttachment"
 	}
+}
+
+var loneInlineVarRegex = regexp.MustCompile(`^\{@?(\w+)}$`)
+
+// bareTextReference reports whether `t` is an append (`+=`) onto an array whose
+// value is exactly one `{variable}` interpolation of something that is already
+// text, and returns that variable's identifier.
+//
+// The text-only restriction is deliberate: `"{n}"` on a number is also how
+// Cherri coerces to text, and passing the bare reference through would change
+// the appended item's type. Suffixes (`['key']`, `.coerce`) are left to the
+// normal path for the same reason.
+func bareTextReference(t *token) (identifier string, ok bool) {
+	if t.typeof != AddTo || t.valueType != String {
+		return
+	}
+	if target, found := variables[t.ident]; !found || target.valueType != Arr {
+		return
+	}
+
+	var str, isString = t.value.(string)
+	if !isString {
+		return
+	}
+	var match = loneInlineVarRegex.FindStringSubmatch(str)
+	if match == nil {
+		return
+	}
+
+	var referenced, found = getVariableValue(match[1])
+	if !found || !isTextValued(referenced) {
+		return
+	}
+
+	return match[1], true
+}
+
+// isTextValued reports whether a variable is known to hold text, either by its
+// declared type or because it is bound to an action whose output is text.
+func isTextValued(v *varValue) bool {
+	switch v.valueType {
+	case String, RawString:
+		return true
+	case Action:
+		if call, isAction := v.value.(action); isAction {
+			if definition, found := actions[call.ident]; found {
+				return definition.outputType == String
+			}
+		}
+	}
+
+	return false
 }
 
 func makeVariableValueAction(token *token, customOutputName *string, varUUID *string) {
@@ -826,7 +912,11 @@ func makeOutputName(token *token) string {
 	}
 	var typeOfToken = string(token.valueType)
 	if typeOfToken == "action" {
-		typeOfToken = token.value.(action).ident
+		var actionCall = token.value.(action)
+		typeOfToken = actionCall.ident
+		if actionDef, found := actions[actionCall.ident]; found && actionDef.outputName != "" {
+			return checkDuplicateOutputName(actionDef.outputName)
+		}
 	}
 
 	if token.valueType == "" {
@@ -838,42 +928,53 @@ func makeOutputName(token *token) string {
 	return checkDuplicateOutputName(customOutputName)
 }
 
+// makeArrayVariable builds an array literal (`@x = ["a", "b"]`) as a single
+// native `is.workflow.actions.list` action — the same action the list()
+// function call produces (see the "list" entry in actions_std.go) — followed
+// by one setvariable referencing that list action's output. This previously
+// built the array via a per-item gettext+appendvariable chain instead of the
+// native List action, which both looked nothing like what the Shortcuts app
+// itself produces and dropped a setvariable's worth of clarity for every
+// item. Reusing actions["list"].makeParams keeps this from drifting out of
+// sync with list()'s own item-encoding logic.
 func makeArrayVariable(t *token) {
 	if t.value == nil {
 		return
 	}
+
+	var listArgs []actionArgument
 	for _, value := range t.value.([]interface{}) {
 		if value == nil {
 			continue
 		}
-		var UUID = createUUID(&t.ident)
-		var valueType tokenType
-		var itemIdent string
+		var itemType tokenType
 		switch reflect.TypeOf(value).Kind() {
 		case reflect.String:
-			valueType = String
-			itemIdent = "Text"
+			itemType = String
 		case reflect.Float64:
-			valueType = Integer
-			itemIdent = "Number"
+			itemType = Integer
 		case reflect.Map:
-			valueType = Dict
-			itemIdent = "Dictionary"
+			itemType = Dict
 		default:
 			exit(fmt.Sprintf("Invalid array value '%v' (%s)", value, reflect.TypeOf(value)))
 		}
-		makeVariableValueAction(&token{
-			typeof:    valueType,
-			ident:     itemIdent,
-			valueType: valueType,
-			value:     value,
-		}, &itemIdent, &UUID)
-
-		addStdAction("appendvariable", map[string]any{
-			"WFInput":        inputValue(itemIdent, UUID),
-			"WFVariableName": t.ident,
-		})
+		listArgs = append(listArgs, actionArgument{valueType: itemType, value: value})
 	}
+
+	var outputName = checkDuplicateOutputName("List")
+	var listUUID = createUUID(&outputName)
+	uuids[outputName] = listUUID
+
+	var listParams = actions["list"].makeParams(listArgs)
+	listParams["CustomOutputName"] = outputName
+	listParams["UUID"] = listUUID
+	addStdAction("list", listParams)
+
+	addStdAction("setvariable", map[string]any{
+		"WFInput":             inputValue(outputName, listUUID),
+		"WFVariableName":      t.ident,
+		"WFSerializationType": "WFTextTokenAttachment",
+	})
 }
 
 func makeConditionalAction(t *token) {
@@ -888,11 +989,18 @@ func makeConditionalAction(t *token) {
 		if len(cond.conditions) == 1 || iosVersion < 18 {
 			var firstCondition = cond.conditions[0]
 			var firstArg = firstCondition.arguments[0]
+			var inputType = inputEffectiveType(firstArg.value.(varValue))
+			var inputVariable = variableValue(firstArg.value.(varValue))
+			var conditionCode = firstCondition.condition
+			if isBareBooleanCondition(firstCondition, inputType) {
+				inputVariable = booleanNameInput(inputVariable.(WFTextTokenAttachment))
+				conditionCode = conditions[Is]
+				conditionalParams["WFConditionalActionString"] = booleanTrueString
+			}
 			conditionalParams["WFInput"] = map[string]any{
 				"Type":     "Variable",
-				"Variable": variableValue(firstArg.value.(varValue)),
+				"Variable": inputVariable,
 			}
-			var conditionCode = firstCondition.condition
 			if len(firstCondition.arguments) > 1 && firstCondition.arguments[1].valueType == Quantity {
 				switch conditionCode {
 				case conditions[GreaterThan]:
@@ -901,7 +1009,6 @@ func makeConditionalAction(t *token) {
 					conditionCode = 1001
 				}
 			}
-			var inputType = inputEffectiveType(firstArg.value.(varValue))
 			if len(firstCondition.arguments) > 1 {
 				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[1], inputType)
 			}
@@ -923,6 +1030,27 @@ func makeConditionalAction(t *token) {
 }
 
 var filterTemplates []WFConditionParam
+
+const booleanTrueString = "true"
+
+// isBareBooleanCondition reports whether a conditional is a bare `if @x` (no comparison value)
+// on a Boolean-typed input. Shortcuts is supposed to treat that as "is true", but it renders
+// as an unresolved "is +" and demands a value (a long-standing Shortcuts bug).
+func isBareBooleanCondition(c condition, inputType tokenType) bool {
+	return inputType == Bool && len(c.arguments) == 1 && c.condition == conditions[Any]
+}
+
+// booleanNameInput coerces a Boolean variable reference to its Name, which turns it into text so
+// the conditional can compare it with "true". This is the same shape Shortcuts writes when the
+// workaround is applied by hand in the editor.
+func booleanNameInput(attachment WFTextTokenAttachment) WFTextTokenAttachment {
+	attachment.Value.Aggrandizements = append(attachment.Value.Aggrandizements, Aggrandizement{
+		Type:             "WFPropertyVariableAggrandizement",
+		PropertyName:     "Name",
+		PropertyUserInfo: "WFItemName",
+	})
+	return attachment
+}
 
 // inputEffectiveType resolves a conditional's left-hand variable to its concrete type,
 // which determines which plist key the comparison value is written into.
@@ -994,12 +1122,19 @@ func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate 
 		}
 
 		var inputType = inputEffectiveType(condition.arguments[0].value.(varValue))
+		var inputVariable = variableValue(condition.arguments[0].value.(varValue)).(WFTextTokenAttachment)
 		var conditionParam = WFConditionParam{
 			WFCondition: conditionCode,
 			WFInput: WFInputVariable{
 				Type:     "Variable",
-				Variable: variableValue(condition.arguments[0].value.(varValue)).(WFTextTokenAttachment),
+				Variable: inputVariable,
 			},
+		}
+
+		if isBareBooleanCondition(condition, inputType) {
+			conditionParam.WFCondition = conditions[Is]
+			conditionParam.WFInput.Variable = booleanNameInput(inputVariable)
+			conditionParam.WFConditionalActionString = booleanTrueString
 		}
 
 		if len(condition.arguments) > 1 {
