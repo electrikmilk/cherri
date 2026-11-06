@@ -114,6 +114,7 @@ Plus, some stability comes with this project being on macOS and not iOS, and I'm
 
 - [VS Code Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=electrikmilk.cherri-vscode-extension) ([repo](https://github.com/electrikmilk/cherri-vscode))
 - [Zed Editor](https://github.com/videah/zed-cherri)
+- [Cherri Shortcuts App](https://apps.apple.com/us/app/cherri-shortcuts/id6823830776) **Unofficial app** - Cherri in an app experience similar to JellyCuts. Keep in mind, this app is not maintained as apart of Cherri and comes with no support or guarantees.
 
 ## Credits
 
