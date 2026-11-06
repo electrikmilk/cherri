@@ -939,6 +939,10 @@ func escapeString(value string) string {
 }
 
 func decompValueObject(value map[string]interface{}) string {
+	if isRawActionSerializedValue(value, rawActionQuantityFieldValueSerializationType) {
+		return decompQuantityFieldValue(value)
+	}
+
 	if v, found := value["Value"]; found {
 		if reflect.TypeOf(v).Kind() == reflect.Map {
 			value = v.(map[string]interface{})
@@ -981,9 +985,25 @@ func decompValueObject(value map[string]interface{}) string {
 		return fmt.Sprintf("Ask: \"%s\"", value["Prompt"])
 	case globals[ShortcutInput].variableType:
 		return ShortcutInput
+	case globals["CurrentDate"].variableType:
+		if value["Aggrandizements"] == nil {
+			return "CurrentDate"
+		}
 	}
 
 	return decompObjectValue(value)
+}
+
+func decompQuantityFieldValue(value map[string]interface{}) string {
+	var quantityValue, ok = value["Value"].(map[string]interface{})
+	if !ok {
+		return "qty(0, \"\")"
+	}
+
+	var magnitude = decompValue(quantityValue["Magnitude"])
+	var unit = decompValue(quantityValue["Unit"])
+
+	return fmt.Sprintf("qty(%s, %s)", strings.Trim(magnitude, "\""), unit)
 }
 
 func decompObjectValue(valueObj any) string {
@@ -1208,33 +1228,54 @@ func actionIdentifierEnd(identifier string) string {
 }
 
 func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
-	for i, param := range matchedAction.parameters {
+	type decompArgument struct {
+		value   string
+		present bool
+	}
+
+	var arguments []decompArgument
+	var lastPresent = -1
+	for _, param := range matchedAction.parameters {
 		if param.key == "" {
 			continue
 		}
 
-		var argValue string
+		var argument decompArgument
 		if value, found := action.WFWorkflowActionParameters[param.key]; found {
-			argValue = decompValue(value)
+			argument.value = decompValue(value)
+			argument.present = true
 		} else if !param.optional {
-			argValue = makeDefaultValue(param)
+			argument.value = makeDefaultValue(param)
+			argument.present = true
 		}
 
 		switch param.validType {
 		case Integer:
-			if startsWith(Ask, argValue) {
+			if startsWith(Ask, argument.value) {
 				break
 			}
-			argValue = strings.Trim(argValue, "\"")
+			argument.value = strings.Trim(argument.value, "\"")
 		}
 
-		if argValue != "" {
-			if i == 0 {
-				actionCallCode.WriteString(argValue)
-			} else {
-				actionCallCode.WriteString(fmt.Sprintf(", %s", argValue))
-			}
+		arguments = append(arguments, argument)
+		if argument.present {
+			lastPresent = len(arguments) - 1
 		}
+	}
+
+	if lastPresent == -1 {
+		return
+	}
+
+	for i, argument := range arguments[:lastPresent+1] {
+		if i > 0 {
+			actionCallCode.WriteString(", ")
+		}
+		if argument.value == "" {
+			actionCallCode.WriteString("nil")
+			continue
+		}
+		actionCallCode.WriteString(argument.value)
 	}
 }
 
@@ -1292,19 +1333,100 @@ func processRawParameters(params map[string]any) map[string]any {
 	for key, value := range params {
 		if key == UUID || key == "CustomOutputName" {
 			delete(params, key)
+			continue
 		}
 
-		if reflect.TypeOf(value).Kind() == reflect.Map {
-			decompilingDictionary = true
-			params[key] = decompValueObject(value.(map[string]interface{}))
-			decompilingDictionary = false
+		if value != nil && reflect.TypeOf(value).Kind() == reflect.Map {
+			params[key] = decompRawParameterValue(value)
 		}
 	}
 
 	return params
 }
 
+func decompRawParameterValue(value any) any {
+	if value == nil || reflect.TypeOf(value).Kind() != reflect.Map {
+		return value
+	}
+
+	var valueMap = value.(map[string]interface{})
+	if isRawActionSerializedValue(valueMap, rawActionQuantityFieldValueSerializationType) {
+		return decompRawActionQuantityFieldValue(valueMap)
+	}
+
+	decompilingDictionary = true
+	var decompiledValue = decompValueObject(valueMap)
+	decompilingDictionary = false
+	return decompiledValue
+}
+
+func decompRawActionQuantityFieldValue(value map[string]interface{}) map[string]any {
+	var quantityValue = map[string]any{}
+	var valueMap, ok = value["Value"].(map[string]interface{})
+	if ok {
+		if magnitude, found := valueMap["Magnitude"]; found {
+			quantityValue["Magnitude"] = decompRawActionQuantityComponent(magnitude)
+		}
+		if unit, found := valueMap["Unit"]; found {
+			quantityValue["Unit"] = decompRawActionQuantityComponent(unit)
+		}
+	}
+
+	return map[string]any{
+		"Value":               quantityValue,
+		"WFSerializationType": rawActionQuantityFieldValueSerializationType,
+	}
+}
+
+func decompRawActionQuantityComponent(value any) any {
+	if isRawActionVariableReference(value) {
+		var identifier = strings.Trim(decompValue(value), "\"")
+		return fmt.Sprintf("${%s}", identifier)
+	}
+
+	return value
+}
+
+func isRawActionVariableReference(value any) bool {
+	if value == nil || reflect.TypeOf(value).Kind() != reflect.Map {
+		return false
+	}
+
+	var valueMap = value.(map[string]interface{})
+	if wrappedValue, found := valueMap["Value"]; found && wrappedValue != nil && reflect.TypeOf(wrappedValue).Kind() == reflect.Map {
+		valueMap = wrappedValue.(map[string]interface{})
+	}
+
+	var valueType, ok = valueMap["Type"].(string)
+	if !ok {
+		return false
+	}
+	if valueType == "ActionOutput" || valueType == "Variable" {
+		return true
+	}
+	for _, global := range globals {
+		if valueType == global.variableType {
+			return true
+		}
+	}
+
+	return false
+}
+
 func matchAction(action *ShortcutAction) (name string, definition actionDefinition) {
+	// Health sample variants share an identifier; preserve the second quantity or category value.
+	if action.WFWorkflowActionIdentifier == "is.workflow.actions.health.quantity.log" {
+		var call = "logHealthQuantitySample"
+		if _, found := action.WFWorkflowActionParameters["WFQuantitySampleAdditionalQuantity"]; found {
+			call = "logBloodPressure"
+		} else if _, found := action.WFWorkflowActionParameters["WFCategorySampleEnumeration"]; found {
+			call = "logHealthCategorySample"
+		}
+		if def, found := actions[call]; found {
+			return call, *def
+		}
+	}
+
 	for call, def := range actions {
 		var identifier = strings.ToLower(call)
 		if def.identifier != "" {
