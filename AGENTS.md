@@ -320,6 +320,8 @@ A signed Shortcut is necessary but not sufficient to confirm correct behavior. T
 
 **Workflow:** Build the equivalent Shortcut in the Shortcuts app, share it via iCloud, then retrieve its canonical plist to compare against Cherri's output. Use `--debug` (`-d`) to make Cherri emit its own plist for the comparison, and `--output=` (`-o=`) to control where the compiled `.shortcut` file is written. Run `go run . --help` for the full list of CLI flags.
 
+**On macOS, skip the iCloud round trip:** `.claude/skills/actions-sync/scripts/shortcut-plist.sh "<shortcut name>"` prints the actions plist the Shortcuts app stored for an installed shortcut, `.claude/skills/actions-sync/scripts/actions-sync.sh` compares the actions in the Shortcuts ToolKit databases (macOS and the booted iOS simulator) with Cherri's definitions, and `.claude/skills/actions-sync/scripts/actions-sync-params.sh` compares their parameters and enum values. See `.claude/skills/actions-sync/SKILL.md` for usage and limits.
+
 **Fetching a Shortcuts iCloud plist:**
 ```bash
 # Given a share URL like https://www.icloud.com/shortcuts/{identifier}
