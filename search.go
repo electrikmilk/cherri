@@ -5,8 +5,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/electrikmilk/args-parser"
@@ -16,9 +19,10 @@ func handleActionSearch() {
 	if args.Value("action") == "" {
 		for identifier, definition := range actions {
 			setCurrentAction(identifier, definition)
-			if undefinable() {
+			if !args.Using("debug") && undefinable() {
 				continue
 			}
+			printActionDebugInfo()
 			fmt.Println(generateActionDefinition(parameterDefinition{}, true))
 			fmt.Print("\n---\n")
 		}
@@ -34,6 +38,7 @@ func actionsSearch() {
 	var identifier = args.Value("action")
 	if _, found := actions[identifier]; found {
 		setCurrentAction(identifier, actions[identifier])
+		printActionDebugInfo()
 		fmt.Println(generateActionDefinition(parameterDefinition{}, true))
 		return
 	}
@@ -72,6 +77,61 @@ func actionsSearch() {
 		fmt.Println(ansi("\nThe closest actions are:", yellow, italic, bold))
 		fmt.Println(actionSearchResults.String())
 	}
+}
+
+type debugParameter struct {
+	Key  string   `json:"key"`
+	Enum []string `json:"enum,omitempty"`
+}
+
+type debugParameters struct {
+	Parameters []debugParameter `json:"parameters"`
+	Fixed      []string         `json:"fixed,omitempty"`
+	Dynamic    bool             `json:"dynamic"`
+}
+
+// printActionDebugInfo prints what is needed to match the current action against the Shortcuts ToolKit DB.
+func printActionDebugInfo() {
+	if !args.Using("debug") {
+		return
+	}
+
+	printActionIdentifiers()
+	printActionParameters()
+}
+
+// printActionParameters prints the plist keys the current action maps from its arguments as JSON.
+// Dynamic actions build some of their keys in Go from the arguments, so their keys cannot be listed completely.
+func printActionParameters() {
+	var definition = currentAction.definition
+	var debugInfo = debugParameters{
+		Parameters: []debugParameter{},
+		Fixed:      slices.Sorted(maps.Keys(definition.appendParams)),
+		Dynamic:    definition.makeParams != nil || definition.appendParamsFunc != nil,
+	}
+
+	for _, param := range definition.parameters {
+		if param.key == "" {
+			continue
+		}
+		debugInfo.Parameters = append(debugInfo.Parameters, debugParameter{Key: param.key, Enum: enumerations[param.enum]})
+	}
+
+	var encoded, encodeErr = json.Marshal(debugInfo)
+	handle(encodeErr)
+	fmt.Println("parameters:", string(encoded))
+}
+
+func printActionIdentifiers() {
+	fmt.Println("identifier:", getFullActionIdentifier())
+
+	var intent = currentAction.definition.appIntent
+	if intent == emptyAppIntent {
+		return
+	}
+
+	fmt.Println("appIntentIdentifier:", intent.appIntentIdentifier)
+	fmt.Println("bundleIdentifier:", intent.bundleIdentifier)
 }
 
 func handleGlyphSearch() {
