@@ -42,16 +42,19 @@ parse_toolkit_arguments() {
 }
 
 prepare_toolkit_inputs() {
-	local repo_root
-	repo_root="$(git rev-parse --show-toplevel)"
-	work_dir="$(mktemp -d)"
-	trap 'rm -rf "$work_dir"' EXIT
+	prepare_toolkit_databases
 
 	if [ -z "$cherri_bin" ]; then
 		# The brew binary can lag the repo by months, so always compare against the working tree.
 		cherri_bin="$work_dir/cherri"
-		(cd "$repo_root" && go build -o "$cherri_bin" .)
+		(cd "$(git rev-parse --show-toplevel)" && go build -o "$cherri_bin" .)
 	fi
+}
+
+# For scripts that only read the ToolKit databases and do not need a Cherri binary.
+prepare_toolkit_databases() {
+	work_dir="$(mktemp -d)"
+	trap 'rm -rf "$work_dir"' EXIT
 
 	if [ ! -r "$mac_db" ]; then
 		echo "Mac ToolKit database not found at $mac_db. Open the Shortcuts app once, or pass --mac-db." >&2
