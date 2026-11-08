@@ -1,17 +1,20 @@
 ---
 name: shortcuts-sync
-description: Use when developing, debugging or verifying Cherri actions. Finds standard Shortcuts and Apple app actions Cherri is missing or has lost, new actions after an OS release, and gets the plist Shortcuts itself stores for an installed shortcut so it can be compared with the plist Cherri compiles.
+description: Use when developing, debugging or verifying Cherri actions or automation triggers. Finds standard Shortcuts and Apple app actions and automation triggers Cherri is missing or has lost, new ones after an OS release, and gets the plist Shortcuts itself stores for an installed shortcut's actions or automations so it can be compared with what Cherri compiles.
 ---
 
 # Shortcuts sync
 
-Three tools that keep Cherri's action definitions matched to what Shortcuts actually does. They are plain bash scripts in this skill's `scripts/` folder, so any agent or person can run them directly. Run them from the repo root.
+Tools that keep Cherri's action and automation trigger definitions matched to what Shortcuts actually does. They are plain bash scripts in this skill's `scripts/` folder, so any agent or person can run them directly. Run them from the repo root.
 
 | Need | Tool |
 |---|---|
 | Which actions exist in Shortcuts but not Cherri, or the reverse | `scripts/actions-sync.sh` |
 | Which parameters and enum values differ for actions both define | `scripts/actions-sync-params.sh` |
 | What plist does Shortcuts produce for this action | `scripts/shortcut-plist.sh` |
+| Which automation trigger families exist in Shortcuts but not Cherri, or the reverse | `scripts/triggers-sync.sh` |
+| Which variants, parameters and enum values a trigger family has | `scripts/trigger-params.sh` |
+| What automation data Shortcuts stored for an installed shortcut | `scripts/trigger-plist.sh` |
 
 The paths in the table are relative to `.claude/skills/shortcuts-sync/`. The commands below use the full path from the repo root.
 
@@ -126,6 +129,45 @@ Both plists are an array of action dicts, so a plain `diff reference.plist cherr
 The shortcut name must be unique in the library. The script stops with an error if it is not, or if it is missing.
 
 The check covers structure, not behavior. A matching plist does not prove the action runs correctly, so the signed `go test -run '^TestCherri$'` and the Shortcuts app still apply.
+
+## Automation triggers
+
+Automations baked into a shortcut are stored as `WFWorkflowTriggers`. Each entry has a `WFTriggerIdentifier` (the family, such as `WFWifiTrigger`), `WFTriggerSerializedParameters` and `WFTriggerUUID`.
+
+### Find missing or lost trigger families
+
+```bash
+bash .claude/skills/shortcuts-sync/scripts/triggers-sync.sh
+```
+
+Compares the families in the `Triggers` table of the Mac and booted simulator ToolKit databases with the families in `triggerIdentifiers` in `automations.go`. It reads `automations.go` directly and does not build Cherri. It takes `--mac-db` and `--sim-db` like the action scripts, and its report has the same sections.
+
+### List a family's variants and enum values
+
+```bash
+bash .claude/skills/shortcuts-sync/scripts/trigger-params.sh WFPlugInTrigger
+```
+
+Prints each variant id (`com.apple.shortcuts.<family>.<variant>`), its parameter keys and the enum values with their English titles. Use it to see the permutations of a trigger without building each one in Shortcuts. Pass `--db` for the simulator database.
+
+Limits:
+
+- A variant is not stored in the shortcut. Shortcuts picks it from which parameters are set, so a family with several variants, such as `WFWifiTrigger`, lists keys per variant.
+- Some values are not enum cases in the database. Wi-Fi's `WFConnectionType` (`joined`) is implied by the variant id, so read it from a reference plist.
+- An absent key means the default. Defaults are in the `typeInstance` blobs of `TriggerParameters`, which are protobuf and not decoded by these scripts.
+
+### Get the automations Shortcuts stored
+
+1. In Shortcuts, create the automations on a shortcut with the parameter values to cover.
+2. Print them as a JSON array:
+
+   ```bash
+   bash .claude/skills/shortcuts-sync/scripts/trigger-plist.sh "My Test Shortcut"
+   ```
+
+   For the simulator library, pass `--db "$(xcrun simctl getenv booted HOME)/Library/Shortcuts/Shortcuts.sqlite"`.
+
+The shortcut name must be unique in the library. Compare with the triggers Cherri compiles by ignoring `WFTriggerUUID`.
 
 ## After finding a gap
 
