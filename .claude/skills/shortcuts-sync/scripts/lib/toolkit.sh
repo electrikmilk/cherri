@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Shared setup for the actions-sync scripts. Source it, do not run it.
+# Shared setup for the shortcuts-sync scripts. Source it, do not run it.
 #
 # Call parse_toolkit_arguments "$@" and then prepare_toolkit_inputs. Afterwards these are set:
 # cherri_bin, mac_db, sim_db, work_dir and toolkit_scope.

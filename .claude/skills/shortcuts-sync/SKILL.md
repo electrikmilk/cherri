@@ -1,9 +1,9 @@
 ---
-name: actions-sync
+name: shortcuts-sync
 description: Use when developing, debugging or verifying Cherri actions. Finds standard Shortcuts and Apple app actions Cherri is missing or has lost, new actions after an OS release, and gets the plist Shortcuts itself stores for an installed shortcut so it can be compared with the plist Cherri compiles.
 ---
 
-# Actions sync
+# Shortcuts sync
 
 Three tools that keep Cherri's action definitions matched to what Shortcuts actually does. They are plain bash scripts in this skill's `scripts/` folder, so any agent or person can run them directly. Run them from the repo root.
 
@@ -13,12 +13,12 @@ Three tools that keep Cherri's action definitions matched to what Shortcuts actu
 | Which parameters and enum values differ for actions both define | `scripts/actions-sync-params.sh` |
 | What plist does Shortcuts produce for this action | `scripts/shortcut-plist.sh` |
 
-The paths in the table are relative to `.claude/skills/actions-sync/`. The commands below use the full path from the repo root.
+The paths in the table are relative to `.claude/skills/shortcuts-sync/`. The commands below use the full path from the repo root.
 
 ## Find missing or lost actions
 
 ```bash
-bash .claude/skills/actions-sync/scripts/actions-sync.sh
+bash .claude/skills/shortcuts-sync/scripts/actions-sync.sh
 ```
 
 Compares the Shortcuts ToolKit databases (macOS and the booted iOS simulator) with the actions Cherri defines, by full Shortcuts identifier such as `is.workflow.actions.alert`. It builds Cherri from the working tree first. The brew binary can lag the repo by months, so do not compare against it. To reuse a binary you already built, pass `--cherri <path>`.
@@ -50,14 +50,14 @@ Each missing entry shows the identifier and its English name from the database.
 
 ### Limits
 
-- Identifier level only. An action present in both can still differ in parameters, so run `.claude/skills/actions-sync/scripts/actions-sync-params.sh` for those.
+- Identifier level only. An action present in both can still differ in parameters, so run `.claude/skills/shortcuts-sync/scripts/actions-sync-params.sh` for those.
 - Cherri needs `--action= --debug` to print identifiers. Without `--debug` the listing hides actions that cannot be defined in the Cherri DSL.
 - The databases are versioned per OS release, and the Mac and the simulator can be on different releases. Mention the versions when reporting results.
 
 ## Compare parameters and enums
 
 ```bash
-bash .claude/skills/actions-sync/scripts/actions-sync-params.sh
+bash .claude/skills/shortcuts-sync/scripts/actions-sync-params.sh
 ```
 
 For every action both Shortcuts and Cherri define, it compares the plist parameter keys and the enum values. It takes the same options and prerequisites as `actions-sync.sh`, and reports separately for the Mac and the simulator database.
@@ -105,7 +105,7 @@ Shortcuts is the source of truth for how an action and its parameters are struct
 2. Print the plist Shortcuts stored for it:
 
    ```bash
-   bash .claude/skills/actions-sync/scripts/shortcut-plist.sh "My Test Shortcut" > reference.plist
+   bash .claude/skills/shortcuts-sync/scripts/shortcut-plist.sh "My Test Shortcut" > reference.plist
    ```
 
    This reads the Mac library. For the simulator library, pass `--db "$(xcrun simctl getenv booted HOME)/Library/Shortcuts/Shortcuts.sqlite"`. Use that for actions that do not exist on the Mac.
