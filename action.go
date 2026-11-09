@@ -1037,6 +1037,7 @@ func collectToggleSetAction(doc selfDoc) {
 		if char != ')' {
 			skipWhitespace()
 			extraParams = collectParameterDefinitions(!shared.internal)
+			checkVariadicParameters(extraParams, shared.internal)
 		} else {
 			advance()
 		}
@@ -1213,6 +1214,7 @@ func collectActionSignature(definition *actionDefinition, until rune) {
 		advance()
 		skipWhitespace()
 		definition.parameters = collectParameterDefinitions(!definition.internal)
+		checkVariadicParameters(definition.parameters, definition.internal)
 	} else {
 		advanceTimes(2)
 	}
@@ -1270,6 +1272,11 @@ func collectParameterDefinitions(keyDefaultsToName bool) (arguments []parameterD
 
 		skipWhitespace()
 
+		var infinite bool
+		if tokenAhead(Ellipsis) {
+			infinite = true
+		}
+
 		var optional bool
 		if char == '?' {
 			optional = true
@@ -1318,6 +1325,7 @@ func collectParameterDefinitions(keyDefaultsToName bool) (arguments []parameterD
 			qty:          quantity,
 			ref:          acceptsRef,
 			literal:      literal,
+			infinite:     infinite,
 		})
 
 		skipWhitespace()
@@ -1325,6 +1333,26 @@ func collectParameterDefinitions(keyDefaultsToName bool) (arguments []parameterD
 	advance()
 
 	return
+}
+
+// checkVariadicParameters validates parameters declared with ... in a definition. They are placed by the logic of an
+// internal action, since there is no automatic way to write a variable number of values, and only the last parameter can
+// take the arguments that remain.
+func checkVariadicParameters(parameters []parameterDefinition, internal bool) {
+	for i, param := range parameters {
+		if !param.infinite {
+			continue
+		}
+		if !internal {
+			parserError(fmt.Sprintf("Variadic parameter '%s' is only allowed in internal actions", param.name))
+		}
+		if i != len(parameters)-1 {
+			parserError(fmt.Sprintf("Variadic parameter '%s' must be the last parameter", param.name))
+		}
+		if param.defaultValue != nil {
+			parserError(fmt.Sprintf("Variadic parameter '%s' cannot have a default value", param.name))
+		}
+	}
 }
 
 func makeActionValue(identifier string, arguments []actionArgument) action {

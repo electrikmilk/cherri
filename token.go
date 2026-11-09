@@ -116,6 +116,7 @@ const (
 	LeftBrace      tokenType = "{"
 	RightBrace     tokenType = "}"
 	Colon          tokenType = ":"
+	Ellipsis       tokenType = "..."
 	And            tokenType = "&&"
 	Or             tokenType = "||"
 )
