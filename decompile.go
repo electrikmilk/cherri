@@ -508,7 +508,7 @@ func decompileActions() {
 			if dictionaryKey != nil && action.WFWorkflowActionParameters[UUID] != nil &&
 				!slices.Contains(constUUIDs, action.WFWorkflowActionParameters[UUID].(string)) {
 				decompDictionaryGetValue(&action)
-				continue
+				break
 			}
 			fallthrough
 		default:
