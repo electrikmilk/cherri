@@ -417,7 +417,9 @@ Minimal Go definition:
 },
 ```
 
-**Declaring a Go-defined action in Cherri:** A DSL declaration inherits `check`, `makeParams`, `appendParamsFunc`, `decomp` and `appIntent` from the `actions_std.go` entry of the same name. The declaration must carry the `internal` modifier (`action internal 'identifier' name(...)`) so the `.cherri` file shows it depends on compiler logic. The compiler errors if a declaration matches a Go entry without `internal`, and if `internal` is used with no Go entry to attach to.
+**Declaring a Go-defined action in Cherri:** A DSL declaration inherits `check`, `makeParams`, `appendParamsFunc` and `decomp` from the `actions_std.go` entry of the same name. The declaration must carry the `internal` modifier (`action internal 'identifier' name(...)`) so the `.cherri` file shows it depends on compiler logic. The compiler errors if a declaration matches a Go entry without `internal`, and if `internal` is used with no Go entry to attach to.
+
+**App intents in the DSL:** Declare an app once with `intent Clock 'com.apple.clock'` (name, then bundle identifier), then reference one of its intents after the quoted identifier: `action 'identifier' Clock:'DeleteAlarmIntent' name(...)`. This sets the `AppIntentDescriptor` parameter. When the declaration has no quoted identifier, the action's identifier defaults to the bundle plus the intent identifier (`com.apple.clock.DeleteAlarmIntent`). Declare each intent in the one action file that uses it, since a second declaration of the same name is an error. Whole numbers in an action's `{ }` body are written as integers, matching how Shortcuts stores them.
 
 Use `argumentValue(args, i)` or `paramValue(arg, type)` inside `makeParams` to convert collected arguments to plist values. Use `appendParamsFunc` instead of `makeParams` when you want automatic parameter handling to still apply but need to inject extra keys based on argument values.
 
