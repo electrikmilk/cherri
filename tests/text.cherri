@@ -53,4 +53,8 @@ if allCapitalized != "Hello World" {
 containsText("hello world", "hello")
 containsText("hello world", "hello", false)
 
+// the separator and glue default to a new line
+@lines = splitText("a\nb")
+const rejoined = joinText(@lines)
+
 show("✅ All tests passed")
