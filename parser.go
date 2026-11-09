@@ -900,11 +900,11 @@ func collectControlFlowOutput(identifier *string, constant *bool) (identified bo
 func collectType(valueType *tokenType, value *any, until rune) {
 	switch {
 	case tokenAhead(String):
+		// Left nil (like arrays) so a bare `@x: text` is a compile-time type
+		// declaration only, instead of becoming an empty Text action at runtime.
 		*valueType = String
-		*value = ""
 	case tokenAhead(RawString):
 		*valueType = RawString
-		*value = ""
 	case tokenAhead(Integer):
 		*valueType = Integer
 		*value = "0"
@@ -1497,10 +1497,14 @@ func collectEndStatement() {
 		reachable()
 	}
 
-	if controlFlowGroup.identifier == "" {
-		addNothing()
-	}
-
+	// Closing an unnamed if/repeat/repeat.each block used to bracket the
+	// EndClosure token with addNothing() placeholders on both sides, on the
+	// theory that otherwise the next action could silently inherit the
+	// block's last action as an implicit magic-variable input. Shortcuts
+	// doesn't do that: an action only receives another action's output when
+	// something actually wires a magic-variable chip into it — there's no
+	// positional/implicit chaining to guard against, so neither nothing
+	// action represented anything the user wrote.
 	variables[controlFlowGroup.identifier] = varValue{
 		constant: true,
 	}
@@ -1512,7 +1516,6 @@ func collectEndStatement() {
 		value:     controlFlowGroup.identifier,
 	})
 	groupingIdx--
-	addNothing()
 }
 
 // groupStatement creates a grouping UUID for a statement and adds to the statement groupings.
