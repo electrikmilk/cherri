@@ -1016,12 +1016,37 @@ func collectToggleSetAction(doc selfDoc) {
 func collectAdditionalParams() (params map[string]interface{}) {
 	if char == '{' {
 		advance()
-		var dict = collectDictionary()
-		handleRawParams(dict.(map[string]interface{}))
-		return dict.(map[string]interface{})
+		var dict = restoreIntegers(collectDictionary()).(map[string]interface{})
+		handleRawParams(dict)
+		return dict
 	}
 
 	return
+}
+
+// restoreIntegers converts the whole numbers that JSON decoding turns into floats back to integers, which is how
+// Shortcuts stores them.
+func restoreIntegers(value any) any {
+	switch typed := value.(type) {
+	case float64:
+		if typed == math.Trunc(typed) {
+			return int(typed)
+		}
+	case map[string]any:
+		var converted = make(map[string]any, len(typed))
+		for key, item := range typed {
+			converted[key] = restoreIntegers(item)
+		}
+		return converted
+	case []any:
+		var converted = make([]any, len(typed))
+		for i, item := range typed {
+			converted[i] = restoreIntegers(item)
+		}
+		return converted
+	}
+
+	return value
 }
 
 var docCommentRegex = regexp.MustCompile(`^\[Doc]: ?(?:\[(.*?)])?\s(.*?)?(?:: (.*?))?$`)
