@@ -419,10 +419,15 @@ func mapImportQuestions() {
 		var defaultValue string
 		switch value := importQuestion.DefaultValue.(type) {
 		case nil:
+			defaultValue = `""`
 		case string:
-			defaultValue = value
+			defaultValue = fmt.Sprintf("\"%s\"", escapeString(value))
+		case map[string]any:
+			var dictionaryItems WFItems
+			mapToStruct(value, &dictionaryItems)
+			defaultValue = decompDictionaryValue(dictionaryItems.Value.WFDictionaryFieldValueItems)
 		default:
-			decompWarning(fmt.Sprintf("Import question '%s' has a default value of type %T, but #question only supports text. Skipping it.", importQuestion.Text, value))
+			decompWarning(fmt.Sprintf("Import question '%s' has a default value of type %T, but #question only supports text and dictionaries. Skipping it.", importQuestion.Text, value))
 			continue
 		}
 
@@ -433,7 +438,7 @@ func mapImportQuestions() {
 			parameterKey: importQuestion.ParameterKey,
 		}] = &decompiledQuestion{identifier: identifier}
 
-		definitions.WriteString(fmt.Sprintf("#question %s \"%s\" \"%s\"\n", identifier, escapeString(importQuestion.Text), escapeString(defaultValue)))
+		definitions.WriteString(fmt.Sprintf("#question %s \"%s\" %s\n", identifier, escapeString(importQuestion.Text), defaultValue))
 	}
 
 	if definitions.Len() == 0 {
@@ -919,6 +924,14 @@ type WFItems struct {
 var decompilingDictionary = false
 
 func decompDictionary(action *ShortcutAction) {
+	// A literal would drop the question, so write the dictionary() call it binds to.
+	if question, found := findQuestionBinding("WFItems"); found {
+		question.bound = true
+		currentVariableValue = fmt.Sprintf("dictionary(%s)", question.identifier)
+		checkConstantLiteral(action)
+		return
+	}
+
 	var params DictionaryActionParameters
 	mapToStruct(action.WFWorkflowActionParameters, &params)
 

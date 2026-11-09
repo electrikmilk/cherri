@@ -1149,6 +1149,52 @@
 					<string>val</string>
 				</dict>
 			</dict>
+			<dict>
+				<key>WFWorkflowActionIdentifier</key>
+				<string>is.workflow.actions.dictionary</string>
+				<key>WFWorkflowActionParameters</key>
+				<dict>
+					<key>CustomOutputName</key>
+					<string>settings</string>
+					<key>UUID</key>
+					<string>0e9d8a54-2b1c-4c43-9f7e-5a1f3c6d7b20</string>
+					<key>WFItems</key>
+					<dict>
+						<key>Value</key>
+						<dict>
+							<key>WFDictionaryFieldValueItems</key>
+							<array>
+								<dict>
+									<key>WFItemType</key>
+									<integer>0</integer>
+									<key>WFKey</key>
+									<dict>
+										<key>Value</key>
+										<dict>
+											<key>string</key>
+											<string>url</string>
+										</dict>
+										<key>WFSerializationType</key>
+										<string>WFTextTokenString</string>
+									</dict>
+									<key>WFValue</key>
+									<dict>
+										<key>Value</key>
+										<dict>
+											<key>string</key>
+											<string></string>
+										</dict>
+										<key>WFSerializationType</key>
+										<string>WFTextTokenString</string>
+									</dict>
+								</dict>
+							</array>
+						</dict>
+						<key>WFSerializationType</key>
+						<string>WFDictionaryFieldValue</string>
+					</dict>
+				</dict>
+			</dict>
 		</array>
 		<key>WFWorkflowImportQuestions</key>
 		<array>
@@ -1175,6 +1221,51 @@
 				<string>WFTextActionText</string>
 				<key>Text</key>
 				<string>Who is it?</string>
+			</dict>
+			<dict>
+				<key>ActionIndex</key>
+				<integer>46</integer>
+				<key>Category</key>
+				<string>Parameter</string>
+				<key>DefaultValue</key>
+				<dict>
+					<key>Value</key>
+					<dict>
+						<key>WFDictionaryFieldValueItems</key>
+						<array>
+							<dict>
+								<key>WFItemType</key>
+								<integer>0</integer>
+								<key>WFKey</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string>url</string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+								<key>WFValue</key>
+								<dict>
+									<key>Value</key>
+									<dict>
+										<key>string</key>
+										<string></string>
+									</dict>
+									<key>WFSerializationType</key>
+									<string>WFTextTokenString</string>
+								</dict>
+							</dict>
+						</array>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFDictionaryFieldValue</string>
+				</dict>
+				<key>ParameterKey</key>
+				<string>WFItems</string>
+				<key>Text</key>
+				<string>Enter the settings</string>
 			</dict>
 		</array>
 		<key>WFWorkflowClientVersion</key>
