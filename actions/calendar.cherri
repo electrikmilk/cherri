@@ -2,11 +2,7 @@
 Calendar Actions
 */
 
-app Clock 'com.apple.clock' {
-    CreateAlarmIntent,
-    DeleteAlarmIntent,
-    ToggleAlarmIntent
-}
+app Clock 'com.apple.clock'
 
 enum eventDetail {
     'Start Date',

@@ -2,9 +2,7 @@
 Shortcut Actions
 */
 
-app Shortcuts 'com.apple.shortcuts' {
-    CreateShortcutiCloudLinkAction
-}
+app Shortcuts 'com.apple.shortcuts'
 
 enum shortcutDetail {
 	'Folder',
