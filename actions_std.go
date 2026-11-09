@@ -223,32 +223,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"containsText": {
-		doc: selfDoc{
-			title:       "Contains Text",
-			description: "Uses Match Text to check if text is within subject.",
-			category:    "text",
-			subcategory: "Text Editing",
-		},
-		identifier: "text.match",
-		parameters: []parameterDefinition{
-			{
-				name:      "subject",
-				validType: String,
-				key:       "text",
-			},
-			{
-				name:      "text",
-				key:       "WFMatchTextPattern",
-				validType: String,
-			},
-			{
-				name:         "caseSensitive",
-				validType:    Bool,
-				key:          "WFMatchTextCaseSensitive",
-				defaultValue: true,
-				optional:     true,
-			},
-		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			var textArg = args[1]
 			if textArg.valueType == Variable {
@@ -291,52 +265,12 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"splitText": {
-		doc: selfDoc{
-			title:       "Split Text",
-			description: "Split text by a separator.",
-			category:    "text",
-			subcategory: "Text Editing",
-		},
-		identifier: "text.split",
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				key:       "text",
-				validType: String,
-			},
-			{
-				name:         "separator",
-				validType:    String,
-				defaultValue: "\n",
-			},
-		},
 		appendParamsFunc: textParts,
 		decomp:           decompTextParts,
-		outputType:       Arr,
 	},
 	"joinText": {
-		doc: selfDoc{
-			title:       "Join Text",
-			description: "Join text by a combiner.",
-			category:    "text",
-			subcategory: "Text Editing",
-		},
-		identifier: "text.combine",
-		parameters: []parameterDefinition{
-			{
-				name:      "text",
-				key:       "text",
-				validType: Variable,
-			},
-			{
-				name:         "glue",
-				validType:    String,
-				defaultValue: "\n",
-			},
-		},
 		appendParamsFunc: textParts,
 		decomp:           decompTextParts,
-		outputType:       String,
 	},
 	"url": {
 		doc: selfDoc{

@@ -49,4 +49,8 @@ if allCapitalized != "Hello World" {
     mustOutput("❌ FAIL: capitalizeAll — got {allCapitalized}, expected 'Hello World'", "❌ FAIL: capitalizeAll — got {allCapitalized}, expected 'Hello World'")
 }
 
+// containsText with and without case sensitivity
+containsText("hello world", "hello")
+containsText("hello world", "hello", false)
+
 show("✅ All tests passed")
