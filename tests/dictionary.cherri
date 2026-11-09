@@ -119,4 +119,11 @@ if bareLast.text != "constant" {
     mustOutput("❌ FAIL: bare constant as last dictionary item - got {bareLast}, expected 'constant'", "❌ FAIL: bare constant as last dictionary item - got {bareLast}, expected 'constant'")
 }
 
+// dictionary action
+const made = dictionary({"name": "Bob"})
+const madeName = getValue(made, "name")
+if madeName.text != "Bob" {
+    mustOutput("❌ FAIL: dictionary action — got {madeName}, expected 'Bob'", "❌ FAIL: dictionary action — got {madeName}, expected 'Bob'")
+}
+
 show("✅ All tests passed")
