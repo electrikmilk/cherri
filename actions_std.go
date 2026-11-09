@@ -1238,7 +1238,11 @@ func textParts(args []actionArgument) map[string]any {
 		"Show-text": true,
 	}
 
-	var separator = getArgValue(args[1])
+	var separator any = "\n"
+	if len(args) > 1 {
+		separator = getArgValue(args[1])
+	}
+
 	switch {
 	case separator == " ":
 		data["WFTextSeparator"] = "Spaces"
