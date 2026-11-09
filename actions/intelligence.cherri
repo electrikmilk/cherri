@@ -109,3 +109,6 @@ action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextInte
 action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextIntent' generateKeyPoints(text text: 'text'): text {
     "summaryType": "createKeyPoints"
 }
+
+// [Doc]: [Image Playground] Create Image using Image Playground: Generate an Image with a prompt using the Image Playground app.
+action internal 'com.apple.GenerativePlaygroundApp.GenerateImageIntent' generateImage(text prompt, variable ?image, imagePlaygroundStyle ?style: '' = "animation", saveToPlaygroundBehavior ?saveToPlayground = "always")
