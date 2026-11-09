@@ -881,9 +881,20 @@ var actions = map[string]*actionDefinition{
 	},
 	"updateContact": {
 		check: func(args []actionArgument, _ *actionDefinition) {
-			var contactDetail = args[1].value.(string)
-			var contactDetailKey = strings.ReplaceAll(contactDetail, " ", "")
-			currentAction.definition.parameters[2].key = "WFContactContentItem" + contactDetailKey
+			if args[1].valueType == Variable {
+				parserError("Contact detail must be a literal value as it determines which parameter is set")
+			}
+		},
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			if len(args) < 3 {
+				return map[string]any{}
+			}
+
+			var detailKey = strings.ReplaceAll(getArgValue(args[1]).(string), " ", "")
+
+			return map[string]any{
+				"WFContactContentItem" + detailKey: argumentValue(args, 2),
+			}
 		},
 	},
 	"setWindowedMultitasking": {
