@@ -175,26 +175,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"labelFile": {
-		doc: selfDoc{
-			title:       "Label File",
-			description: "Label a file.",
-			category:    "documents",
-			subcategory: "Files & Folders",
-		},
-		identifier: "file.label",
-		parameters: []parameterDefinition{
-			{
-				name:      "file",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:      "color",
-				validType: String,
-				optional:  false,
-				enum:      "fileLabel",
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) == 0 {
 				return map[string]any{}
@@ -208,40 +188,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"filterFiles": {
-		doc: selfDoc{
-			title:       "Filter Files",
-			description: "Filter the provided files with various filters.",
-			category:    "documents",
-			subcategory: "Files & Folders",
-		},
-		identifier: "filter.files",
-		parameters: []parameterDefinition{
-			{
-				name:      "files",
-				validType: Variable,
-				key:       "WFContentItemInputParameter",
-			},
-			{
-				name:      "limit",
-				validType: Integer,
-				key:       "WFContentItemLimitNumber",
-				optional:  true,
-			},
-			{
-				name:      "sortBy",
-				validType: String,
-				key:       "WFContentItemSortProperty",
-				enum:      "filesSortBy",
-				optional:  true,
-			},
-			{
-				name:      "orderBy",
-				validType: String,
-				key:       "WFContentItemSortOrder",
-				enum:      "fileOrderings",
-				optional:  true,
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) (params map[string]any) {
 			if len(args) == 0 {
 				return map[string]any{}
@@ -257,44 +203,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getPDFText": {
-		doc: selfDoc{
-			title:       "Get PDF Text",
-			description: "Get text from PDF.",
-			category:    "pdf",
-		},
-		identifier: "gettextfrompdf",
-		parameters: []parameterDefinition{
-			{
-				name:      "pdfFile",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:         "richText",
-				validType:    Bool,
-				defaultValue: false,
-				optional:     true,
-			},
-			{
-				name:         "combinePages",
-				validType:    Bool,
-				key:          "WFCombinePages",
-				defaultValue: true,
-				optional:     true,
-			},
-			{
-				name:      "headerText",
-				validType: String,
-				key:       "WFGetTextFromPDFPageHeader",
-				optional:  true,
-			},
-			{
-				name:      "footerText",
-				validType: String,
-				key:       "WFGetTextFromPDFPageFooter",
-				optional:  true,
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) == 0 {
 				return map[string]any{}
@@ -354,31 +262,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getFileFromFolder": {
-		doc: selfDoc{
-			title:       "Get File From Folder",
-			description: "Get a file from a folder. Prepend path with a `~` to access the home folder on macOS.",
-			category:    "documents",
-			subcategory: "Files & Folders",
-		},
-		identifier: "documentpicker.open",
-		parameters: []parameterDefinition{
-			{
-				name:      "folder",
-				validType: String,
-			},
-			{
-				name:      "path",
-				validType: String,
-				key:       "WFGetFilePath",
-			},
-			{
-				name:         "errorIfNotFound",
-				validType:    Bool,
-				key:          "WFFileErrorIfNotFound",
-				defaultValue: true,
-				optional:     true,
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) == 0 {
 				return map[string]any{}
