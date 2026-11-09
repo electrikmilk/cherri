@@ -404,10 +404,15 @@ func mapImportQuestions() {
 		var defaultValue string
 		switch value := importQuestion.DefaultValue.(type) {
 		case nil:
+			defaultValue = `""`
 		case string:
-			defaultValue = value
+			defaultValue = fmt.Sprintf("\"%s\"", escapeString(value))
+		case map[string]any:
+			var dictionaryItems WFItems
+			mapToStruct(value, &dictionaryItems)
+			defaultValue = decompDictionaryValue(dictionaryItems.Value.WFDictionaryFieldValueItems)
 		default:
-			decompWarning(fmt.Sprintf("Import question '%s' has a default value of type %T, but #question only supports text. Skipping it.", importQuestion.Text, value))
+			decompWarning(fmt.Sprintf("Import question '%s' has a default value of type %T, but #question only supports text and dictionaries. Skipping it.", importQuestion.Text, value))
 			continue
 		}
 
@@ -418,7 +423,7 @@ func mapImportQuestions() {
 			parameterKey: importQuestion.ParameterKey,
 		}] = identifier
 
-		fmt.Fprintf(&definitions, "#question %s \"%s\" \"%s\"\n", identifier, escapeString(importQuestion.Text), escapeString(defaultValue))
+		fmt.Fprintf(&definitions, "#question %s \"%s\" %s\n", identifier, escapeString(importQuestion.Text), defaultValue)
 	}
 
 	if definitions.Len() == 0 {
@@ -925,6 +930,10 @@ type WFItems struct {
 var decompilingDictionary = false
 
 func decompDictionary(action *ShortcutAction) {
+	if decompQuestionCall(action, "dictionary", "WFItems") {
+		return
+	}
+
 	var params DictionaryActionParameters
 	mapToStruct(action.WFWorkflowActionParameters, &params)
 
