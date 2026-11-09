@@ -97,6 +97,7 @@ type actionDefinition struct {
 	minVersion         float64
 	maxVersion         float64
 	parsed             bool // parsed is false for an action defined only in Go, and is how a second Cherri definition of the same name is detected as a duplicate.
+	internal           bool // internal marks a Cherri declaration that attaches to the logic of a compiler-defined action.
 }
 
 var enumerations = map[string][]string{
@@ -857,6 +858,12 @@ func parseActionDefinitions() {
 }
 
 func collectActionPrefixModifiers(definition *actionDefinition) {
+	// The following space distinguishes the keyword from an action name that starts with it.
+	if next(len(Internal)) == ' ' && tokenAhead(Internal) {
+		definition.internal = true
+		advance()
+	}
+
 	if tokenAhead(Mac) {
 		definition.macOnly = true
 		advance()
@@ -891,15 +898,23 @@ func internalDefinition(name string) *actionDefinition {
 }
 
 // defineAction stores a definition collected from Cherri, keeping the logic of a compiler-defined action of the same name
-// so that only the declaration has to be written in Cherri.
+// so that only the declaration has to be written in Cherri. The internal keyword must match whether that logic exists so
+// a declaration shows when it depends on code outside of Cherri.
 func defineAction(name string, definition *actionDefinition) {
-	var internal = internalDefinition(name)
-	if internal != nil {
-		definition.check = internal.check
-		definition.makeParams = internal.makeParams
-		definition.appendParamsFunc = internal.appendParamsFunc
-		definition.decomp = internal.decomp
-		definition.appIntent = internal.appIntent
+	var compilerDefinition = internalDefinition(name)
+	if compilerDefinition == nil && definition.internal {
+		parserError(fmt.Sprintf("Action '%s()' is declared internal but has no compiler-defined logic", name))
+	}
+	if compilerDefinition != nil && !definition.internal {
+		parserError(fmt.Sprintf("Action '%s()' has compiler-defined logic and must be declared with the internal keyword", name))
+	}
+
+	if compilerDefinition != nil {
+		definition.check = compilerDefinition.check
+		definition.makeParams = compilerDefinition.makeParams
+		definition.appendParamsFunc = compilerDefinition.appendParamsFunc
+		definition.decomp = compilerDefinition.decomp
+		definition.appIntent = compilerDefinition.appIntent
 	}
 
 	definition.parsed = true
