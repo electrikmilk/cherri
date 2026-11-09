@@ -1,0 +1,10 @@
+// compile-only: prompt asks the user for input
+
+const name = prompt("What is your name?")
+const age = prompt("How old are you?", "Number")
+const website = prompt("Website?", "URL", "https://cherrilang.org")
+const count = prompt("How many?", "Number", "5")
+const oneLine = prompt("Nickname?", nil, nil, false)
+const manyLines = prompt("Notes?", nil, nil, true)
+
+show("✅ All tests passed")
