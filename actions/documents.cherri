@@ -140,10 +140,10 @@ action 'generatebarcode' makeQRCode(text input: 'WFText', QRCodeErrorCorrection 
 action 'com.apple.HydraUSDAppIntents.ConvertToUSDZ' convertToUSDZ(variable file)
 
 // [Doc]: [Files & Folders] Label File: Label a file.
-action internal 'file.label' labelFile(variable file: 'WFInput', fileLabel color: '')
+action internal 'file.label' labelFile(variable file: 'WFInput', fileLabel color)
 
 // [Doc]: [Files & Folders] Filter Files: Filter the provided files with various filters.
 action internal 'filter.files' filterFiles(variable files: 'WFContentItemInputParameter', number ?limit: 'WFContentItemLimitNumber', filesSortBy ?sortBy: 'WFContentItemSortProperty', fileOrderings ?orderBy: 'WFContentItemSortOrder')
 
 // [Doc]: [Files & Folders] Get File From Folder: Get a file from a folder. Prepend path with a `~` to access the home folder on macOS.
-action internal 'documentpicker.open' getFileFromFolder(text folder: '', text path: 'WFGetFilePath', bool ?errorIfNotFound: 'WFFileErrorIfNotFound' = true)
+action internal 'documentpicker.open' getFileFromFolder(text folder, text path: 'WFGetFilePath', bool ?errorIfNotFound: 'WFFileErrorIfNotFound' = true)

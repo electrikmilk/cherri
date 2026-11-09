@@ -34,7 +34,7 @@ action 'runworkflow' run(text shortcutName: 'WFWorkflowName', variable input: 'W
 action Shortcuts:'CreateShortcutiCloudLinkAction' createShortcutLink(variable shortcut)
 
 // [Doc]: Open Shortcut: Open a shortcut in the Shortcuts app.
-action internal 'com.apple.shortcuts.OpenWorkflowAction' openShortcut(text shortcutName: '')
+action internal 'com.apple.shortcuts.OpenWorkflowAction' openShortcut(text shortcutName)
 
 // [Doc]: Run Self: Run the current Shortcut with optional output.
 action internal 'runworkflow' runSelf(variable output: 'WFInput')

@@ -72,9 +72,9 @@ action 'setters.contacts' removeContactDetail(variable contact: 'WFInput', conta
 }
 
 // [Doc]: Add New Contact: Create a new contact.
-action internal 'addnewcontact' newContact(text firstName: 'WFContactFirstName', text lastName: 'WFContactLastName', text phoneNumber: '', text emailAddress: '', text company: 'WFContactCompany', text notes: 'WFContactNotes', bool ?prompt: 'ShowWhenRun' = false)
+action internal 'addnewcontact' newContact(text firstName: 'WFContactFirstName', text lastName: 'WFContactLastName', text phoneNumber, text emailAddress, text company: 'WFContactCompany', text notes: 'WFContactNotes', bool ?prompt: 'ShowWhenRun' = false)
 
 // [Doc]: Update Contact
-action default internal 'setters.contacts' updateContact(variable contact: 'WFInput', contactDetail detail: 'WFContentItemPropertyName', text value: '') {
+action default internal 'setters.contacts' updateContact(variable contact: 'WFInput', contactDetail detail: 'WFContentItemPropertyName', text value) {
     "Mode": "Set"
 }

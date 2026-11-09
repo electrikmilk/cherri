@@ -111,4 +111,4 @@ action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextInte
 }
 
 // [Doc]: [Image Playground] Create Image using Image Playground: Generate an Image with a prompt using the Image Playground app.
-action internal 'com.apple.GenerativePlaygroundApp.GenerateImageIntent' generateImage(text prompt, variable ?image, imagePlaygroundStyle ?style: '' = "animation", saveToPlaygroundBehavior ?saveToPlayground = "always")
+action internal 'com.apple.GenerativePlaygroundApp.GenerateImageIntent' generateImage(text prompt: 'prompt', variable ?image: 'image', imagePlaygroundStyle ?style = "animation", saveToPlaygroundBehavior ?saveToPlayground: 'saveToPlayground' = "always")
