@@ -450,6 +450,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 			))
 		}
 	case argValueType == Question:
+		checkQuestionDefaultType(param, argument)
 	case argValueType == Nil:
 	case argValueType == Reference:
 	case param.validType == String && argument.valueType == RawString:
@@ -561,9 +562,33 @@ func resolveQuestionArgs(arguments []actionArgument) {
 		if question, found := questions[identifier]; found {
 			question.parameter = currentAction.definition.parameters[i].key
 			question.actionIndex = len(shortcut.WFWorkflowActions)
+
+			// Shortcuts keeps a dictionary question's default in the action itself, unlike text.
+			if dictionary, isDictionary := question.defaultValue.(map[string]any); isDictionary {
+				arguments[i] = actionArgument{valueType: Dict, value: dictionary}
+				continue
+			}
 		}
 		arguments[i].value = ""
 	}
+}
+
+// checkQuestionDefaultType ensures a dictionary question is only bound to a dictionary argument and vice versa.
+func checkQuestionDefaultType(param *parameterDefinition, argument *actionArgument) {
+	var question, found = questions[argument.value.(string)]
+	if !found {
+		return
+	}
+
+	var _, isDictionary = question.defaultValue.(map[string]any)
+	if isDictionary == (param.validType == Dict) {
+		return
+	}
+
+	if isDictionary {
+		parserError(fmt.Sprintf("Import question '%s' has a dictionary default value, but argument '%s' is not a dictionary.", argument.value, param.name))
+	}
+	parserError(fmt.Sprintf("Import question '%s' has a text default value, but argument '%s' is a dictionary.", argument.value, param.name))
 }
 
 func checkLiteralValue(param *parameterDefinition, argument *actionArgument) {
