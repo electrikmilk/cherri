@@ -253,7 +253,17 @@ func makeActionParams(arguments []actionArgument, params map[string]any) {
 		}
 
 		if param.validType == Variable {
-			params[param.key] = variableValue(arguments[i].value.(varValue))
+			var varVal = arguments[i].value.(varValue)
+			if _, isGlobal := globals[varVal.value.(string)]; isGlobal {
+				// Built-in globals (ShortcutInput, Clipboard, CurrentDate, Device, Ask) are
+				// identified in native Shortcuts plists by Type alone. Routing them through
+				// variableValue() here would attach a VariableName, which Shortcuts reads as
+				// a reference to a missing user-defined variable instead of the actual global.
+				var refStr = makeVariableReferenceString(varVal)
+				params[param.key] = attachmentValues(fmt.Sprintf("{%s}", refStr))
+			} else {
+				params[param.key] = variableValue(varVal)
+			}
 		} else {
 			params[param.key] = argumentValue(arguments, i)
 		}
