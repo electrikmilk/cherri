@@ -328,40 +328,6 @@ var actions = map[string]*actionDefinition{
 		decomp: decompInfiniteURLAction,
 	},
 	"prompt": {
-		doc: selfDoc{
-			title:       "Ask for Input",
-			description: "Ask for input with prompt, with optional inputType and defaultValue.",
-			category:    "basic",
-			subcategory: "Notifications",
-		},
-		identifier: "ask",
-		parameters: []parameterDefinition{
-			{
-				name:      "prompt",
-				validType: String,
-				key:       "WFAskActionPrompt",
-			},
-			{
-				name:         "inputType",
-				validType:    String,
-				key:          "WFInputType",
-				enum:         "inputType",
-				optional:     true,
-				defaultValue: "Text",
-			},
-			{
-				name:      "defaultValue",
-				validType: String,
-				optional:  true,
-			},
-			{
-				name:         "multiline",
-				validType:    String,
-				key:          "WFAllowsMultilineText",
-				optional:     true,
-				defaultValue: true,
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) < 3 {
 				return map[string]any{}

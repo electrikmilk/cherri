@@ -183,3 +183,6 @@ action 'getitemfromlist' getListItem(variable list: 'WFInput', number index: 'WF
 action 'getitemfromlist' getListItems(variable list: 'WFInput', number start: 'WFItemRangeStart', number end: 'WFItemRangeEnd'): array {
 	"WFItemSpecifier": "Items in Range"
 }
+
+// [Doc]: [Notifications] Ask for Input: Ask for input with prompt, with optional inputType and defaultValue.
+action internal 'ask' prompt(text prompt: 'WFAskActionPrompt', inputType ?inputType: 'WFInputType' = "Text", text ?defaultValue: '', bool ?multiline: 'WFAllowsMultilineText' = true)
