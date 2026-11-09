@@ -18,6 +18,25 @@ if encoded != "aGVsbG8=" {
     mustOutput("❌ FAIL: base64Encode — got {encoded}, expected 'aGVsbG8='", "❌ FAIL: base64Encode — got {encoded}, expected 'aGVsbG8='")
 }
 
+// "None" never wraps; the input is long enough that both wrapping modes would insert breaks
+@longInput = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog again."
+const unwrapped = base64Encode(@longInput, "None")
+if unwrapped != "VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZy4gVGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZyBhZ2Fpbi4=" {
+    mustOutput("❌ FAIL: base64Encode None — got {unwrapped}", "❌ FAIL: base64Encode None — got {unwrapped}")
+}
+
+// The default mode is "Every 76 Characters", so it must differ from the unwrapped output
+const wrappedDefault = base64Encode(@longInput)
+if wrappedDefault == unwrapped {
+    mustOutput("❌ FAIL: base64Encode default mode did not wrap long input", "❌ FAIL: base64Encode default mode did not wrap long input")
+}
+
+// 64 breaks at a different width than the 76 default, so the output must differ
+const wrapped64 = base64Encode(@longInput, "Every 64 Characters")
+if wrapped64 == wrappedDefault {
+    mustOutput("❌ FAIL: base64Encode 64 characters matches the 76 character default", "❌ FAIL: base64Encode 64 characters matches the 76 character default")
+}
+
 // base64 decode round-trip
 @b64 = "aGVsbG8="
 const decoded = base64Decode(@b64)
