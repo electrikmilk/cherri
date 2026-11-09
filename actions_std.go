@@ -32,12 +32,6 @@ var fileLabelsMap = map[string]int{
 	"gray":   1,
 }
 
-var setMultitaskingModeIntent = appIntent{
-	name:                "ShortcutsActions",
-	bundleIdentifier:    "com.apple.ShortcutsActions",
-	appIntentIdentifier: "SetMultitaskingModeAction",
-}
-
 // actions is the data structure that determines every action the compiler knows about.
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
@@ -906,95 +900,16 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setWindowedMultitasking": {
-		doc: selfDoc{
-			title:       "Set Windowed Multitasking Mode",
-			description: "Set the multitasking mode to windowed. Applies to iPadOS and macOS only.",
-			category:    "settings",
-			subcategory: "Multitasking",
-		},
-		appIdentifier: "com.apple.ShortcutsActions",
-		identifier:    "SetMultitaskingModeAction",
-		defaultAction: true,
-		appIntent:     setMultitaskingModeIntent,
-		parameters: []parameterDefinition{
-			{
-				name:      "automaticallyShowAndHideDock",
-				validType: Bool,
-				key:       "automaticallyShowAndHideDock",
-				optional:  true,
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			return appendSetMultitaskingModeParam("Windowed Apps", "windowedApps", "macwindow.on.rectangle")
 		},
-		minVersion: 26,
 	},
 	"setStageManagerMultitasking": {
-		doc: selfDoc{
-			title:       "Set Stage Manager Multitasking Mode",
-			description: "Set the multitasking mode to Stage Manager. Applies to iPadOS and macOS only.",
-			category:    "settings",
-			subcategory: "Multitasking",
-		},
-		appIdentifier: "com.apple.ShortcutsActions",
-		identifier:    "SetMultitaskingModeAction",
-		parameters: []parameterDefinition{
-			{
-				name:      "automaticallyShowAndHideDock",
-				validType: Bool,
-				key:       "automaticallyShowAndHideDock",
-				optional:  true,
-			},
-			{
-				name:      "showRecentApps",
-				validType: Bool,
-				key:       "showRecentApps",
-				optional:  true,
-			},
-		},
-		appIntent: setMultitaskingModeIntent,
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			return appendSetMultitaskingModeParam("Stage Manager", "stageManager", "squares.leading.rectangle")
 		},
-		minVersion: 26,
 	},
 	"setFocusMode": {
-		doc: selfDoc{
-			title:       "Set Focus Mode",
-			description: "Set a default focus mode on or off. If setting to on, optionally set until with optional arguments for time or event.",
-			category:    "settings",
-			subcategory: "Notifications",
-		},
-		identifier: "dnd.set",
-		parameters: []parameterDefinition{
-			{
-				name:         "focusMode",
-				validType:    String,
-				defaultValue: "Do Not Disturb",
-				enum:         "focusModes",
-				optional:     true,
-			},
-			{
-				name:         "until",
-				validType:    String,
-				key:          "AssertionType",
-				defaultValue: "Turned Off",
-				enum:         "focusUntil",
-				optional:     true,
-			},
-			{
-				name:      "time",
-				validType: String,
-				key:       "Time",
-				optional:  true,
-			},
-			{
-				name:      "event",
-				validType: Variable,
-				key:       "Event",
-				optional:  true,
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) > 0 {
 				var mode = getArgValue(args[0]).(string)
@@ -1009,22 +924,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"toggleFocusMode": {
-		doc: selfDoc{
-			title:       "Toggle Focus Mode",
-			description: "Toggle a focus mode.",
-			category:    "settings",
-			subcategory: "Notifications",
-		},
-		identifier: "dnd.set",
-		parameters: []parameterDefinition{
-			{
-				name:         "focusMode",
-				validType:    String,
-				defaultValue: "Do Not Disturb",
-				enum:         "focusModes",
-				optional:     true,
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			var params = map[string]any{
 				"Operation": "Toggle",
