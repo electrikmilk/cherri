@@ -31,7 +31,7 @@ action v16.4 'com.apple.shortcuts.CreateWorkflowAction' makeShortcut(text name, 
 action 'runworkflow' run(text shortcutName: 'WFWorkflowName', variable input: 'WFInput')
 
 // [Doc]: Create Shortcut Link: Create an iCloud link to a Shortcut.
-action Shortcuts:'CreateShortcutiCloudLinkAction' createShortcutLink(variable shortcut)
+action intent Shortcuts:'CreateShortcutiCloudLinkAction' createShortcutLink(variable shortcut)
 
 // [Doc]: Open Shortcut: Open a shortcut in the Shortcuts app.
 action internal 'com.apple.shortcuts.OpenWorkflowAction' openShortcut(text shortcutName)
