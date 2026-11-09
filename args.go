@@ -109,6 +109,10 @@ func init() {
 		Description: "Do not use the Shortcuts toolkit DB to decompile non-standard actions.",
 	})
 	args.Register(args.Argument{
+		Name:        "faithful",
+		Description: "Decompile every action as a literal rawAction() call instead of matching known Cherri actions.",
+	})
+	args.Register(args.Argument{
 		Name:         "signing-server",
 		ExpectsValue: true,
 		Description:  "Sign the compiled Shortcut using a remote signing service that runs https://github.com/scaxyz/shortcut-signing-server.",
