@@ -1,0 +1,9 @@
+// compile-only: flashlight state is hardware dependent
+
+flashlightOn()
+flashlightOn(0.8)
+flashlightOff()
+toggleFlashlight()
+toggleFlashlight(0.3)
+
+show("✅ All tests passed")
