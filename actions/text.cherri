@@ -109,3 +109,12 @@ action default 'text.match.getgroup' getMatchGroup(variable matches, number inde
 action 'text.match.getgroup' getMatchGroups(variable matches) {
 	"WFGetGroupType": "All Groups"
 }
+
+// [Doc]: [Text Editing] Contains Text: Uses Match Text to check if text is within subject.
+action internal 'text.match' containsText(text subject: 'text', text text: 'WFMatchTextPattern', bool ?caseSensitive: 'WFMatchTextCaseSensitive' = true)
+
+// [Doc]: [Text Editing] Split Text: Split text by a separator.
+action internal 'text.split' splitText(text text: 'text', text separator: '' = "\n"): array
+
+// [Doc]: [Text Editing] Join Text: Join text by a combiner.
+action internal 'text.combine' joinText(variable text: 'text', text glue: '' = "\n"): text
