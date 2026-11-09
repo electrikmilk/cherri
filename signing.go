@@ -20,8 +20,6 @@ import (
 )
 
 var signFailed = false
-var signingServiceFailed = false
-var backoff = 10
 
 // sign runs the shortcuts sign command on the unsigned shortcut file.
 func sign() {
@@ -77,8 +75,6 @@ type SigningService struct {
 
 // Sign the Shortcut using a signing service.
 func useSigningService(service *SigningService) {
-	handleBackoff(service)
-
 	if !args.Using("no-ansi") {
 		fmt.Println(ansi(fmt.Sprintf("Signing using %s service...", service.name), green))
 		if service.info != nil {
@@ -87,9 +83,6 @@ func useSigningService(service *SigningService) {
 	}
 
 	var signedShortcut = requestSignedShortcut(service)
-	if len(signedShortcut) == 0 {
-		return
-	}
 
 	if !looksLikeSignedShortcut(signedShortcut) {
 		exit("Signing server response does not look like a Shortcut file.")
@@ -100,17 +93,6 @@ func useSigningService(service *SigningService) {
 
 	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green))
-	}
-}
-
-func handleBackoff(service *SigningService) {
-	if signingServiceFailed {
-		fmt.Println(ansi(fmt.Sprintf("Backing off from %s", service.name), red))
-		for i := 5; i > 0; i-- {
-			fmt.Printf("%d seconds...\r", i)
-			time.Sleep(1 * time.Second)
-		}
-		fmt.Print("\n\n")
 	}
 }
 
@@ -137,25 +119,15 @@ func requestSignedShortcut(service *SigningService) []byte {
 	handle(resErr)
 	defer response.Body.Close()
 
+	// Checked before the content type because error responses can have any content type.
+	if response.StatusCode != http.StatusOK {
+		exit(fmt.Sprintf("Failed to sign Shortcut (%s)", response.Status))
+	}
+
 	var responseContentType = response.Header.Get("Content-Type")
 	var allowedContentTypes = []string{"application/octet-stream", "application/x-plist", "application/x-apple-shortcut"}
 	if !slices.Contains(allowedContentTypes, responseContentType) {
-		exit(fmt.Sprintf("Unsupported response type: %s", responseContentType))
-	}
-
-	if response.StatusCode != http.StatusOK {
-		signingServiceFailed = true
-		backoff += 10
-		fmt.Println(ansi(fmt.Sprintf("Failed to sign Shortcut (%s)", response.Status), red))
-		return []byte{}
-	}
-
-	signingServiceFailed = false
-
-	if backoff > 10 {
-		backoff -= 10
-	} else {
-		backoff = 10
+		exit(fmt.Sprintf("Unsupported response content type: %s", responseContentType))
 	}
 
 	var body, readErr = io.ReadAll(response.Body)
