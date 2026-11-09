@@ -1,0 +1,16 @@
+// compile-only: multitasking and focus modes change device settings
+#define version 26
+
+setWindowedMultitasking()
+setWindowedMultitasking(true)
+setStageManagerMultitasking()
+setStageManagerMultitasking(true, false)
+
+setFocusMode()
+setFocusMode("Work")
+setFocusMode("Personal", "Time", "17:00")
+setFocusMode("Sleep", "Event Ends")
+toggleFocusMode()
+toggleFocusMode("Driving")
+
+show("✅ All tests passed")
