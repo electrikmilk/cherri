@@ -640,8 +640,8 @@ func collectInlineVariables(str *string) (noVarString string) {
 func argumentValue(args []actionArgument, idx int) any {
 	var actionParameter parameterDefinition
 	if len(currentAction.definition.parameters) <= idx {
-		// First parameter is likely infinite
-		actionParameter = currentAction.definition.parameters[0]
+		// Arguments past the last parameter belong to its variadic parameter
+		actionParameter = currentAction.definition.parameters[len(currentAction.definition.parameters)-1]
 	} else {
 		actionParameter = currentAction.definition.parameters[idx]
 	}
