@@ -10,4 +10,9 @@ newContact("Ada", "Lovelace", @phone, @email, "Analytical Engines", "First progr
 updateContact(@contact, "First Name", "Ada")
 updateContact(@contact, "Company", "Analytical Engines")
 
+@email = emailAddress("ada@example.com")
+@emails = emailAddress("ada@example.com", "lovelace@example.com")
+@number = phoneNumber("555-0100")
+@numbers = phoneNumber("555-0100", "555-0101")
+
 show("✅ All tests passed")

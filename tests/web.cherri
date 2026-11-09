@@ -34,4 +34,8 @@ const host = getURLDetail("{API_URL}", "Host")
 openCustomXCallbackURL("myapp://do-something")
 openCustomXCallbackURL("myapp://do-something", "success", "cancel", "error", "myapp://done")
 
+// Safari reading list
+addToReadingList("https://cherrilang.org")
+addToReadingList("https://cherrilang.org", "https://example.com")
+
 show("✅ All tests passed")

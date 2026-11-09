@@ -143,3 +143,20 @@ action internal 'splitscreen' splitApps(text firstAppID, text secondAppID, appSp
 // [Doc]: [Apps] Kill App: Kill an app.
 // [Warning]: This will not ask to save changes!
 action internal 'quit.app' killApp(text appID)
+
+// [Doc]: [Apps] Hide Apps: Hide multiple apps. Allows exception.
+action internal 'hide.app' hideAllApps(text ...?except) {
+    "WFHideAppMode": "All Apps"
+}
+
+// [Doc]: [Apps] Quit All Apps: Quits all apps. Allows exceptions.
+action internal 'quit.app' quitAllApps(text ...?except) {
+    "WFQuitAppMode": "All Apps"
+}
+
+// [Doc]: [Apps] Kill All Apps: Kills all apps. Allows exceptions.
+// [Warning]: This will quit all the apps running on the device without asking to save changes!
+action internal 'quit.app' killAllApps(text ...?except) {
+    "WFQuitAppMode": "All Apps",
+    "WFAskToSaveChanges": false
+}

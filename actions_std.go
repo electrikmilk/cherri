@@ -78,20 +78,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"emailAddress": {
-		doc: selfDoc{
-			title:       "Email Address",
-			description: "Create an email address value.",
-			category:    "contacts",
-			subcategory: "Email",
-		},
-		identifier: "email",
-		parameters: []parameterDefinition{
-			{
-				name:      "email",
-				validType: String,
-				infinite:  true,
-			},
-		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			if len(args) > 1 && args[0].valueType == Variable {
 				parserError("Shortcuts only allows one variable for an email address.")
@@ -113,19 +99,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"phoneNumber": {
-		doc: selfDoc{
-			title:       "Phone Number",
-			description: "Create a phone number value.",
-			category:    "contacts",
-			subcategory: "Phone",
-		},
-		parameters: []parameterDefinition{
-			{
-				name:      "number",
-				validType: String,
-				infinite:  true,
-			},
-		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			if len(args) > 1 && args[0].valueType == Variable {
 				parserError("Shortcuts only allows one variable for a phone number.")
@@ -267,19 +240,6 @@ var actions = map[string]*actionDefinition{
 		decomp:           decompTextParts,
 	},
 	"url": {
-		doc: selfDoc{
-			title:       "URL",
-			description: "Create a URL value.",
-			category:    "web",
-			subcategory: "URLs",
-		},
-		parameters: []parameterDefinition{
-			{
-				name:      "url",
-				validType: String,
-				infinite:  true,
-			},
-		},
 		makeParams: func(args []actionArgument) map[string]any {
 			var urlItems []any
 			for _, item := range args {
@@ -294,20 +254,6 @@ var actions = map[string]*actionDefinition{
 		decomp: decompInfiniteURLAction,
 	},
 	"addToReadingList": {
-		doc: selfDoc{
-			title:       "Add to Reading List",
-			description: "Add a link to the reading list.",
-			category:    "web",
-			subcategory: "Safari",
-		},
-		identifier: "readinglist",
-		parameters: []parameterDefinition{
-			{
-				name:      "url",
-				validType: String,
-				infinite:  true,
-			},
-		},
 		makeParams: func(args []actionArgument) map[string]any {
 			var urlItems []any
 			for _, item := range args {
@@ -382,26 +328,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"hideAllApps": {
-		doc: selfDoc{
-			title:       "Hide Apps",
-			description: "Hide multiple apps. Allows exception.",
-			category:    "device",
-			subcategory: "Apps",
-		},
-		identifier: "hide.app",
-		parameters: []parameterDefinition{
-			{
-				name:      "except",
-				validType: String,
-				optional:  true,
-				infinite:  true,
-			},
-		},
 		check:      replaceAppIDs,
 		makeParams: makeAllAppsAction,
-		appendParams: map[string]any{
-			"WFHideAppMode": "All Apps",
-		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			return decompAppAction("WFAppsExcept", action)
 		},
@@ -428,26 +356,8 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"quitAllApps": {
-		doc: selfDoc{
-			title:       "Quit All Apps",
-			description: "Quits all apps. Allows exceptions.",
-			category:    "device",
-			subcategory: "Apps",
-		},
-		identifier: "quit.app",
-		parameters: []parameterDefinition{
-			{
-				name:      "except",
-				validType: String,
-				optional:  true,
-				infinite:  true,
-			},
-		},
 		check:      replaceAppIDs,
 		makeParams: makeAllAppsAction,
-		appendParams: map[string]any{
-			"WFQuitAppMode": "All Apps",
-		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			return decompAppAction("WFAppsExcept", action)
 		},
@@ -477,27 +387,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"killAllApps": {
-		doc: selfDoc{
-			title:       "Kill All Apps",
-			description: "Kills all apps. Allows exceptions.",
-			warning:     "This will quit all the apps running on the device without asking to save changes!",
-			category:    "device",
-			subcategory: "Apps",
-		},
-		identifier: "quit.app",
-		parameters: []parameterDefinition{
-			{
-				name:      "except",
-				validType: String,
-				optional:  true,
-				infinite:  true,
-			},
-		},
 		check: replaceAppIDs,
-		appendParams: map[string]any{
-			"WFQuitAppMode":      "All Apps",
-			"WFAskToSaveChanges": false,
-		},
 		makeParams: makeAllAppsAction,
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			return decompAppAction("WFAppsExcept", action)
@@ -592,19 +482,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"list": {
-		doc: selfDoc{
-			title:       "List",
-			description: "Create an immutable array of text.",
-			category:    "basic",
-			subcategory: "Lists",
-		},
-		parameters: []parameterDefinition{
-			{
-				name:      "listItem",
-				validType: String,
-				infinite:  true,
-			},
-		},
 		makeParams: func(args []actionArgument) map[string]any {
 			var listItems []map[string]any
 			for _, item := range args {
