@@ -1154,10 +1154,19 @@ func generateImportQuestions() (importQuestions []WFQuestion) {
 			Category:     "Parameter",
 			ActionIndex:  q.actionIndex,
 			Text:         q.text,
-			DefaultValue: q.defaultValue,
+			DefaultValue: makeQuestionDefaultValue(q.defaultValue),
 		})
 	}
 	return
+}
+
+func makeQuestionDefaultValue(defaultValue any) any {
+	if _, isDictionary := defaultValue.(map[string]any); !isDictionary {
+		return defaultValue
+	}
+
+	// A question default is plain values, so there are no variable references to read as files.
+	return makeDictionaryValue(&defaultValue, false)
 }
 
 func generateInputContentItems() (inputContentItems []string) {
