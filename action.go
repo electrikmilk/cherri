@@ -15,6 +15,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/electrikmilk/args-parser"
 )
@@ -99,6 +100,9 @@ type actionDefinition struct {
 	parsed             bool // parsed is false for an action defined only in Go, and is how a second Cherri definition of the same name is detected as a duplicate.
 	internal           bool // internal marks a Cherri declaration that attaches to the logic of a compiler-defined action.
 }
+
+// intents maps the name of an intent declared in Cherri to the bundle identifier of the app it belongs to.
+var intents = map[string]string{}
 
 var enumerations = map[string][]string{
 	"measurementUnitType":           {"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"},
@@ -848,6 +852,8 @@ func parseActionDefinitions() {
 			collectComment()
 		case startOfLineTokenAhead(Enumeration):
 			collectEnumeration()
+		case next(len(Intent)) == ' ' && startOfLineTokenAhead(Intent):
+			collectIntentDeclaration()
 		case startOfLineTokenAhead(Action):
 			advance()
 			collectDefinedAction()
@@ -885,6 +891,64 @@ func collectActionPrefixModifiers(definition *actionDefinition) {
 		}
 		advance()
 	}
+
+	if intentReferenceAhead() {
+		collectIntentReference(definition)
+	}
+}
+
+// collectIntentDeclaration collects `intent Name 'bundle.identifier'` so actions can refer to the app by name.
+func collectIntentDeclaration() {
+	var lineRef = newLineReference()
+
+	advance()
+	var name = collectIdentifier()
+	if _, found := intents[name]; found {
+		parserError(fmt.Sprintf("Duplicate declaration of intent '%s'", name))
+	}
+
+	skipInlineWhitespace()
+	if char != '\'' {
+		parserError("Expected intent bundle identifier raw string (').")
+	}
+	advance()
+	intents[name] = collectRawString()
+
+	lineRef.replaceLines()
+}
+
+// intentReferenceAhead tells an intent reference (Name:'Identifier') apart from the name of the action, which is followed by a parenthesis.
+func intentReferenceAhead() bool {
+	var offset int
+	for unicode.IsLetter(next(offset)) || unicode.IsDigit(next(offset)) || next(offset) == '_' {
+		offset++
+	}
+
+	return offset > 0 && next(offset) == ':' && next(offset+1) == '\''
+}
+
+// collectIntentReference sets the app intent of a definition. Without an identifier of its own, the action is identified
+// by the intent, which is how most app intents are named in a Shortcut.
+func collectIntentReference(definition *actionDefinition) {
+	var name = collectIdentifier()
+	var bundleIdentifier, found = intents[name]
+	if !found {
+		parserError(fmt.Sprintf("Unknown intent '%s'", name))
+	}
+
+	advanceTimes(2)
+	var intentIdentifier = collectRawString()
+	definition.appIntent = appIntent{
+		name:                name,
+		bundleIdentifier:    bundleIdentifier,
+		appIntentIdentifier: intentIdentifier,
+	}
+
+	if definition.identifier == "" && definition.overrideIdentifier == "" {
+		definition.appIdentifier = bundleIdentifier
+		definition.identifier = intentIdentifier
+	}
+	advance()
 }
 
 // internalDefinition returns the compiler-defined entry for name if a Cherri definition has not taken it over yet.
@@ -914,7 +978,6 @@ func defineAction(name string, definition *actionDefinition) {
 		definition.makeParams = compilerDefinition.makeParams
 		definition.appendParamsFunc = compilerDefinition.appendParamsFunc
 		definition.decomp = compilerDefinition.decomp
-		definition.appIntent = compilerDefinition.appIntent
 	}
 
 	definition.parsed = true

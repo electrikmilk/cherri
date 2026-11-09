@@ -9,3 +9,6 @@ openShortcut("shortcuts")
 run("shortcuts", @intVar)
 
 runSelf(nil)
+
+@shortcutToLink = "shortcuts"
+createShortcutLink(@shortcutToLink)

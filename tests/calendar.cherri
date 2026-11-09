@@ -1,0 +1,13 @@
+// compile-only: alarms change state on the device
+
+@alarm = "alarm"
+
+createAlarm("Wake", "07:30")
+createAlarm("Gym", "06:00", false, ["monday", "friday"])
+deleteAlarm(@alarm)
+turnOnAlarm(@alarm)
+turnOnAlarm(@alarm, false)
+turnOffAlarm(@alarm)
+toggleAlarm(@alarm)
+
+show("✅ All tests passed")

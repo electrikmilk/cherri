@@ -32,18 +32,6 @@ var fileLabelsMap = map[string]int{
 	"gray":   1,
 }
 
-var toggleAlarmIntent = appIntent{
-	name:                "Clock",
-	bundleIdentifier:    "com.apple.clock",
-	appIntentIdentifier: "ToggleAlarmIntent",
-}
-
-var createShortcutiCloudLinkIntent = appIntent{
-	name:                "Shortcuts",
-	bundleIdentifier:    "com.apple.shortcuts",
-	appIntentIdentifier: "CreateShortcutiCloudLinkAction",
-}
-
 var setMultitaskingModeIntent = appIntent{
 	name:                "ShortcutsActions",
 	bundleIdentifier:    "com.apple.ShortcutsActions",
@@ -54,11 +42,6 @@ var setMultitaskingModeIntent = appIntent{
 // The key determines the identifier of the identifier that must be used in the syntax, it's value defines its behavior, etc. using an actionDefinition.
 var actions = map[string]*actionDefinition{
 	"createAlarm": {
-		appIntent: appIntent{
-			name:                "Clock",
-			bundleIdentifier:    "com.apple.clock",
-			appIntentIdentifier: "CreateAlarmIntent",
-		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			if len(args) < 4 {
 				return
@@ -98,111 +81,6 @@ var actions = map[string]*actionDefinition{
 			return map[string]any{
 				"repeats": repeats,
 			}
-		},
-	},
-	"deleteAlarm": {
-		doc: selfDoc{
-			title:       "Delete Alarm",
-			description: "Deletes an alarm.",
-			category:    "calendar",
-			subcategory: "Alarms",
-		},
-		appIdentifier: "com.apple.clock",
-		identifier:    "DeleteAlarmIntent",
-		appIntent: appIntent{
-			name:                "Clock",
-			bundleIdentifier:    "com.apple.clock",
-			appIntentIdentifier: "DeleteAlarmIntent",
-		},
-		parameters: []parameterDefinition{
-			{
-				name:      "alarm",
-				validType: Variable,
-				key:       "entities",
-			},
-		},
-	},
-	"turnOnAlarm": {
-		doc: selfDoc{
-			title:       "Turn On Alarm",
-			description: "Turn on an alarm.",
-			category:    "calendar",
-			subcategory: "Alarms",
-		},
-		appIdentifier: "com.apple.mobiletimer-framework",
-		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
-		appIntent:     toggleAlarmIntent,
-		parameters: []parameterDefinition{
-			{
-				name:      "alarm",
-				validType: Variable,
-				key:       "alarm",
-			},
-			{
-				name:         "showWhenRun",
-				validType:    Bool,
-				key:          "ShowWhenRun",
-				defaultValue: true,
-				optional:     true,
-			},
-		},
-		appendParams: map[string]any{
-			"state": 1,
-		},
-		defaultAction: true,
-	},
-	"turnOffAlarm": {
-		doc: selfDoc{
-			title:       "Turn Off Alarm",
-			description: "Turn off an alarm.",
-			category:    "calendar",
-			subcategory: "Alarms",
-		},
-		appIdentifier: "com.apple.mobiletimer-framework",
-		identifier:    "MobileTimerIntents.MTToggleAlarmIntent",
-		appIntent:     toggleAlarmIntent,
-		parameters: []parameterDefinition{
-			{
-				name:      "alarm",
-				validType: Variable,
-				key:       "alarm",
-			},
-			{
-				name:         "showWhenRun",
-				validType:    Bool,
-				key:          "ShowWhenRun",
-				defaultValue: true,
-				optional:     true,
-			},
-		},
-		appendParams: map[string]any{
-			"state": 0,
-		},
-	},
-	"toggleAlarm": {
-		doc: selfDoc{
-			title:       "Toggle Alarm",
-			description: "Toggle an alarm.",
-			category:    "calendar",
-			subcategory: "Alarms",
-		},
-		parameters: []parameterDefinition{
-			{
-				name:      "alarm",
-				validType: Variable,
-				key:       "alarm",
-			},
-			{
-				name:         "showWhenRun",
-				validType:    Bool,
-				key:          "ShowWhenRun",
-				defaultValue: true,
-				optional:     true,
-			},
-		},
-		appIntent: toggleAlarmIntent,
-		appendParams: map[string]any{
-			"operation": "Toggle",
 		},
 	},
 	"emailAddress": {
@@ -1192,22 +1070,6 @@ var actions = map[string]*actionDefinition{
 			}
 
 			return
-		},
-	},
-	"createShortcutLink": {
-		doc: selfDoc{
-			title:    "Create Shortcut Link",
-			category: "shortcuts",
-		},
-		appIdentifier: "com.apple.shortcuts",
-		identifier:    "CreateShortcutiCloudLinkAction",
-		appIntent:     createShortcutiCloudLinkIntent,
-		parameters: []parameterDefinition{
-			{
-				name:      "shortcut",
-				key:       "shortcut",
-				validType: Variable,
-			},
 		},
 	},
 	"getWindows": {
