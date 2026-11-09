@@ -153,49 +153,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"newContact": {
-		doc: selfDoc{
-			title:       "Add New Contact",
-			description: "Create a new contact.",
-			category:    "contacts",
-		},
-		identifier: "addnewcontact",
-		parameters: []parameterDefinition{
-			{
-				name:      "firstName",
-				validType: String,
-				key:       "WFContactFirstName",
-			},
-			{
-				name:      "lastName",
-				validType: String,
-				key:       "WFContactLastName",
-			},
-			{
-				name:      "phoneNumber",
-				validType: String,
-			},
-			{
-				name:      "emailAddress",
-				validType: String,
-			},
-			{
-				name:      "company",
-				validType: String,
-				key:       "WFContactCompany",
-			},
-			{
-				name:      "notes",
-				validType: String,
-				key:       "WFContactNotes",
-			},
-			{
-				name:         "prompt",
-				validType:    Bool,
-				key:          "ShowWhenRun",
-				defaultValue: false,
-				optional:     true,
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) (params map[string]any) {
 			params = make(map[string]any)
 			if len(args) >= 3 {
@@ -1362,36 +1319,10 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"updateContact": {
-		doc: selfDoc{
-			title:    "Update Contact",
-			category: "contacts",
-		},
-		identifier:    "setters.contacts",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "contact",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:      "detail",
-				validType: String,
-				key:       "WFContentItemPropertyName",
-				enum:      "contactDetail",
-			},
-			{
-				name:      "value",
-				validType: String,
-			},
-		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			var contactDetail = args[1].value.(string)
 			var contactDetailKey = strings.ReplaceAll(contactDetail, " ", "")
 			currentAction.definition.parameters[2].key = "WFContactContentItem" + contactDetailKey
-		},
-		appendParams: map[string]any{
-			"Mode": "Set",
 		},
 	},
 	"setWindowedMultitasking": {
