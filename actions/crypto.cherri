@@ -2,8 +2,14 @@
 Cryptography Actions
 */
 
+enum base64LineBreakMode {
+    'Every 76 Characters',
+    'Every 64 Characters',
+    'None'
+}
+
 // [Doc]: Base 64 Encode: Base 64 encodes input.
-action default 'base64encode' base64Encode(variable encodeInput: 'WFInput'): text {
+action default 'base64encode' base64Encode(variable encodeInput: 'WFInput', base64LineBreakMode ?breakMode: 'WFBase64LineBreakMode' = "Every 76 Characters"): text {
 	"input": "Encode"
 }
 

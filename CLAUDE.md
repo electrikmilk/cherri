@@ -22,7 +22,7 @@ go run . file.cherri --debug      # also writes .plist and preprocessed file
 
 # Tests
 go test -run TestCherriNoSign     # compile all tests/*.cherri files, skip signing (use on non-macOS)
-go test -run TestCherri           # same but with signing (macOS only)
+go test -run '^TestCherri$'       # same but with signing (macOS only)
 go test -run TestDecomp           # decompile tests/decomp-me.plist, compare to tests/decomp-expected.cherri
 go test -run TestActionIdentifiers # verify specific action identifier output
 
@@ -279,9 +279,9 @@ The test runner calls `compile()` which calls `main()`, so `os.Args[1]` is set t
 
 `TestDecomp` is a diff test: it decompiles `tests/decomp-me.plist` and expects byte-for-byte equality with `tests/decomp-expected.cherri`. When decompiler output changes intentionally, regenerate the expected file.
 
-**Verification hierarchy:** On macOS, always run `go test -run TestCherri` as the final automated check — it is never sufficient to stop at `TestCherriNoSign`. `TestCherriNoSign` only confirms compilation does not panic; it does not validate plist structure. The signing step in `TestCherri` is the only automated confirmation that the generated plist is structurally accepted by the Shortcuts runtime. Use `TestCherriNoSign` only for rapid iteration or on non-macOS hosts. After `TestCherri` passes, the user performs the final verification: open the compiled `.shortcut` in QuickLook and import it into the Shortcuts app to confirm it runs correctly — this step cannot be automated.
+**Verification hierarchy:** On macOS, always run `go test -run '^TestCherri$'` as the final automated check — it is never sufficient to stop at `TestCherriNoSign`. `TestCherriNoSign` only confirms compilation does not panic; it does not validate plist structure. The signing step in `TestCherri` is the only automated confirmation that the generated plist is structurally accepted by the Shortcuts runtime. Use `TestCherriNoSign` only for rapid iteration or on non-macOS hosts. After `TestCherri` passes, the user performs the final verification: open the compiled `.shortcut` in QuickLook and import it into the Shortcuts app to confirm it runs correctly — this step cannot be automated.
 
-**Sequential test isolation:** The test functions are not designed to run sequentially in the same process. The global `actions` map and related state accumulate across test functions, so running `go test` (all tests together) may produce failures that do not occur in CI. Always run tests individually with `-run`, matching how the GitLab pipeline executes them.
+**Sequential test isolation:** The test functions are not designed to run sequentially in the same process. The global `actions` map and related state accumulate across test functions, so running `go test` (all tests together) may produce failures that do not occur in CI. Always run tests individually with `-run`, matching how the GitLab pipeline executes them. `-run` takes a regex, so `-run TestCherri` also matches `TestCherriNoSign` and runs both in one process, failing with errors like `Duplicate enumeration 'backgroundSound'` on the second. Anchor the pattern (`-run '^TestCherri$'`) to run only the signed suite.
 
 **Dual-purpose test files:** Test files are designed to both compile clean in CI *and* run in the Shortcuts app to verify runtime behavior. Each assertable test file follows this pattern:
 
@@ -317,6 +317,8 @@ The `.text` suffix on a const (`result.text`) works in conditions and is preferr
 A signed Shortcut is necessary but not sufficient to confirm correct behavior. The authoritative source of truth for how any action or parameter should be structured is the plist XML produced by the Shortcuts app itself.
 
 **Workflow:** Build the equivalent Shortcut in the Shortcuts app, share it via iCloud, then retrieve its canonical plist to compare against Cherri's output. Use `--debug` (`-d`) to make Cherri emit its own plist for the comparison, and `--output=` (`-o=`) to control where the compiled `.shortcut` file is written. Run `go run . --help` for the full list of CLI flags.
+
+**On macOS, skip the iCloud round trip:** `.claude/skills/shortcuts-sync/scripts/shortcut-plist.sh "<shortcut name>"` prints the actions plist the Shortcuts app stored for an installed shortcut, `.claude/skills/shortcuts-sync/scripts/actions-sync.sh` compares the actions in the Shortcuts ToolKit databases (macOS and the booted iOS simulator) with Cherri's definitions, and `.claude/skills/shortcuts-sync/scripts/actions-sync-params.sh` compares their parameters and enum values. See `.claude/skills/shortcuts-sync/SKILL.md` for usage and limits.
 
 **Fetching a Shortcuts iCloud plist:**
 ```bash

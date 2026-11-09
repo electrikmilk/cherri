@@ -14,6 +14,7 @@ func defineRawAction() {
 			{
 				name:      "identifier",
 				validType: String,
+				literal:   true,
 			},
 			{
 				name:      "parameters",

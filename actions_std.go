@@ -829,6 +829,9 @@ var actions = map[string]*actionDefinition{
 			replaceAppIDs(args, definition)
 		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return map[string]any{}
+			}
 			if args[0].valueType == Variable {
 				return map[string]any{
 					"WFSelectedApp": argumentValue(args, 0),
@@ -1077,6 +1080,9 @@ var actions = map[string]*actionDefinition{
 		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			var params = make(map[string]any)
+			if len(args) == 0 {
+				return params
+			}
 			if args[0].valueType == Variable {
 				params["WFPrimaryAppIdentifier"] = argumentValue(args, 0)
 			} else {

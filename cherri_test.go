@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -16,7 +17,47 @@ import (
 
 var currentTest string
 
+const signingTestAttempts = 3
+const initialSigningTestBackoff = 5 * time.Second
+
+// retryingTransport lets a rate limited signing service recover mid-suite, since the CLI itself fails on the first error.
+// Only rate limiting and server errors are retried because any other status will not change on a retry.
+type retryingTransport struct {
+	next http.RoundTripper
+}
+
+func (transport retryingTransport) RoundTrip(request *http.Request) (*http.Response, error) {
+	var backoff = initialSigningTestBackoff
+	for attempt := 1; ; attempt++ {
+		var attemptRequest = request.Clone(request.Context())
+		if request.GetBody != nil {
+			var body, bodyErr = request.GetBody()
+			if bodyErr != nil {
+				return nil, bodyErr
+			}
+			attemptRequest.Body = body
+		}
+
+		var response, responseErr = transport.next.RoundTrip(attemptRequest)
+		if responseErr != nil || attempt == signingTestAttempts {
+			return response, responseErr
+		}
+		if response.StatusCode != http.StatusTooManyRequests && response.StatusCode < http.StatusInternalServerError {
+			return response, nil
+		}
+
+		_ = response.Body.Close()
+		fmt.Println(ansi(fmt.Sprintf("Failed to sign Shortcut (%s). Backing off from %s for %s (attempt %d of %d)...", response.Status, request.URL.Host, backoff, attempt, signingTestAttempts), red))
+		time.Sleep(backoff)
+		backoff *= 2
+	}
+}
+
 func TestCherri(_ *testing.T) {
+	var defaultTransport = http.DefaultTransport
+	http.DefaultTransport = retryingTransport{next: defaultTransport}
+	defer func() { http.DefaultTransport = defaultTransport }()
+
 	args.Args["no-ansi"] = ""
 	args.Args["comments"] = ""
 	var files, err = os.ReadDir("tests")
