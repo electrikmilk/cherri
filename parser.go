@@ -1286,7 +1286,7 @@ type question struct {
 	parameter    string
 	actionIndex  int
 	text         string
-	defaultValue string
+	defaultValue any
 	used         bool
 }
 
@@ -1309,12 +1309,22 @@ func collectQuestion() {
 	var text = collectString()
 	advance()
 
-	if char != '"' {
-		parserError("Expected question default string value.")
+	var defaultValue any
+	switch char {
+	case '"':
+		advance()
+		defaultValue = collectString()
+	case '{':
+		advance()
+		var dictionary = collectDictionary()
+		if dictionary == nil {
+			dictionary = make(map[string]any)
+		}
+		defaultValue = dictionary
+	default:
+		parserError("Expected question default string or dictionary value.")
 	}
-	advance()
 
-	var defaultValue = collectString()
 	questions[identifier] = &question{
 		text:         text,
 		defaultValue: defaultValue,
