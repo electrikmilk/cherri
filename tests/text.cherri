@@ -57,4 +57,7 @@ containsText("hello world", "hello", false)
 @lines = splitText("a\nb")
 const rejoined = joinText(@lines)
 
+// an empty separator splits into every character
+@characters = splitText("abc", "")
+
 show("✅ All tests passed")
