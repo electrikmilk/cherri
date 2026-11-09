@@ -15,7 +15,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"unicode"
 
 	"github.com/electrikmilk/args-parser"
 )
@@ -852,7 +851,7 @@ func parseActionDefinitions() {
 			collectComment()
 		case startOfLineTokenAhead(Enumeration):
 			collectEnumeration()
-		case next(len(Intent)) == ' ' && startOfLineTokenAhead(Intent):
+		case startOfLineTokenAhead(Intent):
 			collectIntentDeclaration()
 		case startOfLineTokenAhead(Action):
 			advance()
@@ -864,8 +863,7 @@ func parseActionDefinitions() {
 }
 
 func collectActionPrefixModifiers(definition *actionDefinition) {
-	// The following space distinguishes the keyword from an action name that starts with it.
-	if next(len(Internal)) == ' ' && tokenAhead(Internal) {
+	if tokenAhead(Internal) {
 		definition.internal = true
 		advance()
 	}
@@ -892,7 +890,8 @@ func collectActionPrefixModifiers(definition *actionDefinition) {
 		advance()
 	}
 
-	if intentReferenceAhead() {
+	if tokenAhead(Intent) {
+		advance()
 		collectIntentReference(definition)
 	}
 }
@@ -917,17 +916,7 @@ func collectIntentDeclaration() {
 	lineRef.replaceLines()
 }
 
-// intentReferenceAhead tells an intent reference (Name:'Identifier') apart from the name of the action, which is followed by a parenthesis.
-func intentReferenceAhead() bool {
-	var offset int
-	for unicode.IsLetter(next(offset)) || unicode.IsDigit(next(offset)) || next(offset) == '_' {
-		offset++
-	}
-
-	return offset > 0 && next(offset) == ':' && next(offset+1) == '\''
-}
-
-// collectIntentReference sets the app intent of a definition. Without an identifier of its own, the action is identified
+// collectIntentReference sets the app intent of a definition from `intent Name:'Identifier'`. Without an identifier of its own, the action is identified
 // by the intent, which is how most app intents are named in a Shortcut.
 func collectIntentReference(definition *actionDefinition) {
 	var name = collectIdentifier()
@@ -936,7 +925,10 @@ func collectIntentReference(definition *actionDefinition) {
 		parserError(fmt.Sprintf("Unknown intent '%s'", name))
 	}
 
-	advanceTimes(2)
+	if !isChar(':') || !isChar('\'') {
+		parserError("Expected the intent identifier as a raw string after the intent name (Name:'Identifier').")
+	}
+
 	var intentIdentifier = collectRawString()
 	definition.appIntent = appIntent{
 		name:                name,
