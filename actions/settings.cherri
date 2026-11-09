@@ -2,7 +2,9 @@
 Settings Actions
 */
 
-intent ShortcutsActions 'com.apple.ShortcutsActions'
+intent ShortcutsActions 'com.apple.ShortcutsActions' {
+    SetMultitaskingModeAction
+}
 
 // [Doc]: [Notifications] Turn On Do Not Disturb
 action 'dnd.set' DNDOn() {
@@ -75,10 +77,10 @@ action toggleSet 'truetone.set' TrueTone 'OnValue'
 action toggleSet 'stagemanager.set' StageManager(bool showDock: 'showDock' = true, bool showRecentApps: 'showRecentApps' = true)
 
 // [Doc]: [Multitasking] Set Windowed Multitasking Mode: Set the multitasking mode to windowed. Applies to iPadOS and macOS only.
-action default internal v26 intent ShortcutsActions:'SetMultitaskingModeAction' setWindowedMultitasking(bool ?automaticallyShowAndHideDock: 'automaticallyShowAndHideDock')
+action default internal v26 intent:ShortcutsActions.SetMultitaskingModeAction setWindowedMultitasking(bool ?automaticallyShowAndHideDock: 'automaticallyShowAndHideDock')
 
 // [Doc]: [Multitasking] Set Stage Manager Multitasking Mode: Set the multitasking mode to Stage Manager. Applies to iPadOS and macOS only.
-action internal v26 intent ShortcutsActions:'SetMultitaskingModeAction' setStageManagerMultitasking(bool ?automaticallyShowAndHideDock: 'automaticallyShowAndHideDock', bool ?showRecentApps: 'showRecentApps')
+action internal v26 intent:ShortcutsActions.SetMultitaskingModeAction setStageManagerMultitasking(bool ?automaticallyShowAndHideDock: 'automaticallyShowAndHideDock', bool ?showRecentApps: 'showRecentApps')
 
 // [Doc]: [Notifications] Set Focus Mode: Set a default focus mode on or off. If setting to on, optionally set until with optional arguments for time or event.
 action internal 'dnd.set' setFocusMode(focusModes ?focusMode = "Do Not Disturb", focusUntil ?until: 'AssertionType' = "Turned Off", text ?time: 'Time', variable ?event: 'Event')

@@ -100,8 +100,8 @@ type actionDefinition struct {
 	internal           bool // internal marks a Cherri declaration that attaches to the logic of a compiler-defined action.
 }
 
-// intents maps the name of an intent declared in Cherri to the bundle identifier of the app it belongs to.
-var intents = map[string]string{}
+// intents maps the app name and identifier of an intent declared in Cherri (e.g. Clock.ToggleAlarmIntent) to its app intent.
+var intents = map[string]appIntent{}
 
 var enumerations = map[string][]string{
 	"measurementUnitType":           {"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"},
@@ -890,55 +890,76 @@ func collectActionPrefixModifiers(definition *actionDefinition) {
 		advance()
 	}
 
-	if tokenAhead(Intent) {
-		advance()
+	if tokenAhead(IntentReference) {
 		collectIntentReference(definition)
 	}
 }
 
-// collectIntentDeclaration collects `intent Name 'bundle.identifier'` so actions can refer to the app by name.
+// collectIntentDeclaration collects `intent App 'bundle.identifier' { Intent, ... }` so actions can refer to the intents of an app.
 func collectIntentDeclaration() {
 	var lineRef = newLineReference()
 
 	advance()
-	var name = collectIdentifier()
-	if _, found := intents[name]; found {
-		parserError(fmt.Sprintf("Duplicate declaration of intent '%s'", name))
-	}
+	var appName = collectIdentifier()
 
 	skipInlineWhitespace()
 	if char != '\'' {
 		parserError("Expected intent bundle identifier raw string (').")
 	}
 	advance()
-	intents[name] = collectRawString()
+	var bundleIdentifier = collectRawString()
+
+	skipInlineWhitespace()
+	if char != '{' {
+		parserError("Expected { to list the intents of the app.")
+	}
+	advance()
+	skipWhitespace()
+
+	for char != '}' && char != -1 {
+		var intentIdentifier = collectIdentifier()
+		if intentIdentifier == "" {
+			parserError(fmt.Sprintf("Expected an intent identifier for app '%s'.", appName))
+		}
+
+		var reference = appName + "." + intentIdentifier
+		if _, found := intents[reference]; found {
+			parserError(fmt.Sprintf("Duplicate declaration of intent '%s'", reference))
+		}
+		intents[reference] = appIntent{
+			name:                appName,
+			bundleIdentifier:    bundleIdentifier,
+			appIntentIdentifier: intentIdentifier,
+		}
+
+		skipWhitespace()
+		if char == ',' {
+			advance()
+			skipWhitespace()
+		}
+	}
 
 	lineRef.replaceLines()
 }
 
-// collectIntentReference sets the app intent of a definition from `intent Name:'Identifier'`. Without an identifier of its own, the action is identified
-// by the intent, which is how most app intents are named in a Shortcut.
+// collectIntentReference sets the app intent of a definition from `intent:App.Intent`. Without an identifier of its own, the
+// action is identified by the intent, which is how most app intents are named in a Shortcut.
 func collectIntentReference(definition *actionDefinition) {
-	var name = collectIdentifier()
-	var bundleIdentifier, found = intents[name]
+	var appName = collectIdentifier()
+	if !isChar('.') {
+		parserError("Expected an intent after the app name (intent:App.Intent).")
+	}
+
+	var intentIdentifier = collectIdentifier()
+	var intent, found = intents[appName+"."+intentIdentifier]
 	if !found {
-		parserError(fmt.Sprintf("Unknown intent '%s'", name))
+		parserError(fmt.Sprintf("Unknown intent '%s.%s'", appName, intentIdentifier))
 	}
 
-	if !isChar(':') || !isChar('\'') {
-		parserError("Expected the intent identifier as a raw string after the intent name (Name:'Identifier').")
-	}
-
-	var intentIdentifier = collectRawString()
-	definition.appIntent = appIntent{
-		name:                name,
-		bundleIdentifier:    bundleIdentifier,
-		appIntentIdentifier: intentIdentifier,
-	}
-
+	definition.appIntent = intent
 	if definition.identifier == "" && definition.overrideIdentifier == "" {
-		definition.appIdentifier = bundleIdentifier
-		definition.identifier = intentIdentifier
+		definition.appIdentifier = intent.bundleIdentifier
+		definition.identifier = intent.appIntentIdentifier
 	}
 	advance()
 }
