@@ -78,3 +78,9 @@ action internal 'addnewcontact' newContact(text firstName: 'WFContactFirstName',
 action default internal 'setters.contacts' updateContact(variable contact: 'WFInput', contactDetail detail: 'WFContentItemPropertyName', text value) {
     "Mode": "Set"
 }
+
+// [Doc]: [Email] Email Address: Create an email address value.
+action internal 'email' emailAddress(text ...email)
+
+// [Doc]: [Phone] Phone Number: Create a phone number value.
+action internal phoneNumber(text ...number)

@@ -144,3 +144,9 @@ action 'downloadurl' fileRequest(
 
 // [Doc]: Open Custom X-Callback URL
 action internal 'openxcallbackurl' openCustomXCallbackURL(text url: 'WFXCallbackURL', text ?successKey: 'WFXCallbackCustomSuccessKey', text ?cancelKey: 'WFXCallbackCustomCancelKey', text ?errorKey: 'WFXCallbackCustomErrorKey', text ?successURL: 'WFXCallbackCustomSuccessURL')
+
+// [Doc]: [URLs] URL: Create a URL value.
+action internal url(text ...url)
+
+// [Doc]: [Safari] Add to Reading List: Add a link to the reading list.
+action internal 'readinglist' addToReadingList(text ...url)
