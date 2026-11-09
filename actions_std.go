@@ -723,29 +723,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"convertMeasurement": {
-		doc: selfDoc{
-			title:       "Convert Measurement",
-			category:    "math",
-			subcategory: "Measurement",
-		},
-		identifier: "measurement.convert",
-		parameters: []parameterDefinition{
-			{
-				name:      "measurement",
-				validType: Variable,
-				key:       "WFInput",
-			},
-			{
-				name:      "unitType",
-				validType: String,
-				key:       "WFMeasurementUnitType",
-				enum:      "measurementUnitType",
-			},
-			{
-				name:      "unit",
-				validType: String,
-			},
-		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			var value = getArgValue(args[1])
 			if reflect.TypeOf(value).Kind() != reflect.String {
@@ -789,28 +766,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"measurement": {
-		doc: selfDoc{
-			title:       "Create Measurement",
-			category:    "math",
-			subcategory: "Measurement",
-		},
-		identifier: "measurement.create",
-		parameters: []parameterDefinition{
-			{
-				name:      "magnitude",
-				validType: String,
-			},
-			{
-				name:      "unitType",
-				validType: String,
-				key:       "WFMeasurementUnitType",
-				enum:      "measurementUnitType",
-			},
-			{
-				name:      "unit",
-				validType: String,
-			},
-		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			var value = getArgValue(args[1])
 			if reflect.TypeOf(value).String() != "string" {

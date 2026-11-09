@@ -76,3 +76,9 @@ action 'round' ceil(number number: 'WFInput', roundingPlace ?roundTo: 'WFRoundTo
 action 'round' floor(number number: 'WFInput', roundingPlace ?roundTo: 'WFRoundTo' = "Integer"): number {
 	"WFRoundMode": "Always Round Down"
 }
+
+// [Doc]: [Measurement] Convert Measurement
+action internal 'measurement.convert' convertMeasurement(variable measurement: 'WFInput', measurementUnitType unitType: 'WFMeasurementUnitType', text unit: '')
+
+// [Doc]: [Measurement] Create Measurement
+action internal 'measurement.create' measurement(text magnitude: '', measurementUnitType unitType: 'WFMeasurementUnitType', text unit: '')
