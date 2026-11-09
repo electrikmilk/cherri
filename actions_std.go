@@ -453,20 +453,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"killApp": {
-		doc: selfDoc{
-			title:       "Kill App",
-			description: "Kill an app.",
-			warning:     "This will not ask to save changes!",
-			category:    "device",
-			subcategory: "Apps",
-		},
-		identifier: "quit.app",
-		parameters: []parameterDefinition{
-			{
-				name:      "appID",
-				validType: String,
-			},
-		},
 		check: func(args []actionArgument, definition *actionDefinition) {
 			replaceAppIDs(args, definition)
 		},

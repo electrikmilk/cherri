@@ -139,3 +139,7 @@ action default internal 'quit.app' quitApp(text appID)
 
 // [Doc]: [Apps] Split Apps: Split apps across the screen.
 action internal 'splitscreen' splitApps(text firstAppID, text secondAppID, appSplitRatio ?ratio: 'WFAppRatio' = "half")
+
+// [Doc]: [Apps] Kill App: Kill an app.
+// [Warning]: This will not ask to save changes!
+action internal 'quit.app' killApp(text appID)
