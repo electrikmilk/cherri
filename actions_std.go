@@ -585,19 +585,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openShortcut": {
-		doc: selfDoc{
-			title:       "Open Shortcut",
-			description: "Open a shortcut in the Shortcuts app.",
-			category:    "shortcuts",
-		},
-		appIdentifier: "com.apple.shortcuts",
-		identifier:    "OpenWorkflowAction",
-		parameters: []parameterDefinition{
-			{
-				name:      "shortcutName",
-				validType: String,
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			return map[string]any{
 				"target": map[string]any{
@@ -615,19 +602,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"runSelf": {
-		doc: selfDoc{
-			title:       "Run Self",
-			description: "Run the current Shortcut with optional output.",
-			category:    "shortcuts",
-		},
-		identifier: "runworkflow",
-		parameters: []parameterDefinition{
-			{
-				name:      "output",
-				key:       "WFInput",
-				validType: Variable,
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) == 0 {
 				return map[string]any{
@@ -690,42 +664,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openCustomXCallbackURL": {
-		doc: selfDoc{
-			title:    "Open Custom X-Callback URL",
-			category: "web",
-		},
-		identifier: "openxcallbackurl",
-		parameters: []parameterDefinition{
-			{
-				name:      "url",
-				validType: String,
-				key:       "WFXCallbackURL",
-			},
-			{
-				name:      "successKey",
-				validType: String,
-				key:       "WFXCallbackCustomSuccessKey",
-				optional:  true,
-			},
-			{
-				name:      "cancelKey",
-				validType: String,
-				key:       "WFXCallbackCustomCancelKey",
-				optional:  true,
-			},
-			{
-				name:      "errorKey",
-				validType: String,
-				key:       "WFXCallbackCustomErrorKey",
-				optional:  true,
-			},
-			{
-				name:      "successURL",
-				validType: String,
-				key:       "WFXCallbackCustomSuccessURL",
-				optional:  true,
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) (xCallbackParams map[string]any) {
 			if len(args) == 0 {
 				return
@@ -746,34 +684,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getWindows": {
-		doc: selfDoc{
-			title:       "Get Windows",
-			category:    "mac",
-			subcategory: "Windows",
-		},
-		identifier: "filter.windows",
-		parameters: []parameterDefinition{
-			{
-				name:      "sortBy",
-				validType: String,
-				key:       "WFContentItemSortProperty",
-				enum:      "windowSorting",
-				optional:  true,
-			},
-			{
-				name:      "orderBy",
-				validType: String,
-				key:       "WFContentItemSortOrder",
-				enum:      "sortOrder",
-				optional:  true,
-			},
-			{
-				name:      "limit",
-				validType: Integer,
-				key:       "WFContentItemLimitNumber",
-				optional:  true,
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) (params map[string]any) {
 			if len(args) == 0 {
 				return map[string]any{}
@@ -811,7 +721,6 @@ var actions = map[string]*actionDefinition{
 				}
 			}
 		},
-		macOnly: true,
 	},
 	"convertMeasurement": {
 		doc: selfDoc{
