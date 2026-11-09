@@ -851,8 +851,9 @@ func parseActionDefinitions() {
 			collectComment()
 		case startOfLineTokenAhead(Enumeration):
 			collectEnumeration()
-		case startOfLineTokenAhead(Intent):
-			collectIntentDeclaration()
+		// The space keeps actions that start with app, like appendToFile, from being read as a declaration.
+		case next(len(App)) == ' ' && startOfLineTokenAhead(App):
+			collectAppDeclaration()
 		case startOfLineTokenAhead(Action):
 			advance()
 			collectDefinedAction()
@@ -878,6 +879,10 @@ func collectActionPrefixModifiers(definition *actionDefinition) {
 
 	definition.minVersion, definition.maxVersion = collectVersionLimitsDefinition()
 
+	if isChar('#') {
+		collectIntentReference(definition)
+	}
+
 	if char == '\'' {
 		advance()
 		var workflowIdentifier = collectRawString()
@@ -890,13 +895,15 @@ func collectActionPrefixModifiers(definition *actionDefinition) {
 		advance()
 	}
 
-	if tokenAhead(IntentReference) {
-		collectIntentReference(definition)
+	// Without an identifier of its own, an action is identified by its intent, which is how most app intents are named in a Shortcut.
+	if definition.appIntent != emptyAppIntent && definition.identifier == "" && definition.overrideIdentifier == "" {
+		definition.appIdentifier = definition.appIntent.bundleIdentifier
+		definition.identifier = definition.appIntent.appIntentIdentifier
 	}
 }
 
-// collectIntentDeclaration collects `intent App 'bundle.identifier' { Intent, ... }` so actions can refer to the intents of an app.
-func collectIntentDeclaration() {
+// collectAppDeclaration collects `app Name 'bundle.identifier' { Intent, ... }` so actions can refer to the intents of an app.
+func collectAppDeclaration() {
 	var lineRef = newLineReference()
 
 	advance()
@@ -904,7 +911,7 @@ func collectIntentDeclaration() {
 
 	skipInlineWhitespace()
 	if char != '\'' {
-		parserError("Expected intent bundle identifier raw string (').")
+		parserError("Expected app bundle identifier raw string (').")
 	}
 	advance()
 	var bundleIdentifier = collectRawString()
@@ -942,12 +949,11 @@ func collectIntentDeclaration() {
 	lineRef.replaceLines()
 }
 
-// collectIntentReference sets the app intent of a definition from `intent:App.Intent`. Without an identifier of its own, the
-// action is identified by the intent, which is how most app intents are named in a Shortcut.
+// collectIntentReference sets the app intent of a definition from `#App.Intent`.
 func collectIntentReference(definition *actionDefinition) {
 	var appName = collectIdentifier()
 	if !isChar('.') {
-		parserError("Expected an intent after the app name (intent:App.Intent).")
+		parserError("Expected an intent after the app name (#App.Intent).")
 	}
 
 	var intentIdentifier = collectIdentifier()
@@ -957,10 +963,6 @@ func collectIntentReference(definition *actionDefinition) {
 	}
 
 	definition.appIntent = intent
-	if definition.identifier == "" && definition.overrideIdentifier == "" {
-		definition.appIdentifier = intent.bundleIdentifier
-		definition.identifier = intent.appIntentIdentifier
-	}
 	advance()
 }
 

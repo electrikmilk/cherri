@@ -13,4 +13,8 @@ filterFiles(@files, 5, "File Size", "Biggest First")
 getFileFromFolder("~/Documents", "report.pdf")
 getFileFromFolder("Shortcuts/Documents", "notes.txt", false)
 
+// an action that starts with app is not an app declaration
+@contents = "contents"
+appendToFile("notes.txt", @contents)
+
 show("✅ All tests passed")
