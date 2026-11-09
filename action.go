@@ -1113,8 +1113,12 @@ func restoreIntegers(value any) any {
 }
 
 var docCommentRegex = regexp.MustCompile(`^\[Doc]: ?(?:\[(.*?)])?\s(.*?)?(?:: (.*?))?$`)
+var warningCommentRegex = regexp.MustCompile(`^\[Warning]: ?(.*)$`)
 
+// checkDocComment collects the documentation comment above an action. A [Warning] comment goes directly under the [Doc] comment.
 func checkDocComment() (doc selfDoc) {
+	var warning = collectWarningComment()
+
 	var lastToken = getLastAddedToken()
 	if lastToken.typeof == Comment {
 		var comment = lastToken.value.(string)
@@ -1125,14 +1129,35 @@ func checkDocComment() (doc selfDoc) {
 			doc = selfDoc{
 				title:       strings.TrimSpace(match[2]),
 				description: strings.TrimSpace(match[3]),
+				warning:     warning,
 				category:    currentCategory,
 				subcategory: match[1],
 			}
 
 			tokens = slices.Delete(tokens, len(tokens)-1, len(tokens))
+			return
 		}
 	}
+
+	if warning != "" {
+		parserError("A [Warning] comment must be placed directly under a [Doc] comment.")
+	}
 	return
+}
+
+func collectWarningComment() (warning string) {
+	var lastToken = getLastAddedToken()
+	if lastToken.typeof != Comment {
+		return
+	}
+
+	var matches = warningCommentRegex.FindStringSubmatch(lastToken.value.(string))
+	if matches == nil {
+		return
+	}
+
+	tokens = slices.Delete(tokens, len(tokens)-1, len(tokens))
+	return strings.TrimSpace(matches[1])
 }
 
 func collectVersionLimitsDefinition() (minVersion float64, maxVersion float64) {
