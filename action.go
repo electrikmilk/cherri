@@ -5,6 +5,7 @@
 package main
 
 import (
+	"cmp"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -102,6 +103,16 @@ type actionDefinition struct {
 
 // intents maps the app name and identifier of an intent declared in Cherri (e.g. Clock.ToggleAlarmIntent) to its app intent.
 var intents = map[string]appIntent{}
+
+// sourceLocation is a position in a Cherri file that is reported on after parsing has moved past it.
+type sourceLocation struct {
+	file string
+	line int
+	col  int
+}
+
+// unreferencedIntents holds the declared intents that no action has referenced yet, by where they were declared.
+var unreferencedIntents = map[string]sourceLocation{}
 
 var enumerations = map[string][]string{
 	"measurementUnitType":           {"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"},
@@ -837,8 +848,26 @@ func appIntentDescriptor(intent appIntent) map[string]any {
 // handleActionDefinitions parses defined actions in the current file and collects them into the actions map.
 func handleActionDefinitions() {
 	parseActionDefinitions()
+	warnUnreferencedIntents()
 
 	resetParse()
+}
+
+func warnUnreferencedIntents() {
+	var references = slices.SortedFunc(maps.Keys(unreferencedIntents), func(a string, b string) int {
+		return cmp.Or(
+			cmp.Compare(unreferencedIntents[a].file, unreferencedIntents[b].file),
+			cmp.Compare(unreferencedIntents[a].line, unreferencedIntents[b].line),
+			cmp.Compare(a, b),
+		)
+	})
+
+	for _, reference := range references {
+		var location = unreferencedIntents[reference]
+		parserWarningAt(fmt.Sprintf("Intent '%s' is declared but no action references it.", reference), location.file, location.line, location.col)
+	}
+
+	clear(unreferencedIntents)
 }
 
 func parseActionDefinitions() {
@@ -924,6 +953,7 @@ func collectAppDeclaration() {
 	skipWhitespace()
 
 	for char != '}' && char != -1 {
+		var file, line, col = delinquentFile()
 		var intentIdentifier = collectIdentifier()
 		if intentIdentifier == "" {
 			parserError(fmt.Sprintf("Expected an intent identifier for app '%s'.", appName))
@@ -938,6 +968,7 @@ func collectAppDeclaration() {
 			bundleIdentifier:    bundleIdentifier,
 			appIntentIdentifier: intentIdentifier,
 		}
+		unreferencedIntents[reference] = sourceLocation{file: file, line: line, col: col}
 
 		skipWhitespace()
 		if char == ',' {
@@ -963,6 +994,7 @@ func collectIntentReference(definition *actionDefinition) {
 	}
 
 	definition.appIntent = intent
+	delete(unreferencedIntents, appName+"."+intentIdentifier)
 	advance()
 }
 
