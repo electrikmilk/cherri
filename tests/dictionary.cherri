@@ -80,4 +80,11 @@ if !vals {
     mustOutput("❌ FAIL: getValues — returned no value", "❌ FAIL: getValues — returned no value")
 }
 
+// dictionary action
+const made = dictionary({"name": "Bob"})
+const madeName = getValue(made, "name")
+if madeName.text != "Bob" {
+    mustOutput("❌ FAIL: dictionary action — got {madeName}, expected 'Bob'", "❌ FAIL: dictionary action — got {madeName}, expected 'Bob'")
+}
+
 show("✅ All tests passed")

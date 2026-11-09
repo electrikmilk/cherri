@@ -124,6 +124,9 @@ action waitToReturn()
 // [Doc]: [Search] Search/Spotlight: Get results from search on iOS or iPadOS, and Spotlight on macOS.
 action 'spotlightsearch' search(text query: 'WFInputText', number ?limit: 'WFSpotlightSearchLimit' = 5, array ?resultType: 'WFSpotlightSearchResultType' = ["Calendar Events","Contacts","Mail","Messages","Notes","Photos","Reminders","Voice Recordings","Bookmarks"]): array
 
+// [Doc]: [Dictionaries] Dictionary: Make a dictionary from `items`. Use this to bind an import question to a dictionary, otherwise a dictionary literal should be used.
+action 'dictionary' dictionary(dictionary items: 'WFItems'): dictionary
+
 // [Doc]: [Dictionaries] Get Dictionary: Get the dictionary from `input`.
 action 'detect.dictionary' getDictionary(variable input: 'WFInput'): dictionary
 
