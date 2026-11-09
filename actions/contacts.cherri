@@ -55,7 +55,7 @@ action 'com.apple.facetime.facetime' facetimeCall(variable contact: 'WFFaceTimeC
 }
 
 // [Doc]: [Phone] Get Phone Numbers: Get phone numbers from input.
-action 'detect.phonenumber' getPhoneNumbers(variable input: 'WFInput'): array
+action 'detect.phonenumber' getPhoneNumbers(text input: 'WFInput'): array
 
 // [Doc]: [Phone] Select Phone Number: Prompt the user to select a phone number from their contacts.
 action 'selectphone' selectPhoneNumber()
