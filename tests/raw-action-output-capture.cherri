@@ -5,4 +5,12 @@ if result.text != "hello" {
     alert("❌ FAIL: rawAction output capture — got {result.text}, expected 'hello'")
 }
 
+@mutableResult = rawAction("is.workflow.actions.gettext", {
+    "WFTextActionText": "world"
+})
+@mutableText = "{@mutableResult}"
+if @mutableText != "world" {
+    alert("❌ FAIL: rawAction mutable capture - got {@mutableText}, expected 'world'")
+}
+
 show("✅ All tests passed")

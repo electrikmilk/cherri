@@ -94,10 +94,7 @@ func generateActions() {
 			if actions[tokenAction.ident] == nil {
 				exit(fmt.Sprintf("Undefined action '%s'", tokenAction.ident))
 			}
-			setCurrentAction(tokenAction.ident, actions[tokenAction.ident])
-			if tokenAction.ident == "rawAction" && len(tokenAction.args) > 0 {
-				currentAction.definition.overrideIdentifier = getArgValue(tokenAction.args[0]).(string)
-			}
+			setCurrentActionFromCall(tokenAction)
 			makeAction(tokenAction.args, &WFActionReference{})
 		case Repeat:
 			makeRepeatAction(&t)
@@ -110,6 +107,14 @@ func generateActions() {
 		case Conditional:
 			makeConditionalAction(&t)
 		}
+	}
+}
+
+// rawAction has no identifier of its own, it takes it from its first argument.
+func setCurrentActionFromCall(call action) {
+	setCurrentAction(call.ident, actions[call.ident])
+	if call.ident == "rawAction" {
+		currentAction.definition.overrideIdentifier = call.args[0].value.(string)
 	}
 }
 
@@ -207,7 +212,7 @@ func makeVariableValue(reference *WFActionReference, valueType tokenType, value 
 	case Action:
 		var valuePtr = *value
 		var action = valuePtr.(action)
-		setCurrentAction(action.ident, actions[action.ident])
+		setCurrentActionFromCall(action)
 		makeAction(action.args, reference)
 	case Dict:
 		addStdAction("dictionary", attachReferenceToParams(map[string]any{
