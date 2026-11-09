@@ -78,7 +78,7 @@ action 'round' floor(number number: 'WFInput', roundingPlace ?roundTo: 'WFRoundT
 }
 
 // [Doc]: [Measurement] Convert Measurement
-action internal 'measurement.convert' convertMeasurement(variable measurement: 'WFInput', measurementUnitType unitType: 'WFMeasurementUnitType', text unit: '')
+action internal 'measurement.convert' convertMeasurement(variable measurement: 'WFInput', measurementUnitType unitType: 'WFMeasurementUnitType', text unit)
 
 // [Doc]: [Measurement] Create Measurement
-action internal 'measurement.create' measurement(text magnitude: '', measurementUnitType unitType: 'WFMeasurementUnitType', text unit: '')
+action internal 'measurement.create' measurement(text magnitude, measurementUnitType unitType: 'WFMeasurementUnitType', text unit)

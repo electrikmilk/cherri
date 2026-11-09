@@ -132,10 +132,10 @@ action !mac returnToHomescreen()
 action default internal openApp(text appID: 'WFAppIdentifier')
 
 // [Doc]: [Apps] Hide App: Hide an app.
-action default internal 'hide.app' hideApp(text appID: '')
+action default internal 'hide.app' hideApp(text appID)
 
 // [Doc]: [Apps] Quit App: Quit an app.
-action default internal 'quit.app' quitApp(text appID: '')
+action default internal 'quit.app' quitApp(text appID)
 
 // [Doc]: [Apps] Split Apps: Split apps across the screen.
-action internal 'splitscreen' splitApps(text firstAppID: '', text secondAppID: '', appSplitRatio ?ratio: 'WFAppRatio' = "half")
+action internal 'splitscreen' splitApps(text firstAppID, text secondAppID, appSplitRatio ?ratio: 'WFAppRatio' = "half")

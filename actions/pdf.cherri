@@ -29,4 +29,4 @@ action splitPDF(variable pdf: 'WFInput'): array
 action makeImageFromPDFPage(variable pdf: 'WFInput', colorSpace ?colorSpace: 'WFMakeImageFromPDFPageColorspace' = "RGB", text ?pageResolution: 'WFMakeImageFromPDFPageResolution' = "300")
 
 // [Doc]: Get PDF Text: Get text from PDF.
-action internal 'gettextfrompdf' getPDFText(variable pdfFile: 'WFInput', bool ?richText: '' = false, bool ?combinePages: 'WFCombinePages' = true, text ?headerText: 'WFGetTextFromPDFPageHeader', text ?footerText: 'WFGetTextFromPDFPageFooter')
+action internal 'gettextfrompdf' getPDFText(variable pdfFile: 'WFInput', bool ?richText = false, bool ?combinePages: 'WFCombinePages' = true, text ?headerText: 'WFGetTextFromPDFPageHeader', text ?footerText: 'WFGetTextFromPDFPageFooter')

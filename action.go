@@ -1036,7 +1036,7 @@ func collectToggleSetAction(doc selfDoc) {
 		advance()
 		if char != ')' {
 			skipWhitespace()
-			extraParams = collectParameterDefinitions()
+			extraParams = collectParameterDefinitions(!shared.internal)
 		} else {
 			advance()
 		}
@@ -1187,7 +1187,7 @@ func collectActionSignature(definition *actionDefinition, until rune) {
 	if next(1) != ')' {
 		advance()
 		skipWhitespace()
-		definition.parameters = collectParameterDefinitions()
+		definition.parameters = collectParameterDefinitions(!definition.internal)
 	} else {
 		advanceTimes(2)
 	}
@@ -1217,7 +1217,9 @@ func collectEnumerationType(valueType *tokenType, quantity *bool, until rune) (e
 	return enumeration
 }
 
-func collectParameterDefinitions() (arguments []parameterDefinition) {
+// collectParameterDefinitions collects the parameters of an action definition. A parameter without a key is named by default
+// except for internal actions, where one without a key is left to the compiler-defined logic to place.
+func collectParameterDefinitions(keyDefaultsToName bool) (arguments []parameterDefinition) {
 	for char != ')' && char != -1 {
 		var valueType tokenType
 		var value any
@@ -1260,7 +1262,7 @@ func collectParameterDefinitions() (arguments []parameterDefinition) {
 			}
 			advance()
 			parameterKey = collectRawString()
-		} else {
+		} else if keyDefaultsToName {
 			parameterKey = identifier
 		}
 
