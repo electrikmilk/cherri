@@ -1,0 +1,13 @@
+// compile-only: contacts are changed on the device
+
+@contact = "contact"
+@phone = "555-0100"
+@email = "ada@example.com"
+
+newContact("Ada", "Lovelace", "555-0100", "ada@example.com", "Analytical Engines", "First programmer")
+newContact("Ada", "Lovelace", @phone, @email, "Analytical Engines", "First programmer", true)
+
+updateContact(@contact, "First Name", "Ada")
+updateContact(@contact, "Company", "Analytical Engines")
+
+show("✅ All tests passed")
