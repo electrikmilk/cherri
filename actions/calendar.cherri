@@ -2,7 +2,7 @@
 Calendar Actions
 */
 
-intent Clock 'com.apple.clock' {
+app Clock 'com.apple.clock' {
     CreateAlarmIntent,
     DeleteAlarmIntent,
     ToggleAlarmIntent
@@ -73,26 +73,26 @@ action 'addquickreminder' addQuickReminder()
 action removeReminders(variable reminders: 'WFInputReminders')
 
 // [Doc]: [Alarms] Create Alarm: Creates an alarm at a specific time with a name, snooze allowance, and applicable weekdays.
-action internal 'com.apple.mobiletimer-framework.MobileTimerIntents.MTCreateAlarmIntent' intent:Clock.CreateAlarmIntent createAlarm(text name: 'name', text time: 'dateComponents', bool ?allowsSnooze: 'allowsSnooze' = true, array ?repeatWeekdays)
+action internal #Clock.CreateAlarmIntent 'com.apple.mobiletimer-framework.MobileTimerIntents.MTCreateAlarmIntent' createAlarm(text name: 'name', text time: 'dateComponents', bool ?allowsSnooze: 'allowsSnooze' = true, array ?repeatWeekdays)
 
 // [Doc]: [Alarms] Get Alarms: Returns all of the alarms on the device.
 action 'com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent' getAlarms()
 
 // [Doc]: [Alarms] Delete Alarm: Deletes an alarm.
-action intent:Clock.DeleteAlarmIntent deleteAlarm(variable alarm: 'entities')
+action #Clock.DeleteAlarmIntent deleteAlarm(variable alarm: 'entities')
 
 // [Doc]: [Alarms] Turn On Alarm: Turn on an alarm.
-action default 'com.apple.mobiletimer-framework.MobileTimerIntents.MTToggleAlarmIntent' intent:Clock.ToggleAlarmIntent turnOnAlarm(variable alarm, bool ?showWhenRun: 'ShowWhenRun' = true) {
+action default #Clock.ToggleAlarmIntent 'com.apple.mobiletimer-framework.MobileTimerIntents.MTToggleAlarmIntent' turnOnAlarm(variable alarm, bool ?showWhenRun: 'ShowWhenRun' = true) {
     "state": 1
 }
 
 // [Doc]: [Alarms] Turn Off Alarm: Turn off an alarm.
-action 'com.apple.mobiletimer-framework.MobileTimerIntents.MTToggleAlarmIntent' intent:Clock.ToggleAlarmIntent turnOffAlarm(variable alarm, bool ?showWhenRun: 'ShowWhenRun' = true) {
+action #Clock.ToggleAlarmIntent 'com.apple.mobiletimer-framework.MobileTimerIntents.MTToggleAlarmIntent' turnOffAlarm(variable alarm, bool ?showWhenRun: 'ShowWhenRun' = true) {
     "state": 0
 }
 
 // [Doc]: [Alarms] Toggle Alarm: Toggle an alarm.
-action 'com.apple.mobiletimer-framework.MobileTimerIntents.MTToggleAlarmIntent' intent:Clock.ToggleAlarmIntent toggleAlarm(variable alarm, bool ?showWhenRun: 'ShowWhenRun' = true) {
+action #Clock.ToggleAlarmIntent 'com.apple.mobiletimer-framework.MobileTimerIntents.MTToggleAlarmIntent' toggleAlarm(variable alarm, bool ?showWhenRun: 'ShowWhenRun' = true) {
     "operation": "toggle"
 }
 
