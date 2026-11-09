@@ -940,42 +940,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"generateImage": {
-		doc: selfDoc{
-			title:       "Create Image using Image Playground",
-			description: "Generate an Image with a prompt using the Image Playground app.",
-			category:    "intelligence",
-			subcategory: "Image Playground",
-		},
-		appIdentifier: "com.apple.GenerativePlaygroundApp",
-		identifier:    "GenerateImageIntent",
-		parameters: []parameterDefinition{
-			{
-				name:      "prompt",
-				validType: String,
-				key:       "prompt",
-			},
-			{
-				name:      "image",
-				validType: Variable,
-				key:       "image",
-				optional:  true,
-			},
-			{
-				name:         "style",
-				validType:    String,
-				defaultValue: "animation",
-				optional:     true,
-				enum:         "imagePlaygroundStyle",
-			},
-			{
-				name:         "saveToPlayground",
-				validType:    String,
-				key:          "saveToPlayground",
-				enum:         "saveToPlaygroundBehavior",
-				defaultValue: "always",
-				optional:     true,
-			},
-		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) < 3 {
 				return map[string]any{}
