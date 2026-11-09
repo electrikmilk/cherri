@@ -538,27 +538,14 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
-			var params = make(map[string]any)
-			if len(args) == 0 {
-				return params
-			}
-			if args[0].valueType == Variable {
-				params["WFPrimaryAppIdentifier"] = argumentValue(args, 0)
-			} else {
-				params["WFPrimaryAppIdentifier"] = map[string]any{
-					"BundleIdentifier": argumentValue(args, 0),
-				}
+			if len(args) < 2 {
+				return map[string]any{}
 			}
 
-			if args[0].valueType == Variable {
-				params["WFSecondaryAppIdentifier"] = argumentValue(args, 0)
-			} else {
-				params["WFSecondaryAppIdentifier"] = map[string]any{
-					"BundleIdentifier": argumentValue(args, 0),
-				}
+			return map[string]any{
+				"WFPrimaryAppIdentifier":   appIdentifierValue(args, 0),
+				"WFSecondaryAppIdentifier": appIdentifierValue(args, 1),
 			}
-
-			return params
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			var splitRatio = decompValue(action.WFWorkflowActionParameters["WFAppRatio"])
@@ -1336,6 +1323,16 @@ func replaceAppID(id string) string {
 		parserError(fmt.Sprintf("Invalid app bundle identifier: %s", id))
 	}
 	return id
+}
+
+func appIdentifierValue(args []actionArgument, index int) any {
+	if args[index].valueType == Variable {
+		return argumentValue(args, index)
+	}
+
+	return map[string]any{
+		"BundleIdentifier": argumentValue(args, index),
+	}
 }
 
 func replaceAppIDs(args []actionArgument, _ *actionDefinition) {
