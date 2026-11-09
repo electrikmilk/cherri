@@ -127,3 +127,15 @@ action dismissSiri()
 
 // [Doc]: [System] Return to Home Screen: Returns to the device home screen.
 action !mac returnToHomescreen()
+
+// [Doc]: [Apps] Open App: Open an app.
+action default internal openApp(text appID: 'WFAppIdentifier')
+
+// [Doc]: [Apps] Hide App: Hide an app.
+action default internal 'hide.app' hideApp(text appID: '')
+
+// [Doc]: [Apps] Quit App: Quit an app.
+action default internal 'quit.app' quitApp(text appID: '')
+
+// [Doc]: [Apps] Split Apps: Split apps across the screen.
+action internal 'splitscreen' splitApps(text firstAppID: '', text secondAppID: '', appSplitRatio ?ratio: 'WFAppRatio' = "half")

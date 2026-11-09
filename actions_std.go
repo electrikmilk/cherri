@@ -343,20 +343,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openApp": {
-		doc: selfDoc{
-			title:       "Open App",
-			description: "Open an app.",
-			category:    "device",
-			subcategory: "Apps",
-		},
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "appID",
-				validType: String,
-				key:       "WFAppIdentifier",
-			},
-		},
 		check: func(args []actionArgument, definition *actionDefinition) {
 			replaceAppIDs(args, definition)
 		},
@@ -381,20 +367,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"hideApp": {
-		doc: selfDoc{
-			title:       "Hide App",
-			description: "Hide an app.",
-			category:    "device",
-			subcategory: "Apps",
-		},
-		identifier:    "hide.app",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "appID",
-				validType: String,
-			},
-		},
 		check: func(args []actionArgument, definition *actionDefinition) {
 			replaceAppIDs(args, definition)
 		},
@@ -441,20 +413,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"quitApp": {
-		doc: selfDoc{
-			title:       "Quit App",
-			description: "Quit an app.",
-			category:    "device",
-			subcategory: "Apps",
-		},
-		identifier:    "quit.app",
-		defaultAction: true,
-		parameters: []parameterDefinition{
-			{
-				name:      "appID",
-				validType: String,
-			},
-		},
 		check: func(args []actionArgument, definition *actionDefinition) {
 			replaceAppIDs(args, definition)
 		},
@@ -566,31 +524,6 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"splitApps": {
-		doc: selfDoc{
-			title:       "Split Apps",
-			description: "Split apps across the screen.",
-			category:    "device",
-			subcategory: "Apps",
-		},
-		identifier: "splitscreen",
-		parameters: []parameterDefinition{
-			{
-				name:      "firstAppID",
-				validType: String,
-			},
-			{
-				name:      "secondAppID",
-				validType: String,
-			},
-			{
-				name:         "ratio",
-				key:          "WFAppRatio",
-				validType:    String,
-				optional:     true,
-				enum:         "appSplitRatio",
-				defaultValue: "half",
-			},
-		},
 		check: func(args []actionArgument, _ *actionDefinition) {
 			if args[0].valueType != Variable {
 				args[0].value = replaceAppID(getArgValue(args[0]).(string))

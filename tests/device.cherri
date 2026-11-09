@@ -1,9 +1,20 @@
-// compile-only: flashlight state is hardware dependent
+// compile-only: flashlight state and app windows are device dependent
 
 flashlightOn()
 flashlightOn(0.8)
 flashlightOff()
 toggleFlashlight()
 toggleFlashlight(0.3)
+
+@app = "notes"
+openApp("notes")
+openApp(@app)
+hideApp("notes")
+hideApp(@app)
+quitApp("notes")
+quitApp(@app)
+splitApps("notes", "maps")
+splitApps(@app, "maps")
+splitApps("notes", "maps", "thirdByTwo")
 
 show("✅ All tests passed")
