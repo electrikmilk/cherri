@@ -134,4 +134,11 @@ if markup != "<b>Tom & Jerry</b>" {
     mustOutput("❌ FAIL: dict text with <, > and & - got {markup}, expected '<b>Tom & Jerry</b>'", "❌ FAIL: dict text with <, > and & - got {markup}, expected '<b>Tom & Jerry</b>'")
 }
 
+// dictionary action
+const made = dictionary({"name": "Bob"})
+const madeName = getValue(made, "name")
+if madeName.text != "Bob" {
+    mustOutput("❌ FAIL: dictionary action — got {madeName}, expected 'Bob'", "❌ FAIL: dictionary action — got {madeName}, expected 'Bob'")
+}
+
 show("✅ All tests passed")
