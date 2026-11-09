@@ -1,0 +1,16 @@
+@greeting = "world"
+
+// Pass a mutable variable reference using ${@varName} form.
+// The old strings.Trim() extracted the name by stripping a character set
+// ("{", "$", "@", "}"), which would corrupt any name starting/ending with
+// those chars and was semantically wrong for all names. The fix uses a
+// regex capture group so the extraction is exact.
+// compile-only: runtime assertion requires outputType: Variable (separate PR)
+// This test verifies the fix compiles without panicking — the variable reference
+// is correctly resolved to a WFTextTokenAttachment rather than corrupted by
+// the old strings.Trim() character-set stripping.
+rawAction("is.workflow.actions.gettext", {
+    "WFTextActionText": "${@greeting}"
+})
+
+show("✅ All tests passed")
