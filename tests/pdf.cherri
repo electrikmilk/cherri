@@ -1,0 +1,10 @@
+// compile-only: PDF input is not available when compiling
+
+@pdf = "pdf"
+
+getPDFText(@pdf)
+getPDFText(@pdf, true)
+getPDFText(@pdf, false, false)
+getPDFText(@pdf, false, false, "Header", "Footer")
+
+show("✅ All tests passed")

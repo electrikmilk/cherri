@@ -1,0 +1,16 @@
+// compile-only: files on the device are labeled and read
+
+@files = "files"
+
+labelFile(@files, "red")
+labelFile(@files, "blue")
+
+filterFiles(@files)
+filterFiles(@files, 5)
+filterFiles(@files, 5, "File Size")
+filterFiles(@files, 5, "File Size", "Biggest First")
+
+getFileFromFolder("~/Documents", "report.pdf")
+getFileFromFolder("Shortcuts/Documents", "notes.txt", false)
+
+show("✅ All tests passed")
