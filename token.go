@@ -38,6 +38,7 @@ const (
 	Copy           tokenType = "copy"
 	Paste          tokenType = "paste"
 	Default        tokenType = "default"
+	Internal       tokenType = "internal"
 )
 
 /* Definitions */
