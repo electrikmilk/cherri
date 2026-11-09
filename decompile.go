@@ -223,6 +223,10 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 			if valueTwo != nil && valueTwo["Value"] != nil && reflect.TypeOf(valueTwo["Value"]).Kind() == reflect.Map {
 				var itemsValue = valueTwo["Value"].(map[string]interface{})
 
+				if itemsValue["WFDictionaryFieldValueItems"] == nil {
+					continue
+				}
+
 				var dictionaryItems []WFDictionaryFieldValueItem
 				mapToStruct(itemsValue["WFDictionaryFieldValueItems"], &dictionaryItems)
 				mapDictionaryValueIdentifiers(dictionaryItems)
