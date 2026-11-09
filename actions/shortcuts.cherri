@@ -2,6 +2,8 @@
 Shortcut Actions
 */
 
+intent Shortcuts 'com.apple.shortcuts'
+
 enum shortcutDetail {
 	'Folder',
 	'Icon',
@@ -27,3 +29,6 @@ action v16.4 'com.apple.shortcuts.CreateWorkflowAction' makeShortcut(text name, 
 
 // [Doc]: Run Shortcut: Run Shortcut with name `shortcutName`, providing it with `input`.
 action 'runworkflow' run(text shortcutName: 'WFWorkflowName', variable input: 'WFInput')
+
+// [Doc]: Create Shortcut Link: Create an iCloud link to a Shortcut.
+action Shortcuts:'CreateShortcutiCloudLinkAction' createShortcutLink(variable shortcut)
