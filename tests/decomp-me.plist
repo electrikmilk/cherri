@@ -1150,6 +1150,33 @@
 				</dict>
 			</dict>
 		</array>
+		<key>WFWorkflowImportQuestions</key>
+		<array>
+			<dict>
+				<key>ActionIndex</key>
+				<integer>0</integer>
+				<key>Category</key>
+				<string>Parameter</string>
+				<key>DefaultValue</key>
+				<string>Hello?</string>
+				<key>ParameterKey</key>
+				<string>WFAskActionPrompt</string>
+				<key>Text</key>
+				<string>What should the first prompt ask?</string>
+			</dict>
+			<dict>
+				<key>ActionIndex</key>
+				<integer>10</integer>
+				<key>Category</key>
+				<string>Parameter</string>
+				<key>DefaultValue</key>
+				<string>me</string>
+				<key>ParameterKey</key>
+				<string>WFTextActionText</string>
+				<key>Text</key>
+				<string>Who is it?</string>
+			</dict>
+		</array>
 		<key>WFWorkflowClientVersion</key>
 		<string>4033.0.4.3</string>
 		<key>WFWorkflowHasOutputFallback</key>
