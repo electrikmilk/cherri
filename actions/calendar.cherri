@@ -2,7 +2,7 @@
 Calendar Actions
 */
 
-app Clock 'com.apple.clock'
+intent Clock 'com.apple.clock'
 
 enum eventDetail {
     'Start Date',

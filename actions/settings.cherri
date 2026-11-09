@@ -2,7 +2,7 @@
 Settings Actions
 */
 
-app ShortcutsActions 'com.apple.ShortcutsActions'
+intent ShortcutsActions 'com.apple.ShortcutsActions'
 
 // [Doc]: [Notifications] Turn On Do Not Disturb
 action 'dnd.set' DNDOn() {

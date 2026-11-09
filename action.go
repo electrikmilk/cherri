@@ -101,8 +101,8 @@ type actionDefinition struct {
 	internal           bool // internal marks a Cherri declaration that attaches to the logic of a compiler-defined action.
 }
 
-// declaredApps maps the name of an app declared in Cherri to its bundle identifier.
-var declaredApps = map[string]string{}
+// appIntents maps the name of an app declared with intent in Cherri to its bundle identifier.
+var appIntents = map[string]string{}
 
 // sourceLocation is a position in a Cherri file that is reported on after parsing has moved past it.
 type sourceLocation struct {
@@ -111,8 +111,8 @@ type sourceLocation struct {
 	col  int
 }
 
-// unreferencedApps holds the declared apps that no action has referenced yet, by where they were declared.
-var unreferencedApps = map[string]sourceLocation{}
+// unreferencedAppIntents holds the declared app intents that no action has referenced yet, by where they were declared.
+var unreferencedAppIntents = map[string]sourceLocation{}
 
 var enumerations = map[string][]string{
 	"measurementUnitType":           {"Acceleration", "Angle", "Area", "Concentration Mass", "Dispersion", "Duration", "Electric Charge", "Electric Current", "Electric Potential Difference", "V Electric Resistance", "Energy", "Frequency", "Fuel Efficiency", "Illuminance", "Information Storage", "Length", "Mass", "Power", "Pressure", "Speed", "Temperature", "Volume"},
@@ -848,26 +848,26 @@ func appIntentDescriptor(intent appIntent) map[string]any {
 // handleActionDefinitions parses defined actions in the current file and collects them into the actions map.
 func handleActionDefinitions() {
 	parseActionDefinitions()
-	warnUnreferencedApps()
+	warnUnreferencedAppIntents()
 
 	resetParse()
 }
 
-func warnUnreferencedApps() {
-	var names = slices.SortedFunc(maps.Keys(unreferencedApps), func(a string, b string) int {
+func warnUnreferencedAppIntents() {
+	var names = slices.SortedFunc(maps.Keys(unreferencedAppIntents), func(a string, b string) int {
 		return cmp.Or(
-			cmp.Compare(unreferencedApps[a].file, unreferencedApps[b].file),
-			cmp.Compare(unreferencedApps[a].line, unreferencedApps[b].line),
+			cmp.Compare(unreferencedAppIntents[a].file, unreferencedAppIntents[b].file),
+			cmp.Compare(unreferencedAppIntents[a].line, unreferencedAppIntents[b].line),
 			cmp.Compare(a, b),
 		)
 	})
 
 	for _, name := range names {
-		var location = unreferencedApps[name]
-		parserWarningAt(fmt.Sprintf("App '%s' is declared but no action references one of its intents.", name), location.file, location.line, location.col)
+		var location = unreferencedAppIntents[name]
+		parserWarningAt(fmt.Sprintf("Intent '%s' is declared but no action references it.", name), location.file, location.line, location.col)
 	}
 
-	clear(unreferencedApps)
+	clear(unreferencedAppIntents)
 }
 
 func parseActionDefinitions() {
@@ -880,9 +880,8 @@ func parseActionDefinitions() {
 			collectComment()
 		case startOfLineTokenAhead(Enumeration):
 			collectEnumeration()
-		// The space keeps actions that start with app, like appendToFile, from being read as a declaration.
-		case next(len(App)) == ' ' && startOfLineTokenAhead(App):
-			collectAppDeclaration()
+		case startOfLineTokenAhead(Intent):
+			collectIntentDeclaration()
 		case startOfLineTokenAhead(Action):
 			advance()
 			collectDefinedAction()
@@ -931,24 +930,24 @@ func collectActionPrefixModifiers(definition *actionDefinition) {
 	}
 }
 
-// collectAppDeclaration collects `app Name 'bundle.identifier'` so actions can refer to the intents of an app.
-func collectAppDeclaration() {
+// collectIntentDeclaration collects `intent Name 'bundle.identifier'` so actions can refer to the intents of an app.
+func collectIntentDeclaration() {
 	var lineRef = newLineReference()
 
 	advance()
 	var file, line, col = delinquentFile()
 	var name = collectIdentifier()
-	if _, found := declaredApps[name]; found {
-		parserError(fmt.Sprintf("Duplicate declaration of app '%s'", name))
+	if _, found := appIntents[name]; found {
+		parserError(fmt.Sprintf("Duplicate declaration of intent '%s'", name))
 	}
 
 	skipInlineWhitespace()
 	if char != '\'' {
-		parserError("Expected app bundle identifier raw string (').")
+		parserError("Expected intent bundle identifier raw string (').")
 	}
 	advance()
-	declaredApps[name] = collectRawString()
-	unreferencedApps[name] = sourceLocation{file: file, line: line, col: col}
+	appIntents[name] = collectRawString()
+	unreferencedAppIntents[name] = sourceLocation{file: file, line: line, col: col}
 
 	lineRef.replaceLines()
 }
@@ -956,9 +955,9 @@ func collectAppDeclaration() {
 // collectIntentReference sets the app intent of a definition from `#App.Intent`.
 func collectIntentReference(definition *actionDefinition) {
 	var appName = collectIdentifier()
-	var bundleIdentifier, found = declaredApps[appName]
+	var bundleIdentifier, found = appIntents[appName]
 	if !found {
-		parserError(fmt.Sprintf("Unknown app '%s'", appName))
+		parserError(fmt.Sprintf("Unknown intent '%s'", appName))
 	}
 
 	if !isChar('.') {
@@ -975,7 +974,7 @@ func collectIntentReference(definition *actionDefinition) {
 		bundleIdentifier:    bundleIdentifier,
 		appIntentIdentifier: intentIdentifier,
 	}
-	delete(unreferencedApps, appName)
+	delete(unreferencedAppIntents, appName)
 	advance()
 }
 

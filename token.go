@@ -39,7 +39,7 @@ const (
 	Paste          tokenType = "paste"
 	Default        tokenType = "default"
 	Internal       tokenType = "internal"
-	App            tokenType = "app"
+	Intent         tokenType = "intent"
 )
 
 /* Definitions */
