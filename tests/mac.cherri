@@ -1,0 +1,8 @@
+// compile-only: window state is device dependent
+#define mac true
+
+getWindows("Title", "asc", 5)
+getWindows("Width", "desc", 3)
+getWindows("Random", "asc", 1)
+
+show("✅ All tests passed")

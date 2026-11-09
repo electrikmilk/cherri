@@ -141,3 +141,6 @@ action 'downloadurl' fileRequest(
 ) {
     "WFHTTPBodyType": "File"
 }
+
+// [Doc]: Open Custom X-Callback URL
+action internal 'openxcallbackurl' openCustomXCallbackURL(text url: 'WFXCallbackURL', text ?successKey: 'WFXCallbackCustomSuccessKey', text ?cancelKey: 'WFXCallbackCustomCancelKey', text ?errorKey: 'WFXCallbackCustomErrorKey', text ?successURL: 'WFXCallbackCustomSuccessURL')
