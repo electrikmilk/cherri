@@ -217,6 +217,10 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 		switch valueTwo := wfValue["Value"].(type) {
 		case map[string]interface{}:
 			if itemsValue, isMap := valueTwo["Value"].(map[string]interface{}); isMap {
+				if itemsValue["WFDictionaryFieldValueItems"] == nil {
+					continue
+				}
+
 				var dictionaryItems []WFDictionaryFieldValueItem
 				mapToStruct(itemsValue["WFDictionaryFieldValueItems"], &dictionaryItems)
 				mapDictionaryValueIdentifiers(dictionaryItems)
