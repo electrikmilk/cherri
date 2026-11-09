@@ -6,6 +6,25 @@
 		<array>
 			<dict>
 				<key>WFWorkflowActionIdentifier</key>
+				<string>is.workflow.actions.timer.start</string>
+				<key>WFWorkflowActionParameters</key>
+				<dict>
+					<key>WFDuration</key>
+					<dict>
+						<key>Value</key>
+						<dict>
+							<key>Magnitude</key>
+							<integer>5</integer>
+							<key>Unit</key>
+							<string>min</string>
+						</dict>
+						<key>WFSerializationType</key>
+						<string>WFQuantityFieldValue</string>
+					</dict>
+				</dict>
+			</dict>
+			<dict>
+				<key>WFWorkflowActionIdentifier</key>
 				<string>is.workflow.actions.ask</string>
 				<key>WFWorkflowActionParameters</key>
 				<dict>
@@ -1116,6 +1135,87 @@
 					</dict>
 					<key>WFVariableName</key>
 					<string>val</string>
+				</dict>
+			</dict>
+			<dict>
+				<key>WFWorkflowActionIdentifier</key>
+				<string>is.workflow.actions.timer.start</string>
+				<key>WFWorkflowActionParameters</key>
+				<dict>
+					<key>WFDuration</key>
+					<dict>
+						<key>Value</key>
+						<dict>
+							<key>Magnitude</key>
+							<dict>
+								<key>Type</key>
+								<string>Variable</string>
+								<key>VariableName</key>
+								<string>int</string>
+							</dict>
+							<key>Unit</key>
+							<string>sec</string>
+						</dict>
+						<key>WFSerializationType</key>
+						<string>WFQuantityFieldValue</string>
+					</dict>
+				</dict>
+			</dict>
+			<dict>
+				<key>WFWorkflowActionIdentifier</key>
+				<string>is.workflow.actions.setvariable</string>
+				<key>WFWorkflowActionParameters</key>
+				<dict>
+					<key>WFInput</key>
+					<dict>
+						<key>Value</key>
+						<dict>
+							<key>Aggrandizements</key>
+							<array>
+								<dict>
+									<key>PropertyName</key>
+									<string>OS</string>
+									<key>PropertyUserInfo</key>
+									<integer>0</integer>
+									<key>Type</key>
+									<string>WFPropertyVariableAggrandizement</string>
+								</dict>
+							</array>
+							<key>Type</key>
+							<string>DeviceDetails</string>
+							<key>VariableName</key>
+							<string>Device</string>
+						</dict>
+						<key>WFSerializationType</key>
+						<string>WFTextTokenAttachment</string>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenAttachment</string>
+					<key>WFVariableName</key>
+					<string>deviceOS</string>
+				</dict>
+			</dict>
+			<dict>
+				<key>WFWorkflowActionIdentifier</key>
+				<string>is.workflow.actions.setvariable</string>
+				<key>WFWorkflowActionParameters</key>
+				<dict>
+					<key>WFInput</key>
+					<dict>
+						<key>Value</key>
+						<dict>
+							<key>Type</key>
+							<string>CurrentDate</string>
+							<key>VariableName</key>
+							<string>CurrentDate</string>
+						</dict>
+						<key>WFSerializationType</key>
+						<string>WFTextTokenAttachment</string>
+					</dict>
+					<key>WFSerializationType</key>
+					<string>WFTextTokenAttachment</string>
+					<key>WFVariableName</key>
+					<string>date</string>
 				</dict>
 			</dict>
 		</array>
