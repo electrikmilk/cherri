@@ -4,13 +4,6 @@ Settings Actions
 
 intent ShortcutsActions 'com.apple.ShortcutsActions'
 
-enum FocusUntil {
-    'Turned Off'
-    'Time'
-    'I Leave'
-    'Event Ends'
-}
-
 // [Doc]: [Notifications] Turn On Do Not Disturb
 action 'dnd.set' DNDOn() {
 	"Enabled": 1,
