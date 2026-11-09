@@ -417,6 +417,8 @@ Minimal Go definition:
 },
 ```
 
+**Declaring a Go-defined action in Cherri:** A DSL declaration inherits `check`, `makeParams`, `appendParamsFunc`, `decomp` and `appIntent` from the `actions_std.go` entry of the same name. The declaration must carry the `internal` modifier (`action internal 'identifier' name(...)`) so the `.cherri` file shows it depends on compiler logic. The compiler errors if a declaration matches a Go entry without `internal`, and if `internal` is used with no Go entry to attach to.
+
 Use `argumentValue(args, i)` or `paramValue(arg, type)` inside `makeParams` to convert collected arguments to plist values. Use `appendParamsFunc` instead of `makeParams` when you want automatic parameter handling to still apply but need to inject extra keys based on argument values.
 
 **Return types matter for testability:** Always declare `: type` on action output in DSL definitions when the action returns a value — omitting it causes the result to have type `''`, which prevents comparisons in test code and breaks type inference downstream. For actions that return values of varying type (e.g. `getValue`), `: text` is usually correct since the Shortcuts runtime coerces as needed.
