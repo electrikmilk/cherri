@@ -58,12 +58,10 @@ func collectTrigger() {
 		var list = valueList{name: "screenshot location", list: &validScreenshotLocations}
 		triggerParams["ScreenshotLocations"] = list.parseList('\n')
 	case "battery":
-		if char == '>' {
+		if isChar('>') {
 			triggerParams["WFBatteryLevelComparison"] = "rises_above"
-			advance()
-		} else if char == '<' {
+		} else if isChar('<') {
 			triggerParams["WFBatteryLevelComparison"] = "falls_below"
-			advance()
 		}
 
 		var batteryLevel = collectUntil('\n')
