@@ -952,7 +952,7 @@ func collectAppDeclaration() {
 // intents of its own app, so an intent cannot be used with another app.
 func collectIntentReference(definition *actionDefinition) {
 	var appNames = slices.Sorted(maps.Keys(apps))
-	var appList = valueList{name: "app", plural: "apps", list: &appNames}
+	var appList = valueList{name: "app", list: &appNames}
 	var appName = collectIdentifier()
 	appList.validate(&appName)
 
