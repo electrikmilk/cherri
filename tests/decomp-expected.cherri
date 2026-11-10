@@ -43,6 +43,9 @@ menu "Prompt" {
 item "Item 1":
 }
 alert("Title", "Message")
+alert("No title")
+confirm("No title")
+confirm("No button setting")
 show(@var)
 
 repeat _ for 3 {

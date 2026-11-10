@@ -1438,6 +1438,12 @@ func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefi
 	matchedValues += valueMatches
 
 	var splitActionAddParams []parameterDefinition
+	for key, value := range splitAction.definition.appendParams {
+		splitActionAddParams = append(splitActionAddParams, parameterDefinition{
+			key:          key,
+			defaultValue: value,
+		})
+	}
 	if splitAction.definition.appendParamsFunc != nil {
 		for key, value := range splitAction.definition.appendParamsFunc([]actionArgument{}) {
 			splitActionAddParams = append(splitActionAddParams, parameterDefinition{

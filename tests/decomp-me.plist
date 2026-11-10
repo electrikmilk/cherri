@@ -986,6 +986,37 @@
 			</dict>
 			<dict>
 				<key>WFWorkflowActionIdentifier</key>
+				<string>is.workflow.actions.alert</string>
+				<key>WFWorkflowActionParameters</key>
+				<dict>
+					<key>WFAlertActionCancelButtonShown</key>
+					<false/>
+					<key>WFAlertActionMessage</key>
+					<string>No title</string>
+				</dict>
+			</dict>
+			<dict>
+				<key>WFWorkflowActionIdentifier</key>
+				<string>is.workflow.actions.alert</string>
+				<key>WFWorkflowActionParameters</key>
+				<dict>
+					<key>WFAlertActionCancelButtonShown</key>
+					<true/>
+					<key>WFAlertActionMessage</key>
+					<string>No title</string>
+				</dict>
+			</dict>
+			<dict>
+				<key>WFWorkflowActionIdentifier</key>
+				<string>is.workflow.actions.alert</string>
+				<key>WFWorkflowActionParameters</key>
+				<dict>
+					<key>WFAlertActionMessage</key>
+					<string>No button setting</string>
+				</dict>
+			</dict>
+			<dict>
+				<key>WFWorkflowActionIdentifier</key>
 				<string>is.workflow.actions.showresult</string>
 				<key>WFWorkflowActionParameters</key>
 				<dict>
