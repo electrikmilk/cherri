@@ -1798,6 +1798,10 @@ func startOfLineTokenAhead(token tokenType) bool {
 	return lineCharIdx == 0 && tokenAhead(token)
 }
 
+func startOfLineTokenAheadWithSpace(token tokenType) bool {
+	return next(len(token)) == ' ' && startOfLineTokenAhead(token)
+}
+
 func tokenAhead(token tokenType) bool {
 	var tokenLen = len(token)
 	for i, tokenChar := range token {

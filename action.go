@@ -857,12 +857,11 @@ func parseActionDefinitions() {
 			advanceUntil('\n')
 		case commentAhead():
 			collectComment()
-		case startOfLineTokenAhead(Enumeration):
+		case startOfLineTokenAheadWithSpace(Enumeration):
 			collectEnumeration()
-		// The space keeps actions that start with app, like appendToFile, from being read as a declaration.
-		case next(len(App)) == ' ' && startOfLineTokenAhead(App):
+		case startOfLineTokenAheadWithSpace(App):
 			collectAppDeclaration()
-		case startOfLineTokenAhead(Action):
+		case startOfLineTokenAheadWithSpace(Action):
 			advance()
 			collectDefinedAction()
 		}
