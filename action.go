@@ -101,8 +101,8 @@ type actionDefinition struct {
 	internal           bool // internal marks a Cherri declaration that attaches to the logic of a compiler-defined action.
 }
 
-// appBundles maps the name of an app declared in Cherri to its bundle identifier.
-var appBundles = map[string]string{}
+// apps maps the name of an app declared in Cherri to its bundle identifier.
+var apps = map[string]string{}
 
 // appIntents maps the name of an app declared in Cherri to its intents, which references to its intents are validated against.
 var appIntents = map[string][]string{}
@@ -947,10 +947,10 @@ func collectAppDeclaration() {
 	}
 	advance()
 	var bundleIdentifier = collectRawString()
-	if declared, found := appBundles[appName]; found && declared != bundleIdentifier {
+	if declared, found := apps[appName]; found && declared != bundleIdentifier {
 		parserError(fmt.Sprintf("App '%s' is already declared with bundle identifier '%s'", appName, declared))
 	}
-	appBundles[appName] = bundleIdentifier
+	apps[appName] = bundleIdentifier
 
 	skipInlineWhitespace()
 	if char != '{' {
@@ -990,10 +990,10 @@ func collectAppDeclaration() {
 // collectIntentReference sets the app intent of a definition from `#App.Intent`. The intent is validated against the
 // intents of its own app, so an intent cannot be used with another app.
 func collectIntentReference(definition *actionDefinition) {
-	var appNames = slices.Sorted(maps.Keys(appBundles))
-	var apps = valueList{name: "app", plural: "apps", list: &appNames}
+	var appNames = slices.Sorted(maps.Keys(apps))
+	var appList = valueList{name: "app", plural: "apps", list: &appNames}
 	var appName = collectIdentifier()
-	apps.validate(&appName)
+	appList.validate(&appName)
 
 	if !isChar('.') {
 		parserError("Expected an intent after the app name (#App.Intent).")
@@ -1005,7 +1005,7 @@ func collectIntentReference(definition *actionDefinition) {
 
 	definition.appIntent = appIntent{
 		name:                appName,
-		bundleIdentifier:    appBundles[appName],
+		bundleIdentifier:    apps[appName],
 		appIntentIdentifier: intentIdentifier,
 	}
 	delete(unreferencedAppIntents, appName+"."+intentIdentifier)
