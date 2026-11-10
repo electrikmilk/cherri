@@ -7,6 +7,7 @@ require github.com/google/uuid v1.6.0
 require github.com/electrikmilk/args-parser v1.1.3
 
 require (
+	github.com/aixiansheng/lzfse v0.2.4
 	github.com/glebarez/go-sqlite v1.22.0
 	github.com/go-git/go-git/v5 v5.16.3
 	howett.net/plist v1.0.1
