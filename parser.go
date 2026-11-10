@@ -1914,11 +1914,6 @@ func printTokens(tokens []token) {
 
 func parserWarning(message string) {
 	var errorFilename, errorLine, errorCol = delinquentFile()
-	parserWarningAt(message, errorFilename, errorLine, errorCol)
-}
-
-// parserWarningAt warns about a position that was recorded earlier in parsing instead of the current one.
-func parserWarningAt(message string, errorFilename string, errorLine int, errorCol int) {
 	var warning = fmt.Sprintf("%s %s", ansi("\nWarning:", yellow, bold), message)
 
 	if !args.Using("no-ansi") {
