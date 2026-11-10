@@ -387,7 +387,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"killAllApps": {
-		check: replaceAppIDs,
+		check:      replaceAppIDs,
 		makeParams: makeAllAppsAction,
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			return decompAppAction("WFAppsExcept", action)
@@ -1172,7 +1172,7 @@ func makeAppIds() {
 	}
 }
 
-func apps(args []actionArgument) (apps []map[string]any) {
+func appArgument(args []actionArgument) (apps []map[string]any) {
 	for _, arg := range args {
 		if arg.valueType != Variable {
 			apps = append(apps, map[string]any{
@@ -1230,7 +1230,7 @@ func makeAllAppsAction(args []actionArgument) (params map[string]any) {
 	params = make(map[string]any)
 
 	if args[0].valueType != Variable {
-		params["WFAppsExcept"] = apps(args)
+		params["WFAppsExcept"] = appArgument(args)
 	} else {
 		params["WFAppsExcept"] = argumentValue(args, 0)
 	}
