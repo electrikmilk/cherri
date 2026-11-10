@@ -679,31 +679,42 @@ func collectEnumeration() {
 	}
 
 	advanceUntilExpect('{', 3)
-	advance()
-	skipWhitespace()
-
-	if char != '\'' {
-		parserError(fmt.Sprintf("Expected enumeration raw string ('), got: %c", char))
-	}
-	advance()
-
-	var enumeration []string
-	for char != '}' && char != -1 {
-		var permutation = collectRawString()
-		enumeration = append(enumeration, permutation)
-		if char == ',' {
-			advance()
-		}
-		skipWhitespace()
-		if char == '\'' {
-			advance()
-		}
+	var enumeration = collectRawStringList("enumeration value")
+	if len(enumeration) == 0 {
+		parserError("Expected at least one enumeration raw string (').")
 	}
 
 	lineRef.replaceLines()
 
 	enumerations[identifier] = enumeration
 	advance()
+}
+
+// collectRawStringList collects the raw strings of a list between curly braces, like the values of an enumeration or the
+// intents of an app. It starts on the opening brace and stops on the closing one. valueName describes one value in errors.
+func collectRawStringList(valueName string) (list []string) {
+	if char != '{' {
+		parserError(fmt.Sprintf("Expected { to start the %ss.", valueName))
+	}
+	advance()
+
+	for {
+		skipWhitespace()
+		if char == '}' || char == -1 {
+			return
+		}
+		if char != '\'' {
+			parserError(fmt.Sprintf("Expected %s raw string (').", valueName))
+		}
+		advance()
+
+		list = append(list, collectRawString())
+
+		skipWhitespace()
+		if char == ',' {
+			advance()
+		}
+	}
 }
 
 func collectArguments() (arguments []actionArgument) {
