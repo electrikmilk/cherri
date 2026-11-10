@@ -2,6 +2,10 @@
 Text Editing Actions
 */
 
+app ShortcutsActions 'com.apple.ShortcutsActions' {
+    'TranscribeAudioAction'
+}
+
 // [Doc]: [Rich Text] Make HTML: Make HTML from Rich Text.
 action 'gethtmlfromrichtext' makeHTML(text input: 'WFInput', bool ?makeFullDocument: 'WFMakeFullDocument' = false): text
 
@@ -42,7 +46,7 @@ action 'showdefinition' define(text word: 'Word'): text
 action 'speaktext' speak(text prompt: 'WFText', bool ?waitUntilFinished: 'WFSpeakTextWait' = true, text ?language: 'WFSpeakTextLanguage')
 
 // [Doc]: Transcribe Audio: Transcribes text from the provided audio.
-action v17 'com.apple.ShortcutsActions.TranscribeAudioAction' transcribeText(variable audio): text
+action v17 #ShortcutsActions.TranscribeAudioAction transcribeText(variable audio): text
 
 // [Doc]: [Text Editing] Uppercase: Transforms the text to all uppercase.
 action default 'text.changecase' uppercase(text text): text {

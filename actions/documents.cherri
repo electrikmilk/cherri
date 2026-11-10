@@ -2,6 +2,11 @@
 Document Actions
 */
 
+app Notes 'com.apple.Notes' {
+    'AppendToNoteLinkAction',
+    'OpenNoteLinkAction'
+}
+
 enum archiveFormat {
     '.zip',
     '.tar.gz',
@@ -115,10 +120,10 @@ action 'format.filesize' fileSize(text file: 'WFFileSize', fileSizeFormat format
 }
 
 // [Doc]: [Notes] Open Note: Open note in the Notes app.
-action 'shownote' openNote(variable note: 'WFInput')
+action #Notes.OpenNoteLinkAction 'shownote' openNote(variable note: 'WFInput')
 
 // [Doc]: [Notes] Append Note: Append text to a note.
-action appendNote(text note: 'WFNote', text input: 'WFInput')
+action #Notes.AppendToNoteLinkAction 'appendnote' appendNote(text note: 'WFNote', text input: 'WFInput')
 
 // [Doc]: [Notes] Show Quick Note: Show quick note.
 action 'com.apple.mobilenotes.ShowQuickNoteIntent' showQuickNote()

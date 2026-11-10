@@ -17,4 +17,9 @@ getFileFromFolder("Shortcuts/Documents", "notes.txt", false)
 @contents = "contents"
 appendToFile("notes.txt", @contents)
 
+// Notes
+@noteToOpen = "note"
+appendNote("Groceries", "Milk")
+openNote(@noteToOpen)
+
 show("✅ All tests passed")

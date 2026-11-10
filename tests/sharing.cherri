@@ -1,0 +1,6 @@
+// compile-only: Messages is searched on the device
+
+findConversation("Cherri")
+findMessage("Cherri")
+
+show("✅ All tests passed")

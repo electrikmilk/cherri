@@ -13,4 +13,6 @@ setFocusMode("Sleep", "Event Ends")
 toggleFocusMode()
 toggleFocusMode("Driving")
 
+getMultitaskingMode()
+
 show("✅ All tests passed")

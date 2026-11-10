@@ -10,4 +10,6 @@ turnOnAlarm(@alarm, false)
 turnOffAlarm(@alarm)
 toggleAlarm(@alarm)
 
+getAlarms()
+
 show("✅ All tests passed")

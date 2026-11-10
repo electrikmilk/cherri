@@ -29,4 +29,7 @@ killAllApps()
 killAllApps("notes")
 killAllApps("notes", "maps")
 
+getOrientation()
+showControlCenter()
+
 show("✅ All tests passed")

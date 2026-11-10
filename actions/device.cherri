@@ -2,6 +2,11 @@
 Device Actions
 */
 
+app ShortcutsActions 'com.apple.ShortcutsActions' {
+    'GetOrientationAction',
+    'ShowControlCenterAction'
+}
+
 enum deviceDetail {
 	'Device Name',
 	'Device Hostname',
@@ -22,7 +27,7 @@ action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail')
 action getOnScreenContent()
 
 // [Doc]: [Display] Get Orientation: Get the current orientation of the device.
-action 'com.apple.ShortcutsActions.GetOrientationAction' getOrientation(): text
+action #ShortcutsActions.GetOrientationAction getOrientation(): text
 
 // [Doc]: Lock Screen: Lock the device screen.
 action v17 lockScreen()
@@ -52,7 +57,7 @@ action !mac 'flashlight' toggleFlashlight(float brightness: 'WFFlashlightLevel' 
 }
 
 // [Doc]: Show Control Center: Open the control center on the device.
-action 'com.apple.ShortcutsActions.ShowControlCenterAction' showControlCenter()
+action #ShortcutsActions.ShowControlCenterAction showControlCenter()
 
 // [Doc]: [Battery] Low Power Mode
 action toggleSet !mac 'lowpowermode.set' LowPowerMode 'OnValue'

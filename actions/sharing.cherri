@@ -2,6 +2,11 @@
 Sharing Actions
 */
 
+app Messages 'com.apple.MobileSMS' {
+    'ConversationEntity',
+    'MessageEntity'
+}
+
 // [Doc]: Share: Prompt the user to share `input`.
 action share(variable input: 'WFInput')
 
@@ -36,10 +41,10 @@ action sendMessage(
 action 'com.apple.mobilemail.MailMessageEntity' findEmail(text search: 'WFContentItemInputParameter')
 
 // [Doc]: [Email & SMS Messaging] Find Message: Find SMS/iMessage message.
-action 'com.apple.MobileSMS.MessageEntity' findMessage(text search: 'WFContentItemInputParameter')
+action #Messages.MessageEntity findMessage(text search: 'WFContentItemInputParameter')
 
 // [Doc]: [Email & SMS Messaging] Find Conversation: Find SMS/iMessage conversation.
-action 'com.apple.MobileSMS.ConversationEntity' findConversation(text search: 'WFContentItemInputParameter')
+action #Messages.ConversationEntity findConversation(text search: 'WFContentItemInputParameter')
 
 // [Doc]: [AirDrop] AirDrop: Prompt the user to AirDrop `input`.
 action 'airdropdocument' airdrop(variable input: 'WFInput')

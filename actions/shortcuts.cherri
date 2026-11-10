@@ -3,7 +3,10 @@ Shortcut Actions
 */
 
 app Shortcuts 'com.apple.shortcuts' {
-    'CreateShortcutiCloudLinkAction'
+    'CreateShortcutiCloudLinkAction',
+    'CreateWorkflowAction',
+    'SearchShortcutsAction',
+    'OpenWorkflowAction'
 }
 
 enum shortcutDetail {
@@ -24,10 +27,10 @@ action 'getmyworkflows' getShortcuts(): array
 action 'properties.workflow' getShortcutDetail(variable shortcut: 'WFInput', shortcutDetail detail: 'WFContentItemPropertyName')
 
 // [Doc]: Search Shortcuts: Search the users Shortcuts.
-action v16.4 'com.apple.shortcuts.SearchShortcutsAction' searchShortcuts(text query: 'searchPhrase')
+action v16.4 #Shortcuts.SearchShortcutsAction searchShortcuts(text query: 'searchPhrase')
 
 // [Doc]: Make Shortcut: Create a shortcut.
-action v16.4 'com.apple.shortcuts.CreateWorkflowAction' makeShortcut(text name, bool ?open: 'OpenWhenRun' = true)
+action v16.4 #Shortcuts.CreateWorkflowAction makeShortcut(text name, bool ?open: 'OpenWhenRun' = true)
 
 // [Doc]: Run Shortcut: Run Shortcut with name `shortcutName`, providing it with `input`.
 action 'runworkflow' run(text shortcutName: 'WFWorkflowName', variable input: 'WFInput')
@@ -36,7 +39,7 @@ action 'runworkflow' run(text shortcutName: 'WFWorkflowName', variable input: 'W
 action #Shortcuts.CreateShortcutiCloudLinkAction createShortcutLink(variable shortcut)
 
 // [Doc]: Open Shortcut: Open a shortcut in the Shortcuts app.
-action internal 'com.apple.shortcuts.OpenWorkflowAction' openShortcut(text shortcutName)
+action internal #Shortcuts.OpenWorkflowAction openShortcut(text shortcutName)
 
 // [Doc]: Run Self: Run the current Shortcut with optional output.
 action internal 'runworkflow' runSelf(variable output: 'WFInput')

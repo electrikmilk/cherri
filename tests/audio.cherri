@@ -1,0 +1,7 @@
+// compile-only: audio input is not available when compiling
+
+@audio = "audio"
+
+transcribeText(@audio)
+
+show("✅ All tests passed")
