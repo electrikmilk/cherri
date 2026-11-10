@@ -101,8 +101,14 @@ type actionDefinition struct {
 	internal           bool // internal marks a Cherri declaration that attaches to the logic of a compiler-defined action.
 }
 
-// apps maps the name of an app declared in Cherri to its bundle identifier.
-var apps = map[string]string{}
+// app is an app declared in Cherri that actions refer to the intents of.
+type app struct {
+	name             string // name of the app shown in the app intent, which is the declared name unless a display name is given
+	bundleIdentifier string
+}
+
+// apps maps the name of an app declared in Cherri to the app.
+var apps = map[string]app{}
 
 // appIntents maps the name of an app declared in Cherri to its intents, which references to its intents are validated against.
 var appIntents = map[string][]string{}
@@ -933,12 +939,20 @@ func collectActionPrefixModifiers(definition *actionDefinition) {
 	}
 }
 
-// collectAppDeclaration collects `app Name 'bundle.identifier' { 'Intent', ... }` so actions can refer to the intents of an app.
+// collectAppDeclaration collects `app Name[:'Display Name'] 'bundle.identifier' { 'Intent', ... }` so actions can refer to the intents of an app.
 func collectAppDeclaration() {
 	var lineRef = newLineReference()
 
 	advance()
 	var appName = collectIdentifier()
+
+	var displayName = appName
+	if isChar(':') {
+		if !isChar('\'') {
+			parserError("Expected app display name raw string (').")
+		}
+		displayName = collectRawString()
+	}
 
 	skipInlineWhitespace()
 	if char != '\'' {
@@ -946,12 +960,14 @@ func collectAppDeclaration() {
 	}
 	advance()
 	var bundleIdentifier = collectRawString()
-	if declared, found := apps[appName]; found && declared != bundleIdentifier {
-		parserError(fmt.Sprintf("App '%s' is already declared with bundle identifier '%s'", appName, declared))
-	}
-	apps[appName] = bundleIdentifier
-
 	skipInlineWhitespace()
+
+	var declared, found = apps[appName]
+	if found && declared != (app{name: displayName, bundleIdentifier: bundleIdentifier}) {
+		parserError(fmt.Sprintf("App '%s' is already declared with bundle identifier '%s' and name '%s'", appName, declared.bundleIdentifier, declared.name))
+	}
+	apps[appName] = app{name: displayName, bundleIdentifier: bundleIdentifier}
+
 	if char != '{' {
 		parserError("Expected { to list the intents of the app.")
 	}
@@ -1003,8 +1019,8 @@ func collectIntentReference(definition *actionDefinition) {
 	var intentIdentifier = intents.parse(' ')
 
 	definition.appIntent = appIntent{
-		name:                appName,
-		bundleIdentifier:    apps[appName],
+		name:                apps[appName].name,
+		bundleIdentifier:    apps[appName].bundleIdentifier,
 		appIntentIdentifier: intentIdentifier,
 	}
 	delete(unreferencedAppIntents, appName+"."+intentIdentifier)
