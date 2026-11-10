@@ -101,8 +101,12 @@ type actionDefinition struct {
 	internal           bool // internal marks a Cherri declaration that attaches to the logic of a compiler-defined action.
 }
 
-// appIntents maps the app name and identifier of an intent declared in Cherri (e.g. Clock.ToggleAlarmIntent) to its app intent.
-var appIntents = map[string]appIntent{}
+// appBundles maps the name of an app declared in Cherri to its bundle identifier.
+var appBundles = map[string]string{}
+
+// appIntents lists the intents declared in Cherri as App.Intent (e.g. Clock.ToggleAlarmIntent), which intent references are
+// validated against.
+var appIntents []string
 
 // sourceLocation is a position in a Cherri file that is reported on after parsing has moved past it.
 type sourceLocation struct {
@@ -944,6 +948,10 @@ func collectAppDeclaration() {
 	}
 	advance()
 	var bundleIdentifier = collectRawString()
+	if declared, found := appBundles[appName]; found && declared != bundleIdentifier {
+		parserError(fmt.Sprintf("App '%s' is already declared with bundle identifier '%s'", appName, declared))
+	}
+	appBundles[appName] = bundleIdentifier
 
 	skipInlineWhitespace()
 	if char != '{' {
@@ -965,14 +973,10 @@ func collectAppDeclaration() {
 		var intentIdentifier = collectRawString()
 
 		var reference = appName + "." + intentIdentifier
-		if _, found := appIntents[reference]; found {
+		if slices.Contains(appIntents, reference) {
 			parserError(fmt.Sprintf("Duplicate declaration of intent '%s'", reference))
 		}
-		appIntents[reference] = appIntent{
-			name:                appName,
-			bundleIdentifier:    bundleIdentifier,
-			appIntentIdentifier: intentIdentifier,
-		}
+		appIntents = append(appIntents, reference)
 		unreferencedAppIntents[reference] = sourceLocation{file: file, line: line, col: col}
 
 		skipWhitespace()
@@ -986,18 +990,15 @@ func collectAppDeclaration() {
 
 // collectIntentReference sets the app intent of a definition from `#App.Intent`.
 func collectIntentReference(definition *actionDefinition) {
-	var appName = collectIdentifier()
-	if !isChar('.') {
-		parserError("Expected an intent after the app name (#App.Intent).")
-	}
+	var intents = valueList{name: "app intent", list: &appIntents}
+	var reference = intents.parse(' ')
 
-	var reference = appName + "." + collectIdentifier()
-	var intent, found = appIntents[reference]
-	if !found {
-		parserError(fmt.Sprintf("Unknown intent '%s'", reference))
+	var appName, intentIdentifier, _ = strings.Cut(reference, ".")
+	definition.appIntent = appIntent{
+		name:                appName,
+		bundleIdentifier:    appBundles[appName],
+		appIntentIdentifier: intentIdentifier,
 	}
-
-	definition.appIntent = intent
 	delete(unreferencedAppIntents, reference)
 	advance()
 }
