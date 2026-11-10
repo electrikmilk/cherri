@@ -938,33 +938,11 @@ func collectAppDeclaration() {
 	}
 	apps[appName] = declaredApp
 
-	if char != '{' {
-		parserError("Expected { to list the intents of the app.")
-	}
-	advance()
-
-	for {
-		skipWhitespace()
-		if char == '}' || char == -1 {
-			break
-		}
-		if char != '\'' {
-			parserError("Expected intent identifier raw string (').")
-		}
-
-		advance()
-		var intentIdentifier = collectRawString()
-
-		var reference = appName + "." + intentIdentifier
+	for _, intentIdentifier := range collectRawStringList("intent identifier") {
 		if slices.Contains(appIntents[appName], intentIdentifier) {
-			parserError(fmt.Sprintf("Duplicate declaration of intent '%s'", reference))
+			parserError(fmt.Sprintf("Duplicate declaration of intent '%s.%s'", appName, intentIdentifier))
 		}
 		appIntents[appName] = append(appIntents[appName], intentIdentifier)
-
-		skipWhitespace()
-		if char == ',' {
-			advance()
-		}
 	}
 
 	lineRef.replaceLines()
