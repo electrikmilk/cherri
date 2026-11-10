@@ -88,12 +88,12 @@ type debugParameters struct {
 }
 
 // printActionDebugInfo prints what is needed to match the current action against the Shortcuts ToolKit DB.
+// The identifier is part of the debug action definition printed after this.
 func printActionDebugInfo() {
 	if !args.Using("debug") {
 		return
 	}
 
-	printActionIdentifiers()
 	printActionParameters()
 }
 
@@ -117,18 +117,6 @@ func printActionParameters() {
 	var encoded, encodeErr = json.Marshal(debugInfo)
 	handle(encodeErr)
 	fmt.Println("parameters:", string(encoded))
-}
-
-func printActionIdentifiers() {
-	fmt.Println("identifier:", getFullActionIdentifier())
-
-	var intent = currentAction.definition.appIntent
-	if intent == emptyAppIntent {
-		return
-	}
-
-	fmt.Println("appIntentIdentifier:", intent.appIntentIdentifier)
-	fmt.Println("bundleIdentifier:", intent.bundleIdentifier)
 }
 
 func handleGlyphSearch() {

@@ -29,7 +29,8 @@ cut -f1 "$work_dir/mac.tsv" >"$work_dir/mac.ids"
 cut -f1 "$work_dir/sim.tsv" >"$work_dir/sim.ids"
 
 "$cherri_bin" --action= --debug --no-ansi >"$work_dir/cherri.raw"
-sed -n 's/^identifier: //p' "$work_dir/cherri.raw" |
+awk -f "$(dirname "${BASH_SOURCE[0]}")/lib/cherri-definitions.awk" "$work_dir/cherri.raw" |
+	jq -r '.identifier' |
 	grep -E '^(is\.workflow\.actions|com\.apple)\.' |
 	sort -u >"$work_dir/cherri.ids"
 

@@ -12,11 +12,7 @@ prepare_toolkit_inputs
 
 "$cherri_bin" --action= --debug --no-ansi >"$work_dir/cherri.raw"
 
-# Each action prints its identifier line and then its parameters line, so pair them up.
-awk '
-	/^identifier: / { identifier = substr($0, 13) }
-	/^parameters: / { printf "{\"identifier\":\"%s\",\"data\":%s}\n", identifier, substr($0, 13) }
-' "$work_dir/cherri.raw" >"$work_dir/cherri.jsonl"
+awk -f "$(dirname "${BASH_SOURCE[0]}")/lib/cherri-definitions.awk" "$work_dir/cherri.raw" >"$work_dir/cherri.jsonl"
 
 compare_database() {
 	local label="$1"

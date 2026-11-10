@@ -198,19 +198,6 @@ func getFullActionIdentifier() (ident string) {
 	return
 }
 
-// getActionIdentifier determines the identifier of currentAction.definition.
-func getActionIdentifier() (ident string) {
-	if currentAction.definition.appIdentifier != "" {
-		ident = fmt.Sprintf("%s.", currentAction.definition.appIdentifier)
-	}
-	if currentAction.definition.identifier != "" {
-		ident = fmt.Sprintf("%s%s", ident, currentAction.definition.identifier)
-	} else {
-		ident = fmt.Sprintf("%s%s", ident, strings.ToLower(currentAction.identifier))
-	}
-	return
-}
-
 var emptyAppIntent = appIntent{}
 
 // getActionParameters creates the actions' parameters by injecting the values of the arguments into the defined parameters.
@@ -827,10 +814,7 @@ func generateActionDebugDefinition() string {
 		definition.WriteRune(' ')
 	}
 
-	if currentAction.identifier != "" || currentAction.definition.appIdentifier != "" {
-		setCurrentAction(currentAction.identifier, &currentAction.definition)
-		definition.WriteString(ansi(fmt.Sprintf("'%s' ", getActionIdentifier()), red))
-	}
+	definition.WriteString(ansi(fmt.Sprintf("'%s' ", getFullActionIdentifier()), red))
 
 	return definition.String()
 }
