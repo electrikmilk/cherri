@@ -1172,10 +1172,10 @@ func makeAppIds() {
 	}
 }
 
-func appArgument(args []actionArgument) (apps []map[string]any) {
+func appArgument(args []actionArgument) (appArg []map[string]any) {
 	for _, arg := range args {
 		if arg.valueType != Variable {
-			apps = append(apps, map[string]any{
+			appArg = append(appArg, map[string]any{
 				"BundleIdentifier": arg.value,
 				"TeamIdentifier":   "0000000000",
 			})
