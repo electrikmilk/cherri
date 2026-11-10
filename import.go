@@ -6,6 +6,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -48,8 +49,12 @@ func importShortcut(path string) (shortcutBytes []byte) {
 		shortcutBytes = readShortcutFile()
 	}
 
-	if hasSignedBytes(shortcutBytes) {
-		exit("import: Signed Shortcuts are currently not supported :(\nYou can use an iCloud link instead by sharing the Shortcut and selecting \"Copy iCloud Link\".")
+	if looksLikeSignedShortcut(shortcutBytes) {
+		var extractErr error
+		shortcutBytes, extractErr = extractSignedShortcut(shortcutBytes)
+		if extractErr != nil {
+			exit(fmt.Sprintf("import: %s", extractErr))
+		}
 	}
 
 	return
@@ -114,18 +119,4 @@ func readShortcutFile() []byte {
 	handle(readErr)
 
 	return b
-}
-
-func hasSignedBytes(b []byte) bool {
-	var rawUnsignedBytes = []byte{98, 112, 108, 105, 115, 116, 48, 48}
-	var unsignedBytes = []byte{60, 63, 120, 109, 108, 32, 118, 101}
-	for i, ub := range unsignedBytes {
-		if ub == b[i] || b[i] == rawUnsignedBytes[i] {
-			continue
-		}
-
-		return true
-	}
-
-	return false
 }
