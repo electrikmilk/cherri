@@ -679,7 +679,7 @@ func collectEnumeration() {
 	}
 
 	advanceUntilExpect('{', 3)
-	var enumeration = collectRawStringList("enumeration value")
+	var enumeration = collectRawStringList("enumeration value", nil)
 	if len(enumeration) == 0 {
 		parserError("Expected at least one enumeration raw string (').")
 	}
@@ -692,7 +692,8 @@ func collectEnumeration() {
 
 // collectRawStringList collects the raw strings of a list between curly braces, like the values of an enumeration or the
 // intents of an app. It starts on the opening brace and stops on the closing one. valueName describes one value in errors.
-func collectRawStringList(valueName string) (list []string) {
+// collected is optional and is called with each value as soon as it is collected so an error is reported at that value.
+func collectRawStringList(valueName string, collected func(value string)) (list []string) {
 	if char != '{' {
 		parserError(fmt.Sprintf("Expected { to start the %ss.", valueName))
 	}
@@ -708,7 +709,11 @@ func collectRawStringList(valueName string) (list []string) {
 		}
 		advance()
 
-		list = append(list, collectRawString())
+		var value = collectRawString()
+		list = append(list, value)
+		if collected != nil {
+			collected(value)
+		}
 
 		skipWhitespace()
 		if char == ',' {
