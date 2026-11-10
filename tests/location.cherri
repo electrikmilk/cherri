@@ -1,0 +1,8 @@
+// compile-only: weather locations are saved on the device
+
+@location = "Cupertino"
+
+addWeatherLocation(@location)
+removeWeatherLocation(@location)
+
+show("✅ All tests passed")

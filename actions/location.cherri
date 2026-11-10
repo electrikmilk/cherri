@@ -2,6 +2,11 @@
 Location Actions
 */
 
+app Weather 'com.apple.weather' {
+    'AddSavedLocationIntent',
+    'RemoveSavedLocationIntent'
+}
+
 // [Doc]: Location: Create a location value.
 action default location(text location: 'WFLocation')
 
@@ -95,7 +100,7 @@ enum weatherDetail {
 action 'properties.weather.conditions' getWeatherDetail(variable weather: 'WFInput', weatherDetail detail: 'WFContentItemPropertyName')
 
 // [Doc]: [Weather] Add Location to List: Add a location to Weather app.
-action 'com.apple.weather.AddSavedLocationIntent' addWeatherLocation(variable location: 'placemark')
+action #Weather.AddSavedLocationIntent addWeatherLocation(variable location: 'placemark')
 
 // [Doc]: [Weather] Remove Location from List: Remove a location from the Weather app.
-action 'com.apple.weather.RemoveSavedLocationIntent' removeWeatherLocation(variable location: 'entities')
+action #Weather.RemoveSavedLocationIntent removeWeatherLocation(variable location: 'entities')

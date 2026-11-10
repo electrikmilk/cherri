@@ -2,6 +2,10 @@
 Apple Intelligence actions.
 */
 
+app ImagePlayground:'Image Playground' 'com.apple.GenerativePlaygroundApp' {
+    'GenerateImageIntent'
+}
+
 enum generativeResultType {
     'Text',
     'Number',
@@ -111,4 +115,4 @@ action 'com.apple.WritingTools.WritingToolsAppIntentsExtension.SummarizeTextInte
 }
 
 // [Doc]: [Image Playground] Create Image using Image Playground: Generate an Image with a prompt using the Image Playground app.
-action internal 'com.apple.GenerativePlaygroundApp.GenerateImageIntent' generateImage(text prompt: 'prompt', variable ?image: 'image', imagePlaygroundStyle ?style = "animation", saveToPlaygroundBehavior ?saveToPlayground: 'saveToPlayground' = "always")
+action internal #ImagePlayground.GenerateImageIntent generateImage(text prompt: 'prompt', variable ?image: 'image', imagePlaygroundStyle ?style = "animation", saveToPlaygroundBehavior ?saveToPlayground: 'saveToPlayground' = "always")

@@ -5,7 +5,8 @@ Calendar Actions
 app Clock 'com.apple.clock' {
     'CreateAlarmIntent',
     'DeleteAlarmIntent',
-    'ToggleAlarmIntent'
+    'ToggleAlarmIntent',
+    'AlarmEntity'
 }
 
 enum eventDetail {
@@ -76,7 +77,7 @@ action removeReminders(variable reminders: 'WFInputReminders')
 action internal #Clock.CreateAlarmIntent 'com.apple.mobiletimer-framework.MobileTimerIntents.MTCreateAlarmIntent' createAlarm(text name: 'name', text time: 'dateComponents', bool ?allowsSnooze: 'allowsSnooze' = true, array ?repeatWeekdays)
 
 // [Doc]: [Alarms] Get Alarms: Returns all of the alarms on the device.
-action 'com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent' getAlarms()
+action #Clock.AlarmEntity 'com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent' getAlarms()
 
 // [Doc]: [Alarms] Delete Alarm: Deletes an alarm.
 action #Clock.DeleteAlarmIntent deleteAlarm(variable alarm: 'entities')

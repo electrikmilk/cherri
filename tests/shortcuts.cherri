@@ -12,3 +12,6 @@ runSelf(nil)
 
 @shortcutToLink = "shortcuts"
 createShortcutLink(@shortcutToLink)
+
+makeShortcut("New Shortcut")
+searchShortcuts("Cherri")

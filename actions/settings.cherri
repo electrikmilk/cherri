@@ -3,7 +3,8 @@ Settings Actions
 */
 
 app ShortcutsActions 'com.apple.ShortcutsActions' {
-    'SetMultitaskingModeAction'
+    'SetMultitaskingModeAction',
+    'GetMultitaskingModeAction'
 }
 
 enum focusUntil {
@@ -44,7 +45,7 @@ action 'dnd.set' toggleDND() {
 action 'dnd.getfocus' getFocusMode()
 
 // [Doc]: [Multitasking] Get Multitasking Mode: Get the current multitasking mode.
-action v26 'com.apple.ShortcutsActions.GetMultitaskingModeAction' getMultitaskingMode(): text
+action v26 #ShortcutsActions.GetMultitaskingModeAction getMultitaskingMode(): text
 
 // [Doc]: [Appearance] Set Appearance to Light
 action 'appearance' lightMode() {

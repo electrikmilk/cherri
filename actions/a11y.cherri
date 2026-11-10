@@ -2,6 +2,12 @@
 Accessibility Actions
 */
 
+app Magnifier 'com.apple.Magnifier' {
+    'DescribeThisIntent',
+    'PointAndSpeakIntent',
+    'ReaderModeIntent'
+}
+
 enum backgroundSound {
 	'BalancedNoise',
 	'BrightNoise',
@@ -55,13 +61,13 @@ enum soundRecognitionOperations {
 action !mac v18 'com.apple.AccessibilityUtilities.AXSettingsShortcuts.AXToggleSoundDetectionIntent' setSoundRecognition(soundRecognitionOperations ?operation = "activate")
 
 // [Doc]: [Magnifier] Describe This
-action !mac v18 'com.apple.Magnifier.DescribeThisIntent' magnifierDescribe()
+action !mac v18 #Magnifier.DescribeThisIntent magnifierDescribe()
 
 // [Doc]: [Magnifier] Open Reader
-action !mac v18 'com.apple.Magnifier.ReaderModeIntent' magnifierReader()
+action !mac v18 #Magnifier.ReaderModeIntent magnifierReader()
 
 // [Doc]: [Magnifier] Start Point & Speak
-action !mac v18 'com.apple.Magnifier.PointAndSpeakIntent' magnifierPointAndSpeak()
+action !mac v18 #Magnifier.PointAndSpeakIntent magnifierPointAndSpeak()
 
 // [Doc]: [Hearing] Background Sounds
 action toggleSet 'com.apple.UniversalAccess.AXSettingsShortcuts.AXToggleBackgroundSoundsIntent' BackgroundSounds
