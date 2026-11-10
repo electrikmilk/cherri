@@ -103,7 +103,7 @@ type actionDefinition struct {
 
 // app is an app declared in Cherri that actions refer to the intents of.
 type app struct {
-	name             string // name of the app shown in the app intent, which is the declared name unless a display name is given
+	displayName      string // the name shown in the app intent when it is not the name the app was declared with
 	bundleIdentifier string
 }
 
@@ -946,7 +946,7 @@ func collectAppDeclaration() {
 	advance()
 	var appName = collectIdentifier()
 
-	var displayName = appName
+	var displayName string
 	if isChar(':') {
 		if !isChar('\'') {
 			parserError("Expected app display name raw string (').")
@@ -962,11 +962,11 @@ func collectAppDeclaration() {
 	var bundleIdentifier = collectRawString()
 	skipInlineWhitespace()
 
-	var declared, found = apps[appName]
-	if found && declared != (app{name: displayName, bundleIdentifier: bundleIdentifier}) {
-		parserError(fmt.Sprintf("App '%s' is already declared with bundle identifier '%s' and name '%s'", appName, declared.bundleIdentifier, declared.name))
+	var declaredApp = app{displayName: displayName, bundleIdentifier: bundleIdentifier}
+	if declared, found := apps[appName]; found && declared != declaredApp {
+		parserError(fmt.Sprintf("App '%s' is already declared with a different bundle identifier or display name", appName))
 	}
-	apps[appName] = app{name: displayName, bundleIdentifier: bundleIdentifier}
+	apps[appName] = declaredApp
 
 	if char != '{' {
 		parserError("Expected { to list the intents of the app.")
@@ -1018,8 +1018,13 @@ func collectIntentReference(definition *actionDefinition) {
 	var intents = valueList{name: fmt.Sprintf("%s intent", appName), list: &declaredIntents}
 	var intentIdentifier = intents.parse(' ')
 
+	var name = appName
+	if apps[appName].displayName != "" {
+		name = apps[appName].displayName
+	}
+
 	definition.appIntent = appIntent{
-		name:                apps[appName].name,
+		name:                name,
 		bundleIdentifier:    apps[appName].bundleIdentifier,
 		appIntentIdentifier: intentIdentifier,
 	}
