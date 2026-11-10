@@ -104,9 +104,8 @@ type actionDefinition struct {
 // appBundles maps the name of an app declared in Cherri to its bundle identifier.
 var appBundles = map[string]string{}
 
-// appIntents lists the intents declared in Cherri as App.Intent (e.g. Clock.ToggleAlarmIntent), which intent references are
-// validated against.
-var appIntents []string
+// appIntents maps the name of an app declared in Cherri to its intents, which references to its intents are validated against.
+var appIntents = map[string][]string{}
 
 // sourceLocation is a position in a Cherri file that is reported on after parsing has moved past it.
 type sourceLocation struct {
@@ -973,10 +972,10 @@ func collectAppDeclaration() {
 		var intentIdentifier = collectRawString()
 
 		var reference = appName + "." + intentIdentifier
-		if slices.Contains(appIntents, reference) {
+		if slices.Contains(appIntents[appName], intentIdentifier) {
 			parserError(fmt.Sprintf("Duplicate declaration of intent '%s'", reference))
 		}
-		appIntents = append(appIntents, reference)
+		appIntents[appName] = append(appIntents[appName], intentIdentifier)
 		unreferencedAppIntents[reference] = sourceLocation{file: file, line: line, col: col}
 
 		skipWhitespace()
@@ -988,18 +987,28 @@ func collectAppDeclaration() {
 	lineRef.replaceLines()
 }
 
-// collectIntentReference sets the app intent of a definition from `#App.Intent`.
+// collectIntentReference sets the app intent of a definition from `#App.Intent`. The intent is validated against the
+// intents of its own app, so an intent cannot be used with another app.
 func collectIntentReference(definition *actionDefinition) {
-	var intents = valueList{name: "app intent", list: &appIntents}
-	var reference = intents.parse(' ')
+	var appNames = slices.Sorted(maps.Keys(appBundles))
+	var apps = valueList{name: "app", plural: "apps", list: &appNames}
+	var appName = collectIdentifier()
+	apps.validate(&appName)
 
-	var appName, intentIdentifier, _ = strings.Cut(reference, ".")
+	if !isChar('.') {
+		parserError("Expected an intent after the app name (#App.Intent).")
+	}
+
+	var declaredIntents = appIntents[appName]
+	var intents = valueList{name: fmt.Sprintf("%s intent", appName), list: &declaredIntents}
+	var intentIdentifier = intents.parse(' ')
+
 	definition.appIntent = appIntent{
 		name:                appName,
 		bundleIdentifier:    appBundles[appName],
 		appIntentIdentifier: intentIdentifier,
 	}
-	delete(unreferencedAppIntents, reference)
+	delete(unreferencedAppIntents, appName+"."+intentIdentifier)
 	advance()
 }
 
