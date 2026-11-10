@@ -260,6 +260,15 @@ func getLastAddedToken() token {
 	return tokens[len(tokens)-1]
 }
 
+// deleteLastToken removes the last token added.
+func deleteLastToken() {
+	if len(tokens) == 0 {
+		return
+	}
+
+	tokens = tokens[:len(tokens)-1]
+}
+
 func collectUntilIgnoreStrings(ch rune) string {
 	var collected strings.Builder
 	var insideString = false

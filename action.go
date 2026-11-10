@@ -1175,7 +1175,7 @@ func checkDocComment() (doc selfDoc) {
 				subcategory: match[1],
 			}
 
-			tokens = slices.Delete(tokens, len(tokens)-1, len(tokens))
+			deleteLastToken()
 			return
 		}
 	}
@@ -1197,7 +1197,7 @@ func collectWarningComment() (warning string) {
 		return
 	}
 
-	tokens = slices.Delete(tokens, len(tokens)-1, len(tokens))
+	deleteLastToken()
 	return strings.TrimSpace(matches[1])
 }
 
