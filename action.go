@@ -109,6 +109,10 @@ type app struct {
 // apps maps the name of an app declared in Cherri to the app.
 var apps = map[string]app{}
 
+// appNames lists the names of the apps declared in Cherri, which references to an app are validated against.
+var appNames []string
+var appList = valueList{name: "app", list: &appNames}
+
 // appIntents maps the name of an app declared in Cherri to its intents, which references to its intents are validated against.
 var appIntents = map[string][]string{}
 
@@ -936,6 +940,9 @@ func collectAppDeclaration() {
 	if declared, found := apps[appName]; found && declared != declaredApp {
 		parserError(fmt.Sprintf("App '%s' is already declared with a different bundle identifier or display name", appName))
 	}
+	if _, found := apps[appName]; !found {
+		appNames = append(appNames, appName)
+	}
 	apps[appName] = declaredApp
 
 	collectRawStringList("intent identifier", func(intentIdentifier string) {
@@ -951,8 +958,6 @@ func collectAppDeclaration() {
 // collectIntentReference sets the app intent of a definition from `#App.Intent`. The intent is validated against the
 // intents of its own app, so an intent cannot be used with another app.
 func collectIntentReference(definition *actionDefinition) {
-	var appNames = slices.Sorted(maps.Keys(apps))
-	var appList = valueList{name: "app", list: &appNames}
 	var appName = collectIdentifier()
 	appList.validate(&appName)
 
