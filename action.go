@@ -103,7 +103,7 @@ type actionDefinition struct {
 
 // app is an app declared in Cherri that actions refer to the intents of.
 type app struct {
-	displayName      string // the name shown in the app intent when it is not the name the app was declared with
+	displayName      string // the name shown in the app intent when name of the app contains spaces.
 	bundleIdentifier string
 }
 
