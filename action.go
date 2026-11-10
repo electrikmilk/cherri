@@ -992,18 +992,24 @@ func internalDefinition(name string) *actionDefinition {
 	return existing
 }
 
-// defineAction stores a definition collected from Cherri, keeping the logic of a compiler-defined action of the same name
-// so that only the declaration has to be written in Cherri. The internal keyword must match whether that logic exists so
-// a declaration shows when it depends on code outside of Cherri.
-func defineAction(name string, definition *actionDefinition) {
+// matchInternalDefinition returns the compiler-defined entry that a declaration of the action name attaches to. The internal
+// keyword must match whether that entry exists so a declaration shows when it depends on code outside of Cherri. It is checked
+// as soon as the name is collected so an error is reported where the declaration is.
+func matchInternalDefinition(name string, internal bool) *actionDefinition {
 	var compilerDefinition = internalDefinition(name)
-	if compilerDefinition == nil && definition.internal {
+	if compilerDefinition == nil && internal {
 		parserError(fmt.Sprintf("Action '%s()' is declared internal but has no compiler-defined logic", name))
 	}
-	if compilerDefinition != nil && !definition.internal {
+	if compilerDefinition != nil && !internal {
 		parserError(fmt.Sprintf("Action '%s()' has compiler-defined logic and must be declared with the internal keyword", name))
 	}
 
+	return compilerDefinition
+}
+
+// defineAction stores a definition collected from Cherri, keeping the logic of the compiler-defined action it attaches to
+// so that only the declaration has to be written in Cherri.
+func defineAction(name string, definition *actionDefinition, compilerDefinition *actionDefinition) {
 	if compilerDefinition != nil {
 		definition.check = compilerDefinition.check
 		definition.makeParams = compilerDefinition.makeParams
@@ -1036,6 +1042,7 @@ func collectDefinedAction() {
 
 	var identifier = collectIdentifier()
 	checkDuplicateActionDeclaration(identifier)
+	var compilerDefinition = matchInternalDefinition(identifier, definition.internal)
 	collectActionSignature(definition, '\n')
 	if definition.identifier == "" {
 		definition.identifier = strings.ToLower(identifier)
@@ -1047,13 +1054,15 @@ func collectDefinedAction() {
 
 	lineRef.replaceLines()
 
-	defineAction(identifier, definition)
+	defineAction(identifier, definition, compilerDefinition)
 }
 
 func collectToggleSetAction(doc selfDoc) {
 	var shared actionDefinition
 	collectActionPrefixModifiers(&shared)
 	var name = collectIdentifier()
+	var compilerToggleDefinition = matchInternalDefinition("toggle"+name, shared.internal)
+	var compilerSetDefinition = matchInternalDefinition("set"+name, shared.internal)
 	skipInlineWhitespace()
 
 	var setKey = "state"
@@ -1093,7 +1102,7 @@ func collectToggleSetAction(doc selfDoc) {
 	toggleDefinition.doc.title = "Toggle " + docTitle
 	toggleDefinition.parameters = extraParams
 	toggleDefinition.appendParams = toggleAppendParams
-	defineAction("toggle"+name, &toggleDefinition)
+	defineAction("toggle"+name, &toggleDefinition, compilerToggleDefinition)
 
 	var setAppendParams = maps.Clone(extraBody)
 	if setAppendParams == nil {
@@ -1105,7 +1114,7 @@ func collectToggleSetAction(doc selfDoc) {
 	setDefinition.parameters = append([]parameterDefinition{{name: "status", validType: Bool, key: setKey}}, extraParams...)
 	setDefinition.appendParams = setAppendParams
 	setDefinition.defaultAction = true
-	defineAction("set"+name, &setDefinition)
+	defineAction("set"+name, &setDefinition, compilerSetDefinition)
 }
 
 func collectAdditionalParams() (params map[string]interface{}) {
