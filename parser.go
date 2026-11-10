@@ -1961,10 +1961,6 @@ type valueList struct {
 // each as soon as it's collected so a bad value is reported where it sits
 // rather than after the cursor has already skipped past the whole list.
 func (v *valueList) parseList(until rune) []string {
-	if v.plural == "" {
-		v.plural = fmt.Sprintf("%ss", v.name)
-	}
-
 	for {
 		var stop = until
 		if strings.Contains(lookAheadUntil(until), ",") {
@@ -1996,6 +1992,10 @@ func (v *valueList) parse(until rune) string {
 }
 
 func (v *valueList) validate(value *string) {
+	if v.plural == "" {
+		v.plural = fmt.Sprintf("%ss", v.name)
+	}
+
 	var match bool
 	if v.mapList != nil {
 		_, match = (*v.mapList)[*value]
