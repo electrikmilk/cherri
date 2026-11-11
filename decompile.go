@@ -207,6 +207,12 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 			continue
 		}
 
+		// A file item wraps its attachment one level deeper than other items, which would otherwise be read as a nested dictionary.
+		if dictDataType(item.WFItemType) == itemTypeFile {
+			checkParamValueAttachments(wfValue["Value"].(map[string]interface{}))
+			continue
+		}
+
 		checkParamValueAttachments(wfValue)
 
 		var valueKind = reflect.TypeOf(wfValue["Value"]).Kind()
@@ -860,6 +866,10 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	var itemStringValue = decompValue(item.WFValue)
 	var itemValueMap = item.WFValue.(map[string]interface{})
 	var itemValue any
+
+	if dictDataType(item.WFItemType) == itemTypeFile {
+		return fmt.Sprintf("${%s}", decompValue(itemValueMap["Value"]))
+	}
 
 	if isReferenceValue(itemValueMap["Value"]) {
 		return fmt.Sprintf("{%s}", itemStringValue)
