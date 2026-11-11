@@ -12,6 +12,7 @@ filterFiles(@files, 5, "File Size", "Biggest First")
 
 getFileFromFolder("~/Documents", "report.pdf")
 getFileFromFolder("Shortcuts/Documents", "notes.txt", false)
+getFileFromFolder("~/Documents/Projects/Cherri", "main.go")
 
 // an action that starts with app is not an app declaration
 @contents = "contents"

@@ -212,8 +212,8 @@ var actions = map[string]*actionDefinition{
 			var fileLocationType = pathParts[0]
 
 			var filename = end(pathParts)
-			slices.Delete(pathParts, 0, len(pathParts)-1)
-			folderPath = strings.Trim(strings.Join(pathParts, "/"), "/")
+			// Shortcuts stores the subpath relative to the location root, including the folder's own name.
+			folderPath = strings.Trim(strings.Join(pathParts[1:], "/"), "/")
 			var fileLocation = map[string]any{
 				"relativeSubpath": folderPath,
 			}
