@@ -154,7 +154,7 @@ var actions = map[string]*actionDefinition{
 
 				if text, isText := value.(string); isText {
 					if name, isVariableOnly := variableOnlyValueName(text); isVariableOnly {
-						if _, found := getVariableValue(name); !found {
+						if !validReference(name) {
 							parserError(fmt.Sprintf("Undefined reference '%s'", name))
 						}
 

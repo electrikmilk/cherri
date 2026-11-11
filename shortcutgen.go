@@ -352,26 +352,21 @@ func attachReferenceToParams(params map[string]any, reference *WFActionReference
 }
 
 func inputValue(name string, varUUID string) WFTextTokenAttachment {
-	var value = Value{}
+	var value Value
+	var global, isGlobal = globals[name]
+	switch {
+	case isGlobal:
+		// A global here points at the action output made for it, so it keeps its type without a variable name.
+		isInputVariable(name)
+		value = Value{Type: global.variableType}
+	case validReference(name):
+		value = referenceValue(varValue{value: name})
+	default:
+		value = Value{OutputName: name, Type: "ActionOutput"}
+	}
 
 	if varUUID != "" {
 		value.OutputUUID = varUUID
-	}
-
-	if variable, found := variables[name]; found {
-		if !variable.repeatItem && (variable.constant && variable.valueType != Variable) {
-			value.OutputName = name
-			value.Type = "ActionOutput"
-		} else {
-			value.VariableName = name
-			value.Type = "Variable"
-		}
-	} else if global, found := globals[name]; found {
-		isInputVariable(name)
-		value.Type = global.variableType
-	} else {
-		value.OutputName = name
-		value.Type = "ActionOutput"
 	}
 
 	return WFTextTokenAttachment{
@@ -394,96 +389,95 @@ func globalDisplayName(identifier string, v varValue) string {
 	return identifier
 }
 
-func variableValue(variable varValue) any {
-	return variableValueWithSerialization(variable, "WFTextTokenAttachment")
-}
-
-func variableValueWithSerialization(variable varValue, serializationType string) any {
-	var identifier = variable.value.(string)
-	var variableReference varValue
+// referenceAggrandizements builds the key or property read and the coercion written after a
+// variable reference. Which kind of read it is depends on the type of the definition behind
+// the reference, because Shortcuts reads dictionary keys and content item properties differently.
+func referenceAggrandizements(reference varValue) []Aggrandizement {
 	var aggrandizements []Aggrandizement
-	if global, found := globals[identifier]; found {
-		isInputVariable(identifier)
-		variable.variableType = global.variableType
-		identifier = globalDisplayName(identifier, global)
-	} else if v, found := variables[identifier]; found {
-		variableReference = v
-		variable.constant = v.constant
-		variable.repeatItem = v.repeatItem
-	}
-	if variable.getAs != "" {
-		var refValueType = variable.valueType
-		if variable.valueType == Variable && variableReference.valueType != "" {
-			refValueType = variableReference.valueType
-		}
-		if refValueType == Dict {
+	if reference.getAs != "" {
+		var identifier, _ = reference.value.(string)
+		var definition, _ = resolveDefinition(identifier)
+		if effectiveType(definition) == Dict {
 			aggrandizements = append(aggrandizements, Aggrandizement{
 				Type:          "WFDictionaryValueVariableAggrandizement",
-				DictionaryKey: variable.getAs,
+				DictionaryKey: reference.getAs,
 			})
 		} else {
 			aggrandizements = append(aggrandizements, Aggrandizement{
-				PropertyUserInfo: 0,
-				Type:             "WFPropertyVariableAggrandizement",
-				PropertyName:     variable.getAs,
+				Type:         "WFPropertyVariableAggrandizement",
+				PropertyName: reference.getAs,
 			})
 		}
 	}
-	if variable.coerce != "" {
-		if contentItem, found := contentItems[variable.coerce]; found {
-			aggrandizements = append(aggrandizements, Aggrandizement{
-				Type:              "WFCoercionVariableAggrandizement",
-				CoercionItemClass: contentItem,
-			})
+	if reference.coerce != "" {
+		checkCoerce(reference.coerce)
+		aggrandizements = append(aggrandizements, Aggrandizement{
+			Type:              "WFCoercionVariableAggrandizement",
+			CoercionItemClass: contentItems[reference.coerce],
+		})
+	}
+
+	return aggrandizements
+}
+
+// referenceValue is the only place a variable reference becomes a plist Value.
+func referenceValue(reference varValue) Value {
+	var identifier = reference.value.(string)
+	var value = Value{
+		VariableName: identifier,
+		Type:         "Variable",
+	}
+	if global, isGlobal := globals[identifier]; isGlobal {
+		isInputVariable(identifier)
+		value.VariableName = globalDisplayName(identifier, global)
+		value.Type = global.variableType
+		if global.variableType == Ask && reference.prompt != "" {
+			value.Prompt = reference.prompt
+		}
+	} else if variable, found := variables[identifier]; found && variable.constant {
+		value = Value{
+			OutputName: identifier,
+			OutputUUID: uuids[identifier],
+			Type:       "ActionOutput",
 		}
 	}
-	var varType = "Variable"
-	if variable.variableType != "" {
-		varType = variable.variableType
-	}
-	var varValue = Value{}
-	if variable.constant {
-		var varUUID = uuids[identifier]
-		varValue.OutputName = identifier
-		varValue.OutputUUID = varUUID
-		varValue.Type = "ActionOutput"
-	} else {
-		varValue.VariableName = identifier
-		varValue.Type = varType
-		if varType == Ask && variable.prompt != "" {
-			varValue.Prompt = variable.prompt
-		}
-	}
+
+	var aggrandizements = referenceAggrandizements(reference)
 	if len(aggrandizements) > 0 {
-		varValue.Aggrandizements = aggrandizements
+		value.Aggrandizements = aggrandizements
 	}
 
-	if serializationType == "" {
-		return varValue
+	return value
+}
+
+// attachmentReferenceValue is a reference written as a whole value instead of inside text.
+// Shortcuts stores a property read there with PropertyUserInfo, but not in the text form of referenceValue.
+func attachmentReferenceValue(reference varValue) Value {
+	var value = referenceValue(reference)
+	for i, aggrandizement := range value.Aggrandizements {
+		if aggrandizement.Type == "WFPropertyVariableAggrandizement" {
+			value.Aggrandizements[i].PropertyUserInfo = 0
+		}
 	}
 
+	return value
+}
+
+func variableValue(reference varValue) WFTextTokenAttachment {
 	return WFTextTokenAttachment{
-		Value:               varValue,
-		WFSerializationType: serializationType,
+		Value:               attachmentReferenceValue(reference),
+		WFSerializationType: "WFTextTokenAttachment",
 	}
 }
 
 type inlineVariable struct {
-	identifier string
-	col        int
-	getAs      string
-	coerce     string
-}
-
-type attachmentVariable struct {
-	identifier string
-	getAs      string
-	coerce     string
+	reference varValue
+	col       int
 }
 
 var varPositions map[string]Value
 var inlineVariables []inlineVariable
-var varIndex []attachmentVariable
+var varIndex []varValue
 
 func attachmentValues(str string) any {
 	if !strings.ContainsAny(str, "{}") {
@@ -492,7 +486,7 @@ func attachmentValues(str string) any {
 
 	varPositions = make(map[string]Value)
 	inlineVariables = []inlineVariable{}
-	varIndex = []attachmentVariable{}
+	varIndex = []varValue{}
 
 	var noVarString = collectInlineVariables(&str)
 	makeAttachmentValues()
@@ -508,71 +502,14 @@ func attachmentValues(str string) any {
 
 func makeAttachmentValues() {
 	for _, inlineVar := range inlineVariables {
-		var varValue, found = getVariableValue(inlineVar.identifier)
-		if !found {
-			exit(fmt.Sprintf("Undefined reference '%s'", inlineVar.identifier))
-		}
-
-		var attachmentValue Value
-		var aggrandizements []Aggrandizement
-		var varType = "Variable"
-		if varValue.variableType != "" {
-			varType = varValue.variableType
-		}
-		if !varValue.constant {
-			attachmentValue = Value{
-				VariableName: globalDisplayName(inlineVar.identifier, *varValue),
-				Type:         varType,
-			}
-		} else {
-			var varUUID = uuids[inlineVar.identifier]
-			attachmentValue = Value{
-				OutputName: inlineVar.identifier,
-				OutputUUID: varUUID,
-				Type:       "ActionOutput",
-			}
-		}
-
-		if inlineVar.getAs != "" {
-			aggrandizements = append(aggrandizements, makeAggrandizement(&varValue.valueType, varValue, inlineVar.getAs))
-		}
-		if inlineVar.coerce != "" {
-			aggrandizements = append(aggrandizements, Aggrandizement{
-				Type:              "WFCoercionVariableAggrandizement",
-				CoercionItemClass: contentItems[inlineVar.coerce],
-			})
-		}
-		if inlineVar.getAs != "" || inlineVar.coerce != "" {
-			attachmentValue.Aggrandizements = aggrandizements
+		var identifier = inlineVar.reference.value.(string)
+		if !validReference(identifier) {
+			exit(fmt.Sprintf("Undefined reference '%s'", identifier))
 		}
 
 		var positionsKey = fmt.Sprintf("{%d, 1}", inlineVar.col)
-		varPositions[positionsKey] = attachmentValue
+		varPositions[positionsKey] = referenceValue(inlineVar.reference)
 	}
-}
-
-func makeAggrandizement(valueType *tokenType, variable *varValue, getAs string) (aggrandizement Aggrandizement) {
-	switch *valueType {
-	case Dict:
-		aggrandizement.Type = "WFDictionaryValueVariableAggrandizement"
-	case Action:
-		var variableAction = *variable.value.(action).def
-		if variableAction.outputType == Dict {
-			aggrandizement.Type = "WFDictionaryValueVariableAggrandizement"
-		} else {
-			aggrandizement.Type = "WFPropertyVariableAggrandizement"
-		}
-	default:
-		aggrandizement.Type = "WFPropertyVariableAggrandizement"
-	}
-
-	if aggrandizement.Type == "WFDictionaryValueVariableAggrandizement" {
-		aggrandizement.DictionaryKey = getAs
-	} else {
-		aggrandizement.PropertyName = getAs
-	}
-
-	return aggrandizement
 }
 
 const utf16BMPThreshold = 0x10000
@@ -586,10 +523,8 @@ func mapInlineVariables(noVarString *string) {
 	for _, r := range *noVarString {
 		if r == ObjectReplaceChar {
 			inlineVariables = append(inlineVariables, inlineVariable{
-				identifier: varIndex[variableIdx].identifier,
-				col:        charPos,
-				getAs:      varIndex[variableIdx].getAs,
-				coerce:     varIndex[variableIdx].coerce,
+				reference: varIndex[variableIdx],
+				col:       charPos,
 			})
 			variableIdx++
 		}
@@ -611,18 +546,14 @@ func collectInlineVariables(str *string) (noVarString string) {
 	var matches = collectInlineVarRegex.FindAllStringSubmatch(*str, -1)
 	if matches != nil {
 		for _, match := range matches {
-			var attachmentVar attachmentVariable
 			if len(match) < 2 {
 				continue
 			}
-			attachmentVar.identifier = match[1]
-			if len(match[2]) > 0 {
-				attachmentVar.getAs = match[2]
-			}
-			if len(match[3]) > 0 {
-				attachmentVar.coerce = match[3]
-			}
-			varIndex = append(varIndex, attachmentVar)
+			varIndex = append(varIndex, varValue{
+				value:  match[1],
+				getAs:  match[2],
+				coerce: match[3],
+			})
 		}
 
 		noVarString = replaceVarRegex.ReplaceAllString(*str, ObjectReplaceCharStr)
@@ -986,7 +917,7 @@ func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate 
 			WFCondition: conditionCode,
 			WFInput: WFInputVariable{
 				Type:     "Variable",
-				Variable: variableValue(condition.arguments[0].value.(varValue)).(WFTextTokenAttachment),
+				Variable: variableValue(condition.arguments[0].value.(varValue)),
 			},
 		}
 

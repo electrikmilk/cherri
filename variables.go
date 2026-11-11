@@ -137,20 +137,8 @@ func validVariableReference(identifier *string) bool {
 	return true
 }
 
-func getVariableValue(identifier string) (variableValue *varValue, found bool) {
-	if value, found := globals[identifier]; found {
-		isInputVariable(identifier)
-		return &value, true
-	}
-	if value, found := variables[identifier]; found {
-		return &value, true
-	}
-
-	return nil, false
-}
-
 // resolveDefinition returns the definition that identifier ultimately refers to, following
-// variables that were assigned from other variables. Unlike getVariableValue it does not
+// variables that were assigned from other variables. Unlike validReference it does not
 // mark ShortcutInput as used, because collecting a reference already does.
 func resolveDefinition(identifier string) (definition varValue, found bool) {
 	if global, isGlobal := globals[identifier]; isGlobal {

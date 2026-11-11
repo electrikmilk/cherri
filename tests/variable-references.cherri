@@ -10,4 +10,10 @@ if @r != "right" { mustOutput("❌ FAIL: copy of number in > conditional", "❌ 
 const n = number(@copyOfCopy)
 if n != 5 { mustOutput("❌ FAIL: copy of copy - got {n}, expected 5", "❌ FAIL: copy of copy - got {n}, expected 5") }
 
+// a key read on a dictionary const passed to a variable parameter reads the key
+@raw = {"a": "1"}
+const dict = getDictionary(@raw)
+const first = getFirstItem(dict['a'])
+if first.text != "1" { mustOutput("❌ FAIL: dict key as argument - got {first}, expected '1'", "❌ FAIL: dict key as argument - got {first}, expected '1'") }
+
 show("✅ All tests passed")
