@@ -32,7 +32,7 @@
 
             src = ./.;
 
-            vendorHash = pkgs.lib.fakeHash;
+            vendorHash = "sha256-LtACCOt0UBm2nLsn28X2r09vz01MHncy4nnNEGy7+i0=";
 
             # Only run tests that don't require network access
             # TestDecomp is excluded due to a pre-existing bug
