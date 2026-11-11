@@ -907,7 +907,7 @@ func makeConditionalAction(t *token) {
 					conditionCode = 1001
 				}
 			}
-			var inputType = inputEffectiveType(firstArg.value.(varValue))
+			var inputType = referenceType(firstArg.value.(varValue))
 			if len(firstCondition.arguments) > 1 {
 				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[1], inputType)
 			}
@@ -929,24 +929,6 @@ func makeConditionalAction(t *token) {
 }
 
 var filterTemplates []WFConditionParam
-
-// inputEffectiveType resolves a conditional's left-hand variable to its concrete type,
-// which determines which plist key the comparison value is written into.
-func inputEffectiveType(v varValue) tokenType {
-	var identifier = v.value.(string)
-	if global, found := globals[identifier]; found {
-		return global.valueType
-	}
-	if variable, found := variables[identifier]; found {
-		if variable.valueType == Action {
-			if a, ok := variable.value.(action); ok && a.def != nil {
-				return a.def.outputType
-			}
-		}
-		return variable.valueType
-	}
-	return String
-}
 
 func routeConditionalValue(param *WFConditionParam, val any, inputType tokenType) {
 	switch inputType {
@@ -999,7 +981,7 @@ func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate 
 			}
 		}
 
-		var inputType = inputEffectiveType(condition.arguments[0].value.(varValue))
+		var inputType = referenceType(condition.arguments[0].value.(varValue))
 		var conditionParam = WFConditionParam{
 			WFCondition: conditionCode,
 			WFInput: WFInputVariable{

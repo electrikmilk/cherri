@@ -377,31 +377,6 @@ func checkEnum(param *parameterDefinition, argument *actionArgument) {
 	}
 }
 
-// realVariableValue recurses to get the real value of a variable given its name.
-func realVariableValue(identifier string, lastValueType tokenType) (variableValue varValue) {
-	if _, global := globals[identifier]; global {
-		variableValue = globals[identifier]
-		return
-	}
-	var front = strings.Split(identifier, "[")[0]
-	if _, found := variables[front]; !found {
-		parserError(fmt.Sprintf("Variable or Global '%s' does not exist", identifier))
-	}
-	var argValueType = variables[front].valueType
-	var value = variables[front].value
-	if argValueType == Variable {
-		if lastValueType == Variable {
-			parserError("Passed variable value that evaluates to variable")
-		}
-		if value != nil {
-			variableValue = realVariableValue(value.(varValue).value.(string), argValueType)
-		}
-	} else {
-		variableValue = variables[front]
-	}
-	return
-}
-
 func checkTypeTransform(valueType tokenType) tokenType {
 	if valueType == Expression {
 		valueType = Integer
@@ -424,17 +399,16 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		if reference.getAs != "" && reference.coerce == "" {
 			return
 		}
-		var getVar = realVariableValue(reference.value.(string), String)
-		argValueType = checkTypeTransform(getVar.valueType)
-		argVal = getVar.value
-		if reference.coerce != "" {
-			argValueType = tokenType(reference.coerce)
+		var definition, found = resolveDefinition(reference.value.(string))
+		if !found {
+			parserError(fmt.Sprintf("Variable or Global '%s' does not exist", reference.value))
 		}
-		if argValueType == Action {
-			validActionOutput(param, argVal)
+		if reference.coerce == "" && definition.valueType == Action {
+			validActionOutput(param, definition.value)
 			return
 		}
-		if argValueType != param.validType && param.validType != Variable && getVar.variableType != Ask {
+		argValueType = referenceType(reference)
+		if argValueType != param.validType && param.validType != Variable && definition.variableType != Ask {
 			if argValueType == Date && param.validType == String {
 				return
 			}
@@ -442,7 +416,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 				return
 			}
 			parserError(fmt.Sprintf("Invalid variable value %v (%s) for argument '%s' (%s).\n%s",
-				argVal,
+				definition.value,
 				argValueType,
 				param.name,
 				param.validType,
@@ -504,16 +478,15 @@ func getArgValue(argument actionArgument) any {
 	}
 
 	var identifier = argument.value.(varValue).value.(string)
-	if _, found := variables[identifier]; !found {
+	if _, isGlobal := globals[identifier]; isGlobal {
 		return argument.value
 	}
-	if variables[identifier].valueType == Variable {
-		return getArgValue(actionArgument{
-			valueType: variables[identifier].valueType,
-			value:     variables[identifier].value,
-		})
+	var definition, found = resolveDefinition(identifier)
+	if !found {
+		return argument.value
 	}
-	return variables[identifier].value
+
+	return definition.value
 }
 
 // checkArg checks to ensure the collected argument for the current action is valid.

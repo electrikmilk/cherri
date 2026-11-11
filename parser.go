@@ -1462,20 +1462,7 @@ func collectConditional() (conditional condition) {
 
 func checkConditionalTypes(conditional *tokenType, variableType tokenType, value any) {
 	if variableType == Variable {
-		var variable = value.(varValue)
-		variableType = variable.valueType
-		var variableValue, found = getVariableValue(variable.value.(string))
-		if found && variableValue.valueType != Variable {
-			variableType = variableValue.valueType
-		}
-		if variableType == Action {
-			if a, ok := variableValue.value.(action); ok && a.def != nil {
-				variableType = a.def.outputType
-			}
-		}
-		if variable.coerce != "" {
-			variableType = tokenType(variable.coerce)
-		}
+		variableType = referenceType(value.(varValue))
 	}
 	if variableType == Expression {
 		variableType = Integer

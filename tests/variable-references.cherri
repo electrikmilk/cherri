@@ -1,0 +1,13 @@
+// an assigned copy of a number keeps the number type in conditionals
+@count = 5
+@copy = @count
+@r = "wrong"
+if @copy > 3 { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: copy of number in > conditional", "❌ FAIL: copy of number in > conditional") }
+
+// a copy of a copy resolves to the original value as an action argument
+@copyOfCopy = @copy
+const n = number(@copyOfCopy)
+if n != 5 { mustOutput("❌ FAIL: copy of copy - got {n}, expected 5", "❌ FAIL: copy of copy - got {n}, expected 5") }
+
+show("✅ All tests passed")

@@ -149,6 +149,60 @@ func getVariableValue(identifier string) (variableValue *varValue, found bool) {
 	return nil, false
 }
 
+// resolveDefinition returns the definition that identifier ultimately refers to, following
+// variables that were assigned from other variables. Unlike getVariableValue it does not
+// mark ShortcutInput as used, because collecting a reference already does.
+func resolveDefinition(identifier string) (definition varValue, found bool) {
+	if global, isGlobal := globals[identifier]; isGlobal {
+		return global, true
+	}
+	definition, found = variables[identifier]
+	if !found || definition.valueType != Variable {
+		return
+	}
+
+	// Function call variables and declarations without a value are not copies of another variable.
+	var copied, isCopy = definition.value.(varValue)
+	if !isCopy {
+		return
+	}
+	var copiedIdentifier, hasIdentifier = copied.value.(string)
+	if !hasIdentifier {
+		return
+	}
+
+	return resolveDefinition(copiedIdentifier)
+}
+
+// effectiveType is the type a definition holds once it is used as a value.
+func effectiveType(definition varValue) tokenType {
+	switch definition.valueType {
+	case Expression:
+		return Integer
+	case Action:
+		if output, isAction := definition.value.(action); isAction && output.def != nil {
+			return output.def.outputType
+		}
+	}
+
+	return definition.valueType
+}
+
+// referenceType is the type of a reference as written at its use site, where a coercion
+// takes precedence over the type of the definition behind it.
+func referenceType(reference varValue) tokenType {
+	if reference.coerce != "" {
+		return tokenType(reference.coerce)
+	}
+	var identifier, _ = reference.value.(string)
+	var definition, found = resolveDefinition(identifier)
+	if !found {
+		return Variable
+	}
+
+	return effectiveType(definition)
+}
+
 func makeVariableReferenceString(value varValue) string {
 	var identifier strings.Builder
 	identifier.WriteString(value.value.(string))
