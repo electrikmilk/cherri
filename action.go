@@ -419,10 +419,17 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		validActionOutput(param, argVal)
 		return
 	case argValueType == Variable:
-		var identifier = argVal.(varValue).value.(string)
-		var getVar = realVariableValue(identifier, String)
+		var reference = argVal.(varValue)
+		// The value of a key or property read is only known at runtime.
+		if reference.getAs != "" && reference.coerce == "" {
+			return
+		}
+		var getVar = realVariableValue(reference.value.(string), String)
 		argValueType = checkTypeTransform(getVar.valueType)
 		argVal = getVar.value
+		if reference.coerce != "" {
+			argValueType = tokenType(reference.coerce)
+		}
 		if argValueType == Action {
 			validActionOutput(param, argVal)
 			return

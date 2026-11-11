@@ -20,6 +20,13 @@ if @n2 != 42 {
     mustOutput("❌ FAIL: .text — got {@n2}, expected 42", "❌ FAIL: .text — got {@n2}, expected 42")
 }
 
+// .text coercion as an action argument is checked as text, not as the variable's own type
+@numArgument = 7
+const coercedArgument = text(@numArgument.text)
+if coercedArgument.text != "7" {
+    mustOutput("❌ FAIL: .text as action argument — got {coercedArgument}, expected '7'", "❌ FAIL: .text as action argument — got {coercedArgument}, expected '7'")
+}
+
 // Device global with .text coercion (compile coverage — value varies by device)
 @deviceOS = Device['OS']
 @versionText = "{Device['System Version'].text}"

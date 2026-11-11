@@ -28,6 +28,13 @@ if parsedVal != "hello" {
     mustOutput("❌ FAIL: getDictionary/getValue — got {parsedVal}, expected 'hello'", "❌ FAIL: getDictionary/getValue — got {parsedVal}, expected 'hello'")
 }
 
+// bracket key as an action argument: the key's value type is unknown at compile time,
+// so it must not be type-checked as the dictionary it was read from
+const keyArgument = text(parsed['key'])
+if keyArgument.text != "hello" {
+    mustOutput("❌ FAIL: dict['key'] as action argument — got {keyArgument}, expected 'hello'", "❌ FAIL: dict['key'] as action argument — got {keyArgument}, expected 'hello'")
+}
+
 // nested dictionary: child dict and mixed array as values
 @nested = {
     "meta": {
