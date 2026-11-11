@@ -839,29 +839,7 @@ func makeConditionalAction(t *token) {
 
 		var cond = t.value.(WFConditions)
 		if len(cond.conditions) == 1 || iosVersion < 18 {
-			var firstCondition = cond.conditions[0]
-			var firstArg = firstCondition.arguments[0]
-			conditionalParams["WFInput"] = map[string]any{
-				"Type":     "Variable",
-				"Variable": variableValue(firstArg.value.(varValue)),
-			}
-			var conditionCode = firstCondition.condition
-			if len(firstCondition.arguments) > 1 && firstCondition.arguments[1].valueType == Quantity {
-				switch conditionCode {
-				case conditions[GreaterThan]:
-					conditionCode = 1000
-				case conditions[LessThan]:
-					conditionCode = 1001
-				}
-			}
-			var inputType = referenceType(firstArg.value.(varValue))
-			if len(firstCondition.arguments) > 1 {
-				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[1], inputType)
-			}
-			if len(firstCondition.arguments) > 2 {
-				conditionalParameterLegacy(conditionalParams, firstCondition.arguments[2], inputType)
-			}
-			conditionalParams["WFCondition"] = conditionCode
+			legacyConditionParams(makeConditionParam(cond.conditions[0]), conditionalParams)
 		} else {
 			conditionalParams["WFConditions"] = makeConditions(&cond)
 		}
@@ -896,55 +874,61 @@ func routeConditionalValue(param *WFConditionParam, val any, inputType tokenType
 	}
 }
 
-func routeConditionalValueLegacy(params map[string]any, val any, inputType tokenType) {
-	switch inputType {
-	case Date:
-		if _, exists := params["WFDate"]; !exists {
-			params["WFDate"] = val
-		} else {
-			params["WFAnotherDate"] = val
-		}
-	case Integer, Float, Bool:
-		if _, exists := params["WFNumberValue"]; !exists {
-			params["WFNumberValue"] = val
-		} else {
-			params["WFAnotherNumber"] = val
-		}
-	default:
-		params["WFConditionalActionString"] = val
+// legacyConditionParams writes a single condition as the flat parameters iOS < 18 uses
+// instead of a filter template.
+func legacyConditionParams(param WFConditionParam, params map[string]any) {
+	params["WFCondition"] = param.WFCondition
+	params["WFInput"] = param.WFInput
+	var optionalValues = map[string]any{
+		"WFConditionalActionString": param.WFConditionalActionString,
+		"WFNumberValue":             param.WFNumberValue,
+		"WFAnotherNumber":           param.WFAnotherNumber,
+		"WFDate":                    param.WFDate,
+		"WFAnotherDate":             param.WFAnotherDate,
+		"WFDuration":                param.WFDuration,
 	}
+	for key, value := range optionalValues {
+		if value != nil {
+			params[key] = value
+		}
+	}
+}
+
+func makeConditionParam(cond condition) WFConditionParam {
+	var conditionCode = cond.condition
+	if len(cond.arguments) > 1 && cond.arguments[1].valueType == Quantity {
+		switch conditionCode {
+		case conditions[GreaterThan]:
+			conditionCode = 1000
+		case conditions[LessThan]:
+			conditionCode = 1001
+		}
+	}
+
+	var reference = cond.arguments[0].value.(varValue)
+	var inputType = referenceType(reference)
+	var conditionParam = WFConditionParam{
+		WFCondition: conditionCode,
+		WFInput: WFInputVariable{
+			Type:     "Variable",
+			Variable: variableValue(reference),
+		},
+	}
+
+	if len(cond.arguments) > 1 {
+		conditionalParameter(&conditionParam, cond.arguments[1], inputType)
+	}
+	if len(cond.arguments) > 2 {
+		conditionalParameter(&conditionParam, cond.arguments[2], inputType)
+	}
+
+	return conditionParam
 }
 
 func makeConditions(wfConditions *WFConditions) WFContentPredicateTableTemplate {
 	filterTemplates = []WFConditionParam{}
-	for _, condition := range wfConditions.conditions {
-		var conditionCode = condition.condition
-		if len(condition.arguments) > 1 && condition.arguments[1].valueType == Quantity {
-			switch conditionCode {
-			case conditions[GreaterThan]:
-				conditionCode = 1000
-			case conditions[LessThan]:
-				conditionCode = 1001
-			}
-		}
-
-		var inputType = referenceType(condition.arguments[0].value.(varValue))
-		var conditionParam = WFConditionParam{
-			WFCondition: conditionCode,
-			WFInput: WFInputVariable{
-				Type:     "Variable",
-				Variable: variableValue(condition.arguments[0].value.(varValue)),
-			},
-		}
-
-		if len(condition.arguments) > 1 {
-			conditionalParameter(&conditionParam, condition.arguments[1], inputType)
-		}
-		if len(condition.arguments) > 2 {
-			conditionalParameter(&conditionParam, condition.arguments[2], inputType)
-		}
-
-		filterTemplates = append(filterTemplates, conditionParam)
+	for _, cond := range wfConditions.conditions {
+		filterTemplates = append(filterTemplates, makeConditionParam(cond))
 	}
 
 	return WFContentPredicateTableTemplate{
@@ -982,36 +966,6 @@ func conditionalParameterVariable(param *WFConditionParam, arg actionArgument, i
 		routeConditionalValue(param, variableValue(condVarValue), inputType)
 	default:
 		routeConditionalValue(param, textTokenStringValue(condVarValue), inputType)
-	}
-}
-
-// conditionalParameterLegacy is for iOS < 18 compatibility where we still use map[string]any
-func conditionalParameterLegacy(params map[string]any, arg actionArgument, inputType tokenType) {
-	switch arg.valueType {
-	case Quantity:
-		params["WFDuration"] = makeQuantityFieldValue(arg.value.([]actionArgument))
-	case Variable:
-		conditionalParameterVariableLegacy(params, arg, inputType)
-	case Bool:
-		var boolNumber = 0
-		if arg.value == true {
-			boolNumber = 1
-		}
-		routeConditionalValueLegacy(params, paramValue(actionArgument{valueType: Integer, value: boolNumber}, Integer), inputType)
-	case Integer, Float:
-		routeConditionalValueLegacy(params, paramValue(arg, arg.valueType), Integer)
-	default:
-		routeConditionalValueLegacy(params, paramValue(arg, arg.valueType), inputType)
-	}
-}
-
-func conditionalParameterVariableLegacy(params map[string]any, arg actionArgument, inputType tokenType) {
-	var condVarValue = arg.value.(varValue)
-	switch inputType {
-	case Date, Integer, Float, Bool:
-		routeConditionalValueLegacy(params, variableValue(condVarValue), inputType)
-	default:
-		routeConditionalValueLegacy(params, textTokenStringValue(condVarValue), inputType)
 	}
 }
 
