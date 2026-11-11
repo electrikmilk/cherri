@@ -113,7 +113,7 @@ action default downloadURL(text url: 'WFURL', dictionary! ?headers: 'WFHTTPHeade
 }
 
 // [Doc]: [HTTP] Form Request: Send a `method` request to `url` with `body` and optional `headers.
-action 'downloadurl' formRequest(
+action internal 'downloadurl' formRequest(
     text url: 'WFURL',
     HTTPMethod ?method: 'WFHTTPMethod',
     dictionary! ?body: 'WFFormValues',

@@ -141,6 +141,34 @@ var actions = map[string]*actionDefinition{
 			return
 		},
 	},
+	"formRequest": {
+		check: func(args []actionArgument, _ *actionDefinition) {
+			if len(args) < 3 || args[2].valueType != Dict {
+				return
+			}
+
+			var fields = args[2].value.(map[string]interface{})
+			var formFields = make(map[string]interface{}, len(fields))
+			for key, value := range fields {
+				formFields[key] = value
+
+				if text, isText := value.(string); isText {
+					if name, isVariableOnly := variableOnlyValueName(text); isVariableOnly {
+						if _, found := getVariableValue(name); !found {
+							parserError(fmt.Sprintf("Undefined reference '%s'", name))
+						}
+
+						formFields[key] = varValue{value: name}
+						continue
+					}
+				}
+
+				checkNoFileItemSyntax(key, value)
+			}
+
+			args[2].value = formFields
+		},
+	},
 	"labelFile": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) == 0 {
@@ -1206,6 +1234,24 @@ func appIdentifierValue(args []actionArgument, index int) any {
 
 	return map[string]any{
 		"BundleIdentifier": argumentValue(args, index),
+	}
+}
+
+// A value that looks like a file item but cannot be one would otherwise silently compile to text with a literal $.
+func checkNoFileItemSyntax(key string, value any) {
+	switch v := value.(type) {
+	case string:
+		if strings.HasPrefix(v, "${") {
+			parserError(fmt.Sprintf("Form request field '%s' must be only a single variable reference to be a file, e.g. \"${@variable}\"", key))
+		}
+	case map[string]interface{}:
+		for nestedKey, nestedValue := range v {
+			checkNoFileItemSyntax(nestedKey, nestedValue)
+		}
+	case []interface{}:
+		for _, item := range v {
+			checkNoFileItemSyntax(key, item)
+		}
 	}
 }
 

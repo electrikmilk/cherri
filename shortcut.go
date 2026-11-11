@@ -187,6 +187,7 @@ const itemTypeNumber dictDataType = 3
 const itemTypeArray dictDataType = 2
 const itemTypeDict dictDataType = 1
 const itemTypeBool dictDataType = 4
+const itemTypeFile dictDataType = 5
 
 var noInput map[string]any
 

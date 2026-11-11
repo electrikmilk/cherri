@@ -782,6 +782,12 @@ func makeDictionaryItem(key string, value any) WFDictionaryFieldValueItem {
 	case WFBoolValue:
 		itemType = itemTypeBool
 		wfValue = v
+	case varValue:
+		itemType = itemTypeFile
+		wfValue = WFValue{
+			Value:               variableValue(v),
+			WFSerializationType: "WFTokenAttachmentParameterState",
+		}
 	default:
 		exit(fmt.Sprintf("Unsupported dictionary item value type %T", value))
 		return WFDictionaryFieldValueItem{}

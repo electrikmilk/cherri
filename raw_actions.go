@@ -7,6 +7,14 @@ import (
 
 var rawActionVariableValueRegex = regexp.MustCompile(`^\$\{@?.*}$`)
 
+func variableOnlyValueName(value string) (name string, isVariableOnly bool) {
+	if !rawActionVariableValueRegex.MatchString(value) {
+		return "", false
+	}
+
+	return strings.Trim(value, "${@}"), true
+}
+
 func defineRawAction() {
 	actions["rawAction"] = &actionDefinition{
 		parameters: []parameterDefinition{
@@ -51,10 +59,8 @@ func normalizeRawActionParamValue(value any) any {
 		if !strings.ContainsAny(v, "{}") {
 			return value
 		}
-		if rawActionVariableValueRegex.MatchString(v) {
-			return variableValue(varValue{
-				value: strings.Trim(v, "${@}"),
-			})
+		if name, isVariableOnly := variableOnlyValueName(v); isVariableOnly {
+			return variableValue(varValue{value: name})
 		}
 		return attachmentValues(v)
 	case map[string]any:
