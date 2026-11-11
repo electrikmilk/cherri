@@ -1,0 +1,11 @@
+// compile-only: Ask prompts for input at runtime
+alert(Ask: 'Text parameter prompt')
+const n = number(Ask: 'Number parameter prompt')
+alert(Ask)
+
+function greet(text name) {
+    alert("Hello {@name}")
+}
+greet(Ask: 'Function argument prompt')
+
+show("✅ All tests passed")

@@ -470,6 +470,20 @@ func variableValue(reference varValue) WFTextTokenAttachment {
 	}
 }
 
+// textTokenStringValue wraps a reference as a whole text value without writing it as `{name}`
+// text and parsing it back, which would lose what the text form cannot carry, like an Ask prompt.
+func textTokenStringValue(reference varValue) WFTextTokenString {
+	return WFTextTokenString{
+		Value: WFTextTokenStringValue{
+			String: ObjectReplaceCharStr,
+			AttachmentsByRange: map[string]Value{
+				"{0, 1}": referenceValue(reference),
+			},
+		},
+		WFSerializationType: "WFTextTokenString",
+	}
+}
+
 type inlineVariable struct {
 	reference varValue
 	col       int
@@ -590,8 +604,7 @@ func paramValue(arg actionArgument, handleAs tokenType) any {
 	switch arg.valueType {
 	case Variable:
 		if handleAs == String {
-			var refStr = makeVariableReferenceString(arg.value.(varValue))
-			return attachmentValues(fmt.Sprintf("{%s}", refStr))
+			return textTokenStringValue(arg.value.(varValue))
 		}
 
 		return variableValue(arg.value.(varValue))
@@ -699,6 +712,9 @@ func makeDictionaryItem(key string, value any) WFDictionaryFieldValueItem {
 	case WFTextTokenAttachment, WFTextTokenString:
 		itemType = itemTypeText
 		wfValue = v
+	case functionArgReference:
+		itemType = itemTypeText
+		wfValue = textTokenStringValue(varValue(v))
 	case WFDictionaryFieldValue:
 		itemType = itemTypeDict
 		wfValue = v
@@ -965,7 +981,7 @@ func conditionalParameterVariable(param *WFConditionParam, arg actionArgument, i
 	case Date, Integer, Float, Bool:
 		routeConditionalValue(param, variableValue(condVarValue), inputType)
 	default:
-		routeConditionalValue(param, attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue))), inputType)
+		routeConditionalValue(param, textTokenStringValue(condVarValue), inputType)
 	}
 }
 
@@ -995,7 +1011,7 @@ func conditionalParameterVariableLegacy(params map[string]any, arg actionArgumen
 	case Date, Integer, Float, Bool:
 		routeConditionalValueLegacy(params, variableValue(condVarValue), inputType)
 	default:
-		routeConditionalValueLegacy(params, attachmentValues(fmt.Sprintf("{%s}", makeVariableReferenceString(condVarValue))), inputType)
+		routeConditionalValueLegacy(params, textTokenStringValue(condVarValue), inputType)
 	}
 }
 

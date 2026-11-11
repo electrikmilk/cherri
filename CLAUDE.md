@@ -246,7 +246,7 @@ The central value-generation path is in `shortcutgen.go`:
 - **`makeDictionaryItem(key, value) WFDictionaryFieldValueItem`** — converts a Go value into a typed plist dict item using a type-switch. Returns typed structs (`WFTextTokenString`, `WFArrayValue`, `WFBoolValue`, `WFDictionaryFieldValue`) rather than `map[string]any`.
 - **`argumentValue(args, idx) any`** — wraps `paramValue`, using the current action's parameter definition to determine the expected type.
 
-For function call argument serialization specifically, use `makeFunctionArgValue(arg, paramType)` in `functions.go` — this produces values suitable for the function call dict (`{ref}` strings for variables, which `makeDictionaryItem` later resolves to proper attachments).
+For function call argument serialization specifically, use `makeFunctionArgValue(arg, paramType)` in `functions.go` — this produces values suitable for the function call dict. Variable arguments become a `functionArgReference`, which `makeDictionaryItem` turns into a `WFTextTokenString` holding the reference (via `textTokenStringValue`) when the dict is generated, because output UUIDs do not exist yet while the call is parsed.
 
 ## Action Definitions
 

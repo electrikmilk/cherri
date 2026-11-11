@@ -319,14 +319,18 @@ func makeFunctionCall(identifier *string, arguments *[]actionArgument) map[strin
 	}
 }
 
+// functionArgReference is a variable passed to a function. Its value is built when the call
+// dictionary is generated, because output UUIDs are not assigned while the call is parsed.
+type functionArgReference varValue
+
 func makeFunctionArgValue(arg actionArgument, paramType tokenType) any {
 	switch arg.valueType {
 	case Variable:
-		var refStr = makeVariableReferenceString(arg.value.(varValue))
+		var reference = functionArgReference(arg.value.(varValue))
 		if paramType == Arr {
-			return map[string]any{"array": fmt.Sprintf("{%s}", refStr)}
+			return map[string]any{"array": reference}
 		}
-		return fmt.Sprintf("{%s}", refStr)
+		return reference
 	case Arr:
 		return map[string]any{"array": arg.value}
 	default:
