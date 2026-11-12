@@ -157,7 +157,7 @@ func hubSign() SigningService {
 		name: "HubSign",
 		url:  "https://routinehub.co/api/v1/sign-shortcut",
 		info: func() string {
-			return fmt.Sprintf("HubSign (Shortcut signing service) - Powered By %s", ansi("RoutineHub", red))
+			return fmt.Sprintf("Powered By %s", ansi("RoutineHub", red))
 		},
 		requestBody: func() (*bytes.Buffer, string) {
 			return hubSignRequestBody(apiKey)
