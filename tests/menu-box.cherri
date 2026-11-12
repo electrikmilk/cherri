@@ -1,0 +1,182 @@
+// compile-only: interactive UI and iOS/iPadOS-only third-party actions (Menu Box,
+// dev.alexhay.MenuBox) — nothing here is deterministic enough to assert at runtime.
+//
+// Exercises the first-class Menu Box action definitions (actions_menubox.go) rather than
+// the rawAction() escape hatch. One section per action so each can be debugged in isolation.
+
+#define name MENU BOX TEST
+#define color purple
+
+// Quick Menu — marked-up text in, menu items out. Covers SF Symbols with default, emoji and hex
+// colours, a mask, a scale, transparent backgrounds, and emoji icons.
+const quickMenuItems = quickMenu("Title: Example 1\nSub: SFSymbol with default colours\nIcon: waveform.circle.fill\n\nTitle: Example 2\nSub: SFSymbol with weight, scale & emoji colours\nIcon: globe.thin,🟢,⚪️\nScale: Small\n\nTitle: Example 3\nSub: SFSymbol with hex colours and mask\nIcon: gamecontroller.fill, #f12711, #FDC830\nMask: circle\n\nTitle: Example 4\nSub: SFSymbol with transparent background and emoji icon colour\nIcon: touchid,none,teal\nScale: large\n\nTitle: Example 5\nSub: Emoji icon with transparent background\nIcon: 🥰,none\n\nTitle: Example 6\nSub: Emoji icon with scale and no mask\nIcon: 🐭,🟠\nScale: Small\nMask: none")
+const quickMenuChoice = chooseFromList(quickMenuItems, "Which one?")
+
+// Quick Menu with the menu text held in a Text action and passed in as a variable — the shape
+// Shortcuts produces when the text is built up elsewhere and wired into the action.
+const menuText = text("Title: Dictate\nSub: Speak your tasks\nIcon: mic.fill\n\nTitle: Type\nSub: Manually enter your tasks\nIcon: keyboard")
+const quickMenuFromVariable = quickMenu(menuText)
+const variableChoice = chooseFromList(quickMenuFromVariable)
+
+// Menu Item properties — a chosen item exposes its title, ID and data fields. Confirmed on device
+// that a plain property reference works without any extra user info on the aggrandizement.
+const dataMenuItems = quickMenu("Title: With data\nSub: Has a field\nField1: Example text")
+const dataMenuChoice = chooseFromList(dataMenuItems)
+const dataMenuDetails = text("{dataMenuChoice['title']}\n{dataMenuChoice['id']}\n{dataMenuChoice['field1']}")
+alert(dataMenuDetails)
+
+// Load Menu Set — the set is an entity resolved by its set ID, which belongs to one Menu Box
+// library. The IDs below are from the author's device and only need to compile, not resolve.
+const toggleMenu = loadMenuSet("toggle", "AAFE6B19-CEBD-4DC2-A580-879298CBA9B1")
+const toggleChoice = chooseFromList(toggleMenu)
+
+const inputSourceMenu = loadMenuSet("ThingsGPT — Input Source", "E092F845-188B-4F16-98FE-D78AE33788C3", false)
+const inputSourceChoice = chooseFromList(inputSourceMenu)
+
+// Create Menu Item From Symbol — every parameter we have a verified key for, then the minimum
+// (title and symbol only), then one with the subtitle skipped to set only the weight.
+const symbolItem = createMenuItemFromSymbol("create A Menu From Sf Symbol Title Example", "microphone", "create a menu from SF symbols subtitle example", "regular", "large", true)
+const symbolChoice = chooseFromList(symbolItem)
+
+const minimalSymbolItem = createMenuItemFromSymbol("Minimal", "star")
+const minimalSymbolChoice = chooseFromList(minimalSymbolItem)
+
+const boldSymbolItem = createMenuItemFromSymbol("Bold", "heart.fill", nil, "bold")
+const boldSymbolChoice = chooseFromList(boldSymbolItem)
+
+// Scale and mask — each value is a separate key on the action, so one item per value.
+const smallSymbolItem = createMenuItemFromSymbol("Small", "microphone", nil, nil, "small")
+const smallSymbolChoice = chooseFromList(smallSymbolItem)
+
+const mediumSymbolItem = createMenuItemFromSymbol("Medium", "microphone", nil, nil, "medium")
+const mediumSymbolChoice = chooseFromList(mediumSymbolItem)
+
+const circleSymbolItem = createMenuItemFromSymbol("Circle mask", "microphone", nil, nil, "medium", true, "circle")
+const circleSymbolChoice = chooseFromList(circleSymbolItem)
+
+const roundRectSymbolItem = createMenuItemFromSymbol("Rounded rectangle mask", "microphone", nil, nil, "medium", true, "roundRect")
+const roundRectSymbolChoice = chooseFromList(roundRectSymbolItem)
+
+// Colours — a colour is a preset name or a hex. Presets are written as their hex, because Menu Box
+// ignores every preset entity (a Menu Box bug, reproduced in a hand-built shortcut) while the hex
+// renders. Transparent Background hides the background colour, so the background items turn it off
+// to be visible.
+const redSymbolItem = createMenuItemFromSymbol("Red preset", "microphone", nil, nil, "medium", true, "roundRect", "Red")
+const redSymbolChoice = chooseFromList(redSymbolItem)
+
+const greenHexSymbolItem = createMenuItemFromSymbol("Green hex", "microphone", nil, nil, "medium", true, "roundRect", "00ff00")
+const greenHexSymbolChoice = chooseFromList(greenHexSymbolItem)
+
+const presetBackgroundSymbolItem = createMenuItemFromSymbol("Red on Blue", "microphone", nil, nil, "medium", false, "roundRect", "Red", "Blue")
+const presetBackgroundSymbolChoice = chooseFromList(presetBackgroundSymbolItem)
+
+// No background colour with Transparent Background off — confirmed on device: the tile is white.
+const noBackgroundSymbolItem = createMenuItemFromSymbol("Red, no background", "microphone", nil, nil, "medium", false, "roundRect", "Red")
+const noBackgroundSymbolChoice = chooseFromList(noBackgroundSymbolItem)
+
+const hexBackgroundSymbolItem = createMenuItemFromSymbol("Green on magenta", "microphone", nil, nil, "medium", false, "roundRect", "#00ff00", "ff00ff")
+const hexBackgroundSymbolChoice = chooseFromList(hexBackgroundSymbolItem)
+
+// Menu Box's own docs accept either spelling for grey, so both resolve to the Grey preset. This one
+// rendered default blue as a preset entity because of the Menu Box bug, so it is now written as hex.
+const grayBackgroundSymbolItem = createMenuItemFromSymbol("Gray", "microphone", nil, nil, "medium", true, "roundRect", "Gray")
+const graySymbolChoice = chooseFromList(grayBackgroundSymbolItem)
+
+// Render Icon off skips drawing the icon until the item is added to a Menu Set, so this item shows
+// no icon in Choose From List. That is expected, not a failure.
+const noRenderSymbolItem = createMenuItemFromSymbol("Render off", "microphone", nil, nil, nil, nil, nil, nil, nil, false)
+const noRenderSymbolChoice = chooseFromList(noRenderSymbolItem)
+
+// Mask none is the raw value Menu Box writes when None is chosen explicitly, and Fields 1 to 4 carry
+// data that is read back from the chosen item (Add Data is written for them automatically).
+const noMaskSymbolItem = createMenuItemFromSymbol("No mask", "microphone", nil, nil, "medium", true, "none")
+const noMaskSymbolChoice = chooseFromList(noMaskSymbolItem)
+
+const fieldsSymbolItem = createMenuItemFromSymbol("Fields", "microphone", nil, nil, nil, nil, nil, nil, nil, nil, "Field one test", "F2 test", "F3 test", "F4 test")
+const fieldsSymbolChoice = chooseFromList(fieldsSymbolItem)
+const fieldsSymbolDetails = text("{fieldsSymbolChoice['field1']}\n{fieldsSymbolChoice['field2']}\n{fieldsSymbolChoice['field3']}\n{fieldsSymbolChoice['field4']}")
+if fieldsSymbolDetails != "Field one test\nF2 test\nF3 test\nF4 test" {
+    alert("❌ FAIL: Symbol fields — got {fieldsSymbolDetails}")
+}
+
+// Create Menu Item From Emoji — title and emoji only, then each parameter on its own. Transparent
+// Background is on by default for emoji, so a background colour needs it turned off to show.
+const emojiItem = createMenuItemFromEmoji("Emoji", "😀")
+const emojiChoice = chooseFromList(emojiItem)
+
+const subtitleEmojiItem = createMenuItemFromEmoji("With subtitle", "😀", "emoji test subtitle")
+const subtitleEmojiChoice = chooseFromList(subtitleEmojiItem)
+
+const largeEmojiItem = createMenuItemFromEmoji("Large", "😀", nil, "large")
+const largeEmojiChoice = chooseFromList(largeEmojiItem)
+
+const circleEmojiItem = createMenuItemFromEmoji("Circle mask", "😀", nil, "large", false, "circle")
+const circleEmojiChoice = chooseFromList(circleEmojiItem)
+
+const roundRectEmojiItem = createMenuItemFromEmoji("Rounded rectangle mask", "😀", nil, "large", false, "roundRect")
+const roundRectEmojiChoice = chooseFromList(roundRectEmojiItem)
+
+const noMaskEmojiItem = createMenuItemFromEmoji("No mask", "😀", nil, nil, nil, "none")
+const noMaskEmojiChoice = chooseFromList(noMaskEmojiItem)
+
+const backgroundEmojiItem = createMenuItemFromEmoji("Magenta background", "🔥", nil, nil, false, "roundRect", "ff00ff")
+const backgroundEmojiChoice = chooseFromList(backgroundEmojiItem)
+
+const letterEmojiItem = createMenuItemFromEmoji("Letter", "A", nil, nil, false, "roundRect")
+const letterEmojiChoice = chooseFromList(letterEmojiItem)
+
+const noRenderEmojiItem = createMenuItemFromEmoji("Render off", "😀", nil, nil, nil, nil, nil, false)
+const noRenderEmojiChoice = chooseFromList(noRenderEmojiItem)
+
+const fieldsEmojiItem = createMenuItemFromEmoji("Fields", "😀", nil, nil, nil, nil, nil, nil, "Field one test", "F2 test", "F3 test", "F4 test")
+const fieldsEmojiChoice = chooseFromList(fieldsEmojiItem)
+const fieldsEmojiDetails = text("{fieldsEmojiChoice['title']}\n{fieldsEmojiChoice['field1']}\n{fieldsEmojiChoice['field2']}\n{fieldsEmojiChoice['field3']}\n{fieldsEmojiChoice['field4']}")
+if fieldsEmojiDetails != "Fields\nField one test\nF2 test\nF3 test\nF4 test" {
+    alert("❌ FAIL: Emoji fields — got {fieldsEmojiDetails}")
+}
+
+// Create Menu Item From Image and Create Menu Item From Base64 — the icon is the image itself, so the
+// only options are the mask and the data fields (no scale, background or render option). The image
+// source is the one difference: a file or image variable for Image, a base64 string for Base64. A file
+// can't be picked as a literal, so the file is a Base64 Decode of the same icon (a 180×180 toggle).
+const toggleIconText = text("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")
+const toggleIconFile = base64Decode(toggleIconText)
+
+const imageItem = createMenuItemFromImage("Image file", toggleIconFile, "From a decoded variable")
+const imageChoice = chooseFromList(imageItem)
+
+const circleImageItem = createMenuItemFromImage("Circle mask", toggleIconFile, nil, "circle")
+const circleImageChoice = chooseFromList(circleImageItem)
+
+const roundRectImageItem = createMenuItemFromImage("Rounded rectangle mask", toggleIconFile, nil, "roundRect")
+const roundRectImageChoice = chooseFromList(roundRectImageItem)
+
+const noMaskImageItem = createMenuItemFromImage("No mask", toggleIconFile, nil, "none")
+const noMaskImageChoice = chooseFromList(noMaskImageItem)
+
+const fieldsImageItem = createMenuItemFromImage("Fields", toggleIconFile, nil, nil, "Field one test", "F2 test", "F3 test", "F4 test")
+const fieldsImageChoice = chooseFromList(fieldsImageItem)
+const fieldsImageDetails = text("{fieldsImageChoice['title']}\n{fieldsImageChoice['field1']}\n{fieldsImageChoice['field2']}\n{fieldsImageChoice['field3']}\n{fieldsImageChoice['field4']}")
+if fieldsImageDetails != "Fields\nField one test\nF2 test\nF3 test\nF4 test" {
+    alert("❌ FAIL: Image fields — got {fieldsImageDetails}")
+}
+
+// The base64 string as text held in a Text action, which is how most shortcuts will pass it, then a
+// short literal (a 1×1 pixel PNG, so the icon is a single dot) for the string written inline.
+const base64Item = createMenuItemFromBase64("Base64 text", toggleIconText, "From a Text action")
+const base64Choice = chooseFromList(base64Item)
+
+const circleBase64Item = createMenuItemFromBase64("Circle mask", toggleIconText, nil, "circle")
+const circleBase64Choice = chooseFromList(circleBase64Item)
+
+const literalBase64Item = createMenuItemFromBase64("Literal 1×1 pixel", "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "Inline string, tiny icon")
+const literalBase64Choice = chooseFromList(literalBase64Item)
+
+const fieldsBase64Item = createMenuItemFromBase64("Fields", toggleIconText, nil, nil, "Field one test", "F2 test", "F3 test", "F4 test")
+const fieldsBase64Choice = chooseFromList(fieldsBase64Item)
+const fieldsBase64Details = text("{fieldsBase64Choice['title']}\n{fieldsBase64Choice['field1']}\n{fieldsBase64Choice['field2']}\n{fieldsBase64Choice['field3']}\n{fieldsBase64Choice['field4']}")
+if fieldsBase64Details != "Fields\nField one test\nF2 test\nF3 test\nF4 test" {
+    alert("❌ FAIL: Base64 fields — got {fieldsBase64Details}")
+}
+
+show("✅ All tests passed")
