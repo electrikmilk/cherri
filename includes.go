@@ -14,16 +14,37 @@ import (
 	"github.com/electrikmilk/args-parser"
 )
 
-// include is a data structure to track include statements.
-type include struct {
-	file   string
-	start  int
-	end    int
-	lines  []string
-	length int
+// lineOrigin is where a line of the combined source came from.
+// The main file has an empty file, lines the compiler generated have a line of 0.
+type lineOrigin struct {
+	file string
+	line int
 }
 
-var includes []include
+// lineOrigins has an origin for each of the lines.
+var lineOrigins []lineOrigin
+
+// originsFor numbers count lines of file from 1.
+func originsFor(file string, count int) []lineOrigin {
+	var origins = make([]lineOrigin, count)
+	for i := range origins {
+		origins[i] = lineOrigin{file: file, line: i + 1}
+	}
+
+	return origins
+}
+
+func (origin lineOrigin) source() string {
+	if origin.line == 0 {
+		return "(generated)"
+	}
+	if origin.file == "" {
+		return "(main file)"
+	}
+
+	return origin.file
+}
+
 var included []string
 
 func handleIncludes() {
@@ -121,17 +142,8 @@ func parseInclude() {
 	var includeLines = strings.Split(includeContents, "\n")
 	var includeLinesCount = len(includeLines)
 
-	updateIncludesMap(lineIdx, includeLinesCount)
-
-	includes = append(includes, include{
-		file:   includePath,
-		start:  lineIdx,
-		end:    lineIdx + includeLinesCount,
-		lines:  includeLines,
-		length: includeLinesCount,
-	})
-
-	lines[lineIdx] = includeContents
+	lines = slices.Replace(lines, lineIdx, lineIdx+1, includeLines...)
+	lineOrigins = slices.Replace(lineOrigins, lineIdx, lineIdx+1, originsFor(includePath, includeLinesCount)...)
 	included = append(included, includePath)
 }
 
@@ -139,80 +151,36 @@ var packageIncludeRegex = regexp.MustCompile("packages/@(.*?)/(.*?)/")
 
 // handlePackageIncludePath resolves internal package includes.
 func handlePackageIncludePath(includePath *string) {
-	if inc, found := insideInclude("packages/@"); found {
-		var matches = packageIncludeRegex.FindAllStringSubmatch(inc.file, -1)
-		if len(matches) != 0 {
-			var userName = matches[0][1]
-			var packageName = matches[0][2]
-			*includePath = fmt.Sprintf("packages/@%s/%s/%s", userName, packageName, *includePath)
-		}
-	}
-}
-
-// updateIncludesMap checks if an included file starts on `line`.
-// If so, it updates its start and end lines to account for the included file it overlaps with.
-func updateIncludesMap(line int, includeLines int) {
-	for i, inc := range includes {
-		if inc.start == line {
-			includes[i].start = inc.start + includeLines
-			includes[i].end = (inc.start + includeLines) + inc.length
-		}
-	}
-}
-
-// delinquentFile determines what file the current cursor exists within in relation to any included files.
-func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
-	errorFilename = workflowName + ".cherri"
-	errorLine = lineIdx + 1
-	errorCol = lineCharIdx + 1
-	if len(includes) == 0 {
+	var matches = packageIncludeRegex.FindStringSubmatch(lineOrigins[lineIdx].file)
+	if matches == nil {
 		return
 	}
 
-	var currentLine = lines[lineIdx]
-	var found bool
-	for _, inc := range includes {
-		if errorLine <= inc.start || errorLine >= inc.end {
-			continue
-		}
-		errorFilename = inc.file
+	*includePath = fmt.Sprintf("packages/@%s/%s/%s", matches[1], matches[2], *includePath)
+}
 
-		for l, line := range inc.lines {
-			if line == currentLine {
-				errorLine = l + 1
-				found = true
-				break
-			}
-		}
+// delinquentFile determines what file and line the current cursor came from.
+func delinquentFile() (errorFilename string, errorLine int, errorCol int) {
+	errorFilename = filePath
+	errorLine = lineIdx + 1
+	errorCol = lineCharIdx + 1
+
+	// The source lines are discarded once parsing finishes, so errors while generating have no origin.
+	if lineIdx >= len(lineOrigins) {
+		return
 	}
 
-	if !found {
-		findOriginalLine(&errorLine)
+	var origin = lineOrigins[lineIdx]
+	if origin.line == 0 {
+		return
+	}
+
+	errorLine = origin.line
+	if origin.file != "" {
+		errorFilename = origin.file
 	}
 
 	return
-}
-
-func findOriginalLine(errorLine *int) {
-	for l, line := range strings.Split(originalContents, "\n") {
-		if line == lines[lineIdx] {
-			*errorLine = l + 1
-			break
-		}
-	}
-}
-
-// insideInclude returns a boolean based on if we are within an included file with a name that contains needle.
-func insideInclude(needle string) (inc *include, inside bool) {
-	for _, inc := range includes {
-		if !strings.Contains(inc.file, needle) || lineIdx+1 < inc.start || lineIdx+1 > inc.end {
-			continue
-		}
-
-		return &inc, true
-	}
-
-	return nil, false
 }
 
 func printIncludesDebug() {
@@ -223,19 +191,15 @@ func printIncludesDebug() {
 
 	fmt.Print("\n")
 
-	fmt.Println(ansi("## INCLUDES MAP ##", bold))
-	for i := range lines {
-		for _, inc := range includes {
-			if inc.start == i {
-				fmt.Println(ansi("#include", magenta), inc.file)
-				fmt.Println(ansi(fmt.Sprintf("%d |", inc.start+1), cyan))
-				fmt.Print(ansi("...", dim))
-				fmt.Print(ansi(fmt.Sprintf("%d lines", inc.length), magenta))
-				fmt.Println(ansi("...", dim))
-				fmt.Println(ansi(fmt.Sprintf("%d |", inc.end+1), cyan))
-				fmt.Print("\n")
-			}
+	fmt.Println(ansi("## LINE ORIGINS ##", bold))
+	var runStart int
+	for i := 1; i <= len(lineOrigins); i++ {
+		if i < len(lineOrigins) && lineOrigins[i].source() == lineOrigins[runStart].source() {
+			continue
 		}
+
+		fmt.Println(ansi(fmt.Sprintf("%d-%d |", runStart+1, i), cyan), lineOrigins[runStart].source())
+		runStart = i
 	}
 
 	fmt.Print("\n")

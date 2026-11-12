@@ -952,14 +952,14 @@ func loadBasicStandardActions() {
 
 func loadActionsByCategory() {
 	for _, actionInclude := range actionCategories {
-		lines = append(lines, fmt.Sprintf("#include 'actions/%s'\n", actionInclude))
+		prependGeneratedLines(fmt.Sprintf("#include 'actions/%s'\n", actionInclude))
 		resetParse()
 		handleIncludes()
 		currentCategory = actionInclude
 		handleActionDefinitions()
 
 		included = []string{}
-		includes = []include{}
+		lineOrigins = nil
 		lines = []string{}
 		tokens = []token{}
 
@@ -971,7 +971,7 @@ func includeBasicStandardActions() {
 	if includedBasicStandardActions {
 		return
 	}
-	lines = append([]string{"#include 'actions/basic'\n"}, lines...)
+	prependGeneratedLines("#include 'actions/basic'\n")
 	resetParse()
 	includedBasicStandardActions = true
 }
@@ -984,7 +984,7 @@ func includeStandardActions() {
 	for _, actionInclude := range actionIncludes {
 		standardIncludes = append(standardIncludes, fmt.Sprintf("#include 'actions/%s'\n", actionInclude))
 	}
-	lines = append(standardIncludes, lines...)
+	prependGeneratedLines(standardIncludes...)
 	resetParse()
 }
 
@@ -1015,7 +1015,7 @@ func checkMissingStandardInclude(identifier *string, parsing bool) (requiredIncl
 		if slices.Contains(included, fmt.Sprintf("actions/%s", actionInclude)) {
 			continue
 		}
-		lines = append([]string{fmt.Sprintf("#include 'actions/%s'\n", actionInclude)}, lines...)
+		prependGeneratedLines(fmt.Sprintf("#include 'actions/%s'\n", actionInclude))
 		resetParse()
 		handleIncludes()
 		handleActionDefinitions()

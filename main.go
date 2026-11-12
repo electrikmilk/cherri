@@ -21,7 +21,6 @@ var filePath string
 var filename string
 var basename string
 var contents string
-var originalContents string
 var relativePath string
 var inputPath string
 var outputPath string

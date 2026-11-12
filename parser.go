@@ -40,6 +40,7 @@ var isFirstCommentAction = true
 // then reset the chars and lines, then reset the parser cursor position.
 // This is usually done when something modifies the contents of the file like functions or includes.
 func resetParse() {
+	lineOrigins = expandLineOrigins()
 	contents = strings.Join(lines, "\n")
 	chars = []rune(contents)
 	lines = strings.Split(contents, "\n")
@@ -47,13 +48,37 @@ func resetParse() {
 	tokens = []token{}
 }
 
+// expandLineOrigins gives each line of a multi-line element of lines the origin of the element,
+// matching how resetParse splits them into separate lines.
+func expandLineOrigins() []lineOrigin {
+	var expanded = make([]lineOrigin, 0, len(lines))
+	for i, line := range lines {
+		for range strings.Count(line, "\n") + 1 {
+			expanded = append(expanded, lineOrigins[i])
+		}
+	}
+
+	// Splitting empty contents still results in one line.
+	if len(expanded) == 0 {
+		expanded = []lineOrigin{{}}
+	}
+
+	return expanded
+}
+
+// prependGeneratedLines adds lines the compiler generated before the source.
+func prependGeneratedLines(generated ...string) {
+	lines = append(generated, lines...)
+	lineOrigins = append(make([]lineOrigin, len(generated)), lineOrigins...)
+}
+
 // errorPosition holds the state parserError reads to locate the cursor in the source.
-// includes is cloned because updateIncludesMap edits its entries in place.
+// lineOrigins is cloned because parseInclude splices it in place.
 type errorPosition struct {
 	contents    string
 	lineIdx     int
 	lineCharIdx int
-	includes    []include
+	lineOrigins []lineOrigin
 }
 
 func saveErrorPosition() errorPosition {
@@ -61,7 +86,7 @@ func saveErrorPosition() errorPosition {
 		contents:    contents,
 		lineIdx:     lineIdx,
 		lineCharIdx: lineCharIdx,
-		includes:    slices.Clone(includes),
+		lineOrigins: slices.Clone(lineOrigins),
 	}
 }
 
@@ -69,7 +94,7 @@ func (position errorPosition) restore() {
 	contents = position.contents
 	lineIdx = position.lineIdx
 	lineCharIdx = position.lineCharIdx
-	includes = position.includes
+	lineOrigins = position.lineOrigins
 }
 
 type lineReference struct {
@@ -96,9 +121,9 @@ func initParse() {
 	questions = make(map[string]*question)
 	controlFlowGroups = make(map[int]controlFlowGroup)
 	definitions = make(map[string]any)
-	originalContents = contents
 	chars = []rune(contents)
 	lines = strings.Split(contents, "\n")
+	lineOrigins = originsFor("", len(lines))
 	idx = -1
 	advance()
 
@@ -117,7 +142,6 @@ func initParse() {
 	}
 
 	contents = ""
-	originalContents = ""
 	char = -1
 	idx = -1
 	lineIdx = 0
@@ -127,7 +151,7 @@ func initParse() {
 	lines = []string{}
 	controlFlowGroups = map[int]controlFlowGroup{}
 	groupingIdx = 0
-	includes = []include{}
+	lineOrigins = nil
 
 	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green) + "\n")

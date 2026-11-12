@@ -307,7 +307,7 @@ func resetParser() {
 	noInput = map[string]any{}
 	tokens = []token{}
 	included = []string{}
-	includes = []include{}
+	lineOrigins = nil
 	workflowName = ""
 	menus = map[string][]varValue{}
 	uuids = map[string]string{}

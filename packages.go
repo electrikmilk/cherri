@@ -396,7 +396,7 @@ func includePackages() {
 
 	for _, pkg := range sortedPackages {
 		var packageInclude = fmt.Sprintf("#include './packages/%s/main.cherri'\n", pkg.signature())
-		lines = append([]string{packageInclude}, lines...)
+		prependGeneratedLines(packageInclude)
 	}
 
 	resetParse()

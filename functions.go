@@ -58,7 +58,7 @@ func handleFunctions() {
 	usingFunctions = isUsingFunctions()
 	if usingFunctions {
 		var functionsHeader = generateFunctionsHeader()
-		lines = append([]string{functionsHeader}, lines...)
+		prependGeneratedLines(functionsHeader)
 
 		resetParse()
 	}
