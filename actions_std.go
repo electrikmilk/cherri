@@ -988,7 +988,9 @@ func includeStandardActions() {
 	resetParse()
 }
 
-func checkMissingStandardInclude(identifier *string, parsing bool) {
+// checkMissingStandardInclude returns the include statement that defines the action when parsing,
+// and adds the include to the decompiled source otherwise.
+func checkMissingStandardInclude(identifier *string, parsing bool) (requiredInclude string) {
 	if !parsing && !args.Using("no-toolkit") {
 		connectToolkitDB()
 		var identifiers = strings.Split(*identifier, ".")
@@ -1005,7 +1007,7 @@ func checkMissingStandardInclude(identifier *string, parsing bool) {
 				popLine(fmt.Sprintf("#import '%s'", baseIdentifier))
 			}
 
-			return
+			return ""
 		}
 	}
 
@@ -1022,20 +1024,19 @@ func checkMissingStandardInclude(identifier *string, parsing bool) {
 			mapSplitActions()
 		}
 
-		var name, nameErr = getActionNameByIdentifier(identifier)
+		var _, nameErr = getActionNameByIdentifier(identifier)
 		if nameErr != nil {
 			continue
 		}
 
 		var includeStatement = fmt.Sprintf("#include 'actions/%s'", actionInclude)
 		if parsing {
-			exit(fmt.Sprintf("Action '%s()' requires include:\n\n%s", name, includeStatement))
-		} else {
-			popLine(includeStatement)
-			break
+			return includeStatement
 		}
+		popLine(includeStatement)
+		break
 	}
-	return
+	return ""
 }
 
 func getActionNameByIdentifier(identifier *string) (name string, err error) {

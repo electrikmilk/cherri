@@ -1770,8 +1770,11 @@ func collectAction(identifier *string) (value action) {
 	if _, found := actions[*identifier]; !found {
 		// Probing the standard includes rewinds the cursor and rewrites the source.
 		var beforeProbe = saveErrorPosition()
-		checkMissingStandardInclude(identifier, true)
+		var requiredInclude = checkMissingStandardInclude(identifier, true)
 		beforeProbe.restore()
+		if requiredInclude != "" {
+			parserError(fmt.Sprintf("Action '%s()' requires include:\n\n%s", *identifier, requiredInclude))
+		}
 		args.Args["action"] = *identifier
 		actionsSearch()
 		parserError(fmt.Sprintf("Undefined action '%s()'", *identifier))
