@@ -1717,6 +1717,7 @@ func collectArray() (array interface{}) {
 		parserError(fmt.Sprintf("JSON array error: %s", err))
 	}
 	array = array.(map[string]interface{})["array"]
+	checkJSONInlineVars(array)
 	advance()
 	return
 }
@@ -1735,7 +1736,27 @@ func collectDictionary() (dictionary interface{}) {
 	if err := json.Unmarshal([]byte(rawJSON), &dictionary); err != nil {
 		parserError(fmt.Sprintf("JSON error: %s", err))
 	}
+	checkJSONInlineVars(dictionary)
 	return
+}
+
+// checkJSONInlineVars checks inline variables in every key and string of a collected array or dictionary, like collectStringValue does for text.
+func checkJSONInlineVars(value any) {
+	switch v := value.(type) {
+	case string:
+		if strings.ContainsAny(v, "{}") {
+			checkInlineVars(&v)
+		}
+	case []any:
+		for _, item := range v {
+			checkJSONInlineVars(item)
+		}
+	case map[string]any:
+		for key, item := range v {
+			checkJSONInlineVars(key)
+			checkJSONInlineVars(item)
+		}
+	}
 }
 
 func collectObject() string {

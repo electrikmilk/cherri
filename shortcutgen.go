@@ -537,7 +537,6 @@ func makeAttachmentValues() {
 			aggrandizements = append(aggrandizements, makeAggrandizement(&varValue.valueType, varValue, inlineVar.getAs))
 		}
 		if inlineVar.coerce != "" {
-			checkCoerce(inlineVar.coerce)
 			aggrandizements = append(aggrandizements, Aggrandizement{
 				Type:              "WFCoercionVariableAggrandizement",
 				CoercionItemClass: contentItems[inlineVar.coerce],
