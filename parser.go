@@ -934,7 +934,9 @@ func collectVariableModifier(constant bool, varType *tokenType) {
 	if *varType != Variable && constant {
 		parserError("Constants cannot be added to.")
 	}
-	advance()
+
+	// Skipping a newline here would report errors on the next line.
+	skipInlineWhitespace()
 }
 
 func collectControlFlowOutput(identifier *string, constant *bool) (identified bool) {
