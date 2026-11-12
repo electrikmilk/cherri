@@ -115,12 +115,12 @@ func init() {
 	})
 	args.Register(args.Argument{
 		Name:        "hubsign",
-		Description: "Sign the compiled Shortcut using RoutineHub's remote signing service. Requires --routinehub-api-key.",
+		Description: "Sign the compiled Shortcut using RoutineHub's remote signing service. (Requires --routinehub-api-key).",
 	})
 	args.Register(args.Argument{
 		Name:         "routinehub-api-key",
 		ExpectsValue: true,
-		Description:  "RoutineHub API key used to sign using RoutineHub's remote signing service.",
+		Description:  "RoutineHub API key used to sign using HubSign.",
 	})
 	args.Register(args.Argument{
 		Name:        "no-ansi",
