@@ -2132,21 +2132,35 @@ func excerptError(message string, errorFilename string, errorLine int, errorCol 
 		fmt.Println(ansi(fmt.Sprintf("%d | %s", errorLine-1, lines[lineIdx-1]), dim))
 	}
 
+	var linePrefix = fmt.Sprintf("%d | ", errorLine)
+	var currentRunes []rune
 	if len(lines) > lineIdx {
+		currentRunes = []rune(lines[lineIdx])
+
 		var currentLine strings.Builder
-		currentLine.WriteString(fmt.Sprintf("%d | ", errorLine))
-		for c, chr := range strings.Split(lines[lineIdx], "") {
+		currentLine.WriteString(linePrefix)
+		for c, chr := range currentRunes {
 			if c == lineCharIdx {
-				currentLine.WriteString(ansi(chr, underline))
+				currentLine.WriteString(ansi(string(chr), underline))
 			} else {
-				currentLine.WriteString(chr)
+				currentLine.WriteRune(chr)
 			}
 		}
 		fmt.Println(ansi(currentLine.String(), red, bold))
 	}
 
-	var spaces = strings.Repeat(" ", lineCharIdx+4)
-	fmt.Println(ansi(fmt.Sprintf("%s^", spaces), red))
+	var caretPadding strings.Builder
+	caretPadding.WriteString(strings.Repeat(" ", len(linePrefix)))
+	for c := 0; c < lineCharIdx; c++ {
+		// Tabs are kept so the caret lines up however they are rendered.
+		if c < len(currentRunes) && currentRunes[c] == '\t' {
+			caretPadding.WriteRune('\t')
+		} else {
+			caretPadding.WriteRune(' ')
+		}
+	}
+
+	fmt.Println(ansi(fmt.Sprintf("%s^", caretPadding.String()), red))
 
 	if len(lines) > (lineIdx + 1) {
 		fmt.Print(ansi(fmt.Sprintf("%d | %s\n-----\n\n", errorLine+1, lines[lineIdx+1]), dim))
