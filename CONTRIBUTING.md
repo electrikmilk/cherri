@@ -57,7 +57,7 @@ reproduce it and what environment it may be isolated to are clearly communicated
 - Test your code to the best of your ability; do not submit code that does not compile.
 - Please refrain from writing Go tests and adding Go test files, instead add Cherri test files. It matters much more that a Cherri test compiles a correct Shortcut that you can see is valid in the Shortcuts app on an Apple device. A test in Go only means that the compiler _seems_ to output the correct thing because of a test written in Go. Our default test suites in our pipelines run the Cherri files in the tests folders; that is our main way of testing the project. I also don't want to clutter the project with unit tests.
 - Test your feature or bug fix by writing a Cherri file and checking that it compiles to a valid Shortcut. If you are on
-  a non-macOS platform, ensure you use the `--hubsign` option to test the Shortcut signs successfully.
+  a non-macOS platform, ensure you use the `--hubsign` option with a RoutineHub API key (`--routinehub-api-key=`) to test the Shortcut signs successfully. Never commit your API key.
 - Use `go test` to test Cherri using one of the following test names:
   - **macOS:** `go test -run TestCherri` Runs all Cherri code tests in the `/tests/` directory.
   - **Linux, other:** `go test -run TestCherriNoSign` Runs all Cherri code tests, but skips signing the produced Shortcuts.

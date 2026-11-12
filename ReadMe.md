@@ -35,7 +35,7 @@ The primary goal is to make it practical to create large Shortcut projects (with
 - 📄 Embed files in base64
 - 🔀 Convert Shortcuts from an iCloud link with the `--import=` option
 - 🔢 Type system and type inference
-- 🔏 Signs using macOS, falls back on [HubSign](https://routinehub.co/membership) or another server that uses [scaxyz/shortcut-signing-server](https://github.com/scaxyz/shortcut-signing-server).
+- 🔏 Signs using macOS, falls back on [HubSign](https://routinehub.co/membership) (requires a RoutineHub API key, `--routinehub-api-key=`) or another server that uses [scaxyz/shortcut-signing-server](https://github.com/scaxyz/shortcut-signing-server).
 
 ### Resources
 
