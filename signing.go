@@ -18,7 +18,7 @@ var signFailed = false
 // sign runs the shortcuts sign command on the unsigned shortcut file.
 func sign() {
 	if !darwin {
-		useHubSign()
+		useSigningService()
 		return
 	}
 
@@ -48,17 +48,12 @@ func sign() {
 
 		fmt.Printf("%s\n%s\n", ansi("Failed to sign Shortcut using macOS :(", orange, bold), ansi(stdErr.String(), orange))
 
-		useHubSign()
+		useSigningService()
 	}
 
 	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green))
 	}
-}
-
-func useHubSign() {
-	var hubSignService = hubSign()
-	useSigningService(&hubSignService)
 }
 
 func removeUnsigned() {

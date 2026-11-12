@@ -27,19 +27,44 @@ type SigningService struct {
 	requestBody func() (*bytes.Buffer, string)
 }
 
+// signService can be set before signing, like in tests, to skip choosing a service from the arguments.
+var signService SigningService
+
+func chooseSigningService() SigningService {
+	if args.Using("signing-server") {
+		return customSigningServer()
+	}
+
+	return hubSign()
+}
+
+func customSigningServer() SigningService {
+	return SigningService{
+		name: "Custom Signing Server URL",
+		url:  args.Value("signing-server"),
+		info: func() string {
+			return ansi(fmt.Sprintf("Signing using %s", args.Value("signing-server")), cyan)
+		},
+	}
+}
+
 // Sign the Shortcut using a signing service.
-func useSigningService(service *SigningService) {
+func useSigningService() {
+	if signService.url == "" {
+		signService = chooseSigningService()
+	}
+
 	if !args.Using("no-ansi") {
-		fmt.Println(ansi(fmt.Sprintf("Signing using %s service...", service.name), green))
-		if service.info != nil {
-			fmt.Println(service.info())
+		fmt.Println(ansi(fmt.Sprintf("Signing using %s service...", signService.name), green))
+		if signService.info != nil {
+			fmt.Println(signService.info())
 		}
 	}
 
-	var signedShortcut = requestSignedShortcut(service)
+	var signedShortcut = requestSignedShortcut()
 
 	if !looksLikeSignedShortcut(signedShortcut) {
-		exit(fmt.Sprintf("%s did not properly sign Shortcut.", service.name))
+		exit(fmt.Sprintf("%s did not properly sign Shortcut.", signService.name))
 	}
 
 	var writeErr = os.WriteFile(outputPath, signedShortcut, 0600)
@@ -85,14 +110,14 @@ func hubSignRequestBody(apiKey string) (*bytes.Buffer, string) {
 	return &body, form.FormDataContentType()
 }
 
-func requestSignedShortcut(service *SigningService) []byte {
-	var requestBody = service.requestBody
+func requestSignedShortcut() []byte {
+	var requestBody = signService.requestBody
 	if requestBody == nil {
 		requestBody = jsonSigningRequestBody
 	}
 	var body, contentType = requestBody()
 
-	var request, httpErr = http.NewRequest("POST", service.url, body)
+	var request, httpErr = http.NewRequest("POST", signService.url, body)
 	handle(httpErr)
 	request.Header.Set("Content-Type", contentType)
 	request.Header.Set("User-Agent", fmt.Sprintf("cherri/%s", version))

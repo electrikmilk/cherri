@@ -60,16 +60,8 @@ func createShortcut() {
 
 	if !args.Using("skip-sign") {
 		switch {
-		case args.Using("signing-server"):
-			useSigningService(&SigningService{
-				name: "Custom Signing Server URL",
-				url:  args.Value("signing-server"),
-				info: func() string {
-					return ansi(fmt.Sprintf("Signing using %s", args.Value("signing-server")), cyan)
-				},
-			})
-		case args.Using("hubsign"):
-			useHubSign()
+		case args.Using("signing-server"), args.Using("hubsign"):
+			useSigningService()
 		default:
 			sign()
 		}
