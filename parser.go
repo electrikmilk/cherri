@@ -47,6 +47,31 @@ func resetParse() {
 	tokens = []token{}
 }
 
+// errorPosition holds the state parserError reads to locate the cursor in the source.
+// includes is cloned because updateIncludesMap edits its entries in place.
+type errorPosition struct {
+	contents    string
+	lineIdx     int
+	lineCharIdx int
+	includes    []include
+}
+
+func saveErrorPosition() errorPosition {
+	return errorPosition{
+		contents:    contents,
+		lineIdx:     lineIdx,
+		lineCharIdx: lineCharIdx,
+		includes:    slices.Clone(includes),
+	}
+}
+
+func (position errorPosition) restore() {
+	contents = position.contents
+	lineIdx = position.lineIdx
+	lineCharIdx = position.lineCharIdx
+	includes = position.includes
+}
+
 type lineReference struct {
 	start int
 }
@@ -1743,7 +1768,10 @@ func collectActionCall() {
 
 func collectAction(identifier *string) (value action) {
 	if _, found := actions[*identifier]; !found {
+		// Probing the standard includes rewinds the cursor and rewrites the source.
+		var beforeProbe = saveErrorPosition()
 		checkMissingStandardInclude(identifier, true)
+		beforeProbe.restore()
 		args.Args["action"] = *identifier
 		actionsSearch()
 		parserError(fmt.Sprintf("Undefined action '%s()'", *identifier))
