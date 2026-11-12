@@ -537,15 +537,11 @@ func makeAttachmentValues() {
 			aggrandizements = append(aggrandizements, makeAggrandizement(&varValue.valueType, varValue, inlineVar.getAs))
 		}
 		if inlineVar.coerce != "" {
-			if contentItem, found := contentItems[inlineVar.coerce]; found {
-				aggrandizements = append(aggrandizements, Aggrandizement{
-					Type:              "WFCoercionVariableAggrandizement",
-					CoercionItemClass: contentItem,
-				})
-			} else {
-				var list = makeKeyList("Available content item types:", contentItems, inlineVar.coerce)
-				parserError(fmt.Sprintf("Invalid content item for type coerce '%s'\n\n%s\n", inlineVar.coerce, list))
-			}
+			checkCoerce(inlineVar.coerce)
+			aggrandizements = append(aggrandizements, Aggrandizement{
+				Type:              "WFCoercionVariableAggrandizement",
+				CoercionItemClass: contentItems[inlineVar.coerce],
+			})
 		}
 		if inlineVar.getAs != "" || inlineVar.coerce != "" {
 			attachmentValue.Aggrandizements = aggrandizements

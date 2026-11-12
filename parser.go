@@ -607,6 +607,7 @@ func checkInlineVars(value *string) {
 			continue
 		}
 		var identifier = match[1]
+		checkCoerce(match[3])
 
 		if startsWith(Ask, identifier) {
 			identifier = Ask
@@ -624,6 +625,19 @@ func checkInlineVars(value *string) {
 			parserError(fmt.Sprintf("Undefined inline reference '%s'", identifier))
 		}
 	}
+}
+
+// checkCoerce errors when coerce is not a content item type. Checking while parsing keeps the error on the line it is written on.
+func checkCoerce(coerce string) {
+	if coerce == "" {
+		return
+	}
+	if _, found := contentItems[coerce]; found {
+		return
+	}
+
+	var list = makeKeyList("Available content item types:", contentItems, coerce)
+	parserError(fmt.Sprintf("Invalid content item for type coerce '%s'\n\n%s\n", coerce, list))
 }
 
 func collectReference(valueType *tokenType, value *any, until *rune, variable bool) {
