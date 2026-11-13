@@ -14,6 +14,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf16"
 
 	"github.com/electrikmilk/args-parser"
 	"howett.net/plist"
@@ -1035,18 +1036,35 @@ func decompObjectValue(valueObj any) string {
 	return attachmentString
 }
 
+// decompAttachmentString substitutes each attachment into the string. Attachment ranges are UTF-16
+// code unit offsets, the inverse of mapInlineVariables, so the string is indexed as UTF-16 rather
+// than as code points, which would misplace attachments after an emoji.
 func decompAttachmentString(attachmentString *string, attachments map[string]interface{}) {
 	var originalString = *attachmentString
-	var attachmentChars = strings.Split(*attachmentString, "")
+	var units = utf16.Encode([]rune(originalString))
 
+	var positions []int
+	var attachmentsByPosition = make(map[int]any, len(attachments))
 	for attachmentRange, a := range attachments {
 		var attachmentStart, _, _ = strings.Cut(attachmentRange, ",")
 		var attachmentPosition = strings.TrimPrefix(attachmentStart, "{")
 		var position, convErr = strconv.Atoi(attachmentPosition)
 		handle(convErr)
 
+		positions = append(positions, position)
+		attachmentsByPosition[position] = a
+	}
+	sort.Ints(positions)
+
+	var result strings.Builder
+	var consumed int
+	for _, position := range positions {
+		if position < consumed || position >= len(units) {
+			decompError(fmt.Sprintf("Attachment position %d is outside of the string", position), &ShortcutAction{WFWorkflowActionIdentifier: currentAction.identifier})
+		}
+
 		var attachment Value
-		mapToStruct(a, &attachment)
+		mapToStruct(attachmentsByPosition[position], &attachment)
 
 		var variableName = attachment.VariableName
 		if _, uuid := uuids[attachment.OutputUUID]; uuid {
@@ -1070,10 +1088,13 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 			decompAggrandizements(&variableName, attachment.Aggrandizements)
 		}
 
-		attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
+		result.WriteString(string(utf16.Decode(units[consumed:position])))
+		result.WriteString(fmt.Sprintf("{%s}", variableName))
+		consumed = position + 1
 	}
+	result.WriteString(string(utf16.Decode(units[consumed:])))
 
-	*attachmentString = escapeString(strings.Join(attachmentChars, ""))
+	*attachmentString = escapeString(result.String())
 
 	if !decompilingDictionary && !decompilingText {
 		if originalString == ObjectReplaceCharStr {
