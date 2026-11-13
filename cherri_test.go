@@ -9,11 +9,13 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/electrikmilk/args-parser"
+	"howett.net/plist"
 )
 
 var currentTest string
@@ -167,43 +169,215 @@ func TestDecomp(t *testing.T) {
 	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
 }
 
-// TestRoundTrip decompiles compiler-generated plists to verify the full compile→decompile
-// pipeline. The _unsigned.shortcut files are produced by TestCherriNoSign; individual
-// sub-tests skip gracefully when the file is absent rather than failing.
+// roundTripKnownFailures lists shortcuts whose decompile or recompile exits non-zero, keyed by
+// test file name without _unsigned.shortcut. An entry that starts passing must be removed.
+var roundTripKnownFailures = map[string]string{
+	"conditionals":                 "panic: WFCondition is nil",
+	"date-comparisons":             "Invalid conditional 1000",
+	"device":                       "Unknown app value type",
+	"nil":                          "panic: peek past last action",
+	"shortcuts":                    "panic in decomp hook: string is not a map",
+	"variable-interpolation-utf16": "panic: attachment index out of range",
+	"web":                          "panic in decompInfiniteURLAction: nil value",
+	"zz-action-identifiers":        "panic: slice bounds in checkMissingStandardInclude",
+	"arrays":                       "variable-typed const in conditional",
+	"dictionary":                   "variable-typed const in conditional",
+	"variable-references":          "variable-typed const in conditional",
+	"functions":                    "Type variable values cannot be constants",
+	"ask-prompts":                  "Type variable values cannot be constants",
+	"standard":                     "Type variable values cannot be constants",
+	"control-flow-output":          "control flow output lost",
+	"menus":                        "Undefined variable reference 'RepeatIndex'",
+	"repeats":                      "Undefined variable reference 'RepeatIndex'",
+	"globals":                      "global decompiles to nothing",
+	"contacts":                     "wrong arguments",
+	"documents":                    "wrong arguments",
+	"pdf":                          "wrong arguments",
+	"prompt":                       "wrong arguments",
+	"mac":                          "wrong arguments",
+	"split-screen":                 "wrong arguments",
+	"qty-color":                    "wrong arguments",
+	"settings":                     "app intent action name and empty first argument",
+	"sharing":                      "app intent action name and empty first argument",
+	"images":                       "missing include",
+	"toggle-set":                   "missing include",
+	"math":                         "scientific math operator",
+}
+
+// roundTripKnownMismatches lists shortcuts that recompile but with a different action sequence,
+// keyed like roundTripKnownFailures. An entry that starts matching must be removed.
+var roundTripKnownMismatches = map[string]string{
+	"Hello, Cherri!":            "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
+	"Test":                      "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
+	"a11y":                      "action 0: is.workflow.actions.comment became com.apple.UniversalAccess.UASettingsShortcuts.UASetBackgroundSoundIntent",
+	"ai":                        "action 0: is.workflow.actions.comment became is.workflow.actions.askllm",
+	"audio":                     "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
+	"calendar":                  "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
+	"copy-paste":                "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
+	"crypto":                    "action 2: is.workflow.actions.comment became is.workflow.actions.hash",
+	"empty-types":               "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
+	"enum":                      "action 0: is.workflow.actions.comment became com.apple.facetime.facetime",
+	"getas-typecast":            "action 0: is.workflow.actions.comment became is.workflow.actions.number",
+	"import-questions":          "action 0: is.workflow.actions.comment became is.workflow.actions.alert",
+	"include-actions":           "action 0: is.workflow.actions.comment became is.workflow.actions.file.select",
+	"location":                  "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
+	"measurements":              "action 0: is.workflow.actions.comment became is.workflow.actions.measurement.create",
+	"numbers":                   "action 0: is.workflow.actions.comment became is.workflow.actions.math",
+	"raw-action-output-capture": "action 6: is.workflow.actions.gettext became is.workflow.actions.nothing",
+	"raw-action":                "action 0: is.workflow.actions.comment became is.workflow.actions.alert",
+	"smol":                      "action 0: is.workflow.actions.comment became is.workflow.actions.number",
+	"text":                      "action 6: is.workflow.actions.text.changecase became is.workflow.actions.nothing",
+	"types":                     "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
+	"variables":                 "action 0: is.workflow.actions.comment became is.workflow.actions.number",
+}
+
+// roundTripRun runs the built compiler and returns whether it exited zero. The compiler runs as a
+// separate process because it keeps global state and calls os.Exit on error.
+func roundTripRun(binary string, arguments ...string) (string, bool) {
+	var output, runErr = exec.Command(binary, arguments...).CombinedOutput()
+	return string(output), runErr == nil
+}
+
+func roundTripTail(output string) string {
+	var outputLines = strings.Split(strings.TrimSpace(output), "\n")
+	if len(outputLines) > 20 {
+		outputLines = outputLines[len(outputLines)-20:]
+	}
+
+	return strings.Join(outputLines, "\n")
+}
+
+func roundTripIdentifiers(t *testing.T, path string) []string {
+	t.Helper()
+
+	var data, readErr = os.ReadFile(path)
+	if readErr != nil {
+		t.Fatalf("read %s: %s", path, readErr)
+	}
+
+	var parsed struct {
+		WFWorkflowActions []struct {
+			WFWorkflowActionIdentifier string
+		}
+	}
+	var _, plistErr = plist.Unmarshal(data, &parsed)
+	if plistErr != nil {
+		t.Fatalf("parse %s: %s", path, plistErr)
+	}
+
+	var identifiers []string
+	for _, action := range parsed.WFWorkflowActions {
+		identifiers = append(identifiers, action.WFWorkflowActionIdentifier)
+	}
+
+	return identifiers
+}
+
+// firstDifference describes where two identifier lists diverge, or returns an empty string when equal.
+func firstDifference(original []string, recompiled []string) string {
+	for i := 0; i < max(len(original), len(recompiled)); i++ {
+		var originalID = "(end)"
+		if i < len(original) {
+			originalID = original[i]
+		}
+		var recompiledID = "(end)"
+		if i < len(recompiled) {
+			recompiledID = recompiled[i]
+		}
+		if originalID != recompiledID {
+			return fmt.Sprintf("action %d: %s became %s", i, originalID, recompiledID)
+		}
+	}
+
+	return ""
+}
+
+// TestRoundTrip decompiles each compiler-generated plist, recompiles the result and compares the
+// action identifiers with the original. The _unsigned.shortcut files are produced by TestCherriNoSign.
 //
 // Run independently:
 //
-//	go test -run TestCherriNoSign && go test -run TestRoundTrip
+//	go test -run '^TestCherriNoSign$' && go test -run '^TestRoundTrip$'
 func TestRoundTrip(t *testing.T) {
-	args.Args["no-ansi"] = ""
-
-	// Chosen because their plist structures are within the decompiler's action handlers.
-	var candidates = []string{
-		"tests/calc_unsigned.shortcut",
-		"tests/numbers_unsigned.shortcut",
-		"tests/repeats_unsigned.shortcut",
-		"tests/conditionals_unsigned.shortcut",
-		"tests/dictionary_unsigned.shortcut",
-		"tests/variables_unsigned.shortcut",
+	var originals, globErr = filepath.Glob("tests/*_unsigned.shortcut")
+	if globErr != nil {
+		t.Fatal(globErr)
+	}
+	if len(originals) == 0 {
+		t.Skip("no tests/*_unsigned.shortcut files - run TestCherriNoSign first")
 	}
 
-	for _, plistPath := range candidates {
-		t.Run(plistPath, func(t *testing.T) {
-			defer resetParser()
+	var tempDir = t.TempDir()
+	var binary = filepath.Join(tempDir, "cherri")
+	var buildOutput, buildErr = exec.Command("go", "build", "-o", binary, ".").CombinedOutput()
+	if buildErr != nil {
+		t.Fatalf("build compiler: %s\n%s", buildErr, buildOutput)
+	}
 
-			if _, statErr := os.Stat(plistPath); os.IsNotExist(statErr) {
-				t.Skipf("compile output absent — run TestCherriNoSign first: %s", plistPath)
+	for _, original := range originals {
+		var name = strings.TrimSuffix(filepath.Base(original), unsignedEnd)
+		t.Run(name, func(t *testing.T) {
+			var dir = filepath.Join(tempDir, name)
+			var decompiledDir = filepath.Join(dir, "dec")
+			var mkdirErr = os.MkdirAll(decompiledDir, 0755)
+			if mkdirErr != nil {
+				t.Fatal(mkdirErr)
 			}
 
-			// Direct decompiler output to /dev/null so no .cherri files land in
-			// tests/, which would be picked up and compiled by TestCherriNoSign.
-			args.Args["output"] = os.DevNull
-			args.Args["import"] = plistPath
-			decompile(importShortcut(args.Value("import")))
-			delete(args.Args, "output")
+			var data, readErr = os.ReadFile(original)
+			if readErr != nil {
+				t.Fatal(readErr)
+			}
+			var copied = filepath.Join(dir, name+".shortcut")
+			var writeErr = os.WriteFile(copied, data, 0600)
+			if writeErr != nil {
+				t.Fatal(writeErr)
+			}
 
-			if code.Len() == 0 {
-				t.Errorf("decompile of %s produced empty output", plistPath)
+			var knownFailure, failureKnown = roundTripKnownFailures[name]
+			var knownMismatch, mismatchKnown = roundTripKnownMismatches[name]
+
+			var failure string
+			var decompiledPath = filepath.Join(decompiledDir, strings.ReplaceAll(name, " ", "_")+".cherri")
+			var output, ok = roundTripRun(binary, "--import="+copied, "--output="+decompiledDir+"/", "--no-ansi")
+			if !ok {
+				failure = "decompile failed:\n" + roundTripTail(output)
+			}
+
+			if failure == "" {
+				output, ok = roundTripRun(binary, decompiledPath, "--skip-sign", "--no-ansi")
+				if !ok {
+					failure = "recompile failed:\n" + roundTripTail(output)
+				}
+			}
+
+			if failure != "" {
+				if failureKnown {
+					t.Logf("known failure (%s): %s", knownFailure, failure)
+					return
+				}
+				t.Fatal(failure)
+			}
+			if failureKnown {
+				t.Fatalf("%s now decompiles and recompiles: remove from roundTripKnownFailures", name)
+			}
+
+			// The recompiled shortcut is named by the decompiled #define name, so it is found by suffix.
+			var recompiled, recompiledErr = filepath.Glob(filepath.Join(decompiledDir, "*"+unsignedEnd))
+			if recompiledErr != nil || len(recompiled) != 1 {
+				t.Fatalf("expected one recompiled shortcut in %s, found %v", decompiledDir, recompiled)
+			}
+
+			var difference = firstDifference(roundTripIdentifiers(t, original), roundTripIdentifiers(t, recompiled[0]))
+			if difference != "" {
+				if mismatchKnown {
+					t.Logf("known mismatch (%s): %s", knownMismatch, difference)
+					return
+				}
+				t.Fatalf("recompiled actions differ from the original, %s", difference)
+			}
+			if mismatchKnown {
+				t.Fatalf("%s now round trips: remove from roundTripKnownMismatches", name)
 			}
 		})
 	}
