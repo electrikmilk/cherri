@@ -172,8 +172,6 @@ func TestDecomp(t *testing.T) {
 // roundTripKnownFailures lists shortcuts whose decompile or recompile exits non-zero, keyed by
 // test file name without _unsigned.shortcut. An entry that starts passing must be removed.
 var roundTripKnownFailures = map[string]string{
-	"conditionals":          "panic: WFCondition is nil",
-	"date-comparisons":      "Invalid conditional 1000",
 	"device":                "Unknown app value type",
 	"nil":                   "Invalid value \"Title\" (text) for argument 'artwork' (variable)",
 	"shortcuts":             "panic in decomp hook: string is not a map",
@@ -189,6 +187,7 @@ var roundTripKnownFailures = map[string]string{
 	"menus":                 "Undefined variable reference 'RepeatIndex'",
 	"repeats":               "Undefined variable reference 'RepeatIndex'",
 	"globals":               "global decompiles to nothing",
+	"date-comparisons":      "global decompiles to nothing",
 	"contacts":              "wrong arguments",
 	"documents":             "wrong arguments",
 	"pdf":                   "wrong arguments",
@@ -212,6 +211,7 @@ var roundTripKnownMismatches = map[string]string{
 	"ai":                           "action 0: is.workflow.actions.comment became is.workflow.actions.askllm",
 	"audio":                        "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
 	"calendar":                     "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
+	"conditionals":                 "action 0: is.workflow.actions.comment became is.workflow.actions.number",
 	"copy-paste":                   "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
 	"crypto":                       "action 2: is.workflow.actions.comment became is.workflow.actions.hash",
 	"empty-types":                  "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",

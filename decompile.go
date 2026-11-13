@@ -765,44 +765,112 @@ func decompConditional(action *ShortcutAction) {
 	}
 }
 
-func matchConditionOperator(number int) tokenType {
-	for operator, cond := range conditions {
-		if cond == number {
+// matchConditionOperator reverses makeConditionParam, which swaps the greater and less than codes
+// for 1000 and 1001 when the condition compares a date to a duration.
+func matchConditionOperator(conditionCode int, condition map[string]interface{}, action *ShortcutAction) tokenType {
+	switch conditionCode {
+	case 1000, 1001:
+		if condition["WFDuration"] == nil {
+			decompError(fmt.Sprintf("Expected a WFDuration operand for conditional %d", conditionCode), action)
+		}
+		if conditionCode == 1000 {
+			return GreaterThan
+		}
+		return LessThan
+	}
+	for operator, operatorCode := range conditions {
+		if operatorCode == conditionCode {
 			return operator
 		}
 	}
+
+	decompError(fmt.Sprintf("Invalid conditional %d", conditionCode), action)
 	return ""
 }
 
 func decompCondition(condition map[string]interface{}, action *ShortcutAction) {
-	var conditionInt = condition["WFCondition"].(uint64)
-	var conditionalOperator = matchConditionOperator(int(conditionInt))
-	if conditionalOperator == "" {
-		decompError(fmt.Sprintf("Invalid conditional %v", conditionInt), action)
+	// The plist omits WFCondition when it is 0 (LessThan).
+	var conditionCode uint64
+	if condition["WFCondition"] != nil {
+		var wfCondition, isInt = condition["WFCondition"].(uint64)
+		if !isInt {
+			decompError(fmt.Sprintf("Expected WFCondition to be an integer, got %T", condition["WFCondition"]), action)
+		}
+		conditionCode = wfCondition
 	}
+
+	var conditionalOperator = matchConditionOperator(int(conditionCode), condition, action)
 	if conditionalOperator == Empty {
 		code.WriteRune('!')
 	}
 
 	code.WriteString(decompValue(condition["WFInput"]))
 
-	if conditionalOperator == Any || conditionalOperator == Empty {
+	switch conditionalOperator {
+	case Any, Empty:
+		return
+	case IsToday:
+		code.WriteString(fmt.Sprintf(" %s", IsToday))
 		return
 	}
 
 	code.WriteString(fmt.Sprintf(" %s ", conditionalOperator))
+	code.WriteString(decompConditionOperand(condition, []string{"WFDuration", "WFDate", "WFNumberValue", "WFConditionalActionString"}, action))
 
-	if condition["WFNumberValue"] != nil && condition["WFNumberValue"] != "" {
-		if stringValue, isString := condition["WFNumberValue"].(string); isString {
-			var numberValue, convErr = strconv.Atoi(stringValue)
-			handle(convErr)
-			code.WriteString(decompValue(numberValue))
-		} else {
-			code.WriteString(decompValue(condition["WFNumberValue"]))
-		}
-	} else if _, foundStr := condition["WFConditionalActionString"]; foundStr {
-		code.WriteString(decompValue(condition["WFConditionalActionString"]))
+	if conditionalOperator == Between {
+		code.WriteRune(' ')
+		code.WriteString(decompConditionOperand(condition, []string{"WFAnotherDate", "WFAnotherNumber"}, action))
 	}
+}
+
+// decompConditionOperand writes the first of keys present in condition, as routeConditionalValue
+// and conditionalParameter write each operand to exactly one of them.
+func decompConditionOperand(condition map[string]interface{}, keys []string, action *ShortcutAction) string {
+	for _, key := range keys {
+		var operand = condition[key]
+		if operand == nil {
+			continue
+		}
+
+		switch key {
+		case "WFDuration":
+			return decompConditionDuration(operand, action)
+		case "WFNumberValue", "WFAnotherNumber":
+			return decompConditionNumber(operand)
+		default:
+			return decompValue(operand)
+		}
+	}
+
+	decompError(fmt.Sprintf("Expected a condition operand in one of %s", strings.Join(keys, ", ")), action)
+	return ""
+}
+
+// decompConditionNumber writes a number stored as text, as a duration's Magnitude always is, without
+// converting it so floats are not truncated.
+func decompConditionNumber(operand any) string {
+	var numberText, isText = operand.(string)
+	if !isText {
+		return decompValue(operand)
+	}
+	if _, parseErr := strconv.ParseFloat(numberText, 64); parseErr != nil {
+		return decompValue(numberText)
+	}
+
+	return numberText
+}
+
+func decompConditionDuration(operand any, action *ShortcutAction) string {
+	var duration, isMap = operand.(map[string]interface{})
+	if !isMap {
+		decompError(fmt.Sprintf("Expected WFDuration to be a WFQuantityFieldValue, got %T", operand), action)
+	}
+	var quantity, hasValue = duration["Value"].(map[string]interface{})
+	if !hasValue || quantity["Magnitude"] == nil || quantity["Unit"] == nil {
+		decompError("Expected WFDuration to have a Value with a Magnitude and a Unit", action)
+	}
+
+	return fmt.Sprintf("qty(%s, %s)", decompConditionNumber(quantity["Magnitude"]), decompValue(quantity["Unit"]))
 }
 
 type DictionaryActionParameters struct {
