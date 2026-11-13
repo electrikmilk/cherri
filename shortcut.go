@@ -135,7 +135,7 @@ type WFQuantityFieldValue struct {
 }
 
 type WFMenuItem struct {
-	WFItemType int `plist:",omitempty"`
+	WFItemType int
 	WFValue    any `plist:",omitempty"`
 }
 
