@@ -976,15 +976,19 @@ func makeMenuAction(t *token) {
 			}, String)
 		}
 		var menuItemParams = menus[t.ident]
-		var menuItems = make([]WFMenuItem, 0, len(menuItemParams))
+		var menuItems = make([]any, 0, len(menuItemParams))
 		for _, item := range menuItemParams {
-			menuItems = append(menuItems, WFMenuItem{
-				WFItemType: 0,
-				WFValue: paramValue(actionArgument{
-					valueType: item.valueType,
-					value:     item.value,
-				}, String),
-			})
+			var title = paramValue(actionArgument{
+				valueType: item.valueType,
+				value:     item.value,
+			}, String)
+
+			// Shortcuts only stores an option as a dictionary when it holds a variable.
+			if staticTitle, isStatic := title.(string); isStatic {
+				menuItems = append(menuItems, staticTitle)
+				continue
+			}
+			menuItems = append(menuItems, WFMenuItem{WFItemType: 0, WFValue: title})
 		}
 
 		menuParams["WFMenuItems"] = menuItems
@@ -994,18 +998,75 @@ func makeMenuAction(t *token) {
 }
 
 func makeMenuItemAction(t *token) {
-	addStdAction("choosefrommenu", map[string]any{
+	var menuItemParams = map[string]any{
 		"GroupingIdentifier": t.ident,
 		"WFControlFlowMode":  statementPart,
-		"WFMenuItemAttributedTitle": paramValue(actionArgument{
-			valueType: t.valueType,
-			value:     t.value,
-		}, String),
-		"WFMenuItemTitle": paramValue(actionArgument{
-			valueType: t.valueType,
-			value:     t.value,
-		}, String),
-	})
+	}
+
+	var title = paramValue(actionArgument{
+		valueType: t.valueType,
+		value:     t.value,
+	}, String)
+	if tokenString, hasVariable := title.(WFTextTokenString); hasVariable {
+		menuItemParams["WFMenuItemAttributedTitle"] = tokenString.Value
+		menuItemParams["WFMenuItemTitle"] = menuItemPlainTitle(tokenString.Value)
+	} else {
+		menuItemParams["WFMenuItemTitle"] = title
+	}
+
+	addStdAction("choosefrommenu", menuItemParams)
+}
+
+// menuItemPlainTitle is the title Shortcuts stores beside an attributed one, with each variable
+// replaced by the name Shortcuts shows for it.
+func menuItemPlainTitle(title WFTextTokenStringValue) string {
+	var plainTitle strings.Builder
+	var position int
+	for _, r := range title.String {
+		if r == ObjectReplaceChar {
+			plainTitle.WriteString(referenceDisplayName(title.AttachmentsByRange[fmt.Sprintf("{%d, 1}", position)]))
+		} else {
+			plainTitle.WriteRune(r)
+		}
+
+		if r >= utf16BMPThreshold {
+			position += 2
+		} else {
+			position++
+		}
+	}
+
+	return plainTitle.String()
+}
+
+var globalDisplayNames = map[string]string{
+	"Ask":            "Ask Each Time",
+	"Clipboard":      "Clipboard",
+	"CurrentDate":    "Current Date",
+	"DeviceDetails":  "Device Details",
+	"ExtensionInput": "Shortcut Input",
+}
+
+// referenceDisplayName is the name Shortcuts shows for a reference, followed by the key or property read from it.
+func referenceDisplayName(reference Value) string {
+	var name = reference.VariableName
+	if reference.OutputName != "" {
+		name = reference.OutputName
+	}
+	if globalName, isGlobal := globalDisplayNames[reference.Type]; isGlobal {
+		name = globalName
+	}
+
+	for _, aggrandizement := range reference.Aggrandizements {
+		if aggrandizement.PropertyName != "" {
+			name = fmt.Sprintf("%s (%s)", name, aggrandizement.PropertyName)
+		}
+		if aggrandizement.DictionaryKey != "" {
+			name = fmt.Sprintf("%s (%s)", name, aggrandizement.DictionaryKey)
+		}
+	}
+
+	return name
 }
 
 func makeRepeatAction(t *token) {

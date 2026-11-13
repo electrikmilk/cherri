@@ -26,6 +26,28 @@ menu "Prompt" {
         alert("Item 2", "You chose:")
 }
 
+// Choose from menu with variables in the options
+
+@menuValue = "x"
+
+menu "Variable options" {
+    item "{@menuValue}":
+        alert("Variable", "You chose:")
+    item "Static":
+        alert("Static", "You chose:")
+}
+
+menu "Composite and global options" {
+    item "One":
+        alert("One", "You chose:")
+    item "Two {@menuValue}":
+        alert("Two", "You chose:")
+    item "{Device['OS']}":
+        alert("Device property", "You chose:")
+    item "{Clipboard}":
+        alert("Clipboard", "You chose:")
+}
+
 // Choose from list
 
 @listVar = list("Item 1","Item 2","Item 3")
