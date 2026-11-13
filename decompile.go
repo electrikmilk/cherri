@@ -1239,6 +1239,7 @@ func makeActionCallCode(action *ShortcutAction) string {
 			return actionCallCode.String()
 		}
 	}
+	includeStandardAction(matchedIdentifier)
 
 	if (matchedAction.macOnly || matchedAction.nonMacOnly) && !setMacDefinition {
 		macDefinition = matchedAction.macOnly && !matchedAction.nonMacOnly

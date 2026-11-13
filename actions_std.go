@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"maps"
 	"os"
 	"regexp"
 	"slices"
@@ -991,37 +992,30 @@ func includeStandardActions() {
 	resetParse()
 }
 
-// checkMissingStandardInclude returns the include statement that defines the action when parsing,
-// and adds the include to the decompiled source otherwise.
+// standardActionIncludes maps the name of an action to the standard include that defines it. Looking for an include
+// leaves every category it passed loaded, so a later action from one of them resolves without checkMissingStandardInclude
+// and its include is found here instead.
+var standardActionIncludes = map[string]string{}
+
+// checkMissingStandardInclude returns the include statement that defines the action when parsing, and loads the
+// definitions of the action otherwise. Standard actions win over actions imported from the ToolKit database.
 func checkMissingStandardInclude(identifier *string, parsing bool) (requiredInclude string) {
-	if !parsing && !args.Using("no-toolkit") {
-		connectToolkitDB()
-		var identifiers = strings.Split(*identifier, ".")
-		identifiers = append(identifiers[:3], identifiers[4:]...)
-		var baseIdentifier = strings.Join(identifiers, ".")
-
-		var containerId, containerErr = getContainerIdByIdentifier(&baseIdentifier)
-		if containerErr == nil {
-			var containerName, containerErr = getContainerName(&containerId)
-			importActions(baseIdentifier)
-			if containerErr == nil {
-				popLine(fmt.Sprintf("#import '%s'", containerName))
-			} else {
-				popLine(fmt.Sprintf("#import '%s'", baseIdentifier))
-			}
-
-			return ""
-		}
-	}
-
 	for _, actionInclude := range actionIncludes {
 		if slices.Contains(included, fmt.Sprintf("actions/%s", actionInclude)) {
 			continue
 		}
+
+		var definedBefore = maps.Clone(actions)
 		prependGeneratedLines(fmt.Sprintf("#include 'actions/%s'\n", actionInclude))
 		resetParse()
 		handleIncludes()
 		handleActionDefinitions()
+
+		for name, definition := range actions {
+			if definedBefore[name] != definition {
+				standardActionIncludes[name] = actionInclude
+			}
+		}
 
 		if !parsing {
 			mapSplitActions()
@@ -1032,14 +1026,64 @@ func checkMissingStandardInclude(identifier *string, parsing bool) (requiredIncl
 			continue
 		}
 
-		var includeStatement = fmt.Sprintf("#include 'actions/%s'", actionInclude)
 		if parsing {
-			return includeStatement
+			return fmt.Sprintf("#include 'actions/%s'", actionInclude)
 		}
-		popLine(includeStatement)
-		break
+		return ""
 	}
+
+	if !parsing {
+		importToolkitActions(identifier)
+	}
+
 	return ""
+}
+
+var decompiledIncludes []string
+
+// includeStandardAction adds the include that defines the action to the decompiled source once.
+func includeStandardAction(name string) {
+	var actionInclude, found = standardActionIncludes[name]
+	if !found || slices.Contains(decompiledIncludes, actionInclude) {
+		return
+	}
+
+	decompiledIncludes = append(decompiledIncludes, actionInclude)
+	popLine(fmt.Sprintf("#include 'actions/%s'", actionInclude))
+}
+
+// importToolkitActions imports the actions of the app that the action belongs to, which is the identifier without the
+// name of the action.
+func importToolkitActions(identifier *string) {
+	if args.Using("no-toolkit") {
+		return
+	}
+
+	var identifiers = strings.Split(*identifier, ".")
+	if len(identifiers) < 2 {
+		return
+	}
+
+	var baseIdentifier = strings.Join(identifiers[:len(identifiers)-1], ".")
+	if slices.Contains(imported, baseIdentifier) {
+		return
+	}
+
+	connectToolkitDB()
+
+	var containerId, containerErr = getContainerIdByIdentifier(&baseIdentifier)
+	if containerErr != nil {
+		return
+	}
+
+	importActions(baseIdentifier)
+
+	var containerName, nameErr = getContainerName(&containerId)
+	if nameErr != nil {
+		popLine(fmt.Sprintf("#import '%s'", baseIdentifier))
+		return
+	}
+	popLine(fmt.Sprintf("#import '%s'", containerName))
 }
 
 func getActionNameByIdentifier(identifier *string) (name string, err error) {
