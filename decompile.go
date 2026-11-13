@@ -1203,7 +1203,7 @@ func skipDecompAction(action *ShortcutAction) bool {
 		return true
 	}
 
-	if identifier == "nothing" {
+	if identifier == "nothing" && actionIndex+1 < len(shortcut.WFWorkflowActions) {
 		var nextAction = peekActions(1)
 		var controlflowActionIdentifiers = []string{"conditional", "repeat.each", "repeat.count", "choosefrommenu"}
 		var nextActionIdentifier = actionIdentifierEnd(nextAction.WFWorkflowActionIdentifier)
