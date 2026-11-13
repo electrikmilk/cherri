@@ -56,8 +56,10 @@ func decompile(b []byte) {
 
 	defineName()
 	decompileIcon()
+	mapImportQuestions()
 
 	decompileActions()
+	warnUnboundQuestions()
 
 	if args.Using("debug") {
 		printDecompDebug()
@@ -220,6 +222,10 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 			var valueTwo = wfValue["Value"].(map[string]interface{})
 			if valueTwo != nil && valueTwo["Value"] != nil && reflect.TypeOf(valueTwo["Value"]).Kind() == reflect.Map {
 				var itemsValue = valueTwo["Value"].(map[string]interface{})
+
+				if itemsValue["WFDictionaryFieldValueItems"] == nil {
+					continue
+				}
 
 				var dictionaryItems []WFDictionaryFieldValueItem
 				mapToStruct(itemsValue["WFDictionaryFieldValueItems"], &dictionaryItems)
@@ -385,6 +391,98 @@ func defineColors(icon ShortcutIcon, colors map[string]int) {
 	}
 }
 
+type importQuestionKey struct {
+	actionIndex  int
+	parameterKey string
+}
+
+type decompiledQuestion struct {
+	identifier string
+	bound      bool
+}
+
+var importQuestionBindings map[importQuestionKey]*decompiledQuestion
+
+// mapImportQuestions defines each import question and records which action parameter it is bound to,
+// since Shortcuts blanks that parameter and keeps the question's prompt and default value separately.
+func mapImportQuestions() {
+	importQuestionBindings = make(map[importQuestionKey]*decompiledQuestion)
+
+	var claimedIdentifiers = make(map[string]bool)
+	var definitions strings.Builder
+	for i, importQuestion := range shortcut.WFWorkflowImportQuestions {
+		if importQuestion.Category != "Parameter" {
+			decompWarning(fmt.Sprintf("Import question '%s' has unsupported category '%s', skipping it.", importQuestion.Text, importQuestion.Category))
+			continue
+		}
+
+		var defaultValue string
+		switch value := importQuestion.DefaultValue.(type) {
+		case nil:
+			defaultValue = `""`
+		case string:
+			defaultValue = fmt.Sprintf("\"%s\"", escapeString(value))
+		case map[string]any:
+			var dictionaryItems WFItems
+			mapToStruct(value, &dictionaryItems)
+			defaultValue = decompDictionaryValue(dictionaryItems.Value.WFDictionaryFieldValueItems)
+		default:
+			decompWarning(fmt.Sprintf("Import question '%s' has a default value of type %T, but #question only supports text and dictionaries. Skipping it.", importQuestion.Text, value))
+			continue
+		}
+
+		var identifier = makeQuestionIdentifier(importQuestion.Text, i, claimedIdentifiers)
+		claimedIdentifiers[identifier] = true
+		importQuestionBindings[importQuestionKey{
+			actionIndex:  importQuestion.ActionIndex,
+			parameterKey: importQuestion.ParameterKey,
+		}] = &decompiledQuestion{identifier: identifier}
+
+		definitions.WriteString(fmt.Sprintf("#question %s \"%s\" %s\n", identifier, escapeString(importQuestion.Text), defaultValue))
+	}
+
+	if definitions.Len() == 0 {
+		return
+	}
+	newCodeLine(definitions.String())
+	newCodeLine("\n")
+}
+
+func makeQuestionIdentifier(text string, questionIndex int, claimedIdentifiers map[string]bool) string {
+	var baseIdentifier = text
+	sanitizeIdentifier(&baseIdentifier)
+	if baseIdentifier == "" || (baseIdentifier[0] >= '0' && baseIdentifier[0] <= '9') {
+		baseIdentifier = fmt.Sprintf("question%d", questionIndex+1)
+	}
+
+	var identifier = baseIdentifier
+	for suffix := 2; isQuestionIdentifierTaken(identifier, claimedIdentifiers); suffix++ {
+		identifier = baseIdentifier + strconv.Itoa(suffix)
+	}
+
+	return identifier
+}
+
+func isQuestionIdentifierTaken(identifier string, claimedIdentifiers map[string]bool) bool {
+	return claimedIdentifiers[identifier] || validReference(identifier) || slices.Contains(slices.Collect(maps.Values(uuids)), identifier)
+}
+
+// findQuestionBinding returns the import question bound to a parameter of the action being decompiled.
+func findQuestionBinding(parameterKey string) (*decompiledQuestion, bool) {
+	var question, found = importQuestionBindings[importQuestionKey{actionIndex: actionIndex, parameterKey: parameterKey}]
+	return question, found
+}
+
+func warnUnboundQuestions() {
+	for key, question := range importQuestionBindings {
+		if question.bound {
+			continue
+		}
+
+		decompWarning(fmt.Sprintf("Import question '%s' on action %d parameter '%s' could not be bound to an action argument.", question.identifier, key.actionIndex, key.parameterKey))
+	}
+}
+
 var currentVariableValue string
 
 func decompileActions() {
@@ -420,6 +518,7 @@ func decompileActions() {
 			if dictionaryKey != nil && action.WFWorkflowActionParameters[UUID] != nil &&
 				!slices.Contains(constUUIDs, action.WFWorkflowActionParameters[UUID].(string)) {
 				decompDictionaryGetValue(&action)
+				actionIndex++
 				continue
 			}
 			fallthrough
@@ -487,6 +586,14 @@ func decompComment(action *ShortcutAction) {
 var decompilingText = false
 
 func decompTextValue(action *ShortcutAction) {
+	// A literal would drop the question, and the shared gettext identifier is ambiguous to match, so write the text() call directly.
+	if question, found := findQuestionBinding("WFTextActionText"); found {
+		question.bound = true
+		currentVariableValue = fmt.Sprintf("text(%s)", question.identifier)
+		checkConstantLiteral(action)
+		return
+	}
+
 	decompilingText = true
 	currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 	if currentVariableValue == "" {
@@ -822,6 +929,14 @@ type WFItems struct {
 var decompilingDictionary = false
 
 func decompDictionary(action *ShortcutAction) {
+	// A literal would drop the question, so write the dictionary() call it binds to.
+	if question, found := findQuestionBinding("WFItems"); found {
+		question.bound = true
+		currentVariableValue = fmt.Sprintf("dictionary(%s)", question.identifier)
+		checkConstantLiteral(action)
+		return
+	}
+
 	var params DictionaryActionParameters
 	mapToStruct(action.WFWorkflowActionParameters, &params)
 
@@ -1229,7 +1344,10 @@ func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actio
 		}
 
 		var argValue string
-		if value, found := action.WFWorkflowActionParameters[param.key]; found {
+		if question, found := findQuestionBinding(param.key); found {
+			question.bound = true
+			argValue = question.identifier
+		} else if value, found := action.WFWorkflowActionParameters[param.key]; found {
 			argValue = decompValue(value)
 		} else if !param.optional {
 			argValue = makeDefaultValue(param)

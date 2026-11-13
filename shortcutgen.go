@@ -1135,10 +1135,18 @@ func generateImportQuestions() (importQuestions []WFQuestion) {
 			Category:     "Parameter",
 			ActionIndex:  q.actionIndex,
 			Text:         q.text,
-			DefaultValue: q.defaultValue,
+			DefaultValue: makeQuestionDefaultValue(q.defaultValue),
 		})
 	}
 	return
+}
+
+func makeQuestionDefaultValue(defaultValue any) any {
+	if _, isDictionary := defaultValue.(map[string]any); !isDictionary {
+		return defaultValue
+	}
+
+	return makeDictionaryValue(&defaultValue)
 }
 
 func generateInputContentItems() (inputContentItems []string) {

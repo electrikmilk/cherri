@@ -6,3 +6,9 @@
 alert(name, "Name")
 
 alert(age, "Age")
+
+#question settings "Enter the settings" {"url": "", "draft": true}
+
+const config = dictionary(settings)
+
+alert("Settings", "Done")
