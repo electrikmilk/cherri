@@ -65,6 +65,17 @@ if @r != "right" { mustOutput("❌ FAIL: between", "❌ FAIL: between") }
 if @one > 10 {} else { @r = "right" }
 if @r != "right" { mustOutput("❌ FAIL: else", "❌ FAIL: else") }
 
+// if nested in else, the Shortcuts equivalent of else if
+@r = "wrong"
+if @one > 10 {
+    @r = "wrong"
+} else {
+    if @one == 1 {
+        @r = "right"
+    }
+}
+if @r != "right" { mustOutput("❌ FAIL: if nested in else", "❌ FAIL: if nested in else") }
+
 // && (all conditions)
 @r = "wrong"
 @x = 5

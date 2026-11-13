@@ -1539,9 +1539,13 @@ func collectEndStatement() {
 	advance()
 
 	if tokenAhead(Else) {
-		advance()
+		skipWhitespace()
 		if _, ok := controlFlowGroups[groupingIdx]; !ok {
 			parserError("Else has no starting if statement.")
+		}
+		// Shortcuts has no "else if", it would be parsed as a nested if that never gets closed.
+		if !tokenAhead(LeftBrace) {
+			parserError("Else must be followed by '{', nest an if statement inside the else block instead of using 'else if'.")
 		}
 		tokens = append(tokens, token{
 			typeof:    Conditional,
@@ -1549,7 +1553,6 @@ func collectEndStatement() {
 			valueType: Else,
 			value:     nil,
 		})
-		tokenAhead(LeftBrace)
 		return
 	}
 
