@@ -137,6 +137,9 @@ func initParse() {
 	for char != -1 {
 		parse()
 	}
+	if groupingIdx != 0 {
+		parserError("Reached end of file with an unclosed statement, missing a closing '}'.")
+	}
 	if args.Using("debug") {
 		printParsingDebug()
 	}
