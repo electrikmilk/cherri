@@ -578,7 +578,7 @@ func generateActionVersion() (versionStr string) {
 		return
 	}
 
-	return ansi(fmt.Sprintf("\n\n**%s**", note), yellow)
+	return ansi(fmt.Sprintf("\n\n%s", note), yellow)
 }
 
 func formatVersionNumber(version float64) string {
