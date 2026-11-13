@@ -677,13 +677,18 @@ func decompMenu(action *ShortcutAction) {
 	case statementPart:
 		tabLevel--
 		newCodeLine("item ")
-		if _, found := action.WFWorkflowActionParameters["WFMenuItemAttributedTitle"]; found {
-			code.WriteString(decompValue(action.WFWorkflowActionParameters["WFMenuItemAttributedTitle"]))
-		} else if menus[groupingUUID] != nil {
-			var menuItem = menus[groupingUUID][0]
+
+		// Cases with an attributed title do not read their option but still consume it.
+		var menuItem varValue
+		if len(menus[groupingUUID]) > 0 {
+			menuItem = menus[groupingUUID][0]
+			menus[groupingUUID] = menus[groupingUUID][1:]
+		}
+
+		if attributedTitle, found := action.WFWorkflowActionParameters["WFMenuItemAttributedTitle"]; found {
+			code.WriteString(decompValue(attributedTitle))
+		} else if menuItem.value != nil {
 			code.WriteString(decompValue(menuItem.value))
-			var menu = menus[groupingUUID]
-			menus[groupingUUID] = append(menu[:0], menu[1:]...)
 		}
 		code.WriteString(":\n")
 		tabLevel++
