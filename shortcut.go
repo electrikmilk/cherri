@@ -61,7 +61,7 @@ type Aggrandizement struct {
 
 type WFDictionaryFieldValueItem struct {
 	WFKey      any `plist:",omitempty"`
-	WFItemType int `plist:",omitempty"`
+	WFItemType int
 	WFValue    any `plist:",omitempty"`
 }
 
