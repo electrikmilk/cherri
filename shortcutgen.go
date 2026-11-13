@@ -375,20 +375,6 @@ func inputValue(name string, varUUID string) WFTextTokenAttachment {
 	}
 }
 
-// globalDisplayName translates a Cherri global identifier to the spaced
-// Shortcuts display name stored in its varValue (e.g. RepeatIndex → "Repeat Index").
-// The globals check is required because mutable user variables also store
-// variableType "Variable" — the two maps are the only discriminator.
-// Returns identifier unchanged for non-globals or globals without a "Variable" type.
-func globalDisplayName(identifier string, v varValue) string {
-	if _, isGlobal := globals[identifier]; isGlobal && v.variableType == "Variable" {
-		if name, ok := v.value.(string); ok {
-			return name
-		}
-	}
-	return identifier
-}
-
 // referenceAggrandizements builds the key or property read and the coercion written after a
 // variable reference. Which kind of read it is depends on the type of the definition behind
 // the reference, because Shortcuts reads dictionary keys and content item properties differently.
@@ -429,10 +415,14 @@ func referenceValue(reference varValue) Value {
 	}
 	if global, isGlobal := globals[identifier]; isGlobal {
 		isInputVariable(identifier)
-		value.VariableName = globalDisplayName(identifier, global)
-		value.Type = global.variableType
-		if global.variableType == Ask && reference.prompt != "" {
+		value = Value{Type: global.variableType}
+		if global.variableType == Ask {
 			value.Prompt = reference.prompt
+		}
+		// Shortcuts only stores a name for the repeat variables, the globals of type Variable,
+		// and their value holds the spaced display name (e.g. "Repeat Index").
+		if global.variableType == "Variable" {
+			value.VariableName = global.value.(string)
 		}
 	} else if variable, found := variables[identifier]; found && variable.constant {
 		value = Value{
