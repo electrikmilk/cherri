@@ -175,7 +175,7 @@ var roundTripKnownFailures = map[string]string{
 	"conditionals":                 "panic: WFCondition is nil",
 	"date-comparisons":             "Invalid conditional 1000",
 	"device":                       "Unknown app value type",
-	"nil":                          "panic: peek past last action",
+	"nil":                          "Invalid value \"Title\" (text) for argument 'artwork' (variable)",
 	"shortcuts":                    "panic in decomp hook: string is not a map",
 	"variable-interpolation-utf16": "panic: attachment index out of range",
 	"web":                          "panic in decompInfiniteURLAction: nil value",
