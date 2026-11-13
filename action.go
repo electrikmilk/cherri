@@ -596,6 +596,9 @@ func generateActionVersion() (versionStr string) {
 	switch {
 	case currentAction.definition.maxVersion != 0:
 		note = fmt.Sprintf("Deprecated as of version %s.", formatVersionNumber(currentAction.definition.maxVersion))
+		if args.Using("no-ansi") {
+			note = fmt.Sprintf("{: .warning }\n%s", note)
+		}
 	case currentAction.definition.minVersion != 0:
 		note = fmt.Sprintf("Requires version %s or later.", formatVersionNumber(currentAction.definition.minVersion))
 	default:
