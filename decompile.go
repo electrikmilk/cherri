@@ -518,16 +518,10 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 	}
 
 	var number any
-	var convErr error
 	if reflect.TypeOf(value).Kind() == reflect.String {
-		if strings.Contains(value.(string), ".") {
-			number, convErr = strconv.ParseFloat(value.(string), 64)
-		} else if strings.Contains(value.(string), ",") {
-			number, convErr = strconv.ParseFloat(strings.Replace(value.(string), ",", ".", 1), 64)
-		} else if value != "" {
-			number, convErr = strconv.Atoi(value.(string))
+		if value != "" {
+			number = parseNumberString(value.(string))
 		}
-		handle(convErr)
 	} else {
 		switch v := value.(type) {
 		case uint64:
@@ -541,6 +535,22 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 	checkConstantLiteral(action)
 
 	return
+}
+
+// Whole numbers stay ints so values beyond float64's exact range keep their precision.
+func parseNumberString(numberString string) any {
+	var normalized = strings.Replace(numberString, ",", ".", 1)
+	if strings.Contains(normalized, ".") {
+		var decimal, convErr = strconv.ParseFloat(normalized, 64)
+		handle(convErr)
+
+		return decimal
+	}
+
+	var integer, convErr = strconv.Atoi(normalized)
+	handle(convErr)
+
+	return integer
 }
 
 func decompBasicExpression(action *ShortcutAction) {
@@ -800,9 +810,7 @@ func decompCondition(condition map[string]interface{}, action *ShortcutAction) {
 
 	if condition["WFNumberValue"] != nil && condition["WFNumberValue"] != "" {
 		if reflect.TypeOf(condition["WFNumberValue"]).Kind() == reflect.String {
-			var numberValue, convErr = strconv.Atoi(condition["WFNumberValue"].(string))
-			handle(convErr)
-			code.WriteString(decompValue(numberValue))
+			code.WriteString(decompValue(parseNumberString(condition["WFNumberValue"].(string))))
 		} else {
 			code.WriteString(decompValue(condition["WFNumberValue"]))
 		}
@@ -934,6 +942,13 @@ func decompValue(value any) string {
 		return decompValueObject(value.(map[string]interface{}))
 	case reflect.String:
 		return fmt.Sprintf("\"%s\"", escapeString(value.(string)))
+	case reflect.Float64:
+		var decimal = strconv.FormatFloat(value.(float64), 'f', -1, 64)
+		// Cherri requires a decimal point to distinguish floats from integers.
+		if !strings.Contains(decimal, ".") {
+			decimal += ".0"
+		}
+		return decimal
 	default:
 		return fmt.Sprintf("%v", value)
 	}
