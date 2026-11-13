@@ -1040,7 +1040,7 @@ func checkMissingStandardInclude(identifier *string, parsing bool) (requiredIncl
 }
 
 func getActionNameByIdentifier(identifier *string) (name string, err error) {
-	if actions[*identifier] == nil {
+	if !callableAction(*identifier) {
 		var actionName, found = findActionByIdentifier(identifier)
 		if !found {
 			return "", fmt.Errorf("action name for '%s' not found", *identifier)

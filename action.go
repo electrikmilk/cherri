@@ -959,6 +959,18 @@ func internalDefinition(name string) *actionDefinition {
 	return existing
 }
 
+// logicOnly reports whether a compiler-defined entry has no definition of its own, so it only holds the logic that a Cherri
+// declaration attaches to and cannot be called until that declaration is included.
+func logicOnly(definition *actionDefinition) bool {
+	return !definition.parsed && definition.identifier == "" && len(definition.parameters) == 0
+}
+
+// callableAction reports whether name can be called, meaning it has a definition and not only compiler-defined logic.
+func callableAction(name string) bool {
+	var definition, found = actions[name]
+	return found && !logicOnly(definition)
+}
+
 // matchInternalDefinition returns the compiler-defined entry that a declaration of the action name attaches to. The internal
 // keyword must match whether that entry exists so a declaration shows when it depends on code outside of Cherri. It is checked
 // as soon as the name is collected so an error is reported where the declaration is.
