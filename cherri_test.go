@@ -177,14 +177,7 @@ var roundTripKnownFailures = map[string]string{
 
 // roundTripKnownMismatches lists shortcuts that recompile but with a different action sequence,
 // keyed like roundTripKnownFailures. An entry that starts matching must be removed.
-var roundTripKnownMismatches = map[string]string{
-	"control-flow-output": "extra loop setvariable",
-	"functions":           "extra loop setvariable",
-	"menus":               "extra loop setvariable",
-	"nil":                 "extra loop setvariable",
-	"repeats":             "extra loop setvariable per loop",
-	"standard":            "extra loop setvariable",
-}
+var roundTripKnownMismatches = map[string]string{}
 
 // roundTripRun runs the built compiler and returns whether it exited zero. The compiler runs as a
 // separate process because it keeps global state and calls os.Exit on error.

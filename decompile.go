@@ -143,6 +143,8 @@ type openLoop struct {
 	groupingUUID string
 	variableName string
 	identifier   string
+	// assigned is whether the loop starts with the Set Variable that the compiler writes for its variable.
+	assigned bool
 }
 
 var openLoops []openLoop
@@ -156,7 +158,7 @@ var loopVariableRegex = regexp.MustCompile("^Repeat (Index|Item)( [0-9]+)?$")
 // mapLoopVariables finds the loops whose variable is referenced before any code is written, because the loop
 // identifier is written before the references in its body.
 func mapLoopVariables() {
-	for _, action := range shortcut.WFWorkflowActions {
+	for index, action := range shortcut.WFWorkflowActions {
 		currentAction.identifier = action.WFWorkflowActionIdentifier
 		var isLoop = action.WFWorkflowActionIdentifier == repeatIdentifier || action.WFWorkflowActionIdentifier == repeatEachIdentifier
 		if isLoop && controlFlowMode(&action) == endStatement {
@@ -167,7 +169,7 @@ func mapLoopVariables() {
 		markLoopReferences(action.WFWorkflowActionParameters)
 
 		if isLoop && controlFlowMode(&action) == startStatement {
-			pushLoop(&action)
+			pushLoop(&action, index)
 		}
 	}
 	openLoops = nil
@@ -191,9 +193,9 @@ func markLoopReferences(value any) {
 	}
 }
 
-// pushLoop opens a loop. The compiler numbers the variable of a repeat by how many repeats are open, and the
-// variable of a repeat with each by how many of those are open, so each kind is counted on its own.
-func pushLoop(action *ShortcutAction) openLoop {
+// pushLoop opens the loop at index. The compiler numbers the variable of a repeat by how many repeats are open,
+// and the variable of a repeat with each by how many of those are open, so each kind is counted on its own.
+func pushLoop(action *ShortcutAction, index int) openLoop {
 	var variableName = "Repeat Index"
 	var identifier = "repeatIndex"
 	if action.WFWorkflowActionIdentifier == repeatEachIdentifier {
@@ -212,14 +214,64 @@ func pushLoop(action *ShortcutAction) openLoop {
 		identifier = fmt.Sprintf("%s%d", identifier, depth)
 	}
 
+	// The compiler sets the variable the loop declares to the variable Shortcuts names, so the loop is
+	// declared with that variable, and writing the Set Variable too would have the compiler write it twice.
+	var assignedIdentifier, assigned = loopVariableAssignment(index, variableName)
+	if assigned {
+		identifier = assignedIdentifier
+	}
+
 	var loop = openLoop{
 		groupingUUID: paramString(action, "GroupingIdentifier"),
 		variableName: variableName,
 		identifier:   identifier,
+		assigned:     assigned,
 	}
 	openLoops = append(openLoops, loop)
 
 	return loop
+}
+
+// loopVariableAssignment finds the variable that the Set Variable right after the loop at index sets to
+// variableName, which is the variable the loop declares.
+func loopVariableAssignment(index int, variableName string) (identifier string, found bool) {
+	if index+1 >= len(shortcut.WFWorkflowActions) {
+		return
+	}
+
+	var next = shortcut.WFWorkflowActions[index+1]
+	if next.WFWorkflowActionIdentifier != SetVariableIdentifier || next.WFWorkflowActionParameters["WFInput"] == nil {
+		return
+	}
+
+	var wfInput WFInput
+	mapToStruct(next.WFWorkflowActionParameters["WFInput"], &wfInput)
+	var reference = wfInput.Value
+	if reference.Type != "Variable" || reference.VariableName != variableName || len(reference.Aggrandizements) != 0 {
+		return
+	}
+
+	identifier = paramString(&next, "WFVariableName")
+	sanitizeIdentifier(&identifier)
+
+	return identifier, true
+}
+
+// isLoopVariableAssignment is whether the Set Variable at the current action is the one that the loop
+// declaration just written stands for.
+func isLoopVariableAssignment() bool {
+	if actionIndex == 0 || len(openLoops) == 0 {
+		return false
+	}
+
+	var previous = peekActions(-1)
+	var isLoop = previous.WFWorkflowActionIdentifier == repeatIdentifier || previous.WFWorkflowActionIdentifier == repeatEachIdentifier
+	if !isLoop || controlFlowMode(&previous) != startStatement {
+		return false
+	}
+
+	var innermost = openLoops[len(openLoops)-1]
+	return innermost.assigned && innermost.groupingUUID == paramString(&previous, "GroupingIdentifier")
 }
 
 func popLoop(action *ShortcutAction) {
@@ -261,8 +313,8 @@ func loopVariableReference(variableName string) (reference string, isLoopVariabl
 
 // loopDeclaration opens a loop and returns the identifier it declares.
 func loopDeclaration(action *ShortcutAction) string {
-	var loop = pushLoop(action)
-	if _, referenced := loopIdentifiers[loop.groupingUUID]; !referenced {
+	var loop = pushLoop(action, actionIndex)
+	if _, referenced := loopIdentifiers[loop.groupingUUID]; !referenced && !loop.assigned {
 		return "_"
 	}
 
@@ -595,6 +647,9 @@ func decompileActions() {
 		case "is.workflow.actions.calculateexpression":
 			decompExpression(&action)
 		case SetVariableIdentifier, AppendVariableIdentifier:
+			if isLoopVariableAssignment() {
+				continue
+			}
 			decompVariable(&action)
 		case "is.workflow.actions.conditional":
 			decompConditional(&action)
