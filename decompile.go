@@ -44,6 +44,8 @@ func decompile(b []byte) {
 	currentVariableValue = ""
 	currentVariableUUID = ""
 	currentVariableOperator = ""
+	decompiledImports = nil
+	decompiledDefinitions = nil
 	openMenuItems = make(map[string]bool)
 	appendedVariables = make(map[string]bool)
 	assignedVariables = make(map[string]bool)
@@ -71,6 +73,7 @@ func decompile(b []byte) {
 	decompileIcon()
 
 	decompileActions()
+	writeHeader()
 
 	if args.Using("debug") {
 		printDecompDebug()
@@ -577,31 +580,45 @@ func newCodeLine(s string) {
 	code.WriteString(s)
 }
 
-// defineName writes the name of the imported Shortcut to code as a name definition if the basename contains a space.
+// decompiledImports are the includes and imports the code needs, and decompiledDefinitions the definitions it
+// is written with. Both are written above the code, the imports first, once the code is known.
+var decompiledImports []string
+var decompiledDefinitions []string
+
+// writeHeader writes the imports and then the definitions above the code.
+func writeHeader() {
+	var header = append(slices.Clone(decompiledImports), decompiledDefinitions...)
+	if len(header) == 0 {
+		return
+	}
+
+	var body = strings.TrimLeft(code.String(), "\n")
+	code.Reset()
+	code.WriteString(strings.Join(header, "\n"))
+	code.WriteString("\n\n")
+	code.WriteString(body)
+}
+
+// defineName defines the name of the imported Shortcut if the basename contains a space.
 func defineName() {
 	if strings.Contains(basename, " ") {
-		newCodeLine(fmt.Sprintf("#define name %s\n", basename))
+		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define name %s", basename))
 	}
 }
 
 func decompileIcon() {
 	var icon = shortcut.WFWorkflowIcon
-	var hasIcon = icon.WFWorkflowIconStartColor != iconColor || icon.WFWorkflowIconGlyphNumber != iconGlyph
 
 	if icon.WFWorkflowIconStartColor != iconColor {
 		if name, found := firstNameWithValue(icon.WFWorkflowIconStartColor, colors, altColors); found {
-			newCodeLine(fmt.Sprintf("#define color %s\n", name))
+			decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define color %s", name))
 		}
 	}
 
 	if icon.WFWorkflowIconGlyphNumber != iconGlyph {
 		if name, found := firstNameWithValue(int(icon.WFWorkflowIconGlyphNumber), glyphs); found {
-			newCodeLine(fmt.Sprintf("#define glyph %s\n", name))
+			decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define glyph %s", name))
 		}
-	}
-
-	if hasIcon {
-		newCodeLine("\n")
 	}
 }
 
@@ -1821,13 +1838,6 @@ func decompAggrandizements(reference *string, aggrandizements []Aggrandizement) 
 	}
 }
 
-// popLine adds line to the top of the generated Cherri code.
-func popLine(line string) {
-	var saveCode = code.String()
-	code.Reset()
-	code.WriteString(fmt.Sprintf("%s\n%s", line, saveCode))
-}
-
 var macDefinition bool
 var setMacDefinition bool
 
@@ -1872,7 +1882,7 @@ func makeActionCallCode(action *ShortcutAction) string {
 
 	if (matchedAction.macOnly || matchedAction.nonMacOnly) && !setMacDefinition {
 		macDefinition = matchedAction.macOnly && !matchedAction.nonMacOnly
-		popLine(fmt.Sprintf("#define mac %v", macDefinition))
+		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define mac %v", macDefinition))
 		setMacDefinition = true
 	}
 

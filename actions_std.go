@@ -1231,7 +1231,7 @@ func includeStandardAction(name string) {
 	}
 
 	decompiledIncludes = append(decompiledIncludes, actionInclude)
-	popLine(fmt.Sprintf("#include 'actions/%s'", actionInclude))
+	decompiledImports = append(decompiledImports, fmt.Sprintf("#include 'actions/%s'", actionInclude))
 }
 
 // importToolkitActions imports the actions of the app that the action belongs to, which is the identifier without the
@@ -1258,10 +1258,10 @@ func importToolkitActions(identifier *string) {
 
 	var containerName, nameErr = getContainerName(&containerId)
 	if nameErr != nil {
-		popLine(fmt.Sprintf("#import '%s'", baseIdentifier))
+		decompiledImports = append(decompiledImports, fmt.Sprintf("#import '%s'", baseIdentifier))
 		return
 	}
-	popLine(fmt.Sprintf("#import '%s'", containerName))
+	decompiledImports = append(decompiledImports, fmt.Sprintf("#import '%s'", containerName))
 }
 
 func getActionNameByIdentifier(identifier *string) (name string, err error) {
