@@ -213,6 +213,33 @@ func roundTripRun(binary string, arguments ...string) (string, bool) {
 	return string(output), runErr == nil
 }
 
+// roundTripCheckDeterministic decompiles the shortcut again, in another process as the order of a map changes
+// with each one, and fails when the code is not the same.
+func roundTripCheckDeterministic(t *testing.T, binary string, shortcutPath string, dir string, firstPath string) {
+	t.Helper()
+
+	var secondDir = filepath.Join(dir, "dec-again")
+	if mkdirErr := os.MkdirAll(secondDir, 0755); mkdirErr != nil {
+		t.Fatal(mkdirErr)
+	}
+	var output, ok = roundTripRun(binary, "--import="+shortcutPath, "--output="+secondDir+"/", "--no-ansi", "--comments")
+	if !ok {
+		t.Fatalf("second decompile failed:\n%s", roundTripTail(output))
+	}
+
+	var first, firstErr = os.ReadFile(firstPath)
+	if firstErr != nil {
+		t.Fatal(firstErr)
+	}
+	var second, secondErr = os.ReadFile(filepath.Join(secondDir, filepath.Base(firstPath)))
+	if secondErr != nil {
+		t.Fatal(secondErr)
+	}
+	if string(first) != string(second) {
+		t.Fatalf("decompiling twice gave different code:\n%s\n---\n%s", first, second)
+	}
+}
+
 func roundTripTail(output string) string {
 	var outputLines = strings.Split(strings.TrimSpace(output), "\n")
 	if len(outputLines) > 20 {
@@ -318,6 +345,10 @@ func TestRoundTrip(t *testing.T) {
 			var output, ok = roundTripRun(binary, "--import="+copied, "--output="+decompiledDir+"/", "--no-ansi", "--comments")
 			if !ok {
 				failure = "decompile failed:\n" + roundTripTail(output)
+			}
+
+			if failure == "" {
+				roundTripCheckDeterministic(t, binary, copied, dir, decompiledPath)
 			}
 
 			if failure == "" {
