@@ -59,3 +59,13 @@ enum airdropReceivingStates {
 action setAirdropReceiving(
     airdropReceivingStates ?state: 'WFAirDropState' = "Everyone"
 )
+
+enum QRCodeErrorCorrection {
+    'Low',
+    'Medium',
+    'Quartile',
+    'High',
+}
+
+// [Doc]: [QR Codes] Make QR Code
+action 'generatebarcode' makeQRCode(text input: 'WFText', QRCodeErrorCorrection ?errorCorrection: 'WFQRErrorCorrectionLevel' = "Medium", color foregroundColor: 'WFQRForegroundColor' = color(0.0,0.0,0.0,1.0), color backgroundColor: 'WFQRBackgroundColor' = color(2.0,2.0,2.0,1.0))

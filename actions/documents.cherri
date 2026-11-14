@@ -131,16 +131,6 @@ action 'com.apple.mobilenotes.ShowQuickNoteIntent' showQuickNote()
 // [Doc]: [Printing] Print: Print input to a printer.
 action print(variable input: 'WFInput')
 
-enum QRCodeErrorCorrection {
-	'Low',
-	'Medium',
-	'Quartile',
-	'High',
-}
-
-// [Doc]: [QR Codes] Make QR Code
-action 'generatebarcode' makeQRCode(text input: 'WFText', QRCodeErrorCorrection ?errorCorrection: 'WFQRErrorCorrectionLevel' = "Medium", color foregroundColor: 'WFQRForegroundColor' = color(0.0,0.0,0.0,1.0), color backgroundColor: 'WFQRBackgroundColor' = color(2.0,2.0,2.0,1.0))
-
 // [Doc]: Convert to USDZ
 action 'com.apple.HydraUSDAppIntents.ConvertToUSDZ' convertToUSDZ(variable file)
 
