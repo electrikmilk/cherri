@@ -1052,8 +1052,13 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 		switch v := value.(type) {
 		case uint64:
 			number = int(v)
+		case int64:
+			// A negative integer is read as an int64 rather than a uint64.
+			number = v
 		case float64:
 			number = v
+		default:
+			decompError(fmt.Sprintf("Expected the parameter 'WFNumberActionNumber' to be a number, text or a dictionary, got %T", value), action)
 		}
 	}
 
