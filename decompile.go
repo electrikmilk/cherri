@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"reflect"
 	"regexp"
@@ -906,7 +907,7 @@ func decompMenu(action *ShortcutAction) {
 		if attributedTitle, found := action.WFWorkflowActionParameters["WFMenuItemAttributedTitle"]; found {
 			code.WriteString(decompValue(attributedTitle))
 		} else if menuItem.value != nil {
-			code.WriteString(decompValue(menuItem.value))
+			code.WriteString(decompValue(menuItemValue(menuItem.value, action)))
 		}
 		code.WriteString(":\n")
 		tabLevel++
@@ -914,6 +915,21 @@ func decompMenu(action *ShortcutAction) {
 		tabLevel--
 		newCodeLine("}\n")
 	}
+}
+
+// menuItemValue is the title of a menu item, which the compiler writes as a WFMenuItem dictionary
+// holding it in WFValue, and Shortcuts as a string.
+func menuItemValue(item any, action *ShortcutAction) any {
+	var menuItem, isMap = item.(map[string]interface{})
+	if !isMap {
+		return item
+	}
+	var value, found = menuItem["WFValue"]
+	if !found {
+		decompError("Expected a menu item dictionary to hold its title in WFValue", action)
+	}
+
+	return value
 }
 
 func decompRepeat(action *ShortcutAction) {
@@ -1056,7 +1072,7 @@ func decompConditionOperand(condition map[string]interface{}, keys []string, act
 
 		switch key {
 		case "WFDuration":
-			return decompConditionDuration(operand, action)
+			return decompQuantity(operand, "WFDuration", action)
 		case "WFNumberValue", "WFAnotherNumber":
 			return decompConditionNumber(operand)
 		default:
@@ -1082,14 +1098,14 @@ func decompConditionNumber(operand any) string {
 	return numberText
 }
 
-func decompConditionDuration(operand any, action *ShortcutAction) string {
+func decompQuantity(operand any, key string, action *ShortcutAction) string {
 	var duration, isMap = operand.(map[string]interface{})
 	if !isMap {
-		decompError(fmt.Sprintf("Expected WFDuration to be a WFQuantityFieldValue, got %T", operand), action)
+		decompError(fmt.Sprintf("Expected %s to be a WFQuantityFieldValue, got %T", key, operand), action)
 	}
 	var quantity, hasValue = duration["Value"].(map[string]interface{})
 	if !hasValue || quantity["Magnitude"] == nil || quantity["Unit"] == nil {
-		decompError("Expected WFDuration to have a Value with a Magnitude and a Unit", action)
+		decompError(fmt.Sprintf("Expected %s to have a Value with a Magnitude and a Unit", key), action)
 	}
 
 	return fmt.Sprintf("qty(%s, %s)", decompConditionNumber(quantity["Magnitude"]), decompValue(quantity["Unit"]))
@@ -1117,13 +1133,11 @@ func decompDictionary(action *ShortcutAction) {
 func decompDictionaryValue(items []WFDictionaryFieldValueItem) string {
 	decompilingDictionary = true
 
-	var dictionary = decompDictionaryItems(items)
-	var jsonBytes, jsonErr = json.MarshalIndent(dictionary, strings.Repeat("\t", tabLevel), "\t")
-	handle(jsonErr)
+	var dictionary = decompLiteral(decompDictionaryItems(items))
 
 	decompilingDictionary = false
 
-	return bareReferenceMarkerRegex.ReplaceAllString(string(jsonBytes), "$1")
+	return dictionary
 }
 
 // bareReference is a variable reference that is written without quotes. JSON cannot express that, so it is
@@ -1164,7 +1178,6 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	if !isMap {
 		decompError(fmt.Sprintf("Expected a dictionary item value to be a dictionary, got %T", item.WFValue), currentDecompAction())
 	}
-	var itemStringValue = decompValue(item.WFValue)
 	var itemValue any
 
 	if dictDataType(item.WFItemType) == itemTypeFile {
@@ -1172,7 +1185,7 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	}
 
 	if isReferenceValue(itemValueMap["Value"]) {
-		return fmt.Sprintf("{%s}", itemStringValue)
+		return fmt.Sprintf("{%s}", decompValue(item.WFValue))
 	}
 
 	switch dictDataType(item.WFItemType) {
@@ -1192,7 +1205,7 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 		}
 		itemValue = boolValue
 	case itemTypeText:
-		itemValue = strings.Trim(itemStringValue, "\"")
+		itemValue = strings.Trim(decompValue(item.WFValue), "\"")
 	case itemTypeArray:
 		var arrayItems, isSlice = itemValueMap["Value"].([]interface{})
 		if !isSlice {
@@ -1209,7 +1222,7 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 		mapToStruct(nestedValue["WFDictionaryFieldValueItems"], &dictionaryItems)
 		itemValue = decompDictionaryItems(dictionaryItems)
 	default:
-		itemValue = itemStringValue
+		itemValue = decompValue(item.WFValue)
 	}
 
 	return itemValue
@@ -1234,14 +1247,28 @@ func decompValue(value any) string {
 		return "nil"
 	}
 
-	switch typed := value.(type) {
+	switch typedValue := value.(type) {
 	case map[string]interface{}:
-		return decompValueObject(typed)
+		return decompValueObject(typedValue)
 	case string:
-		return fmt.Sprintf("\"%s\"", escapeString(typed))
+		return fmt.Sprintf("\"%s\"", escapeString(typedValue))
+	case []interface{}:
+		return decompLiteral(decompArray(typedValue))
+	case bool, int, int64, uint64, float64:
+		return fmt.Sprintf("%v", typedValue)
 	default:
-		return fmt.Sprintf("%v", value)
+		decompError(fmt.Sprintf("Expected a value to be text, a number, a boolean, an array or a dictionary, got %T", value), currentDecompAction())
+		return ""
 	}
+}
+
+// decompLiteral writes an array or a dictionary as a Cherri literal, which is JSON, so a Go value is never
+// written with its Go formatting.
+func decompLiteral(value any) string {
+	var jsonBytes, jsonErr = json.MarshalIndent(value, strings.Repeat("\t", tabLevel), "\t")
+	handle(jsonErr)
+
+	return bareReferenceMarkerRegex.ReplaceAllString(string(jsonBytes), "$1")
 }
 
 func escapeString(value string) string {
@@ -1259,6 +1286,11 @@ func escapeString(value string) string {
 }
 
 func decompValueObject(value map[string]interface{}) string {
+	// The compiler writes an empty dictionary for an argument given as nil.
+	if len(value) == 0 {
+		return "nil"
+	}
+
 	if v, found := value["Value"]; found {
 		if nested, isMap := v.(map[string]interface{}); isMap {
 			value = nested
@@ -1363,16 +1395,27 @@ func decompGlobal(referenceType string) string {
 func decompObjectValue(valueObj any) string {
 	var value, isMap = valueObj.(map[string]interface{})
 	if !isMap {
-		return fmt.Sprintf("%v", valueObj)
+		return decompValue(valueObj)
 	}
 
 	var attachmentString string
+	// Shortcuts writes empty text as a text token string without a Value.
+	if value["Value"] == nil && value["WFSerializationType"] == "WFTextTokenString" {
+		return attachmentString
+	}
 	if value["Value"] != nil {
-		var nested, isNestedMap = value["Value"].(map[string]interface{})
+		var nestedValue, isNestedMap = value["Value"].(map[string]interface{})
 		if !isNestedMap {
-			return fmt.Sprintf("%v", valueObj)
+			return decompValue(value["Value"])
 		}
-		value = nested
+		value = nestedValue
+	}
+
+	var _, hasString = value["string"]
+	var _, hasAttachments = value["attachmentsByRange"]
+	if !hasString && !hasAttachments {
+		var keys = slices.Sorted(maps.Keys(value))
+		decompError(fmt.Sprintf("Expected a dictionary value to be text, a variable reference or a dictionary, got one with the keys: %s", strings.Join(keys, ", ")), currentDecompAction())
 	}
 
 	if _, found := value["string"]; found {
@@ -1610,17 +1653,9 @@ func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actio
 
 		var argValue string
 		if value, found := action.WFWorkflowActionParameters[param.key]; found {
-			argValue = decompValue(value)
+			argValue = decompArgument(param, value, action)
 		} else if !param.optional {
 			argValue = makeDefaultValue(param)
-		}
-
-		switch param.validType {
-		case Integer:
-			if startsWith(Ask, argValue) {
-				break
-			}
-			argValue = strings.Trim(argValue, "\"")
 		}
 
 		if argValue != "" {
@@ -1631,6 +1666,57 @@ func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actio
 			}
 		}
 	}
+}
+
+// decompArgument writes the plist value of a parameter, which for a color or a quantity is written
+// as the color() or qty() Cherri reads it from.
+func decompArgument(param parameterDefinition, value any, action *ShortcutAction) string {
+	if isReferenceValue(value) {
+		return decompValue(value)
+	}
+
+	switch param.validType {
+	case Quantity:
+		return decompQuantity(value, param.key, action)
+	case Color:
+		return decompColor(value, param.key, action)
+	}
+
+	var argValue = decompValue(value)
+	if param.validType == Integer && !startsWith(Ask, argValue) {
+		argValue = strings.Trim(argValue, "\"")
+	}
+
+	return argValue
+}
+
+// decompColor writes a WFColorValue as color(). Shortcuts leaves a component out when it is 0.
+func decompColor(value any, key string, action *ShortcutAction) string {
+	var colorValue, isMap = value.(map[string]interface{})
+	if !isMap || colorValue["WFColorRepresentationType"] != "WFColorRepresentationTypeCGColor" {
+		decompError(fmt.Sprintf("Expected %s to be a CGColor color value", key), action)
+	}
+
+	var components []string
+	for _, component := range []string{"redComponent", "greenComponent", "blueComponent", "alphaComponent"} {
+		var number float64
+		switch componentValue := colorValue[component].(type) {
+		case nil:
+		case float64:
+			number = componentValue
+		case uint64:
+			number = float64(componentValue)
+		default:
+			decompError(fmt.Sprintf("Expected %s of %s to be a number, got %T", component, key, componentValue), action)
+		}
+		// Color components are float literals, which need a decimal point to be read as a float.
+		components = append(components, strconv.FormatFloat(number, 'f', -1, 64))
+		if !strings.Contains(end(components), ".") {
+			components[len(components)-1] += ".0"
+		}
+	}
+
+	return fmt.Sprintf("color(%s)", strings.Join(components, ", "))
 }
 
 func makeDefaultValue(param parameterDefinition) string {
