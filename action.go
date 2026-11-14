@@ -778,12 +778,15 @@ func generateActionParamDefinition(param parameterDefinition) string {
 func formatColorDefault(components []actionArgument) string {
 	var formatted []string
 	for _, component := range components {
-		var componentValue = fmt.Sprintf("%v", component.value)
-		if floatValue, isFloat := component.value.(float64); isFloat {
-			componentValue = strconv.FormatFloat(floatValue, 'f', -1, 64)
-			if !strings.Contains(componentValue, ".") {
-				componentValue += ".0"
-			}
+		var floatValue, isFloat = component.value.(float64)
+		if !isFloat {
+			formatted = append(formatted, fmt.Sprintf("%v", component.value))
+			continue
+		}
+
+		var componentValue = strconv.FormatFloat(floatValue, 'f', -1, 64)
+		if !strings.Contains(componentValue, ".") {
+			componentValue += ".0"
 		}
 		formatted = append(formatted, componentValue)
 	}
