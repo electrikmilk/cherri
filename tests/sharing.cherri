@@ -3,7 +3,7 @@
 findConversation("Cherri")
 findMessage("Cherri")
 
-const scanned = scanCode()
-const scannedFromImage = scanCodeInImage(ShortcutInput)
+scanCode()
+scanCodeInImage(ShortcutInput)
 
 show("✅ All tests passed")
