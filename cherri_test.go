@@ -178,14 +178,12 @@ var roundTripKnownFailures = map[string]string{
 // roundTripKnownMismatches lists shortcuts that recompile but with a different action sequence,
 // keyed like roundTripKnownFailures. An entry that starts matching must be removed.
 var roundTripKnownMismatches = map[string]string{
-	"arrays":              "appendvariable becomes setvariable",
-	"control-flow-output": "extra loop setvariable, appendvariable becomes setvariable",
-	"functions":           "appendvariable becomes setvariable",
-	"menus":               "extra loop setvariable, appendvariable becomes setvariable",
+	"control-flow-output": "extra loop setvariable",
+	"functions":           "extra loop setvariable",
+	"menus":               "extra loop setvariable",
 	"nil":                 "extra loop setvariable",
 	"repeats":             "extra loop setvariable per loop",
-	"standard":            "extra loop setvariable, appendvariable becomes setvariable",
-	"variables":           "appendvariable becomes setvariable",
+	"standard":            "extra loop setvariable",
 }
 
 // roundTripRun runs the built compiler and returns whether it exited zero. The compiler runs as a

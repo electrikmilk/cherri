@@ -43,6 +43,8 @@ func decompile(b []byte) {
 	loopIdentifiers = make(map[string]string)
 	currentVariableValue = ""
 	currentVariableUUID = ""
+	appendedVariables = make(map[string]bool)
+	assignedVariables = make(map[string]bool)
 
 	// The Shortcut keeps its name for the name definition and runSelf, only the file name has no spaces.
 	var outputBasename = strings.ReplaceAll(basename, " ", "_")
@@ -276,6 +278,9 @@ func mapVariables() {
 			sanitizeIdentifier(&varName)
 			if _, found := variables[varName]; !found {
 				variables[varName] = varValue{}
+			}
+			if action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
+				appendedVariables[varName] = true
 			}
 
 			if action.WFWorkflowActionParameters["WFInput"] != nil {
@@ -804,10 +809,26 @@ func decompExpression(action *ShortcutAction) {
 	checkConstantLiteral(action)
 }
 
+// appendedVariables are the variables that an Append to Variable adds to, and assignedVariables those that
+// a Set Variable or Append to Variable has written so far.
+var appendedVariables map[string]bool
+var assignedVariables map[string]bool
+
 func decompVariable(action *ShortcutAction) {
 	var variableName = paramString(action, "WFVariableName")
 	sanitizeIdentifier(&variableName)
 	newCodeLine(fmt.Sprintf("@%s", variableName))
+
+	var firstAssignment = !assignedVariables[variableName]
+	assignedVariables[variableName] = true
+
+	// The compiler only appends to a variable that was an array where it was first written, and otherwise
+	// sets it, so the first write of a variable that is appended to declares the type.
+	if firstAssignment && appendedVariables[variableName] && action.WFWorkflowActionIdentifier == SetVariableIdentifier &&
+		action.WFWorkflowActionParameters["WFInput"] == nil {
+		code.WriteString(": array\n")
+		return
+	}
 
 	var inputUUID string
 	if action.WFWorkflowActionParameters["WFInput"] != nil {
@@ -819,7 +840,7 @@ func decompVariable(action *ShortcutAction) {
 	if currentVariableValue == "" || inputUUID == "" || inputUUID != currentVariableUUID {
 		var decompInput = decompValue(action.WFWorkflowActionParameters["WFInput"])
 		if decompInput != "" {
-			code.WriteString(fmt.Sprintf(" = %s", decompInput))
+			code.WriteString(fmt.Sprintf(" %s %s", assignmentOperator(action), decompInput))
 		}
 		code.WriteRune('\n')
 		return
@@ -834,17 +855,20 @@ func decompVariable(action *ShortcutAction) {
 		return
 	}
 
-	code.WriteRune(' ')
-	if action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
-		code.WriteString("+= ")
-	} else {
-		code.WriteString("= ")
-	}
+	code.WriteString(fmt.Sprintf(" %s ", assignmentOperator(action)))
 	code.WriteString(currentVariableValue)
 	code.WriteRune('\n')
 
 	currentVariableValue = ""
 	currentVariableUUID = ""
+}
+
+func assignmentOperator(action *ShortcutAction) string {
+	if action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
+		return "+="
+	}
+
+	return "="
 }
 
 func decompDictionaryGetValue(action *ShortcutAction) {
