@@ -1,6 +1,24 @@
 /*
-3rd Party Actions: Dropbox
+Dropbox Actions
+
+Requires user to connect Dropbox account in Shortcuts.
 */
+
+// [Doc]: Get Dropbox File: Get the file at `path` in Dropbox. Requires user to setup Dropbox account in Shortcuts app.
+action 'dropbox.open' getDropboxFile(
+    text path: 'WFGetFilePath',
+    bool ?errorIfNotFound: 'WFFileErrorIfNotFound' = true
+) {
+    "WFShowFilePicker": false
+}
+
+// [Doc]: Select Dropbox File: Prompt the user to select one or optionally multiple files from Dropbox, starting at `initialPath`. Requires user to setup Dropbox account in Shortcuts app.
+action 'dropbox.open' selectDropboxFile(
+    text ?initialPath: 'WFGetFileInitialDirectoryPath',
+    bool ?selectMultiple: 'SelectMultiple' = false
+) {
+    "WFShowFilePicker": true
+}
 
 // [Doc]: Save File to Dropbox: Save a file to Dropbox. Requires user to setup Dropbox account in Shortcuts app.
 action 'dropbox.savefile' saveToDropbox(
@@ -17,4 +35,20 @@ action 'dropbox.savefile' saveToDropboxPrompt(
     bool ?overwrite: 'WFSaveFileOverwrite' = false
 ) {
     "WFAskWhereToSave": true
+}
+
+// [Doc]: Append to Dropbox File: Append text to a Dropbox text file at `filePath`. Requires user to setup Dropbox account in Shortcuts app.
+action 'dropbox.appendfile' appendDropboxFile(
+    text filePath: 'WFFilePath',
+    text input: 'WFInput',
+    bool ?onNewLine: 'WFAppendOnNewLine' = false
+)
+
+// [Doc]: Prepend to Dropbox File: Prepend text to a Dropbox text file at `filePath`. Requires user to setup Dropbox account in Shortcuts app.
+action 'dropbox.appendfile' prependDropboxFile(
+    text filePath: 'WFFilePath',
+    text input: 'WFInput',
+    bool ?onNewLine: 'WFAppendOnNewLine' = false
+) {
+    "WFAppendFileWriteMode": "Prepend"
 }

@@ -1,0 +1,12 @@
+// compile-only: requires a Dropbox account set up in Shortcuts
+
+@file = selectDropboxFile("/Documents", true)
+saveToDropbox(@file, "/Documents/copy")
+saveToDropboxPrompt(@file, true)
+
+const found = getDropboxFile("/example.txt", false)
+appendDropboxFile("/example.txt", "{found}")
+appendDropboxFile("/example.txt", "{found}", true)
+prependDropboxFile("/example.txt", "{found}", true)
+
+show("✅ All tests passed")
