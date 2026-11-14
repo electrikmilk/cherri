@@ -620,12 +620,16 @@ func decompileIcon() {
 	if icon.WFWorkflowIconStartColor != iconColor {
 		if name, found := firstNameWithValue(icon.WFWorkflowIconStartColor, colors, altColors); found {
 			decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define color %s", name))
+		} else {
+			decompWarning(fmt.Sprintf("The icon color %d has no name in Cherri and is left out.", icon.WFWorkflowIconStartColor))
 		}
 	}
 
 	if icon.WFWorkflowIconGlyphNumber != iconGlyph {
 		if name, found := firstNameWithValue(int(icon.WFWorkflowIconGlyphNumber), glyphs); found {
 			decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define glyph %s", name))
+		} else {
+			decompWarning(fmt.Sprintf("The icon glyph %d has no name in Cherri and is left out.", icon.WFWorkflowIconGlyphNumber))
 		}
 	}
 }
@@ -648,7 +652,9 @@ func decompileDefinitions() {
 	defineList("outputs", "WFWorkflowOutputContentItemClasses", shortcut.WFWorkflowOutputContentItemClasses, contentItems)
 
 	var workflowTypeNames = slices.Sorted(slices.Values(shortcut.WFWorkflowTypes))
-	if !slices.Equal(workflowTypeNames, slices.Sorted(slices.Values(defaultWorkflowTypes))) {
+	if len(workflowTypeNames) == 0 {
+		decompWarning("WFWorkflowTypes is empty, which Cherri cannot write, and is left out for the default.")
+	} else if !slices.Equal(workflowTypeNames, slices.Sorted(slices.Values(defaultWorkflowTypes))) {
 		defineList("from", "WFWorkflowTypes", shortcut.WFWorkflowTypes, workflowTypes)
 	}
 	defineList("quickactions", "WFQuickActionSurfaces", shortcut.WFQuickActionSurfaces, quickActions)
@@ -659,6 +665,11 @@ func decompileDefinitions() {
 
 // defineInputs writes the content items that the Shortcut accepts, which are all of them when not defined.
 func defineInputs() {
+	if len(shortcut.WFWorkflowInputContentItemClasses) == 0 {
+		decompWarning("WFWorkflowInputContentItemClasses is empty, which Cherri cannot write, and is left out for the default.")
+		return
+	}
+
 	var accepted []string
 	for _, class := range shortcut.WFWorkflowInputContentItemClasses {
 		if _, found := reversedContentItems()[class]; found {
