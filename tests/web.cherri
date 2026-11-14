@@ -24,13 +24,13 @@ const created = jsonRequest("{API_URL}", "POST", {"name": "Test", "active": true
 const authedPost = jsonRequest("{API_URL}", "POST", {"name": "Test"}, {"Authorization": "Bearer token"})
 const submitted = formRequest("{API_URL}", "POST", {"key": "value"})
 
-// A form value that is only a variable reference prefixed with $ is sent as a file
+// A bare variable as a form value is sent as a file
 @uploadInput = ShortcutInput
 const uploadContents = text("file contents")
 const uploaded = formRequest("{API_URL}", "POST", {
-    "file": "${@uploadInput}",
-    "contents": "${uploadContents}",
-    "input": "${ShortcutInput}",
+    "file": @uploadInput,
+    "contents": uploadContents,
+    "input": ShortcutInput,
     "name": "{@uploadInput}"
 })
 
