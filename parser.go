@@ -2224,7 +2224,7 @@ func parserError(message string) {
 	var errorFilename, errorLine, errorCol = delinquentFile()
 
 	if args.Using("no-ansi") {
-		fmt.Printf("Error: %s (%d:%d)\n", message, errorLine, errorCol)
+		fmt.Print(noAnsiErrorReport(message, errorFilename, errorLine, errorCol))
 		os.Exit(1)
 	}
 
@@ -2235,6 +2235,16 @@ func parserError(message string) {
 	} else {
 		os.Exit(1)
 	}
+}
+
+// noAnsiErrorReport formats an error for --no-ansi output. The first line never changes so existing parsers keep working,
+// and the included file goes on its own line so its path needs no escaping.
+func noAnsiErrorReport(message string, errorFilename string, errorLine int, errorCol int) string {
+	var report = fmt.Sprintf("Error: %s (%d:%d)\n", message, errorLine, errorCol)
+	if errorFilename != filePath {
+		report += fmt.Sprintf("File: %s\n", errorFilename)
+	}
+	return report
 }
 
 // excerptError prints the error message followed by a colored excerpt of the source around it, underlining the offending character.

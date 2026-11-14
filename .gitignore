@@ -16,6 +16,8 @@
 *.cherri
 !/actions/*.cherri
 !/tests/*.cherri
+!/tests/include-errors/**/*.cherri
+!/tests/include-errors/*.cherri
 /tests/decomp-me.cherri
 *_decompiled.plist
 *_processed.cherri

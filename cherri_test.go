@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -330,4 +331,60 @@ func resetParser() {
 	currentCategory = ""
 	repeatItemIndex = 1
 	repeatIndexDepth = 1
+}
+
+// TestCompileSubprocess is the body for compileInSubprocess, since parserError exits the process.
+func TestCompileSubprocess(t *testing.T) {
+	var file = os.Getenv("CHERRI_SUBPROCESS_FILE")
+	if file == "" {
+		t.Skip("only runs as a subprocess of compileInSubprocess")
+	}
+
+	args.Args["no-ansi"] = ""
+	args.Args["skip-sign"] = ""
+	os.Args[1] = file
+	loadStandardActions()
+	main()
+}
+
+func compileInSubprocess(t *testing.T, file string) string {
+	t.Helper()
+
+	var cmd = exec.Command(os.Args[0], "-test.run=^TestCompileSubprocess$")
+	cmd.Env = append(os.Environ(), "CHERRI_SUBPROCESS_FILE="+file)
+	var output, _ = cmd.CombinedOutput()
+	return string(output)
+}
+
+func TestNoAnsiIncludeErrorNamesTheIncludedFile(t *testing.T) {
+	var output = compileInSubprocess(t, "tests/include-errors/main.cherri")
+
+	var errorPrefix = "Error: Use raw string (') for include file paths (2:"
+	var lines = strings.Split(output, "\n")
+	var errorIdx = -1
+	for i, line := range lines {
+		if strings.HasPrefix(line, errorPrefix) {
+			errorIdx = i
+			break
+		}
+	}
+	if errorIdx == -1 {
+		t.Fatalf("missing error line %q in output:\n%s", errorPrefix, output)
+	}
+	if errorIdx+1 >= len(lines) || lines[errorIdx+1] != "File: tests/include-errors/shared/helper.cherri" {
+		t.Fatalf("expected the File line directly after the error line, got output:\n%s", output)
+	}
+}
+
+func TestNoAnsiMainFileErrorOmitsTheFile(t *testing.T) {
+	var output = compileInSubprocess(t, "tests/include-errors/main-error.cherri")
+
+	if !strings.Contains(output, "Error: Use raw string (') for include file paths (1:") {
+		t.Fatalf("missing error line in output:\n%s", output)
+	}
+	for _, line := range strings.Split(output, "\n") {
+		if strings.HasPrefix(line, "File:") {
+			t.Fatalf("unexpected File line %q in output:\n%s", line, output)
+		}
+	}
 }
