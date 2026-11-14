@@ -6,5 +6,6 @@ getPDFText(@pdf)
 getPDFText(@pdf, true)
 getPDFText(@pdf, false, false)
 getPDFText(@pdf, false, false, "Header", "Footer")
+getPDFText(@pdf, nil, false)
 
 show("✅ All tests passed")

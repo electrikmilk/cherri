@@ -210,8 +210,8 @@ var actions = map[string]*actionDefinition{
 			}
 
 			if len(args) > 1 {
-				var richText = getArgValue(args[1]).(bool)
-				if richText {
+				// A nil richText is left out like a false one.
+				if richText, isBool := getArgValue(args[1]).(bool); isBool && richText {
 					return map[string]any{
 						"WFGetTextFromPDFTextType": "Rich Text",
 					}
@@ -594,8 +594,9 @@ var actions = map[string]*actionDefinition{
 			if args[1].value != nil {
 				var alphabetic = []string{"Title", "App Name", "Name", "Random"}
 				var numeric = []string{"Width", "Height", "X Position", "Y Position", "Window Index"}
-				var sortBy = getArgValue(args[0]).(string)
-				var orderBy = getArgValue(args[1]).(string)
+				// A nil sortBy matches no sort property, so the order is kept as is.
+				var sortBy, _ = getArgValue(args[0]).(string)
+				var orderBy, _ = getArgValue(args[1]).(string)
 				if sortBy != "Random" {
 					if slices.Contains(alphabetic, sortBy) {
 						switch orderBy {
@@ -821,7 +822,8 @@ var actions = map[string]*actionDefinition{
 	"setFocusMode": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) > 0 {
-				var mode = getArgValue(args[0]).(string)
+				// A nil focusMode is left out for the default.
+				var mode, _ = getArgValue(args[0]).(string)
 				if fm, found := focusModes[mode]; found {
 					return map[string]any{
 						"FocusModes": fm,
@@ -839,7 +841,8 @@ var actions = map[string]*actionDefinition{
 			}
 
 			if len(args) > 0 {
-				var mode = getArgValue(args[0]).(string)
+				// A nil focusMode is left out for the default.
+				var mode, _ = getArgValue(args[0]).(string)
 				if fm, found := focusModes[mode]; found {
 					params["FocusModes"] = fm
 				}
