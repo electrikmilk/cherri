@@ -478,40 +478,25 @@ type actionValue struct {
 	definition *actionDefinition
 }
 
+// identifierMap maps the full identifier that an action writes to the actions that write it, sorted by
+// name, so which one of several that share an identifier is picked never depends on the order of a map.
 var identifierMap map[string][]actionValue
 
-// mapSplitActions creates a map of actions that have been split into a few actions to reduce the number of arguments.
+// mapSplitActions indexes the actions by identifier. It is rebuilt from every action defined so far, as actions
+// are defined while the Shortcut is decompiled.
 func mapSplitActions() {
-	if identifierMap == nil {
-		identifierMap = make(map[string][]actionValue)
-	}
-	for identifier, action := range actions {
-		var ident = action.identifier
-		if action.identifier == "" {
-			ident = identifier
-		}
-
-		ident = strings.ToLower(ident)
-
-		var splitActionValue = actionValue{
-			identifier: identifier,
+	identifierMap = make(map[string][]actionValue)
+	for name, action := range actions {
+		var identifier = fullActionIdentifier(name, action)
+		identifierMap[identifier] = append(identifierMap[identifier], actionValue{
+			identifier: name,
 			definition: action,
-		}
-		if identifierMap[ident] != nil && slices.Contains(identifierMap[ident], splitActionValue) {
-			continue
-		}
-
-		identifierMap[ident] = append(identifierMap[ident], splitActionValue)
-	}
-	for identifier, actions := range identifierMap {
-		if len(actions) < 2 {
-			delete(identifierMap, identifier)
-			continue
-		}
-		sort.Slice(actions, func(i, j int) bool {
-			return actions[i].identifier < actions[j].identifier
 		})
-		identifierMap[identifier] = actions
+	}
+	for _, candidates := range identifierMap {
+		sort.Slice(candidates, func(i, j int) bool {
+			return candidates[i].identifier < candidates[j].identifier
+		})
 	}
 }
 
@@ -1914,50 +1899,40 @@ func processRawParameters(params map[string]any) map[string]any {
 }
 
 func matchAction(action *ShortcutAction) (name string, definition actionDefinition) {
-	for call, def := range actions {
-		var identifier = strings.ToLower(call)
-		if def.identifier != "" {
-			identifier = def.identifier
-		}
-		var appIdentifier = "is.workflow.actions"
-		if def.appIdentifier != "" {
-			appIdentifier = def.appIdentifier
-		}
-		var actionIdentifier = fmt.Sprintf("%s.%s", appIdentifier, identifier)
-		if actionIdentifier != action.WFWorkflowActionIdentifier && def.overrideIdentifier != action.WFWorkflowActionIdentifier {
-			continue
-		}
-
-		definition = *def
-		name = call
-
-		if splitActions, found := identifierMap[identifier]; found {
-			matchSplitAction(&splitActions, action, &name, &definition)
-			if name != "run" && name != "runSelf" {
-				return
-			}
-			// A shortcut run by name has no WFWorkflow, and a run of itself without input only has isSelf.
-			if _, hasWorkflow := action.WFWorkflowActionParameters["WFWorkflow"]; !hasWorkflow {
-				return
-			}
-			var workflow = paramMap(action, "WFWorkflow")
-			if _, hasSelf := workflow["isSelf"]; !hasSelf {
-				return
-			}
-			var isSelf, isBool = workflow["isSelf"].(bool)
-			if !isBool {
-				decompError(fmt.Sprintf("Expected isSelf of WFWorkflow to be a boolean, got %T", workflow["isSelf"]), action)
-			}
-			if isSelf || action.WFWorkflowActionParameters["WFWorkflowName"] == basename {
-				name = "runSelf"
-				definition = *actions["runSelf"]
-			} else {
-				name = "run"
-			}
-		}
-
+	var candidates = identifierMap[action.WFWorkflowActionIdentifier]
+	if len(candidates) == 0 {
 		return
 	}
+
+	name = candidates[0].identifier
+	definition = *candidates[0].definition
+	if len(candidates) == 1 {
+		return
+	}
+
+	matchSplitAction(&candidates, action, &name, &definition)
+	if name != "run" && name != "runSelf" {
+		return
+	}
+	// A shortcut run by name has no WFWorkflow, and a run of itself without input only has isSelf.
+	if _, hasWorkflow := action.WFWorkflowActionParameters["WFWorkflow"]; !hasWorkflow {
+		return
+	}
+	var workflow = paramMap(action, "WFWorkflow")
+	if _, hasSelf := workflow["isSelf"]; !hasSelf {
+		return
+	}
+	var isSelf, isBool = workflow["isSelf"].(bool)
+	if !isBool {
+		decompError(fmt.Sprintf("Expected isSelf of WFWorkflow to be a boolean, got %T", workflow["isSelf"]), action)
+	}
+	if isSelf || action.WFWorkflowActionParameters["WFWorkflowName"] == basename {
+		name = "runSelf"
+		definition = *actions["runSelf"]
+	} else {
+		name = "run"
+	}
+
 	return
 }
 

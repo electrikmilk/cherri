@@ -186,19 +186,24 @@ func makeAction(arguments []actionArgument, reference *WFActionReference) {
 }
 
 // getFullActionIdentifier determines the full identifier of currentAction.definition.
-func getFullActionIdentifier() (ident string) {
-	if currentAction.definition.overrideIdentifier != "" {
-		return currentAction.definition.overrideIdentifier
+func getFullActionIdentifier() string {
+	return fullActionIdentifier(currentAction.identifier, &currentAction.definition)
+}
+
+// fullActionIdentifier determines the full identifier that the action called name writes.
+func fullActionIdentifier(name string, definition *actionDefinition) (ident string) {
+	if definition.overrideIdentifier != "" {
+		return definition.overrideIdentifier
 	}
 
 	ident = "is.workflow.actions"
-	if currentAction.definition.appIdentifier != "" {
-		ident = currentAction.definition.appIdentifier
+	if definition.appIdentifier != "" {
+		ident = definition.appIdentifier
 	}
-	if currentAction.definition.identifier != "" {
-		ident = fmt.Sprintf("%s.%s", ident, currentAction.definition.identifier)
+	if definition.identifier != "" {
+		ident = fmt.Sprintf("%s.%s", ident, definition.identifier)
 	} else {
-		ident = fmt.Sprintf("%s.%s", ident, strings.ToLower(currentAction.identifier))
+		ident = fmt.Sprintf("%s.%s", ident, strings.ToLower(name))
 	}
 	return
 }

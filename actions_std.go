@@ -1215,6 +1215,7 @@ func checkMissingStandardInclude(identifier *string, parsing bool) (requiredIncl
 
 	if !parsing {
 		importToolkitActions(identifier)
+		mapSplitActions()
 	}
 
 	return ""
