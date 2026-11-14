@@ -44,10 +44,11 @@ func decompile(b []byte) {
 	currentVariableValue = ""
 	currentVariableUUID = ""
 
-	basename = strings.ReplaceAll(basename, " ", "_")
-	outputPath = getOutputPath(basename + ".cherri")
+	// The Shortcut keeps its name for the name definition and runSelf, only the file name has no spaces.
+	var outputBasename = strings.ReplaceAll(basename, " ", "_")
+	outputPath = getOutputPath(outputBasename + ".cherri")
 	if args.Using("no-ansi") {
-		filePath = basename + ".cherri"
+		filePath = outputBasename + ".cherri"
 	} else {
 		filePath = outputPath
 	}
