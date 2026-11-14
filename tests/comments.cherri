@@ -1,0 +1,7 @@
+// compile-only: a comment action has no output to assert
+comment('a comment action')
+comment('a comment with the end of a multi-line comment */ and a single quote, it\'s')
+comment('a comment
+over two lines')
+
+show("✅ All tests passed")

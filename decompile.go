@@ -670,25 +670,29 @@ func makeConstantLiteral(action *ShortcutAction) {
 	}
 }
 
+// decompComment writes a comment action as a comment action when comments are included, which is the only
+// way for it to compile back into the Shortcut, and as a code comment otherwise.
 func decompComment(action *ShortcutAction) {
 	var commentText = paramString(action, "WFCommentActionText")
 	if args.Using("comments") {
-		if strings.Contains(commentText, "\n") {
-			newCodeLine(fmt.Sprintf("comment('\n%s\n')\n\n", commentText))
-		} else {
-			newCodeLine(fmt.Sprintf("comment('%s')\n", commentText))
-		}
+		newCodeLine(fmt.Sprintf("comment(%s)\n", quoteRawString(commentText)))
+		return
 	}
 
-	if strings.Contains(commentText, "\n") {
+	// A comment that holds the end of a multi-line comment cannot be written as one.
+	if strings.Contains(commentText, "\n") && !strings.Contains(commentText, "*/") {
 		newCodeLine("/*\n")
 		for _, line := range strings.Split(commentText, "\n") {
 			newCodeLine(fmt.Sprintln(line))
 		}
 		newCodeLine("*/\n")
-	} else {
-		newCodeLine(fmt.Sprintf("// %s\n\n", commentText))
+		return
 	}
+
+	for _, line := range strings.Split(commentText, "\n") {
+		newCodeLine(fmt.Sprintf("// %s\n", line))
+	}
+	code.WriteRune('\n')
 }
 
 var decompilingText = false
