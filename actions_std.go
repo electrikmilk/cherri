@@ -285,7 +285,7 @@ var actions = map[string]*actionDefinition{
 				"WFURLActionURL":      urlItems,
 			}
 		},
-		decomp: decompInfiniteURLAction,
+		decomp: decompInfiniteURLAction("WFURLActionURL"),
 	},
 	"addToReadingList": {
 		makeParams: func(args []actionArgument) map[string]any {
@@ -299,7 +299,7 @@ var actions = map[string]*actionDefinition{
 				"WFURL":               urlItems,
 			}
 		},
-		decomp: decompInfiniteURLAction,
+		decomp: decompInfiniteURLAction("WFURL"),
 	},
 	"prompt": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
@@ -458,19 +458,33 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
-			var splitRatio = decompValue(action.WFWorkflowActionParameters["WFAppRatio"])
-
-			var ratio = "half"
-			switch splitRatio {
-			case "½ + ½":
-				ratio = "half"
-			case "⅓ + ⅔":
-				ratio = "thirdByTwo"
-			}
-
-			arguments = append(arguments, fmt.Sprintf("\"%s\"", ratio))
+			// Both apps are required, as the arguments are written by position.
+			requiredParam(action, "WFPrimaryAppIdentifier")
+			requiredParam(action, "WFSecondaryAppIdentifier")
 			arguments = append(arguments, decompAppAction("WFPrimaryAppIdentifier", action)...)
 			arguments = append(arguments, decompAppAction("WFSecondaryAppIdentifier", action)...)
+
+			// Shortcuts leaves the ratio out when it is the default.
+			var splitRatio, hasRatio = action.WFWorkflowActionParameters["WFAppRatio"]
+			if !hasRatio {
+				return
+			}
+
+			switch ratio := splitRatio.(type) {
+			case string:
+				switch ratio {
+				case "½ + ½":
+					arguments = append(arguments, "\"half\"")
+				case "⅓ + ⅔":
+					arguments = append(arguments, "\"thirdByTwo\"")
+				default:
+					decompError(fmt.Sprintf("Expected WFAppRatio to be '½ + ½' or '⅓ + ⅔', got '%s'", ratio), action)
+				}
+			case map[string]interface{}:
+				arguments = append(arguments, decompValue(ratio))
+			default:
+				decompError(fmt.Sprintf("Expected the parameter 'WFAppRatio' to be a string or a variable, got %T", splitRatio), action)
+			}
 
 			return
 		},
@@ -485,9 +499,7 @@ var actions = map[string]*actionDefinition{
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			if action.WFWorkflowActionParameters["target"] != nil {
-				var workflow = action.WFWorkflowActionParameters["target"].(map[string]interface{})
-				var title = workflow["title"].(map[string]interface{})
-				arguments = append(arguments, decompValue(title["key"]))
+				arguments = append(arguments, decompShortcutTitle(action))
 			}
 			return
 		},
@@ -509,10 +521,11 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
-			if action.WFWorkflowActionParameters["WFInput"] != nil {
-				arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["WFInput"]))
+			if action.WFWorkflowActionParameters["WFInput"] == nil {
+				return []string{"nil"}
 			}
-			return
+
+			return []string{decompValue(action.WFWorkflowActionParameters["WFInput"])}
 		},
 	},
 	"list": {
@@ -530,11 +543,14 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
-			var listItems = action.WFWorkflowActionParameters["WFItems"].([]interface{})
-			for _, item := range listItems {
+			for _, item := range paramSlice(action, "WFItems") {
 				var itemValue = item
-				if itemMap, isMap := item.(map[string]interface{}); isMap {
-					itemValue = itemMap["WFValue"]
+				switch listItem := item.(type) {
+				case string:
+				case map[string]interface{}:
+					itemValue = listItem["WFValue"]
+				default:
+					decompError(fmt.Sprintf("Expected an item of WFItems to be a string or a dictionary, got %T", item), action)
 				}
 				arguments = append(arguments, decompValue(itemValue))
 			}
@@ -634,7 +650,7 @@ var actions = map[string]*actionDefinition{
 
 			if action.WFWorkflowActionParameters["WFMeasurementUnit"] != nil {
 				var measurementUnit WFMeasurementUnit
-				mapToStruct(action.WFWorkflowActionParameters["WFMeasurementUnit"].(map[string]interface{}), &measurementUnit)
+				mapToStruct(paramMap(action, "WFMeasurementUnit"), &measurementUnit)
 
 				arguments = append(arguments, decompValue(measurementUnit.WFNSUnitSymbol))
 			}
@@ -672,7 +688,7 @@ var actions = map[string]*actionDefinition{
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			if action.WFWorkflowActionParameters["WFMeasurementUnit"] != nil {
 				var measurementUnit WFMeasurementUnit
-				mapToStruct(action.WFWorkflowActionParameters["WFMeasurementUnit"].(map[string]interface{}), &measurementUnit)
+				mapToStruct(paramMap(action, "WFMeasurementUnit"), &measurementUnit)
 
 				arguments = append(arguments,
 					decompValue(measurementUnit.Value.Magnitude),
@@ -1149,14 +1165,25 @@ func decompContactValue(action *ShortcutAction, key string, contentKit contentKi
 		return []string{decompValue(action.WFWorkflowActionParameters[key])}
 	}
 
-	var value = wfValue.Value.(map[string]interface{})
+	var value, hasValue = wfValue.Value.(map[string]interface{})
+	if !hasValue {
+		decompError(fmt.Sprintf("Expected the parameter '%s' to have a Value dictionary, got %T", key, wfValue.Value), action)
+	}
+	var fieldValues, hasFieldValues = value["WFContactFieldValues"].([]interface{})
+	if !hasFieldValues {
+		decompError(fmt.Sprintf("Expected the parameter '%s' to have a WFContactFieldValues array, got %T", key, value["WFContactFieldValues"]), action)
+	}
+
 	var contactFieldValues []WFContactFieldValue
-	mapToStruct(value["WFContactFieldValues"].([]interface{}), &contactFieldValues)
+	mapToStruct(fieldValues, &contactFieldValues)
 
 	for _, contactFieldValue := range contactFieldValues {
 		var serializedKey = fmt.Sprintf("link.contentkit.%s", contentKit)
-		var email = contactFieldValue.SerializedEntry[serializedKey]
-		arguments = append(arguments, fmt.Sprintf("\"%s\"", email.(string)))
+		var email, isString = contactFieldValue.SerializedEntry[serializedKey].(string)
+		if !isString {
+			decompError(fmt.Sprintf("Expected a contact field value to have a text entry '%s', got %T", serializedKey, contactFieldValue.SerializedEntry[serializedKey]), action)
+		}
+		arguments = append(arguments, fmt.Sprintf("\"%s\"", email))
 	}
 
 	return
@@ -1191,12 +1218,17 @@ func textParts(args []actionArgument) map[string]any {
 	return data
 }
 
-func decompReferenceValue(paramValue any) string {
+func decompReferenceValue(paramValue any, action *ShortcutAction) string {
 	if isReferenceValue(paramValue) {
 		return decompValue(paramValue)
 	}
 
-	return paramValue.(string)
+	var text, isString = paramValue.(string)
+	if !isString {
+		decompError(fmt.Sprintf("Expected a text separator to be a string or a variable reference, got %T", paramValue), action)
+	}
+
+	return text
 }
 
 func decompTextParts(action *ShortcutAction) (arguments []string) {
@@ -1205,10 +1237,10 @@ func decompTextParts(action *ShortcutAction) (arguments []string) {
 	var glue string
 	var hasCustomSeparator bool
 	if action.WFWorkflowActionParameters["WFTextSeparator"] != nil {
-		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextSeparator"])
+		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextSeparator"], action)
 	}
 	if action.WFWorkflowActionParameters["WFTextCustomSeparator"] != nil {
-		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextCustomSeparator"])
+		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextCustomSeparator"], action)
 		hasCustomSeparator = true
 	}
 
@@ -1328,42 +1360,83 @@ func appendSetMultitaskingModeParam(title, identifier, symbol string) map[string
 	}
 }
 
+// decompAppAction writes the apps of key, which is a bundle identifier, a variable, or for the actions that take
+// every app except some, an array of bundle identifiers that is left out when there are no exceptions.
 func decompAppAction(key string, action *ShortcutAction) (arguments []string) {
-	var value = action.WFWorkflowActionParameters[key]
-	if value == nil {
+	var value, found = action.WFWorkflowActionParameters[key]
+	if !found {
 		return
 	}
-	switch typed := value.(type) {
+
+	switch app := value.(type) {
 	case string:
-		return append(arguments, decompValue(typed))
+		return append(arguments, decompValue(app))
 	case map[string]interface{}:
-		for k, bundle := range typed {
-			if k == "BundleIdentifier" {
-				arguments = append(arguments, fmt.Sprintf("\"%s\"", bundle))
-			}
-		}
+		return append(arguments, decompApp(app, key, action))
 	case []interface{}:
-		for _, app := range typed {
-			var bundleIdentifer = app.(map[string]interface{})["BundleIdentifier"]
-			arguments = append(arguments, fmt.Sprintf("\"%s\"", bundleIdentifer))
+		for _, item := range app {
+			var appItem, isMap = item.(map[string]interface{})
+			if !isMap {
+				decompError(fmt.Sprintf("Expected an app of '%s' to be a dictionary, got %T", key, item), action)
+			}
+			arguments = append(arguments, decompApp(appItem, key, action))
 		}
-	default:
-		decompError("Unknown app value type", action)
+		return
 	}
 
+	decompError(fmt.Sprintf("Expected the parameter '%s' to be a string, a dictionary or an array of dictionaries, got %T", key, value), action)
 	return
 }
 
-func decompInfiniteURLAction(action *ShortcutAction) (arguments []string) {
-	var value = action.WFWorkflowActionParameters["WFURLActionURL"]
-	switch typed := value.(type) {
-	case map[string]interface{}, string:
-		return append(arguments, decompValue(value))
-	case []interface{}:
-		for _, url := range typed {
-			arguments = append(arguments, decompValue(url))
-		}
+// decompApp writes an app that is either a bundle identifier dictionary or a variable.
+func decompApp(app map[string]interface{}, key string, action *ShortcutAction) string {
+	if bundleIdentifier, found := app["BundleIdentifier"]; found {
+		return decompValue(bundleIdentifier)
+	}
+	if app["Value"] == nil {
+		decompError(fmt.Sprintf("Expected an app of '%s' to have a BundleIdentifier or a variable Value", key), action)
 	}
 
-	return
+	return decompValue(app)
+}
+
+// decompInfiniteURLAction writes the URLs of key, which is a single value or an array of values.
+func decompInfiniteURLAction(key string) func(action *ShortcutAction) []string {
+	return func(action *ShortcutAction) (arguments []string) {
+		var value = requiredParam(action, key)
+		switch urls := value.(type) {
+		case string, map[string]interface{}:
+			return append(arguments, decompValue(urls))
+		case []interface{}:
+			for _, url := range urls {
+				arguments = append(arguments, decompValue(url))
+			}
+			return
+		}
+
+		decompError(fmt.Sprintf("Expected the parameter '%s' to be a string, a dictionary or an array, got %T", key, value), action)
+		return
+	}
+}
+
+// decompShortcutTitle writes the title of the target of an Open Shortcut action. Shortcuts stores the title as a
+// localized string dictionary, while a shortcut name compiled by Cherri is a plain or interpolated string.
+func decompShortcutTitle(action *ShortcutAction) string {
+	var target = paramMap(action, "target")
+	switch title := target["title"].(type) {
+	case string:
+		return decompValue(title)
+	case map[string]interface{}:
+		if key, found := title["key"]; found {
+			return decompValue(key)
+		}
+		if title["Value"] == nil {
+			decompError("Expected the title of the target to have a key or a variable Value", action)
+		}
+
+		return decompValue(title)
+	default:
+		decompError(fmt.Sprintf("Expected the title of the target to be a string or a dictionary, got %T", title), action)
+		return ""
+	}
 }

@@ -172,10 +172,8 @@ func TestDecomp(t *testing.T) {
 // roundTripKnownFailures lists shortcuts whose decompile or recompile exits non-zero, keyed by
 // test file name without _unsigned.shortcut. An entry that starts passing must be removed.
 var roundTripKnownFailures = map[string]string{
-	"device":              "Unknown app value type",
+	"device":              "hideAllApps and quitAllApps match hideApp and quitApp",
 	"nil":                 "Invalid value \"Title\" (text) for argument 'artwork' (variable)",
-	"shortcuts":           "panic in decomp hook: string is not a map",
-	"web":                 "panic in decompInfiniteURLAction: nil value",
 	"arrays":              "variable-typed const in conditional",
 	"dictionary":          "variable-typed const in conditional",
 	"variable-references": "variable-typed const in conditional",
@@ -192,7 +190,6 @@ var roundTripKnownFailures = map[string]string{
 	"pdf":                 "wrong arguments",
 	"prompt":              "wrong arguments",
 	"mac":                 "wrong arguments",
-	"split-screen":        "wrong arguments",
 	"qty-color":           "wrong arguments",
 	"settings":            "empty first argument",
 	"math":                "scientific math operator",
@@ -222,12 +219,15 @@ var roundTripKnownMismatches = map[string]string{
 	"raw-action-output-capture":    "action 6: is.workflow.actions.gettext became is.workflow.actions.nothing",
 	"raw-action":                   "action 0: is.workflow.actions.comment became is.workflow.actions.alert",
 	"sharing":                      "action 0: is.workflow.actions.comment became com.apple.MobileSMS.ConversationEntity",
+	"shortcuts":                    "action 0: is.workflow.actions.comment became is.workflow.actions.getmyworkflows",
 	"smol":                         "action 0: is.workflow.actions.comment became is.workflow.actions.number",
+	"split-screen":                 "action 0: is.workflow.actions.comment became is.workflow.actions.choosefrommenu",
 	"text":                         "action 6: is.workflow.actions.text.changecase became is.workflow.actions.nothing",
 	"toggle-set":                   "action 0: is.workflow.actions.comment became is.workflow.actions.nightshift.set",
 	"types":                        "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
 	"variable-interpolation-utf16": "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
 	"variables":                    "action 0: is.workflow.actions.comment became is.workflow.actions.number",
+	"web":                          "action 1: is.workflow.actions.comment became is.workflow.actions.downloadurl",
 	"zz-action-identifiers":        "action 0: is.workflow.actions.comment became is.workflow.actions.shortid",
 }
 

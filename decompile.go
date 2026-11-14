@@ -7,8 +7,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"maps"
 	"os"
+	"reflect"
 	"regexp"
 	"slices"
 	"sort"
@@ -79,10 +79,10 @@ func mapIdentifiers() {
 		}
 
 		if params["UUID"] != nil && params["CustomOutputName"] != nil {
-			mapUUID(params["UUID"].(string), params["CustomOutputName"].(string))
+			mapUUID(paramString(&action, "UUID"), paramString(&action, "CustomOutputName"))
 		}
 
-		checkParamIdentifiers(params)
+		checkParamIdentifiers(params, &action)
 	}
 }
 
@@ -97,13 +97,13 @@ func mapControlFlowOutputs() {
 			fallthrough
 		case "is.workflow.actions.repeat.each":
 			var params = action.WFWorkflowActionParameters
-			if params["WFControlFlowMode"].(uint64) != endStatement {
+			if controlFlowMode(&action) != endStatement {
 				continue
 			}
 
 			var groupName string
 			if params["UUID"] != nil {
-				var endingUUID = params["UUID"].(string)
+				var endingUUID = paramString(&action, "UUID")
 				if uuids[endingUUID] != "" {
 					groupName = uuids[endingUUID]
 				}
@@ -123,9 +123,8 @@ func mapControlFlowOutputs() {
 func mapVariables() {
 	for _, action := range shortcut.WFWorkflowActions {
 		currentAction.identifier = action.WFWorkflowActionIdentifier
-		var params = action.WFWorkflowActionParameters
 		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
-			var varName = params["WFVariableName"].(string)
+			var varName = paramString(&action, "WFVariableName")
 			sanitizeIdentifier(&varName)
 			if _, found := variables[varName]; !found {
 				variables[varName] = varValue{}
@@ -151,7 +150,7 @@ func insertCodeComment(comment string) {
 	newCodeLine(fmt.Sprintf("// %s\n", comment))
 }
 
-func checkParamIdentifiers(params map[string]interface{}) {
+func checkParamIdentifiers(params map[string]interface{}, action *ShortcutAction) {
 	for _, value := range params {
 		var paramValues, isMap = value.(map[string]interface{})
 		if !isMap {
@@ -159,22 +158,52 @@ func checkParamIdentifiers(params map[string]interface{}) {
 		}
 		checkParamValueAttachments(paramValues)
 
-		if _, found := paramValues["Variable"]; found {
-			var paramVariable = paramValues["Variable"].(map[string]interface{})
+		// A dictionary value can hold any key, so a "Variable" that is not a dictionary is not an attachment.
+		if paramVariable, isMap := paramValues["Variable"].(map[string]interface{}); isMap {
 			checkParamValueAttachments(paramVariable)
 		}
 
 		if _, found := paramValues["WFConditions"]; found {
-			var wfConditions = paramValues["WFConditions"].(map[string]interface{})
-			var value = wfConditions["Value"].(map[string]interface{})
-			if value["WFActionParameterFilterTemplates"] != nil {
-				for _, filtertemplate := range value["WFActionParameterFilterTemplates"].([]interface{}) {
-					var paramFilterTemplate = filtertemplate.(map[string]interface{})
-					checkParamIdentifiers(paramFilterTemplate["WFInput"].(map[string]interface{}))
+			var wfConditions, hasConditions = paramValues["WFConditions"].(map[string]interface{})
+			if !hasConditions {
+				decompError(fmt.Sprintf("Expected WFConditions to be a dictionary, got %T", paramValues["WFConditions"]), action)
+			}
+			var conditionsValue, hasValue = wfConditions["Value"].(map[string]interface{})
+			if !hasValue {
+				decompError("Expected WFConditions to have a Value dictionary", action)
+			}
+			if conditionsValue["WFActionParameterFilterTemplates"] != nil {
+				for _, filterTemplate := range conditionTemplates(conditionsValue, action) {
+					if filterTemplate["WFInput"] == nil {
+						continue
+					}
+					var templateInput, hasInput = filterTemplate["WFInput"].(map[string]interface{})
+					if !hasInput {
+						decompError(fmt.Sprintf("Expected WFInput of a condition to be a dictionary, got %T", filterTemplate["WFInput"]), action)
+					}
+					checkParamIdentifiers(templateInput, action)
 				}
 			}
 		}
 	}
+}
+
+// conditionTemplates returns the conditions in the Value of a WFConditions parameter.
+func conditionTemplates(conditionsValue map[string]interface{}, action *ShortcutAction) (templates []map[string]interface{}) {
+	var templateValues, isSlice = conditionsValue["WFActionParameterFilterTemplates"].([]interface{})
+	if !isSlice {
+		decompError(fmt.Sprintf("Expected WFActionParameterFilterTemplates to be an array, got %T", conditionsValue["WFActionParameterFilterTemplates"]), action)
+	}
+
+	for _, templateValue := range templateValues {
+		var template, isMap = templateValue.(map[string]interface{})
+		if !isMap {
+			decompError(fmt.Sprintf("Expected a condition to be a dictionary, got %T", templateValue), action)
+		}
+		templates = append(templates, template)
+	}
+
+	return
 }
 
 // checkParamValueAttachments checks for attachments on values to map them.
@@ -209,7 +238,11 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 
 		// A file item wraps its attachment one level deeper than other items, which would otherwise be read as a nested dictionary.
 		if dictDataType(item.WFItemType) == itemTypeFile {
-			checkParamValueAttachments(wfValue["Value"].(map[string]interface{}))
+			var fileValue, isMap = wfValue["Value"].(map[string]interface{})
+			if !isMap {
+				decompError(fmt.Sprintf("Expected a file dictionary item to hold a dictionary, got %T", wfValue["Value"]), currentDecompAction())
+			}
+			checkParamValueAttachments(fileValue)
 			continue
 		}
 
@@ -386,6 +419,7 @@ var currentVariableValue string
 
 func decompileActions() {
 	for _, action := range shortcut.WFWorkflowActions {
+		currentAction.identifier = action.WFWorkflowActionIdentifier
 		switch action.WFWorkflowActionIdentifier {
 		case "is.workflow.actions.comment":
 			decompComment(&action)
@@ -415,7 +449,7 @@ func decompileActions() {
 		case "is.workflow.actions.getvalueforkey":
 			var dictionaryKey = action.WFWorkflowActionParameters["WFDictionaryKey"]
 			if dictionaryKey != nil && action.WFWorkflowActionParameters[UUID] != nil &&
-				!slices.Contains(constUUIDs, action.WFWorkflowActionParameters[UUID].(string)) {
+				!slices.Contains(constUUIDs, paramString(&action, UUID)) {
 				decompDictionaryGetValue(&action)
 				continue
 			}
@@ -435,7 +469,7 @@ func checkConstantLiteral(action *ShortcutAction) {
 	if _, found := action.WFWorkflowActionParameters[UUID]; !found {
 		return
 	}
-	var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
+	var actionUUID = paramString(action, UUID)
 	if slices.Contains(varUUIDs, actionUUID) && !slices.Contains(constUUIDs, actionUUID) {
 		return
 	}
@@ -451,7 +485,7 @@ func makeConstantLiteral(action *ShortcutAction) {
 	if _, found := action.WFWorkflowActionParameters[UUID]; !found {
 		return
 	}
-	var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
+	var actionUUID = paramString(action, UUID)
 	if outputName, found := uuids[actionUUID]; found {
 		newCodeLine(fmt.Sprintf("const %s = ", outputName))
 		code.WriteString(currentVariableValue)
@@ -461,7 +495,7 @@ func makeConstantLiteral(action *ShortcutAction) {
 }
 
 func decompComment(action *ShortcutAction) {
-	var commentText = action.WFWorkflowActionParameters["WFCommentActionText"].(string)
+	var commentText = paramString(action, "WFCommentActionText")
 	if args.Using("comments") {
 		if strings.Contains(commentText, "\n") {
 			newCodeLine(fmt.Sprintf("comment('\n%s\n')\n\n", commentText))
@@ -496,9 +530,12 @@ func decompTextValue(action *ShortcutAction) {
 }
 
 func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
-	var value = action.WFWorkflowActionParameters["WFNumberActionNumber"]
+	var value = requiredParam(action, "WFNumberActionNumber")
 	if mapValue, isMap := value.(map[string]interface{}); isMap {
-		var Value = mapValue["Value"].(map[string]interface{})
+		var Value, hasValue = mapValue["Value"].(map[string]interface{})
+		if !hasValue {
+			decompError(fmt.Sprintf("Expected the parameter 'WFNumberActionNumber' to have a Value dictionary, got %T", mapValue["Value"]), action)
+		}
 		value = decompValue(value)
 
 		match, _ := regexp.MatchString("[0-9.]", value.(string))
@@ -550,7 +587,7 @@ func decompBasicExpression(action *ShortcutAction) {
 		case "÷":
 			operation = "/"
 		default:
-			operation = action.WFWorkflowActionParameters["WFMathOperation"].(string)
+			operation = paramString(action, "WFMathOperation")
 		}
 	}
 	var expression = strings.Trim(decompValue(input), "\"") + " " + strings.Trim(operation, "\"") + " " + strings.Trim(decompValue(operand), "\"")
@@ -561,12 +598,14 @@ func decompBasicExpression(action *ShortcutAction) {
 }
 
 func decompExpression(action *ShortcutAction) {
-	var raw = action.WFWorkflowActionParameters["Input"]
 	var expression string
-	if s, ok := raw.(string); ok {
-		expression = s
-	} else {
-		expression = strings.Trim(decompValue(raw.(map[string]interface{})["Value"]), "\"")
+	switch input := requiredParam(action, "Input").(type) {
+	case string:
+		expression = input
+	case map[string]interface{}:
+		expression = strings.Trim(decompValue(input["Value"]), "\"")
+	default:
+		decompError(fmt.Sprintf("Expected the parameter 'Input' to be a string or a dictionary, got %T", input), action)
 	}
 	var varRegex = regexp.MustCompile(`{(.*?)}`)
 	currentVariableValue = varRegex.ReplaceAllString(expression, "$1")
@@ -575,7 +614,7 @@ func decompExpression(action *ShortcutAction) {
 }
 
 func decompVariable(action *ShortcutAction) {
-	var variableName = action.WFWorkflowActionParameters["WFVariableName"].(string)
+	var variableName = paramString(action, "WFVariableName")
 	sanitizeIdentifier(&variableName)
 	newCodeLine(fmt.Sprintf("@%s", variableName))
 
@@ -627,7 +666,7 @@ func checkControlFlowOutput(action *ShortcutAction) bool {
 	case "is.workflow.actions.repeat.count":
 		fallthrough
 	case "is.workflow.actions.repeat.each":
-		if action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64) == startStatement {
+		if controlFlowMode(action) == startStatement {
 			var group = controlFlowGroups[groupingIdx]
 			if group.identifier != "" {
 				newCodeLine(fmt.Sprintf("const %s = ", group.identifier))
@@ -656,15 +695,13 @@ func decompMenu(action *ShortcutAction) {
 	if len(menus) == 0 {
 		menus = make(map[string][]varValue)
 	}
-	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
-	var groupingUUID = action.WFWorkflowActionParameters["GroupingIdentifier"].(string)
-	switch controlFlowMode {
+	var groupingUUID = paramString(action, "GroupingIdentifier")
+	switch controlFlowMode(action) {
 	case startStatement:
 		beginStatement(Menu, action)
 
 		menus[groupingUUID] = []varValue{}
-		var items = action.WFWorkflowActionParameters["WFMenuItems"]
-		for _, item := range items.([]interface{}) {
+		for _, item := range paramSlice(action, "WFMenuItems") {
 			menus[groupingUUID] = append(menus[groupingUUID], varValue{value: item})
 		}
 		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFMenuPrompt"]))
@@ -695,8 +732,7 @@ func decompMenu(action *ShortcutAction) {
 }
 
 func decompRepeat(action *ShortcutAction) {
-	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
-	switch controlFlowMode {
+	switch controlFlowMode(action) {
 	case startStatement:
 		beginStatement(Repeat, action)
 
@@ -713,8 +749,7 @@ func decompRepeat(action *ShortcutAction) {
 }
 
 func decompFor(action *ShortcutAction) {
-	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
-	switch controlFlowMode {
+	switch controlFlowMode(action) {
 	case startStatement:
 		beginStatement(RepeatWithEach, action)
 
@@ -731,21 +766,23 @@ func decompFor(action *ShortcutAction) {
 }
 
 func decompConditional(action *ShortcutAction) {
-	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
-	switch controlFlowMode {
+	switch controlFlowMode(action) {
 	case startStatement:
 		beginStatement(If, action)
 
 		if action.WFWorkflowActionParameters["WFConditions"] != nil {
-			var conditions = action.WFWorkflowActionParameters["WFConditions"].(map[string]interface{})
-			var conditionValue = conditions["Value"].(map[string]interface{})
+			var conditions = paramMap(action, "WFConditions")
+			var conditionValue, hasValue = conditions["Value"].(map[string]interface{})
+			if !hasValue {
+				decompError("Expected WFConditions to have a Value dictionary", action)
+			}
 			var intFilterPrefix, convErr = strconv.Atoi(fmt.Sprintf("%d", conditionValue["WFActionParameterFilterPrefix"]))
 			handle(convErr)
 			var paramFilterPrefix = convertFilterPrefix(intFilterPrefix)
-			var filterTemplates = conditionValue["WFActionParameterFilterTemplates"].([]interface{})
-			var conditionsLen = len(filterTemplates)
-			for i, condition := range filterTemplates {
-				decompCondition(condition.(map[string]interface{}), action)
+			var templates = conditionTemplates(conditionValue, action)
+			var conditionsLen = len(templates)
+			for i, condition := range templates {
+				decompCondition(condition, action)
 
 				if i != conditionsLen-1 {
 					code.WriteString(fmt.Sprintf(" %s ", paramFilterPrefix))
@@ -940,8 +977,11 @@ func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary map[s
 var numericRegex = regexp.MustCompile("^[0-9]+$")
 
 func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
+	var itemValueMap, isMap = item.WFValue.(map[string]interface{})
+	if !isMap {
+		decompError(fmt.Sprintf("Expected a dictionary item value to be a dictionary, got %T", item.WFValue), currentDecompAction())
+	}
 	var itemStringValue = decompValue(item.WFValue)
-	var itemValueMap = item.WFValue.(map[string]interface{})
 	var itemValue any
 
 	if dictDataType(item.WFItemType) == itemTypeFile {
@@ -963,16 +1003,27 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 		itemValue, convErr = strconv.ParseInt(itemValue.(string), 10, 64)
 		handle(convErr)
 	case itemTypeBool:
-		var wfValue = item.WFValue.(map[string]interface{})
-		itemValue = wfValue["Value"].(bool)
+		var boolValue, isBool = itemValueMap["Value"].(bool)
+		if !isBool {
+			decompError(fmt.Sprintf("Expected a boolean dictionary item value, got %T", itemValueMap["Value"]), currentDecompAction())
+		}
+		itemValue = boolValue
 	case itemTypeText:
 		itemValue = strings.Trim(itemStringValue, "\"")
 	case itemTypeArray:
-		itemValue = decompArray(itemValueMap["Value"].([]interface{}))
+		var arrayItems, isSlice = itemValueMap["Value"].([]interface{})
+		if !isSlice {
+			decompError(fmt.Sprintf("Expected an array dictionary item value to be an array, got %T", itemValueMap["Value"]), currentDecompAction())
+		}
+		itemValue = decompArray(arrayItems)
 	case itemTypeDict:
 		var dictionaryItems []WFDictionaryFieldValueItem
-		var value = itemValueMap["Value"].(map[string]interface{})
-		mapToStruct(value["Value"].(map[string]interface{})["WFDictionaryFieldValueItems"], &dictionaryItems)
+		var value, hasValue = itemValueMap["Value"].(map[string]interface{})
+		var nestedValue, hasNestedValue = value["Value"].(map[string]interface{})
+		if !hasValue || !hasNestedValue {
+			decompError("Expected a dictionary item value to be a dictionary holding a Value dictionary", currentDecompAction())
+		}
+		mapToStruct(nestedValue["WFDictionaryFieldValueItems"], &dictionaryItems)
 		itemValue = decompDictionaryItems(dictionaryItems)
 	default:
 		itemValue = itemStringValue
@@ -1041,17 +1092,27 @@ func decompValueObject(value map[string]interface{}) string {
 	switch value["Type"] {
 	case "Variable":
 		if _, found := value["VariableName"]; found {
-			var variableName = value["VariableName"].(string)
+			var variableName, isString = value["VariableName"].(string)
+			if !isString {
+				decompError(fmt.Sprintf("Expected VariableName to be a string, got %T", value["VariableName"]), currentDecompAction())
+			}
 			sanitizeIdentifier(&variableName)
 
 			return fmt.Sprintf("@%s", variableName)
 		}
 
-		var variableValue = value["Variable"].(map[string]interface{})
+		var variableValue, hasVariable = value["Variable"].(map[string]interface{})
+		if !hasVariable {
+			decompError(fmt.Sprintf("Expected a Variable value to have a VariableName or a Variable dictionary, got %T", value["Variable"]), currentDecompAction())
+		}
 		return decompValue(variableValue["Value"])
 	case "ActionOutput":
 		if _, found := value["OutputUUID"]; found {
-			var outputName = uuids[value["OutputUUID"].(string)]
+			var outputUUID, isString = value["OutputUUID"].(string)
+			if !isString {
+				decompError(fmt.Sprintf("Expected OutputUUID to be a string, got %T", value["OutputUUID"]), currentDecompAction())
+			}
+			var outputName = uuids[outputUUID]
 			sanitizeIdentifier(&outputName)
 
 			if value["Aggrandizements"] == nil {
@@ -1088,7 +1149,11 @@ func decompObjectValue(valueObj any) string {
 	}
 
 	if _, found := value["string"]; found {
-		attachmentString = value["string"].(string)
+		var valueString, isString = value["string"].(string)
+		if !isString {
+			decompError(fmt.Sprintf("Expected string of a text value to be a string, got %T", value["string"]), currentDecompAction())
+		}
+		attachmentString = valueString
 	}
 
 	if value["Aggrandizements"] != nil {
@@ -1100,7 +1165,11 @@ func decompObjectValue(valueObj any) string {
 	}
 
 	if attachments, found := value["attachmentsByRange"]; found {
-		decompAttachmentString(&attachmentString, attachments.(map[string]interface{}))
+		var attachmentsMap, isMap = attachments.(map[string]interface{})
+		if !isMap {
+			decompError(fmt.Sprintf("Expected attachmentsByRange to be a dictionary, got %T", attachments), currentDecompAction())
+		}
+		decompAttachmentString(&attachmentString, attachmentsMap)
 	}
 
 	return attachmentString
@@ -1130,7 +1199,7 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 	var consumed int
 	for _, position := range positions {
 		if position < consumed || position >= len(units) {
-			decompError(fmt.Sprintf("Attachment position %d is outside of the string", position), &ShortcutAction{WFWorkflowActionIdentifier: currentAction.identifier})
+			decompError(fmt.Sprintf("Attachment position %d is outside of the string", position), currentDecompAction())
 		}
 
 		var attachment Value
@@ -1275,7 +1344,7 @@ func checkOutputType(action *ShortcutAction) (isConstant bool, isVariableValue b
 	if action.WFWorkflowActionParameters[UUID] == nil {
 		return
 	}
-	var uuid = action.WFWorkflowActionParameters[UUID].(string)
+	var uuid = paramString(action, UUID)
 	if _, found := uuids[uuid]; !found {
 		return
 	}
@@ -1398,20 +1467,26 @@ func makeRawAction(action *ShortcutAction) string {
 	return fmt.Sprintf("rawAction(%s)", arguments)
 }
 
+// processRawParameters returns the parameters to write for a raw action. It builds a new map as
+// the action's own parameters are still read after the raw action is written.
 func processRawParameters(params map[string]any) map[string]any {
+	var rawParams = make(map[string]any, len(params))
 	for key, value := range params {
 		if key == UUID || key == "CustomOutputName" {
-			delete(params, key)
+			continue
 		}
 
-		if valueMap, isMap := value.(map[string]interface{}); isMap {
+		if mapValue, isMap := value.(map[string]interface{}); isMap {
 			decompilingDictionary = true
-			params[key] = decompValueObject(valueMap)
+			rawParams[key] = decompValueObject(mapValue)
 			decompilingDictionary = false
+			continue
 		}
+
+		rawParams[key] = value
 	}
 
-	return params
+	return rawParams
 }
 
 func matchAction(action *ShortcutAction) (name string, definition actionDefinition) {
@@ -1437,11 +1512,19 @@ func matchAction(action *ShortcutAction) (name string, definition actionDefiniti
 			if name != "run" && name != "runSelf" {
 				return
 			}
-			var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]interface{})
-			if _, isSelf := workflow["isSelf"]; !isSelf {
+			// A shortcut run by name has no WFWorkflow, and a run of itself without input only has isSelf.
+			if _, hasWorkflow := action.WFWorkflowActionParameters["WFWorkflow"]; !hasWorkflow {
 				return
 			}
-			if workflow["isSelf"].(bool) || action.WFWorkflowActionParameters["WFWorkflowName"] == basename {
+			var workflow = paramMap(action, "WFWorkflow")
+			if _, hasSelf := workflow["isSelf"]; !hasSelf {
+				return
+			}
+			var isSelf, isBool = workflow["isSelf"].(bool)
+			if !isBool {
+				decompError(fmt.Sprintf("Expected isSelf of WFWorkflow to be a boolean, got %T", workflow["isSelf"]), action)
+			}
+			if isSelf || action.WFWorkflowActionParameters["WFWorkflowName"] == basename {
 				name = "runSelf"
 				definition = *actions["runSelf"]
 			} else {
@@ -1600,13 +1683,8 @@ func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameter
 		if value, found := parameters[param.key]; found {
 			matchedParams++
 
-			var defaultValueMap, defaultValueIsMap = param.defaultValue.(map[string]interface{})
-			var valueMap, valueIsMap = value.(map[string]interface{})
-			if defaultValueIsMap && valueIsMap {
-				if maps.Equal(defaultValueMap, valueMap) {
-					matchedValues++
-				}
-			} else if param.defaultValue == value {
+			// Values can hold maps and slices, which cannot be compared with ==.
+			if reflect.DeepEqual(param.defaultValue, value) {
 				matchedValues++
 			}
 		}
@@ -1679,13 +1757,68 @@ func decompError(message string, action *ShortcutAction) {
 	fmt.Println(ansi(fmt.Sprintf("Error: %s\n\n", message), red, bold))
 
 	fmt.Println("Action identifier:", action.WFWorkflowActionIdentifier)
-	lines = strings.Split(code.String(), "\n")
-	var linesLen = len(lines)
-	var lastWrittenLine = lines[linesLen-1]
-	var prevWrittenLine = lines[linesLen-2]
+	var writtenLines = strings.Split(code.String(), "\n")
+	var linesLen = len(writtenLines)
 	fmt.Printf("\nStopped while writing line %d:\n", linesLen)
-	fmt.Printf("%s %s\n", ansi(fmt.Sprintf("%d |", linesLen-1), dim), ansi(prevWrittenLine, dim))
-	fmt.Printf("%s %s\n", ansi(fmt.Sprintf("%d |", linesLen), dim), ansi(lastWrittenLine, red))
+	if linesLen >= 2 {
+		fmt.Printf("%s %s\n", ansi(fmt.Sprintf("%d |", linesLen-1), dim), ansi(writtenLines[linesLen-2], dim))
+	}
+	fmt.Printf("%s %s\n", ansi(fmt.Sprintf("%d |", linesLen), dim), ansi(writtenLines[linesLen-1], red))
 
 	os.Exit(1)
+}
+
+// currentDecompAction describes the action being decompiled for errors raised where the action is not at hand.
+func currentDecompAction() *ShortcutAction {
+	return &ShortcutAction{WFWorkflowActionIdentifier: currentAction.identifier}
+}
+
+// requiredParam returns the value of key, which the action must have.
+func requiredParam(action *ShortcutAction, key string) any {
+	var value, found = action.WFWorkflowActionParameters[key]
+	if !found {
+		decompError(fmt.Sprintf("Expected the parameter '%s' to be present", key), action)
+	}
+
+	return value
+}
+
+func paramMap(action *ShortcutAction, key string) map[string]interface{} {
+	var value = requiredParam(action, key)
+	var mapValue, isMap = value.(map[string]interface{})
+	if !isMap {
+		decompError(fmt.Sprintf("Expected the parameter '%s' to be a dictionary, got %T", key, value), action)
+	}
+
+	return mapValue
+}
+
+func paramString(action *ShortcutAction, key string) string {
+	var value = requiredParam(action, key)
+	var stringValue, isString = value.(string)
+	if !isString {
+		decompError(fmt.Sprintf("Expected the parameter '%s' to be a string, got %T", key, value), action)
+	}
+
+	return stringValue
+}
+
+func paramSlice(action *ShortcutAction, key string) []interface{} {
+	var value = requiredParam(action, key)
+	var sliceValue, isSlice = value.([]interface{})
+	if !isSlice {
+		decompError(fmt.Sprintf("Expected the parameter '%s' to be an array, got %T", key, value), action)
+	}
+
+	return sliceValue
+}
+
+func controlFlowMode(action *ShortcutAction) uint64 {
+	var value = requiredParam(action, "WFControlFlowMode")
+	var mode, isInt = value.(uint64)
+	if !isInt {
+		decompError(fmt.Sprintf("Expected the parameter 'WFControlFlowMode' to be an integer, got %T", value), action)
+	}
+
+	return mode
 }
