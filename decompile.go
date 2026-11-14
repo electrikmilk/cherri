@@ -30,9 +30,16 @@ var code strings.Builder
 var specialCharsRegex *regexp.Regexp
 
 func decompile(b []byte) {
+	// A fresh Shortcut, so a key missing from this plist is not kept from one decompiled before.
+	shortcut = Shortcut{}
 	var _, marshalIndexedErr = plist.Unmarshal(b, &shortcut)
 	handle(marshalIndexedErr)
 
+	code.Reset()
+	varUUIDs = nil
+	constUUIDs = nil
+	menus = make(map[string][]varValue)
+	tabLevel = 0
 	variables = make(map[string]varValue)
 	uuids = make(map[string]string)
 	standardActionIncludes = make(map[string]string)
