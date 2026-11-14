@@ -180,7 +180,7 @@ var roundTripKnownFailures = map[string]string{
 var roundTripKnownMismatches = map[string]string{
 	"arrays":              "appendvariable becomes setvariable",
 	"control-flow-output": "extra loop setvariable, appendvariable becomes setvariable",
-	"functions":           "getitemfromlist order, appendvariable becomes setvariable",
+	"functions":           "appendvariable becomes setvariable",
 	"menus":               "extra loop setvariable, appendvariable becomes setvariable",
 	"nil":                 "extra loop setvariable",
 	"repeats":             "extra loop setvariable per loop",

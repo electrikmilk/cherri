@@ -269,7 +269,7 @@ func loopDeclaration(action *ShortcutAction) string {
 
 // Map out variables in the Shortcut and their UUIDs for later checks.
 func mapVariables() {
-	for _, action := range shortcut.WFWorkflowActions {
+	for index, action := range shortcut.WFWorkflowActions {
 		currentAction.identifier = action.WFWorkflowActionIdentifier
 		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
 			var varName = paramString(&action, "WFVariableName")
@@ -284,9 +284,17 @@ func mapVariables() {
 				// An output read through aggrandizements stays a constant, since folding its action
 				// into the Set Variable would drop them.
 				var _, found = uuids[wfInput.Value.OutputUUID]
-				if !found && len(wfInput.Value.Aggrandizements) == 0 {
-					varUUIDs = append(varUUIDs, wfInput.Value.OutputUUID)
+				if found || len(wfInput.Value.Aggrandizements) != 0 {
+					continue
 				}
+
+				// An action is only folded into the Set Variable written right after it, as folding one that
+				// has other actions between would move it after them.
+				if index > 0 && shortcut.WFWorkflowActions[index-1].WFWorkflowActionParameters[UUID] == wfInput.Value.OutputUUID {
+					varUUIDs = append(varUUIDs, wfInput.Value.OutputUUID)
+					continue
+				}
+				mapValueReference(wfInput.Value)
 			}
 		}
 	}
