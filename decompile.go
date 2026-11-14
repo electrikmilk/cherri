@@ -763,8 +763,18 @@ func decompBasicExpression(action *ShortcutAction) {
 			operation = "*"
 		case "÷":
 			operation = "/"
-		default:
+		case "+", "-":
 			operation = paramString(action, "WFMathOperation")
+		case "…":
+			// A scientific operation is stored in a second key that an infix expression has no way to
+			// write, so it is written as the calculate() call that makes it.
+			if action.WFWorkflowActionParameters["WFScientificMathOperation"] == nil {
+				decompError("Expected the parameter 'WFScientificMathOperation' to name the scientific operation of the math action", action)
+			}
+			decompAction(action)
+			return
+		default:
+			decompError(fmt.Sprintf("Expected the parameter 'WFMathOperation' to be '+', '-', '×', '÷' or '…', got '%v'", action.WFWorkflowActionParameters["WFMathOperation"]), action)
 		}
 	}
 	var expression = strings.Trim(decompValue(input), "\"") + " " + strings.Trim(operation, "\"") + " " + strings.Trim(decompValue(operand), "\"")

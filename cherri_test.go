@@ -175,7 +175,6 @@ var roundTripKnownFailures = map[string]string{
 	"dictionary":  "text with literal braces is written double-escaped in double quotes and read back as inline references: Illegal character 'k'",
 	"functions":   "output(\"{@n}\") decompiles to output(@n), rejected for a number-typed variable; a Set Variable's held action is dropped when a Nothing comes before it",
 	"ask-prompts": "Expected prompt raw string ('), got: \"",
-	"math":        "scientific math operator",
 }
 
 // roundTripKnownMismatches lists shortcuts that recompile but with a different action sequence,
@@ -205,6 +204,7 @@ var roundTripKnownMismatches = map[string]string{
 	"include-actions":              "action 0: is.workflow.actions.comment became is.workflow.actions.file.select",
 	"location":                     "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
 	"mac":                          "action 0: is.workflow.actions.comment became is.workflow.actions.filter.windows",
+	"math":                         "action 6: is.workflow.actions.round became is.workflow.actions.nothing (stray nothing() after if blocks)",
 	"measurements":                 "action 0: is.workflow.actions.comment became is.workflow.actions.measurement.create",
 	"menus":                        "action 0: is.workflow.actions.comment became is.workflow.actions.gettext; also extra loop setvariable, appendvariable became setvariable",
 	"nil":                          "action 0: is.workflow.actions.comment became is.workflow.actions.documentpicker.open; also stray nothing(), extra loop setvariable",
