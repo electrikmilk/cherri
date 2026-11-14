@@ -4,6 +4,7 @@
 
 createAlarm("Wake", "07:30")
 createAlarm("Gym", "06:00", false, ["monday", "friday"])
+createAlarm("Silent", "08:00", true, ["monday"], false)
 deleteAlarm(@alarm)
 turnOnAlarm(@alarm)
 turnOnAlarm(@alarm, false)
@@ -21,15 +22,17 @@ getCurrentTimerDetail("duration")
 cancelTimer()
 
 startStopwatch()
-lapStopwatch()
-stopStopwatch()
-resetStopwatch()
+lapStopwatch(false)
+stopStopwatch(false)
+resetStopwatch(false)
 
 @city = "city"
 
-addWorldClockCity(@city)
+addWorldClock(@city)
+addWorldClock(@city, false)
 getTimeForCity(@city)
-removeWorldClockCity(@city)
+removeWorldClock(@city)
+removeWorldClock(@city, false)
 
 openClockTab("timer")
 
