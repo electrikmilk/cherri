@@ -5,7 +5,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
@@ -1700,57 +1699,89 @@ func collectRawString() string {
 	return collection.String()
 }
 
-func collectArray() (array interface{}) {
-	var rawJSON = "{\"array\":[" + collectUntilIgnoreStrings(']') + "]}"
-	if err := json.Unmarshal([]byte(rawJSON), &array); err != nil {
-		if args.Using("debug") {
-			fmt.Println(ansi("\n### COLLECTED ARRAY ###", bold))
-			fmt.Println(rawJSON)
-			fmt.Print("\n")
-		}
-		parserError(fmt.Sprintf("JSON array error: %s", err))
+func collectArray() (array []any) {
+	if char == ']' {
+		advance()
+		return
 	}
-	array = array.(map[string]interface{})["array"]
-	checkJSONInlineVars(array)
-	advance()
+
+	for char != -1 {
+		skipWhitespace()
+		var valueType tokenType
+		var value any
+		collectValue(&valueType, &value, ',')
+		array = append(array, value)
+
+		if !isChar(',') {
+			break
+		}
+	}
+
+	if !isChar(']') {
+		parserError("Array missing ending bracket")
+	}
+
+	if args.Using("debug") {
+		fmt.Println(ansi("\n\n### COLLECTED ARRAY ###", bold))
+		fmt.Println(array)
+		fmt.Print("\n")
+	}
+
 	return
 }
 
-func collectDictionary() (dictionary interface{}) {
+func collectDictionary() (dictionary map[string]interface{}) {
 	if char == '}' {
 		advance()
 		return
 	}
-	var rawJSON = "{" + collectObject() + "}"
+	dictionary = make(map[string]interface{})
+
+	for char != -1 {
+		var key, value = collectDictionaryItem()
+		dictionary[key] = value
+
+		if !isChar(',') {
+			break
+		}
+	}
+
+	skipWhitespace()
+
+	if !isChar('}') {
+		parserError("Dictionary missing ending bracket")
+	}
+
 	if args.Using("debug") {
 		fmt.Println(ansi("\n\n### COLLECTED DICTIONARY ###", bold))
-		fmt.Println(rawJSON)
+		fmt.Println(dictionary)
 		fmt.Print("\n")
 	}
-	if err := json.Unmarshal([]byte(rawJSON), &dictionary); err != nil {
-		parserError(fmt.Sprintf("JSON error: %s", err))
-	}
-	checkJSONInlineVars(dictionary)
+
 	return
 }
 
-// checkJSONInlineVars checks inline variables in every key and string of a collected array or dictionary, like collectStringValue does for text.
-func checkJSONInlineVars(value any) {
-	switch v := value.(type) {
-	case string:
-		if strings.ContainsAny(v, "{}") {
-			checkInlineVars(&v)
-		}
-	case []any:
-		for _, item := range v {
-			checkJSONInlineVars(item)
-		}
-	case map[string]any:
-		for key, item := range v {
-			checkJSONInlineVars(key)
-			checkJSONInlineVars(item)
-		}
+func collectDictionaryItem() (key string, value any) {
+	skipWhitespace()
+	if char != '"' {
+		parserError("Expected item key")
 	}
+
+	var keyType tokenType
+	var keyValue any
+	collectStringValue(&keyType, &keyValue)
+	key = keyValue.(string)
+
+	if !isChar(':') {
+		parserError("Expected item separator (:)")
+	}
+
+	skipInlineWhitespace()
+
+	var valueType tokenType
+	collectValue(&valueType, &value, ',')
+
+	return
 }
 
 func collectObject() string {
