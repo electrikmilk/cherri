@@ -136,7 +136,7 @@ func validVariableReference(identifier *string) bool {
 		return false
 	}
 	if v.repeatItem {
-		parserError(fmt.Sprintf("Loop variable '%s' is constant and cannot be referenced with @.", *identifier))
+		parserError(fmt.Sprintf("Repeat item '%s' is constant and cannot be referenced with @.", *identifier))
 	}
 	return true
 }
