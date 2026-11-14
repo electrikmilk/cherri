@@ -172,38 +172,22 @@ func TestDecomp(t *testing.T) {
 // roundTripKnownFailures lists shortcuts whose decompile or recompile exits non-zero, keyed by
 // test file name without _unsigned.shortcut. An entry that starts passing must be removed.
 var roundTripKnownFailures = map[string]string{
-	"functions":   "a Set Variable's held action is dropped when a Nothing comes before it",
 	"ask-prompts": "the prompt of an Ask in a function call argument is inside a dictionary, where Cherri cannot write it",
 }
 
 // roundTripKnownMismatches lists shortcuts that recompile but with a different action sequence,
 // keyed like roundTripKnownFailures. An entry that starts matching must be removed.
 var roundTripKnownMismatches = map[string]string{
-	"arrays":                       "action 9: is.workflow.actions.comment became is.workflow.actions.nothing (stray nothing() after an if block); also appendvariable became setvariable",
-	"conditionals":                 "action 11: is.workflow.actions.conditional became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"control-flow-output":          "action 9: is.workflow.actions.gettext became is.workflow.actions.nothing (stray nothing() after an if block); also extra loop setvariable, appendvariable became setvariable",
-	"copy-paste":                   "action 13: is.workflow.actions.showresult became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"crypto":                       "action 9: is.workflow.actions.comment became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"date-comparisons":             "action 15: is.workflow.actions.conditional became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"dictionary":                   "action 9: is.workflow.actions.comment became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"empty-types":                  "action 10: is.workflow.actions.setvariable became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"getas-typecast":               "action 10: is.workflow.actions.comment became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"globals":                      "action 6: is.workflow.actions.comment became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"math":                         "action 6: is.workflow.actions.round became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"menus":                        "action 4: is.workflow.actions.setvariable became is.workflow.actions.nothing (stray nothing() after an if block); also extra loop setvariable, appendvariable became setvariable",
-	"nil":                          "action 5: is.workflow.actions.setvariable became is.workflow.actions.nothing (stray nothing() after an if block); also extra loop setvariable",
-	"numbers":                      "action 7: is.workflow.actions.math became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"raw-action-output-capture":    "action 6: is.workflow.actions.gettext became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"repeats":                      "action 5: is.workflow.actions.math became is.workflow.actions.setvariable; also extra loop setvariable per loop",
-	"smol":                         "action 11: (end) became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"split-screen":                 "action 10: is.workflow.actions.alert became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"standard":                     "action 26: is.workflow.actions.conditional became is.workflow.actions.nothing (stray nothing() after an if block); also extra loop setvariable, appendvariable became setvariable",
-	"text":                         "action 6: is.workflow.actions.text.changecase became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"types":                        "action 8: is.workflow.actions.setvariable became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"variable-interpolation-utf16": "action 11: is.workflow.actions.comment became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"variable-references":          "action 12: is.workflow.actions.conditional became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"variables":                    "action 10: is.workflow.actions.number became is.workflow.actions.nothing (stray nothing() after an if block)",
-	"web":                          "action 12: is.workflow.actions.comment became is.workflow.actions.nothing (stray nothing() after an if block)",
+	"arrays":              "appendvariable becomes setvariable",
+	"control-flow-output": "extra loop setvariable, appendvariable becomes setvariable",
+	"empty-types":         "an empty dictionary set with a type declaration is written as an assignment, which compiles to a Nothing before the Set Variable",
+	"functions":           "an empty dictionary set with a type declaration is written as an assignment, which compiles to a Nothing before the Set Variable",
+	"menus":               "extra loop setvariable, appendvariable becomes setvariable",
+	"nil":                 "extra loop setvariable",
+	"repeats":             "extra loop setvariable per loop",
+	"standard":            "extra loop setvariable, appendvariable becomes setvariable",
+	"types":               "an empty dictionary set with a type declaration is written as an assignment, which compiles to a Nothing before the Set Variable",
+	"variables":           "an empty dictionary set with a type declaration is written as an assignment, which compiles to a Nothing before the Set Variable, appendvariable becomes setvariable",
 }
 
 // roundTripRun runs the built compiler and returns whether it exited zero. The compiler runs as a

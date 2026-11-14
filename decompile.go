@@ -560,7 +560,10 @@ var currentVariableValue string
 var currentVariableUUID string
 
 func decompileActions() {
-	for _, action := range shortcut.WFWorkflowActions {
+	for index, action := range shortcut.WFWorkflowActions {
+		// Set from the loop so an action that is written without reaching the end of it does not shift
+		// the actions that are peeked at.
+		actionIndex = index
 		currentAction.identifier = action.WFWorkflowActionIdentifier
 		switch action.WFWorkflowActionIdentifier {
 		case "is.workflow.actions.comment":
@@ -599,7 +602,6 @@ func decompileActions() {
 		default:
 			decompAction(&action)
 		}
-		actionIndex++
 	}
 }
 
@@ -1688,19 +1690,47 @@ func skipDecompAction(action *ShortcutAction) bool {
 		return true
 	}
 
-	if identifier == "nothing" && actionIndex+1 < len(shortcut.WFWorkflowActions) {
-		var nextAction = peekActions(1)
-		var controlflowActionIdentifiers = []string{"conditional", "repeat.each", "repeat.count", "choosefrommenu"}
-		var nextActionIdentifier = actionIdentifierEnd(nextAction.WFWorkflowActionIdentifier)
-		if slices.Contains(controlflowActionIdentifiers, nextActionIdentifier) {
-			var controlFlowMode = nextAction.WFWorkflowActionParameters["WFControlFlowMode"]
-			if controlFlowMode == endStatement || controlFlowMode == statementPart {
-				return true
-			}
+	return identifier == "nothing" && isCompilerNothing()
+}
+
+// isCompilerNothing reports whether the current Nothing action is one the compiler inserts, which is
+// written again when the code is compiled, so it must not be written. Each is a Nothing that:
+//   - follows the end of a block, which the compiler always adds so no output is passed on
+//   - comes before the end of a block, or before an item of a menu, that does not capture its output
+//   - comes before a Set Variable with no input, which a variable set to nil is compiled to
+func isCompilerNothing() bool {
+	if actionIndex > 0 {
+		var previous = peekActions(-1)
+		if isControlFlowAction(&previous) && controlFlowMode(&previous) == endStatement {
+			return true
 		}
+	}
+	if actionIndex+1 >= len(shortcut.WFWorkflowActions) {
+		return false
+	}
+
+	var next = peekActions(1)
+	if next.WFWorkflowActionIdentifier == SetVariableIdentifier {
+		return next.WFWorkflowActionParameters["WFInput"] == nil
+	}
+	if !isControlFlowAction(&next) {
+		return false
+	}
+
+	var _, capturesOutput = controlFlowOutputs[paramString(&next, "GroupingIdentifier")]
+	switch controlFlowMode(&next) {
+	case endStatement:
+		return !capturesOutput
+	case statementPart:
+		// The compiler adds no Nothing before an else.
+		return next.WFWorkflowActionIdentifier == "is.workflow.actions.choosefrommenu" && !capturesOutput
 	}
 
 	return false
+}
+
+func isControlFlowAction(action *ShortcutAction) bool {
+	return slices.Contains(controlFlowIdentifiers, action.WFWorkflowActionIdentifier)
 }
 
 func actionIdentifierEnd(identifier string) string {
