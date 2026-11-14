@@ -97,7 +97,7 @@ func mapIdentifiers() {
 				continue
 			}
 			var wfInput WFInput
-			mapToStruct(params["WFInput"], &wfInput)
+			decompMapToStruct(params["WFInput"], &wfInput, "WFInput", &action)
 			if len(wfInput.Value.Aggrandizements) != 0 {
 				mapValueReference(wfInput.Value)
 			}
@@ -254,7 +254,7 @@ func loopVariableAssignment(index int, variableName string) (identifier string, 
 	}
 
 	var wfInput WFInput
-	mapToStruct(next.WFWorkflowActionParameters["WFInput"], &wfInput)
+	decompMapToStruct(next.WFWorkflowActionParameters["WFInput"], &wfInput, "WFInput", &next)
 	var reference = wfInput.Value
 	if reference.Type != "Variable" || reference.VariableName != variableName || len(reference.Aggrandizements) != 0 {
 		return
@@ -346,7 +346,7 @@ func mapVariables() {
 
 			if action.WFWorkflowActionParameters["WFInput"] != nil {
 				var wfInput WFInput
-				mapToStruct(action.WFWorkflowActionParameters["WFInput"], &wfInput)
+				decompMapToStruct(action.WFWorkflowActionParameters["WFInput"], &wfInput, "WFInput", &action)
 				// An output read through aggrandizements stays a constant, since folding its action
 				// into the Set Variable would drop them.
 				var _, found = uuids[wfInput.Value.OutputUUID]
@@ -439,7 +439,7 @@ func checkParamValueAttachments(param map[string]interface{}) {
 	}
 
 	var inputValue Value
-	mapToStruct(paramValue, &inputValue)
+	decompMapToStruct(paramValue, &inputValue, "Value", currentDecompAction())
 	mapValueReference(inputValue)
 	checkConstantUUID(inputValue)
 
@@ -477,7 +477,7 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 		case map[string]interface{}:
 			if itemsValue, isMap := valueTwo["Value"].(map[string]interface{}); isMap {
 				var dictionaryItems []WFDictionaryFieldValueItem
-				mapToStruct(itemsValue["WFDictionaryFieldValueItems"], &dictionaryItems)
+				decompMapToStruct(itemsValue["WFDictionaryFieldValueItems"], &dictionaryItems, "WFDictionaryFieldValueItems", currentDecompAction())
 				mapDictionaryValueIdentifiers(dictionaryItems)
 			}
 		case []interface{}:
@@ -494,7 +494,7 @@ func mapDictionaryItems(items []interface{}) (dictionaryItems []WFDictionaryFiel
 		}
 
 		var dictionaryItem WFDictionaryFieldValueItem
-		mapToStruct(value, &dictionaryItem)
+		decompMapToStruct(value, &dictionaryItem, "WFDictionaryFieldValueItems", currentDecompAction())
 		dictionaryItems = append(dictionaryItems, dictionaryItem)
 	}
 	return
@@ -1045,7 +1045,9 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 		} else if stringValue != "" {
 			number, convErr = strconv.Atoi(stringValue)
 		}
-		handle(convErr)
+		if convErr != nil {
+			decompError(fmt.Sprintf("Expected the parameter 'WFNumberActionNumber' to be a number, got '%s'", value), action)
+		}
 	} else {
 		switch v := value.(type) {
 		case uint64:
@@ -1172,7 +1174,7 @@ func decompVariable(action *ShortcutAction) {
 	var inputUUID string
 	if action.WFWorkflowActionParameters["WFInput"] != nil {
 		var wfInput WFInput
-		mapToStruct(action.WFWorkflowActionParameters["WFInput"], &wfInput)
+		decompMapToStruct(action.WFWorkflowActionParameters["WFInput"], &wfInput, "WFInput", action)
 		inputUUID = wfInput.Value.OutputUUID
 	}
 
@@ -1376,11 +1378,12 @@ func decompConditional(action *ShortcutAction) {
 			if !hasValue {
 				decompError("Expected WFConditions to have a Value dictionary", action)
 			}
-			var intFilterPrefix, convErr = strconv.Atoi(fmt.Sprintf("%d", conditionValue["WFActionParameterFilterPrefix"]))
-			handle(convErr)
-			var paramFilterPrefix = convertFilterPrefix(intFilterPrefix)
 			var templates = conditionTemplates(conditionValue, action)
 			var conditionsLen = len(templates)
+			var paramFilterPrefix string
+			if conditionsLen > 1 {
+				paramFilterPrefix = decompFilterPrefix(conditionValue, action)
+			}
 			for i, condition := range templates {
 				decompCondition(condition, action)
 
@@ -1402,6 +1405,21 @@ func decompConditional(action *ShortcutAction) {
 		tabLevel--
 		newCodeLine("}\n")
 	}
+}
+
+// decompFilterPrefix writes the operator that joins the conditions, which is only read when there is more than
+// one, so an absent prefix only stops on conditions it would join.
+func decompFilterPrefix(conditionValue map[string]interface{}, action *ShortcutAction) string {
+	var key = "WFActionParameterFilterPrefix"
+	var filterPrefix, isInt = conditionValue[key].(uint64)
+	if !isInt {
+		decompError(fmt.Sprintf("Expected WFConditions to have a %s of %d (any) or %d (all) to join its conditions, got %T", key, conditionFilterPrefixes[Or], conditionFilterPrefixes[And], conditionValue[key]), action)
+	}
+	if filterPrefix != uint64(conditionFilterPrefixes[Or]) && filterPrefix != uint64(conditionFilterPrefixes[And]) {
+		decompError(fmt.Sprintf("Expected the %s of WFConditions to be %d (any) or %d (all), got %d", key, conditionFilterPrefixes[Or], conditionFilterPrefixes[And], filterPrefix), action)
+	}
+
+	return convertFilterPrefix(int(filterPrefix))
 }
 
 // matchConditionOperator reverses makeConditionParam, which swaps the greater and less than codes
@@ -1512,10 +1530,6 @@ func decompQuantity(operand any, key string, action *ShortcutAction) string {
 	return fmt.Sprintf("qty(%s, %s)", decompConditionNumber(quantity["Magnitude"]), decompValue(quantity["Unit"]))
 }
 
-type DictionaryActionParameters struct {
-	WFItems WFItems
-}
-
 type WFItems struct {
 	Value Value
 }
@@ -1525,10 +1539,13 @@ var decompilingDictionary = false
 const emptyDictionary = "{}"
 
 func decompDictionary(action *ShortcutAction) {
-	var params DictionaryActionParameters
-	mapToStruct(action.WFWorkflowActionParameters, &params)
+	// An empty dictionary has no WFItems.
+	var items WFItems
+	if action.WFWorkflowActionParameters["WFItems"] != nil {
+		decompMapToStruct(action.WFWorkflowActionParameters["WFItems"], &items, "WFItems", action)
+	}
 
-	currentVariableValue = decompDictionaryValue(params.WFItems.Value.WFDictionaryFieldValueItems)
+	currentVariableValue = decompDictionaryValue(items.Value.WFDictionaryFieldValueItems)
 
 	checkConstantLiteral(action)
 }
@@ -1644,7 +1661,7 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 		if !hasValue || !hasNestedValue {
 			decompError("Expected a dictionary item value to be a dictionary holding a Value dictionary", currentDecompAction())
 		}
-		mapToStruct(nestedValue["WFDictionaryFieldValueItems"], &dictionaryItems)
+		decompMapToStruct(nestedValue["WFDictionaryFieldValueItems"], &dictionaryItems, "WFDictionaryFieldValueItems", currentDecompAction())
 		itemValue = decompDictionaryItems(dictionaryItems)
 	default:
 		itemValue = decompValue(item.WFValue)
@@ -1658,7 +1675,7 @@ func decompArray(items []interface{}) (array []interface{}) {
 	for _, item := range items {
 		if itemMap, isMap := item.(map[string]interface{}); isMap {
 			var fieldValueItem WFDictionaryFieldValueItem
-			mapToStruct(itemMap, &fieldValueItem)
+			decompMapToStruct(itemMap, &fieldValueItem, "array item", currentDecompAction())
 			array = append(array, decompDictionaryItem(fieldValueItem))
 			continue
 		}
@@ -1817,7 +1834,7 @@ func decompValueObject(value map[string]interface{}) string {
 
 	if value["WFDictionaryFieldValueItems"] != nil {
 		var items []WFDictionaryFieldValueItem
-		mapToStruct(value["WFDictionaryFieldValueItems"], &items)
+		decompMapToStruct(value["WFDictionaryFieldValueItems"], &items, "WFDictionaryFieldValueItems", currentDecompAction())
 
 		return decompDictionaryValue(items)
 	}
@@ -1850,7 +1867,7 @@ func decompValueObject(value map[string]interface{}) string {
 	}
 
 	var reference Value
-	mapToStruct(value, &reference)
+	decompMapToStruct(value, &reference, "reference", currentDecompAction())
 
 	return decompReference(reference)
 }
@@ -1968,7 +1985,9 @@ func decompAttachmentString(text string, attachments map[string]interface{}) str
 		var attachmentStart, _, _ = strings.Cut(attachmentRange, ",")
 		var attachmentPosition = strings.TrimPrefix(attachmentStart, "{")
 		var position, convErr = strconv.Atoi(attachmentPosition)
-		handle(convErr)
+		if convErr != nil {
+			decompError(fmt.Sprintf("Expected a range of attachmentsByRange to start with a position, such as {0, 1}, got '%s'", attachmentRange), currentDecompAction())
+		}
 
 		positions = append(positions, position)
 		attachmentsByPosition[position] = a
@@ -1987,7 +2006,7 @@ func decompAttachmentString(text string, attachments map[string]interface{}) str
 		}
 
 		var attachment Value
-		mapToStruct(attachmentsByPosition[position], &attachment)
+		decompMapToStruct(attachmentsByPosition[position], &attachment, "attachmentsByRange", currentDecompAction())
 		// Cherri can only write the prompt of an Ask on a whole value, not inside of text or an array or a dictionary.
 		var keepsPrompt = isWholeValue && !decompilingDictionary && !decompilingText
 		if attachment.Prompt != "" && !keepsPrompt {
@@ -2683,6 +2702,21 @@ func decompError(message string, action *ShortcutAction) {
 // currentDecompAction describes the action being decompiled for errors raised where the action is not at hand.
 func currentDecompAction() *ShortcutAction {
 	return &ShortcutAction{WFWorkflowActionIdentifier: currentAction.identifier}
+}
+
+// decompMapToStruct is mapToStruct for a value read from the Shortcut, which stops on a value that does not
+// have the shape of structure, naming what holds it, as mapToStruct panics on one.
+func decompMapToStruct(value any, structure any, key string, action *ShortcutAction) {
+	var expected = strings.ReplaceAll(strings.TrimPrefix(fmt.Sprintf("%T", structure), "*"), "main.", "")
+	var plistBytes, marshalErr = plist.Marshal(value, plist.XMLFormat)
+	if marshalErr != nil {
+		decompError(fmt.Sprintf("Expected '%s' to be a %s, got %T: %s", key, expected, value, marshalErr), action)
+	}
+
+	var _, unmarshalErr = plist.Unmarshal(plistBytes, structure)
+	if unmarshalErr != nil {
+		decompError(fmt.Sprintf("Expected '%s' to be a %s, got %T: %s", key, expected, value, unmarshalErr), action)
+	}
 }
 
 // requiredParam returns the value of key, which the action must have.

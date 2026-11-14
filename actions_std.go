@@ -774,7 +774,7 @@ var actions = map[string]*actionDefinition{
 
 			if action.WFWorkflowActionParameters["WFMeasurementUnit"] != nil {
 				var measurementUnit WFMeasurementUnit
-				mapToStruct(paramMap(action, "WFMeasurementUnit"), &measurementUnit)
+				decompMapToStruct(paramMap(action, "WFMeasurementUnit"), &measurementUnit, "WFMeasurementUnit", action)
 
 				arguments = append(arguments, decompValue(measurementUnit.WFNSUnitSymbol))
 			}
@@ -812,7 +812,7 @@ var actions = map[string]*actionDefinition{
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			if action.WFWorkflowActionParameters["WFMeasurementUnit"] != nil {
 				var measurementUnit WFMeasurementUnit
-				mapToStruct(paramMap(action, "WFMeasurementUnit"), &measurementUnit)
+				decompMapToStruct(paramMap(action, "WFMeasurementUnit"), &measurementUnit, "WFMeasurementUnit", action)
 
 				arguments = append(arguments,
 					decompValue(measurementUnit.Value.Magnitude),
@@ -1325,7 +1325,7 @@ func decompContactValue(action *ShortcutAction, key string, contentKit contentKi
 	}
 
 	var wfValue WFValue
-	mapToStruct(action.WFWorkflowActionParameters[key], &wfValue)
+	decompMapToStruct(action.WFWorkflowActionParameters[key], &wfValue, key, action)
 
 	if wfValue.WFSerializationType == "WFTextTokenString" {
 		return []string{decompValue(action.WFWorkflowActionParameters[key])}
@@ -1341,7 +1341,7 @@ func decompContactValue(action *ShortcutAction, key string, contentKit contentKi
 	}
 
 	var contactFieldValues []WFContactFieldValue
-	mapToStruct(fieldValues, &contactFieldValues)
+	decompMapToStruct(fieldValues, &contactFieldValues, "WFContactFieldValues", action)
 
 	for _, contactFieldValue := range contactFieldValues {
 		var serializedKey = fmt.Sprintf("link.contentkit.%s", contentKit)
