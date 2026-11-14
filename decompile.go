@@ -817,6 +817,15 @@ func decompVariable(action *ShortcutAction) {
 		return
 	}
 
+	// Assigning an empty dictionary compiles to a Nothing before the Set Variable, so only a type
+	// declaration compiles to a Set Variable that takes the dictionary.
+	if currentVariableValue == emptyDictionary && action.WFWorkflowActionIdentifier == SetVariableIdentifier {
+		code.WriteString(": dictionary\n")
+		currentVariableValue = ""
+		currentVariableUUID = ""
+		return
+	}
+
 	code.WriteRune(' ')
 	if action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
 		code.WriteString("+= ")
@@ -1125,6 +1134,8 @@ type WFItems struct {
 }
 
 var decompilingDictionary = false
+
+const emptyDictionary = "{}"
 
 func decompDictionary(action *ShortcutAction) {
 	var params DictionaryActionParameters

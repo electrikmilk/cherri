@@ -180,14 +180,12 @@ var roundTripKnownFailures = map[string]string{
 var roundTripKnownMismatches = map[string]string{
 	"arrays":              "appendvariable becomes setvariable",
 	"control-flow-output": "extra loop setvariable, appendvariable becomes setvariable",
-	"empty-types":         "an empty dictionary set with a type declaration is written as an assignment, which compiles to a Nothing before the Set Variable",
-	"functions":           "an empty dictionary set with a type declaration is written as an assignment, which compiles to a Nothing before the Set Variable",
+	"functions":           "getitemfromlist order, appendvariable becomes setvariable",
 	"menus":               "extra loop setvariable, appendvariable becomes setvariable",
 	"nil":                 "extra loop setvariable",
 	"repeats":             "extra loop setvariable per loop",
 	"standard":            "extra loop setvariable, appendvariable becomes setvariable",
-	"types":               "an empty dictionary set with a type declaration is written as an assignment, which compiles to a Nothing before the Set Variable",
-	"variables":           "an empty dictionary set with a type declaration is written as an assignment, which compiles to a Nothing before the Set Variable, appendvariable becomes setvariable",
+	"variables":           "appendvariable becomes setvariable",
 }
 
 // roundTripRun runs the built compiler and returns whether it exited zero. The compiler runs as a
