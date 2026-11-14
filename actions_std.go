@@ -260,6 +260,9 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getPDFText": {
+		check: func(args []actionArgument, _ *actionDefinition) {
+			checkLiteralArgument[bool](args, 1, "Rich text must be a literal value, as it determines which text type is written.")
+		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) == 0 {
 				return map[string]any{}
@@ -690,7 +693,7 @@ var actions = map[string]*actionDefinition{
 				return map[string]any{}
 			}
 
-			if args[2].value != nil {
+			if len(args) > 2 && args[2].value != nil {
 				params = map[string]any{
 					"WFContentItemLimitEnabled": true,
 				}
@@ -698,7 +701,11 @@ var actions = map[string]*actionDefinition{
 			return
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
-			if args[1].value != nil {
+			if len(args) > 1 && args[1].value != nil {
+				// A variable order is written as it is, but a literal one is written by the kind of property.
+				if args[1].valueType != Variable {
+					checkLiteralArgument[string](args, 0, "Sort property must be a literal value when the sort order is, as it determines how the order is written.")
+				}
 				var alphabetic = []string{"Title", "App Name", "Name", "Random"}
 				var numeric = []string{"Width", "Height", "X Position", "Y Position", "Window Index"}
 				// A nil sortBy matches no sort property, so the order is kept as is.
@@ -950,6 +957,9 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setFocusMode": {
+		check: func(args []actionArgument, _ *actionDefinition) {
+			checkLiteralArgument[string](args, 0, "Focus mode must be a literal value, as it determines which focus is set.")
+		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) > 0 {
 				// A nil focusMode is left out for the default.
@@ -968,6 +978,9 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"toggleFocusMode": {
+		check: func(args []actionArgument, _ *actionDefinition) {
+			checkLiteralArgument[string](args, 0, "Focus mode must be a literal value, as it determines which focus is set.")
+		},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) > 0 {
 				// A nil focusMode is left out for the default.
@@ -1353,6 +1366,19 @@ func decompContactValue(action *ShortcutAction, key string, contentKit contentKi
 	}
 
 	return
+}
+
+// checkLiteralArgument stops on a variable argument at index that is not set to a literal of type T, as an
+// argument that decides which parameters are written cannot be read from a value only known when the
+// Shortcut runs. A nil argument is not a variable, so it is still left out.
+func checkLiteralArgument[T any](args []actionArgument, index int, message string) {
+	if len(args) <= index || args[index].valueType != Variable {
+		return
+	}
+
+	if _, isLiteral := getArgValue(args[index]).(T); !isLiteral {
+		parserError(message)
+	}
 }
 
 func textParts(args []actionArgument) map[string]any {
