@@ -32,7 +32,7 @@ if @x > 3 {
     @innerStr = "{inner}"
 }
 if @innerStr != "inner yes" {
-    mustOutput("❌ FAIL: nested if output — got {@innerStr}, expected 'inner yes'", "❌ FAIL: nested if output — got {@innerStr}, expected 'inner yes'")
+    mustOutput("❌ FAIL: nested if output - got {@innerStr}, expected 'inner yes'", "❌ FAIL: nested if output - got {@innerStr}, expected 'inner yes'")
 }
 
 // if whose output is not captured nested inside a captured if output
@@ -47,10 +47,10 @@ const outer = if @x > 3 {
 }
 @outerStr = "{outer}"
 if @outerStr != "outer yes" {
-    mustOutput("❌ FAIL: if output around nested if — got {@outerStr}, expected 'outer yes'", "❌ FAIL: if output around nested if — got {@outerStr}, expected 'outer yes'")
+    mustOutput("❌ FAIL: if output around nested if - got {@outerStr}, expected 'outer yes'", "❌ FAIL: if output around nested if - got {@outerStr}, expected 'outer yes'")
 }
 if @flag != "set" {
-    mustOutput("❌ FAIL: nested if in if output — got {@flag}, expected 'set'", "❌ FAIL: nested if in if output — got {@flag}, expected 'set'")
+    mustOutput("❌ FAIL: nested if in if output - got {@flag}, expected 'set'", "❌ FAIL: nested if in if output - got {@flag}, expected 'set'")
 }
 
 // compile-only: device-dependent and interactive values
