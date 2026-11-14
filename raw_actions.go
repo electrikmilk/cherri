@@ -1,19 +1,6 @@
 package main
 
-import (
-	"regexp"
-	"strings"
-)
-
-var rawActionVariableValueRegex = regexp.MustCompile(`^\$\{@?.*}$`)
-
-func variableOnlyValueName(value string) (name string, isVariableOnly bool) {
-	if !rawActionVariableValueRegex.MatchString(value) {
-		return "", false
-	}
-
-	return strings.Trim(value, "${@}"), true
-}
+import "strings"
 
 func defineRawAction() {
 	actions["rawAction"] = &actionDefinition{
@@ -45,6 +32,11 @@ func defineRawAction() {
 
 func handleRawParams(params map[string]any) {
 	for key, value := range params {
+		if reference, isReference := value.(varValue); isReference {
+			params[key] = variableValue(reference)
+			continue
+		}
+
 		params[key] = normalizeRawActionParamValue(value)
 	}
 }
@@ -58,9 +50,6 @@ func normalizeRawActionParamValue(value any) any {
 	case string:
 		if !strings.ContainsAny(v, "{}") {
 			return value
-		}
-		if name, isVariableOnly := variableOnlyValueName(v); isVariableOnly {
-			return variableValue(varValue{value: name})
 		}
 		return attachmentValues(v)
 	case map[string]any:
