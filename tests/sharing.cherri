@@ -1,6 +1,9 @@
-// compile-only: Messages is searched on the device
+// compile-only: Messages is searched on the device and scanning needs a camera
 
 findConversation("Cherri")
 findMessage("Cherri")
+
+const scanned = scanCode()
+const scannedFromImage = scanCodeInImage(ShortcutInput)
 
 show("✅ All tests passed")

@@ -69,3 +69,11 @@ enum QRCodeErrorCorrection {
 
 // [Doc]: [QR Codes] Make QR Code
 action 'generatebarcode' makeQRCode(text input: 'WFText', QRCodeErrorCorrection ?errorCorrection: 'WFQRErrorCorrectionLevel' = "Medium", color foregroundColor: 'WFQRForegroundColor' = color(0.0,0.0,0.0,1.0), color backgroundColor: 'WFQRBackgroundColor' = color(2.0,2.0,2.0,1.0))
+
+// [Doc]: [QR Codes] Scan QR or Barcode: Scan a QR code or barcode using the camera.
+action 'scanbarcode' scanCode(): variable
+
+// [Doc]: [QR Codes] Scan QR or Barcode in Image: Scan a QR code or barcode in `image`.
+action 'scanbarcode' scanCodeInImage(variable image: 'imageFile'): variable {
+    "WFScanCodeActionMode": 1
+}
