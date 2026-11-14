@@ -623,8 +623,8 @@ func checkInlineVars(value *string) {
 			continue
 		}
 
-		if !validReference(identifier) {
-			parserError(fmt.Sprintf("Undefined inline reference '%s'", identifier))
+		if !validActionReference(&identifier) && !validGlobalReference(&identifier) {
+			parserError(fmt.Sprintf("Undefined inline reference '%s'. Variable references must be prefixed with @.", identifier))
 		}
 	}
 }
@@ -668,7 +668,7 @@ func collectReference(valueType *tokenType, value *any, until *rune, variable bo
 		}
 
 		if !validActionReference(&reference) && !validGlobalReference(&reference) {
-			parserError(fmt.Sprintf("Undefined reference '%s'", reference))
+			parserError(fmt.Sprintf("Undefined reference '%s' Variable references must be prefixed with @.", reference))
 		}
 
 		if v, found := variables[reference]; found {

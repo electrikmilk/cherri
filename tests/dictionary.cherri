@@ -53,7 +53,7 @@ const metaRaw = getValue(@nested, "meta")
 const meta = getDictionary(metaRaw)
 @author = "{meta['author']}"
 if @author != "Cherri" {
-    mustOutput("❌ FAIL: nested dict child getValue — got {author}, expected 'Cherri'", "❌ FAIL: nested dict child getValue — got {author}, expected 'Cherri'")
+    mustOutput("❌ FAIL: nested dict child getValue — got {@author}, expected 'Cherri'", "❌ FAIL: nested dict child getValue — got {@author}, expected 'Cherri'")
 }
 
 const configRaw = getValue(@nested, "config")

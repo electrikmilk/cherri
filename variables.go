@@ -121,7 +121,7 @@ func validGlobalReference(identifier *string) bool {
 func validActionReference(identifier *string) bool {
 	if v, found := variables[*identifier]; found {
 		if !v.constant && !v.repeatItem {
-			parserError(fmt.Sprintf("Unknown reference '%s'. Variable references must be prepended with @.", *identifier))
+			return false
 		}
 		return true
 	}
