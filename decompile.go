@@ -709,25 +709,23 @@ func decompTextValue(action *ShortcutAction) {
 	decompilingText = false
 }
 
+var numberLiteralRegex = regexp.MustCompile(`^-?[0-9]+(\.[0-9]+)?$`)
+
 func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 	var value = requiredParam(action, "WFNumberActionNumber")
 	if mapValue, isMap := value.(map[string]interface{}); isMap {
-		var Value, hasValue = mapValue["Value"].(map[string]interface{})
-		if !hasValue {
+		if _, hasValue := mapValue["Value"].(map[string]interface{}); !hasValue {
 			decompError(fmt.Sprintf("Expected the parameter 'WFNumberActionNumber' to have a Value dictionary, got %T", mapValue["Value"]), action)
 		}
-		value = decompValue(value)
 
-		match, _ := regexp.MatchString("[0-9.]", value.(string))
-		if !match {
+		var literal = strings.Trim(decompValue(value), "\"")
+		if !numberLiteralRegex.MatchString(literal) {
 			nonLiteral = true
 			return
 		}
 
-		if Value["Type"] == "ActionOutput" {
-			currentVariableValue = value.(string)
-			checkConstantLiteral(action)
-		}
+		currentVariableValue = literal
+		checkConstantLiteral(action)
 		return
 	}
 

@@ -176,4 +176,11 @@ if @rand > 10 {
     mustOutput("❌ FAIL: randomNumber max — got {@rand}, expected <= 10", "❌ FAIL: randomNumber max — got {@rand}, expected <= 10")
 }
 
+// a variable with a digit in its name converts to a number like any other
+@count1 = "5"
+const fromCount = number(@count1)
+if fromCount != 5 {
+    alert("❌ FAIL: number of a variable with a digit in its name - got {fromCount}, expected 5")
+}
+
 show("✅ All tests passed")
