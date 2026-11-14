@@ -40,7 +40,7 @@ if @var == @str && @int == 2 {
 }
 
 menu "Prompt" {
-item "Item 1":
+	item "Item 1":
 }
 alert("Title", "Message")
 alert("No title")

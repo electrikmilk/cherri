@@ -44,6 +44,7 @@ func decompile(b []byte) {
 	currentVariableValue = ""
 	currentVariableUUID = ""
 	currentVariableOperator = ""
+	openMenuItems = make(map[string]bool)
 	appendedVariables = make(map[string]bool)
 	assignedVariables = make(map[string]bool)
 
@@ -1041,7 +1042,11 @@ func decompMenu(action *ShortcutAction) {
 		code.WriteString(" {\n")
 		tabLevel++
 	case statementPart:
-		tabLevel--
+		// The body of the item before this one is one level in from the item.
+		if openMenuItems[groupingUUID] {
+			tabLevel--
+		}
+		openMenuItems[groupingUUID] = true
 		newCodeLine("item ")
 
 		// Cases with an attributed title do not read their option but still consume it.
@@ -1059,10 +1064,17 @@ func decompMenu(action *ShortcutAction) {
 		code.WriteString(":\n")
 		tabLevel++
 	case endStatement:
+		if openMenuItems[groupingUUID] {
+			tabLevel--
+		}
+		delete(openMenuItems, groupingUUID)
 		tabLevel--
 		newCodeLine("}\n")
 	}
 }
+
+// openMenuItems are the menus that have an item whose body is open.
+var openMenuItems = make(map[string]bool)
 
 // menuItemValue is the title of a menu item, which the compiler writes as a WFMenuItem dictionary
 // holding it in WFValue, and Shortcuts as a string.
