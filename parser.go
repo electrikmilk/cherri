@@ -1710,6 +1710,10 @@ func collectArray() (array []any) {
 		var valueType tokenType
 		var value any
 		collectValue(&valueType, &value, ',')
+		if valueType == Action {
+			actionCallNotAllowedError()
+		}
+
 		array = append(array, value)
 
 		if !isChar(',') {
@@ -1780,8 +1784,15 @@ func collectDictionaryItem() (key string, value any) {
 
 	var valueType tokenType
 	collectValue(&valueType, &value, ',')
+	if valueType == Action {
+		actionCallNotAllowedError()
+	}
 
 	return
+}
+
+func actionCallNotAllowedError() {
+	parserError("Action call not allowed here")
 }
 
 func collectObject() string {
