@@ -81,6 +81,14 @@ func mapIdentifiers() {
 		currentAction.identifier = action.WFWorkflowActionIdentifier
 		var params = action.WFWorkflowActionParameters
 		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
+			if params["WFInput"] == nil {
+				continue
+			}
+			var wfInput WFInput
+			mapToStruct(params["WFInput"], &wfInput)
+			if len(wfInput.Value.Aggrandizements) != 0 {
+				mapValueReference(wfInput.Value)
+			}
 			continue
 		}
 
@@ -272,7 +280,10 @@ func mapVariables() {
 			if action.WFWorkflowActionParameters["WFInput"] != nil {
 				var wfInput WFInput
 				mapToStruct(action.WFWorkflowActionParameters["WFInput"], &wfInput)
-				if _, found := uuids[wfInput.Value.OutputUUID]; !found {
+				// An output read through aggrandizements stays a constant, since folding its action
+				// into the Set Variable would drop them.
+				var _, found = uuids[wfInput.Value.OutputUUID]
+				if !found && len(wfInput.Value.Aggrandizements) == 0 {
 					varUUIDs = append(varUUIDs, wfInput.Value.OutputUUID)
 				}
 			}
@@ -1261,51 +1272,92 @@ func decompValueObject(value map[string]interface{}) string {
 		return decompDictionaryValue(items)
 	}
 
-	switch value["Type"] {
-	case "Variable":
-		if _, found := value["VariableName"]; found {
-			var variableName, isString = value["VariableName"].(string)
-			if !isString {
-				decompError(fmt.Sprintf("Expected VariableName to be a string, got %T", value["VariableName"]), currentDecompAction())
-			}
-			if loopReference, isLoopVariable := loopVariableReference(variableName); isLoopVariable {
-				return loopReference
-			}
-			sanitizeIdentifier(&variableName)
+	var valueType, hasType = value["Type"]
+	if !hasType {
+		return decompObjectValue(value)
+	}
 
-			return fmt.Sprintf("@%s", variableName)
-		}
-
+	// A condition input wraps its reference in a Variable dictionary instead of naming it.
+	if _, named := value["VariableName"]; valueType == "Variable" && !named {
 		var variableValue, hasVariable = value["Variable"].(map[string]interface{})
 		if !hasVariable {
 			decompError(fmt.Sprintf("Expected a Variable value to have a VariableName or a Variable dictionary, got %T", value["Variable"]), currentDecompAction())
 		}
 		return decompValue(variableValue["Value"])
-	case "ActionOutput":
-		if _, found := value["OutputUUID"]; found {
-			var outputUUID, isString = value["OutputUUID"].(string)
-			if !isString {
-				decompError(fmt.Sprintf("Expected OutputUUID to be a string, got %T", value["OutputUUID"]), currentDecompAction())
-			}
-			var outputName = uuids[outputUUID]
-			sanitizeIdentifier(&outputName)
-
-			if value["Aggrandizements"] == nil {
-				return outputName
-			}
-		}
-		break
-	case "Ask":
-		if value["Prompt"] == nil {
-			return Ask
-		}
-
-		return fmt.Sprintf("Ask: \"%s\"", value["Prompt"])
-	case globals[ShortcutInput].variableType:
-		return ShortcutInput
 	}
 
-	return decompObjectValue(value)
+	for _, key := range []string{"Type", "VariableName", "OutputUUID", "OutputName", "Prompt"} {
+		if field, found := value[key]; found {
+			if _, isString := field.(string); !isString {
+				decompError(fmt.Sprintf("Expected %s of a reference to be a string, got %T", key, field), currentDecompAction())
+			}
+		}
+	}
+	if aggrandizements, found := value["Aggrandizements"]; found {
+		if _, isArray := aggrandizements.([]interface{}); !isArray {
+			decompError(fmt.Sprintf("Expected Aggrandizements of a reference to be an array, got %T", aggrandizements), currentDecompAction())
+		}
+	}
+
+	var reference Value
+	mapToStruct(value, &reference)
+	if reference.Type == "Ask" && reference.Prompt != "" {
+		return fmt.Sprintf("Ask: \"%s\"", reference.Prompt)
+	}
+
+	return decompReference(reference)
+}
+
+// decompReference is the only place a plist reference becomes Cherri, so references written as
+// whole values and references inside text resolve globals and aggrandizements the same way.
+func decompReference(reference Value) string {
+	var name string
+	switch reference.Type {
+	case "Variable":
+		if reference.VariableName == "" {
+			decompError("Expected a Variable reference to have a VariableName", currentDecompAction())
+		}
+		if loopReference, isLoopVariable := loopVariableReference(reference.VariableName); isLoopVariable {
+			name = loopReference
+			break
+		}
+		name = reference.VariableName
+		sanitizeIdentifier(&name)
+		name = fmt.Sprintf("@%s", name)
+	case "ActionOutput":
+		var outputName, found = uuids[reference.OutputUUID]
+		if !found {
+			decompError(fmt.Sprintf("Expected the output UUID '%s' to belong to an earlier action", reference.OutputUUID), currentDecompAction())
+		}
+		sanitizeIdentifier(&outputName)
+		name = outputName
+	default:
+		name = decompGlobal(reference.Type)
+	}
+
+	decompAggrandizements(&name, reference.Aggrandizements)
+
+	return name
+}
+
+// decompGlobal skips the globals of type Variable, the repeat variables, because Shortcuts names them.
+func decompGlobal(referenceType string) string {
+	for name, global := range globals {
+		if global.variableType != "Variable" && global.variableType == referenceType {
+			return name
+		}
+	}
+
+	var globalTypes []string
+	for _, global := range globals {
+		if global.variableType != "Variable" {
+			globalTypes = append(globalTypes, global.variableType)
+		}
+	}
+	sort.Strings(globalTypes)
+	decompError(fmt.Sprintf("Expected a reference of type Variable, ActionOutput or a global (%s), got '%s'", strings.Join(globalTypes, ", "), referenceType), currentDecompAction())
+
+	return ""
 }
 
 func decompObjectValue(valueObj any) string {
@@ -1329,14 +1381,6 @@ func decompObjectValue(valueObj any) string {
 			decompError(fmt.Sprintf("Expected string of a text value to be a string, got %T", value["string"]), currentDecompAction())
 		}
 		attachmentString = valueString
-	}
-
-	if value["Aggrandizements"] != nil {
-		attachmentString = ObjectReplaceCharStr
-		decompAttachmentString(&attachmentString, map[string]any{
-			"{0, 1}": value,
-		})
-		attachmentString = strings.Trim(attachmentString, "\"{}")
 	}
 
 	if attachments, found := value["attachmentsByRange"]; found {
@@ -1385,32 +1429,8 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 			referencesControlFlowOutput = true
 		}
 
-		var variableName = attachment.VariableName
-		if _, uuid := uuids[attachment.OutputUUID]; uuid {
-			variableName = uuids[attachment.OutputUUID]
-		}
-		sanitizeIdentifier(&variableName)
-		if variableName == "" && attachment.Type == globals[ShortcutInput].variableType {
-			variableName = ShortcutInput
-		}
-		if attachment.Type != "Variable" {
-			for name, global := range globals {
-				if global.variableType == attachment.Type {
-					variableName = name
-				}
-			}
-		} else if loopReference, isLoopVariable := loopVariableReference(attachment.VariableName); isLoopVariable {
-			variableName = loopReference
-		} else {
-			variableName = fmt.Sprintf("@%s", variableName)
-		}
-
-		if len(attachment.Aggrandizements) != 0 {
-			decompAggrandizements(&variableName, attachment.Aggrandizements)
-		}
-
 		result.WriteString(string(utf16.Decode(units[consumed:position])))
-		result.WriteString(fmt.Sprintf("{%s}", variableName))
+		result.WriteString(fmt.Sprintf("{%s}", decompReference(attachment)))
 		consumed = position + 1
 	}
 	result.WriteString(string(utf16.Decode(units[consumed:])))
@@ -1427,28 +1447,39 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 	}
 }
 
-func decompAggrandizements(reference *string, aggrs []Aggrandizement) {
-	var index string
-	var coerce string
+// decompAggrandizements writes the aggrandizements in plist order. The compiler reads at most one
+// key or property followed by at most one coercion, so any other order cannot be written as Cherri.
+func decompAggrandizements(reference *string, aggrandizements []Aggrandizement) {
 	var revContentItems = reversedContentItems()
-	for _, aggr := range aggrs {
-		switch aggr.Type {
-		case "WFCoercionVariableAggrandizement":
-			if _, found := revContentItems[aggr.CoercionItemClass]; found {
-				coerce = revContentItems[coerce]
+	var keyed, coerced bool
+	for _, aggrandizement := range aggrandizements {
+		switch aggrandizement.Type {
+		case "WFDictionaryValueVariableAggrandizement", "WFPropertyVariableAggrandizement":
+			if keyed || coerced {
+				decompError("Expected at most one dictionary key or property read on a reference, before any coercion", currentDecompAction())
 			}
-		case "WFDictionaryValueVariableAggrandizement":
-			index = aggr.DictionaryKey
-		case "WFPropertyVariableAggrandizement":
-			index = aggr.PropertyName
+			var key = aggrandizement.DictionaryKey
+			if aggrandizement.Type == "WFPropertyVariableAggrandizement" {
+				key = aggrandizement.PropertyName
+			}
+			if key == "" || strings.Contains(key, "'") {
+				decompError(fmt.Sprintf("Expected a dictionary key or property name that is not empty and has no single quote, got '%s'", key), currentDecompAction())
+			}
+			*reference = fmt.Sprintf("%s['%s']", *reference, key)
+			keyed = true
+		case "WFCoercionVariableAggrandizement":
+			if coerced {
+				decompError("Expected at most one coercion on a reference", currentDecompAction())
+			}
+			var coerce, found = revContentItems[aggrandizement.CoercionItemClass]
+			if !found {
+				decompError(fmt.Sprintf("Expected a coercion to a known content item class, got '%s'", aggrandizement.CoercionItemClass), currentDecompAction())
+			}
+			*reference = fmt.Sprintf("%s.%s", *reference, coerce)
+			coerced = true
+		default:
+			decompError(fmt.Sprintf("Expected a coercion, dictionary key or property aggrandizement, got '%s'", aggrandizement.Type), currentDecompAction())
 		}
-	}
-
-	if index != "" {
-		*reference = fmt.Sprintf("%s['%s']", *reference, index)
-	}
-	if index != "" && coerce != "" {
-		*reference = fmt.Sprintf("%s.%s", *reference, coerce)
 	}
 }
 

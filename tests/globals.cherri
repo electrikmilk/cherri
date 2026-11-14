@@ -12,5 +12,7 @@ if !CurrentDate {
 @input = ShortcutInput
 @clipboard = Clipboard
 @shortcutInput = "{ShortcutInput}"
+@clipboardText = Clipboard.text
+@shortcutInputText = "{ShortcutInput.text}"
 
 show("✅ All tests passed")
