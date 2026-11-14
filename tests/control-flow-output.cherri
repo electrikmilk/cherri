@@ -32,14 +32,14 @@ show("{connectionName}")
 
 // repeat output: compile-only (output format varies)
 const repeated = repeat i for 6 {
-    number(@i)
+    number(i)
 }
 show("{repeated}")
 
 // for/in output: compile-only (output is a list)
 @items = ["1", "2", "3"]
 const mapped = for item in @items {
-    number(@item)
+    number(item)
 }
 show("{mapped}")
 

@@ -72,7 +72,7 @@ func availableIdentifier(identifier *string) {
 			parserError(fmt.Sprintf("Cannot redefine constant '%s'.", *identifier))
 		}
 		if v.repeatItem {
-			parserError(fmt.Sprintf("Cannot redefine repeat item '%s'.", *identifier))
+			parserError(fmt.Sprintf("Cannot redefine loop variable '%s'. Loop variables are constant.", *identifier))
 		}
 	}
 	if _, found := globals[*identifier]; found {
@@ -117,10 +117,10 @@ func validGlobalReference(identifier *string) bool {
 	return false
 }
 
-// Checks if identifier is a variable that is not a constant.
+// Checks if identifier is a constant or loop variable, which are referenced without @.
 func validActionReference(identifier *string) bool {
 	if v, found := variables[*identifier]; found {
-		if !v.constant {
+		if !v.constant && !v.repeatItem {
 			parserError(fmt.Sprintf("Unknown reference '%s'. Variable references must be prepended with @.", *identifier))
 		}
 		return true
@@ -129,10 +129,14 @@ func validActionReference(identifier *string) bool {
 	return false
 }
 
-// Checks if identifier is a variable that is not a constant.
+// Checks if identifier is a mutable variable, which is referenced with @.
 func validVariableReference(identifier *string) bool {
-	if v, found := variables[*identifier]; !found || v.constant {
+	var v, found = variables[*identifier]
+	if !found || v.constant {
 		return false
+	}
+	if v.repeatItem {
+		parserError(fmt.Sprintf("Loop variable '%s' is constant and cannot be referenced with @.", *identifier))
 	}
 	return true
 }

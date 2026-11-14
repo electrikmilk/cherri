@@ -11,7 +11,7 @@ if @count != 5 {
 @firstIndex = 0
 repeat i for 3 {
     if @firstIndex == 0 {
-        @firstIndex = @i
+        @firstIndex = i
     }
 }
 if @firstIndex != 1 {
@@ -22,7 +22,7 @@ if @firstIndex != 1 {
 @items = list("alpha", "beta", "gamma")
 @last = ""
 for item in @items {
-    @last = "{@item}"
+    @last = "{item}"
 }
 if @last != "gamma" {
     mustOutput("❌ FAIL: for/in last item — got {@last}, expected 'gamma'", "❌ FAIL: for/in last item — got {@last}, expected 'gamma'")
@@ -51,7 +51,7 @@ if @lastItem != "gamma" {
 @innerLast = ""
 for outer in @items {
     for inner in @nestedItems {
-        @innerLast = "{@inner}"
+        @innerLast = "{inner}"
     }
 }
 if @innerLast != "y" {
@@ -62,7 +62,7 @@ if @innerLast != "y" {
 @outerCapture = ""
 for outer2 in @items {
     for inner2 in @nestedItems {
-        @outerCapture = "{@outer2}"
+        @outerCapture = "{outer2}"
     }
 }
 if @outerCapture != "gamma" {
@@ -73,7 +73,7 @@ if @outerCapture != "gamma" {
 @innerRepeatIdx = 0
 repeat i2 for 2 {
     repeat j for 3 {
-        @innerRepeatIdx = @j
+        @innerRepeatIdx = j
     }
 }
 if @innerRepeatIdx != 3 {
@@ -84,7 +84,7 @@ if @innerRepeatIdx != 3 {
 @innerIdxStr = ""
 repeat i3 for 2 {
     repeat k for 3 {
-        @innerIdxStr = "{@k}"
+        @innerIdxStr = "{k}"
     }
 }
 if @innerIdxStr != "3" {

@@ -1988,7 +1988,7 @@ func skipInlineWhitespace() {
 
 func printVariables() {
 	for identifier, v := range variables {
-		if v.constant {
+		if v.constant || v.repeatItem {
 			fmt.Print("const ")
 		} else {
 			fmt.Print("@")

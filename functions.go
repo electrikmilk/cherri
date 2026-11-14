@@ -207,7 +207,7 @@ func handleFunctionArguments(functionsHeader *strings.Builder, identifier string
 			functionsHeader.WriteString(fmt.Sprintf("const %s_array_dictionary = getDictionary(%s)\n", argumentReference, argumentReference))
 			functionsHeader.WriteString(fmt.Sprintf("                const %s_array = getValue(%s_array_dictionary,\"array\")\n", argumentReference, argumentReference))
 			functionsHeader.WriteString(fmt.Sprintf("                for %s_array_item in %s_array {\n", argumentReference, argumentReference))
-			functionsHeader.WriteString(fmt.Sprintf("                    @%s += @%s_array_item\n                }", param.name, argumentReference))
+			functionsHeader.WriteString(fmt.Sprintf("                    @%s += %s_array_item\n                }", param.name, argumentReference))
 		default:
 			functionsHeader.WriteString(fmt.Sprintf("@%s = %s\n", param.name, argumentReference))
 		}
