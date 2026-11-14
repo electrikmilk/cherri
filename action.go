@@ -761,6 +761,8 @@ func generateActionParamDefinition(param parameterDefinition) string {
 		if param.validType == Quantity {
 			var qtyArgs = param.defaultValue.([]actionArgument)
 			defaultValue = fmt.Sprintf("qty(%d, \"%s\")", qtyArgs[0].value, qtyArgs[1].value)
+		} else if param.validType == Color {
+			defaultValue = formatColorDefault(param.defaultValue.([]actionArgument))
 		} else if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
 			defaultValue = fmt.Sprintf("\"%v\"", strings.Replace(param.defaultValue.(string), "\n", "\\n", 1))
 		} else {
@@ -770,6 +772,23 @@ func generateActionParamDefinition(param parameterDefinition) string {
 	}
 
 	return definition.String()
+}
+
+// Whole floats are written with a trailing .0 so the default reads the way it was declared.
+func formatColorDefault(components []actionArgument) string {
+	var formatted []string
+	for _, component := range components {
+		var componentValue = fmt.Sprintf("%v", component.value)
+		if floatValue, isFloat := component.value.(float64); isFloat {
+			componentValue = strconv.FormatFloat(floatValue, 'f', -1, 64)
+			if !strings.Contains(componentValue, ".") {
+				componentValue += ".0"
+			}
+		}
+		formatted = append(formatted, componentValue)
+	}
+
+	return fmt.Sprintf("color(%s)", strings.Join(formatted, ", "))
 }
 
 func generateActionDebugDefinition() string {
