@@ -1349,7 +1349,7 @@ func decompContactValue(action *ShortcutAction, key string, contentKit contentKi
 		if !isString {
 			decompError(fmt.Sprintf("Expected a contact field value to have a text entry '%s', got %T", serializedKey, contactFieldValue.SerializedEntry[serializedKey]), action)
 		}
-		arguments = append(arguments, fmt.Sprintf("\"%s\"", email))
+		arguments = append(arguments, quoteString(email, false))
 	}
 
 	return
@@ -1384,34 +1384,35 @@ func textParts(args []actionArgument) map[string]any {
 	return data
 }
 
-func decompReferenceValue(paramValue any, action *ShortcutAction) string {
-	if isReferenceValue(paramValue) {
+// decompSeparator writes a separator as a string literal, or as the text or reference it holds. Only a named
+// separator, and not a custom one, is converted to the character it names, as a custom separator is the
+// text it holds.
+func decompSeparator(paramValue any, named bool, action *ShortcutAction) string {
+	if _, isMap := paramValue.(map[string]interface{}); isMap {
 		return decompValue(paramValue)
 	}
 
 	var text, isString = paramValue.(string)
 	if !isString {
-		decompError(fmt.Sprintf("Expected a text separator to be a string or a variable reference, got %T", paramValue), action)
+		decompError(fmt.Sprintf("Expected a text separator to be text or a variable reference, got %T", paramValue), action)
+	}
+	if named {
+		text = glueToChar(text)
 	}
 
-	return text
+	return quoteString(text, false)
 }
 
 func decompTextParts(action *ShortcutAction) (arguments []string) {
 	arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["text"]))
 
-	var glue string
-	var hasCustomSeparator bool
-	if action.WFWorkflowActionParameters["WFTextSeparator"] != nil {
-		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextSeparator"], action)
+	var separator = action.WFWorkflowActionParameters["WFTextSeparator"]
+	if customSeparator, isCustom := action.WFWorkflowActionParameters["WFTextCustomSeparator"]; isCustom && customSeparator != nil {
+		arguments = append(arguments, decompSeparator(customSeparator, false, action))
+		return
 	}
-	if action.WFWorkflowActionParameters["WFTextCustomSeparator"] != nil {
-		glue = decompReferenceValue(action.WFWorkflowActionParameters["WFTextCustomSeparator"], action)
-		hasCustomSeparator = true
-	}
-
-	if glue != "" || hasCustomSeparator {
-		arguments = append(arguments, fmt.Sprintf("\"%s\"", glueToChar(glue)))
+	if separator != nil && separator != "" {
+		arguments = append(arguments, decompSeparator(separator, true, action))
 	}
 
 	return

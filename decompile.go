@@ -1224,9 +1224,7 @@ func decompDictionaryGetValue(action *ShortcutAction) {
 	if action.WFWorkflowActionParameters["WFDictionaryKey"] != nil {
 		dictionaryValueRef.WriteRune('[')
 		if keyValue, isString := action.WFWorkflowActionParameters["WFDictionaryKey"].(string); isString {
-			dictionaryValueRef.WriteRune('\'')
-			dictionaryValueRef.WriteString(keyValue)
-			dictionaryValueRef.WriteRune('\'')
+			dictionaryValueRef.WriteString(quoteRawString(keyValue))
 		} else {
 			dictionaryValueRef.WriteString(decompValue(action.WFWorkflowActionParameters["WFDictionaryKey"]))
 		}

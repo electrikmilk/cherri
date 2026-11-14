@@ -66,6 +66,23 @@ const rejoined = joinText(@lines)
 // an empty separator splits into every character
 @characters = splitText("abc", "")
 
+// separators with a quote, a backslash or a new line are written escaped
+@quoteParts = splitText("a\"b", "\"")
+const backslashJoined = joinText(@quoteParts, "\\")
+if backslashJoined != "a\\b" {
+    alert("❌ FAIL: joinText with a backslash - got {backslashJoined}")
+}
+const lineJoined = joinText(@quoteParts, "-\n-")
+if lineJoined != "a-\n-b" {
+    alert("❌ FAIL: joinText with a new line - got {lineJoined}")
+}
+
+// a custom separator named like a separator is the text it holds
+const spacesJoined = joinText(@quoteParts, "Spaces")
+if spacesJoined != "aSpacesb" {
+    alert("❌ FAIL: joinText with the text Spaces - got {spacesJoined}")
+}
+
 // text that starts and ends with a quote, written escaped and as a raw string
 @quoted = "\"quoted\""
 if @quoted != '"quoted"' {
