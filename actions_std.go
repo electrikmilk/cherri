@@ -78,7 +78,7 @@ var actions = map[string]*actionDefinition{
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			var recovered = make(map[string]string)
-			if _, found := action.WFWorkflowActionParameters["repeats"]; !found {
+			if _, found := optionalParam(action, "repeats"); !found {
 				return decompHookArguments(action, recovered)
 			}
 
@@ -229,7 +229,7 @@ var actions = map[string]*actionDefinition{
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			var colorNumber, isNumber = requiredParam(action, "WFLabelColorNumber").(uint64)
 			if !isNumber {
-				decompError(fmt.Sprintf("Expected WFLabelColorNumber to be an integer, got %T", action.WFWorkflowActionParameters["WFLabelColorNumber"]), action)
+				decompError(fmt.Sprintf("Expected WFLabelColorNumber to be an integer, got %T", readParam(action, "WFLabelColorNumber")), action)
 			}
 			var recovered = make(map[string]string)
 			for color, number := range fileLabelsMap {
@@ -283,7 +283,7 @@ var actions = map[string]*actionDefinition{
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			var recovered = make(map[string]string)
-			if textType, found := action.WFWorkflowActionParameters["WFGetTextFromPDFTextType"]; found {
+			if textType, found := optionalParam(action, "WFGetTextFromPDFTextType"); found {
 				// Text is written whether richText is false or left out, so only Rich Text needs the argument.
 				switch textType {
 				case "Rich Text":
@@ -421,7 +421,7 @@ var actions = map[string]*actionDefinition{
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			var recovered = make(map[string]string)
-			if defaultAnswer, found := action.WFWorkflowActionParameters["WFAskActionDefaultAnswer"]; found {
+			if defaultAnswer, found := optionalParam(action, "WFAskActionDefaultAnswer"); found {
 				recovered["defaultValue"] = decompValue(defaultAnswer)
 			}
 
@@ -575,7 +575,7 @@ var actions = map[string]*actionDefinition{
 			arguments = append(arguments, decompAppAction("WFSecondaryAppIdentifier", action)...)
 
 			// Shortcuts leaves the ratio out when it is the default.
-			var splitRatio, hasRatio = action.WFWorkflowActionParameters["WFAppRatio"]
+			var splitRatio, hasRatio = optionalParam(action, "WFAppRatio")
 			if !hasRatio {
 				return
 			}
@@ -608,7 +608,7 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
-			if action.WFWorkflowActionParameters["target"] != nil {
+			if readParam(action, "target") != nil {
 				arguments = append(arguments, decompShortcutTitle(action))
 			}
 			return
@@ -631,11 +631,11 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
-			if action.WFWorkflowActionParameters["WFInput"] == nil {
+			if readParam(action, "WFInput") == nil {
 				return []string{"nil"}
 			}
 
-			return []string{decompValue(action.WFWorkflowActionParameters["WFInput"])}
+			return []string{decompValue(readParam(action, "WFInput"))}
 		},
 	},
 	"list": {
@@ -739,7 +739,7 @@ var actions = map[string]*actionDefinition{
 				"Smallest First": "desc",
 			}
 			// Any other sort order is read as is, a variable or the asc or desc kept for a random sort.
-			var sortOrder, _ = action.WFWorkflowActionParameters["WFContentItemSortOrder"].(string)
+			var sortOrder, _ = readParam(action, "WFContentItemSortOrder").(string)
 			if order, found := sortOrders[sortOrder]; found {
 				recovered["orderBy"] = decompValue(order)
 			}
@@ -775,11 +775,11 @@ var actions = map[string]*actionDefinition{
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			arguments = append(arguments,
-				decompValue(action.WFWorkflowActionParameters["WFInput"]),
-				decompValue(action.WFWorkflowActionParameters["WFMeasurementUnitType"]),
+				decompValue(readParam(action, "WFInput")),
+				decompValue(readParam(action, "WFMeasurementUnitType")),
 			)
 
-			if action.WFWorkflowActionParameters["WFMeasurementUnit"] != nil {
+			if readParam(action, "WFMeasurementUnit") != nil {
 				var measurementUnit WFMeasurementUnit
 				decompMapToStruct(paramMap(action, "WFMeasurementUnit"), &measurementUnit, "WFMeasurementUnit", action)
 
@@ -817,13 +817,13 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
-			if action.WFWorkflowActionParameters["WFMeasurementUnit"] != nil {
+			if readParam(action, "WFMeasurementUnit") != nil {
 				var measurementUnit WFMeasurementUnit
 				decompMapToStruct(paramMap(action, "WFMeasurementUnit"), &measurementUnit, "WFMeasurementUnit", action)
 
 				arguments = append(arguments,
 					decompValue(measurementUnit.Value.Magnitude),
-					decompValue(action.WFWorkflowActionParameters["WFMeasurementUnitType"]),
+					decompValue(readParam(action, "WFMeasurementUnitType")),
 					decompValue(measurementUnit.Value.Unit),
 				)
 			}
@@ -1024,7 +1024,7 @@ var actions = map[string]*actionDefinition{
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			var recovered = make(map[string]string)
-			if _, found := action.WFWorkflowActionParameters["style"]; !found {
+			if _, found := optionalParam(action, "style"); !found {
 				return decompHookArguments(action, recovered)
 			}
 
@@ -1088,7 +1088,7 @@ var focusModes = map[string]focusMode{
 // decompFocusMode recovers the focusMode argument from FocusModes, which is left out for the default.
 func decompFocusMode(action *ShortcutAction) map[string]string {
 	var recovered = make(map[string]string)
-	if _, found := action.WFWorkflowActionParameters["FocusModes"]; !found {
+	if _, found := optionalParam(action, "FocusModes"); !found {
 		return recovered
 	}
 
@@ -1333,15 +1333,15 @@ func contactValue(contentKit contentKit, args []actionArgument) map[string]any {
 }
 
 func decompContactValue(action *ShortcutAction, key string, contentKit contentKit) (arguments []string) {
-	if action.WFWorkflowActionParameters[key] == nil {
+	if readParam(action, key) == nil {
 		return
 	}
 
 	var wfValue WFValue
-	decompMapToStruct(action.WFWorkflowActionParameters[key], &wfValue, key, action)
+	decompMapToStruct(readParam(action, key), &wfValue, key, action)
 
 	if wfValue.WFSerializationType == "WFTextTokenString" {
-		return []string{decompValue(action.WFWorkflowActionParameters[key])}
+		return []string{decompValue(readParam(action, key))}
 	}
 
 	var value, hasValue = wfValue.Value.(map[string]interface{})
@@ -1430,10 +1430,10 @@ func decompSeparator(paramValue any, named bool, action *ShortcutAction) string 
 }
 
 func decompTextParts(action *ShortcutAction) (arguments []string) {
-	arguments = append(arguments, decompValue(action.WFWorkflowActionParameters["text"]))
+	arguments = append(arguments, decompValue(readParam(action, "text")))
 
-	var separator = action.WFWorkflowActionParameters["WFTextSeparator"]
-	if customSeparator, isCustom := action.WFWorkflowActionParameters["WFTextCustomSeparator"]; isCustom && customSeparator != nil {
+	var separator = readParam(action, "WFTextSeparator")
+	if customSeparator, isCustom := optionalParam(action, "WFTextCustomSeparator"); isCustom && customSeparator != nil {
 		arguments = append(arguments, decompSeparator(customSeparator, false, action))
 		return
 	}
@@ -1556,7 +1556,7 @@ func appendSetMultitaskingModeParam(title, identifier, symbol string) map[string
 // decompAppAction writes the apps of key, which is a bundle identifier, a variable, or for the actions that take
 // every app except some, an array of bundle identifiers that is left out when there are no exceptions.
 func decompAppAction(key string, action *ShortcutAction) (arguments []string) {
-	var value, found = action.WFWorkflowActionParameters[key]
+	var value, found = optionalParam(action, key)
 	if !found {
 		return
 	}

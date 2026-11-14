@@ -2110,6 +2110,7 @@ func decompAction(action *ShortcutAction) {
 }
 
 func makeActionCallCode(action *ShortcutAction) string {
+	readParameters = make(map[string]bool)
 	var actionCallCode strings.Builder
 	var matchedIdentifier, matchedAction = matchAction(action)
 	if matchedIdentifier == "" {
@@ -2145,8 +2146,60 @@ func makeActionCallCode(action *ShortcutAction) string {
 	}
 
 	actionCallCode.WriteString(")")
+	warnDroppedParameters(matchedIdentifier, &matchedAction, action)
 
 	return actionCallCode.String()
+}
+
+// readParameters are the parameters of the action being written that were read to write it.
+var readParameters = make(map[string]bool)
+
+// bookkeepingParameters are written by the compiler for every action that needs them, never from an argument.
+var bookkeepingParameters = []string{UUID, "CustomOutputName", "GroupingIdentifier", "WFControlFlowMode"}
+
+// derivedParameters are the parameters that the compiler writes for an action whatever its arguments are, or
+// works out from the arguments, so compiling the action again writes them again.
+var derivedParameters = map[string][]string{
+	"addToReadingList":            {"Show-WFURLActionURL"},
+	"filterFiles":                 {"WFContentItemLimitEnabled"},
+	"getWindows":                  {"WFContentItemLimitEnabled"},
+	"joinText":                    {"Show-text"},
+	"openApp":                     {"WFSelectedApp"},
+	"openCustomXCallbackURL":      {"WFXCallbackCustomCallbackEnabled", "WFXCallbackCustomSuccessURLEnabled"},
+	"prompt":                      {"WFAskActionDefaultAnswerNumber"},
+	"setStageManagerMultitasking": {"mode"},
+	"setWindowedMultitasking":     {"mode"},
+	"splitText":                   {"Show-text"},
+	"url":                         {"Show-WFURLActionURL"},
+}
+
+// warnDroppedParameters warns about the parameters of an action that no argument was written from, as the
+// action is still matched by its identifier but those values are lost when it is compiled again.
+func warnDroppedParameters(name string, definition *actionDefinition, action *ShortcutAction) {
+	var dropped []string
+	for key := range action.WFWorkflowActionParameters {
+		if readParameters[key] || slices.Contains(bookkeepingParameters, key) || slices.Contains(derivedParameters[name], key) {
+			continue
+		}
+		if key == "AppIntentDescriptor" && definition.appIntent != emptyAppIntent {
+			continue
+		}
+		if _, isStatic := definition.appendParams[key]; isStatic {
+			continue
+		}
+		var isParameter = slices.ContainsFunc(definition.parameters, func(param parameterDefinition) bool {
+			return param.key == key
+		})
+		if !isParameter {
+			dropped = append(dropped, key)
+		}
+	}
+	if len(dropped) == 0 {
+		return
+	}
+
+	sort.Strings(dropped)
+	decompWarning(fmt.Sprintf("The parameters %s of %s() have no argument to be written as and are left out.", strings.Join(dropped, ", "), name))
 }
 
 // checkOutputType determines if action output is a constant or a variable.
@@ -2724,10 +2777,27 @@ func decompMapToStruct(value any, structure any, key string, action *ShortcutAct
 
 // requiredParam returns the value of key, which the action must have.
 func requiredParam(action *ShortcutAction, key string) any {
+	readParameters[key] = true
 	var value, found = action.WFWorkflowActionParameters[key]
 	if !found {
 		decompError(fmt.Sprintf("Expected the parameter '%s' to be present", key), action)
 	}
+
+	return value
+}
+
+// optionalParam returns the value of key and whether the action has it, and counts it as read so it is not
+// warned about as left out.
+func optionalParam(action *ShortcutAction, key string) (value any, found bool) {
+	readParameters[key] = true
+	value, found = action.WFWorkflowActionParameters[key]
+
+	return
+}
+
+// readParam is optionalParam for a value that is nil when the action does not have it.
+func readParam(action *ShortcutAction, key string) any {
+	var value, _ = optionalParam(action, key)
 
 	return value
 }
