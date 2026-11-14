@@ -43,6 +43,7 @@ func decompile(b []byte) {
 	loopIdentifiers = make(map[string]string)
 	currentVariableValue = ""
 	currentVariableUUID = ""
+	currentVariableOperator = ""
 	appendedVariables = make(map[string]bool)
 	assignedVariables = make(map[string]bool)
 
@@ -841,11 +842,51 @@ func decompBasicExpression(action *ShortcutAction) {
 			decompError(fmt.Sprintf("Expected the parameter 'WFMathOperation' to be '+', '-', '×', '÷' or '…', got '%v'", action.WFWorkflowActionParameters["WFMathOperation"]), action)
 		}
 	}
-	var expression = strings.Trim(decompValue(input), "\"") + " " + strings.Trim(operation, "\"") + " " + strings.Trim(decompValue(operand), "\"")
+	var inputText = strings.Trim(decompValue(input), "\"")
+	var operandText = strings.Trim(decompValue(operand), "\"")
+	var expression = inputText + " " + strings.Trim(operation, "\"") + " " + operandText
 	var varRegex = regexp.MustCompile(`{(.*?)}`)
 	currentVariableValue = varRegex.ReplaceAllString(expression, "$1")
 
 	checkConstantLiteral(action)
+
+	var compound, isCompound = compoundAssignment(action, inputText, operation, operandText)
+	if isCompound {
+		currentVariableValue = operandText
+		currentVariableOperator = compound
+	}
+}
+
+// currentVariableOperator is the operator that the Set Variable consuming currentVariableValue is written
+// with when the value is the operand of a compound assignment.
+var currentVariableOperator string
+
+var integerLiteralRegex = regexp.MustCompile(`^-?[0-9]+$`)
+
+// compoundAssignment reverses variableValueModifier: a math action that has a variable as its first operand,
+// an integer as its second and whose output is only taken by the Set Variable right after it that sets that
+// variable is what x += 3 compiles to. The compiler only writes that for an integer operand, and only appends
+// to a variable that is an array instead, so neither is written as one.
+func compoundAssignment(action *ShortcutAction, inputText string, operation string, operandText string) (operator string, isCompound bool) {
+	if action.WFWorkflowActionParameters[UUID] == nil || actionIndex+1 >= len(shortcut.WFWorkflowActions) {
+		return
+	}
+	var actionUUID = paramString(action, UUID)
+	if currentVariableUUID != actionUUID || !integerLiteralRegex.MatchString(operandText) {
+		return
+	}
+
+	var next = peekActions(1)
+	if next.WFWorkflowActionIdentifier != SetVariableIdentifier {
+		return
+	}
+	var variableName = paramString(&next, "WFVariableName")
+	sanitizeIdentifier(&variableName)
+	if inputText != "@"+variableName || appendedVariables[variableName] {
+		return
+	}
+
+	return operation + "=", true
 }
 
 func decompExpression(action *ShortcutAction) {
@@ -910,7 +951,12 @@ func decompVariable(action *ShortcutAction) {
 		return
 	}
 
-	code.WriteString(fmt.Sprintf(" %s ", assignmentOperator(action)))
+	var operator = assignmentOperator(action)
+	if currentVariableOperator != "" {
+		operator = currentVariableOperator
+		currentVariableOperator = ""
+	}
+	code.WriteString(fmt.Sprintf(" %s ", operator))
 	code.WriteString(currentVariableValue)
 	code.WriteRune('\n')
 
