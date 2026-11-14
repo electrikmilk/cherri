@@ -11,7 +11,6 @@ app Clock 'com.apple.clock' {
     'PauseTimerIntent',
     'ResumeTimerIntent',
     'CancelTimerIntent',
-    'GetCurrentTimerDetailsIntent',
     'StartStopwatchIntent',
     'StopStopwatchIntent',
     'LapStopwatchIntent',
@@ -22,9 +21,21 @@ app Clock 'com.apple.clock' {
     'OpenTab'
 }
 
+// These intents are stored under the identifier of the iOS Clock app, which differs from the macOS Clock app.
+app MobileTimer:'Clock' 'com.apple.mobiletimer' {
+    'GetCurrentTimerDetailsIntent',
+    'EditSleepAlarmIntent'
+}
+
 enum currentTimerDetail {
     'duration',
     'remainingTime',
+}
+
+enum sleepAlarmOperation {
+    'skip',
+    'unskip',
+    'toggle',
 }
 
 enum clockTab {
@@ -138,7 +149,10 @@ action !mac #Clock.ResumeTimerIntent resumeTimer()
 action !mac #Clock.CancelTimerIntent cancelTimer()
 
 // [Doc]: [Clock] Get Current Timer Detail: Returns the total duration or the remaining time of the current timer.
-action !mac #Clock.GetCurrentTimerDetailsIntent getCurrentTimerDetail(currentTimerDetail detail: 'mode'): variable
+action !mac #MobileTimer.GetCurrentTimerDetailsIntent getCurrentTimerDetail(currentTimerDetail detail: 'mode'): variable
+
+// [Doc]: [Clock] Toggle Sleep Alarm: Skips, unskips or toggles the next sleep alarm. Requires a Sleep schedule set up in the Health app.
+action !mac #MobileTimer.EditSleepAlarmIntent toggleSleepAlarm(sleepAlarmOperation operation: 'operation')
 
 // [Doc]: [Clock] Start Stopwatch: Starts the stopwatch.
 action !mac #Clock.StartStopwatchIntent startStopwatch()
