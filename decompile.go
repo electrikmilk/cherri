@@ -37,7 +37,10 @@ func decompile(b []byte) {
 	uuids = make(map[string]string)
 	standardActionIncludes = make(map[string]string)
 	decompiledIncludes = []string{}
-	controlFlowGroups = make(map[int]controlFlowGroup)
+	controlFlowOutputs = make(map[string]string)
+	controlFlowOutputUUIDs = []string{}
+	currentVariableValue = ""
+	currentVariableUUID = ""
 
 	basename = strings.ReplaceAll(basename, " ", "_")
 	outputPath = getOutputPath(basename + ".cherri")
@@ -86,37 +89,37 @@ func mapIdentifiers() {
 	}
 }
 
+// controlFlowOutputs maps the GroupingIdentifier of a control flow block to the name its output is referenced by.
+var controlFlowOutputs map[string]string
+var controlFlowOutputUUIDs []string
+
+var controlFlowIdentifiers = []string{
+	"is.workflow.actions.conditional",
+	"is.workflow.actions.choosefrommenu",
+	"is.workflow.actions.repeat.count",
+	"is.workflow.actions.repeat.each",
+}
+
+// mapControlFlowOutputs names the output of each control flow block from its end action, which is the only one
+// that carries the UUID, so the start action that shares its GroupingIdentifier can be written as a constant.
 func mapControlFlowOutputs() {
 	for _, action := range shortcut.WFWorkflowActions {
-		switch action.WFWorkflowActionIdentifier {
-		case "is.workflow.actions.conditional":
-			fallthrough
-		case "is.workflow.actions.choosefrommenu":
-			fallthrough
-		case "is.workflow.actions.repeat.count":
-			fallthrough
-		case "is.workflow.actions.repeat.each":
-			var params = action.WFWorkflowActionParameters
-			if controlFlowMode(&action) != endStatement {
-				continue
-			}
-
-			var groupName string
-			if params["UUID"] != nil {
-				var endingUUID = paramString(&action, "UUID")
-				if uuids[endingUUID] != "" {
-					groupName = uuids[endingUUID]
-				}
-			}
-
-			controlFlowGroups[groupingIdx] = controlFlowGroup{
-				groupType:  Conditional,
-				identifier: groupName,
-			}
-			groupingIdx++
+		if !slices.Contains(controlFlowIdentifiers, action.WFWorkflowActionIdentifier) {
+			continue
 		}
+		if controlFlowMode(&action) != endStatement || action.WFWorkflowActionParameters[UUID] == nil {
+			continue
+		}
+
+		var outputUUID = paramString(&action, UUID)
+		var outputName, referenced = uuids[outputUUID]
+		if !referenced {
+			continue
+		}
+
+		controlFlowOutputs[paramString(&action, "GroupingIdentifier")] = outputName
+		controlFlowOutputUUIDs = append(controlFlowOutputUUIDs, outputUUID)
 	}
-	groupingIdx = 0
 }
 
 // Map out variables in the Shortcut and their UUIDs for later checks.
@@ -417,6 +420,10 @@ func defineColors(icon ShortcutIcon, colors map[string]int) {
 
 var currentVariableValue string
 
+// currentVariableUUID is the UUID of the action that produced currentVariableValue, which only the Set Variable
+// referencing that UUID may consume.
+var currentVariableUUID string
+
 func decompileActions() {
 	for _, action := range shortcut.WFWorkflowActions {
 		currentAction.identifier = action.WFWorkflowActionIdentifier
@@ -464,21 +471,43 @@ func decompileActions() {
 var varUUIDs []string
 var constUUIDs []string
 
-// checkConstantLiteral determines if action should be written out on a new line as a constant and clear the current variable value.
+// checkConstantLiteral writes the current variable value of action as a constant, holds it for the Set Variable
+// that references it, or writes action as a call on its own line when nothing references its output.
 func checkConstantLiteral(action *ShortcutAction) {
-	if _, found := action.WFWorkflowActionParameters[UUID]; !found {
+	if action.WFWorkflowActionParameters[UUID] == nil {
+		writeUnreferencedCall(action)
 		return
 	}
 	var actionUUID = paramString(action, UUID)
 	if slices.Contains(varUUIDs, actionUUID) && !slices.Contains(constUUIDs, actionUUID) {
+		currentVariableUUID = actionUUID
 		return
 	}
-	if outputName, found := uuids[actionUUID]; found {
-		newCodeLine(fmt.Sprintf("const %s = ", outputName))
-		code.WriteString(currentVariableValue)
-		code.WriteRune('\n')
-		currentVariableValue = ""
+	var outputName, referenced = uuids[actionUUID]
+	if !referenced {
+		writeUnreferencedCall(action)
+		return
 	}
+
+	newCodeLine(fmt.Sprintf("const %s = ", outputName))
+	code.WriteString(currentVariableValue)
+	code.WriteRune('\n')
+	currentVariableValue = ""
+}
+
+// writeUnreferencedCall writes action as a call because a literal on its own line is not valid Cherri.
+// A text action is matched by more than one action definition, so it is written with the text alias.
+func writeUnreferencedCall(action *ShortcutAction) {
+	var call string
+	if action.WFWorkflowActionIdentifier == "is.workflow.actions.gettext" {
+		call = fmt.Sprintf("text(%s)", currentVariableValue)
+	} else {
+		call = makeActionCallCode(action)
+	}
+
+	code.WriteString(tabbedLine(call))
+	code.WriteRune('\n')
+	currentVariableValue = ""
 }
 
 func makeConstantLiteral(action *ShortcutAction) {
@@ -546,6 +575,7 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 
 		if Value["Type"] == "ActionOutput" {
 			currentVariableValue = value.(string)
+			checkConstantLiteral(action)
 		}
 		return
 	}
@@ -618,24 +648,33 @@ func decompVariable(action *ShortcutAction) {
 	sanitizeIdentifier(&variableName)
 	newCodeLine(fmt.Sprintf("@%s", variableName))
 
-	if currentVariableValue != "" {
-		code.WriteRune(' ')
-		if action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
-			code.WriteString("+= ")
-		} else {
-			code.WriteString("= ")
-		}
+	var inputUUID string
+	if action.WFWorkflowActionParameters["WFInput"] != nil {
+		var wfInput WFInput
+		mapToStruct(action.WFWorkflowActionParameters["WFInput"], &wfInput)
+		inputUUID = wfInput.Value.OutputUUID
+	}
 
-		code.WriteString(currentVariableValue)
-	} else {
+	if currentVariableValue == "" || inputUUID == "" || inputUUID != currentVariableUUID {
 		var decompInput = decompValue(action.WFWorkflowActionParameters["WFInput"])
 		if decompInput != "" {
 			code.WriteString(fmt.Sprintf(" = %s", decompInput))
 		}
+		code.WriteRune('\n')
+		return
 	}
 
-	currentVariableValue = ""
+	code.WriteRune(' ')
+	if action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
+		code.WriteString("+= ")
+	} else {
+		code.WriteString("= ")
+	}
+	code.WriteString(currentVariableValue)
 	code.WriteRune('\n')
+
+	currentVariableValue = ""
+	currentVariableUUID = ""
 }
 
 func decompDictionaryGetValue(action *ShortcutAction) {
@@ -667,10 +706,9 @@ func checkControlFlowOutput(action *ShortcutAction) bool {
 		fallthrough
 	case "is.workflow.actions.repeat.each":
 		if controlFlowMode(action) == startStatement {
-			var group = controlFlowGroups[groupingIdx]
-			if group.identifier != "" {
-				newCodeLine(fmt.Sprintf("const %s = ", group.identifier))
-				groupingIdx++
+			var outputName, captured = controlFlowOutputs[paramString(action, "GroupingIdentifier")]
+			if captured {
+				newCodeLine(fmt.Sprintf("const %s = ", outputName))
 				return true
 			}
 		}
@@ -1197,6 +1235,7 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 
 	var result strings.Builder
 	var consumed int
+	var referencesControlFlowOutput bool
 	for _, position := range positions {
 		if position < consumed || position >= len(units) {
 			decompError(fmt.Sprintf("Attachment position %d is outside of the string", position), currentDecompAction())
@@ -1204,6 +1243,10 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 
 		var attachment Value
 		mapToStruct(attachmentsByPosition[position], &attachment)
+
+		if slices.Contains(controlFlowOutputUUIDs, attachment.OutputUUID) {
+			referencesControlFlowOutput = true
+		}
 
 		var variableName = attachment.VariableName
 		if _, uuid := uuids[attachment.OutputUUID]; uuid {
@@ -1236,7 +1279,8 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 	*attachmentString = escapeString(result.String())
 
 	if !decompilingDictionary && !decompilingText {
-		if originalString == ObjectReplaceCharStr {
+		// The output of a control flow block has no type, so the compiler only accepts it inside text.
+		if originalString == ObjectReplaceCharStr && !referencesControlFlowOutput {
 			*attachmentString = strings.Trim(*attachmentString, "{}")
 		} else if !strings.Contains("\"", *attachmentString) {
 			*attachmentString = fmt.Sprintf("\"%s\"", *attachmentString)
@@ -1291,7 +1335,9 @@ func decompAction(action *ShortcutAction) {
 		makeConstantLiteral(action)
 	} else if isConstant {
 		checkConstantLiteral(action)
-	} else if !isVariableValue {
+	} else if isVariableValue {
+		currentVariableUUID = paramString(action, UUID)
+	} else {
 		code.WriteString(tabbedLine(currentVariableValue))
 		code.WriteRune('\n')
 		currentVariableValue = ""

@@ -21,6 +21,38 @@ if @smallerStr != "no" {
     mustOutput("❌ FAIL: if output (false branch) — got {@smallerStr}, expected 'no'", "❌ FAIL: if output (false branch) — got {@smallerStr}, expected 'no'")
 }
 
+// captured if output nested inside an if whose output is not captured
+@innerStr = ""
+if @x > 3 {
+    const inner = if @x > 4 {
+        text("inner yes")
+    } else {
+        text("inner no")
+    }
+    @innerStr = "{inner}"
+}
+if @innerStr != "inner yes" {
+    mustOutput("❌ FAIL: nested if output — got {@innerStr}, expected 'inner yes'", "❌ FAIL: nested if output — got {@innerStr}, expected 'inner yes'")
+}
+
+// if whose output is not captured nested inside a captured if output
+@flag = ""
+const outer = if @x > 3 {
+    if @x > 4 {
+        @flag = "set"
+    }
+    text("outer yes")
+} else {
+    text("outer no")
+}
+@outerStr = "{outer}"
+if @outerStr != "outer yes" {
+    mustOutput("❌ FAIL: if output around nested if — got {@outerStr}, expected 'outer yes'", "❌ FAIL: if output around nested if — got {@outerStr}, expected 'outer yes'")
+}
+if @flag != "set" {
+    mustOutput("❌ FAIL: nested if in if output — got {@flag}, expected 'set'", "❌ FAIL: nested if in if output — got {@flag}, expected 'set'")
+}
+
 // compile-only: device-dependent and interactive values
 @deviceModel = "{Device['Model']}"
 const connectionName = if @deviceModel == "iPhone" {
