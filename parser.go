@@ -828,7 +828,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 
 	var valueType tokenType
 	var value any
-	collectValue(&valueType, &value, endOfNextArgument())
+	collectValue(&valueType, &value, endOfNextItem(')'))
 
 	skipWhitespace()
 
@@ -842,16 +842,8 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	return
 }
 
-func endOfNextArgument() (until rune) {
-	until = ')'
-	if strings.Contains(lookAheadUntil(')'), ",") {
-		until = ','
-	}
-	return
-}
-
-// endOfNextItem is like endOfNextArgument for array and dictionary items. The last item has no comma after it,
-// so looking ahead for one would run past the closing bracket into whatever comes after the literal.
+// endOfNextItem finds where the next argument, array item or dictionary item ends. The last one has no comma
+// after it, so looking ahead for one would run past the closing bracket into whatever comes after.
 func endOfNextItem(closing rune) (until rune) {
 	until = closing
 	if strings.Contains(lookAheadUntil(closing), ",") {
