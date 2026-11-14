@@ -456,8 +456,8 @@ func validActionOutput(param *parameterDefinition, value any) {
 			if actionOutputType == Date && param.validType == String {
 				return
 			}
-			parserError(fmt.Sprintf("Invalid variable value of action '%v' (%s) for argument '%s' (%s).\n%s",
-				actionIdent+"()",
+			parserError(fmt.Sprintf("Invalid variable value of action '%v()' (%s) for argument '%s' (%s).\n%s",
+				actionIdent,
 				actionOutputType,
 				param.name,
 				param.validType,
