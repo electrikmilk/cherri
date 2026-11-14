@@ -8,10 +8,6 @@ const location = location(Ask)
 @urls = url("https://google.com", "https://apple.com", "https://cherrilang.org")
 @int = 42
 @dict = {
-	"key": "",
-	"key2": "value",
-	"key3": false,
-	"key4": "{@int}",
 	"key5": {
 		"key": "test",
 		"key1": 5
@@ -19,7 +15,11 @@ const location = location(Ask)
 	"key7": [
 		5,
 		6
-	]
+	],
+	"key": "",
+	"key2": "value",
+	"key3": false,
+	"key4": "{@int}"
 }
 @str = "me"
 @var = "5 {@str}"

@@ -1294,17 +1294,8 @@ func enterLiteral() (leave func()) {
 	}
 }
 
-// bareReference is a variable reference that is written without quotes. JSON cannot express that, so it is
-// marshaled as a string with a NUL prefix that is unquoted afterwards, as no real dictionary text starts with one.
+// bareReference is a variable reference that is written in a literal without quotes.
 type bareReference string
-
-const bareReferenceMarker = "\x00"
-
-var bareReferenceMarkerRegex = regexp.MustCompile(`"\\u0000([^"]*)"`)
-
-func (reference bareReference) MarshalJSON() ([]byte, error) {
-	return json.Marshal(bareReferenceMarker + string(reference))
-}
 
 func isReferenceValue(value any) bool {
 	if mapValue, isMap := value.(map[string]interface{}); isMap {
@@ -1316,17 +1307,43 @@ func isReferenceValue(value any) bool {
 	return false
 }
 
-func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary map[string]interface{}) {
+// literalItem is a key and value of a dictionary literal.
+type literalItem struct {
+	key   string
+	value any
+}
+
+// literalDictionary is a dictionary literal that keeps the order of its items, as the order the items
+// are in is the order they show in the Shortcut, which a Go map would not keep.
+type literalDictionary []literalItem
+
+func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary literalDictionary) {
 	defer enterLiteral()()
-	dictionary = make(map[string]interface{})
 	for _, item := range items {
 		var itemKey = decompValue(item.WFKey)
-		dictionary[itemKey] = decompDictionaryItem(item)
+		dictionary = append(dictionary, literalItem{key: itemKey, value: decompDictionaryItem(item)})
 	}
 	return
 }
 
-var numericRegex = regexp.MustCompile("^[0-9]+$")
+// jsonNumberRegex is a number as JSON writes it, which has no leading zero.
+var jsonNumberRegex = regexp.MustCompile(`^-?(0|[1-9][0-9]*)(\.[0-9]+)?$`)
+
+// decompNumberItem writes the text of a number item as a number if it is one, keeping a decimal or a negative
+// as it is. A number with a leading zero is written as the number it is, as JSON has no number like it.
+func decompNumberItem(text string) (number json.Number, isNumber bool) {
+	if !numberLiteralRegex.MatchString(text) {
+		return "", false
+	}
+	if jsonNumberRegex.MatchString(text) {
+		return json.Number(text), true
+	}
+
+	var value, parseErr = strconv.ParseFloat(text, 64)
+	handle(parseErr)
+
+	return json.Number(strconv.FormatFloat(value, 'f', -1, 64)), true
+}
 
 func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	var itemValueMap, isMap = item.WFValue.(map[string]interface{})
@@ -1345,14 +1362,13 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 
 	switch dictDataType(item.WFItemType) {
 	case itemTypeNumber:
-		itemValue = decompValue(item.WFValue)
-		if !numericRegex.MatchString(itemValue.(string)) {
+		var numberText = decompValue(item.WFValue)
+		var number, isNumber = decompNumberItem(numberText)
+		if !isNumber {
+			itemValue = numberText
 			break
 		}
-
-		var convErr error
-		itemValue, convErr = strconv.ParseInt(itemValue.(string), 10, 64)
-		handle(convErr)
+		itemValue = number
 	case itemTypeBool:
 		var boolValue, isBool = itemValueMap["Value"].(bool)
 		if !isBool {
@@ -1421,10 +1437,69 @@ func decompValue(value any) string {
 // decompLiteral writes an array or a dictionary as a Cherri literal, which is JSON, so a Go value is never
 // written with its Go formatting.
 func decompLiteral(value any) string {
-	var jsonBytes, jsonErr = json.MarshalIndent(value, strings.Repeat("\t", tabLevel), "\t")
-	handle(jsonErr)
+	var literal strings.Builder
+	writeLiteral(&literal, value, tabLevel)
 
-	return bareReferenceMarkerRegex.ReplaceAllString(string(jsonBytes), "$1")
+	return literal.String()
+}
+
+// writeLiteral writes value as indented JSON that keeps the order of a dictionary. Each line after the first
+// starts at level tabs, as the literal is written where code is indented that much.
+func writeLiteral(literal *strings.Builder, value any, level int) {
+	var inner = strings.Repeat("\t", level+1)
+	var outer = strings.Repeat("\t", level)
+
+	switch typedValue := value.(type) {
+	case literalDictionary:
+		if len(typedValue) == 0 {
+			literal.WriteString(emptyDictionary)
+			return
+		}
+
+		literal.WriteString("{\n")
+		for i, item := range typedValue {
+			literal.WriteString(inner)
+			writeLiteralScalar(literal, item.key)
+			literal.WriteString(": ")
+			writeLiteral(literal, item.value, level+1)
+			if i < len(typedValue)-1 {
+				literal.WriteRune(',')
+			}
+			literal.WriteRune('\n')
+		}
+		literal.WriteString(outer + "}")
+	case []interface{}:
+		if len(typedValue) == 0 {
+			literal.WriteString("[]")
+			return
+		}
+
+		literal.WriteString("[\n")
+		for i, item := range typedValue {
+			literal.WriteString(inner)
+			writeLiteral(literal, item, level+1)
+			if i < len(typedValue)-1 {
+				literal.WriteRune(',')
+			}
+			literal.WriteRune('\n')
+		}
+		literal.WriteString(outer + "]")
+	case bareReference:
+		literal.WriteString(string(typedValue))
+	default:
+		writeLiteralScalar(literal, value)
+	}
+}
+
+// writeLiteralScalar writes text, a number or a boolean as JSON. Text keeps <, > and & as they are, which
+// the encoder would escape as it assumes the JSON is put in HTML.
+func writeLiteralScalar(literal *strings.Builder, value any) {
+	var encoded strings.Builder
+	var encoder = json.NewEncoder(&encoded)
+	encoder.SetEscapeHTML(false)
+	handle(encoder.Encode(value))
+
+	literal.WriteString(strings.TrimSuffix(encoded.String(), "\n"))
 }
 
 // stringEscaper is one replacer, rather than a chain of replacements, so the backslashes it adds are
