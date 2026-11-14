@@ -839,7 +839,19 @@ func decompDictionaryValue(items []WFDictionaryFieldValueItem) string {
 
 	decompilingDictionary = false
 
-	return string(jsonBytes)
+	return bareReferenceMarkerRegex.ReplaceAllString(string(jsonBytes), "$1")
+}
+
+// bareReference is a variable reference that is written without quotes. JSON cannot express that, so it is
+// marshaled as a string with a NUL prefix that is unquoted afterwards, as no real dictionary text starts with one.
+type bareReference string
+
+const bareReferenceMarker = "\x00"
+
+var bareReferenceMarkerRegex = regexp.MustCompile(`"\\u0000([^"]*)"`)
+
+func (reference bareReference) MarshalJSON() ([]byte, error) {
+	return json.Marshal(bareReferenceMarker + string(reference))
 }
 
 func isReferenceValue(value any) bool {
@@ -873,7 +885,7 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	var itemValue any
 
 	if dictDataType(item.WFItemType) == itemTypeFile {
-		return fmt.Sprintf("${%s}", decompValue(itemValueMap["Value"]))
+		return bareReference(decompValue(itemValueMap["Value"]))
 	}
 
 	if isReferenceValue(itemValueMap["Value"]) {
