@@ -589,15 +589,19 @@ func newCodeLine(s string) {
 var decompiledImports []string
 var decompiledDefinitions []string
 
-// writeHeader writes the imports and then the definitions above the code.
+// writeHeader writes the imports and then the definitions above the code. The blank line written before a
+// block is trimmed from the start of the code even without a header, as the compiler rejects a file that
+// starts with a blank line.
 func writeHeader() {
+	var body = strings.TrimLeft(code.String(), "\n")
+	code.Reset()
+
 	var header = append(slices.Clone(decompiledImports), decompiledDefinitions...)
 	if len(header) == 0 {
+		code.WriteString(body)
 		return
 	}
 
-	var body = strings.TrimLeft(code.String(), "\n")
-	code.Reset()
 	code.WriteString(strings.Join(header, "\n"))
 	code.WriteString("\n\n")
 	code.WriteString(body)
