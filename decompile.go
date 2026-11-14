@@ -39,6 +39,8 @@ func decompile(b []byte) {
 	decompiledIncludes = []string{}
 	controlFlowOutputs = make(map[string]string)
 	controlFlowOutputUUIDs = []string{}
+	openLoops = nil
+	loopIdentifiers = make(map[string]string)
 	currentVariableValue = ""
 	currentVariableUUID = ""
 
@@ -58,6 +60,7 @@ func decompile(b []byte) {
 	mapSplitActions()
 	mapIdentifiers()
 	mapControlFlowOutputs()
+	mapLoopVariables()
 
 	defineName()
 	decompileIcon()
@@ -120,6 +123,139 @@ func mapControlFlowOutputs() {
 		controlFlowOutputs[paramString(&action, "GroupingIdentifier")] = outputName
 		controlFlowOutputUUIDs = append(controlFlowOutputUUIDs, outputUUID)
 	}
+}
+
+const repeatIdentifier = "is.workflow.actions.repeat.count"
+const repeatEachIdentifier = "is.workflow.actions.repeat.each"
+
+type openLoop struct {
+	groupingUUID string
+	variableName string
+	identifier   string
+}
+
+var openLoops []openLoop
+
+// loopIdentifiers maps the GroupingIdentifier of each loop whose variable is referenced to the identifier the
+// loop declares, so a loop whose variable is never referenced can still be written with `_`.
+var loopIdentifiers map[string]string
+
+var loopVariableRegex = regexp.MustCompile("^Repeat (Index|Item)( [0-9]+)?$")
+
+// mapLoopVariables finds the loops whose variable is referenced before any code is written, because the loop
+// identifier is written before the references in its body.
+func mapLoopVariables() {
+	for _, action := range shortcut.WFWorkflowActions {
+		currentAction.identifier = action.WFWorkflowActionIdentifier
+		var isLoop = action.WFWorkflowActionIdentifier == repeatIdentifier || action.WFWorkflowActionIdentifier == repeatEachIdentifier
+		if isLoop && controlFlowMode(&action) == endStatement {
+			popLoop(&action)
+			continue
+		}
+
+		markLoopReferences(action.WFWorkflowActionParameters)
+
+		if isLoop && controlFlowMode(&action) == startStatement {
+			pushLoop(&action)
+		}
+	}
+	openLoops = nil
+}
+
+func markLoopReferences(value any) {
+	switch typedValue := value.(type) {
+	case map[string]interface{}:
+		if variableName, isString := typedValue["VariableName"].(string); isString && typedValue["Type"] == "Variable" {
+			if loop, found := findOpenLoop(variableName); found {
+				loopIdentifiers[loop.groupingUUID] = loop.identifier
+			}
+		}
+		for _, item := range typedValue {
+			markLoopReferences(item)
+		}
+	case []interface{}:
+		for _, item := range typedValue {
+			markLoopReferences(item)
+		}
+	}
+}
+
+// pushLoop opens a loop. The compiler numbers the variable of a repeat by how many repeats are open, and the
+// variable of a repeat with each by how many of those are open, so each kind is counted on its own.
+func pushLoop(action *ShortcutAction) openLoop {
+	var variableName = "Repeat Index"
+	var identifier = "repeatIndex"
+	if action.WFWorkflowActionIdentifier == repeatEachIdentifier {
+		variableName = "Repeat Item"
+		identifier = "repeatItem"
+	}
+
+	var depth = 1
+	for _, loop := range openLoops {
+		if strings.HasPrefix(loop.variableName, variableName) {
+			depth++
+		}
+	}
+	if depth > 1 {
+		variableName = fmt.Sprintf("%s %d", variableName, depth)
+		identifier = fmt.Sprintf("%s%d", identifier, depth)
+	}
+
+	var loop = openLoop{
+		groupingUUID: paramString(action, "GroupingIdentifier"),
+		variableName: variableName,
+		identifier:   identifier,
+	}
+	openLoops = append(openLoops, loop)
+
+	return loop
+}
+
+func popLoop(action *ShortcutAction) {
+	var groupingUUID = paramString(action, "GroupingIdentifier")
+	if len(openLoops) == 0 || openLoops[len(openLoops)-1].groupingUUID != groupingUUID {
+		decompError(fmt.Sprintf("Expected loop '%s' to end the innermost open loop", groupingUUID), action)
+	}
+	openLoops = openLoops[:len(openLoops)-1]
+}
+
+func findOpenLoop(variableName string) (openLoop, bool) {
+	for i := len(openLoops) - 1; i >= 0; i-- {
+		if openLoops[i].variableName == variableName {
+			return openLoops[i], true
+		}
+	}
+
+	return openLoop{}, false
+}
+
+// loopVariableReference returns how a variable name that Shortcuts gives a loop is referenced in Cherri.
+// Outside a loop that defines it, only the first index and item can be referenced, as globals.
+func loopVariableReference(variableName string) (reference string, isLoopVariable bool) {
+	if !loopVariableRegex.MatchString(variableName) {
+		return "", false
+	}
+	if loop, found := findOpenLoop(variableName); found {
+		return fmt.Sprintf("@%s", loop.identifier), true
+	}
+	for name, global := range globals {
+		if global.value == variableName {
+			return name, true
+		}
+	}
+
+	decompError(fmt.Sprintf("Expected the variable '%s' to be referenced inside a loop that defines it", variableName), currentDecompAction())
+	return "", false
+}
+
+// loopDeclaration opens a loop and returns the identifier it declares.
+func loopDeclaration(action *ShortcutAction) string {
+	var loop = pushLoop(action)
+	if _, referenced := loopIdentifiers[loop.groupingUUID]; !referenced {
+		return "_"
+	}
+
+	return loop.identifier
 }
 
 // Map out variables in the Shortcut and their UUIDs for later checks.
@@ -774,13 +910,12 @@ func decompRepeat(action *ShortcutAction) {
 	case startStatement:
 		beginStatement(Repeat, action)
 
-		code.WriteString("_ for ")
-
-		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFRepeatCount"]))
-
-		code.WriteString(" {\n")
+		// The count is evaluated outside the loop, so it is decompiled before the loop opens.
+		var count = decompValue(action.WFWorkflowActionParameters["WFRepeatCount"])
+		code.WriteString(fmt.Sprintf("%s for %s {\n", loopDeclaration(action), count))
 		tabLevel++
 	case endStatement:
+		popLoop(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -791,13 +926,12 @@ func decompFor(action *ShortcutAction) {
 	case startStatement:
 		beginStatement(RepeatWithEach, action)
 
-		code.WriteString("_ in ")
-
-		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
-
-		code.WriteString(" {\n")
+		// The input is evaluated outside the loop, so it is decompiled before the loop opens.
+		var input = decompValue(action.WFWorkflowActionParameters["WFInput"])
+		code.WriteString(fmt.Sprintf("%s in %s {\n", loopDeclaration(action), input))
 		tabLevel++
 	case endStatement:
+		popLoop(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
@@ -1134,6 +1268,9 @@ func decompValueObject(value map[string]interface{}) string {
 			if !isString {
 				decompError(fmt.Sprintf("Expected VariableName to be a string, got %T", value["VariableName"]), currentDecompAction())
 			}
+			if loopReference, isLoopVariable := loopVariableReference(variableName); isLoopVariable {
+				return loopReference
+			}
 			sanitizeIdentifier(&variableName)
 
 			return fmt.Sprintf("@%s", variableName)
@@ -1262,6 +1399,8 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 					variableName = name
 				}
 			}
+		} else if loopReference, isLoopVariable := loopVariableReference(attachment.VariableName); isLoopVariable {
+			variableName = loopReference
 		} else {
 			variableName = fmt.Sprintf("@%s", variableName)
 		}
