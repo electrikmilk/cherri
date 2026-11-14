@@ -850,6 +850,16 @@ func endOfNextArgument() (until rune) {
 	return
 }
 
+// endOfNextItem is like endOfNextArgument for array and dictionary items. The last item has no comma after it,
+// so looking ahead for one would run past the closing bracket into whatever comes after the literal.
+func endOfNextItem(closing rune) (until rune) {
+	until = closing
+	if strings.Contains(lookAheadUntil(closing), ",") {
+		until = ','
+	}
+	return
+}
+
 func collectComment() {
 	var comment strings.Builder
 	switch char {
@@ -1709,7 +1719,7 @@ func collectArray() (array []any) {
 		skipWhitespace()
 		var valueType tokenType
 		var value any
-		collectValue(&valueType, &value, ',')
+		collectValue(&valueType, &value, endOfNextItem(']'))
 		if valueType == Action {
 			actionCallNotAllowedError()
 		}
@@ -1783,7 +1793,7 @@ func collectDictionaryItem() (key string, value any) {
 	skipInlineWhitespace()
 
 	var valueType tokenType
-	collectValue(&valueType, &value, ',')
+	collectValue(&valueType, &value, endOfNextItem('}'))
 	if valueType == Action {
 		actionCallNotAllowedError()
 	}

@@ -80,4 +80,12 @@ if !vals {
     mustOutput("❌ FAIL: getValues — returned no value", "❌ FAIL: getValues — returned no value")
 }
 
+// a reference as the last item must not be read as an action call by the lookahead
+const lastItemReference = text("ref")
+@referenceDictionary = {"first": 1, "last": lastItemReference}
+const referenceValue = getValue(@referenceDictionary, "last")
+if !referenceValue {
+    mustOutput("❌ FAIL: reference as last dictionary item — returned no value", "❌ FAIL: reference as last dictionary item — returned no value")
+}
+
 show("✅ All tests passed")

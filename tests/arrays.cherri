@@ -49,4 +49,12 @@ if stillZ.text != "z" {
     mustOutput("❌ FAIL: prior item after append — got {stillZ}, expected 'z'", "❌ FAIL: prior item after append — got {stillZ}, expected 'z'")
 }
 
+// a reference as the last item must not be read as an action call by the lookahead
+const lastItemReference = text("ref")
+@referenceItems = ["a", lastItemReference]
+const referenceItem = getLastItem(@referenceItems)
+if referenceItem.text != "ref" {
+    mustOutput("❌ FAIL: reference as last array item — got {referenceItem}, expected 'ref'", "❌ FAIL: reference as last array item — got {referenceItem}, expected 'ref'")
+}
+
 show("✅ All tests passed")
