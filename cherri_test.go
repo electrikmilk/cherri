@@ -173,7 +173,7 @@ func TestDecomp(t *testing.T) {
 // roundTripKnownFailures lists shortcuts whose decompile or recompile exits non-zero, keyed by
 // test file name without _unsigned.shortcut. An entry that starts passing must be removed.
 var roundTripKnownFailures = map[string]string{
-	"ask-prompts": "the prompt of an Ask in a function call argument is inside a dictionary, where Cherri cannot write it",
+	"ask-prompts": "the prompt of an Ask in a function call argument is inside the dictionary of the call, and Cherri has no syntax for a prompt inside text, an array or a dictionary",
 }
 
 // roundTripKnownMismatches lists shortcuts that recompile but with a different action sequence,
