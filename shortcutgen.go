@@ -782,26 +782,36 @@ func makeArrayVariable(t *token) {
 	if t.value == nil {
 		return
 	}
-	for _, value := range t.value.([]interface{}) {
+	for _, value := range t.value.([]any) {
 		if value == nil {
 			continue
 		}
 		var UUID = createUUID(&t.ident)
 		var valueType tokenType
 		var itemIdent string
-		switch reflect.TypeOf(value).Kind() {
-		case reflect.String:
-			valueType = String
-			itemIdent = "Text"
-		case reflect.Float64:
-			valueType = Integer
-			itemIdent = "Number"
-		case reflect.Map:
-			valueType = Dict
-			itemIdent = "Dictionary"
-		default:
-			exit(fmt.Sprintf("Invalid array value '%v' (%s)", value, reflect.TypeOf(value)))
+
+		if reflect.TypeOf(value).String() == "main.varValue" {
+			valueType = Variable
+			itemIdent = value.(varValue).value.(string)
+		} else {
+			switch reflect.TypeOf(value).Kind() {
+			case reflect.String:
+				valueType = String
+				itemIdent = "Text"
+			case reflect.Int:
+				valueType = Integer
+				itemIdent = "Number"
+			case reflect.Float64:
+				valueType = Float
+				itemIdent = "Float"
+			case reflect.Map:
+				valueType = Dict
+				itemIdent = "Dictionary"
+			default:
+				exit(fmt.Sprintf("Invalid array value '%v' (%s)", value, reflect.TypeOf(value)))
+			}
 		}
+
 		makeVariableValueAction(&token{
 			typeof:    valueType,
 			ident:     itemIdent,
