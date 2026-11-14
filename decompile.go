@@ -1713,10 +1713,14 @@ func decompArgument(param parameterDefinition, value any, action *ShortcutAction
 
 	switch param.validType {
 	case Quantity:
-		return decompQuantity(value, param.key, action)
+		var quantity = decompQuantity(value, param.key, action)
+		checkDecompEnum(param, value.(map[string]interface{})["Value"].(map[string]interface{})["Unit"], action)
+		return quantity
 	case Color:
 		return decompColor(value, param.key, action)
 	}
+
+	checkDecompEnum(param, value, action)
 
 	var argValue = decompValue(value)
 	if param.validType == Integer && !startsWith(Ask, argValue) {
@@ -1724,6 +1728,19 @@ func decompArgument(param parameterDefinition, value any, action *ShortcutAction
 	}
 
 	return argValue
+}
+
+// checkDecompEnum stops on a text value that is not in the enum of param, as Cherri would reject it.
+func checkDecompEnum(param parameterDefinition, value any, action *ShortcutAction) {
+	var text, isText = value.(string)
+	if param.enum == "" || !isText {
+		return
+	}
+
+	var enum = getEnum(param.enum)
+	if !slices.Contains(enum, text) {
+		decompError(fmt.Sprintf("Expected the value of '%s' to be one of: %s, got '%s'", param.name, strings.Join(enum, ", "), text), action)
+	}
 }
 
 // decompColor writes a WFColorValue as color(). Shortcuts leaves a component out when it is 0.

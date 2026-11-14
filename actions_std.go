@@ -725,6 +725,22 @@ var actions = map[string]*actionDefinition{
 				}
 			}
 		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var recovered = make(map[string]string)
+			var sortOrders = map[string]string{
+				"A to Z":         "asc",
+				"Biggest First":  "asc",
+				"Z to A":         "desc",
+				"Smallest First": "desc",
+			}
+			// Any other sort order is read as is, a variable or the asc or desc kept for a random sort.
+			var sortOrder, _ = action.WFWorkflowActionParameters["WFContentItemSortOrder"].(string)
+			if order, found := sortOrders[sortOrder]; found {
+				recovered["orderBy"] = decompValue(order)
+			}
+
+			return decompHookArguments(action, recovered)
+		},
 	},
 	"convertMeasurement": {
 		check: func(args []actionArgument, _ *actionDefinition) {

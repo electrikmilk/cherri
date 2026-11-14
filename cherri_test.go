@@ -177,7 +177,6 @@ var roundTripKnownFailures = map[string]string{
 	"functions":   "output(\"{@n}\") decompiles to output(@n), rejected for a number-typed variable; a Set Variable's held action is dropped when a Nothing comes before it",
 	"ask-prompts": "Expected prompt raw string ('), got: \"",
 	"documents":   "getFileFromFolder matches getFile, whose folder cannot be a file dictionary",
-	"mac":         "getWindows sort orders are not mapped back to asc or desc: Invalid value 'A to Z' for argument 'orderBy'",
 	"math":        "scientific math operator",
 }
 
@@ -205,6 +204,7 @@ var roundTripKnownMismatches = map[string]string{
 	"import-questions":             "action 0: is.workflow.actions.comment became is.workflow.actions.alert",
 	"include-actions":              "action 0: is.workflow.actions.comment became is.workflow.actions.file.select",
 	"location":                     "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
+	"mac":                          "action 0: is.workflow.actions.comment became is.workflow.actions.filter.windows",
 	"measurements":                 "action 0: is.workflow.actions.comment became is.workflow.actions.measurement.create",
 	"menus":                        "action 0: is.workflow.actions.comment became is.workflow.actions.gettext; also extra loop setvariable, appendvariable became setvariable",
 	"nil":                          "action 0: is.workflow.actions.comment became is.workflow.actions.documentpicker.open; also stray nothing(), extra loop setvariable",
