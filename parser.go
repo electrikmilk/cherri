@@ -616,10 +616,9 @@ func checkInlineVars(value *string) {
 			identifier = Ask
 		}
 
-		if startsWith("@", identifier) {
-			identifier = strings.TrimPrefix(identifier, "@")
-			if !validVariableReference(&identifier) {
-				parserError(fmt.Sprintf("Undefined inline variable reference '%s'", identifier))
+		if variableName, isVariable := strings.CutPrefix(identifier, "@"); isVariable {
+			if !validVariableReference(&variableName) {
+				parserError(fmt.Sprintf("Undefined inline variable reference '%s'", variableName))
 			}
 			continue
 		}

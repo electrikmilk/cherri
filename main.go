@@ -233,8 +233,7 @@ func fileArg() string {
 // handleFile splits the file argument into parts.
 func handleFile() {
 	relativePath = strings.Replace(filePath, filename, "", 1)
-	var nameParts = strings.Split(filename, ".")
-	basename = nameParts[0]
+	basename, _, _ = strings.Cut(filename, ".")
 	workflowName = basename
 
 	var fileBytes, readErr = os.ReadFile(filePath)

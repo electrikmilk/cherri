@@ -1041,8 +1041,8 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 	var attachmentChars = strings.Split(*attachmentString, "")
 
 	for attachmentRange, a := range attachments {
-		var attachmentRanges = strings.Split(attachmentRange, ",")
-		var attachmentPosition = strings.TrimPrefix(attachmentRanges[0], "{")
+		var attachmentStart, _, _ = strings.Cut(attachmentRange, ",")
+		var attachmentPosition = strings.TrimPrefix(attachmentStart, "{")
 		var position, convErr = strconv.Atoi(attachmentPosition)
 		handle(convErr)
 

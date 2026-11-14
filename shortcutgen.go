@@ -264,14 +264,11 @@ func makeExpressionValue(reference *WFActionReference, value *any) {
 }
 
 func makeMathValue(reference *WFActionReference, expression string, expressionParts []string) {
-	var operandOne string
-	var operandTwo string
-
 	var operation = expressionParts[1]
-	expressionParts = strings.Split(expression, operation)
+	var leftOperand, rightOperand, _ = strings.Cut(expression, operation)
 
-	operandOne = strings.Trim(expressionParts[0], " ")
-	operandTwo = strings.Trim(expressionParts[1], " ")
+	var operandOne = strings.Trim(leftOperand, " ")
+	var operandTwo = strings.Trim(rightOperand, " ")
 
 	switch operation {
 	case "*":
