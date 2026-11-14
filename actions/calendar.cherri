@@ -167,13 +167,13 @@ action !mac #Clock.LapStopwatchIntent lapStopwatch(bool ?open: 'OpenWhenRun' = t
 action !mac #Clock.ResetStopwatchIntent resetStopwatch(bool ?open: 'OpenWhenRun' = true)
 
 // [Doc]: [Clock] Add City: Adds `city` to the world clock.
-action #Clock.AddWorldClockIntent addWorldClock(variable city, bool ?open: 'OpenWhenRun' = true)
+action internal #Clock.AddWorldClockIntent addWorldClock(worldClockCity city, bool ?open: 'OpenWhenRun' = true)
 
-// [Doc]: [Clock] Remove City: Removes `cities` from the world clock.
-action #Clock.RemoveWorldClockIntent removeWorldClock(variable cities: 'entities', bool ?open: 'OpenWhenRun' = true)
+// [Doc]: [Clock] Remove City: Removes `cities`, an array of city names, from the world clock.
+action internal #Clock.RemoveWorldClockIntent removeWorldClock(array cities, bool ?open: 'OpenWhenRun' = true)
 
-// [Doc]: [Clock] Get Time for City: Returns the current time in `city`.
-action !mac #Clock.GetTimeForCityIntent getTimeForCity(variable city): text
+// [Doc]: [Clock] Get City Time: Returns the current time in `city`.
+action internal #Clock.GetTimeForCityIntent getCityTime(worldClockCity city): text
 
 // [Doc]: [Clock] Open Clock Tab: Opens `tab` in the Clock app.
 action #Clock.OpenTab openClockTab(clockTab tab)

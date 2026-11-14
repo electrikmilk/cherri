@@ -77,6 +77,40 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
+	"addWorldClock": {
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return nil
+			}
+
+			return map[string]any{
+				"city": worldClockCityValue(args[0]),
+			}
+		},
+	},
+	"removeWorldClock": {
+		check: checkWorldClockCities,
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return nil
+			}
+
+			return map[string]any{
+				"entities": worldClockCitiesValue(args[0]),
+			}
+		},
+	},
+	"getCityTime": {
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			if len(args) == 0 {
+				return nil
+			}
+
+			return map[string]any{
+				"city": worldClockCityValue(args[0]),
+			}
+		},
+	},
 	"emailAddress": {
 		check: func(args []actionArgument, _ *actionDefinition) {
 			if len(args) > 1 && args[0].valueType == Variable {

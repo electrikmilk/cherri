@@ -1,0 +1,582 @@
+0	Abidjan
+1	Abu Dhabi
+2	Accra
+3	Adak
+4	Addis Ababa
+5	Adelaide
+6	Albuquerque
+7	Algiers
+8	Amman
+9	Amsterdam
+10	Anadyr
+11	Antananarivo
+12	Anchorage
+13	Ankara
+14	Ashgabat
+15	Asmera
+16	Astana
+17	Asunción
+18	Athens
+19	Atlanta
+20	Auckland
+21	Austin
+22	Baghdad
+23	Baku
+24	Baltimore
+25	Bamako
+26	Bangkok
+27	Bangui
+28	Barcelona
+29	Bari
+30	Basse-Terre
+31	Beijing
+32	Beirut
+33	Belgrade
+34	Belize City
+35	Benicia
+36	Berkeley
+37	Berlin
+38	Bern
+39	Bishkek
+40	Bissau
+41	Blacksburg
+42	Bogotá
+43	Bologna
+44	Boston
+45	Bratislava
+46	Brasília
+47	Bridgetown
+48	Brisbane
+49	Brussels
+50	Bucharest
+51	Budapest
+52	Buenos Aires
+53	Burlingame
+54	Cairo
+55	Calgary
+56	Canary Islands
+57	Canberra
+58	Canton
+59	Cape Town
+60	Caracas
+61	Cardiff
+62	Catanzaro
+63	Cayenne
+64	Charlotte
+65	Charlotte Amalie
+66	Chennai
+67	Chicago
+68	Chisinau
+69	Chita
+70	Cleveland
+71	Colombo
+72	Columbus
+73	Conakry
+74	Copenhagen
+75	Cupertino
+76	Cork
+77	Crotone
+78	Dhaka
+79	Dakar
+80	Dallas
+81	Daly City
+82	Damascus
+83	Dar es Salaam
+84	Darwin
+85	Denver
+86	Detroit
+87	Djibouti
+88	Doha
+89	Douala
+90	Dubai
+91	Dublin
+92	Dushanbe
+93	Edinburgh
+94	El Paso
+95	Florence
+96	Fremont
+97	Fort-de-France
+98	Foster City
+99	Freetown
+100	Gaborone
+101	Galápagos Islands
+102	Geneva
+103	Genoa
+104	Georgetown
+105	Grytviken
+106	Guam
+107	Guatemala City
+108	Gustavia
+109	Halifax
+110	Hamburg
+111	Easter Island
+112	Hanoi
+113	Harare
+114	Havana
+115	Healdsburg
+116	Helsinki
+117	Hobart
+118	Hong Kong
+119	Honolulu
+120	Houston
+121	Indianapolis
+122	Irkutsk
+123	Islamabad
+124	Istanbul
+125	Jakarta
+126	Jerusalem
+127	Johannesburg
+128	Kabul
+129	Kaliningrad
+130	Kampala
+131	Kathmandu
+132	Khartoum
+133	Kyiv
+134	Kingston
+135	Kinshasa
+136	Knoxville
+137	Kolkata
+138	Krasnoyarsk
+139	Kuala Lumpur
+140	Kuwait
+142	La Paz
+143	Lagos
+144	Las Vegas
+145	Lima
+146	Lisbon
+147	Little Rock
+148	Ljubljana
+149	London
+151	Los Altos
+152	Los Angeles
+153	Los Gatos
+154	Louisville
+155	Luanda
+156	Lusaka
+157	Luxembourg
+158	Macao
+159	Madison
+160	Madrid
+161	Malabo
+162	Male
+163	Managua
+164	Manama
+165	Marigot
+166	Manila
+167	Maputo
+168	Mecca
+169	Melbourne
+170	Memphis
+171	Menlo Park
+172	Messina
+173	Mexico City
+174	Miami
+175	Milan
+176	Milbank
+177	Milwaukee
+178	Minneapolis
+179	Minsk
+180	Magadan
+181	Mogadishu
+182	Monrovia
+183	Montevideo
+184	Montpelier
+185	Montreal
+186	Moscow
+187	Monterey
+188	Mountain View
+189	Mumbai
+190	Munich
+191	Muscat
+192	Napa
+193	Naples
+194	Nairobi
+195	Naters
+196	Ndjamena
+197	New Delhi
+198	New Orleans
+199	New York
+200	Niamey
+201	Nouakchott
+202	Noumea
+203	Novato
+204	Novosibirsk
+205	Nukuʻalofa
+206	Nuuk
+207	Oakland
+208	Oklahoma City
+209	Omaha
+210	Omsk
+211	Osaka
+212	Oslo
+213	Ottawa
+214	Ouagadougou
+215	Pacifica
+216	Pago Pago
+217	Palermo
+218	Palo Alto
+219	Panama City
+220	Tahiti
+221	Paramaribo
+222	Paris
+223	Perm
+224	Perth
+225	Petaluma
+226	Philadelphia
+227	Phnom Penh
+228	Phoenix
+229	Pittsburgh
+230	Pleasanton
+231	Podgorica
+232	Ponta Delgada
+233	Port Louis
+234	Port-au-Prince
+235	Portland
+236	Prague
+237	Pyongyang
+238	Quito
+239	Rabat
+240	Rangoon
+241	Recife
+242	Redwood City
+243	Regina
+244	Reykjavik
+245	Riga
+246	Rio de Janeiro
+247	Riyadh
+248	Rome
+249	Saint-Denis
+250	Salt Lake City
+251	Samara
+252	San Diego
+253	San Antonio
+254	San Bruno
+255	San Carlos
+256	San Francisco
+257	San Jose
+258	San José
+259	San Juan
+260	San Leandro
+261	San Salvador
+262	San Marino
+263	San Mateo
+264	San Pablo
+265	San Rafael
+266	San Ramon
+267	Santa Clara
+268	Santa Cruz
+269	Sanaa
+270	Santiago
+271	Santo Domingo
+272	São Paulo
+273	Seattle
+274	Seoul
+275	Shanghai
+276	Shenzhen
+277	Singapore
+278	Sioux Falls
+279	Skopje
+280	Sofia
+281	St. John's
+282	St. Louis
+283	St. Petersburg
+284	Sunnyvale
+285	Stockholm
+286	Suva
+287	Sydney
+288	Taipei
+289	Tallinn
+290	Tashkent
+291	Tegucigalpa
+292	Tehran
+293	Ho Chi Minh City
+294	Tianjin
+295	Tokyo
+296	Toronto
+297	Tréhet
+298	Tripoli
+299	Tunis
+300	Turin
+301	Ulaanbaatar
+302	UTC
+303	Vaduz
+304	Vallejo
+305	Valletta
+306	Vancouver
+307	Verona
+308	Victoria
+309	Vienna
+310	Vilnius
+311	Vladivostok
+312	Volgograd
+313	Walnut Creek
+314	Warsaw
+315	Washington, D.C.
+316	Wellington
+317	Winnipeg
+318	Yakutsk
+319	Yamoussoukro
+320	Yaoundé
+321	Yekaterinburg
+322	Yerevan
+323	Zagreb
+324	Zurich
+325	Decatur
+327	Vientiane
+328	Lomé
+329	Brazzaville
+330	Mbabane
+331	Maseru
+332	Andorra la Vella
+334	Rio Branco
+335	Fernando de Noronha
+336	Pristina
+337	Thimphu
+338	Berkeley Heights
+339	Acton
+340	Thessaloniki
+341	Heraklion
+342	Tel Aviv
+343	Frankfurt
+345	Fort St. John
+346	Yangon
+347	Matamoros
+348	Ojinaga
+349	Santa Isabel
+350	Sarajevo
+351	Salzburg
+352	Lyon
+353	Marseille
+354	Tbilisi
+355	Saskatoon
+356	Tórshavn
+357	Waitangi
+358	Makassar
+359	Jayapura
+360	Antwerp
+361	Alexandria
+362	Chiang Mai
+363	Hamilton
+364	Kraków
+365	Tirana
+366	Windhoek
+367	Nicosia
+368	Apia
+369	Salvador
+370	St. John's
+371	The Valley
+372	McMurdo Station
+373	Amundsen-Scott Station
+374	Rothera Station
+375	Palmer Station
+376	Mawson Station
+377	Davis Station
+378	Casey Station
+379	Vostok Station
+380	Dumont-d'Urville Station
+381	Syowa Station
+382	Macquarie Island Station
+383	Cordoba
+384	Salta
+385	San Salvador de Jujuy
+386	Tucaman
+387	Catamarca
+388	La Rioja
+389	San Juan
+390	Mendoza
+391	San Luis
+392	Rio Gallegos
+393	Ushuaia
+394	Lord Howe Island
+395	Currie
+396	Broken Hill
+397	Lindeman Island
+398	Eucla
+399	Oranjestad
+400	Mariehamn
+401	Bujumbura
+402	Porto-Novo
+403	Bandar Seri Begawan
+404	Kralendijk
+405	Belem
+406	Fortaleza
+407	Araguaina
+408	Maceio
+409	Campo Grande
+410	Cuiaba
+411	Santarém
+412	Porto Velho
+413	Boa Vista
+414	Manaus
+415	Eirunepe
+416	Nassau
+417	Glace Bay
+418	Moncton
+419	Happy Valley-Goose Bay
+420	Blanc-Sablon
+421	Nipigon
+422	Thunder Bay
+423	Iqaluit
+424	Pangnirtung
+425	Resolute
+426	Atikokan
+427	Rankin Inlet
+428	Rainy River
+429	Swift Current
+430	Edmonton
+431	Cambridge Bay
+432	Yellowknife
+433	Inuvik
+434	Dawson Creek
+435	Whitehorse
+436	Dawson City
+437	Bantam Village
+438	Lubumbashi
+439	Rarotonga
+440	Harbin
+441	Chongqing
+442	Urumqi
+443	Kashgar
+444	Praia
+445	Willemstad
+446	The Settlement
+447	Roseau
+448	Guayaquil
+449	El-Aaiun
+450	Ceuta
+451	Stanley
+452	Chuuk
+453	Pohnpei
+454	Kosrae
+455	Libreville
+456	St. Georges
+457	Saint Peter Port
+458	Gibraltar
+459	Chengdu
+460	Dalian
+461	Hefei
+462	Lhasa
+463	Nanjing
+464	Qingdao
+465	Shenyang
+466	Danmarkshavn
+467	Ittoqqortoormiit
+468	Thule
+469	Banjul
+470	Pontianak
+471	Douglas
+472	Diego Garcia
+473	St. Helier
+474	Tarawa
+475	Kanton Island
+476	Kiritimati
+477	Moroni
+478	Basseterre
+479	George Town
+480	Kyzylorda
+481	Aqtobe
+482	Atyrau
+483	Oral
+484	Castries
+485	Monaco
+486	Majuro
+487	Kwajalein Atoll
+488	Hovd
+489	Choibalsan
+490	Saipan
+491	Plymouth
+492	Blantyre
+493	Cancun
+494	Mérida
+495	Monterrey
+496	Mazatlán
+497	Chihuahua
+498	Hermosillo
+499	Tijuana
+500	Puerto Vallarta
+501	Kuching
+502	Kingston
+503	Nauru
+504	Alofi
+505	Chatham Island
+506	Taiohae
+507	Rikitea
+508	Port Moresby
+509	Karachi
+510	Saint-Pierre
+511	Adamstown
+512	Gaza
+513	Hebron
+514	Funchal
+515	Vincennes
+516	Koror
+517	Novokuznetsk
+518	Yuzhno-Sakhalinsk
+519	Petropavlovsk-Kamchatsky
+520	Monticello
+521	Kigali
+522	Honiara
+523	Jamestown
+524	Longyearbyen
+525	Juba
+526	São Tomé
+527	Lower Prince's Quarter
+528	Cockburn Town
+529	Port-aux-Français
+530	Fale
+531	Dili
+532	Winamac
+533	Marengo
+534	Petersburg
+535	Vevay
+536	Tell City
+537	Knox
+538	Menominee
+539	Center
+540	Beulah
+541	Boise
+542	Shiprock
+543	Juneau
+544	Sitka
+545	Yakutat
+546	Nome
+547	Metlakatla
+548	Samarkand
+549	Vatican City
+550	Kingstown
+551	Road Town
+552	Christiansted
+553	Efate
+554	Mata-Utu
+555	Aden
+556	Mamoudzou
+557	Gothenburg
+558	Malmö
+559	New Salem
+560	Creston
+561	Quebec City
+562	Nashville
+563	Green Bay
+564	Acapulco
+565	Aguascalientes
+566	Ciudad Juárez
+567	Cuernavaca
+568	Guadalajara
+569	Guanajuato
+570	León
+571	Mexicali
+572	Puebla
+573	Querétaro
+574	San Luis Potosí
+575	Toluca
+576	Torreón
+577	Odesa
+578	Donetsk
+579	Casablanca
+580	Marrakesh
+581	Punta Arenas
+582	Famagusta
+583	Aktau
+584	Saratov
+585	Ramallah
+586	Coyhaique

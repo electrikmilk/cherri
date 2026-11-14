@@ -29,13 +29,18 @@ lapStopwatch(false)
 stopStopwatch(false)
 resetStopwatch(false)
 
-@city = "city"
+@city = "Austin"
+@cities = ["Cairo", "Austin"]
 
+addWorldClock("Alexandria")
+addWorldClock("Austin", false)
+addWorldClock("Kingston (134)")
 addWorldClock(@city)
-addWorldClock(@city, false)
-getTimeForCity(@city)
-removeWorldClock(@city)
-removeWorldClock(@city, false)
+getCityTime("Cairo")
+getCityTime(@city)
+removeWorldClock(["Cairo"])
+removeWorldClock(["Cairo", "Austin"], false)
+removeWorldClock(@cities)
 
 openClockTab("timer")
 
