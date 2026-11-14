@@ -1883,12 +1883,51 @@ func collectAction(identifier *string) (value action) {
 
 	var arguments = collectArguments()
 	currentAction.arguments = arguments
+	warnBareVariableArguments(*identifier, arguments)
 
 	checkAction()
 	value = makeActionValue(*identifier, arguments)
 
 	advance()
 	return
+}
+
+// warnBareVariableArguments warns because Shortcuts only supports a variable as a dictionary value in a few
+// actions, such as form requests. Raw actions are skipped because their author already knows what is accepted.
+func warnBareVariableArguments(identifier string, arguments []actionArgument) {
+	if identifier == "formRequest" || identifier == "rawAction" {
+		return
+	}
+
+	for _, argument := range arguments {
+		if argument.valueType != Dict || !containsBareVariable(argument.value) {
+			continue
+		}
+
+		parserWarning(fmt.Sprintf("A variable is used as a dictionary value in '%s()'. Be sure this action supports variable values there, otherwise use \"{@variable}\" to insert it inline.", identifier))
+		return
+	}
+}
+
+func containsBareVariable(value any) bool {
+	switch v := value.(type) {
+	case varValue:
+		return true
+	case map[string]interface{}:
+		for _, item := range v {
+			if containsBareVariable(item) {
+				return true
+			}
+		}
+	case []interface{}:
+		for _, item := range v {
+			if containsBareVariable(item) {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 // advance advances the character cursor.
