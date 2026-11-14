@@ -65,7 +65,7 @@ func normalizeRawActionParamValue(value any) any {
 		return attachmentValues(v)
 	case map[string]any:
 		var normalized any = normalizeRawActionDictionary(v)
-		return makeDictionaryValue(&normalized)
+		return makeDictionaryValue(&normalized, true)
 	case []any:
 		return makeRawActionArrayValue(v)
 	default:
@@ -84,7 +84,7 @@ func normalizeRawActionDictionary(value map[string]any) map[string]any {
 func makeRawActionArrayValue(value []any) WFArrayValue {
 	var items = make([]WFDictionaryFieldValueItem, 0, len(value))
 	for _, item := range value {
-		items = append(items, makeDictionaryItem("", normalizeRawActionParamValue(item)))
+		items = append(items, makeDictionaryItem("", normalizeRawActionParamValue(item), true))
 	}
 	return makeArrayValue(items)
 }

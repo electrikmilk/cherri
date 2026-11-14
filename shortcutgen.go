@@ -216,7 +216,7 @@ func makeVariableValue(reference *WFActionReference, valueType tokenType, value 
 		makeAction(action.args, reference)
 	case Dict:
 		addStdAction("dictionary", attachReferenceToParams(map[string]any{
-			"WFItems": makeDictionaryValue(value),
+			"WFItems": makeDictionaryValue(value, false),
 		}, reference))
 	}
 }
@@ -286,10 +286,10 @@ func makeMathValue(reference *WFActionReference, expression string, expressionPa
 	return
 }
 
-func makeDictionaryValue(value *any) WFDictionaryFieldValue {
+func makeDictionaryValue(value *any, fileItems bool) WFDictionaryFieldValue {
 	return WFDictionaryFieldValue{
 		Value: WFDictionaryFieldValueWrapper{
-			WFDictionaryFieldValueItems: makeDictionary(*value),
+			WFDictionaryFieldValueItems: makeDictionary(*value, fileItems),
 		},
 		WFSerializationType: "WFDictionaryFieldValue",
 	}
@@ -596,7 +596,7 @@ func paramValue(arg actionArgument, handleAs tokenType) any {
 
 		return variableValue(arg.value.(varValue))
 	case Dict:
-		return makeDictionaryValue(&arg.value)
+		return makeDictionaryValue(&arg.value, true)
 	case Integer:
 		fallthrough
 	case Bool:
@@ -635,18 +635,20 @@ const (
 	endStatement   uint64 = 2
 )
 
-// makeDictionary creates a Shortcut dictionary value.
-func makeDictionary(value interface{}) (dictItems []WFDictionaryFieldValueItem) {
+// makeDictionary creates a Shortcut dictionary value. Shortcuts only accepts a variable as a dictionary item
+// (a file) in an action argument, so fileItems is false for assigned dictionaries and the variable is inserted
+// inline as text instead.
+func makeDictionary(value interface{}, fileItems bool) (dictItems []WFDictionaryFieldValueItem) {
 	if value == nil {
 		return []WFDictionaryFieldValueItem{}
 	}
 	for key, item := range value.(map[string]interface{}) {
-		dictItems = append(dictItems, makeDictionaryItem(key, item))
+		dictItems = append(dictItems, makeDictionaryItem(key, item, fileItems))
 	}
 	return
 }
 
-func makeDictionaryItem(key string, value any) WFDictionaryFieldValueItem {
+func makeDictionaryItem(key string, value any, fileItems bool) WFDictionaryFieldValueItem {
 	if value == nil {
 		value = ""
 	}
@@ -673,7 +675,7 @@ func makeDictionaryItem(key string, value any) WFDictionaryFieldValueItem {
 		itemType = itemTypeArray
 		var items []WFDictionaryFieldValueItem
 		for _, item := range v {
-			items = append(items, makeDictionaryItem("", item))
+			items = append(items, makeDictionaryItem("", item, fileItems))
 		}
 		wfValue = makeArrayValue(items)
 	case map[string]interface{}:
@@ -686,7 +688,7 @@ func makeDictionaryItem(key string, value any) WFDictionaryFieldValueItem {
 			Value: WFDictionaryFieldValue{
 				WFSerializationType: "WFDictionaryFieldValue",
 				Value: WFDictionaryFieldValueWrapper{
-					WFDictionaryFieldValueItems: makeDictionary(v),
+					WFDictionaryFieldValueItems: makeDictionary(v, fileItems),
 				},
 			},
 		}
@@ -712,6 +714,12 @@ func makeDictionaryItem(key string, value any) WFDictionaryFieldValueItem {
 		itemType = itemTypeBool
 		wfValue = v
 	case varValue:
+		if !fileItems {
+			itemType = itemTypeText
+			wfValue = textTokenStringValue(v)
+			break
+		}
+
 		itemType = itemTypeFile
 		wfValue = WFValue{
 			Value:               variableValue(v),

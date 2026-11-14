@@ -57,4 +57,20 @@ if referenceItem.text != "ref" {
     mustOutput("❌ FAIL: reference as last array item — got {referenceItem}, expected 'ref'", "❌ FAIL: reference as last array item — got {referenceItem}, expected 'ref'")
 }
 
+// bare variables in arrays, and in a dictionary inside an array
+@bareItem = "item"
+const bareItemConst = text("const item")
+@bareItems = [@bareItem, bareItemConst]
+const bareFirst = getFirstItem(@bareItems)
+if bareFirst.text != "item" {
+    mustOutput("❌ FAIL: bare variable in array - got {bareFirst}, expected 'item'", "❌ FAIL: bare variable in array - got {bareFirst}, expected 'item'")
+}
+@bareDictionaries = [{"value": @bareItem}]
+const bareDictionaryRaw = getFirstItem(@bareDictionaries)
+const bareDictionaryItem = getDictionary(bareDictionaryRaw)
+const bareDictionaryValue = getValue(bareDictionaryItem, "value")
+if bareDictionaryValue.text != "item" {
+    mustOutput("❌ FAIL: bare variable in dictionary in array - got {bareDictionaryValue}, expected 'item'", "❌ FAIL: bare variable in dictionary in array - got {bareDictionaryValue}, expected 'item'")
+}
+
 show("✅ All tests passed")

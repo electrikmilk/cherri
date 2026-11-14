@@ -88,4 +88,28 @@ if !referenceValue {
     mustOutput("❌ FAIL: reference as last dictionary item — returned no value", "❌ FAIL: reference as last dictionary item — returned no value")
 }
 
+// bare variables in an assigned dictionary are inline text references
+@bareText = "bare"
+@bareCount = 3
+const bareConst = text("constant")
+@bareDictionary = {"inline": "{@bareText}", "text": @bareText, "count": @bareCount, "nested": {"inner": bareConst}, "list": [@bareText], "input": ShortcutInput, "last": bareConst}
+const bareTextValue = getValue(@bareDictionary, "text")
+if bareTextValue.text != "bare" {
+    mustOutput("❌ FAIL: bare variable in dictionary - got {bareTextValue}, expected 'bare'", "❌ FAIL: bare variable in dictionary - got {bareTextValue}, expected 'bare'")
+}
+const bareCountValue = getValue(@bareDictionary, "count")
+if bareCountValue.text != "3" {
+    mustOutput("❌ FAIL: bare number in dictionary - got {bareCountValue}, expected '3'", "❌ FAIL: bare number in dictionary - got {bareCountValue}, expected '3'")
+}
+const bareNestedRaw = getValue(@bareDictionary, "nested")
+const bareNested = getDictionary(bareNestedRaw)
+const bareInner = getValue(bareNested, "inner")
+if bareInner.text != "constant" {
+    mustOutput("❌ FAIL: bare constant in nested dictionary - got {bareInner}, expected 'constant'", "❌ FAIL: bare constant in nested dictionary - got {bareInner}, expected 'constant'")
+}
+const bareLast = getValue(@bareDictionary, "last")
+if bareLast.text != "constant" {
+    mustOutput("❌ FAIL: bare constant as last dictionary item - got {bareLast}, expected 'constant'", "❌ FAIL: bare constant as last dictionary item - got {bareLast}, expected 'constant'")
+}
+
 show("✅ All tests passed")
