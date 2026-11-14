@@ -1,4 +1,4 @@
-// compile-only: alarms change state on the device
+// compile-only: alarms, timers, stopwatch and world clock change state on the device
 
 @alarm = "alarm"
 
@@ -11,5 +11,26 @@ turnOffAlarm(@alarm)
 toggleAlarm(@alarm)
 
 getAlarms()
+openAlarm(@alarm)
+
+startTimer(qty(5, "min"))
+pauseTimer()
+resumeTimer()
+getCurrentTimerDetail("remainingTime")
+getCurrentTimerDetail("duration")
+cancelTimer()
+
+startStopwatch()
+lapStopwatch()
+stopStopwatch()
+resetStopwatch()
+
+@city = "city"
+
+addWorldClockCity(@city)
+getTimeForCity(@city)
+removeWorldClockCity(@city)
+
+openClockTab("timer")
 
 show("✅ All tests passed")

@@ -6,7 +6,32 @@ app Clock 'com.apple.clock' {
     'CreateAlarmIntent',
     'DeleteAlarmIntent',
     'ToggleAlarmIntent',
-    'AlarmEntity'
+    'AlarmEntity',
+    'OpenAlarmIntent',
+    'PauseTimerIntent',
+    'ResumeTimerIntent',
+    'CancelTimerIntent',
+    'GetCurrentTimerDetailsIntent',
+    'StartStopwatchIntent',
+    'StopStopwatchIntent',
+    'LapStopwatchIntent',
+    'ResetStopwatchIntent',
+    'AddWorldClockIntent',
+    'RemoveWorldClockIntent',
+    'GetTimeForCityIntent',
+    'OpenTab'
+}
+
+enum currentTimerDetail {
+    'duration',
+    'remainingTime',
+}
+
+enum clockTab {
+    'clock',
+    'alarm',
+    'stopwatch',
+    'timer',
 }
 
 enum eventDetail {
@@ -97,8 +122,47 @@ action #Clock.ToggleAlarmIntent 'com.apple.mobiletimer-framework.MobileTimerInte
     "operation": "toggle"
 }
 
+// [Doc]: [Clock] Open Alarm: Opens `alarm` in the Clock app.
+action #Clock.OpenAlarmIntent openAlarm(variable alarm: 'target')
+
 // [Doc]: [Clock] Start Timer: Creates a new timer.
 action 'timer.start' startTimer(#timeDuration duration: 'WFDuration' = qty(0, "min"))
+
+// [Doc]: [Clock] Pause Timer: Pauses the current timer.
+action #Clock.PauseTimerIntent pauseTimer()
+
+// [Doc]: [Clock] Resume Timer: Resumes the current timer.
+action #Clock.ResumeTimerIntent resumeTimer()
+
+// [Doc]: [Clock] Cancel Timer: Cancels the current timer.
+action #Clock.CancelTimerIntent cancelTimer()
+
+// [Doc]: [Clock] Get Current Timer Detail: Returns the total duration or the remaining time of the current timer.
+action #Clock.GetCurrentTimerDetailsIntent getCurrentTimerDetail(currentTimerDetail detail: 'mode'): variable
+
+// [Doc]: [Clock] Start Stopwatch: Starts the stopwatch.
+action #Clock.StartStopwatchIntent startStopwatch()
+
+// [Doc]: [Clock] Stop Stopwatch: Stops the stopwatch.
+action #Clock.StopStopwatchIntent stopStopwatch()
+
+// [Doc]: [Clock] Lap Stopwatch: Laps the stopwatch.
+action #Clock.LapStopwatchIntent lapStopwatch()
+
+// [Doc]: [Clock] Reset Stopwatch: Resets the stopwatch.
+action #Clock.ResetStopwatchIntent resetStopwatch()
+
+// [Doc]: [Clock] Add City: Adds `city` to the world clock.
+action #Clock.AddWorldClockIntent addWorldClockCity(variable city)
+
+// [Doc]: [Clock] Remove City: Removes `cities` from the world clock.
+action #Clock.RemoveWorldClockIntent removeWorldClockCity(variable cities: 'entities')
+
+// [Doc]: [Clock] Get Time for City: Returns the current time in `city`.
+action #Clock.GetTimeForCityIntent getTimeForCity(variable city): text
+
+// [Doc]: [Clock] Open Clock Tab: Opens `tab` in the Clock app.
+action #Clock.OpenTab openClockTab(clockTab tab)
 
 // [Doc]: [Dates] Get Dates: Get dates from input.
 action 'detect.date' getDates(variable input: 'WFInput')
