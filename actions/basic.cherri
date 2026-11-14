@@ -146,7 +146,7 @@ action 'getvalueforkey' getValue(dictionary dictionary: 'WFInput', text key: 'WF
 action 'setvalueforkey' setValue(variable dictionary: 'WFDictionary', text key: 'WFDictionaryKey', text value: 'WFDictionaryValue'): dictionary
 
 // [Doc]: [Items] Get Name: Get the name of an item.
-action 'getitemname' getName(variable item: 'WFInput')
+action 'getitemname' getName(variable item: 'WFInput'): text
 
 // [Doc]: [Items] Set Name: Set the name of an item.
 action 'setitemname' setName(variable item: 'WFInput', text name: 'WFName', bool ?includeFileExtension: 'WFDontIncludeFileExtension' = false)
@@ -188,4 +188,4 @@ action 'getitemfromlist' getListItems(variable list: 'WFInput', number start: 'W
 action internal 'ask' prompt(text prompt: 'WFAskActionPrompt', inputType ?inputType: 'WFInputType' = "Text", text ?defaultValue, bool ?multiline: 'WFAllowsMultilineText' = true)
 
 // [Doc]: [Lists] List: Create an immutable array of text.
-action internal list(text ...listItem)
+action internal list(text ...listItem): array
