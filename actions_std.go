@@ -1053,17 +1053,13 @@ func includeStandardAction(name string) {
 }
 
 // importToolkitActions imports the actions of the app that the action belongs to, which is the identifier without the
-// name of the action.
+// name of the action. The identifier must have at least two parts.
 func importToolkitActions(identifier *string) {
 	if args.Using("no-toolkit") {
 		return
 	}
 
 	var identifiers = strings.Split(*identifier, ".")
-	if len(identifiers) < 2 {
-		return
-	}
-
 	var baseIdentifier = strings.Join(identifiers[:len(identifiers)-1], ".")
 	if slices.Contains(imported, baseIdentifier) {
 		return

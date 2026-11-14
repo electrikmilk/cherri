@@ -35,6 +35,8 @@ func decompile(b []byte) {
 
 	variables = make(map[string]varValue)
 	uuids = make(map[string]string)
+	standardActionIncludes = make(map[string]string)
+	decompiledIncludes = []string{}
 	controlFlowGroups = make(map[int]controlFlowGroup)
 
 	basename = strings.ReplaceAll(basename, " ", "_")
@@ -1231,6 +1233,10 @@ func makeActionCallCode(action *ShortcutAction) string {
 	var actionCallCode strings.Builder
 	var matchedIdentifier, matchedAction = matchAction(action)
 	if matchedIdentifier == "" {
+		if !strings.Contains(action.WFWorkflowActionIdentifier, ".") {
+			decompError(fmt.Sprintf("Expected the action identifier '%s' to be a dot separated identifier such as 'is.workflow.actions.name'", action.WFWorkflowActionIdentifier), action)
+		}
+
 		checkMissingStandardInclude(&action.WFWorkflowActionIdentifier, false)
 
 		matchedIdentifier, matchedAction = matchAction(action)
