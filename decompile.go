@@ -522,16 +522,13 @@ func decompileIcon() {
 	var hasIcon = icon.WFWorkflowIconStartColor != iconColor || icon.WFWorkflowIconGlyphNumber != iconGlyph
 
 	if icon.WFWorkflowIconStartColor != iconColor {
-		defineColors(icon, colors)
-		defineColors(icon, altColors)
+		if name, found := firstNameWithValue(icon.WFWorkflowIconStartColor, colors, altColors); found {
+			newCodeLine(fmt.Sprintf("#define color %s\n", name))
+		}
 	}
 
 	if icon.WFWorkflowIconGlyphNumber != iconGlyph {
-		for name, i := range glyphs {
-			if icon.WFWorkflowIconGlyphNumber != int64(i) {
-				continue
-			}
-
+		if name, found := firstNameWithValue(int(icon.WFWorkflowIconGlyphNumber), glyphs); found {
 			newCodeLine(fmt.Sprintf("#define glyph %s\n", name))
 		}
 	}
@@ -541,14 +538,19 @@ func decompileIcon() {
 	}
 }
 
-func defineColors(icon ShortcutIcon, colors map[string]int) {
-	for name, i := range colors {
-		if icon.WFWorkflowIconStartColor != i {
-			continue
+// firstNameWithValue returns the alphabetically first name that has the value, so that when names share a value
+// the one that is written never depends on the order of a map.
+func firstNameWithValue(value int, namedValues ...map[string]int) (firstName string, found bool) {
+	for _, names := range namedValues {
+		for name, namedValue := range names {
+			if namedValue == value && (!found || name < firstName) {
+				firstName = name
+				found = true
+			}
 		}
-
-		newCodeLine(fmt.Sprintf("#define color %s\n", name))
 	}
+
+	return
 }
 
 var currentVariableValue string
