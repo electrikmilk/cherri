@@ -693,13 +693,17 @@ func decompComment(action *ShortcutAction) {
 
 var decompilingText = false
 
+// decompilingTextParameter is set while writing the argument of a text parameter, which keeps text that is only a
+// reference as text but, unlike a Text action, can be written as an Ask with a prompt.
+var decompilingTextParameter bool
+
 func decompTextValue(action *ShortcutAction) {
 	decompilingText = true
-	currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
-	if currentVariableValue == "" {
-		currentVariableValue = "\"\""
+	// Shortcuts leaves out the text of a Text action that is empty.
+	if action.WFWorkflowActionParameters["WFTextActionText"] == nil {
+		currentVariableValue = quoteString("", false)
 	} else {
-		currentVariableValue = fmt.Sprintf("\"%s\"", escapeString(strings.Trim(currentVariableValue, "\"")))
+		currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 	}
 	checkConstantLiteral(action)
 	decompilingText = false
@@ -1140,13 +1144,18 @@ func decompDictionary(action *ShortcutAction) {
 }
 
 func decompDictionaryValue(items []WFDictionaryFieldValueItem) string {
+	return decompLiteral(decompDictionaryItems(items))
+}
+
+// enterLiteral keeps the text inside of an array or a dictionary as it is until the returned function is called,
+// as it is escaped when the literal is written as JSON, and restores what was set so literals can be nested.
+func enterLiteral() (leave func()) {
+	var wasLiteral = decompilingDictionary
 	decompilingDictionary = true
 
-	var dictionary = decompLiteral(decompDictionaryItems(items))
-
-	decompilingDictionary = false
-
-	return dictionary
+	return func() {
+		decompilingDictionary = wasLiteral
+	}
 }
 
 // bareReference is a variable reference that is written without quotes. JSON cannot express that, so it is
@@ -1172,9 +1181,10 @@ func isReferenceValue(value any) bool {
 }
 
 func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary map[string]interface{}) {
+	defer enterLiteral()()
 	dictionary = make(map[string]interface{})
 	for _, item := range items {
-		var itemKey = strings.Trim(decompValue(item.WFKey), "\"")
+		var itemKey = decompValue(item.WFKey)
 		dictionary[itemKey] = decompDictionaryItem(item)
 	}
 	return
@@ -1214,7 +1224,7 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 		}
 		itemValue = boolValue
 	case itemTypeText:
-		itemValue = strings.Trim(decompValue(item.WFValue), "\"")
+		itemValue = decompValue(item.WFValue)
 	case itemTypeArray:
 		var arrayItems, isSlice = itemValueMap["Value"].([]interface{})
 		if !isSlice {
@@ -1238,6 +1248,7 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 }
 
 func decompArray(items []interface{}) (array []interface{}) {
+	defer enterLiteral()()
 	for _, item := range items {
 		if itemMap, isMap := item.(map[string]interface{}); isMap {
 			var fieldValueItem WFDictionaryFieldValueItem
@@ -1246,7 +1257,7 @@ func decompArray(items []interface{}) (array []interface{}) {
 			continue
 		}
 
-		array = append(array, strings.Trim(decompValue(item), "\""))
+		array = append(array, decompValue(item))
 	}
 	return
 }
@@ -1260,7 +1271,7 @@ func decompValue(value any) string {
 	case map[string]interface{}:
 		return decompValueObject(typedValue)
 	case string:
-		return fmt.Sprintf("\"%s\"", escapeString(typedValue))
+		return decompTextLiteral(typedValue, false)
 	case []interface{}:
 		return decompLiteral(decompArray(typedValue))
 	case bool, int, int64, uint64, float64:
@@ -1280,18 +1291,51 @@ func decompLiteral(value any) string {
 	return bareReferenceMarkerRegex.ReplaceAllString(string(jsonBytes), "$1")
 }
 
+// stringEscaper is one replacer, rather than a chain of replacements, so the backslashes it adds are
+// never escaped again.
+var stringEscaper = strings.NewReplacer(`\`, `\\`, `"`, `\"`, "\n", `\n`, "\t", `\t`, "\r", `\r`)
+
+// escapeString escapes raw text for the inside of a double quoted Cherri string, the inverse of collectString.
 func escapeString(value string) string {
-	var escapes = map[string]string{
-		"\n": "\\n",
-		"\t": "\\t",
-		"\r": "\\r",
-		"\"": `\"`,
-	}
-	for chr, e := range escapes {
-		value = strings.ReplaceAll(value, chr, e)
+	return stringEscaper.Replace(value)
+}
+
+// quoteString is the only place text becomes a Cherri string literal, so every caller passes the
+// text as it is in the Shortcut and never trims or escapes it first. Text that has its inline
+// references already written as {reference} is passed with hasReferences.
+//
+// Cherri has no escape for a brace in a double quoted string, and the compiler reads the braces in
+// one as inline references, so text with a literal brace is written as a raw string.
+func quoteString(text string, hasReferences bool) string {
+	if hasReferences || !strings.ContainsAny(text, "{}") {
+		return fmt.Sprintf("\"%s\"", escapeString(text))
 	}
 
-	return value
+	return quoteRawString(text)
+}
+
+// quoteRawString writes text as a raw string, which only has an escape for the single quote, so a
+// backslash at the end of the text would escape the closing quote.
+func quoteRawString(text string) string {
+	if strings.HasSuffix(text, `\`) {
+		decompError(fmt.Sprintf("Expected text that is written as a raw string not to end with a backslash, got '%s'", text), currentDecompAction())
+	}
+
+	return fmt.Sprintf("'%s'", strings.ReplaceAll(text, "'", `\'`))
+}
+
+// decompTextLiteral writes text as it is written in the current context. Inside an array or a dictionary it
+// stays as it is because it is escaped when the literal is written as JSON.
+func decompTextLiteral(text string, hasReferences bool) string {
+	if decompilingDictionary {
+		if !hasReferences && strings.ContainsAny(text, "{}") {
+			decompError(fmt.Sprintf("Expected text in an array or a dictionary to have no literal brace, as Cherri reads it as an inline reference, got '%s'", text), currentDecompAction())
+		}
+
+		return text
+	}
+
+	return quoteString(text, hasReferences)
 }
 
 func decompValueObject(value map[string]interface{}) string {
@@ -1342,9 +1386,6 @@ func decompValueObject(value map[string]interface{}) string {
 
 	var reference Value
 	mapToStruct(value, &reference)
-	if reference.Type == "Ask" && reference.Prompt != "" {
-		return fmt.Sprintf("Ask: \"%s\"", reference.Prompt)
-	}
 
 	return decompReference(reference)
 }
@@ -1374,6 +1415,9 @@ func decompReference(reference Value) string {
 		name = outputName
 	default:
 		name = decompGlobal(reference.Type)
+		if reference.Type == Ask && reference.Prompt != "" {
+			name = fmt.Sprintf("%s: %s", name, quoteRawString(reference.Prompt))
+		}
 	}
 
 	decompAggrandizements(&name, reference.Aggrandizements)
@@ -1407,10 +1451,9 @@ func decompObjectValue(valueObj any) string {
 		return decompValue(valueObj)
 	}
 
-	var attachmentString string
 	// Shortcuts writes empty text as a text token string without a Value.
 	if value["Value"] == nil && value["WFSerializationType"] == "WFTextTokenString" {
-		return attachmentString
+		return decompTextLiteral("", false)
 	}
 	if value["Value"] != nil {
 		var nestedValue, isNestedMap = value["Value"].(map[string]interface{})
@@ -1427,31 +1470,32 @@ func decompObjectValue(valueObj any) string {
 		decompError(fmt.Sprintf("Expected a dictionary value to be text, a variable reference or a dictionary, got one with the keys: %s", strings.Join(keys, ", ")), currentDecompAction())
 	}
 
+	var text string
 	if _, found := value["string"]; found {
 		var valueString, isString = value["string"].(string)
 		if !isString {
 			decompError(fmt.Sprintf("Expected string of a text value to be a string, got %T", value["string"]), currentDecompAction())
 		}
-		attachmentString = valueString
+		text = valueString
 	}
 
-	if attachments, found := value["attachmentsByRange"]; found {
-		var attachmentsMap, isMap = attachments.(map[string]interface{})
-		if !isMap {
-			decompError(fmt.Sprintf("Expected attachmentsByRange to be a dictionary, got %T", attachments), currentDecompAction())
-		}
-		decompAttachmentString(&attachmentString, attachmentsMap)
+	var attachments, found = value["attachmentsByRange"]
+	if !found {
+		return decompTextLiteral(text, false)
+	}
+	var attachmentsMap, isAttachmentsMap = attachments.(map[string]interface{})
+	if !isAttachmentsMap {
+		decompError(fmt.Sprintf("Expected attachmentsByRange to be a dictionary, got %T", attachments), currentDecompAction())
 	}
 
-	return attachmentString
+	return decompAttachmentString(text, attachmentsMap)
 }
 
-// decompAttachmentString substitutes each attachment into the string. Attachment ranges are UTF-16
-// code unit offsets, the inverse of mapInlineVariables, so the string is indexed as UTF-16 rather
-// than as code points, which would misplace attachments after an emoji.
-func decompAttachmentString(attachmentString *string, attachments map[string]interface{}) {
-	var originalString = *attachmentString
-	var units = utf16.Encode([]rune(originalString))
+// decompAttachmentString substitutes each attachment into the text and writes it as text. Attachment
+// ranges are UTF-16 code unit offsets, the inverse of mapInlineVariables, so the text is indexed as
+// UTF-16 rather than as code points, which would misplace attachments after an emoji.
+func decompAttachmentString(text string, attachments map[string]interface{}) string {
+	var units = utf16.Encode([]rune(text))
 
 	var positions []int
 	var attachmentsByPosition = make(map[int]any, len(attachments))
@@ -1469,6 +1513,9 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 	var result strings.Builder
 	var consumed int
 	var referencesControlFlowOutput bool
+	var isWholeValue = text == ObjectReplaceCharStr
+	var lastReference string
+	var hasPrompt bool
 	for _, position := range positions {
 		if position < consumed || position >= len(units) {
 			decompError(fmt.Sprintf("Attachment position %d is outside of the string", position), currentDecompAction())
@@ -1476,27 +1523,43 @@ func decompAttachmentString(attachmentString *string, attachments map[string]int
 
 		var attachment Value
 		mapToStruct(attachmentsByPosition[position], &attachment)
-
+		// Cherri can only write the prompt of an Ask on a whole value, not inside of text or an array or a dictionary.
+		var keepsPrompt = isWholeValue && !decompilingDictionary && !decompilingText
+		if attachment.Prompt != "" && !keepsPrompt {
+			decompError(fmt.Sprintf("Expected the Ask in text to have no prompt, as Cherri can only write one on an Ask that is a whole value, got '%s'", attachment.Prompt), currentDecompAction())
+		}
 		if slices.Contains(controlFlowOutputUUIDs, attachment.OutputUUID) {
 			referencesControlFlowOutput = true
 		}
 
-		result.WriteString(string(utf16.Decode(units[consumed:position])))
-		result.WriteString(fmt.Sprintf("{%s}", decompReference(attachment)))
+		lastReference = decompReference(attachment)
+		hasPrompt = attachment.Prompt != ""
+		result.WriteString(decompLiteralText(units[consumed:position]))
+		result.WriteString(fmt.Sprintf("{%s}", lastReference))
 		consumed = position + 1
 	}
-	result.WriteString(string(utf16.Decode(units[consumed:])))
+	result.WriteString(decompLiteralText(units[consumed:]))
 
-	*attachmentString = escapeString(result.String())
-
-	if !decompilingDictionary && !decompilingText {
-		// The output of a control flow block has no type, so the compiler only accepts it inside text.
-		if originalString == ObjectReplaceCharStr && !referencesControlFlowOutput {
-			*attachmentString = strings.Trim(*attachmentString, "{}")
-		} else if !strings.Contains("\"", *attachmentString) {
-			*attachmentString = fmt.Sprintf("\"%s\"", *attachmentString)
-		}
+	// The output of a control flow block has no type, so the compiler only accepts it inside text.
+	// A text parameter keeps the text so the reference is converted to text, which a bare variable of
+	// another type is not.
+	var keepsText = decompilingText || decompilingTextParameter
+	if isWholeValue && !referencesControlFlowOutput && !decompilingDictionary && (!keepsText || hasPrompt) {
+		return lastReference
 	}
+
+	return decompTextLiteral(result.String(), true)
+}
+
+// decompLiteralText decodes text between two attachments, which Cherri can only write when it has no brace
+// because the compiler would read the braces with the references as one reference.
+func decompLiteralText(units []uint16) string {
+	var text = string(utf16.Decode(units))
+	if strings.ContainsAny(text, "{}") {
+		decompError(fmt.Sprintf("Expected text with inline references to have no literal brace, got '%s'", text), currentDecompAction())
+	}
+
+	return text
 }
 
 // decompAggrandizements writes the aggrandizements in plist order. The compiler reads at most one
@@ -1731,7 +1794,9 @@ func decompArgument(param parameterDefinition, value any, action *ShortcutAction
 
 	checkDecompEnum(param, value, action)
 
+	decompilingTextParameter = param.validType == String
 	var argValue = decompValue(value)
+	decompilingTextParameter = false
 	if param.validType == Integer && !startsWith(Ask, argValue) {
 		argValue = strings.Trim(argValue, "\"")
 	}
@@ -1833,9 +1898,9 @@ func processRawParameters(params map[string]any) map[string]any {
 		}
 
 		if mapValue, isMap := value.(map[string]interface{}); isMap {
-			decompilingDictionary = true
+			var leave = enterLiteral()
 			rawParams[key] = decompValueObject(mapValue)
-			decompilingDictionary = false
+			leave()
 			continue
 		}
 

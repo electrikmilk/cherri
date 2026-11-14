@@ -46,7 +46,7 @@ alert("Title", "Message")
 alert("No title")
 confirm("No title")
 confirm("No button setting")
-show(@var)
+show("{@var}")
 
 repeat _ for 3 {
 }
