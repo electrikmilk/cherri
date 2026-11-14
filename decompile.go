@@ -1584,11 +1584,11 @@ func makeActionCallCode(action *ShortcutAction) string {
 	actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
 
 	if matchedAction.makeParams != nil || matchedAction.decomp != nil {
-		decompActionCustom(&actionCallCode, &matchedAction, action)
+		decompActionCustom(&actionCallCode, matchedIdentifier, &matchedAction, action)
 	} else {
 		var matchedParamsSize = len(matchedAction.parameters)
 		if matchedParamsSize > 0 {
-			decompActionArguments(&actionCallCode, &matchedAction, action)
+			decompActionArguments(&actionCallCode, matchedIdentifier, &matchedAction, action)
 		}
 	}
 
@@ -1645,27 +1645,63 @@ func actionIdentifierEnd(identifier string) string {
 	return strings.Replace(identifier, "is.workflow.actions.", "", 1)
 }
 
-func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
-	for i, param := range matchedAction.parameters {
-		if param.key == "" {
+func decompActionArguments(actionCallCode *strings.Builder, name string, matchedAction *actionDefinition, action *ShortcutAction) {
+	actionCallCode.WriteString(strings.Join(decompParameters(name, matchedAction.parameters, action, nil), ", "))
+}
+
+// decompHookName and decompHookDefinition are the action whose decomp hook is running. Hooks cannot
+// look their own definition up in actions, as they are part of its initialization.
+var decompHookName string
+var decompHookDefinition *actionDefinition
+
+// decompHookArguments is decompParameters for a decomp hook, which passes the values it recovered
+// in recovered by parameter name.
+func decompHookArguments(action *ShortcutAction, recovered map[string]string) []string {
+	return decompParameters(decompHookName, decompHookDefinition.parameters, action, recovered)
+}
+
+// decompParameters writes one argument per parameter, as arguments are matched to parameters by
+// position. An absent parameter that can be skipped is written as nil so later arguments keep their
+// position, and the skipped ones left at the end are trimmed. A decomp hook passes the values it
+// recovered in recovered, which are used in place of the plist, and a parameter without a plist key
+// can only be recovered by a hook.
+func decompParameters(name string, parameters []parameterDefinition, action *ShortcutAction, recovered map[string]string) []string {
+	var arguments []string
+	var written int
+	for _, param := range parameters {
+		var skippable = param.optional || param.defaultValue != nil
+		if argValue, isRecovered := recovered[param.name]; isRecovered {
+			arguments = append(arguments, argValue)
+			if argValue != "nil" || !skippable {
+				written = len(arguments)
+			}
 			continue
 		}
 
-		var argValue string
-		if value, found := action.WFWorkflowActionParameters[param.key]; found {
-			argValue = decompArgument(param, value, action)
-		} else if !param.optional {
-			argValue = makeDefaultValue(param)
-		}
-
-		if argValue != "" {
-			if i == 0 {
-				actionCallCode.WriteString(argValue)
-			} else {
-				actionCallCode.WriteString(fmt.Sprintf(", %s", argValue))
+		var value, found = action.WFWorkflowActionParameters[param.key]
+		switch {
+		case param.key == "" && recovered == nil:
+			decompError(fmt.Sprintf("Expected %s() to have a decomp hook, as its parameter '%s' has no plist key to read it from", name, param.name), action)
+		case param.key == "" && !skippable:
+			decompError(fmt.Sprintf("Expected the decomp hook of %s() to recover its required parameter '%s'", name, param.name), action)
+		case (param.key == "" || !found) && skippable:
+			arguments = append(arguments, "nil")
+			continue
+		case !found && param.literal:
+			arguments = append(arguments, makeDefaultValue(param))
+		case !found:
+			// The compiler writes nothing for a required argument given as nil.
+			arguments = append(arguments, "nil")
+		default:
+			arguments = append(arguments, decompArgument(param, value, action))
+			if end(arguments) == "nil" && skippable {
+				continue
 			}
 		}
+		written = len(arguments)
 	}
+
+	return arguments[:written]
 }
 
 // decompArgument writes the plist value of a parameter, which for a color or a quantity is written
@@ -1720,14 +1756,6 @@ func decompColor(value any, key string, action *ShortcutAction) string {
 }
 
 func makeDefaultValue(param parameterDefinition) string {
-	if param.defaultValue != nil {
-		if stringValue, isString := param.defaultValue.(string); isString {
-			return fmt.Sprintf("\"%s\"", stringValue)
-		}
-
-		return fmt.Sprintf("%v", param.defaultValue)
-	}
-
 	switch param.validType {
 	case Integer:
 		return "0"
@@ -1994,7 +2022,13 @@ func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameter
 	return
 }
 
-func decompActionCustom(actionCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
+func decompActionCustom(actionCode *strings.Builder, name string, matchedAction *actionDefinition, action *ShortcutAction) {
+	if matchedAction.decomp == nil {
+		decompError(fmt.Sprintf("Expected %s() to have a decomp hook, as it builds its parameters with makeParams", name), action)
+	}
+
+	decompHookName = name
+	decompHookDefinition = matchedAction
 	var arguments = matchedAction.decomp(action)
 	if len(arguments) == 0 {
 		return

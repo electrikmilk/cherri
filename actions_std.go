@@ -76,6 +76,25 @@ var actions = map[string]*actionDefinition{
 				"repeats": repeats,
 			}
 		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var recovered = make(map[string]string)
+			if _, found := action.WFWorkflowActionParameters["repeats"]; !found {
+				return decompHookArguments(action, recovered)
+			}
+
+			var weekdays []interface{}
+			for _, repeat := range paramSlice(action, "repeats") {
+				var repeatDay, isMap = repeat.(map[string]interface{})
+				var day, isString = repeatDay["value"].(string)
+				if !isMap || !isString {
+					decompError("Expected each of repeats to be a dictionary with a value string", action)
+				}
+				weekdays = append(weekdays, day)
+			}
+			recovered["repeatWeekdays"] = decompLiteral(weekdays)
+
+			return decompHookArguments(action, recovered)
+		},
 	},
 	"addWorldClock": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
@@ -174,6 +193,26 @@ var actions = map[string]*actionDefinition{
 
 			return
 		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var recovered = make(map[string]string)
+			for name, contact := range map[string]struct {
+				key        string
+				contentKit contentKit
+			}{
+				"phoneNumber":  {"WFContactPhoneNumbers", phoneNumber},
+				"emailAddress": {"WFContactEmails", emailAddress},
+			} {
+				var values = decompContactValue(action, contact.key, contact.contentKit)
+				if len(values) > 1 {
+					decompError(fmt.Sprintf("Expected the parameter '%s' to hold one value, got %d", contact.key, len(values)), action)
+				}
+				if len(values) == 1 {
+					recovered[name] = values[0]
+				}
+			}
+
+			return decompHookArguments(action, recovered)
+		},
 	},
 	"labelFile": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
@@ -186,6 +225,23 @@ var actions = map[string]*actionDefinition{
 			return map[string]any{
 				"WFLabelColorNumber": fileLabelsMap[color],
 			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var colorNumber, isNumber = requiredParam(action, "WFLabelColorNumber").(uint64)
+			if !isNumber {
+				decompError(fmt.Sprintf("Expected WFLabelColorNumber to be an integer, got %T", action.WFWorkflowActionParameters["WFLabelColorNumber"]), action)
+			}
+			var recovered = make(map[string]string)
+			for color, number := range fileLabelsMap {
+				if colorNumber == uint64(number) {
+					recovered["color"] = decompValue(color)
+				}
+			}
+			if recovered["color"] == "" {
+				decompError(fmt.Sprintf("Expected WFLabelColorNumber to be a file label color number, got %v", colorNumber), action)
+			}
+
+			return decompHookArguments(action, recovered)
 		},
 	},
 	"filterFiles": {
@@ -221,6 +277,21 @@ var actions = map[string]*actionDefinition{
 			return map[string]any{
 				"WFGetTextFromPDFTextType": "Text",
 			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var recovered = make(map[string]string)
+			if textType, found := action.WFWorkflowActionParameters["WFGetTextFromPDFTextType"]; found {
+				// Text is written whether richText is false or left out, so only Rich Text needs the argument.
+				switch textType {
+				case "Rich Text":
+					recovered["richText"] = "true"
+				case "Text":
+				default:
+					decompError(fmt.Sprintf("Expected WFGetTextFromPDFTextType to be 'Text' or 'Rich Text', got '%v'", textType), action)
+				}
+			}
+
+			return decompHookArguments(action, recovered)
 		},
 	},
 	"containsText": {
@@ -263,6 +334,36 @@ var actions = map[string]*actionDefinition{
 					"displayName":  filename,
 				},
 			}
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var file = paramMap(action, "WFFile")
+			var fileLocation, hasLocation = file["fileLocation"].(map[string]interface{})
+			if !hasLocation {
+				decompError(fmt.Sprintf("Expected WFFile to have a fileLocation dictionary, got %T", file["fileLocation"]), action)
+			}
+			var subpath, hasSubpath = fileLocation["relativeSubpath"].(string)
+			if !hasSubpath {
+				decompError(fmt.Sprintf("Expected the fileLocation of WFFile to have a relativeSubpath string, got %T", fileLocation["relativeSubpath"]), action)
+			}
+
+			// Only a home folder location is stored, the first part of any other folder path is not, so
+			// Shortcuts stands in for it.
+			var root = "Shortcuts"
+			if locationType, found := fileLocation["WFFileLocationType"]; found {
+				if locationType != "Home" {
+					decompError(fmt.Sprintf("Expected WFFileLocationType of WFFile to be 'Home', got '%v'", locationType), action)
+				}
+				root = "~"
+			}
+
+			var folder = root
+			if subpath != "" {
+				folder = root + "/" + subpath
+			}
+
+			return decompHookArguments(action, map[string]string{
+				"folder": decompValue(folder),
+			})
 		},
 	},
 	"splitText": {
@@ -314,6 +415,14 @@ var actions = map[string]*actionDefinition{
 			}
 
 			return defaultAnswer
+		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var recovered = make(map[string]string)
+			if defaultAnswer, found := action.WFWorkflowActionParameters["WFAskActionDefaultAnswer"]; found {
+				recovered["defaultValue"] = decompValue(defaultAnswer)
+			}
+
+			return decompHookArguments(action, recovered)
 		},
 	},
 	"openApp": {
@@ -808,6 +917,13 @@ var actions = map[string]*actionDefinition{
 				"WFContactContentItem" + detailKey: argumentValue(args, 2),
 			}
 		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var detailKey = "WFContactContentItem" + strings.ReplaceAll(paramString(action, "WFContentItemPropertyName"), " ", "")
+
+			return decompHookArguments(action, map[string]string{
+				"value": decompValue(requiredParam(action, detailKey)),
+			})
+		},
 	},
 	"setWindowedMultitasking": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
@@ -833,6 +949,9 @@ var actions = map[string]*actionDefinition{
 
 			return map[string]any{}
 		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompHookArguments(action, decompFocusMode(action))
+		},
 	},
 	"toggleFocusMode": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
@@ -850,6 +969,9 @@ var actions = map[string]*actionDefinition{
 
 			return params
 		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			return decompHookArguments(action, decompFocusMode(action))
+		},
 	},
 	"generateImage": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
@@ -858,47 +980,56 @@ var actions = map[string]*actionDefinition{
 			}
 
 			var title string
-			var subtitle string
 			var style = argumentValue(args, 2)
 			if args[2].valueType == String {
 				style = getArgValue(args[2])
-				switch style {
-				case "chatgpt":
-					style = "z_external_provider"
-					title = "ChatGPT"
-					subtitle = "ChatGPT"
-				case "chatgpt_oil_painting":
-					style = "z_external_provider_1"
-					title = "Oil Painting (ChatGPT)"
-					subtitle = "Oil Painting (ChatGPT)"
-				case "chatgpt_watercolor":
-					style = "z_external_provider_2"
-					title = "Watercolor (ChatGPT)"
-					subtitle = "Watercolor (ChatGPT)"
-				case "chatgpt_vector":
-					style = "z_external_provider_3"
-					title = "Vector (ChatGPT)"
-					subtitle = "Vector (ChatGPT)"
-				case "chatgpt_anime":
-					style = "z_external_provider_4"
-					title = "Anime (ChatGPT)"
-					subtitle = "Anime (ChatGPT)"
-				case "chatgpt_print":
-					style = "z_external_provider_5"
-					title = "Print (ChatGPT)"
-					subtitle = "Print (ChatGPT)"
+				if externalStyle, found := externalImageStyles[style.(string)]; found {
+					style = externalStyle.identifier
+					title = externalStyle.title
 				}
 			}
 
 			return map[string]any{
 				"style": map[string]any{
 					"identifier": style,
-					"subtitle":   subtitle,
+					"subtitle":   title,
 					"title":      title,
 				},
 			}
 		},
+		decomp: func(action *ShortcutAction) (arguments []string) {
+			var recovered = make(map[string]string)
+			if _, found := action.WFWorkflowActionParameters["style"]; !found {
+				return decompHookArguments(action, recovered)
+			}
+
+			var identifier = paramMap(action, "style")["identifier"]
+			recovered["style"] = decompValue(identifier)
+			for name, externalStyle := range externalImageStyles {
+				if identifier == externalStyle.identifier {
+					recovered["style"] = decompValue(name)
+				}
+			}
+
+			return decompHookArguments(action, recovered)
+		},
 	},
+}
+
+type externalImageStyle struct {
+	identifier string
+	title      string
+}
+
+// externalImageStyles maps the Image Playground styles of external providers to the identifier and title
+// Shortcuts stores for them, and is read both ways so a decompiled style gets its Cherri name back.
+var externalImageStyles = map[string]externalImageStyle{
+	"chatgpt":              {"z_external_provider", "ChatGPT"},
+	"chatgpt_oil_painting": {"z_external_provider_1", "Oil Painting (ChatGPT)"},
+	"chatgpt_watercolor":   {"z_external_provider_2", "Watercolor (ChatGPT)"},
+	"chatgpt_vector":       {"z_external_provider_3", "Vector (ChatGPT)"},
+	"chatgpt_anime":        {"z_external_provider_4", "Anime (ChatGPT)"},
+	"chatgpt_print":        {"z_external_provider_5", "Print (ChatGPT)"},
 }
 
 type focusMode struct {
@@ -927,6 +1058,25 @@ var focusModes = map[string]focusMode{
 		DisplayString: "Driving",
 		Identifier:    "com.apple.donotdisturb.mode.driving",
 	},
+}
+
+// decompFocusMode recovers the focusMode argument from FocusModes, which is left out for the default.
+func decompFocusMode(action *ShortcutAction) map[string]string {
+	var recovered = make(map[string]string)
+	if _, found := action.WFWorkflowActionParameters["FocusModes"]; !found {
+		return recovered
+	}
+
+	var modes = paramMap(action, "FocusModes")
+	for name, mode := range focusModes {
+		if modes["Identifier"] == mode.Identifier {
+			recovered["focusMode"] = decompValue(name)
+			return recovered
+		}
+	}
+
+	decompError(fmt.Sprintf("Expected the Identifier of FocusModes to identify a known focus mode, got '%v'", modes["Identifier"]), action)
+	return recovered
 }
 
 var actionIncludes = []string{
