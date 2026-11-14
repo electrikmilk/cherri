@@ -158,19 +158,19 @@ action !mac #MobileTimer.EditSleepAlarmIntent toggleSleepAlarm(sleepAlarmOperati
 action !mac #Clock.StartStopwatchIntent startStopwatch()
 
 // [Doc]: [Clock] Stop Stopwatch: Stops the stopwatch.
-action !mac #Clock.StopStopwatchIntent stopStopwatch(bool ?open: 'OpenWhenRun' = true)
+action !mac #Clock.StopStopwatchIntent stopStopwatch(bool ?showWhenRun: 'OpenWhenRun' = true)
 
 // [Doc]: [Clock] Lap Stopwatch: Laps the stopwatch.
-action !mac #Clock.LapStopwatchIntent lapStopwatch(bool ?open: 'OpenWhenRun' = true)
+action !mac #Clock.LapStopwatchIntent lapStopwatch(bool ?showWhenRun: 'OpenWhenRun' = true)
 
 // [Doc]: [Clock] Reset Stopwatch: Resets the stopwatch.
-action !mac #Clock.ResetStopwatchIntent resetStopwatch(bool ?open: 'OpenWhenRun' = true)
+action !mac #Clock.ResetStopwatchIntent resetStopwatch(bool ?showWhenRun: 'OpenWhenRun' = true)
 
 // [Doc]: [Clock] Add City: Adds `city` to the world clock.
-action internal #Clock.AddWorldClockIntent addWorldClock(worldClockCity city, bool ?open: 'OpenWhenRun' = true)
+action internal #Clock.AddWorldClockIntent addWorldClock(worldClockCity city, bool ?showWhenRun: 'OpenWhenRun' = true)
 
 // [Doc]: [Clock] Remove City: Removes `cities`, an array of city names, from the world clock.
-action internal #Clock.RemoveWorldClockIntent removeWorldClock(array cities, bool ?open: 'OpenWhenRun' = true)
+action internal #Clock.RemoveWorldClockIntent removeWorldClock(array cities, bool ?showWhenRun: 'OpenWhenRun' = true)
 
 // [Doc]: [Clock] Get City Time: Returns the current time in `city`.
 action internal #Clock.GetTimeForCityIntent getCityTime(worldClockCity city): text
