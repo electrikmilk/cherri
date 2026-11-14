@@ -1,6 +1,8 @@
 #include 'actions/location'
 #define color red
 #define glyph apple
+#define inputs text, dictionary, url, app, contact, folder, date, file, maplink, media, pdf, phonenumber, richtext, number, itunes, webpage, article, email, image, location
+#define version 26
 
 const hello = prompt("Hello?")
 @confirm = prompt("What do you want?", "Number")

@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -248,6 +249,61 @@ func roundTripIdentifiers(t *testing.T, path string) []string {
 	return identifiers
 }
 
+// roundTripDefinitionKeys are the keys of a shortcut that the definitions at the top of its code write.
+var roundTripDefinitionKeys = []string{
+	"WFWorkflowIcon",
+	"WFWorkflowClientVersion",
+	"WFQuickActionSurfaces",
+	"WFWorkflowInputContentItemClasses",
+	"WFWorkflowOutputContentItemClasses",
+	"WFWorkflowTypes",
+	"WFWorkflowNoInputBehavior",
+	"WFWorkflowImportQuestions",
+}
+
+// roundTripDefinitions returns the values of roundTripDefinitionKeys as text, with the import questions in a
+// fixed order, as the compiler writes them in the order of a map.
+func roundTripDefinitions(t *testing.T, path string) map[string]string {
+	t.Helper()
+
+	var data, readErr = os.ReadFile(path)
+	if readErr != nil {
+		t.Fatalf("read %s: %s", path, readErr)
+	}
+	var shortcutPlist map[string]interface{}
+	var _, plistErr = plist.Unmarshal(data, &shortcutPlist)
+	if plistErr != nil {
+		t.Fatalf("parse %s: %s", path, plistErr)
+	}
+
+	var definitions = make(map[string]string)
+	for _, key := range roundTripDefinitionKeys {
+		var value = shortcutPlist[key]
+		if questions, isQuestions := value.([]interface{}); isQuestions && key == "WFWorkflowImportQuestions" {
+			var questionTexts []string
+			for _, question := range questions {
+				questionTexts = append(questionTexts, fmt.Sprint(question))
+			}
+			sort.Strings(questionTexts)
+			value = questionTexts
+		}
+		// An icon color is a 32 bit value, which the compiler has a signed and an unsigned name for.
+		if icon, isIcon := value.(map[string]interface{}); isIcon && key == "WFWorkflowIcon" {
+			for iconKey, iconValue := range icon {
+				switch number := iconValue.(type) {
+				case int64:
+					icon[iconKey] = uint32(number)
+				case uint64:
+					icon[iconKey] = uint32(number)
+				}
+			}
+		}
+		definitions[key] = fmt.Sprint(value)
+	}
+
+	return definitions
+}
+
 // firstDifference describes where two identifier lists diverge, or returns an empty string when equal.
 func firstDifference(original []string, recompiled []string) string {
 	for i := 0; i < max(len(original), len(recompiled)); i++ {
@@ -265,6 +321,30 @@ func firstDifference(original []string, recompiled []string) string {
 	}
 
 	return ""
+}
+
+// roundTripClientVersion gives a shortcut that has client version 900 the default client version. resetParser
+// leaves it at 900 while the test shortcuts are compiled as version 27, so decompiling it writes a definition
+// of version 16, which a recompile rejects the newer actions of.
+func roundTripClientVersion(t *testing.T, data []byte) []byte {
+	t.Helper()
+
+	var shortcutPlist map[string]interface{}
+	var _, unmarshalErr = plist.Unmarshal(data, &shortcutPlist)
+	if unmarshalErr != nil {
+		t.Fatal(unmarshalErr)
+	}
+	if shortcutPlist["WFWorkflowClientVersion"] != "900" {
+		return data
+	}
+
+	shortcutPlist["WFWorkflowClientVersion"] = defaultClientVersion
+	var changed, marshalErr = plist.Marshal(shortcutPlist, plist.XMLFormat)
+	if marshalErr != nil {
+		t.Fatal(marshalErr)
+	}
+
+	return changed
 }
 
 // TestRoundTrip decompiles each compiler-generated plist, recompiles the result and compares the
@@ -303,6 +383,7 @@ func TestRoundTrip(t *testing.T) {
 			if readErr != nil {
 				t.Fatal(readErr)
 			}
+			data = roundTripClientVersion(t, data)
 			var copied = filepath.Join(dir, name+".shortcut")
 			var writeErr = os.WriteFile(copied, data, 0600)
 			if writeErr != nil {
@@ -346,6 +427,14 @@ func TestRoundTrip(t *testing.T) {
 			var recompiled, recompiledErr = filepath.Glob(filepath.Join(decompiledDir, "*"+unsignedEnd))
 			if recompiledErr != nil || len(recompiled) != 1 {
 				t.Fatalf("expected one recompiled shortcut in %s, found %v", decompiledDir, recompiled)
+			}
+
+			var originalDefinitions = roundTripDefinitions(t, copied)
+			var recompiledDefinitions = roundTripDefinitions(t, recompiled[0])
+			for _, key := range roundTripDefinitionKeys {
+				if originalDefinitions[key] != recompiledDefinitions[key] {
+					t.Errorf("recompiled %s differs from the original:\n%s\n---\n%s", key, originalDefinitions[key], recompiledDefinitions[key])
+				}
 			}
 
 			var difference = firstDifference(roundTripIdentifiers(t, original), roundTripIdentifiers(t, recompiled[0]))

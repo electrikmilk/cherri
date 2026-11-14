@@ -46,6 +46,7 @@ func decompile(b []byte) {
 	currentVariableOperator = ""
 	decompiledImports = nil
 	decompiledDefinitions = nil
+	questionIdentifiers = make(map[questionKey]string)
 	openMenuItems = make(map[string]bool)
 	appendedVariables = make(map[string]bool)
 	assignedVariables = make(map[string]bool)
@@ -71,8 +72,11 @@ func decompile(b []byte) {
 
 	defineName()
 	decompileIcon()
+	decompileDefinitions()
+	decompileQuestions()
 
 	decompileActions()
+	checkQuestionsWritten()
 	writeHeader()
 
 	if args.Using("debug") {
@@ -618,6 +622,223 @@ func decompileIcon() {
 	if icon.WFWorkflowIconGlyphNumber != iconGlyph {
 		if name, found := firstNameWithValue(int(icon.WFWorkflowIconGlyphNumber), glyphs); found {
 			decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define glyph %s", name))
+		}
+	}
+}
+
+// defaultClientVersion is the client version that is written when none is defined.
+var defaultClientVersion = clientVersion
+
+// defaultWorkflowTypes is what Shortcuts is set to be used in when no workflow types are defined.
+var defaultWorkflowTypes = []string{"Watch", "WFWorkflowTypeShowInSearch"}
+
+// definitionError stops on a part of the Shortcut that holds a definition and is not what the compiler writes it as.
+func definitionError(message string, key string) {
+	decompError(message, &ShortcutAction{WFWorkflowActionIdentifier: key})
+}
+
+// decompileDefinitions writes the definitions that the compiler writes the keys of the Shortcut from, left out
+// when they are what is written without the definition.
+func decompileDefinitions() {
+	defineInputs()
+	defineList("outputs", "WFWorkflowOutputContentItemClasses", shortcut.WFWorkflowOutputContentItemClasses, contentItems)
+
+	var workflowTypeNames = slices.Sorted(slices.Values(shortcut.WFWorkflowTypes))
+	if !slices.Equal(workflowTypeNames, slices.Sorted(slices.Values(defaultWorkflowTypes))) {
+		defineList("from", "WFWorkflowTypes", shortcut.WFWorkflowTypes, workflowTypes)
+	}
+	defineList("quickactions", "WFQuickActionSurfaces", shortcut.WFQuickActionSurfaces, quickActions)
+
+	defineNoInput()
+	defineVersion()
+}
+
+// defineInputs writes the content items that the Shortcut accepts, which are all of them when not defined.
+func defineInputs() {
+	var accepted []string
+	for _, class := range shortcut.WFWorkflowInputContentItemClasses {
+		if _, found := reversedContentItems()[class]; found {
+			accepted = append(accepted, class)
+		}
+	}
+	if len(accepted) == len(contentItems) {
+		warnUnnamedValues("WFWorkflowInputContentItemClasses", shortcut.WFWorkflowInputContentItemClasses, contentItems)
+		return
+	}
+
+	defineList("inputs", "WFWorkflowInputContentItemClasses", shortcut.WFWorkflowInputContentItemClasses, contentItems)
+}
+
+// defineList writes the definition of a list of values by the names the compiler reads them from.
+func defineList(definition string, key string, values []string, names map[string]string) {
+	var listed = warnUnnamedValues(key, values, names)
+	if len(listed) == 0 {
+		return
+	}
+
+	decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define %s %s", definition, strings.Join(listed, ", ")))
+}
+
+// warnUnnamedValues returns the names of values, and warns about the values Cherri has no name for, which
+// cannot be written.
+func warnUnnamedValues(key string, values []string, names map[string]string) (listed []string) {
+	var valueNames = make(map[string]string, len(names))
+	for name, value := range names {
+		valueNames[value] = name
+	}
+
+	for _, value := range values {
+		var name, found = valueNames[value]
+		if !found {
+			decompWarning(fmt.Sprintf("'%s' of %s has no name in Cherri and is left out.", value, key))
+			continue
+		}
+		listed = append(listed, name)
+	}
+
+	return
+}
+
+// defineNoInput writes what the Shortcut does without input, which is the inverse of collectNoInputDefinition.
+func defineNoInput() {
+	if len(shortcut.WFWorkflowNoInputBehavior) == 0 {
+		return
+	}
+
+	var key = "WFWorkflowNoInputBehavior"
+	var name, isText = shortcut.WFWorkflowNoInputBehavior["Name"].(string)
+	if !isText {
+		definitionError(fmt.Sprintf("Expected %s to have a Name that is text, got %T", key, shortcut.WFWorkflowNoInputBehavior["Name"]), key)
+	}
+
+	var parameters map[string]interface{}
+	if rawParameters, hasParameters := shortcut.WFWorkflowNoInputBehavior["Parameters"]; hasParameters {
+		var isMap bool
+		parameters, isMap = rawParameters.(map[string]interface{})
+		if !isMap {
+			definitionError(fmt.Sprintf("Expected the Parameters of %s to be a dictionary, got %T", key, rawParameters), key)
+		}
+	}
+
+	switch name {
+	case "WFWorkflowNoInputBehaviorShowError":
+		var message, hasMessage = parameters["Error"].(string)
+		if !hasMessage {
+			definitionError(fmt.Sprintf("Expected the Parameters of %s to have an Error that is text, got %T", key, parameters["Error"]), key)
+		}
+		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define noinput %s \"%s\"", StopWith, escapeString(message)))
+	case "WFWorkflowNoInputBehaviorAskForInput":
+		var class, hasClass = parameters["ItemClass"].(string)
+		if !hasClass {
+			definitionError(fmt.Sprintf("Expected the Parameters of %s to have an ItemClass that is text, got %T", key, parameters["ItemClass"]), key)
+		}
+		var listed = warnUnnamedValues(key, []string{class}, contentItems)
+		if len(listed) == 0 {
+			return
+		}
+		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define noinput %s %s", AskFor, listed[0]))
+	case "WFWorkflowNoInputBehaviorGetClipboard":
+		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define noinput %s", GetClipboard))
+	default:
+		definitionError(fmt.Sprintf("Expected the Name of %s to be one of WFWorkflowNoInputBehaviorShowError, WFWorkflowNoInputBehaviorAskForInput or WFWorkflowNoInputBehaviorGetClipboard, got '%s'", key, name), key)
+	}
+}
+
+// defineVersion writes the version that the client version of the Shortcut is written for. Several versions
+// have the same client version, of which the shortest name is written.
+func defineVersion() {
+	if shortcut.WFWorkflowClientVersion == "" || shortcut.WFWorkflowClientVersion == defaultClientVersion {
+		return
+	}
+
+	var versionName string
+	for name, versionClient := range versions {
+		if versionClient != shortcut.WFWorkflowClientVersion {
+			continue
+		}
+		if versionName == "" || len(name) < len(versionName) || (len(name) == len(versionName) && name < versionName) {
+			versionName = name
+		}
+	}
+	if versionName == "" {
+		decompWarning(fmt.Sprintf("The client version '%s' has no version in Cherri and is left out.", shortcut.WFWorkflowClientVersion))
+		return
+	}
+
+	decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define version %s", versionName))
+}
+
+// questionKey is the argument an import question holds the value of.
+type questionKey struct {
+	actionIndex  int
+	parameterKey string
+}
+
+// questionIdentifiers names the import question of an argument, and writtenQuestions are those whose argument
+// has been written.
+var questionIdentifiers map[questionKey]string
+var writtenQuestions = make(map[questionKey]bool)
+
+// decompileQuestions writes a question declaration for each import question and names it for the argument that
+// takes it. The compiler writes an empty value for the argument, so only the question holds one.
+func decompileQuestions() {
+	writtenQuestions = make(map[questionKey]bool)
+
+	var questions = slices.Clone(shortcut.WFWorkflowImportQuestions)
+	sort.SliceStable(questions, func(i, j int) bool {
+		if questions[i].ActionIndex != questions[j].ActionIndex {
+			return questions[i].ActionIndex < questions[j].ActionIndex
+		}
+		return questions[i].ParameterKey < questions[j].ParameterKey
+	})
+
+	var number = 1
+	for _, question := range questions {
+		var defaultValue, isText = question.DefaultValue.(string)
+		if question.Category != "Parameter" || !isText || question.ParameterKey == "" {
+			decompWarning(fmt.Sprintf("The import question '%s' is not a question about an argument with a text default value, which Cherri cannot write, and is left out.", question.Text))
+			continue
+		}
+
+		var identifier = freshIdentifier("question", &number)
+		questionIdentifiers[questionKey{question.ActionIndex, question.ParameterKey}] = identifier
+		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#question %s \"%s\" \"%s\"", identifier, escapeString(question.Text), escapeString(defaultValue)))
+	}
+}
+
+// freshIdentifier returns the prefix followed by the next number that is not the name of a variable or a
+// constant, as the compiler rejects a question named like one.
+func freshIdentifier(prefix string, number *int) string {
+	for {
+		var identifier = fmt.Sprintf("%s%d", prefix, *number)
+		*number++
+
+		var taken bool
+		for _, name := range uuids {
+			taken = taken || name == identifier
+		}
+		if _, isVariable := variables[identifier]; !isVariable && !taken {
+			return identifier
+		}
+	}
+}
+
+// questionArgument returns the question that holds the value of the parameter of the current action.
+func questionArgument(parameterKey string) (identifier string, isQuestion bool) {
+	var key = questionKey{actionIndex, parameterKey}
+	identifier, isQuestion = questionIdentifiers[key]
+	if isQuestion {
+		writtenQuestions[key] = true
+	}
+
+	return
+}
+
+// checkQuestionsWritten warns about the import questions that no argument was written for, which are left out.
+func checkQuestionsWritten() {
+	for key, identifier := range questionIdentifiers {
+		if !writtenQuestions[key] {
+			decompWarning(fmt.Sprintf("The import question '%s' is for the parameter '%s' of action %d, which is not written as an argument.", identifier, key.parameterKey, key.actionIndex))
 		}
 	}
 }
@@ -2003,6 +2224,11 @@ func decompParameters(name string, parameters []parameterDefinition, action *Sho
 	var written int
 	for _, param := range parameters {
 		var skippable = param.optional || param.defaultValue != nil
+		if identifier, isQuestion := questionArgument(param.key); isQuestion {
+			arguments = append(arguments, identifier)
+			written = len(arguments)
+			continue
+		}
 		if argValue, isRecovered := recovered[param.name]; isRecovered {
 			arguments = append(arguments, argValue)
 			if argValue != "nil" || !skippable {
