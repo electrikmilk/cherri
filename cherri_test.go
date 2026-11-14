@@ -172,11 +172,9 @@ func TestDecomp(t *testing.T) {
 // roundTripKnownFailures lists shortcuts whose decompile or recompile exits non-zero, keyed by
 // test file name without _unsigned.shortcut. An entry that starts passing must be removed.
 var roundTripKnownFailures = map[string]string{
-	"device":      "hideAllApps and quitAllApps match hideApp and quitApp",
 	"dictionary":  "text with literal braces is written double-escaped in double quotes and read back as inline references: Illegal character 'k'",
 	"functions":   "output(\"{@n}\") decompiles to output(@n), rejected for a number-typed variable; a Set Variable's held action is dropped when a Nothing comes before it",
 	"ask-prompts": "Expected prompt raw string ('), got: \"",
-	"documents":   "getFileFromFolder matches getFile, whose folder cannot be a file dictionary",
 	"math":        "scientific math operator",
 }
 
@@ -196,6 +194,8 @@ var roundTripKnownMismatches = map[string]string{
 	"copy-paste":                   "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
 	"crypto":                       "action 2: is.workflow.actions.comment became is.workflow.actions.hash",
 	"date-comparisons":             "action 0: is.workflow.actions.comment became is.workflow.actions.date; also stray nothing()",
+	"device":                       "action 0: is.workflow.actions.comment became is.workflow.actions.flashlight",
+	"documents":                    "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
 	"empty-types":                  "action 0: is.workflow.actions.comment became is.workflow.actions.gettext",
 	"enum":                         "action 0: is.workflow.actions.comment became com.apple.facetime.facetime",
 	"getas-typecast":               "action 0: is.workflow.actions.comment became is.workflow.actions.number",

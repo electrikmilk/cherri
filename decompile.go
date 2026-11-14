@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"maps"
 	"os"
-	"reflect"
 	"regexp"
 	"slices"
 	"sort"
@@ -1855,7 +1854,7 @@ func matchAction(action *ShortcutAction) (name string, definition actionDefiniti
 		name = call
 
 		if splitActions, found := identifierMap[identifier]; found {
-			matchSplitAction(&splitActions, action.WFWorkflowActionParameters, &name, &definition)
+			matchSplitAction(&splitActions, action, &name, &definition)
 			if name != "run" && name != "runSelf" {
 				return
 			}
@@ -1885,91 +1884,113 @@ func matchAction(action *ShortcutAction) (name string, definition actionDefiniti
 }
 
 type actionMatch struct {
-	params uint
-	values uint
-	action actionValue
+	params  uint
+	values  uint
+	missing uint
+	action  actionValue
 }
 
-func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, identifier *string, definition *actionDefinition) {
+// matchSplitAction picks which of the actions sharing an identifier wrote the parameters. Of the actions
+// that could have written them, the one that matches the most parameters, then the most values, then
+// misses the fewest of its fixed parameters is picked, and on a tie the default action is preferred.
+func matchSplitAction(splitActions *[]actionValue, action *ShortcutAction, identifier *string, definition *actionDefinition) {
+	var parameters = action.WFWorkflowActionParameters
 	if args.Using("debug") {
 		fmt.Println("## MATCHING SPLIT ACTIONS ##")
 		fmt.Println("parameters", parameters)
 	}
 
-	var defaultAction, hasDefaultAction = getDefaultAction(splitActions)
-	if hasDefaultAction {
-		*identifier = defaultAction.identifier
-		*definition = *defaultAction.definition
-		if args.Using("debug") {
-			fmt.Println("has default action", defaultAction.identifier)
+	var matches []actionMatch
+	var names []string
+	for _, splitAction := range *splitActions {
+		names = append(names, splitAction.identifier)
+		var missing, conflicts = splitActionConflicts(splitAction, parameters)
+		if conflicts {
+			continue
 		}
+
+		var matchedParams, matchedValues = scoreActionMatch(splitAction, splitAction.definition.parameters, parameters)
+		matches = append(matches, actionMatch{
+			params:  matchedParams,
+			values:  matchedValues,
+			missing: missing,
+			action:  splitAction,
+		})
 	}
-
-	var matches = getSplitActionMatches(splitActions, parameters)
-
 	if len(matches) == 0 {
-		return
+		decompError(fmt.Sprintf("Expected the parameters to fit one of the actions %s", strings.Join(names, ", ")), action)
 	}
 
 	sort.SliceStable(matches, func(i, j int) bool {
-		return matches[i].params > matches[j].params || matches[i].values > matches[j].values
+		if matches[i].params != matches[j].params {
+			return matches[i].params > matches[j].params
+		}
+		if matches[i].values != matches[j].values {
+			return matches[i].values > matches[j].values
+		}
+		if matches[i].missing != matches[j].missing {
+			return matches[i].missing < matches[j].missing
+		}
+		if matches[i].action.definition.defaultAction != matches[j].action.definition.defaultAction {
+			return matches[i].action.definition.defaultAction
+		}
+		return matches[i].action.identifier < matches[j].action.identifier
 	})
 
 	if args.Using("debug") {
-		for _, match := range matches[0:] {
+		for _, match := range matches {
 			fmt.Printf("%s()\n", match.action.identifier)
-			fmt.Println("params:", match.params, " values:", match.values)
+			fmt.Println("params:", match.params, " values:", match.values, " missing:", match.missing)
 			fmt.Println("---")
 		}
 		fmt.Print("\n")
 	}
 
-	if !competingMatches(matches) {
-		if args.Using("debug") {
-			fmt.Println("matches are not competing! using default")
-		}
-		return
-	}
-
-	var matchedAction = matches[0]
-	*identifier = matchedAction.action.identifier
-	*definition = *matchedAction.action.definition
+	*identifier = matches[0].action.identifier
+	*definition = *matches[0].action.definition
 }
 
-func getSplitActionMatches(splitActions *[]actionValue, parameters map[string]any) (matches []actionMatch) {
-	for _, splitAction := range *splitActions {
-		var matchedParams, matchedValues = scoreActionMatch(splitAction, splitAction.definition.parameters, parameters)
-		if matchedParams == 0 {
+// splitActionConflicts reports whether splitAction cannot have written the parameters: a parameter it
+// always writes holds another value, or one of its variable parameters holds a plain dictionary, which
+// a variable is never written as. It also counts the parameters it always writes that are missing, as
+// Shortcuts leaves a parameter out when it holds its default.
+func splitActionConflicts(splitAction actionValue, parameters map[string]any) (missing uint, conflicts bool) {
+	for key, value := range splitAction.definition.appendParams {
+		var parameter, found = parameters[key]
+		if !found {
+			missing++
 			continue
 		}
-
-		matches = append(matches, actionMatch{
-			params: matchedParams,
-			values: matchedValues,
-			action: splitAction,
-		})
+		if !samePlistValue(value, parameter) {
+			return missing, true
+		}
 	}
-	return
+
+	for _, param := range splitAction.definition.parameters {
+		if param.key == "" || param.validType != Variable {
+			continue
+		}
+		var dictionary, isDictionary = parameters[param.key].(map[string]interface{})
+		if !isDictionary {
+			continue
+		}
+		if _, serialized := dictionary["WFSerializationType"]; !serialized {
+			return missing, true
+		}
+	}
+
+	return missing, false
 }
 
-// competingMatches determines if the matches for this identifier have more values than 1 matching this action.
-func competingMatches(matches []actionMatch) bool {
-	var hasCompetingValues bool
-	for _, match := range matches {
-		if match.values > 1 {
-			hasCompetingValues = true
-			break
-		}
-	}
-	if hasCompetingValues {
-		return true
-	}
-	for _, match := range matches {
-		if match.params > 1 {
-			return true
-		}
-	}
-	return false
+// samePlistValue compares a value written by Cherri with one read from a plist, which holds the same
+// data in other Go types, such as uint64 for an int, so both are compared as JSON.
+func samePlistValue(written any, read any) bool {
+	var writtenJSON, writtenErr = json.Marshal(written)
+	handle(writtenErr)
+	var readJSON, readErr = json.Marshal(read)
+	handle(readErr)
+
+	return string(writtenJSON) == string(readJSON)
 }
 
 func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
@@ -2010,12 +2031,8 @@ func scoreActionParams(splitActionParams *[]parameterDefinition, parameters map[
 			if len(param.enum) > 0 && slices.Contains(getEnum(param.enum), fmt.Sprintf("%s", value)) {
 				matchedValues++
 			}
-			if param.defaultValue != nil {
-				var defaultValue = fmt.Sprintf("%v", param.defaultValue)
-				var rawValue = strings.Trim(decompValue(value), "\"")
-				if defaultValue == rawValue && defaultValue != "" && rawValue != "" {
-					matchedValues++
-				}
+			if param.defaultValue != nil && samePlistValue(param.defaultValue, value) {
+				matchedValues++
 			}
 		}
 	}
@@ -2030,8 +2047,7 @@ func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameter
 		if value, found := parameters[param.key]; found {
 			matchedParams++
 
-			// Values can hold maps and slices, which cannot be compared with ==.
-			if reflect.DeepEqual(param.defaultValue, value) {
+			if samePlistValue(param.defaultValue, value) {
 				matchedValues++
 			}
 		}
@@ -2064,19 +2080,6 @@ func glueToChar(glue string) string {
 	default:
 		return glue
 	}
-}
-
-// getDefaultAction gets the default action from a slice of split actions.
-func getDefaultAction(splitActions *[]actionValue) (action actionValue, found bool) {
-	for _, splitAction := range *splitActions {
-		if splitAction.definition.defaultAction {
-			action = splitAction
-			found = true
-			return
-		}
-	}
-
-	return
 }
 
 func printDecompDebug() {

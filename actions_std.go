@@ -512,8 +512,6 @@ var actions = map[string]*actionDefinition{
 		makeParams: func(args []actionArgument) (params map[string]any) {
 			params = make(map[string]any)
 
-			params["WFAskToSaveChanges"] = false
-
 			if args[0].valueType == Variable {
 				params["WFApp"] = argumentValue(args, 0)
 				return
@@ -971,19 +969,17 @@ var actions = map[string]*actionDefinition{
 	},
 	"toggleFocusMode": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
-			var params = map[string]any{
-				"Operation": "Toggle",
-			}
-
 			if len(args) > 0 {
 				// A nil focusMode is left out for the default.
 				var mode, _ = getArgValue(args[0]).(string)
 				if fm, found := focusModes[mode]; found {
-					params["FocusModes"] = fm
+					return map[string]any{
+						"FocusModes": fm,
+					}
 				}
 			}
 
-			return params
+			return map[string]any{}
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			return decompHookArguments(action, decompFocusMode(action))
