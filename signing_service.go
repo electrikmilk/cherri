@@ -43,7 +43,7 @@ func customSigningServer() SigningService {
 		name: "Custom Signing Server URL",
 		url:  args.Value("signing-server"),
 		info: func() string {
-			return ansi(fmt.Sprintf("Signing using %s", args.Value("signing-server")), cyan)
+			return ansi(fmt.Sprintf("Sending to %s", args.Value("signing-server")), cyan)
 		},
 	}
 }
