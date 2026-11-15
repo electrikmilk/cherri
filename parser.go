@@ -1904,7 +1904,7 @@ func warnBareVariableArguments(identifier string, arguments []actionArgument) {
 			continue
 		}
 
-		parserWarning(fmt.Sprintf("A variable is used as a dictionary value in '%s()'. Be sure this action supports variable values there, otherwise use \"{@variable}\" to insert it inline.", identifier))
+		parserWarning(fmt.Sprintf("A variable is used as a dictionary value in '%s()'. Be sure this action supports variable values there, otherwise use \"{@%s}\" to insert it inline.", identifier, identifier))
 		return
 	}
 }
