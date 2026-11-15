@@ -843,8 +843,8 @@ func makeConditionalAction(t *token) {
 		conditionalParams["WFControlFlowMode"] = startStatement
 
 		var cond = t.value.(WFConditions)
-		if len(cond.conditions) == 1 || iosVersion < 18 {
-			legacyConditionParams(makeConditionParam(cond.conditions[0]), conditionalParams)
+		if len(cond.conditions) == 1 {
+			singleConditionParam(makeConditionParam(cond.conditions[0]), conditionalParams)
 		} else {
 			conditionalParams["WFConditions"] = makeConditions(&cond)
 		}
@@ -879,9 +879,9 @@ func routeConditionalValue(param *WFConditionParam, val any, inputType tokenType
 	}
 }
 
-// legacyConditionParams writes a single condition as the flat parameters iOS < 18 uses
+// singleConditionParam writes a single condition as the flat parameters iOS < 18 uses
 // instead of a filter template.
-func legacyConditionParams(param WFConditionParam, params map[string]any) {
+func singleConditionParam(param WFConditionParam, params map[string]any) {
 	params["WFCondition"] = param.WFCondition
 	params["WFInput"] = param.WFInput
 	var optionalValues = map[string]any{
