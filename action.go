@@ -1301,6 +1301,9 @@ func collectParameterDefinitions(keyDefaultsToName bool) (arguments []parameterD
 		var enumeration = collectEnumerationType(&valueType, &quantity, ' ')
 		if enumeration == "" {
 			collectType(&valueType, &value, ' ')
+			if valueType == Nil {
+				parserError("Argument type cannot be nil")
+			}
 		}
 
 		var literal bool
