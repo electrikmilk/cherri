@@ -3,6 +3,12 @@ if upper != "HELLO" {
     mustOutput("❌ FAIL: uppercase — got {upper}, expected 'HELLO'", "❌ FAIL: uppercase — got {upper}, expected 'HELLO'")
 }
 
+// action call as an action argument
+const upperNested = uppercase(text("hello"))
+if upperNested != "HELLO" {
+    mustOutput("❌ FAIL: action call as argument — got {upperNested}, expected 'HELLO'", "❌ FAIL: action call as argument — got {upperNested}, expected 'HELLO'")
+}
+
 const lower = lowercase("HELLO")
 if lower != "hello" {
     mustOutput("❌ FAIL: lowercase — got {lower}, expected 'hello'", "❌ FAIL: lowercase — got {lower}, expected 'hello'")

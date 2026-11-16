@@ -713,7 +713,7 @@ func insertReference(identifier string, valueType tokenType, value any, constant
 
 	variables[identifier] = varValue{
 		variableType: "Variable",
-		valueType:    Variable,
+		valueType:    valueType,
 		value:        value,
 		constant:     constant,
 	}

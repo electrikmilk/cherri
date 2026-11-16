@@ -794,30 +794,34 @@ func makeArrayVariable(t *token) {
 		if value == nil {
 			continue
 		}
+
+		if reference, isReference := value.(varValue); isReference {
+			addStdAction("appendvariable", map[string]any{
+				"WFInput":        variableValue(reference),
+				"WFVariableName": t.ident,
+			})
+			continue
+		}
+
 		var UUID = createUUID(&t.ident)
 		var valueType tokenType
 		var itemIdent string
 
-		if reflect.TypeOf(value).String() == "main.varValue" {
-			valueType = Variable
-			itemIdent = value.(varValue).value.(string)
-		} else {
-			switch reflect.TypeOf(value).Kind() {
-			case reflect.String:
-				valueType = String
-				itemIdent = "Text"
-			case reflect.Int:
-				valueType = Integer
-				itemIdent = "Number"
-			case reflect.Float64:
-				valueType = Float
-				itemIdent = "Float"
-			case reflect.Map:
-				valueType = Dict
-				itemIdent = "Dictionary"
-			default:
-				exit(fmt.Sprintf("Invalid array value '%v' (%s)", value, reflect.TypeOf(value)))
-			}
+		switch reflect.TypeOf(value).Kind() {
+		case reflect.String:
+			valueType = String
+			itemIdent = "Text"
+		case reflect.Int:
+			valueType = Integer
+			itemIdent = "Number"
+		case reflect.Float64:
+			valueType = Float
+			itemIdent = "Float"
+		case reflect.Map:
+			valueType = Dict
+			itemIdent = "Dictionary"
+		default:
+			exit(fmt.Sprintf("Invalid array value '%v' (%s)", value, reflect.TypeOf(value)))
 		}
 
 		makeVariableValueAction(&token{

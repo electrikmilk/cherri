@@ -73,4 +73,11 @@ if bareDictionaryValue.text != "item" {
     mustOutput("❌ FAIL: bare variable in dictionary in array - got {bareDictionaryValue}, expected 'item'", "❌ FAIL: bare variable in dictionary in array - got {bareDictionaryValue}, expected 'item'")
 }
 
+// an action call as an array item references the action output
+@actionItems = ["a", text("b")]
+const actionItem = getLastItem(@actionItems)
+if actionItem.text != "b" {
+    mustOutput("❌ FAIL: action call in array — got {actionItem}, expected 'b'", "❌ FAIL: action call in array — got {actionItem}, expected 'b'")
+}
+
 show("✅ All tests passed")

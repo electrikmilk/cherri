@@ -68,6 +68,13 @@ if !tags {
     mustOutput("❌ FAIL: nested dict array value — tags missing", "❌ FAIL: nested dict array value — tags missing")
 }
 
+// an action call as a dictionary value references the action output
+@actionDict = {"label": text("hello")}
+const actionDictValue = getValue(@actionDict, "label")
+if actionDictValue.text != "hello" {
+    mustOutput("❌ FAIL: action call in dictionary — got {actionDictValue}, expected 'hello'", "❌ FAIL: action call in dictionary — got {actionDictValue}, expected 'hello'")
+}
+
 // getKeys returns :array (has value check works for any type)
 const keys = getKeys(@dict)
 if !keys {
