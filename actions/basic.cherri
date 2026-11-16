@@ -101,6 +101,10 @@ action 'notification' showNotification(
     variable ?attachment: 'WFInput'
 )
 
+// [Doc]: [Notifications] Ask for Input: Ask for input with prompt, with optional inputType and defaultValue.
+action internal 'ask' prompt(text prompt: 'WFAskActionPrompt', inputType ?inputType: 'WFInputType' = "Text", text ?defaultValue, bool ?multiline: 'WFAllowsMultilineText' = true)
+
+
 // [Doc]: [Numbers] Number: Create a number value.
 action number(variable number: 'WFNumberActionNumber'): number
 
@@ -184,8 +188,11 @@ action 'getitemfromlist' getListItems(variable list: 'WFInput', number start: 'W
 	"WFItemSpecifier": "Items in Range"
 }
 
-// [Doc]: [Notifications] Ask for Input: Ask for input with prompt, with optional inputType and defaultValue.
-action internal 'ask' prompt(text prompt: 'WFAskActionPrompt', inputType ?inputType: 'WFInputType' = "Text", text ?defaultValue, bool ?multiline: 'WFAllowsMultilineText' = true)
-
 // [Doc]: [Lists] List: Create an immutable array of text.
 action internal list(text ...listItem): array
+
+// [Doc]: [Shortcuts] Run Shortcut: Run Shortcut with name `shortcutName`, providing it with `input`.
+action 'runworkflow' run(text shortcutName: 'WFWorkflowName', variable input: 'WFInput')
+
+// [Doc]: [Shortcuts] Run Self: Run the current Shortcut with optional output.
+action internal 'runworkflow' runSelf(variable output: 'WFInput')

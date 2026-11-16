@@ -32,14 +32,8 @@ action v16.4 #Shortcuts.SearchShortcutsAction searchShortcuts(text query: 'searc
 // [Doc]: Make Shortcut: Create a shortcut.
 action v16.4 #Shortcuts.CreateWorkflowAction makeShortcut(text name, bool ?open: 'OpenWhenRun' = true)
 
-// [Doc]: Run Shortcut: Run Shortcut with name `shortcutName`, providing it with `input`.
-action 'runworkflow' run(text shortcutName: 'WFWorkflowName', variable input: 'WFInput')
-
 // [Doc]: Create Shortcut Link: Create an iCloud link to a Shortcut.
 action #Shortcuts.CreateShortcutiCloudLinkAction createShortcutLink(variable shortcut)
 
 // [Doc]: Open Shortcut: Open a shortcut in the Shortcuts app.
 action internal #Shortcuts.OpenWorkflowAction openShortcut(text shortcutName)
-
-// [Doc]: Run Self: Run the current Shortcut with optional output.
-action internal 'runworkflow' runSelf(variable output: 'WFInput')
