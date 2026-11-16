@@ -320,27 +320,6 @@ func deleteLastToken() {
 	tokens = tokens[:len(tokens)-1]
 }
 
-func collectUntilIgnoreStrings(ch rune) string {
-	var collected strings.Builder
-	var insideString = false
-	for char != -1 {
-		if char == ch && !insideString {
-			break
-		}
-		if char == '"' {
-			if insideString {
-				insideString = prev(1) == '\\'
-			} else {
-				insideString = true
-			}
-		}
-		collected.WriteRune(char)
-		advance()
-	}
-
-	return strings.Trim(collected.String(), " ")
-}
-
 // collectUntil advances ahead until the current character is `ch`,
 // This should be used in cases where we are unsure how many characters
 // will occur before we reach this character.
