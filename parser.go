@@ -14,6 +14,7 @@ import (
 	"unicode"
 
 	"github.com/electrikmilk/args-parser"
+	"github.com/google/uuid"
 )
 
 var idx int
@@ -718,6 +719,22 @@ func insertReference(identifier string, valueType tokenType, value any, constant
 	}
 }
 
+// Inserts action value as a reference and converts value to a reference to that call.
+func convertActionCallToReference(valueType *tokenType, value *any) {
+	var actionValue = *value
+
+	var actionArgumentIdentifier = fmt.Sprintf("%s-%s", actionValue.(action).ident, uuid.New().String())
+	insertReference(actionArgumentIdentifier, *valueType, *value, true)
+
+	*valueType = Variable
+	*value = varValue{
+		variableType: "Variable",
+		valueType:    Variable,
+		value:        actionArgumentIdentifier,
+		constant:     true,
+	}
+}
+
 func collectEnumeration() {
 	var lineRef = newLineReference()
 
@@ -810,7 +827,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	var value any
 	collectValue(&valueType, &value, endOfNextItem(')'))
 	if valueType == Action {
-		actionCallNotAllowedError()
+		convertActionCallToReference(&valueType, &value)
 	}
 
 	skipWhitespace()
@@ -1696,7 +1713,7 @@ func collectArray() (array []any) {
 		var value any
 		collectValue(&valueType, &value, endOfNextItem(']'))
 		if valueType == Action {
-			actionCallNotAllowedError()
+			convertActionCallToReference(&valueType, &value)
 		}
 
 		array = append(array, value)
@@ -1770,7 +1787,7 @@ func collectDictionaryItem() (key string, value any) {
 	var valueType tokenType
 	collectValue(&valueType, &value, endOfNextItem('}'))
 	if valueType == Action {
-		actionCallNotAllowedError()
+		convertActionCallToReference(&valueType, &value)
 	}
 	if valueType == Variable {
 		if currentAction.identifier != "" && currentAction.identifier != "formRequest" && currentAction.identifier != "rawAction" {
@@ -1779,10 +1796,6 @@ func collectDictionaryItem() (key string, value any) {
 	}
 
 	return
-}
-
-func actionCallNotAllowedError() {
-	parserError("Action call not allowed here")
 }
 
 func collectObject() string {
