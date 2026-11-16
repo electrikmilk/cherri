@@ -34,4 +34,34 @@ if @rand > 10 {
     mustOutput("❌ FAIL: randomNumber max — got {@rand}, expected <= 10", "❌ FAIL: randomNumber max — got {@rand}, expected <= 10")
 }
 
+// The decompiler emits fixed-point literals, including a decimal point for whole floats.
+@numericInput = 1
+if @numericInput >= 0.5 {
+} else {
+    mustOutput("❌ FAIL: decimal condition", "❌ FAIL: decimal condition")
+}
+
+const smallDecimal = 0.000001
+const scaledSmallDecimal = smallDecimal * 1000000
+if scaledSmallDecimal != 1 {
+    mustOutput("❌ FAIL: small decimal", "❌ FAIL: small decimal")
+}
+
+const largeDecimal = 123456789.5
+const doubledLargeDecimal = largeDecimal * 2
+if doubledLargeDecimal != 246913579 {
+    mustOutput("❌ FAIL: large decimal", "❌ FAIL: large decimal")
+}
+
+const wholeDecimal = 1.0
+const scaledWholeDecimal = wholeDecimal * 10
+if scaledWholeDecimal != 10 {
+    mustOutput("❌ FAIL: whole float", "❌ FAIL: whole float")
+}
+
+const decimalSum = 0.000001 + 3000000.0
+if decimalSum <= 3000000.0 || decimalSum >= 3000000.000002 {
+    mustOutput("❌ FAIL: decimal math operands", "❌ FAIL: decimal math operands")
+}
+
 show("✅ All tests passed")
