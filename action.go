@@ -437,14 +437,10 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		if argValueType == Float && param.validType == Integer {
 			return
 		}
-		if argValueType == String {
-			argVal = "\"" + argVal.(string) + "\""
-		}
-		parserError(fmt.Sprintf("Invalid value %v (%s) for argument '%s' (%s).\n%s",
-			argVal,
+		parserError(fmt.Sprintf("Invalid value of %s for %s argument '%s'.\n%s",
 			argValueType,
-			param.name,
 			param.validType,
+			param.name,
 			generateActionDefinition(*param, false),
 		))
 	}
