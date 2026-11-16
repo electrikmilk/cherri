@@ -594,6 +594,7 @@ func collectActionValue(valueType *tokenType, value *any) {
 	}
 
 	*value = collectAction(&identifier)
+	clearCurrentAction()
 }
 
 var checkInlineVarRegex = regexp.MustCompile(`\{(.*?)(?:\['(.*?)'])?(?:\.(.*?))?}`)
@@ -1863,6 +1864,7 @@ func collectActionCall() {
 		value:     value,
 	})
 	actionIndex++
+	clearCurrentAction()
 }
 
 func collectAction(identifier *string) (value action) {

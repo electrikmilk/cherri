@@ -161,6 +161,12 @@ func setCurrentAction(identifier string, definition *actionDefinition) {
 	currentAction.definition = *definition
 }
 
+func clearCurrentAction() {
+	currentAction.identifier = ""
+	currentAction.definition = actionDefinition{}
+	currentAction.arguments = []actionArgument{}
+}
+
 func saveCurrentAction() {
 	savedAction = currentAction
 }
