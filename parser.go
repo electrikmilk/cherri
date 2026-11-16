@@ -809,6 +809,9 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	var valueType tokenType
 	var value any
 	collectValue(&valueType, &value, endOfNextItem(')'))
+	if valueType == Action {
+		actionCallNotAllowedError()
+	}
 
 	skipWhitespace()
 
