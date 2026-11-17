@@ -1,0 +1,26 @@
+// compile-only: the plist output is asserted by TestGlobalVariableEncoding in cherri_test.go.
+//
+// Built-in globals (ShortcutInput, Clipboard, CurrentDate, Device, Ask) are identified by
+// Type alone in native Shortcuts plists. A VariableName makes Shortcuts read them as a
+// reference to a missing user-defined variable, so the global's value never reaches the
+// action. Covers each place that encodes a variable reference: a Variable-typed action
+// argument, a conditional's input value, and an inline interpolation.
+//
+// No #include needed here — the full test suite auto-injects every standard library category.
+
+// Variable-typed action argument
+setName(ShortcutInput, "Test")
+wait(Ask)
+
+// Conditional input value
+if ShortcutInput {
+    nothing()
+}
+if Clipboard {
+    nothing()
+}
+
+// Inline interpolation
+text("Clipboard was: {Clipboard}, date: {CurrentDate}, device: {Device}")
+
+show("✅ All tests passed")

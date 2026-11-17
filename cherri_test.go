@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -201,6 +202,66 @@ func TestActionIdentifiers(t *testing.T) {
 	}
 
 	resetParser()
+}
+
+// TestGlobalVariableEncoding checks the generated plist directly because the compile-only test
+// file compiles on main too. Native Shortcuts identifies built-in globals by Type alone; a
+// VariableName on them is read as a reference to a missing user-defined variable.
+func TestGlobalVariableEncoding(t *testing.T) {
+	defer resetParser()
+	args.Args["no-ansi"] = ""
+	args.Args["skip-sign"] = ""
+	loadStandardActions()
+
+	currentTest = "tests/global-variable-encoding.cherri"
+	os.Args[1] = currentTest
+
+	compile()
+
+	var jsonBytes, marshalErr = json.Marshal(shortcut.WFWorkflowActions)
+	if marshalErr != nil {
+		t.Fatal(marshalErr)
+	}
+	var actions any
+	if unmarshalErr := json.Unmarshal(jsonBytes, &actions); unmarshalErr != nil {
+		t.Fatal(unmarshalErr)
+	}
+
+	var globalTypes = map[string]bool{
+		"ExtensionInput": true,
+		"Clipboard":      true,
+		"CurrentDate":    true,
+		"DeviceDetails":  true,
+		"Ask":            true,
+	}
+	var seen = map[string]int{}
+	var walk func(node any)
+	walk = func(node any) {
+		switch typed := node.(type) {
+		case map[string]any:
+			if typeName, isType := typed["Type"].(string); isType && globalTypes[typeName] {
+				seen[typeName]++
+				if name, hasName := typed["VariableName"].(string); hasName && name != "" {
+					t.Errorf("global of Type %s carries VariableName %q", typeName, name)
+				}
+			}
+			for _, child := range typed {
+				walk(child)
+			}
+		case []any:
+			for _, child := range typed {
+				walk(child)
+			}
+		}
+	}
+	walk(actions)
+
+	// Guards against a vacuous pass if the test file stops referencing a global.
+	for typeName := range globalTypes {
+		if seen[typeName] == 0 {
+			t.Errorf("test file never encoded a global of Type %s", typeName)
+		}
+	}
 }
 
 func TestCapitalizeEmptyString(t *testing.T) {
