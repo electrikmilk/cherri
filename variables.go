@@ -230,6 +230,17 @@ func checkDuplicateOutputName(name string) string {
 	return currentOutputName
 }
 
+func checkDuplicateReferenceName(name string) string {
+	if name != currentOutputName {
+		currentOutputName = name
+	}
+	if _, found := variables[name]; found {
+		return checkDuplicateOutputName(duplicateOutputName())
+	}
+
+	return currentOutputName
+}
+
 func duplicateOutputName() string {
 	duplicateDelta++
 

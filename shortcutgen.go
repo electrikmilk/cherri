@@ -780,7 +780,7 @@ func makeOutputName(token *token) string {
 		typeOfToken = token.ident
 	}
 
-	var customOutputName = fmt.Sprintf("%s%s", strings.ToTitle(string(typeOfToken[0])), typeOfToken[1:])
+	var customOutputName = capitalize(typeOfToken)
 
 	return checkDuplicateOutputName(customOutputName)
 }

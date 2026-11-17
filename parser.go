@@ -14,7 +14,6 @@ import (
 	"unicode"
 
 	"github.com/electrikmilk/args-parser"
-	"github.com/google/uuid"
 )
 
 var idx int
@@ -723,16 +722,22 @@ func insertReference(identifier string, valueType tokenType, value any, constant
 func convertActionCallToReference(valueType *tokenType, value *any) {
 	var actionValue = *value
 
-	var actionArgumentIdentifier = fmt.Sprintf("%s-%s", actionValue.(action).ident, uuid.New().String())
-	insertReference(actionArgumentIdentifier, *valueType, *value, true)
+	var inlineActionIdentifier = makeInlineActionName(actionValue.(action))
+	insertReference(inlineActionIdentifier, *valueType, *value, true)
 
 	*valueType = Variable
 	*value = varValue{
 		variableType: "Variable",
 		valueType:    Variable,
-		value:        actionArgumentIdentifier,
+		value:        inlineActionIdentifier,
 		constant:     true,
 	}
+}
+
+func makeInlineActionName(action action) string {
+	var customOutputName = capitalize(action.ident)
+
+	return checkDuplicateReferenceName(customOutputName)
 }
 
 func collectEnumeration() {
