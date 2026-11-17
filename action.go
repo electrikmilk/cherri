@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"maps"
 	"math"
-	"reflect"
 	"regexp"
 	"slices"
 	"strconv"
@@ -362,7 +361,8 @@ func getEnum(identifier string) []string {
 // checkEnum checks an argument value against a string slice.
 func checkEnum(param *parameterDefinition, argument *actionArgument) {
 	var value = getArgValue(*argument)
-	if value == nil || reflect.TypeOf(value).Kind() != reflect.String || argument.valueType == Question {
+	var stringValue, isString = value.(string)
+	if !isString || argument.valueType == Question {
 		return
 	}
 	if enumerations[param.enum] == nil {
@@ -371,7 +371,7 @@ func checkEnum(param *parameterDefinition, argument *actionArgument) {
 	if argument.valueType == Variable {
 		return
 	}
-	if !slices.Contains(enumerations[param.enum], value.(string)) {
+	if !slices.Contains(enumerations[param.enum], stringValue) {
 		parserError(
 			fmt.Sprintf(
 				"Invalid value '%s' for argument '%s'.\n\n%s",
@@ -765,8 +765,8 @@ func generateActionParamDefinition(param parameterDefinition) string {
 			defaultValue = fmt.Sprintf("qty(%d, \"%s\")", qtyArgs[0].value, qtyArgs[1].value)
 		} else if param.validType == Color {
 			defaultValue = formatColorDefault(param.defaultValue.([]actionArgument))
-		} else if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
-			defaultValue = fmt.Sprintf("\"%v\"", strings.Replace(param.defaultValue.(string), "\n", "\\n", 1))
+		} else if stringValue, isString := param.defaultValue.(string); isString {
+			defaultValue = fmt.Sprintf("\"%v\"", strings.Replace(stringValue, "\n", "\\n", 1))
 		} else {
 			defaultValue = fmt.Sprintf("%v", param.defaultValue)
 		}

@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"maps"
 	"os"
-	"reflect"
 	"regexp"
 	"slices"
 	"sort"
@@ -151,11 +150,10 @@ func insertCodeComment(comment string) {
 
 func checkParamIdentifiers(params map[string]interface{}) {
 	for _, value := range params {
-		if value == nil || reflect.TypeOf(value).Kind() != reflect.Map {
+		var paramValues, isMap = value.(map[string]interface{})
+		if !isMap {
 			continue
 		}
-
-		var paramValues = value.(map[string]interface{})
 		checkParamValueAttachments(paramValues)
 
 		if _, found := paramValues["Variable"]; found {
@@ -178,11 +176,10 @@ func checkParamIdentifiers(params map[string]interface{}) {
 
 // checkParamValueAttachments checks for attachments on values to map them.
 func checkParamValueAttachments(param map[string]interface{}) {
-	if param["Value"] == nil || reflect.TypeOf(param["Value"]).Kind() != reflect.Map {
+	var paramValue, isMap = param["Value"].(map[string]interface{})
+	if !isMap {
 		return
 	}
-
-	var paramValue = param["Value"].(map[string]interface{})
 
 	var inputValue Value
 	mapToStruct(paramValue, &inputValue)
@@ -199,10 +196,10 @@ func checkParamValueAttachments(param map[string]interface{}) {
 
 func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 	for _, item := range items {
-		if item.WFValue == nil || reflect.TypeOf(item.WFValue).Kind() != reflect.Map {
+		var wfValue, isMap = item.WFValue.(map[string]interface{})
+		if !isMap {
 			continue
 		}
-		var wfValue = item.WFValue.(map[string]interface{})
 		if wfValue["Value"] == nil {
 			continue
 		}
@@ -215,18 +212,15 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 
 		checkParamValueAttachments(wfValue)
 
-		var valueKind = reflect.TypeOf(wfValue["Value"]).Kind()
-		if valueKind == reflect.Map {
-			var valueTwo = wfValue["Value"].(map[string]interface{})
-			if valueTwo != nil && valueTwo["Value"] != nil && reflect.TypeOf(valueTwo["Value"]).Kind() == reflect.Map {
-				var itemsValue = valueTwo["Value"].(map[string]interface{})
-
+		switch valueTwo := wfValue["Value"].(type) {
+		case map[string]interface{}:
+			if itemsValue, isMap := valueTwo["Value"].(map[string]interface{}); isMap {
 				var dictionaryItems []WFDictionaryFieldValueItem
 				mapToStruct(itemsValue["WFDictionaryFieldValueItems"], &dictionaryItems)
 				mapDictionaryValueIdentifiers(dictionaryItems)
 			}
-		} else if valueKind == reflect.Slice {
-			var dictionaryItems = mapDictionaryItems(wfValue["Value"].([]interface{}))
+		case []interface{}:
+			var dictionaryItems = mapDictionaryItems(valueTwo)
 			mapDictionaryValueIdentifiers(dictionaryItems)
 		}
 	}
@@ -234,7 +228,7 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 
 func mapDictionaryItems(items []interface{}) (dictionaryItems []WFDictionaryFieldValueItem) {
 	for _, value := range items {
-		if reflect.TypeOf(value).Kind() != reflect.Map {
+		if _, isMap := value.(map[string]interface{}); !isMap {
 			continue
 		}
 
@@ -500,8 +494,7 @@ func decompTextValue(action *ShortcutAction) {
 
 func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 	var value = action.WFWorkflowActionParameters["WFNumberActionNumber"]
-	if reflect.TypeOf(value).Kind() == reflect.Map {
-		var mapValue = value.(map[string]interface{})
+	if mapValue, isMap := value.(map[string]interface{}); isMap {
 		var Value = mapValue["Value"].(map[string]interface{})
 		value = decompValue(value)
 
@@ -519,13 +512,13 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 
 	var number any
 	var convErr error
-	if reflect.TypeOf(value).Kind() == reflect.String {
-		if strings.Contains(value.(string), ".") {
-			number, convErr = strconv.ParseFloat(value.(string), 64)
-		} else if strings.Contains(value.(string), ",") {
-			number, convErr = strconv.ParseFloat(strings.Replace(value.(string), ",", ".", 1), 64)
-		} else if value != "" {
-			number, convErr = strconv.Atoi(value.(string))
+	if stringValue, isString := value.(string); isString {
+		if strings.Contains(stringValue, ".") {
+			number, convErr = strconv.ParseFloat(stringValue, 64)
+		} else if strings.Contains(stringValue, ",") {
+			number, convErr = strconv.ParseFloat(strings.Replace(stringValue, ",", ".", 1), 64)
+		} else if stringValue != "" {
+			number, convErr = strconv.Atoi(stringValue)
 		}
 		handle(convErr)
 	} else {
@@ -609,9 +602,9 @@ func decompDictionaryGetValue(action *ShortcutAction) {
 
 	if action.WFWorkflowActionParameters["WFDictionaryKey"] != nil {
 		dictionaryValueRef.WriteRune('[')
-		if reflect.TypeOf(action.WFWorkflowActionParameters["WFDictionaryKey"]).Kind() == reflect.String {
+		if keyValue, isString := action.WFWorkflowActionParameters["WFDictionaryKey"].(string); isString {
 			dictionaryValueRef.WriteRune('\'')
-			dictionaryValueRef.WriteString(action.WFWorkflowActionParameters["WFDictionaryKey"].(string))
+			dictionaryValueRef.WriteString(keyValue)
 			dictionaryValueRef.WriteRune('\'')
 		} else {
 			dictionaryValueRef.WriteString(decompValue(action.WFWorkflowActionParameters["WFDictionaryKey"]))
@@ -799,8 +792,8 @@ func decompCondition(condition map[string]interface{}, action *ShortcutAction) {
 	code.WriteString(fmt.Sprintf(" %s ", conditionalOperator))
 
 	if condition["WFNumberValue"] != nil && condition["WFNumberValue"] != "" {
-		if reflect.TypeOf(condition["WFNumberValue"]).Kind() == reflect.String {
-			var numberValue, convErr = strconv.Atoi(condition["WFNumberValue"].(string))
+		if stringValue, isString := condition["WFNumberValue"].(string); isString {
+			var numberValue, convErr = strconv.Atoi(stringValue)
 			handle(convErr)
 			code.WriteString(decompValue(numberValue))
 		} else {
@@ -855,11 +848,7 @@ func (reference bareReference) MarshalJSON() ([]byte, error) {
 }
 
 func isReferenceValue(value any) bool {
-	if value == nil {
-		return false
-	}
-	if reflect.TypeOf(value).Kind() == reflect.Map {
-		var mapValue = value.(map[string]interface{})
+	if mapValue, isMap := value.(map[string]interface{}); isMap {
 		if mapValue["Value"] != nil && mapValue["WFSerializationType"] == "WFTextTokenAttachment" {
 			return true
 		}
@@ -923,9 +912,9 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 
 func decompArray(items []interface{}) (array []interface{}) {
 	for _, item := range items {
-		if reflect.TypeOf(item).Kind() == reflect.Map {
+		if itemMap, isMap := item.(map[string]interface{}); isMap {
 			var fieldValueItem WFDictionaryFieldValueItem
-			mapToStruct(item, &fieldValueItem)
+			mapToStruct(itemMap, &fieldValueItem)
 			array = append(array, decompDictionaryItem(fieldValueItem))
 			continue
 		}
@@ -940,12 +929,11 @@ func decompValue(value any) string {
 		return "nil"
 	}
 
-	var valueType = reflect.TypeOf(value).Kind()
-	switch valueType {
-	case reflect.Map:
-		return decompValueObject(value.(map[string]interface{}))
-	case reflect.String:
-		return fmt.Sprintf("\"%s\"", escapeString(value.(string)))
+	switch typed := value.(type) {
+	case map[string]interface{}:
+		return decompValueObject(typed)
+	case string:
+		return fmt.Sprintf("\"%s\"", escapeString(typed))
 	default:
 		return fmt.Sprintf("%v", value)
 	}
@@ -967,8 +955,8 @@ func escapeString(value string) string {
 
 func decompValueObject(value map[string]interface{}) string {
 	if v, found := value["Value"]; found {
-		if reflect.TypeOf(v).Kind() == reflect.Map {
-			value = v.(map[string]interface{})
+		if nested, isMap := v.(map[string]interface{}); isMap {
+			value = nested
 		}
 	}
 
@@ -1014,19 +1002,18 @@ func decompValueObject(value map[string]interface{}) string {
 }
 
 func decompObjectValue(valueObj any) string {
-	var valueType = reflect.TypeOf(valueObj).Kind()
-	if valueType != reflect.Map {
+	var value, isMap = valueObj.(map[string]interface{})
+	if !isMap {
 		return fmt.Sprintf("%v", valueObj)
 	}
 
-	var value = valueObj.(map[string]interface{})
-
 	var attachmentString string
 	if value["Value"] != nil {
-		if reflect.TypeOf(value["Value"]).Kind() != reflect.Map {
+		var nested, isNestedMap = value["Value"].(map[string]interface{})
+		if !isNestedMap {
 			return fmt.Sprintf("%v", valueObj)
 		}
-		value = value["Value"].(map[string]interface{})
+		value = nested
 	}
 
 	if _, found := value["string"]; found {
@@ -1267,8 +1254,8 @@ func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actio
 
 func makeDefaultValue(param parameterDefinition) string {
 	if param.defaultValue != nil {
-		if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
-			return fmt.Sprintf("\"%s\"", param.defaultValue)
+		if stringValue, isString := param.defaultValue.(string); isString {
+			return fmt.Sprintf("\"%s\"", stringValue)
 		}
 
 		return fmt.Sprintf("%v", param.defaultValue)
@@ -1321,9 +1308,9 @@ func processRawParameters(params map[string]any) map[string]any {
 			delete(params, key)
 		}
 
-		if reflect.TypeOf(value).Kind() == reflect.Map {
+		if valueMap, isMap := value.(map[string]interface{}); isMap {
 			decompilingDictionary = true
-			params[key] = decompValueObject(value.(map[string]interface{}))
+			params[key] = decompValueObject(valueMap)
 			decompilingDictionary = false
 		}
 	}
@@ -1517,10 +1504,10 @@ func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameter
 		if value, found := parameters[param.key]; found {
 			matchedParams++
 
-			var defaultValueType = reflect.TypeOf(param.defaultValue).Kind()
-			var valueType = reflect.TypeOf(value).Kind()
-			if defaultValueType == reflect.Map && valueType == reflect.Map {
-				if maps.Equal(param.defaultValue.(map[string]interface{}), value.(map[string]interface{})) {
+			var defaultValueMap, defaultValueIsMap = param.defaultValue.(map[string]interface{})
+			var valueMap, valueIsMap = value.(map[string]interface{})
+			if defaultValueIsMap && valueIsMap {
+				if maps.Equal(defaultValueMap, valueMap) {
 					matchedValues++
 				}
 			} else if param.defaultValue == value {

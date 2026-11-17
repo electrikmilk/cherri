@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/electrikmilk/args-parser"
 	"howett.net/plist"
@@ -51,10 +50,10 @@ func extractParameterReferences(index int, identifier string, params map[string]
 			action: identifier,
 			index:  index + 1,
 		}
-		if value == nil || reflect.TypeOf(value).Kind() != reflect.Map {
+		var valueMap, isMap = value.(map[string]interface{})
+		if !isMap {
 			continue
 		}
-		var valueMap = value.(map[string]interface{})
 		if valueMap["fileLocation"] != nil {
 			ref.value = extractFileReference(&ref, valueMap)
 		}

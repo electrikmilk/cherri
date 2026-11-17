@@ -21,7 +21,6 @@ package main
 
 import (
 	"fmt"
-	"reflect"
 	"regexp"
 	"strings"
 
@@ -214,8 +213,8 @@ func handleFunctionArguments(functionsHeader *strings.Builder, identifier string
 
 		if param.defaultValue != nil {
 			var defaultValue = param.defaultValue
-			if reflect.TypeOf(param.defaultValue).Kind() == reflect.String {
-				defaultValue = fmt.Sprintf("\"%s\"", defaultValue)
+			if stringValue, isString := param.defaultValue.(string); isString {
+				defaultValue = fmt.Sprintf("\"%s\"", stringValue)
 			}
 
 			functionsHeader.WriteString(fmt.Sprintf("                if !%s {\n", argumentReference))

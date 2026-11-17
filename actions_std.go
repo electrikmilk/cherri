@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
-	"reflect"
 	"regexp"
 	"slices"
 	"strings"
@@ -533,8 +532,8 @@ var actions = map[string]*actionDefinition{
 			var listItems = action.WFWorkflowActionParameters["WFItems"].([]interface{})
 			for _, item := range listItems {
 				var itemValue = item
-				if reflect.TypeOf(item).String() != "string" {
-					itemValue = item.(map[string]interface{})["WFValue"]
+				if itemMap, isMap := item.(map[string]interface{}); isMap {
+					itemValue = itemMap["WFValue"]
 				}
 				arguments = append(arguments, decompValue(itemValue))
 			}
@@ -602,12 +601,11 @@ var actions = map[string]*actionDefinition{
 	},
 	"convertMeasurement": {
 		check: func(args []actionArgument, _ *actionDefinition) {
-			var value = getArgValue(args[1])
-			if reflect.TypeOf(value).Kind() != reflect.String {
+			var unitType, isString = getArgValue(args[1]).(string)
+			if !isString {
 				return
 			}
 
-			var unitType = value.(string)
 			checkEnum(&parameterDefinition{
 				name: "measurement unit",
 				enum: unitType,
@@ -645,12 +643,11 @@ var actions = map[string]*actionDefinition{
 	},
 	"measurement": {
 		check: func(args []actionArgument, _ *actionDefinition) {
-			var value = getArgValue(args[1])
-			if reflect.TypeOf(value).String() != "string" {
+			var unitType, isString = getArgValue(args[1]).(string)
+			if !isString {
 				return
 			}
 
-			var unitType = value.(string)
 			checkEnum(&parameterDefinition{
 				name: fmt.Sprintf("%s unit", unitType),
 				enum: unitType,
@@ -720,11 +717,11 @@ var actions = map[string]*actionDefinition{
 
 			if len(args) > 2 {
 				var photo string
-				var image = getArgValue(args[2])
-				if reflect.TypeOf(image).Kind() != reflect.String && args[2].valueType == Variable {
+				var imageValue, isString = getArgValue(args[2]).(string)
+				if !isString && args[2].valueType == Variable {
 					photo = fmt.Sprintf("{%s}", makeVariableReferenceString(args[2].value.(varValue)))
 				} else {
-					photo = getArgValue(args[2]).(string)
+					photo = imageValue
 				}
 
 				if photo != "" {
@@ -757,11 +754,11 @@ var actions = map[string]*actionDefinition{
 			},
 		},
 		check: func(args []actionArgument, _ *actionDefinition) {
-			var file = getArgValue(args[0])
-			if args[0].valueType == Variable && reflect.TypeOf(file).Kind() != reflect.String {
+			var file, isString = getArgValue(args[0]).(string)
+			if args[0].valueType == Variable && !isString {
 				parserError("File path must be a string literal")
 			}
-			if _, err := os.Stat(file.(string)); os.IsNotExist(err) {
+			if _, err := os.Stat(file); os.IsNotExist(err) {
 				parserError(fmt.Sprintf("File '%s' does not exist!", file))
 			}
 		},
@@ -1292,38 +1289,40 @@ func appendSetMultitaskingModeParam(title, identifier, symbol string) map[string
 }
 
 func decompAppAction(key string, action *ShortcutAction) (arguments []string) {
-	if action.WFWorkflowActionParameters[key] != nil {
-		switch reflect.TypeOf(action.WFWorkflowActionParameters[key]).Kind() {
-		case reflect.String:
-			return append(arguments, decompValue(action.WFWorkflowActionParameters[key]))
-		case reflect.Map:
-			for key, bundle := range action.WFWorkflowActionParameters[key].(map[string]interface{}) {
-				if key == "BundleIdentifier" {
-					arguments = append(arguments, fmt.Sprintf("\"%s\"", bundle))
-				}
+	var value = action.WFWorkflowActionParameters[key]
+	if value == nil {
+		return
+	}
+	switch typed := value.(type) {
+	case string:
+		return append(arguments, decompValue(typed))
+	case map[string]interface{}:
+		for k, bundle := range typed {
+			if k == "BundleIdentifier" {
+				arguments = append(arguments, fmt.Sprintf("\"%s\"", bundle))
 			}
-		case reflect.Array:
-			for _, app := range action.WFWorkflowActionParameters[key].([]interface{}) {
-				var bundleIdentifer = app.(map[string]interface{})["BundleIdentifier"]
-				arguments = append(arguments, fmt.Sprintf("\"%s\"", bundleIdentifer))
-			}
-		default:
-			decompError("Unknown app value type", action)
 		}
+	case []interface{}:
+		for _, app := range typed {
+			var bundleIdentifer = app.(map[string]interface{})["BundleIdentifier"]
+			arguments = append(arguments, fmt.Sprintf("\"%s\"", bundleIdentifer))
+		}
+	default:
+		decompError("Unknown app value type", action)
 	}
 
 	return
 }
 
 func decompInfiniteURLAction(action *ShortcutAction) (arguments []string) {
-	var urlValueType = reflect.TypeOf(action.WFWorkflowActionParameters["WFURLActionURL"]).Kind()
-	if urlValueType == reflect.Map || urlValueType == reflect.String {
-		return append(arguments, decompValue(action.WFWorkflowActionParameters["WFURLActionURL"]))
-	}
-
-	var urls = action.WFWorkflowActionParameters["WFURLActionURL"].([]interface{})
-	for _, url := range urls {
-		arguments = append(arguments, decompValue(url))
+	var value = action.WFWorkflowActionParameters["WFURLActionURL"]
+	switch typed := value.(type) {
+	case map[string]interface{}, string:
+		return append(arguments, decompValue(value))
+	case []interface{}:
+		for _, url := range typed {
+			arguments = append(arguments, decompValue(url))
+		}
 	}
 
 	return

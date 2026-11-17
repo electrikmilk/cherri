@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"reflect"
 	"regexp"
 	"sort"
 	"strings"
@@ -807,21 +806,21 @@ func makeArrayVariable(t *token) {
 		var valueType tokenType
 		var itemIdent string
 
-		switch reflect.TypeOf(value).Kind() {
-		case reflect.String:
+		switch value.(type) {
+		case string:
 			valueType = String
 			itemIdent = "Text"
-		case reflect.Int:
+		case int:
 			valueType = Integer
 			itemIdent = "Number"
-		case reflect.Float64:
+		case float64:
 			valueType = Float
 			itemIdent = "Float"
-		case reflect.Map:
+		case map[string]interface{}:
 			valueType = Dict
 			itemIdent = "Dictionary"
 		default:
-			exit(fmt.Sprintf("Invalid array value '%v' (%s)", value, reflect.TypeOf(value)))
+			exit(fmt.Sprintf("Invalid array value '%v' (%T)", value, value))
 		}
 
 		makeVariableValueAction(&token{
