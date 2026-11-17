@@ -57,11 +57,14 @@ func sign() {
 }
 
 func removeUnsigned() {
-	var _, signedStatErr = os.Stat(fmt.Sprintf("%s%s.shortcut", relativePath, workflowName))
+	if outputPath == inputPath {
+		return
+	}
+	var _, signedStatErr = os.Stat(outputPath)
 	if os.IsNotExist(signedStatErr) {
 		return
 	}
-	var _, unsignedStatErr = os.Stat(fmt.Sprintf("%s%s%s", relativePath, workflowName, unsignedEnd))
+	var _, unsignedStatErr = os.Stat(inputPath)
 	if os.IsNotExist(unsignedStatErr) {
 		return
 	}
