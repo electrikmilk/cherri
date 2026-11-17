@@ -719,7 +719,7 @@ func insertReference(identifier string, valueType tokenType, value any, constant
 }
 
 // Inserts action value as a reference and converts value to a reference to that call.
-func convertActionCallToReference(valueType *tokenType, value *any) {
+func actionCallToReference(valueType *tokenType, value *any) {
 	var actionValue = *value
 
 	var inlineActionIdentifier = makeInlineActionName(actionValue.(action))
@@ -832,7 +832,7 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	var value any
 	collectValue(&valueType, &value, endOfNextItem(')'))
 	if valueType == Action {
-		convertActionCallToReference(&valueType, &value)
+		actionCallToReference(&valueType, &value)
 	}
 
 	skipWhitespace()
@@ -1718,7 +1718,7 @@ func collectArray() (array []any) {
 		var value any
 		collectValue(&valueType, &value, endOfNextItem(']'))
 		if valueType == Action {
-			convertActionCallToReference(&valueType, &value)
+			actionCallToReference(&valueType, &value)
 		}
 
 		array = append(array, value)
@@ -1792,7 +1792,7 @@ func collectDictionaryItem() (key string, value any) {
 	var valueType tokenType
 	collectValue(&valueType, &value, endOfNextItem('}'))
 	if valueType == Action {
-		convertActionCallToReference(&valueType, &value)
+		actionCallToReference(&valueType, &value)
 	}
 	if valueType == Variable {
 		if currentAction.identifier != "" && currentAction.identifier != "formRequest" && currentAction.identifier != "rawAction" {
