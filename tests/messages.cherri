@@ -1,0 +1,28 @@
+// compile-only: these Messages actions act on real conversations, so there is nothing to assert on.
+#define version 27
+
+const convo = text("conversation")
+
+// Each Tapback is stored as a numeric code, and the message is written under two keys.
+tapbackMessage("Question", convo)
+tapbackMessage("Emphasize", convo)
+tapbackMessage("Laugh At", convo)
+tapbackMessage("Dislike", convo)
+tapbackMessage("Like", convo)
+tapbackMessage("Love", convo)
+tapbackMessage(Ask, convo)
+
+// Untouched options are not written, so a bare action has no state or toggle keys.
+markMessageRead(convo)
+markMessageRead(convo, true)
+markMessageRead(convo, true, false)
+
+openMessagesInbox("Messages")
+openMessagesInbox("Unknown Senders")
+openMessagesInbox("Spam")
+openMessagesInbox("Recently Deleted")
+openMessagesInbox("Unread")
+openMessagesInbox("Drafts")
+openMessagesInbox("Send Later")
+
+show("✅ All tests passed")
