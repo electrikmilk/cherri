@@ -103,16 +103,15 @@ func mapIdentifiers() {
 			if params["WFInput"] == nil {
 				continue
 			}
-			var wfInput WFInput
-			decompMapToStruct(params["WFInput"], &wfInput, "WFInput", &action)
+			var wfInput = decompInput(&action)
 			if len(wfInput.Value.Aggrandizements) != 0 {
 				mapValueReference(wfInput.Value)
 			}
 			continue
 		}
 
-		if params["UUID"] != nil && params["CustomOutputName"] != nil {
-			mapUUID(paramString(&action, "UUID"), paramString(&action, "CustomOutputName"))
+		if params[UUID] != nil && params["CustomOutputName"] != nil {
+			mapUUID(paramString(&action, UUID), paramString(&action, "CustomOutputName"))
 		}
 
 		checkParamIdentifiers(params, &action)
@@ -263,16 +262,12 @@ func loopVariableAssignment(index int, variableName string) (identifier string, 
 		return
 	}
 
-	var wfInput WFInput
-	decompMapToStruct(next.WFWorkflowActionParameters["WFInput"], &wfInput, "WFInput", &next)
-	var reference = wfInput.Value
+	var reference = decompInput(&next).Value
 	if reference.Type != "Variable" || reference.VariableName != variableName || len(reference.Aggrandizements) != 0 {
 		return
 	}
 
-	identifier = sanitizeIdentifier(paramString(&next, "WFVariableName"))
-
-	return identifier, true
+	return setVariableName(&next), true
 }
 
 // isLoopVariableAssignment is whether the Set Variable at the current action is the one that the loop
@@ -340,12 +335,25 @@ func loopDeclaration(action *ShortcutAction) string {
 	return loop.identifier
 }
 
+// decompInput reads the WFInput of a Set Variable or Append to Variable action.
+func decompInput(action *ShortcutAction) WFInput {
+	var wfInput WFInput
+	decompMapToStruct(action.WFWorkflowActionParameters["WFInput"], &wfInput, "WFInput", action)
+
+	return wfInput
+}
+
+// setVariableName is the identifier that a Set Variable or Append to Variable action writes to.
+func setVariableName(action *ShortcutAction) string {
+	return sanitizeIdentifier(paramString(action, "WFVariableName"))
+}
+
 // Map out variables in the Shortcut and their UUIDs for later checks.
 func mapVariables() {
 	for index, action := range shortcut.WFWorkflowActions {
 		currentAction.identifier = action.WFWorkflowActionIdentifier
 		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
-			var varName = sanitizeIdentifier(paramString(&action, "WFVariableName"))
+			var varName = setVariableName(&action)
 			if _, found := variables[varName]; !found {
 				variables[varName] = varValue{}
 			}
@@ -354,8 +362,7 @@ func mapVariables() {
 			}
 
 			if action.WFWorkflowActionParameters["WFInput"] != nil {
-				var wfInput WFInput
-				decompMapToStruct(action.WFWorkflowActionParameters["WFInput"], &wfInput, "WFInput", &action)
+				var wfInput = decompInput(&action)
 				// An output read through aggrandizements stays a constant, since folding its action
 				// into the Set Variable would drop them.
 				var _, found = uuids[wfInput.Value.OutputUUID]
@@ -1204,7 +1211,7 @@ func compoundAssignment(action *ShortcutAction, inputText string, operation stri
 	if next.WFWorkflowActionIdentifier != SetVariableIdentifier {
 		return
 	}
-	var variableName = sanitizeIdentifier(paramString(&next, "WFVariableName"))
+	var variableName = setVariableName(&next)
 	if inputText != "@"+variableName || appendedVariables[variableName] {
 		return
 	}
@@ -1233,7 +1240,7 @@ var appendedVariables map[string]bool
 var assignedVariables map[string]bool
 
 func decompVariable(action *ShortcutAction) {
-	var variableName = sanitizeIdentifier(paramString(action, "WFVariableName"))
+	var variableName = setVariableName(action)
 	newCodeLine(fmt.Sprintf("@%s", variableName))
 
 	var firstAssignment = !assignedVariables[variableName]
@@ -1249,15 +1256,13 @@ func decompVariable(action *ShortcutAction) {
 
 	var inputUUID string
 	if action.WFWorkflowActionParameters["WFInput"] != nil {
-		var wfInput WFInput
-		decompMapToStruct(action.WFWorkflowActionParameters["WFInput"], &wfInput, "WFInput", action)
-		inputUUID = wfInput.Value.OutputUUID
+		inputUUID = decompInput(action).Value.OutputUUID
 	}
 
 	if currentVariableValue == "" || inputUUID == "" || inputUUID != currentVariableUUID {
-		var decompInput = decompValue(action.WFWorkflowActionParameters["WFInput"])
-		if decompInput != "" {
-			code.WriteString(fmt.Sprintf(" %s %s", assignmentOperator(action), decompInput))
+		var inputText = decompValue(action.WFWorkflowActionParameters["WFInput"])
+		if inputText != "" {
+			code.WriteString(fmt.Sprintf(" %s %s", assignmentOperator(action), inputText))
 		}
 		code.WriteRune('\n')
 		return
