@@ -1951,7 +1951,6 @@ func collectActionCall() {
 
 func collectAction(identifier *string) (value action) {
 	if !callableAction(*identifier) {
-		// Probing the standard includes rewinds the cursor and rewrites the source.
 		var beforeProbe = saveErrorPosition()
 		var requiredInclude = checkMissingStandardInclude(identifier, true)
 		beforeProbe.restore()

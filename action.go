@@ -401,7 +401,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		return
 	case argValueType == Variable:
 		var reference = argVal.(varValue)
-		// The value of a key or property read is only known at runtime.
+		// The value of a key or property read is specific to each type of value.
 		if reference.getAs != "" && reference.coerce == "" {
 			return
 		}
