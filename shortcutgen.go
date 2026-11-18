@@ -170,7 +170,8 @@ func makeVariableInput(t *token, params map[string]any) {
 
 	makeVariableValueAction(t, &outputName, &varUUID)
 	if t.valueType != Arr && t.value != nil {
-		if t.typeof == Variable && t.valueType == Variable {
+		// Appending to an array emits no action for a reference, so the appended input is the reference itself.
+		if t.valueType == Variable && (t.typeof == Variable || variables[t.ident].valueType == Arr) {
 			params["WFInput"] = variableValue(t.value.(varValue))
 		} else {
 			params["WFInput"] = inputValue(outputName, varUUID)

@@ -80,4 +80,18 @@ if actionItem.text != "b" {
     mustOutput("❌ FAIL: action call in array — got {actionItem}, expected 'b'", "❌ FAIL: action call in array — got {actionItem}, expected 'b'")
 }
 
+// appending a variable or an action call to an array references the appended value
+@appendSource = "appended"
+@appendItems = []
+@appendItems += @appendSource
+@appendItems += text("called")
+const appendFirst = getFirstItem(@appendItems)
+if appendFirst.text != "appended" {
+    mustOutput("❌ FAIL: append variable to array - got {appendFirst}, expected 'appended'", "❌ FAIL: append variable to array - got {appendFirst}, expected 'appended'")
+}
+const appendLast = getLastItem(@appendItems)
+if appendLast.text != "called" {
+    mustOutput("❌ FAIL: append action call to array - got {appendLast}, expected 'called'", "❌ FAIL: append action call to array - got {appendLast}, expected 'called'")
+}
+
 show("✅ All tests passed")
