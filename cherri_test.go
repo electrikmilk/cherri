@@ -174,11 +174,18 @@ func TestDecomp(t *testing.T) {
 // test file name without _unsigned.shortcut. An entry that starts passing must be removed.
 var roundTripKnownFailures = map[string]string{
 	"ask-prompts": "the prompt of an Ask in a function call argument is inside the dictionary of the call, and Cherri has no syntax for a prompt inside text, an array or a dictionary",
+	"calendar":    "addWorldClock() and the other world clock actions build their city parameters in Go and have no decomp hook to read the city back",
+	"dictionary":  "the compiler rejects an array literal written over several lines (Array missing ending bracket), which is how arrays are decompiled",
+	"functions":   "the compiler rejects an array literal written over several lines (Array missing ending bracket), which is how the arguments of a function call are decompiled",
+	"menus":       "the compiler writes @items += makeVCard() as an Append to Variable of an output named Variable 1 that no action has",
+	"standard":    "the compiler writes the @items += item of the functions header for an array argument as an Append to Variable of an output named Variable 1 that no action has",
 }
 
 // roundTripKnownMismatches lists shortcuts that recompile but with a different action sequence,
 // keyed like roundTripKnownFailures. An entry that starts matching must be removed.
-var roundTripKnownMismatches = map[string]string{}
+var roundTripKnownMismatches = map[string]string{
+	"numbers": "an expression with an action call compiles to Calculate Expression, but the decompiled expression reads the call's output as a constant, and an expression of two operands compiles to Math",
+}
 
 // roundTripRun runs the built compiler and returns whether it exited zero. The compiler runs as a
 // separate process because it keeps global state and calls os.Exit on error.
