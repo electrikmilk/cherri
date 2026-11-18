@@ -1091,9 +1091,7 @@ func decompAggrandizements(reference *string, aggrs []Aggrandizement) {
 	for _, aggr := range aggrs {
 		switch aggr.Type {
 		case "WFCoercionVariableAggrandizement":
-			if _, found := revContentItems[aggr.CoercionItemClass]; found {
-				coerce = revContentItems[coerce]
-			}
+			coerce = revContentItems[aggr.CoercionItemClass]
 		case "WFDictionaryValueVariableAggrandizement":
 			index = aggr.DictionaryKey
 		case "WFPropertyVariableAggrandizement":
@@ -1104,7 +1102,7 @@ func decompAggrandizements(reference *string, aggrs []Aggrandizement) {
 	if index != "" {
 		*reference = fmt.Sprintf("%s['%s']", *reference, index)
 	}
-	if index != "" && coerce != "" {
+	if coerce != "" {
 		*reference = fmt.Sprintf("%s.%s", *reference, coerce)
 	}
 }
