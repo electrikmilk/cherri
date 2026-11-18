@@ -187,14 +187,17 @@ func decompressSignedShortcut(signed []byte) ([]byte, error) {
 		// with "Bad magic". Those streams are decoded here instead.
 		if string(stream[:min(len(lzvnBlockMagic), len(stream))]) == lzvnBlockMagic {
 			var block, consumed, lzvnErr = decodeLZVNStream(stream)
-			if lzvnErr != nil {
+			// A stream with more blocks after the LZVN block is left to the library, as before.
+			if lzvnErr != nil && !errors.Is(lzvnErr, errLZVNNotLastBlock) {
 				return nil, fmt.Errorf("failed to decompress signed Shortcut: %w", lzvnErr)
 			}
-			if _, seekErr := compressed.Seek(int64(consumed), io.SeekCurrent); seekErr != nil {
-				return nil, fmt.Errorf("failed to decompress signed Shortcut: %w", seekErr)
+			if lzvnErr == nil {
+				if _, seekErr := compressed.Seek(int64(consumed), io.SeekCurrent); seekErr != nil {
+					return nil, fmt.Errorf("failed to decompress signed Shortcut: %w", seekErr)
+				}
+				archive.Write(block)
+				continue
 			}
-			archive.Write(block)
-			continue
 		}
 
 		var block, decompressErr = io.ReadAll(lzfse.NewReader(compressed))
@@ -210,6 +213,9 @@ func decompressSignedShortcut(signed []byte) ([]byte, error) {
 	return archive.Bytes(), nil
 }
 
+// errLZVNNotLastBlock is returned for a stream where the LZVN block is followed by another block.
+var errLZVNNotLastBlock = errors.New("LZVN block is not the last block of the LZFSE stream")
+
 // decodeLZVNStream decodes an LZFSE stream made of one LZVN block and the end of stream marker, which is how Apple's
 // encoder writes small inputs, and returns the decoded data and the number of stream bytes it used.
 func decodeLZVNStream(stream []byte) ([]byte, int, error) {
@@ -224,7 +230,7 @@ func decodeLZVNStream(stream []byte) ([]byte, int, error) {
 		return nil, 0, fmt.Errorf("LZVN block of %d bytes is truncated, %d bytes left", streamEnd, len(stream))
 	}
 	if string(stream[payloadEnd:streamEnd]) != lzfseEndOfStreamMagic {
-		return nil, 0, fmt.Errorf("expected end of LZFSE stream after LZVN block, found %q", stream[payloadEnd:streamEnd])
+		return nil, 0, errLZVNNotLastBlock
 	}
 
 	var decoded, decodeErr = decodeLZVN(stream[lzvnBlockHeaderSize:payloadEnd], int(rawSize))
