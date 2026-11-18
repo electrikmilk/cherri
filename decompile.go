@@ -28,12 +28,9 @@ const (
 
 var code strings.Builder
 
-func decompile(b []byte) {
-	// A fresh Shortcut, so a key missing from this plist is not kept from one decompiled before.
-	shortcut = Shortcut{}
-	var _, marshalIndexedErr = plist.Unmarshal(b, &shortcut)
-	handle(marshalIndexedErr)
-
+// resetDecompiler clears the state that decompiling keeps in globals, so nothing is kept from a Shortcut
+// decompiled before.
+func resetDecompiler() {
 	code.Reset()
 	varUUIDs = nil
 	constUUIDs = nil
@@ -53,9 +50,27 @@ func decompile(b []byte) {
 	decompiledImports = nil
 	decompiledDefinitions = nil
 	questionIdentifiers = make(map[questionKey]string)
+	writtenQuestions = make(map[questionKey]bool)
 	openMenuItems = make(map[string]bool)
 	appendedVariables = make(map[string]bool)
 	assignedVariables = make(map[string]bool)
+	identifierMap = nil
+	readParameters = make(map[string]bool)
+	decompHookName = ""
+	decompHookDefinition = nil
+	decompilingText = false
+	decompilingDictionary = false
+	macDefinition = false
+	setMacDefinition = false
+}
+
+func decompile(b []byte) {
+	// A fresh Shortcut, so a key missing from this plist is not kept from one decompiled before.
+	shortcut = Shortcut{}
+	var _, marshalIndexedErr = plist.Unmarshal(b, &shortcut)
+	handle(marshalIndexedErr)
+
+	resetDecompiler()
 
 	// The Shortcut keeps its name for the name definition and runSelf, only the file name has no spaces.
 	var outputBasename = strings.ReplaceAll(basename, " ", "_")
@@ -784,13 +799,11 @@ type questionKey struct {
 // questionIdentifiers names the import question of an argument, and writtenQuestions are those whose argument
 // has been written.
 var questionIdentifiers map[questionKey]string
-var writtenQuestions = make(map[questionKey]bool)
+var writtenQuestions map[questionKey]bool
 
 // decompileQuestions writes a question declaration for each import question and names it for the argument that
 // takes it. The compiler writes an empty value for the argument, so only the question holds one.
 func decompileQuestions() {
-	writtenQuestions = make(map[questionKey]bool)
-
 	var questions = slices.Clone(shortcut.WFWorkflowImportQuestions)
 	slices.SortStableFunc(questions, func(a WFQuestion, b WFQuestion) int {
 		if a.ActionIndex != b.ActionIndex {
@@ -1063,7 +1076,7 @@ func decompComment(action *ShortcutAction) {
 	code.WriteRune('\n')
 }
 
-var decompilingText = false
+var decompilingText bool
 
 // decompilingTextParameter is set while writing the argument of a text parameter, which keeps text that is only a
 // reference as text but, unlike a Text action, can be written as an Ask with a prompt.
@@ -1390,7 +1403,7 @@ func decompMenu(action *ShortcutAction) {
 }
 
 // openMenuItems are the menus that have an item whose body is open.
-var openMenuItems = make(map[string]bool)
+var openMenuItems map[string]bool
 
 // menuItemValue is the title of a menu item, which the compiler writes as a WFMenuItem dictionary
 // holding it in WFValue, and Shortcuts as a string.
@@ -1601,7 +1614,7 @@ type WFItems struct {
 	Value Value
 }
 
-var decompilingDictionary = false
+var decompilingDictionary bool
 
 const emptyDictionary = "{}"
 
