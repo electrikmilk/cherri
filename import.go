@@ -190,16 +190,16 @@ func decompressSignedShortcut(signed []byte) ([]byte, error) {
 		// with "Bad magic". Those streams are decoded here instead.
 		if bytes.HasPrefix(stream, []byte(lzvnBlockMagic)) {
 			var block, consumed, lzvnErr = decodeLZVNStream(stream)
-			// A stream with more blocks after the LZVN block is left to the library, as before.
-			if lzvnErr != nil && !errors.Is(lzvnErr, errLZVNNotLastBlock) {
-				return nil, fmt.Errorf("failed to decompress signed Shortcut: %w", lzvnErr)
-			}
-			if lzvnErr == nil {
+			switch {
+			case lzvnErr == nil:
 				if _, seekErr := compressed.Seek(int64(consumed), io.SeekCurrent); seekErr != nil {
 					return nil, fmt.Errorf("failed to decompress signed Shortcut: %w", seekErr)
 				}
 				archive.Write(block)
 				continue
+			// A stream with more blocks after the LZVN block is left to the library, as before.
+			case !errors.Is(lzvnErr, errLZVNNotLastBlock):
+				return nil, fmt.Errorf("failed to decompress signed Shortcut: %w", lzvnErr)
 			}
 		}
 
