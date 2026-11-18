@@ -379,6 +379,10 @@ func TestRoundTrip(t *testing.T) {
 	for _, original := range originals {
 		var name = strings.TrimSuffix(filepath.Base(original), unsignedEnd)
 		t.Run(name, func(t *testing.T) {
+			// Each subtest works in its own directory under tempDir and runs the compiler as separate
+			// processes, so they share nothing that is written. tempDir is removed after all of them finish.
+			t.Parallel()
+
 			var dir = filepath.Join(tempDir, name)
 			var decompiledDir = filepath.Join(dir, "dec")
 			var mkdirErr = os.MkdirAll(decompiledDir, 0755)
