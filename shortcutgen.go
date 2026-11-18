@@ -844,21 +844,26 @@ func makeConditionalAction(t *token) {
 	switch t.valueType {
 	case If:
 		conditionalParams["WFControlFlowMode"] = startStatement
-
-		var cond = t.value.(WFConditions)
-		if len(cond.conditions) == 1 {
-			singleConditionParam(makeConditionParam(cond.conditions[0]), conditionalParams)
-		} else {
-			conditionalParams["WFConditions"] = makeConditions(&cond)
-		}
+		conditionParams(t.value.(WFConditions), conditionalParams)
 	case Else:
 		conditionalParams["WFControlFlowMode"] = statementPart
+		if cond, isElseIf := t.value.(WFConditions); isElseIf {
+			conditionParams(cond, conditionalParams)
+		}
 	case EndClosure:
 		conditionalParams["UUID"] = createUUIDReference(t.value.(string))
 		conditionalParams["WFControlFlowMode"] = endStatement
 	}
 
 	addStdAction("conditional", conditionalParams)
+}
+
+func conditionParams(cond WFConditions, params map[string]any) {
+	if len(cond.conditions) == 1 {
+		singleConditionParam(makeConditionParam(cond.conditions[0]), params)
+	} else {
+		params["WFConditions"] = makeConditions(&cond)
+	}
 }
 
 var filterTemplates []WFConditionParam
