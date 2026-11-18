@@ -39,6 +39,11 @@ var globals = map[string]varValue{
 		valueType:    Date,
 		value:        "CurrentDate",
 	},
+	"CurrentApp": {
+		variableType: "CurrentApp",
+		valueType:    String,
+		value:        "CurrentApp",
+	},
 	"Clipboard": {
 		variableType: "Clipboard",
 		valueType:    String,

@@ -24,6 +24,14 @@ enum deviceDetail {
 // [Doc]: Get Device Detail: Get a detail about current device.
 action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail')
 
+// [Doc]: Get Current App: Get the current app.
+action v27 default getCurrentApp()
+
+// [Doc]: Get Current Visible App: Get the current visible apps.
+action v27 'getcurrentapp' getVisibleApps() {
+    "WFVisibleAppScope": "Visible"
+}
+
 // [Doc]: Get On-Screen Content: Get the content currently on-screen.
 action getOnScreenContent()
 
