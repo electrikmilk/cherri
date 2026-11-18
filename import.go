@@ -188,7 +188,7 @@ func decompressSignedShortcut(signed []byte) ([]byte, error) {
 		// Apple compresses small inputs as a single LZVN block. lzfse v0.2.4 (the latest) stores LZVN literal
 		// and match lengths in a byte, so a length above 255 wraps, the decoder loses its place in the block and fails
 		// with "Bad magic". Those streams are decoded here instead.
-		if string(stream[:min(len(lzvnBlockMagic), len(stream))]) == lzvnBlockMagic {
+		if bytes.HasPrefix(stream, []byte(lzvnBlockMagic)) {
 			var block, consumed, lzvnErr = decodeLZVNStream(stream)
 			// A stream with more blocks after the LZVN block is left to the library, as before.
 			if lzvnErr != nil && !errors.Is(lzvnErr, errLZVNNotLastBlock) {
