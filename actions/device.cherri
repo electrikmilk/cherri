@@ -18,6 +18,7 @@ enum deviceDetail {
 	'Current Volume',
 	'Current Brightness',
 	'Current Appearance',
+	'Device Is Locked'
 }
 
 // [Doc]: Get Device Detail: Get a detail about current device.
