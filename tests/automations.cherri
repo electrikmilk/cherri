@@ -1,0 +1,18 @@
+// compile-only: automations are installed by Shortcuts, not run by the compiler
+
+#trigger keyboard connect
+#trigger keyboard disconnect
+#trigger keyboard both
+#trigger carplay connect
+#trigger carplay disconnect
+#trigger carplay both
+#trigger airplaneMode on
+#trigger airplaneMode off
+#trigger airplaneMode both
+#trigger lowPowerMode on
+#trigger lowPowerMode off
+#trigger lowPowerMode both
+
+alert("Automation ran")
+
+show("✅ All tests passed")
