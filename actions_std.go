@@ -197,6 +197,20 @@ var actions = map[string]*actionDefinition{
 			return limitEnabledParams(args, 2)
 		},
 	},
+	"getTravelTime": {
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			if len(args) > 2 && args[2].valueType != Nil {
+				return map[string]any{}
+			}
+
+			// Shortcuts stores the current location as the start explicitly instead of leaving it out.
+			return map[string]any{
+				"WFGetDirectionsCustomLocation": map[string]any{
+					"isCurrentLocation": true,
+				},
+			}
+		},
+	},
 	"getPDFText": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) == 0 {

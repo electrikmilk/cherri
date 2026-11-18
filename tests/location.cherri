@@ -8,4 +8,9 @@ removeWeatherLocation(@location)
 const homePlace = homeLocation()
 const workPlace = workLocation()
 
+getTravelTime("Driving", workPlace)
+getTravelTime("Walking", workPlace, currentLocation())
+getTravelTime("Transit", workPlace, homePlace, true, true)
+getTravelTime("Biking", workPlace)
+
 show("✅ All tests passed")

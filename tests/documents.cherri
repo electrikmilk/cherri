@@ -21,6 +21,8 @@ appendToFile("notes.txt", @contents)
 // Notes
 @noteToOpen = "note"
 appendNote("Groceries", "Milk")
+appendNoteSection("Groceries", "Dairy", "Milk")
+prependNoteSection("Groceries", "Dairy", "Eggs")
 openNote(@noteToOpen)
 
 show("✅ All tests passed")

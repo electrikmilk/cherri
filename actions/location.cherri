@@ -31,6 +31,16 @@ action !mac v27 'location' workLocation() {
 	}
 }
 
+enum travelMode {
+	'Driving',
+	'Walking',
+	'Transit',
+	'Biking',
+}
+
+// [Doc]: Get Travel Time: Get the travel time to `destination` using `mode`, starting at `start` or the current location. Avoiding tolls and highways are new in version 27.
+action internal 'gettraveltime' getTravelTime(travelMode mode: 'WFGetDirectionsActionMode', variable destination: 'WFDestination', variable ?start: 'WFGetDirectionsCustomLocation', bool ?avoidTolls: 'WFAvoidTolls' = false, bool ?avoidHighways: 'WFAvoidHighways' = false): number
+
 // [Doc]: Get Current Location
 action 'getcurrentlocation' getCurrentLocation()
 
