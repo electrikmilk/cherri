@@ -820,34 +820,87 @@ func decompileQuestions() {
 	})
 
 	var number = 1
+	var claimedIdentifiers = make(map[string]bool)
 	for _, question := range questions {
-		var defaultValue, isText = question.DefaultValue.(string)
-		if question.Category != "Parameter" || !isText || question.ParameterKey == "" {
-			decompWarning(fmt.Sprintf("The import question '%s' is not a question about an argument with a text default value, which Cherri cannot write, and is left out.", question.Text))
+		var defaultValue string
+		var isWritable bool
+		if question.Category == "Parameter" && question.ParameterKey != "" {
+			defaultValue, isWritable = decompQuestionDefault(question)
+		}
+		if !isWritable {
+			decompWarning(fmt.Sprintf("The import question '%s' is not a question about an argument with a text or dictionary default value, which Cherri cannot write, and is left out.", question.Text))
 			continue
 		}
 
-		var identifier = freshIdentifier("question", &number)
+		var identifier = makeQuestionIdentifier(question.Text, &number, claimedIdentifiers)
+		claimedIdentifiers[identifier] = true
 		questionIdentifiers[questionKey{question.ActionIndex, question.ParameterKey}] = identifier
-		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#question %s \"%s\" \"%s\"", identifier, escapeString(question.Text), escapeString(defaultValue)))
+		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#question %s \"%s\" %s", identifier, escapeString(question.Text), defaultValue))
 	}
 }
 
-// freshIdentifier returns the prefix followed by the next number that is not the name of a variable or a
-// constant, as the compiler rejects a question named like one.
-func freshIdentifier(prefix string, number *int) string {
+// decompQuestionDefault writes the default value of a question as the text or dictionary literal that Cherri
+// reads it from, and is false for a default Cherri cannot write.
+func decompQuestionDefault(question WFQuestion) (defaultValue string, isWritable bool) {
+	switch value := question.DefaultValue.(type) {
+	case string:
+		return fmt.Sprintf("\"%s\"", escapeString(value)), true
+	case map[string]interface{}:
+		var action = &ShortcutAction{WFWorkflowActionIdentifier: "an import question"}
+		if question.ActionIndex >= 0 && question.ActionIndex < len(shortcut.WFWorkflowActions) {
+			action = &shortcut.WFWorkflowActions[question.ActionIndex]
+		}
+
+		var items WFItems
+		decompMapToStruct(value, &items, "DefaultValue of the import question '"+question.Text+"'", action)
+		return decompDictionaryValue(items.Value.WFDictionaryFieldValueItems), true
+	}
+
+	return "", false
+}
+
+// makeQuestionIdentifier names a question for its text, so the question reads as what it asks. A text with
+// no name in it is named by the next number instead, and a name that is taken has a number added.
+func makeQuestionIdentifier(text string, number *int, claimedIdentifiers map[string]bool) string {
+	var baseIdentifier = text
+	sanitizeIdentifier(&baseIdentifier)
+	if baseIdentifier == "" || (baseIdentifier[0] >= '0' && baseIdentifier[0] <= '9') {
+		return freshIdentifier("question", number, claimedIdentifiers)
+	}
+
+	var identifier = baseIdentifier
+	for suffix := 2; isIdentifierTaken(identifier, claimedIdentifiers); suffix++ {
+		identifier = baseIdentifier + strconv.Itoa(suffix)
+	}
+
+	return identifier
+}
+
+// freshIdentifier returns the prefix followed by the next number that is not taken.
+func freshIdentifier(prefix string, number *int, claimedIdentifiers map[string]bool) string {
 	for {
 		var identifier = fmt.Sprintf("%s%d", prefix, *number)
 		*number++
 
-		var taken bool
-		for _, name := range uuids {
-			taken = taken || name == identifier
-		}
-		if _, isVariable := variables[identifier]; !isVariable && !taken {
+		if !isIdentifierTaken(identifier, claimedIdentifiers) {
 			return identifier
 		}
 	}
+}
+
+// isIdentifierTaken is whether the compiler would reject a question named identifier, as it can not be named
+// like a variable, a constant, a global, a value or another question.
+func isIdentifierTaken(identifier string, claimedIdentifiers map[string]bool) bool {
+	if claimedIdentifiers[identifier] || validReference(identifier) || slices.Contains([]string{"true", "false", "nil"}, identifier) {
+		return true
+	}
+	for _, name := range uuids {
+		if name == identifier {
+			return true
+		}
+	}
+
+	return slices.Contains(slices.Collect(maps.Values(loopIdentifiers)), identifier)
 }
 
 // questionArgument returns the question that holds the value of the parameter of the current action.
@@ -863,9 +916,15 @@ func questionArgument(parameterKey string) (identifier string, isQuestion bool) 
 
 // checkQuestionsWritten warns about the import questions that no argument was written for, which are left out.
 func checkQuestionsWritten() {
-	for key, identifier := range questionIdentifiers {
+	var keys = slices.SortedFunc(maps.Keys(questionIdentifiers), func(a, b questionKey) int {
+		if a.actionIndex != b.actionIndex {
+			return a.actionIndex - b.actionIndex
+		}
+		return strings.Compare(a.parameterKey, b.parameterKey)
+	})
+	for _, key := range keys {
 		if !writtenQuestions[key] {
-			decompWarning(fmt.Sprintf("The import question '%s' is for the parameter '%s' of action %d, which is not written as an argument.", identifier, key.parameterKey, key.actionIndex))
+			decompWarning(fmt.Sprintf("The import question '%s' is for the parameter '%s' of action %d, which is not written as an argument.", questionIdentifiers[key], key.parameterKey, key.actionIndex))
 		}
 	}
 }
@@ -973,6 +1032,9 @@ func writeUnreferencedCall(action *ShortcutAction) {
 	var call string
 	if action.WFWorkflowActionIdentifier == "is.workflow.actions.gettext" {
 		call = fmt.Sprintf("text(%s)", currentVariableValue)
+		if _, isQuestion := questionIdentifiers[questionKey{actionIndex, "WFTextActionText"}]; isQuestion {
+			call = currentVariableValue
+		}
 	} else {
 		call = makeActionCallCode(action)
 	}
@@ -1027,6 +1089,14 @@ var decompilingText = false
 var decompilingTextParameter bool
 
 func decompTextValue(action *ShortcutAction) {
+	// A literal would drop the question, and the Text action is matched by more than one action definition, so
+	// it is written as the text() call.
+	if identifier, isQuestion := questionArgument("WFTextActionText"); isQuestion {
+		currentVariableValue = fmt.Sprintf("text(%s)", identifier)
+		checkConstantLiteral(action)
+		return
+	}
+
 	decompilingText = true
 	// Shortcuts leaves out the text of a Text action that is empty.
 	if action.WFWorkflowActionParameters["WFTextActionText"] == nil {
@@ -1565,6 +1635,13 @@ var decompilingDictionary = false
 const emptyDictionary = "{}"
 
 func decompDictionary(action *ShortcutAction) {
+	// A literal would drop the question, so write the dictionary() call it is an argument of.
+	if _, isQuestion := questionIdentifiers[questionKey{actionIndex, "WFItems"}]; isQuestion {
+		currentVariableValue = makeActionCallCode(action)
+		checkConstantLiteral(action)
+		return
+	}
+
 	// An empty dictionary has no WFItems.
 	var items WFItems
 	if action.WFWorkflowActionParameters["WFItems"] != nil {
@@ -1854,6 +1931,10 @@ func decompValueObject(value map[string]interface{}) string {
 
 	if v, found := value["Value"]; found {
 		if nested, isMap := v.(map[string]interface{}); isMap {
+			// The compiler writes empty text as a text token string with an empty Value.
+			if len(nested) == 0 && value["WFSerializationType"] == "WFTextTokenString" {
+				return decompTextLiteral("", false)
+			}
 			value = nested
 		}
 	}
