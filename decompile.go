@@ -1107,6 +1107,7 @@ func decompTextValue(action *ShortcutAction) {
 }
 
 var numberLiteralRegex = regexp.MustCompile(`^-?[0-9]+(\.[0-9]+)?$`)
+var inlineReferenceRegex = regexp.MustCompile(`{(.*?)}`)
 
 func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 	var value = requiredParam(action, "WFNumberActionNumber")
@@ -1186,8 +1187,7 @@ func decompBasicExpression(action *ShortcutAction) {
 	var inputText = strings.Trim(decompValue(input), "\"")
 	var operandText = strings.Trim(decompValue(operand), "\"")
 	var expression = inputText + " " + strings.Trim(operation, "\"") + " " + operandText
-	var varRegex = regexp.MustCompile(`{(.*?)}`)
-	currentVariableValue = varRegex.ReplaceAllString(expression, "$1")
+	currentVariableValue = inlineReferenceRegex.ReplaceAllString(expression, "$1")
 
 	checkConstantLiteral(action)
 
@@ -1240,8 +1240,7 @@ func decompExpression(action *ShortcutAction) {
 	default:
 		decompError(fmt.Sprintf("Expected the parameter 'Input' to be a string or a dictionary, got %T", input), action)
 	}
-	var varRegex = regexp.MustCompile(`{(.*?)}`)
-	currentVariableValue = varRegex.ReplaceAllString(expression, "$1")
+	currentVariableValue = inlineReferenceRegex.ReplaceAllString(expression, "$1")
 
 	checkConstantLiteral(action)
 }
