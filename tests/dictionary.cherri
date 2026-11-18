@@ -121,15 +121,15 @@ if bareLast.text != "constant" {
 
 // a fraction and a negative number stay numbers, and text keeps <, > and &
 @typed = {"price": 3.5, "delta": -5, "markup": "<b>Tom & Jerry</b>"}
-const price = "{typed['price']}"
+const price = "{@typed['price']}"
 if price != "3.5" {
     mustOutput("❌ FAIL: dict fraction - got {price}, expected '3.5'", "❌ FAIL: dict fraction - got {price}, expected '3.5'")
 }
-const delta = "{typed['delta']}"
+const delta = "{@typed['delta']}"
 if delta != "-5" {
     mustOutput("❌ FAIL: dict negative number - got {delta}, expected '-5'", "❌ FAIL: dict negative number - got {delta}, expected '-5'")
 }
-const markup = "{typed['markup']}"
+const markup = "{@typed['markup']}"
 if markup != "<b>Tom & Jerry</b>" {
     mustOutput("❌ FAIL: dict text with <, > and & - got {markup}, expected '<b>Tom & Jerry</b>'", "❌ FAIL: dict text with <, > and & - got {markup}, expected '<b>Tom & Jerry</b>'")
 }
