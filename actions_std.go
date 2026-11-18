@@ -41,8 +41,9 @@ var actions = map[string]*actionDefinition{
 				return
 			}
 
-			var repeatDays = getArgValue(args[3])
-			for _, day := range repeatDays.([]interface{}) {
+			// The decompiler writes nil for a skipped optional argument, which means no repeat days.
+			var repeatDays, _ = getArgValue(args[3]).([]interface{})
+			for _, day := range repeatDays {
 				if !slices.Contains(weekdays, strings.ToLower(day.(string))) {
 					parserError(fmt.Sprintf("Invalid repeat weekday for alarm '%s'", day))
 				}
@@ -53,9 +54,9 @@ var actions = map[string]*actionDefinition{
 				return
 			}
 
-			var repeatDays = getArgValue(args[3])
+			var repeatDays, _ = getArgValue(args[3]).([]interface{})
 			var repeats []map[string]any
-			for _, day := range repeatDays.([]interface{}) {
+			for _, day := range repeatDays {
 				var dayStr = day.(string)
 				var dayLower = strings.ToLower(dayStr)
 				var dayCap = capitalize(dayStr)
