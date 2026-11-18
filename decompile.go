@@ -365,33 +365,36 @@ func setVariableName(action *ShortcutAction) string {
 func mapVariables() {
 	for index, action := range shortcut.WFWorkflowActions {
 		currentAction.identifier = action.WFWorkflowActionIdentifier
-		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
-			var varName = setVariableName(&action)
-			if _, found := variables[varName]; !found {
-				variables[varName] = varValue{}
-			}
-			if action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
-				appendedVariables[varName] = true
-			}
-
-			if action.WFWorkflowActionParameters["WFInput"] != nil {
-				var wfInput = decompInput(&action)
-				// An output read through aggrandizements stays a constant, since folding its action
-				// into the Set Variable would drop them.
-				var _, found = uuids[wfInput.Value.OutputUUID]
-				if found || len(wfInput.Value.Aggrandizements) != 0 {
-					continue
-				}
-
-				// An action is only folded into the Set Variable written right after it, as folding one that
-				// has other actions between would move it after them.
-				if index > 0 && shortcut.WFWorkflowActions[index-1].WFWorkflowActionParameters[UUID] == wfInput.Value.OutputUUID {
-					varUUIDs = append(varUUIDs, wfInput.Value.OutputUUID)
-					continue
-				}
-				mapValueReference(wfInput.Value)
-			}
+		if action.WFWorkflowActionIdentifier != SetVariableIdentifier && action.WFWorkflowActionIdentifier != AppendVariableIdentifier {
+			continue
 		}
+
+		var varName = setVariableName(&action)
+		if _, found := variables[varName]; !found {
+			variables[varName] = varValue{}
+		}
+		if action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
+			appendedVariables[varName] = true
+		}
+
+		if action.WFWorkflowActionParameters["WFInput"] == nil {
+			continue
+		}
+		var wfInput = decompInput(&action)
+		// An output read through aggrandizements stays a constant, since folding its action
+		// into the Set Variable would drop them.
+		var _, found = uuids[wfInput.Value.OutputUUID]
+		if found || len(wfInput.Value.Aggrandizements) != 0 {
+			continue
+		}
+
+		// An action is only folded into the Set Variable written right after it, as folding one that
+		// has other actions between would move it after them.
+		if index > 0 && shortcut.WFWorkflowActions[index-1].WFWorkflowActionParameters[UUID] == wfInput.Value.OutputUUID {
+			varUUIDs = append(varUUIDs, wfInput.Value.OutputUUID)
+			continue
+		}
+		mapValueReference(wfInput.Value)
 	}
 }
 
@@ -417,21 +420,30 @@ func checkParamIdentifiers(params map[string]interface{}, action *ShortcutAction
 			checkParamValueAttachments(paramVariable)
 		}
 
-		if _, found := paramValues["WFConditions"]; found {
-			var wfConditions = expectType[map[string]interface{}](paramValues["WFConditions"], "WFConditions", "a dictionary", action)
-			var conditionsValue, hasValue = wfConditions["Value"].(map[string]interface{})
-			if !hasValue {
-				decompError("Expected WFConditions to have a Value dictionary", action)
-			}
-			if conditionsValue["WFActionParameterFilterTemplates"] != nil {
-				for _, filterTemplate := range conditionTemplates(conditionsValue, action) {
-					if filterTemplate["WFInput"] == nil {
-						continue
-					}
-					checkParamIdentifiers(expectType[map[string]interface{}](filterTemplate["WFInput"], "WFInput of a condition", "a dictionary", action), action)
-				}
-			}
+		checkConditionIdentifiers(paramValues, action)
+	}
+}
+
+// checkConditionIdentifiers maps the identifiers inside the conditions of a WFConditions value, if it has any.
+func checkConditionIdentifiers(paramValues map[string]interface{}, action *ShortcutAction) {
+	if _, found := paramValues["WFConditions"]; !found {
+		return
+	}
+
+	var wfConditions = expectType[map[string]interface{}](paramValues["WFConditions"], "WFConditions", "a dictionary", action)
+	var conditionsValue, hasValue = wfConditions["Value"].(map[string]interface{})
+	if !hasValue {
+		decompError("Expected WFConditions to have a Value dictionary", action)
+	}
+	if conditionsValue["WFActionParameterFilterTemplates"] == nil {
+		return
+	}
+
+	for _, filterTemplate := range conditionTemplates(conditionsValue, action) {
+		if filterTemplate["WFInput"] == nil {
+			continue
 		}
+		checkParamIdentifiers(expectType[map[string]interface{}](filterTemplate["WFInput"], "WFInput of a condition", "a dictionary", action), action)
 	}
 }
 
@@ -1130,36 +1142,50 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 	}
 
 	var number any
-	var convErr error
-	if stringValue, isString := value.(string); isString {
-		if strings.Contains(stringValue, ".") {
-			number, convErr = strconv.ParseFloat(stringValue, 64)
-		} else if strings.Contains(stringValue, ",") {
-			number, convErr = strconv.ParseFloat(strings.Replace(stringValue, ",", ".", 1), 64)
-		} else if stringValue != "" {
-			number, convErr = strconv.Atoi(stringValue)
-		}
-		if convErr != nil {
-			decompError(fmt.Sprintf("Expected the parameter 'WFNumberActionNumber' to be a number, got '%s'", value), action)
-		}
+	if text, isText := value.(string); isText {
+		number = numberFromText(text, action)
 	} else {
-		switch v := value.(type) {
-		case uint64:
-			number = int(v)
-		case int64:
-			// A negative integer is read as an int64 rather than a uint64.
-			number = v
-		case float64:
-			number = v
-		default:
-			decompError(fmt.Sprintf("Expected the parameter 'WFNumberActionNumber' to be a number, text or a dictionary, got %T", value), action)
-		}
+		number = numberFromPlist(value, action)
 	}
 
 	currentVariableValue = decompValue(number)
 	checkConstantLiteral(action)
 
 	return
+}
+
+// numberFromText reads the number that the text of a number action holds, which is nil when it is empty.
+func numberFromText(text string, action *ShortcutAction) (number any) {
+	var convErr error
+	if strings.Contains(text, ".") {
+		number, convErr = strconv.ParseFloat(text, 64)
+	} else if strings.Contains(text, ",") {
+		number, convErr = strconv.ParseFloat(strings.Replace(text, ",", ".", 1), 64)
+	} else if text != "" {
+		number, convErr = strconv.Atoi(text)
+	}
+	if convErr != nil {
+		decompError(fmt.Sprintf("Expected the parameter 'WFNumberActionNumber' to be a number, got '%s'", text), action)
+	}
+
+	return
+}
+
+// numberFromPlist reads the number that a number action holds as a number in the plist.
+func numberFromPlist(value any, action *ShortcutAction) any {
+	switch number := value.(type) {
+	case uint64:
+		return int(number)
+	case int64:
+		// A negative integer is read as an int64 rather than a uint64.
+		return number
+	case float64:
+		return number
+	}
+
+	decompError(fmt.Sprintf("Expected the parameter 'WFNumberActionNumber' to be a number, text or a dictionary, got %T", value), action)
+
+	return nil
 }
 
 func decompBasicExpression(action *ShortcutAction) {
