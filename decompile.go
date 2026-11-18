@@ -401,10 +401,7 @@ func checkParamIdentifiers(params map[string]interface{}, action *ShortcutAction
 		}
 
 		if _, found := paramValues["WFConditions"]; found {
-			var wfConditions, hasConditions = paramValues["WFConditions"].(map[string]interface{})
-			if !hasConditions {
-				decompError(fmt.Sprintf("Expected WFConditions to be a dictionary, got %T", paramValues["WFConditions"]), action)
-			}
+			var wfConditions = expectType[map[string]interface{}](paramValues["WFConditions"], "WFConditions", "a dictionary", action)
 			var conditionsValue, hasValue = wfConditions["Value"].(map[string]interface{})
 			if !hasValue {
 				decompError("Expected WFConditions to have a Value dictionary", action)
@@ -414,11 +411,7 @@ func checkParamIdentifiers(params map[string]interface{}, action *ShortcutAction
 					if filterTemplate["WFInput"] == nil {
 						continue
 					}
-					var templateInput, hasInput = filterTemplate["WFInput"].(map[string]interface{})
-					if !hasInput {
-						decompError(fmt.Sprintf("Expected WFInput of a condition to be a dictionary, got %T", filterTemplate["WFInput"]), action)
-					}
-					checkParamIdentifiers(templateInput, action)
+					checkParamIdentifiers(expectType[map[string]interface{}](filterTemplate["WFInput"], "WFInput of a condition", "a dictionary", action), action)
 				}
 			}
 		}
@@ -427,17 +420,10 @@ func checkParamIdentifiers(params map[string]interface{}, action *ShortcutAction
 
 // conditionTemplates returns the conditions in the Value of a WFConditions parameter.
 func conditionTemplates(conditionsValue map[string]interface{}, action *ShortcutAction) (templates []map[string]interface{}) {
-	var templateValues, isSlice = conditionsValue["WFActionParameterFilterTemplates"].([]interface{})
-	if !isSlice {
-		decompError(fmt.Sprintf("Expected WFActionParameterFilterTemplates to be an array, got %T", conditionsValue["WFActionParameterFilterTemplates"]), action)
-	}
+	var templateValues = expectType[[]interface{}](conditionsValue["WFActionParameterFilterTemplates"], "WFActionParameterFilterTemplates", "an array", action)
 
 	for _, templateValue := range templateValues {
-		var template, isMap = templateValue.(map[string]interface{})
-		if !isMap {
-			decompError(fmt.Sprintf("Expected a condition to be a dictionary, got %T", templateValue), action)
-		}
-		templates = append(templates, template)
+		templates = append(templates, expectType[map[string]interface{}](templateValue, "a condition", "a dictionary", action))
 	}
 
 	return
@@ -1611,10 +1597,7 @@ func decompConditionNumber(operand any) string {
 }
 
 func decompQuantity(operand any, key string, action *ShortcutAction) string {
-	var duration, isMap = operand.(map[string]interface{})
-	if !isMap {
-		decompError(fmt.Sprintf("Expected %s to be a WFQuantityFieldValue, got %T", key, operand), action)
-	}
+	var duration = expectType[map[string]interface{}](operand, key, "a WFQuantityFieldValue", action)
 	var quantity, hasValue = duration["Value"].(map[string]interface{})
 	if !hasValue || quantity["Magnitude"] == nil || quantity["Unit"] == nil {
 		decompError(fmt.Sprintf("Expected %s to have a Value with a Magnitude and a Unit", key), action)
@@ -1717,10 +1700,7 @@ func decompNumberItem(text string) (number json.Number, isNumber bool) {
 }
 
 func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
-	var itemValueMap, isMap = item.WFValue.(map[string]interface{})
-	if !isMap {
-		decompError(fmt.Sprintf("Expected a dictionary item value to be a dictionary, got %T", item.WFValue), currentDecompAction())
-	}
+	var itemValueMap = expectType[map[string]interface{}](item.WFValue, "a dictionary item value", "a dictionary", currentDecompAction())
 	var itemValue any
 
 	if dictDataType(item.WFItemType) == itemTypeFile {
@@ -1749,11 +1729,7 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	case itemTypeText:
 		itemValue = decompValue(item.WFValue)
 	case itemTypeArray:
-		var arrayItems, isSlice = itemValueMap["Value"].([]interface{})
-		if !isSlice {
-			decompError(fmt.Sprintf("Expected an array dictionary item value to be an array, got %T", itemValueMap["Value"]), currentDecompAction())
-		}
-		itemValue = decompArray(arrayItems)
+		itemValue = decompArray(expectType[[]interface{}](itemValueMap["Value"], "an array dictionary item value", "an array", currentDecompAction()))
 	case itemTypeDict:
 		var dictionaryItems []WFDictionaryFieldValueItem
 		var value, hasValue = itemValueMap["Value"].(map[string]interface{})
@@ -1966,9 +1942,7 @@ func decompValueObject(value map[string]interface{}) string {
 		}
 	}
 	if aggrandizements, found := value["Aggrandizements"]; found {
-		if _, isArray := aggrandizements.([]interface{}); !isArray {
-			decompError(fmt.Sprintf("Expected Aggrandizements of a reference to be an array, got %T", aggrandizements), currentDecompAction())
-		}
+		expectType[[]interface{}](aggrandizements, "Aggrandizements of a reference", "an array", currentDecompAction())
 	}
 
 	var reference Value
@@ -2061,23 +2035,15 @@ func decompObjectValue(valueObj any) string {
 
 	var text string
 	if _, found := value["string"]; found {
-		var valueString, isString = value["string"].(string)
-		if !isString {
-			decompError(fmt.Sprintf("Expected string of a text value to be a string, got %T", value["string"]), currentDecompAction())
-		}
-		text = valueString
+		text = expectType[string](value["string"], "string of a text value", "a string", currentDecompAction())
 	}
 
 	var attachments, found = value["attachmentsByRange"]
 	if !found {
 		return decompTextLiteral(text, false)
 	}
-	var attachmentsMap, isAttachmentsMap = attachments.(map[string]interface{})
-	if !isAttachmentsMap {
-		decompError(fmt.Sprintf("Expected attachmentsByRange to be a dictionary, got %T", attachments), currentDecompAction())
-	}
 
-	return decompAttachmentString(text, attachmentsMap)
+	return decompAttachmentString(text, expectType[map[string]interface{}](attachments, "attachmentsByRange", "a dictionary", currentDecompAction()))
 }
 
 // decompAttachmentString substitutes each attachment into the text and writes it as text. Attachment
@@ -2604,11 +2570,7 @@ func matchAction(action *ShortcutAction) (name string, definition actionDefiniti
 	if _, hasSelf := workflow["isSelf"]; !hasSelf {
 		return
 	}
-	var isSelf, isBool = workflow["isSelf"].(bool)
-	if !isBool {
-		decompError(fmt.Sprintf("Expected isSelf of WFWorkflow to be a boolean, got %T", workflow["isSelf"]), action)
-	}
-	if isSelf || action.WFWorkflowActionParameters["WFWorkflowName"] == basename {
+	if expectType[bool](workflow["isSelf"], "isSelf of WFWorkflow", "a boolean", action) || action.WFWorkflowActionParameters["WFWorkflowName"] == basename {
 		name = "runSelf"
 		definition = *actions["runSelf"]
 	} else {
@@ -2906,42 +2868,34 @@ func readParam(action *ShortcutAction, key string) any {
 	return value
 }
 
-func paramMap(action *ShortcutAction, key string) map[string]interface{} {
-	var value = requiredParam(action, key)
-	var mapValue, isMap = value.(map[string]interface{})
-	if !isMap {
-		decompError(fmt.Sprintf("Expected the parameter '%s' to be a dictionary, got %T", key, value), action)
+// expectType stops unless value is a T, as a value read from the Shortcut can have any shape. what and typeName
+// are written into the error as "Expected <what> to be <typeName>, got <actual type>".
+func expectType[T any](value any, what string, typeName string, action *ShortcutAction) T {
+	var typed, matches = value.(T)
+	if !matches {
+		decompError(fmt.Sprintf("Expected %s to be %s, got %T", what, typeName, value), action)
 	}
 
-	return mapValue
+	return typed
+}
+
+// requiredParamAs returns the value of key, which the action must have as a T.
+func requiredParamAs[T any](action *ShortcutAction, key string, typeName string) T {
+	return expectType[T](requiredParam(action, key), "the parameter '"+key+"'", typeName, action)
+}
+
+func paramMap(action *ShortcutAction, key string) map[string]interface{} {
+	return requiredParamAs[map[string]interface{}](action, key, "a dictionary")
 }
 
 func paramString(action *ShortcutAction, key string) string {
-	var value = requiredParam(action, key)
-	var stringValue, isString = value.(string)
-	if !isString {
-		decompError(fmt.Sprintf("Expected the parameter '%s' to be a string, got %T", key, value), action)
-	}
-
-	return stringValue
+	return requiredParamAs[string](action, key, "a string")
 }
 
 func paramSlice(action *ShortcutAction, key string) []interface{} {
-	var value = requiredParam(action, key)
-	var sliceValue, isSlice = value.([]interface{})
-	if !isSlice {
-		decompError(fmt.Sprintf("Expected the parameter '%s' to be an array, got %T", key, value), action)
-	}
-
-	return sliceValue
+	return requiredParamAs[[]interface{}](action, key, "an array")
 }
 
 func controlFlowMode(action *ShortcutAction) uint64 {
-	var value = requiredParam(action, "WFControlFlowMode")
-	var mode, isInt = value.(uint64)
-	if !isInt {
-		decompError(fmt.Sprintf("Expected the parameter 'WFControlFlowMode' to be an integer, got %T", value), action)
-	}
-
-	return mode
+	return requiredParamAs[uint64](action, "WFControlFlowMode", "an integer")
 }

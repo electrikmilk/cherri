@@ -228,10 +228,7 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
-			var colorNumber, isNumber = requiredParam(action, "WFLabelColorNumber").(uint64)
-			if !isNumber {
-				decompError(fmt.Sprintf("Expected WFLabelColorNumber to be an integer, got %T", readParam(action, "WFLabelColorNumber")), action)
-			}
+			var colorNumber = expectType[uint64](requiredParam(action, "WFLabelColorNumber"), "WFLabelColorNumber", "an integer", action)
 			var recovered = make(map[string]string)
 			for color, number := range fileLabelsMap {
 				if colorNumber == uint64(number) {
@@ -1569,11 +1566,7 @@ func decompAppAction(key string, action *ShortcutAction) (arguments []string) {
 		return append(arguments, decompApp(app, key, action))
 	case []interface{}:
 		for _, item := range app {
-			var appItem, isMap = item.(map[string]interface{})
-			if !isMap {
-				decompError(fmt.Sprintf("Expected an app of '%s' to be a dictionary, got %T", key, item), action)
-			}
-			arguments = append(arguments, decompApp(appItem, key, action))
+			arguments = append(arguments, decompApp(expectType[map[string]interface{}](item, fmt.Sprintf("an app of '%s'", key), "a dictionary", action), key, action))
 		}
 		return
 	}
