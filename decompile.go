@@ -12,7 +12,6 @@ import (
 	"os"
 	"regexp"
 	"slices"
-	"sort"
 	"strconv"
 	"strings"
 	"unicode/utf16"
@@ -565,8 +564,8 @@ func mapSplitActions() {
 		})
 	}
 	for _, candidates := range identifierMap {
-		sort.Slice(candidates, func(i, j int) bool {
-			return candidates[i].identifier < candidates[j].identifier
+		slices.SortFunc(candidates, func(a actionValue, b actionValue) int {
+			return cmp.Compare(a.identifier, b.identifier)
 		})
 	}
 }
@@ -794,11 +793,11 @@ func decompileQuestions() {
 	writtenQuestions = make(map[questionKey]bool)
 
 	var questions = slices.Clone(shortcut.WFWorkflowImportQuestions)
-	sort.SliceStable(questions, func(i, j int) bool {
-		if questions[i].ActionIndex != questions[j].ActionIndex {
-			return questions[i].ActionIndex < questions[j].ActionIndex
+	slices.SortStableFunc(questions, func(a WFQuestion, b WFQuestion) int {
+		if a.ActionIndex != b.ActionIndex {
+			return cmp.Compare(a.ActionIndex, b.ActionIndex)
 		}
-		return questions[i].ParameterKey < questions[j].ParameterKey
+		return cmp.Compare(a.ParameterKey, b.ParameterKey)
 	})
 
 	var number = 1
@@ -875,13 +874,9 @@ func isIdentifierTaken(identifier string, claimedIdentifiers map[string]bool) bo
 	if claimedIdentifiers[identifier] || validReference(identifier) || slices.Contains([]string{"true", "false", "nil"}, identifier) {
 		return true
 	}
-	for _, name := range uuids {
-		if name == identifier {
-			return true
-		}
-	}
 
-	return slices.Contains(slices.Collect(maps.Values(loopIdentifiers)), identifier)
+	return slices.Contains(slices.Collect(maps.Values(uuids)), identifier) ||
+		slices.Contains(slices.Collect(maps.Values(loopIdentifiers)), identifier)
 }
 
 // questionArgument returns the question that holds the value of the parameter of the current action.
@@ -1997,7 +1992,7 @@ func decompGlobal(referenceType string) string {
 			globalTypes = append(globalTypes, global.variableType)
 		}
 	}
-	sort.Strings(globalTypes)
+	slices.Sort(globalTypes)
 	decompError(fmt.Sprintf("Expected a reference of type Variable, ActionOutput or a global (%s), got '%s'", strings.Join(globalTypes, ", "), referenceType), currentDecompAction())
 
 	return ""
@@ -2060,7 +2055,7 @@ func decompAttachmentString(text string, attachments map[string]interface{}) str
 		positions = append(positions, position)
 		attachmentsByPosition[position] = a
 	}
-	sort.Ints(positions)
+	slices.Sort(positions)
 
 	var result strings.Builder
 	var consumed int
@@ -2261,7 +2256,7 @@ func warnDroppedParameters(name string, definition *actionDefinition, action *Sh
 		return
 	}
 
-	sort.Strings(dropped)
+	slices.Sort(dropped)
 	decompWarning(fmt.Sprintf("The parameters %s of %s() have no argument to be written as and are left out.", strings.Join(dropped, ", "), name))
 }
 
@@ -2615,20 +2610,23 @@ func matchSplitAction(splitActions *[]actionValue, action *ShortcutAction, ident
 		decompError(fmt.Sprintf("Expected the parameters to fit one of the actions %s", strings.Join(names, ", ")), action)
 	}
 
-	sort.SliceStable(matches, func(i, j int) bool {
-		if matches[i].params != matches[j].params {
-			return matches[i].params > matches[j].params
+	slices.SortStableFunc(matches, func(a actionMatch, b actionMatch) int {
+		if a.params != b.params {
+			return cmp.Compare(b.params, a.params)
 		}
-		if matches[i].values != matches[j].values {
-			return matches[i].values > matches[j].values
+		if a.values != b.values {
+			return cmp.Compare(b.values, a.values)
 		}
-		if matches[i].missing != matches[j].missing {
-			return matches[i].missing < matches[j].missing
+		if a.missing != b.missing {
+			return cmp.Compare(a.missing, b.missing)
 		}
-		if matches[i].action.definition.defaultAction != matches[j].action.definition.defaultAction {
-			return matches[i].action.definition.defaultAction
+		if a.action.definition.defaultAction != b.action.definition.defaultAction {
+			if a.action.definition.defaultAction {
+				return -1
+			}
+			return 1
 		}
-		return matches[i].action.identifier < matches[j].action.identifier
+		return cmp.Compare(a.action.identifier, b.action.identifier)
 	})
 
 	if args.Using("debug") {
