@@ -185,6 +185,14 @@ func effectiveType(definition varValue) tokenType {
 	return definition.valueType
 }
 
+// isDictionaryReference is whether a key on the reference is a dictionary key, otherwise it is a property
+// of a content item. Shortcut generation and key validation must agree on this, so both use it.
+func isDictionaryReference(identifier string) bool {
+	var definition, _ = resolveDefinition(identifier)
+
+	return effectiveType(definition) == Dict
+}
+
 // referenceType is the type of a reference as written at its use site, where a coercion
 // takes precedence over the type of the definition behind it.
 func referenceType(reference varValue) tokenType {

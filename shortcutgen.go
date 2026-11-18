@@ -380,8 +380,7 @@ func referenceAggrandizements(reference varValue) []Aggrandizement {
 	var aggrandizements []Aggrandizement
 	if reference.getAs != "" {
 		var identifier, _ = reference.value.(string)
-		var definition, _ = resolveDefinition(identifier)
-		if effectiveType(definition) == Dict {
+		if isDictionaryReference(identifier) {
 			aggrandizements = append(aggrandizements, Aggrandizement{
 				Type:          "WFDictionaryValueVariableAggrandizement",
 				DictionaryKey: reference.getAs,
