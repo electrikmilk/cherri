@@ -1,4 +1,4 @@
-// compile-only: alarms, timers, stopwatch and world clock change state on the device
+// compile-only: alarms, timers, stopwatch, world clock and reminders groups change state on the device
 
 @alarm = "alarm"
 
@@ -43,5 +43,13 @@ removeWorldClock(["Cairo", "Austin"], false)
 removeWorldClock(@cities)
 
 openClockTab("timer")
+
+const group = makeRemindersGroup("Test")
+makeRemindersGroup("Test 2", ShortcutInput)
+const section = makeRemindersSection("Section")
+makeRemindersSection("Section 2", ShortcutInput)
+deleteRemindersGroups(group, true)
+deleteRemindersSections(section)
+deleteRemindersSections(section, true)
 
 show("✅ All tests passed")
