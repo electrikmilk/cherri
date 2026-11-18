@@ -204,6 +204,16 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
+	"findAlbums": {
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			var params = limitEnabledParams(args, 1)
+			if len(args) > 0 && args[0].valueType != Nil {
+				params["WFContentItemSortProperty"] = "creationDate"
+			}
+
+			return params
+		},
+	},
 	"getTravelTime": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) > 2 && args[2].valueType != Nil {
