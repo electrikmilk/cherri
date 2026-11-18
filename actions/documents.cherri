@@ -145,6 +145,19 @@ enum notesOrderings {
 // [Doc]: [Notes] Filter Notes: Get notes from the Notes library, sorted by `sortBy` in `orderBy` order, up to `limit` notes.
 action internal 'filter.notes' filterNotes(notesSortBy ?sortBy: 'WFContentItemSortProperty', notesOrderings ?orderBy: 'WFContentItemSortOrder', number ?limit: 'WFContentItemLimitNumber'): array
 
+// [Doc]: [Notes] Append Note Section: Append text to the `section` of a note.
+action #Notes.AppendToNoteLinkAction 'appendnote' appendNoteSection(text note: 'WFNote', text section: 'section', text input: 'WFInput') {
+	"ignoreWhitespace": true,
+	"interpretAsMarkdown": true
+}
+
+// [Doc]: [Notes] Prepend Note Section: Prepend text to the `section` of a note.
+action #Notes.AppendToNoteLinkAction 'appendnote' prependNoteSection(text note: 'WFNote', text section: 'section', text input: 'WFInput') {
+	"operation": "prepend",
+	"ignoreWhitespace": true,
+	"interpretAsMarkdown": true
+}
+
 // [Doc]: [Notes] Show Quick Note: Show quick note.
 action 'com.apple.mobilenotes.ShowQuickNoteIntent' showQuickNote()
 
