@@ -21,8 +21,7 @@ const location = location(Ask)
 	},
 	"key7": [
 		5,
-		6
-	],
+		6],
 	"key": "",
 	"key2": "value",
 	"key3": false,

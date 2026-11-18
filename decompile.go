@@ -1846,16 +1846,17 @@ func writeLiteral(literal *strings.Builder, value any, level int) {
 			return
 		}
 
+		// The compiler does not skip whitespace before the closing bracket of an array, so it
+		// follows the last item on the same line.
 		literal.WriteString("[\n")
 		for i, item := range typedValue {
 			literal.WriteString(inner)
 			writeLiteral(literal, item, level+1)
 			if i < len(typedValue)-1 {
-				literal.WriteRune(',')
+				literal.WriteString(",\n")
 			}
-			literal.WriteRune('\n')
 		}
-		literal.WriteString(outer + "]")
+		literal.WriteRune(']')
 	case bareReference:
 		literal.WriteString(string(typedValue))
 	default:

@@ -175,8 +175,7 @@ func TestDecomp(t *testing.T) {
 var roundTripKnownFailures = map[string]string{
 	"ask-prompts": "the prompt of an Ask in a function call argument is inside the dictionary of the call, and Cherri has no syntax for a prompt inside text, an array or a dictionary",
 	"calendar":    "addWorldClock() and the other world clock actions build their city parameters in Go and have no decomp hook to read the city back",
-	"dictionary":  "the compiler rejects an array literal written over several lines (Array missing ending bracket), which is how arrays are decompiled",
-	"functions":   "the compiler rejects an array literal written over several lines (Array missing ending bracket), which is how the arguments of a function call are decompiled",
+	"functions":   "the compiler writes the @items += item of the functions header for an array argument as an Append to Variable of an output named Variable 1 that no action has",
 	"menus":       "the compiler writes @items += makeVCard() as an Append to Variable of an output named Variable 1 that no action has",
 	"standard":    "the compiler writes the @items += item of the functions header for an array argument as an Append to Variable of an output named Variable 1 that no action has",
 }
