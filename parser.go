@@ -356,78 +356,99 @@ func collectVariableValue(constant bool, valueType *tokenType, value *any) {
 	if *valueType == Question {
 		parserError(fmt.Sprintf("Illegal reference to import question '%s'. Shortcuts does not support import questions as variable values.", *value))
 	}
-
-	var aheadOfValue = lookAheadUntil('\n')
-	if strings.Contains(aheadOfValue, "//") || strings.Contains(aheadOfValue, "/*") {
-		return
-	}
-	if containsExpressionTokens(aheadOfValue) {
-		collectExpression(valueType, value)
-		return
-	}
 	if constant && (*valueType == Arr || *valueType == Variable) {
 		parserError(fmt.Sprintf("Type %v values cannot be constants.", *valueType))
 	}
 }
 
-func collectExpression(valueType *tokenType, value *any) {
-	if !slices.Contains([]tokenType{Integer, Float, Variable}, *valueType) {
-		parserError(fmt.Sprintf("Value of type '%s' not allowed in expression", *valueType))
+// collectExpressionAfterValue continues the value just collected as an expression when an
+// operator follows it.
+func collectExpressionAfterValue(valueType *tokenType, value *any) {
+	if !slices.Contains([]tokenType{Integer, Float, Variable, Action}, *valueType) || !operatorAhead() {
+		return
 	}
-	if *valueType == Variable {
-		var valueRef = *value
-		*value = fmt.Sprintf("{%s}", valueRef.(varValue).value)
-	} else {
-		*value = fmt.Sprintf("%v", *value)
-	}
-	*valueType = Expression
 
-	for char != -1 && char != '\n' {
-		collectExpressionValue(value)
+	var expression strings.Builder
+	expression.WriteString(operandValue(*valueType, *value))
+	collectExpression(valueType, value, &expression)
+}
+
+// collectExpression collects the operations that follow the operands already in expression.
+func collectExpression(valueType *tokenType, value *any, expression *strings.Builder) {
+	collectOperations(expression)
+
+	*valueType = Expression
+	*value = expression.String()
+}
+
+func collectOperations(expression *strings.Builder) {
+	for operatorAhead() {
+		skipInlineWhitespace()
+		expression.WriteString(fmt.Sprintf(" %c ", char))
+		advance()
+		collectOperand(expression)
 	}
 }
 
-func collectExpressionValue(value *any) {
-	switch char {
-	case ' ':
-		fallthrough
-	case '+':
-		fallthrough
-	case '-':
-		fallthrough
-	case '*':
-		fallthrough
+func collectOperand(expression *strings.Builder) {
+	skipInlineWhitespace()
+	if char == '(' {
+		advance()
+		expression.WriteRune('(')
+		collectOperand(expression)
+		collectOperations(expression)
+
+		skipInlineWhitespace()
+		if char != ')' {
+			parserError("Expected ')' to close group in expression")
+		}
+		advance()
+		expression.WriteRune(')')
+		return
+	}
+
+	var valueType tokenType
+	var value any
+	switch {
+	case intChar(char):
+		collectIntegerValue(&valueType, &value)
+	case actionCallAhead():
+		collectActionValue(&valueType, &value)
+	default:
+		collectReference(&valueType, &value, isChar('@'))
+	}
+
+	expression.WriteString(operandValue(valueType, value))
+}
+
+// operandValue returns how a collected operand is written in an expression. Action calls are
+// inserted before the expression so the expression can reference their output.
+func operandValue(valueType tokenType, value any) string {
+	if valueType == Action {
+		actionCallToReference(&valueType, &value)
+	}
+	if valueType == Variable {
+		return fmt.Sprintf("{%s}", makeVariableReferenceString(value.(varValue)))
+	}
+
+	return fmt.Sprintf("%v", value)
+}
+
+// operatorAhead reports whether an arithmetic operator follows the cursor, ignoring spaces.
+func operatorAhead() bool {
+	var spaces int
+	for next(spaces) == ' ' || next(spaces) == '\t' {
+		spaces++
+	}
+
+	switch next(spaces) {
+	case '+', '-', '*', '%':
+		return true
 	case '/':
-		fallthrough
-	case '%':
-		fallthrough
-	case '(':
-		fallthrough
-	case ')':
-		*value = fmt.Sprintf("%s%c", *value, char)
-		advance()
-		return
+		return !commentStartAhead(spaces)
 	}
 
-	if intChar(char) {
-		var intValueType tokenType
-		var intValue any
-		collectIntegerValue(&intValueType, &intValue)
-
-		*value = fmt.Sprintf("%s%v", *value, intValue)
-		return
-	}
-
-	var until = ' '
-	var refType tokenType
-	var refValue any
-	var varRef = false
-	if char == '@' {
-		advance()
-		varRef = true
-	}
-	collectReference(&refType, &refValue, &until, varRef)
-	*value = fmt.Sprintf("%s{%s}", *value, refValue.(varValue).value)
+	return false
 }
 
 func collectValue(valueType *tokenType, value *any, until rune) {
@@ -457,12 +478,12 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 		*valueType = Dict
 		*value = collectDictionary()
 	case char == '(':
-		*valueType = Integer
-		*value = ""
-		collectExpression(valueType, value)
+		var expression strings.Builder
+		collectOperand(&expression)
+		collectExpression(valueType, value, &expression)
 	case char == '@':
 		advance()
-		collectReference(valueType, value, &until, true)
+		collectReference(valueType, value, true)
 	case tokenAhead(Color):
 		*valueType = Color
 		collectColorValue(value)
@@ -478,11 +499,13 @@ func collectValue(valueType *tokenType, value *any, until rune) {
 	case tokenAhead(Nil):
 		*valueType = Nil
 		advanceUntil(until)
-	case strings.Contains(ahead, "("):
+	case actionCallAhead():
 		collectActionValue(valueType, value)
 	default:
-		collectReference(valueType, value, &until, false)
+		collectReference(valueType, value, false)
 	}
+
+	collectExpressionAfterValue(valueType, value)
 }
 
 func collectColorValue(value *any) {
@@ -618,10 +641,10 @@ func checkCoerce(coerce string) {
 	}
 
 	var list = makeKeyList("Available content item types:", contentItems, coerce)
-	parserError(fmt.Sprintf("Invalid content item for type coerce '%s'\n\n%s\n", coerce, list))
+	parserError(fmt.Sprintf("Invalid content item type coercion '%s'\n\n%s\n", coerce, list))
 }
 
-func collectReference(valueType *tokenType, value *any, until *rune, variable bool) {
+func collectReference(valueType *tokenType, value *any, variable bool) {
 	var reference = collectIdentifier()
 	var getAs string
 	var coerce string
@@ -683,7 +706,7 @@ func collectReference(valueType *tokenType, value *any, until *rune, variable bo
 	}
 	if char == '.' {
 		advance()
-		coerce = collectUntil(*until)
+		coerce = collectIdentifier()
 	}
 
 	isInputVariable(reference)
@@ -720,16 +743,26 @@ func insertReference(identifier string, valueType tokenType, value any, constant
 
 // Inserts action value as a reference and converts value to a reference to that call.
 func actionCallToReference(valueType *tokenType, value *any) {
-	var actionValue = *value
+	var inlineActionIdentifier = makeInlineActionName((*value).(action))
+	insertInlineReference(inlineActionIdentifier, valueType, value)
+}
 
-	var inlineActionIdentifier = makeInlineActionName(actionValue.(action))
-	insertReference(inlineActionIdentifier, *valueType, *value, true)
+// Inserts an expression as a reference and converts value to a reference to that expression.
+// Places that require a reference, like conditionals, cannot hold an expression because its
+// action has to be inserted before the statement using it.
+func expressionToReference(valueType *tokenType, value *any) {
+	var inlineExpressionIdentifier = checkDuplicateReferenceName("Expression")
+	insertInlineReference(inlineExpressionIdentifier, valueType, value)
+}
+
+func insertInlineReference(identifier string, valueType *tokenType, value *any) {
+	insertReference(identifier, *valueType, *value, true)
 
 	*valueType = Variable
 	*value = varValue{
 		variableType: "Variable",
 		valueType:    Variable,
-		value:        inlineActionIdentifier,
+		value:        identifier,
 		constant:     true,
 	}
 }
@@ -738,6 +771,16 @@ func makeInlineActionName(action action) string {
 	var customOutputName = capitalize(action.ident)
 
 	return checkDuplicateReferenceName(customOutputName)
+}
+
+// actionCallAhead reports whether the cursor is on an identifier immediately followed by '('.
+func actionCallAhead() bool {
+	var identifierLength int
+	for isIdentifierChar(next(identifierLength)) {
+		identifierLength++
+	}
+
+	return identifierLength > 0 && next(identifierLength) == '('
 }
 
 func collectEnumeration() {
@@ -833,6 +876,9 @@ func collectArgument(argIndex *int, param *parameterDefinition, paramsSize *int)
 	collectValue(&valueType, &value, endOfNextItem(')'))
 	if valueType == Action {
 		actionCallToReference(&valueType, &value)
+	}
+	if valueType == Expression {
+		expressionToReference(&valueType, &value)
 	}
 
 	skipWhitespace()
@@ -1026,7 +1072,7 @@ func collectType(valueType *tokenType, value *any, until rune) {
 func collectIdentifier() string {
 	var identifier strings.Builder
 	for char != -1 {
-		if unicode.IsLetter(char) || unicode.IsDigit(char) || char == '_' {
+		if isIdentifierChar(char) {
 			identifier.WriteRune(char)
 			advance()
 			continue
@@ -1036,6 +1082,10 @@ func collectIdentifier() string {
 	}
 
 	return identifier.String()
+}
+
+func isIdentifierChar(ch rune) bool {
+	return unicode.IsLetter(ch) || unicode.IsDigit(ch) || ch == '_'
 }
 
 func collectDefinition() {
@@ -1263,6 +1313,9 @@ func collectRepeat(identifier string) {
 	var timesType tokenType
 	var timesValue any
 	collectValue(&timesType, &timesValue, '{')
+	if timesType == Expression {
+		expressionToReference(&timesType, &timesValue)
+	}
 	advanceTimes(2)
 
 	tokens = append(tokens,
@@ -1416,6 +1469,9 @@ func collectConditional() (conditional condition) {
 	var variableOneType tokenType
 	var variableOneValue any
 	collectValue(&variableOneType, &variableOneValue, ' ')
+	if variableOneType == Expression {
+		expressionToReference(&variableOneType, &variableOneValue)
+	}
 	conditional.arguments = append(conditional.arguments, actionArgument{
 		valueType: variableOneType,
 		value:     variableOneValue,
@@ -1447,6 +1503,9 @@ func collectConditional() (conditional condition) {
 		var variableTwoType tokenType
 		var variableTwoValue any
 		collectValue(&variableTwoType, &variableTwoValue, ' ')
+		if variableTwoType == Expression {
+			expressionToReference(&variableTwoType, &variableTwoValue)
+		}
 		conditional.arguments = append(conditional.arguments, actionArgument{
 			valueType: variableTwoType,
 			value:     variableTwoValue,
@@ -1459,6 +1518,9 @@ func collectConditional() (conditional condition) {
 			var variableThreeValue any
 
 			collectValue(&variableThreeType, &variableThreeValue, '{')
+			if variableThreeType == Expression {
+				expressionToReference(&variableThreeType, &variableThreeValue)
+			}
 			conditional.arguments = append(conditional.arguments, actionArgument{
 				valueType: variableThreeType,
 				value:     variableThreeValue,
@@ -1720,6 +1782,9 @@ func collectArray() (array []any) {
 		if valueType == Action {
 			actionCallToReference(&valueType, &value)
 		}
+		if valueType == Expression {
+			expressionToReference(&valueType, &value)
+		}
 
 		array = append(array, value)
 
@@ -1793,6 +1858,9 @@ func collectDictionaryItem() (key string, value any) {
 	collectValue(&valueType, &value, endOfNextItem('}'))
 	if valueType == Action {
 		actionCallToReference(&valueType, &value)
+	}
+	if valueType == Expression {
+		expressionToReference(&valueType, &value)
 	}
 	if valueType == Variable {
 		if currentAction.identifier != "" && currentAction.identifier != "formRequest" && currentAction.identifier != "rawAction" {
@@ -1956,6 +2024,11 @@ func commentAhead() bool {
 	return isChar('/') && (nextChar == '/' || nextChar == '*')
 }
 
+// commentStartAhead reports whether a comment starts offset characters ahead without advancing.
+func commentStartAhead(offset int) bool {
+	return next(offset) == '/' && (next(offset+1) == '/' || next(offset+1) == '*')
+}
+
 func startOfLineTokenAhead(token tokenType) bool {
 	return lineCharIdx == 0 && tokenAhead(token)
 }
@@ -1974,10 +2047,6 @@ func tokenAhead(token tokenType) bool {
 
 	advanceTimes(tokenLen)
 	return true
-}
-
-func containsExpressionTokens(str string) bool {
-	return containsTokens(&str, Plus, Minus, Multiply, Divide, Modulus, LeftParen, RightParen)
 }
 
 func containsTokens(str *string, v ...tokenType) bool {

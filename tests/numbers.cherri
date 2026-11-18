@@ -25,6 +25,129 @@ if modulus != 1 {
     mustOutput("❌ FAIL: modulus — got {modulus}, expected '1'", "❌ FAIL: modulus — got {modulus}, expected '1'")
 }
 
+// expression starting with a variable reference does not need parentheses
+@base = 5
+const fromVariable = @base + 3
+if fromVariable != 8 {
+    mustOutput("❌ FAIL: variable-first expression — got {fromVariable}, expected '8'", "❌ FAIL: variable-first expression — got {fromVariable}, expected '8'")
+}
+
+// expression starting with a constant reference
+const five = 5
+const fromConstant = five + 3
+if fromConstant != 8 {
+    mustOutput("❌ FAIL: constant-first expression — got {fromConstant}, expected '8'", "❌ FAIL: constant-first expression — got {fromConstant}, expected '8'")
+}
+
+// a group sets the order of operations, at the start of an expression or after an operator
+const grouped = (@base + 5) * 2
+if grouped != 20 {
+    mustOutput("❌ FAIL: grouped expression — got {grouped}, expected '20'", "❌ FAIL: grouped expression — got {grouped}, expected '20'")
+}
+const groupedAfterOperator = 2 * (@base + 5)
+if groupedAfterOperator != 20 {
+    mustOutput("❌ FAIL: group after operator — got {groupedAfterOperator}, expected '20'", "❌ FAIL: group after operator — got {groupedAfterOperator}, expected '20'")
+}
+
+// action call inside an expression, after the same action was already assigned
+@words = list("a", "b", "c")
+@wordCount = count(@words)
+const counted = count(@words) + 1
+if @wordCount != 3 {
+    mustOutput("❌ FAIL: action call count — got {@wordCount}, expected '3'", "❌ FAIL: action call count — got {@wordCount}, expected '3'")
+}
+if counted != 4 {
+    mustOutput("❌ FAIL: action call in expression — got {counted}, expected '4'", "❌ FAIL: action call in expression — got {counted}, expected '4'")
+}
+
+// expression as an action argument
+const asArgument = number(@base + 1)
+if asArgument != 6 {
+    mustOutput("❌ FAIL: expression argument — got {asArgument}, expected '6'", "❌ FAIL: expression argument — got {asArgument}, expected '6'")
+}
+
+// expression as the first value of a conditional
+if (@base + 1) > 6 || (@base + 1) < 6 {
+    mustOutput("❌ FAIL: expression conditional — 6 is neither greater nor less than 6", "❌ FAIL: expression conditional — 6 is neither greater nor less than 6")
+}
+
+// expression in a repeat count
+@repeats = 0
+repeat i for 1 + 1 {
+    @repeats += 1
+}
+if @repeats != 2 {
+    mustOutput("❌ FAIL: expression repeat count — got {@repeats}, expected '2'", "❌ FAIL: expression repeat count — got {@repeats}, expected '2'")
+}
+
+// expression in array and dictionary items
+@exprArray = [@base + 1, @base + 2]
+const exprArrayItem = getListItem(@exprArray, 2)
+if exprArrayItem.text != "7" {
+    mustOutput("❌ FAIL: expression array item — got {exprArrayItem}, expected '7'", "❌ FAIL: expression array item — got {exprArrayItem}, expected '7'")
+}
+@exprDict = {"total": @base + 1}
+const exprDictTotal = getValue(@exprDict, "total")
+if exprDictTotal.text != "6" {
+    mustOutput("❌ FAIL: expression dictionary item — got {exprDictTotal}, expected '6'", "❌ FAIL: expression dictionary item — got {exprDictTotal}, expected '6'")
+}
+
+// expression followed by a comment
+const commented = @base + 2 // not part of the expression
+if commented != 7 {
+    mustOutput("❌ FAIL: expression with comment — got {commented}, expected '7'", "❌ FAIL: expression with comment — got {commented}, expected '7'")
+}
+
+// action call in the middle and at the end of an expression
+const leadingOperand = 5 + count(@words)
+if leadingOperand != 8 {
+    mustOutput("❌ FAIL: action call as last operand — got {leadingOperand}, expected '8'", "❌ FAIL: action call as last operand — got {leadingOperand}, expected '8'")
+}
+const twoActionCalls = count(@words) * count(@words)
+if twoActionCalls != 9 {
+    mustOutput("❌ FAIL: two action calls — got {twoActionCalls}, expected '9'", "❌ FAIL: two action calls — got {twoActionCalls}, expected '9'")
+}
+
+// a constant first operand followed by an action call
+const constantThenAction = five + count(@words)
+if constantThenAction != 8 {
+    mustOutput("❌ FAIL: constant then action call — got {constantThenAction}, expected '8'", "❌ FAIL: constant then action call — got {constantThenAction}, expected '8'")
+}
+
+// expressions in a conditional do not need parentheses
+if @base + 1 != 6 {
+    mustOutput("❌ FAIL: unparenthesized first value — 5 + 1 is 6", "❌ FAIL: unparenthesized first value — 5 + 1 is 6")
+}
+if @base != 2 + 3 {
+    mustOutput("❌ FAIL: unparenthesized second value — 2 + 3 is 5", "❌ FAIL: unparenthesized second value — 2 + 3 is 5")
+}
+
+// action call in an expression, before the same action is assigned
+const countedFirst = count(@words) + 1
+@countedLater = count(@words)
+if countedFirst != 4 {
+    mustOutput("❌ FAIL: action call before assignment — got {countedFirst}, expected '4'", "❌ FAIL: action call before assignment — got {countedFirst}, expected '4'")
+}
+if @countedLater != 3 {
+    mustOutput("❌ FAIL: assignment after action call — got {@countedLater}, expected '3'", "❌ FAIL: assignment after action call — got {@countedLater}, expected '3'")
+}
+
+// property coercion and dictionary key reads start an expression
+const coerced = @base.number + 1
+if coerced != 6 {
+    mustOutput("❌ FAIL: coerced reference expression — got {coerced}, expected '6'", "❌ FAIL: coerced reference expression — got {coerced}, expected '6'")
+}
+const keyRead = @exprDict['total'] + 1
+if keyRead != 7 {
+    mustOutput("❌ FAIL: dictionary key expression — got {keyRead}, expected '7'", "❌ FAIL: dictionary key expression — got {keyRead}, expected '7'")
+}
+
+// an expression with more than one operation as an action argument
+const complexArgument = number((@base + 1) * 2)
+if complexArgument != 12 {
+    mustOutput("❌ FAIL: complex expression argument — got {complexArgument}, expected '12'", "❌ FAIL: complex expression argument — got {complexArgument}, expected '12'")
+}
+
 // randomNumber: assert within range only (value is non-deterministic)
 @rand = randomNumber(1, 10)
 if @rand < 1 {

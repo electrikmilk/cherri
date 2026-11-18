@@ -252,7 +252,7 @@ func makeBoolValue(reference *WFActionReference, value *any) {
 func makeExpressionValue(reference *WFActionReference, value *any) {
 	var expression = fmt.Sprintf("%s", *value)
 	var expressionParts = strings.Split(expression, " ")
-	if len(expressionParts) == 3 && containsTokens(&expression, Plus, Minus, Multiply, Divide) {
+	if len(expressionParts) == 3 && containsTokens(&expression, Plus, Minus, Multiply, Divide) && !strings.ContainsAny(expression, "()") {
 		makeMathValue(reference, expression, expressionParts)
 		return
 	}
