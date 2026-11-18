@@ -77,10 +77,10 @@ var actions = map[string]*actionDefinition{
 				"repeats": repeats,
 			}
 		},
-		decomp: func(action *ShortcutAction) (arguments []string) {
+		decompRecover: func(action *ShortcutAction) map[string]string {
 			var recovered = make(map[string]string)
 			if _, found := optionalParam(action, "repeats"); !found {
-				return decompHookArguments(action, recovered)
+				return recovered
 			}
 
 			var weekdays []interface{}
@@ -94,7 +94,7 @@ var actions = map[string]*actionDefinition{
 			}
 			recovered["repeatWeekdays"] = decompLiteral(weekdays)
 
-			return decompHookArguments(action, recovered)
+			return recovered
 		},
 	},
 	"addWorldClock": {
@@ -194,7 +194,7 @@ var actions = map[string]*actionDefinition{
 
 			return
 		},
-		decomp: func(action *ShortcutAction) (arguments []string) {
+		decompRecover: func(action *ShortcutAction) map[string]string {
 			var recovered = make(map[string]string)
 			if phone, found := decompSingleContactValue(action, "WFContactPhoneNumbers", phoneNumber); found {
 				recovered["phoneNumber"] = phone
@@ -203,7 +203,7 @@ var actions = map[string]*actionDefinition{
 				recovered["emailAddress"] = email
 			}
 
-			return decompHookArguments(action, recovered)
+			return recovered
 		},
 	},
 	"labelFile": {
@@ -218,14 +218,14 @@ var actions = map[string]*actionDefinition{
 				"WFLabelColorNumber": fileLabelsMap[color],
 			}
 		},
-		decomp: func(action *ShortcutAction) (arguments []string) {
+		decompRecover: func(action *ShortcutAction) map[string]string {
 			var colorNumber = expectType[uint64](requiredParam(action, "WFLabelColorNumber"), "WFLabelColorNumber", "an integer", action)
 			var color, found = firstKeyWithValue(int(colorNumber), fileLabelsMap)
 			if !found {
 				decompError(fmt.Sprintf("Expected WFLabelColorNumber to be a file label color number, got %v", colorNumber), action)
 			}
 
-			return decompHookArguments(action, map[string]string{"color": decompValue(color)})
+			return map[string]string{"color": decompValue(color)}
 		},
 	},
 	"filterFiles": {
@@ -266,7 +266,7 @@ var actions = map[string]*actionDefinition{
 				"WFGetTextFromPDFTextType": "Text",
 			}
 		},
-		decomp: func(action *ShortcutAction) (arguments []string) {
+		decompRecover: func(action *ShortcutAction) map[string]string {
 			var recovered = make(map[string]string)
 			if textType, found := optionalParam(action, "WFGetTextFromPDFTextType"); found {
 				// Text is written whether richText is false or left out, so only Rich Text needs the argument.
@@ -279,7 +279,7 @@ var actions = map[string]*actionDefinition{
 				}
 			}
 
-			return decompHookArguments(action, recovered)
+			return recovered
 		},
 	},
 	"containsText": {
@@ -323,7 +323,7 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
-		decomp: func(action *ShortcutAction) (arguments []string) {
+		decompRecover: func(action *ShortcutAction) map[string]string {
 			var file = paramMap(action, "WFFile")
 			var fileLocation, hasLocation = file["fileLocation"].(map[string]interface{})
 			if !hasLocation {
@@ -349,9 +349,9 @@ var actions = map[string]*actionDefinition{
 				folder = root + "/" + subpath
 			}
 
-			return decompHookArguments(action, map[string]string{
+			return map[string]string{
 				"folder": decompValue(folder),
-			})
+			}
 		},
 	},
 	"splitText": {
@@ -409,13 +409,13 @@ var actions = map[string]*actionDefinition{
 
 			return defaultAnswer
 		},
-		decomp: func(action *ShortcutAction) (arguments []string) {
+		decompRecover: func(action *ShortcutAction) map[string]string {
 			var recovered = make(map[string]string)
 			if defaultAnswer, found := optionalParam(action, "WFAskActionDefaultAnswer"); found {
 				recovered["defaultValue"] = decompValue(defaultAnswer)
 			}
 
-			return decompHookArguments(action, recovered)
+			return recovered
 		},
 	},
 	"openApp": {
@@ -711,7 +711,7 @@ var actions = map[string]*actionDefinition{
 				}
 			}
 		},
-		decomp: func(action *ShortcutAction) (arguments []string) {
+		decompRecover: func(action *ShortcutAction) map[string]string {
 			var recovered = make(map[string]string)
 			// Any other sort order is read as is, a variable or the asc or desc kept for a random sort.
 			var storedOrder, _ = readParam(action, "WFContentItemSortOrder").(string)
@@ -724,7 +724,7 @@ var actions = map[string]*actionDefinition{
 				}
 			}
 
-			return decompHookArguments(action, recovered)
+			return recovered
 		},
 	},
 	"convertMeasurement": {
@@ -918,12 +918,12 @@ var actions = map[string]*actionDefinition{
 				"WFContactContentItem" + detailKey: argumentValue(args, 2),
 			}
 		},
-		decomp: func(action *ShortcutAction) (arguments []string) {
+		decompRecover: func(action *ShortcutAction) map[string]string {
 			var detailKey = "WFContactContentItem" + strings.ReplaceAll(paramString(action, "WFContentItemPropertyName"), " ", "")
 
-			return decompHookArguments(action, map[string]string{
+			return map[string]string{
 				"value": decompValue(requiredParam(action, detailKey)),
-			})
+			}
 		},
 	},
 	"setWindowedMultitasking": {
@@ -941,12 +941,12 @@ var actions = map[string]*actionDefinition{
 	"setFocusMode": {
 		check:            checkFocusModeLiteral,
 		appendParamsFunc: focusModeParams,
-		decomp:           decompFocusModeAction,
+		decompRecover:    decompFocusMode,
 	},
 	"toggleFocusMode": {
 		check:            checkFocusModeLiteral,
 		appendParamsFunc: focusModeParams,
-		decomp:           decompFocusModeAction,
+		decompRecover:    decompFocusMode,
 	},
 	"generateImage": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
@@ -972,10 +972,10 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
-		decomp: func(action *ShortcutAction) (arguments []string) {
+		decompRecover: func(action *ShortcutAction) map[string]string {
 			var recovered = make(map[string]string)
 			if _, found := optionalParam(action, "style"); !found {
-				return decompHookArguments(action, recovered)
+				return recovered
 			}
 
 			var identifier = paramMap(action, "style")["identifier"]
@@ -986,7 +986,7 @@ var actions = map[string]*actionDefinition{
 				}
 			}
 
-			return decompHookArguments(action, recovered)
+			return recovered
 		},
 	},
 }
@@ -1092,10 +1092,6 @@ func focusModeParams(args []actionArgument) map[string]any {
 	}
 
 	return map[string]any{}
-}
-
-func decompFocusModeAction(action *ShortcutAction) []string {
-	return decompHookArguments(action, decompFocusMode(action))
 }
 
 var actionIncludes = []string{

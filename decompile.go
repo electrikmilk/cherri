@@ -56,8 +56,6 @@ func resetDecompiler() {
 	assignedVariables = make(map[string]bool)
 	identifierMap = nil
 	readParameters = make(map[string]bool)
-	decompHookName = ""
-	decompHookDefinition = nil
 	decompilingText = false
 	decompilingDictionary = false
 	macDefinition = false
@@ -2232,7 +2230,7 @@ func makeActionCallCode(action *ShortcutAction) string {
 
 	actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
 
-	if matchedAction.makeParams != nil || matchedAction.decomp != nil {
+	if matchedAction.makeParams != nil || matchedAction.decomp != nil || matchedAction.decompRecover != nil {
 		decompActionCustom(&actionCallCode, matchedIdentifier, &matchedAction, action)
 	} else {
 		actionCallCode.WriteString(strings.Join(decompParameters(matchedIdentifier, matchedAction.parameters, action, nil), ", "))
@@ -2357,17 +2355,6 @@ func isLoopAction(action *ShortcutAction) bool {
 
 func actionIdentifierEnd(identifier string) string {
 	return strings.Replace(identifier, "is.workflow.actions.", "", 1)
-}
-
-// decompHookName and decompHookDefinition are the action whose decomp hook is running. Hooks cannot
-// look their own definition up in actions, as they are part of its initialization.
-var decompHookName string
-var decompHookDefinition *actionDefinition
-
-// decompHookArguments is decompParameters for a decomp hook, which passes the values it recovered
-// in recovered by parameter name.
-func decompHookArguments(action *ShortcutAction, recovered map[string]string) []string {
-	return decompParameters(decompHookName, decompHookDefinition.parameters, action, recovered)
 }
 
 // decompParameters writes one argument per parameter, as arguments are matched to parameters by
@@ -2763,13 +2750,16 @@ func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameter
 }
 
 func decompActionCustom(actionCode *strings.Builder, name string, matchedAction *actionDefinition, action *ShortcutAction) {
-	if matchedAction.decomp == nil {
+	if matchedAction.decomp == nil && matchedAction.decompRecover == nil {
 		decompError(fmt.Sprintf("Expected %s() to have a decomp hook, as it builds its parameters with makeParams", name), action)
 	}
 
-	decompHookName = name
-	decompHookDefinition = matchedAction
-	var arguments = matchedAction.decomp(action)
+	var arguments []string
+	if matchedAction.decompRecover != nil {
+		arguments = decompParameters(name, matchedAction.parameters, action, matchedAction.decompRecover(action))
+	} else {
+		arguments = matchedAction.decomp(action)
+	}
 	if len(arguments) == 0 {
 		return
 	}

@@ -89,6 +89,7 @@ type actionDefinition struct {
 	appendParamsFunc   paramsFunc     // appendParamsFunc allows for adding additional parameters based on the provided arguments without disabling automatic handling.
 	derivedKeys        []string       // derivedKeys are the parameters the compiler writes whatever the arguments are, or works out from them, so decompiling does not warn that they are left out.
 	decomp             func(action *ShortcutAction) (arguments []string)
+	decompRecover      func(action *ShortcutAction) map[string]string // decompRecover is decomp for an action whose arguments are written by parameter, as it only recovers the values by parameter name.
 	appIntent          appIntent
 	outputType         tokenType
 	defaultAction      bool // Default action for this identifier during decompilation.
@@ -1050,6 +1051,7 @@ func defineAction(name string, definition *actionDefinition, compilerDefinition 
 		definition.appendParamsFunc = compilerDefinition.appendParamsFunc
 		definition.derivedKeys = compilerDefinition.derivedKeys
 		definition.decomp = compilerDefinition.decomp
+		definition.decompRecover = compilerDefinition.decompRecover
 	}
 
 	definition.parsed = true
