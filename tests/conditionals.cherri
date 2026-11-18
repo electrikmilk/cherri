@@ -108,4 +108,81 @@ if @r != "right" { mustOutput("❌ FAIL: has value", "❌ FAIL: has value") }
 if !@empty { @r = "right" }
 if @r != "right" { mustOutput("❌ FAIL: is empty", "❌ FAIL: is empty") }
 
+// else if chains
+@chain = 0
+repeat step for 4 {
+    @chain += 1
+    @r = "wrong"
+    if @chain == 1 {
+        @r = "one"
+    } else if @chain == 2 {
+        @r = "two"
+    } else if @chain == 3 {
+        @r = "three"
+    } else {
+        @r = "other"
+    }
+    @expected = "other"
+    if @chain == 1 { @expected = "one" }
+    if @chain == 2 { @expected = "two" }
+    if @chain == 3 { @expected = "three" }
+    if @r != @expected {
+        mustOutput("❌ FAIL: else if chain at {@chain} - got {@r}, expected {@expected}", "❌ FAIL: else if chain at {@chain} - got {@r}, expected {@expected}")
+    }
+}
+
+// else on the line after the closing brace
+@n = 2
+@r = "wrong"
+if @n == 1 {
+    @r = "one"
+}
+else if @n == 2 {
+    @r = "two"
+}
+else {
+    @r = "other"
+}
+if @r != "two" { mustOutput("❌ FAIL: else if on its own line", "❌ FAIL: else if on its own line") }
+
+// an if nested in an else if block
+@n = 2
+@m = 5
+@r = "wrong"
+if @n == 1 {
+    @r = "one"
+} else if @n == 2 {
+    if @m == 5 {
+        @r = "nested"
+    } else {
+        @r = "nested else"
+    }
+} else {
+    @r = "other"
+}
+if @r != "nested" { mustOutput("❌ FAIL: if nested in else if", "❌ FAIL: if nested in else if") }
+
+// else if with &&
+@n = 2
+@r = "wrong"
+if @n == 1 {
+    @r = "one"
+} else if @n > 1 && @n < 3 {
+    @r = "between"
+} else {
+    @r = "other"
+}
+if @r != "between" { mustOutput("❌ FAIL: else if with &&", "❌ FAIL: else if with &&") }
+
+@n = 5
+@r = "wrong"
+if @n == 1 {
+    @r = "one"
+} else if @n > 1 && @n < 3 {
+    @r = "between"
+} else {
+    @r = "other"
+}
+if @r != "other" { mustOutput("❌ FAIL: else if with && falls through", "❌ FAIL: else if with && falls through") }
+
 show("✅ All tests passed")

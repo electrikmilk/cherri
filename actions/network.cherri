@@ -32,6 +32,35 @@ action 'getwifi' getCellularDetail(cellularDetail detail: 'WFCellularDetail') {
 	"WFNetworkDetailsNetwork": "Cellular"
 }
 
+enum ethernetDetail {
+	'Ethernet Standard',
+	'Hardware MAC Address',
+	'IPv4 Address',
+	'IPv6 Address',
+	'Interface Name',
+	'Is Connected',
+	'Link Speed',
+	'Router IP',
+	'Subnet Mask',
+}
+
+// [Doc]: [Wireless] Get Ethernet Detail: Get a detail of the current Ethernet network.
+action v27 'getwifi' getEthernetDetail(ethernetDetail detail: 'WFEthernetDetail') {
+	"WFNetworkDetailsNetwork": "Ethernet"
+}
+
+enum vpnSortBy {
+	'Name',
+	'Random',
+	'Server Address',
+}
+
+// [Doc]: [VPN] Get Current VPN: Get the VPN that is currently connected.
+action v27 'vpn.get' getCurrentVPN()
+
+// [Doc]: [VPN] Find VPNs: Find VPNs, optionally sorted and limited.
+action internal v27 'filter.vpns' findVPNs(vpnSortBy ?sortBy: 'WFContentItemSortProperty', abcSortOrder ?orderBy: 'WFContentItemSortOrder', number ?limit: 'WFContentItemLimitNumber')
+
 // [Doc]: [Server] Connect to Server: Connect to file server at `url`.
 action 'connecttoservers' connectToServer(text url: 'WFInput')
 

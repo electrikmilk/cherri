@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"regexp"
 	"slices"
@@ -28,6 +29,7 @@ type controlFlowGroup struct {
 	identifier string
 	groupType  tokenType
 	uuid       string
+	hasElse    bool // Shortcuts has nothing after the plain Otherwise of an if.
 }
 
 var controlFlowGroups map[int]controlFlowGroup
@@ -1452,7 +1454,16 @@ func collectConditionals(identifier string) {
 
 	var group = groupStatement(Conditional, &identifier)
 
-	var conditions WFConditions
+	tokens = append(tokens, token{
+		typeof:    Conditional,
+		ident:     group.uuid,
+		valueType: If,
+		value:     collectConditionList(),
+	})
+}
+
+// collectConditionList collects the conditions up to the opening brace and moves past it.
+func collectConditionList() (conditions WFConditions) {
 	conditions.WFActionParameterFilterPrefix = -1
 	for char != 1 && char != '{' {
 		var conditional = collectConditional()
@@ -1463,12 +1474,7 @@ func collectConditionals(identifier string) {
 
 	advance()
 
-	tokens = append(tokens, token{
-		typeof:    Conditional,
-		ident:     group.uuid,
-		valueType: If,
-		value:     conditions,
-	})
+	return
 }
 
 func collectFilterPrefix(wfConditions *WFConditions) {
@@ -1661,16 +1667,35 @@ func collectEndStatement() {
 
 	if tokenAhead(Else) {
 		skipWhitespace()
-		if _, ok := controlFlowGroups[groupingIdx]; !ok {
+		var group, found = controlFlowGroups[groupingIdx]
+		if !found || group.groupType != Conditional {
 			parserError("Else has no starting if statement.")
 		}
-		// Shortcuts has no "else if", it would be parsed as a nested if that never gets closed.
-		if !tokenAhead(LeftBrace) {
-			parserError("Else must be followed by '{', nest an if statement inside the else block instead of using 'else if'.")
+		if group.hasElse {
+			parserError("Else or else if cannot follow an else.")
 		}
+		if tokenAhead(If) {
+			if iosVersion < 27.0 {
+				parserError(fmt.Sprintf("'else if' is not available in set minimum version '%.1f'", math.Ceil(iosVersion)))
+			}
+			advance()
+			// Otherwise If belongs to the group of the if that opened the chain, which has one End If.
+			tokens = append(tokens, token{
+				typeof:    Conditional,
+				ident:     group.uuid,
+				valueType: Else,
+				value:     collectConditionList(),
+			})
+			return
+		}
+		if !tokenAhead(LeftBrace) {
+			parserError("Else must be followed by '{' or 'if'.")
+		}
+		group.hasElse = true
+		controlFlowGroups[groupingIdx] = group
 		tokens = append(tokens, token{
 			typeof:    Conditional,
-			ident:     controlFlowGroups[groupingIdx].uuid,
+			ident:     group.uuid,
 			valueType: Else,
 			value:     nil,
 		})

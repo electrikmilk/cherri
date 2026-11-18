@@ -125,6 +125,19 @@ action #Notes.OpenNoteLinkAction 'shownote' openNote(variable note: 'WFInput')
 // [Doc]: [Notes] Append Note: Append text to a note.
 action #Notes.AppendToNoteLinkAction 'appendnote' appendNote(text note: 'WFNote', text input: 'WFInput')
 
+// [Doc]: [Notes] Append Note Section: Append text to the `section` of a note.
+action #Notes.AppendToNoteLinkAction 'appendnote' appendNoteSection(text note: 'WFNote', text section: 'section', text input: 'WFInput') {
+	"ignoreWhitespace": true,
+	"interpretAsMarkdown": true
+}
+
+// [Doc]: [Notes] Prepend Note Section: Prepend text to the `section` of a note.
+action #Notes.AppendToNoteLinkAction 'appendnote' prependNoteSection(text note: 'WFNote', text section: 'section', text input: 'WFInput') {
+	"operation": "prepend",
+	"ignoreWhitespace": true,
+	"interpretAsMarkdown": true
+}
+
 // [Doc]: [Notes] Show Quick Note: Show quick note.
 action 'com.apple.mobilenotes.ShowQuickNoteIntent' showQuickNote()
 
