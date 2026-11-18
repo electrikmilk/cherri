@@ -1275,9 +1275,6 @@ func collectQuestion() {
 	case '{':
 		advance()
 		defaultValue = collectDictionary()
-		if defaultValue == nil {
-			defaultValue = map[string]any{}
-		}
 	default:
 		parserError("Expected question default string or dictionary value.")
 	}
