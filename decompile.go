@@ -737,7 +737,7 @@ func defineNoInput() {
 		if !hasMessage {
 			definitionError(fmt.Sprintf("Expected the Parameters of %s to have an Error that is text, got %T", key, parameters["Error"]), key)
 		}
-		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define noinput %s \"%s\"", StopWith, escapeString(message)))
+		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define noinput %s %s", StopWith, doubleQuoted(message)))
 	case "WFWorkflowNoInputBehaviorAskForInput":
 		var class, hasClass = parameters["ItemClass"].(string)
 		if !hasClass {
@@ -819,7 +819,7 @@ func decompileQuestions() {
 		var identifier = makeQuestionIdentifier(question.Text, &number, claimedIdentifiers)
 		claimedIdentifiers[identifier] = true
 		questionIdentifiers[questionKey{question.ActionIndex, question.ParameterKey}] = identifier
-		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#question %s \"%s\" %s", identifier, escapeString(question.Text), defaultValue))
+		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#question %s %s %s", identifier, doubleQuoted(question.Text), defaultValue))
 	}
 }
 
@@ -828,7 +828,7 @@ func decompileQuestions() {
 func decompQuestionDefault(question WFQuestion) (defaultValue string, isWritable bool) {
 	switch value := question.DefaultValue.(type) {
 	case string:
-		return fmt.Sprintf("\"%s\"", escapeString(value)), true
+		return doubleQuoted(value), true
 	case map[string]interface{}:
 		var action = &ShortcutAction{WFWorkflowActionIdentifier: "an import question"}
 		if question.ActionIndex >= 0 && question.ActionIndex < len(shortcut.WFWorkflowActions) {
@@ -1859,6 +1859,11 @@ func escapeString(value string) string {
 	return stringEscaper.Replace(value)
 }
 
+// doubleQuoted writes text as a double quoted Cherri string, with no regard for a brace in it, unlike quoteString.
+func doubleQuoted(text string) string {
+	return fmt.Sprintf("\"%s\"", escapeString(text))
+}
+
 // quoteString is the only place text becomes a Cherri string literal, so every caller passes the
 // text as it is in the Shortcut and never trims or escapes it first. Text that has its inline
 // references already written as {reference} is passed with hasReferences.
@@ -1867,7 +1872,7 @@ func escapeString(value string) string {
 // one as inline references, so text with a literal brace is written as a raw string.
 func quoteString(text string, hasReferences bool) string {
 	if hasReferences || !strings.ContainsAny(text, "{}") {
-		return fmt.Sprintf("\"%s\"", escapeString(text))
+		return doubleQuoted(text)
 	}
 
 	return quoteRawString(text)
