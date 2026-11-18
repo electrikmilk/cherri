@@ -297,11 +297,12 @@ func makeDictionaryValue(value *any, fileItems bool) WFDictionaryFieldValue {
 func variableValueModifier(token *token, reference *WFActionReference) {
 	var valueType = token.valueType
 	if valueType == Variable {
-		var variable = token.value.(varValue)
-		valueType = variable.valueType
+		if definition, found := resolveDefinition(token.value.(varValue).value.(string)); found {
+			valueType = effectiveType(definition)
+		}
 	}
 	switch valueType {
-	case Integer:
+	case Integer, Float:
 		var operation string
 		switch token.typeof {
 		case AddTo:
@@ -765,7 +766,7 @@ func makeOutputName(token *token) string {
 			return token.ident
 		}
 	}
-	if token.valueType == Variable && token.value != nil {
+	if token.typeof == Variable && token.valueType == Variable && token.value != nil {
 		var identifier = token.value.(varValue).value.(string)
 		if validReference(identifier) {
 			return identifier

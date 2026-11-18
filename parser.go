@@ -953,6 +953,14 @@ func collectVariable(constant bool) {
 
 		collectVariableValue(constant, &valueType, &value)
 
+		if varType != Variable {
+			switch valueType {
+			case Action:
+				actionCallToReference(&valueType, &value)
+			case Expression:
+				expressionToReference(&valueType, &value)
+			}
+		}
 		if valueType == Variable && value.(varValue).value == "Ask" {
 			parserError("Ask global cannot be used as a variable value.")
 		}

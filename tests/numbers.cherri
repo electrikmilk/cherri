@@ -148,6 +148,25 @@ if complexArgument != 12 {
     mustOutput("❌ FAIL: complex expression argument — got {complexArgument}, expected '12'", "❌ FAIL: complex expression argument — got {complexArgument}, expected '12'")
 }
 
+// compound assignment with a variable, an expression, and an action call
+@compound = 3
+@compound += @base
+if @compound != 8 {
+    mustOutput("❌ FAIL: add variable — got {@compound}, expected '8'", "❌ FAIL: add variable — got {@compound}, expected '8'")
+}
+@compound -= 1 + 1
+if @compound != 6 {
+    mustOutput("❌ FAIL: subtract expression — got {@compound}, expected '6'", "❌ FAIL: subtract expression — got {@compound}, expected '6'")
+}
+@compound += @compound * 2
+if @compound != 18 {
+    mustOutput("❌ FAIL: add expression using itself — got {@compound}, expected '18'", "❌ FAIL: add expression using itself — got {@compound}, expected '18'")
+}
+@compound *= count(@words)
+if @compound != 54 {
+    mustOutput("❌ FAIL: multiply action call — got {@compound}, expected '54'", "❌ FAIL: multiply action call — got {@compound}, expected '54'")
+}
+
 // randomNumber: assert within range only (value is non-deterministic)
 @rand = randomNumber(1, 10)
 if @rand < 1 {
