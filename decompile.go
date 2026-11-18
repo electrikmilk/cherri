@@ -1001,9 +1001,20 @@ func checkConstantLiteral(action *ShortcutAction) {
 		return
 	}
 
-	newCodeLine(fmt.Sprintf("const %s = ", outputName))
+	writeConstant(outputName)
+}
+
+// writeConstant writes the current value as the constant name.
+func writeConstant(name string) {
+	newCodeLine(fmt.Sprintf("const %s = ", name))
 	code.WriteString(currentVariableValue)
 	code.WriteRune('\n')
+	currentVariableValue = ""
+}
+
+// writeStatementLine writes line as a statement on its own line, which consumes the current value.
+func writeStatementLine(line string) {
+	newCodeLine(line + "\n")
 	currentVariableValue = ""
 }
 
@@ -1020,9 +1031,7 @@ func writeUnreferencedCall(action *ShortcutAction) {
 		call = makeActionCallCode(action)
 	}
 
-	code.WriteString(tabbedLine(call))
-	code.WriteRune('\n')
-	currentVariableValue = ""
+	writeStatementLine(call)
 }
 
 func makeConstantLiteral(action *ShortcutAction) {
@@ -1031,10 +1040,7 @@ func makeConstantLiteral(action *ShortcutAction) {
 	}
 	var actionUUID = paramString(action, UUID)
 	if outputName, found := uuids[actionUUID]; found {
-		newCodeLine(fmt.Sprintf("const %s = ", outputName))
-		code.WriteString(currentVariableValue)
-		code.WriteRune('\n')
-		currentVariableValue = ""
+		writeConstant(outputName)
 	}
 }
 
@@ -2162,9 +2168,7 @@ func decompAction(action *ShortcutAction) {
 	} else if isVariableValue {
 		currentVariableUUID = paramString(action, UUID)
 	} else {
-		code.WriteString(tabbedLine(currentVariableValue))
-		code.WriteRune('\n')
-		currentVariableValue = ""
+		writeStatementLine(currentVariableValue)
 	}
 }
 
