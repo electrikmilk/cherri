@@ -22,7 +22,7 @@ if @smallerStr != "no" {
 }
 
 // compile-only: device-dependent and interactive values
-@deviceModel = "{Device['Model']}"
+@deviceModel = "{Device['Device Model']}"
 const connectionName = if @deviceModel == "iPhone" {
     getCellularDetail("Carrier Name")
 } else {

@@ -116,6 +116,7 @@ func initParse() {
 	if args.Using("debug") {
 		fmt.Printf("Parsing %s...\n", filename)
 	}
+	nameContentTypeLists()
 	variables = make(map[string]varValue)
 	questions = make(map[string]*question)
 	controlFlowGroups = make(map[int]controlFlowGroup)
@@ -622,12 +623,50 @@ func checkInlineVars(value *string) {
 			if !validVariableReference(&variableName) {
 				parserError(fmt.Sprintf("Undefined inline variable reference '%s'", variableName))
 			}
+			checkKey(variableName, match[2], match[3])
 			continue
 		}
 
 		if !validActionReference(&identifier) && !validGlobalReference(&identifier) {
 			parserError(fmt.Sprintf("Undefined inline reference '%s'. Variable references must be prefixed with @.", identifier))
 		}
+		checkKey(identifier, match[2], match[3])
+	}
+}
+
+func nameContentTypeLists() {
+	for name, list := range contentTypeProperties {
+		list.name = fmt.Sprintf("%s property", name)
+		list.plural = fmt.Sprintf("%s properties", name)
+		contentTypeProperties[name] = list
+	}
+}
+
+// checkKey validates the key of a reference. A dictionary is never validated as a content item, unlike
+// every other kind of reference. Only the keys of a constant dictionary are checked. A variable keeps its first definition, but can
+// be added to afterwards (e.g. with setValue), so its literal does not say which keys it holds.
+func checkKey(reference string, getAs string, coerce string) {
+	if getAs == "" {
+		return
+	}
+	if validGlobalReference(&reference) {
+		if propList, found := globalProperties[reference]; found {
+			propList.validate(&getAs)
+		}
+		return
+	}
+
+	if isDictionaryReference(reference) {
+		var dictionary = variables[reference]
+		var keys, isLiteral = dictionary.value.(map[string]any)
+		if _, found := keys[getAs]; dictionary.constant && isLiteral && !found {
+			parserError(fmt.Sprintf("Dictionary '%s' has no key '%s'", reference, getAs))
+		}
+		return
+	}
+
+	if propList, found := contentTypeProperties[coerce]; found {
+		propList.validate(&getAs)
 	}
 }
 
@@ -711,6 +750,7 @@ func collectReference(valueType *tokenType, value *any, variable bool) {
 	}
 
 	isInputVariable(reference)
+	checkKey(reference, getAs, coerce)
 
 	*valueType = Variable
 	*value = varValue{
