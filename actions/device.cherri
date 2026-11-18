@@ -35,6 +35,9 @@ action v26 'getcurrentapp' getVisibleApps() {
 // [Doc]: Get On-Screen Content: Get the content currently on-screen.
 action getOnScreenContent()
 
+// [Doc]: Get Selected Text: Get the text currently selected.
+action v27 'getselectedtext' getSelectedText(): text
+
 // [Doc]: [Display] Get Orientation: Get the current orientation of the device.
 action #ShortcutsActions.GetOrientationAction getOrientation(): text
 
