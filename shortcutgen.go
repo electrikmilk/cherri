@@ -1163,8 +1163,8 @@ func generateImportQuestions() (importQuestions []WFQuestion) {
 
 func generateInputContentItems() (inputContentItems []string) {
 	if len(inputs) == 0 {
-		for _, input := range contentItems {
-			inputContentItems = append(inputContentItems, input)
+		for _, input := range defaultContentItems {
+			inputContentItems = append(inputContentItems, contentItems[input])
 		}
 	} else {
 		for _, input := range inputs {
