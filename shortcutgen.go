@@ -393,7 +393,6 @@ func referenceAggrandizements(reference varValue) []Aggrandizement {
 		}
 	}
 	if reference.coerce != "" {
-		checkCoerce(reference.coerce)
 		aggrandizements = append(aggrandizements, Aggrandizement{
 			Type:              "WFCoercionVariableAggrandizement",
 			CoercionItemClass: contentItems[reference.coerce],
