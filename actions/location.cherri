@@ -17,6 +17,20 @@ action 'location' currentLocation() {
 	}
 }
 
+// [Doc]: Home Location: Get the home location of whoever runs the shortcut.
+action !mac v27 'location' homeLocation() {
+	"WFLocation": {
+		"isHomeLocation": true
+	}
+}
+
+// [Doc]: Work Location: Get the work location of whoever runs the shortcut.
+action !mac v27 'location' workLocation() {
+	"WFLocation": {
+		"isWorkLocation": true
+	}
+}
+
 // [Doc]: Get Current Location
 action 'getcurrentlocation' getCurrentLocation()
 
