@@ -109,6 +109,25 @@ action 'addquickreminder' addQuickReminder()
 // [Doc]: [Reminders] Remove Reminders
 action removeReminders(variable reminders: 'WFInputReminders')
 
+app Reminders 'com.apple.reminders' {
+    'CreateGroupAppIntent',
+    'CreateSectionAppIntent',
+    'DeleteRemindersListGroupsAppIntent',
+    'DeleteSectionsAppIntent'
+}
+
+// [Doc]: [Reminders] Make Reminders Group: Make a group of reminders lists named `name`, optionally containing `lists`.
+action v27 #Reminders.CreateGroupAppIntent makeRemindersGroup(text name, variable ?lists)
+
+// [Doc]: [Reminders] Make Reminders Section: Make a section named `name`, optionally in `list`.
+action v27 #Reminders.CreateSectionAppIntent makeRemindersSection(text name, variable ?list)
+
+// [Doc]: [Reminders] Delete Reminders Groups: Delete groups of reminders lists. Delete sublists also deletes the lists inside the groups.
+action v27 #Reminders.DeleteRemindersListGroupsAppIntent deleteRemindersGroups(variable groups: 'entities', bool ?deleteSublists)
+
+// [Doc]: [Reminders] Delete Reminders Sections: Delete sections of a reminders list. Delete reminders also deletes the reminders inside the sections.
+action v27 #Reminders.DeleteSectionsAppIntent deleteRemindersSections(variable sections: 'entities', bool ?deleteReminders)
+
 // [Doc]: [Clock] Create Alarm: Creates an alarm at a specific time with a name, snooze allowance, and applicable weekdays.
 action internal #Clock.CreateAlarmIntent 'com.apple.mobiletimer-framework.MobileTimerIntents.MTCreateAlarmIntent' createAlarm(text name: 'name', text time: 'dateComponents', bool ?allowsSnooze: 'allowsSnooze' = true, array ?repeatWeekdays, bool ?open: 'OpenWhenRun' = true)
 
