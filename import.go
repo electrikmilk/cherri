@@ -142,6 +142,9 @@ const (
 	lzfseEndOfStreamMagic = "bvx$"
 	lzvnBlockHeaderSize   = 12
 	lzvnEndOfStreamOp     = 0x06
+	// lzvnMaxExpansion is the most bytes a payload byte can decode to, as the longest match, 271 bytes,
+	// takes 2 bytes.
+	lzvnMaxExpansion = 136
 )
 
 // archiveFieldLengths are the sizes of the Apple Archive field types a Shortcut archive is made of.
@@ -243,7 +246,9 @@ func decodeLZVNStream(stream []byte) ([]byte, int, error) {
 
 // decodeLZVN decodes an LZVN payload, following the opcode layout of Apple's reference lzvn_decode_base.c.
 func decodeLZVN(payload []byte, rawSize int) ([]byte, error) {
-	var decoded = make([]byte, 0, rawSize)
+	// The raw size comes from the block header, so it is not trusted to size the buffer: a header
+	// that claims 4 GiB over a tiny payload must fail the size check below, not allocate it.
+	var decoded = make([]byte, 0, min(rawSize, len(payload)*lzvnMaxExpansion))
 	var distance int
 	for pos := 0; ; {
 		if pos >= len(payload) {
