@@ -520,8 +520,7 @@ func TestDecompileTextPartsKeepsEmptyCustomSeparator(t *testing.T) {
 }
 
 func TestSanitizeIdentifierWhitespaceOnly(t *testing.T) {
-	identifier := " "
-	sanitizeIdentifier(&identifier)
+	identifier := sanitizeIdentifier(" ")
 
 	if identifier != "" {
 		t.Fatalf("expected sanitized identifier to be empty, got %q", identifier)

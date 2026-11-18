@@ -64,7 +64,7 @@ func extractParameterReferences(index int, identifier string, params map[string]
 			ref.identifier = valueMap["CustomOutputName"].(string)
 		}
 
-		sanitizeIdentifier(&ref.identifier)
+		ref.identifier = sanitizeIdentifier(ref.identifier)
 
 		if skipDuplicateReference(ref) || ref.value == nil {
 			continue

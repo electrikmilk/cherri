@@ -27,7 +27,6 @@ const (
 )
 
 var code strings.Builder
-var specialCharsRegex *regexp.Regexp
 
 func decompile(b []byte) {
 	// A fresh Shortcut, so a key missing from this plist is not kept from one decompiled before.
@@ -271,8 +270,7 @@ func loopVariableAssignment(index int, variableName string) (identifier string, 
 		return
 	}
 
-	identifier = paramString(&next, "WFVariableName")
-	sanitizeIdentifier(&identifier)
+	identifier = sanitizeIdentifier(paramString(&next, "WFVariableName"))
 
 	return identifier, true
 }
@@ -347,8 +345,7 @@ func mapVariables() {
 	for index, action := range shortcut.WFWorkflowActions {
 		currentAction.identifier = action.WFWorkflowActionIdentifier
 		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
-			var varName = paramString(&action, "WFVariableName")
-			sanitizeIdentifier(&varName)
+			var varName = sanitizeIdentifier(paramString(&action, "WFVariableName"))
 			if _, found := variables[varName]; !found {
 				variables[varName] = varValue{}
 			}
@@ -520,29 +517,26 @@ func mapValueReference(value Value) {
 }
 
 func mapUUID(uuid string, varName string) {
-	var outputName string
 	if _, found := uuids[uuid]; !found {
-		outputName = varName
-		sanitizeIdentifier(&outputName)
-		uuids[uuid] = checkDuplicateOutputName(outputName)
+		uuids[uuid] = checkDuplicateOutputName(sanitizeIdentifier(varName))
 	}
 }
 
+var specialCharsRegex = regexp.MustCompile("[^a-zA-Z0-9_]+")
+
 // sanitizeIdentifier strips special characters and replaces dashes with underscores.
-func sanitizeIdentifier(identifier *string) {
-	if specialCharsRegex == nil {
-		specialCharsRegex = regexp.MustCompile("[^a-zA-Z0-9_]+")
-	}
-	if strings.Contains(*identifier, " ") {
-		var words = strings.Split(strings.TrimSpace(*identifier), " ")
+func sanitizeIdentifier(identifier string) string {
+	if strings.Contains(identifier, " ") {
+		var words = strings.Split(strings.TrimSpace(identifier), " ")
 		for i, word := range words {
 			words[i] = capitalize(word)
 		}
-		*identifier = strings.Join(words, "")
+		identifier = strings.Join(words, "")
 	}
 
-	*identifier = specialCharsRegex.ReplaceAllString(*identifier, "")
-	*identifier = strings.ReplaceAll(*identifier, "-", "_")
+	identifier = specialCharsRegex.ReplaceAllString(identifier, "")
+
+	return strings.ReplaceAll(identifier, "-", "_")
 }
 
 type actionValue struct {
@@ -846,8 +840,7 @@ func decompQuestionDefault(question WFQuestion) (defaultValue string, isWritable
 // makeQuestionIdentifier names a question for its text, so the question reads as what it asks. A text with
 // no name in it is named by the next number instead, and a name that is taken has a number added.
 func makeQuestionIdentifier(text string, number *int, claimedIdentifiers map[string]bool) string {
-	var baseIdentifier = text
-	sanitizeIdentifier(&baseIdentifier)
+	var baseIdentifier = sanitizeIdentifier(text)
 	if baseIdentifier == "" || (baseIdentifier[0] >= '0' && baseIdentifier[0] <= '9') {
 		return freshIdentifier("question", number, claimedIdentifiers)
 	}
@@ -1207,8 +1200,7 @@ func compoundAssignment(action *ShortcutAction, inputText string, operation stri
 	if next.WFWorkflowActionIdentifier != SetVariableIdentifier {
 		return
 	}
-	var variableName = paramString(&next, "WFVariableName")
-	sanitizeIdentifier(&variableName)
+	var variableName = sanitizeIdentifier(paramString(&next, "WFVariableName"))
 	if inputText != "@"+variableName || appendedVariables[variableName] {
 		return
 	}
@@ -1237,8 +1229,7 @@ var appendedVariables map[string]bool
 var assignedVariables map[string]bool
 
 func decompVariable(action *ShortcutAction) {
-	var variableName = paramString(action, "WFVariableName")
-	sanitizeIdentifier(&variableName)
+	var variableName = sanitizeIdentifier(paramString(action, "WFVariableName"))
 	newCodeLine(fmt.Sprintf("@%s", variableName))
 
 	var firstAssignment = !assignedVariables[variableName]
@@ -1969,8 +1960,7 @@ func decompReference(reference Value) string {
 			name = loopReference
 			break
 		}
-		name = reference.VariableName
-		sanitizeIdentifier(&name)
+		name = sanitizeIdentifier(reference.VariableName)
 		if !loopVariables[name] {
 			name = fmt.Sprintf("@%s", name)
 		}
@@ -1979,8 +1969,7 @@ func decompReference(reference Value) string {
 		if !found {
 			decompError(fmt.Sprintf("Expected the output UUID '%s' to belong to an earlier action", reference.OutputUUID), currentDecompAction())
 		}
-		sanitizeIdentifier(&outputName)
-		name = outputName
+		name = sanitizeIdentifier(outputName)
 	default:
 		name = decompGlobal(reference.Type)
 		if reference.Type == Ask && reference.Prompt != "" {
