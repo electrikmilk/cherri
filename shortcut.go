@@ -150,7 +150,7 @@ type WFConditionValue struct {
 }
 
 type WFConditionParam struct {
-	WFCondition               int             `plist:",omitempty"`
+	WFCondition               int
 	WFInput                   WFInputVariable `plist:",omitempty"`
 	WFConditionalActionString any             `plist:",omitempty"`
 	WFNumberValue             any             `plist:",omitempty"`
