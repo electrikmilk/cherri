@@ -22,12 +22,17 @@ var triggerIdentifiers = map[string]string{
 	"screenshot":   "WFScreenshotTrigger",
 	"battery":      "WFBatteryLevelTrigger",
 	"charger":      "WFPlugInTrigger",
+	"keyboard":     "WFKeyboardTrigger",
+	"carplay":      "WFCarPlayConnectionTrigger",
+	"airplaneMode": "WFAirplaneModeTrigger",
+	"lowPowerMode": "WFLowPowerModeTrigger",
 }
 
 var validScreenshotLocations = []string{"photos", "files", "clipboard"}
 var validStageManagerStates = []string{"on", "off", "both"}
 var validWifiConnectionStatus = []string{"joined", "disconnected", "both"}
 var validConnectionStatus = []string{"connect", "disconnect", "both"}
+var validToggleStates = []string{"on", "off", "both"}
 
 func checkTriggerIdentifier(identifier string) {
 	if triggerIdentifiers[identifier] == "" {
@@ -86,6 +91,18 @@ func collectTrigger() {
 	case "charger":
 		var list = valueList{name: "charger connection status", plural: "charger connection statuses", list: &validConnectionStatus}
 		triggerParams["WFConnectionType"] = list.parse('\n')
+	case "keyboard":
+		var list = valueList{name: "keyboard connection status", plural: "keyboard connection statuses", list: &validConnectionStatus}
+		triggerParams["WFConnectionType"] = list.parse('\n')
+	case "carplay":
+		var list = valueList{name: "CarPlay connection status", plural: "CarPlay connection statuses", list: &validConnectionStatus}
+		triggerParams["WFCarPlayConnectionType"] = list.parse('\n')
+	case "airplaneMode":
+		var list = valueList{name: "Airplane Mode state", list: &validToggleStates}
+		triggerParams["WFAirplaneModeType"] = list.parse('\n')
+	case "lowPowerMode":
+		var list = valueList{name: "Low Power Mode state", list: &validToggleStates}
+		triggerParams["WFLowPowerModeType"] = list.parse('\n')
 	}
 
 	var triggerUUID = createUUID(&collectIdentifier)
