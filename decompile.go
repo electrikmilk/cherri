@@ -48,6 +48,7 @@ func decompile(b []byte) {
 	controlFlowOutputUUIDs = []string{}
 	openLoops = nil
 	loopIdentifiers = make(map[string]string)
+	loopVariables = make(map[string]bool)
 	currentVariableValue = ""
 	currentVariableUUID = ""
 	currentVariableOperator = ""
@@ -168,6 +169,9 @@ var openLoops []openLoop
 // loopIdentifiers maps the GroupingIdentifier of each loop whose variable is referenced to the identifier the
 // loop declares, so a loop whose variable is never referenced can still be written with `_`.
 var loopIdentifiers map[string]string
+
+// loopVariables holds the identifiers that loops have declared, which are constants and so referenced without @.
+var loopVariables map[string]bool
 
 var loopVariableRegex = regexp.MustCompile("^Repeat (Index|Item)( [0-9]+)?$")
 
@@ -315,7 +319,7 @@ func loopVariableReference(variableName string) (reference string, isLoopVariabl
 		return "", false
 	}
 	if loop, found := findOpenLoop(variableName); found {
-		return fmt.Sprintf("@%s", loop.identifier), true
+		return loop.identifier, true
 	}
 	for name, global := range globals {
 		if global.value == variableName {
@@ -334,6 +338,7 @@ func loopDeclaration(action *ShortcutAction) string {
 		return "_"
 	}
 
+	loopVariables[loop.identifier] = true
 	return loop.identifier
 }
 
@@ -1908,7 +1913,9 @@ func decompReference(reference Value) string {
 		}
 		name = reference.VariableName
 		sanitizeIdentifier(&name)
-		name = fmt.Sprintf("@%s", name)
+		if !loopVariables[name] {
+			name = fmt.Sprintf("@%s", name)
+		}
 	case "ActionOutput":
 		var outputName, found = uuids[reference.OutputUUID]
 		if !found {
