@@ -87,6 +87,7 @@ type actionDefinition struct {
 	makeParams         paramsFunc     // makeParams overrides automatic handling of arguments for custom logic based on the arguments collected.
 	appendParams       map[string]any // appendParams allows for adding additional parameters not based on the provided arguments without affecting automatic handling.
 	appendParamsFunc   paramsFunc     // appendParamsFunc allows for adding additional parameters based on the provided arguments without disabling automatic handling.
+	derivedKeys        []string       // derivedKeys are the parameters the compiler writes whatever the arguments are, or works out from them, so decompiling does not warn that they are left out.
 	decomp             func(action *ShortcutAction) (arguments []string)
 	appIntent          appIntent
 	outputType         tokenType
@@ -1047,6 +1048,7 @@ func defineAction(name string, definition *actionDefinition, compilerDefinition 
 		definition.check = compilerDefinition.check
 		definition.makeParams = compilerDefinition.makeParams
 		definition.appendParamsFunc = compilerDefinition.appendParamsFunc
+		definition.derivedKeys = compilerDefinition.derivedKeys
 		definition.decomp = compilerDefinition.decomp
 	}
 

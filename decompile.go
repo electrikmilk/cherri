@@ -2215,28 +2215,12 @@ var readParameters = make(map[string]bool)
 // bookkeepingParameters are written by the compiler for every action that needs them, never from an argument.
 var bookkeepingParameters = []string{UUID, "CustomOutputName", "GroupingIdentifier", "WFControlFlowMode"}
 
-// derivedParameters are the parameters that the compiler writes for an action whatever its arguments are, or
-// works out from the arguments, so compiling the action again writes them again.
-var derivedParameters = map[string][]string{
-	"addToReadingList":            {"Show-WFURLActionURL"},
-	"filterFiles":                 {"WFContentItemLimitEnabled"},
-	"getWindows":                  {"WFContentItemLimitEnabled"},
-	"joinText":                    {"Show-text"},
-	"openApp":                     {"WFSelectedApp"},
-	"openCustomXCallbackURL":      {"WFXCallbackCustomCallbackEnabled", "WFXCallbackCustomSuccessURLEnabled"},
-	"prompt":                      {"WFAskActionDefaultAnswerNumber"},
-	"setStageManagerMultitasking": {"mode"},
-	"setWindowedMultitasking":     {"mode"},
-	"splitText":                   {"Show-text"},
-	"url":                         {"Show-WFURLActionURL"},
-}
-
 // warnDroppedParameters warns about the parameters of an action that no argument was written from, as the
 // action is still matched by its identifier but those values are lost when it is compiled again.
 func warnDroppedParameters(name string, definition *actionDefinition, action *ShortcutAction) {
 	var dropped []string
 	for key := range action.WFWorkflowActionParameters {
-		if readParameters[key] || slices.Contains(bookkeepingParameters, key) || slices.Contains(derivedParameters[name], key) {
+		if readParameters[key] || slices.Contains(bookkeepingParameters, key) || slices.Contains(definition.derivedKeys, key) {
 			continue
 		}
 		if key == "AppIntentDescriptor" && definition.appIntent != emptyAppIntent {

@@ -238,6 +238,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"filterFiles": {
+		derivedKeys: []string{"WFContentItemLimitEnabled"},
 		appendParamsFunc: func(args []actionArgument) (params map[string]any) {
 			if len(args) == 0 {
 				return map[string]any{}
@@ -363,14 +364,17 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"splitText": {
+		derivedKeys:      []string{"Show-text"},
 		appendParamsFunc: textParts,
 		decomp:           decompTextParts,
 	},
 	"joinText": {
+		derivedKeys:      []string{"Show-text"},
 		appendParamsFunc: textParts,
 		decomp:           decompTextParts,
 	},
 	"url": {
+		derivedKeys: []string{"Show-WFURLActionURL"},
 		makeParams: func(args []actionArgument) map[string]any {
 			var urlItems []any
 			for _, item := range args {
@@ -385,6 +389,7 @@ var actions = map[string]*actionDefinition{
 		decomp: decompInfiniteURLAction("WFURLActionURL"),
 	},
 	"addToReadingList": {
+		derivedKeys: []string{"Show-WFURLActionURL"},
 		makeParams: func(args []actionArgument) map[string]any {
 			var urlItems []any
 			for _, item := range args {
@@ -399,6 +404,7 @@ var actions = map[string]*actionDefinition{
 		decomp: decompInfiniteURLAction("WFURL"),
 	},
 	"prompt": {
+		derivedKeys: []string{"WFAskActionDefaultAnswerNumber"},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) < 3 {
 				return map[string]any{}
@@ -422,6 +428,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openApp": {
+		derivedKeys: []string{"WFSelectedApp"},
 		check: func(args []actionArgument, definition *actionDefinition) {
 			replaceAppIDs(args, definition)
 		},
@@ -656,6 +663,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"openCustomXCallbackURL": {
+		derivedKeys: []string{"WFXCallbackCustomCallbackEnabled", "WFXCallbackCustomSuccessURLEnabled"},
 		appendParamsFunc: func(args []actionArgument) (xCallbackParams map[string]any) {
 			if len(args) == 0 {
 				return
@@ -676,6 +684,7 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"getWindows": {
+		derivedKeys: []string{"WFContentItemLimitEnabled"},
 		appendParamsFunc: func(args []actionArgument) (params map[string]any) {
 			if len(args) == 0 {
 				return map[string]any{}
@@ -927,11 +936,13 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setWindowedMultitasking": {
+		derivedKeys: []string{"mode"},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			return appendSetMultitaskingModeParam("Windowed Apps", "windowedApps", "macwindow.on.rectangle")
 		},
 	},
 	"setStageManagerMultitasking": {
+		derivedKeys: []string{"mode"},
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			return appendSetMultitaskingModeParam("Stage Manager", "stageManager", "squares.leading.rectangle")
 		},
