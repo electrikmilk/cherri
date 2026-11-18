@@ -42,7 +42,6 @@ func decompile(b []byte) {
 	variables = make(map[string]varValue)
 	uuids = make(map[string]string)
 	standardActionIncludes = make(map[string]string)
-	decompiledIncludes = []string{}
 	controlFlowOutputs = make(map[string]string)
 	controlFlowOutputUUIDs = []string{}
 	openLoops = nil

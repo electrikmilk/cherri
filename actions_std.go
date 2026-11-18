@@ -1237,17 +1237,19 @@ func checkMissingStandardInclude(identifier *string, parsing bool) (requiredIncl
 	return ""
 }
 
-var decompiledIncludes []string
-
 // includeStandardAction adds the include that defines the action to the decompiled source once.
 func includeStandardAction(name string) {
 	var actionInclude, found = standardActionIncludes[name]
-	if !found || slices.Contains(decompiledIncludes, actionInclude) {
+	if !found {
 		return
 	}
 
-	decompiledIncludes = append(decompiledIncludes, actionInclude)
-	decompiledImports = append(decompiledImports, fmt.Sprintf("#include 'actions/%s'", actionInclude))
+	var statement = fmt.Sprintf("#include 'actions/%s'", actionInclude)
+	if slices.Contains(decompiledImports, statement) {
+		return
+	}
+
+	decompiledImports = append(decompiledImports, statement)
 }
 
 // importToolkitActions imports the actions of the app that the action belongs to, which is the identifier without the
