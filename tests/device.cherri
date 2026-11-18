@@ -32,4 +32,6 @@ killAllApps("notes", "maps")
 getOrientation()
 showControlCenter()
 
+const selectedText = getSelectedText()
+
 show("✅ All tests passed")
