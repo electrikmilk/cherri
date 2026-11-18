@@ -948,46 +948,14 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"setFocusMode": {
-		check: func(args []actionArgument, _ *actionDefinition) {
-			checkLiteralArgument[string](args, 0, "Focus mode must be a literal value, as it determines which focus is set.")
-		},
-		appendParamsFunc: func(args []actionArgument) map[string]any {
-			if len(args) > 0 {
-				// A nil focusMode is left out for the default.
-				var mode, _ = getArgValue(args[0]).(string)
-				if fm, found := focusModes[mode]; found {
-					return map[string]any{
-						"FocusModes": fm,
-					}
-				}
-			}
-
-			return map[string]any{}
-		},
-		decomp: func(action *ShortcutAction) (arguments []string) {
-			return decompHookArguments(action, decompFocusMode(action))
-		},
+		check:            checkFocusModeLiteral,
+		appendParamsFunc: focusModeParams,
+		decomp:           decompFocusModeAction,
 	},
 	"toggleFocusMode": {
-		check: func(args []actionArgument, _ *actionDefinition) {
-			checkLiteralArgument[string](args, 0, "Focus mode must be a literal value, as it determines which focus is set.")
-		},
-		appendParamsFunc: func(args []actionArgument) map[string]any {
-			if len(args) > 0 {
-				// A nil focusMode is left out for the default.
-				var mode, _ = getArgValue(args[0]).(string)
-				if fm, found := focusModes[mode]; found {
-					return map[string]any{
-						"FocusModes": fm,
-					}
-				}
-			}
-
-			return map[string]any{}
-		},
-		decomp: func(action *ShortcutAction) (arguments []string) {
-			return decompHookArguments(action, decompFocusMode(action))
-		},
+		check:            checkFocusModeLiteral,
+		appendParamsFunc: focusModeParams,
+		decomp:           decompFocusModeAction,
 	},
 	"generateImage": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
@@ -1115,6 +1083,28 @@ func decompFocusMode(action *ShortcutAction) map[string]string {
 
 	decompError(fmt.Sprintf("Expected the Identifier of FocusModes to identify a known focus mode, got '%v'", modes["Identifier"]), action)
 	return recovered
+}
+
+func checkFocusModeLiteral(args []actionArgument, _ *actionDefinition) {
+	checkLiteralArgument[string](args, 0, "Focus mode must be a literal value, as it determines which focus is set.")
+}
+
+func focusModeParams(args []actionArgument) map[string]any {
+	if len(args) > 0 {
+		// A nil focusMode is left out for the default.
+		var mode, _ = getArgValue(args[0]).(string)
+		if fm, found := focusModes[mode]; found {
+			return map[string]any{
+				"FocusModes": fm,
+			}
+		}
+	}
+
+	return map[string]any{}
+}
+
+func decompFocusModeAction(action *ShortcutAction) []string {
+	return decompHookArguments(action, decompFocusMode(action))
 }
 
 var actionIncludes = []string{
