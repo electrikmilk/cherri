@@ -664,9 +664,7 @@ func decompileDefinitions() {
 	defineList("outputs", "WFWorkflowOutputContentItemClasses", shortcut.WFWorkflowOutputContentItemClasses, contentItems)
 
 	var workflowTypeNames = slices.Sorted(slices.Values(shortcut.WFWorkflowTypes))
-	if len(workflowTypeNames) == 0 {
-		decompWarning("WFWorkflowTypes is empty, which Cherri cannot write, and is left out for the default.")
-	} else if !slices.Equal(workflowTypeNames, slices.Sorted(slices.Values(defaultWorkflowTypes))) {
+	if len(workflowTypeNames) > 0 && !slices.Equal(workflowTypeNames, slices.Sorted(slices.Values(defaultWorkflowTypes))) {
 		defineList("from", "WFWorkflowTypes", shortcut.WFWorkflowTypes, workflowTypes)
 	}
 	defineList("quickactions", "WFQuickActionSurfaces", shortcut.WFQuickActionSurfaces, quickActions)
