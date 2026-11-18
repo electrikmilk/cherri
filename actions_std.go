@@ -196,20 +196,11 @@ var actions = map[string]*actionDefinition{
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			var recovered = make(map[string]string)
-			for name, contact := range map[string]struct {
-				key        string
-				contentKit contentKit
-			}{
-				"phoneNumber":  {"WFContactPhoneNumbers", phoneNumber},
-				"emailAddress": {"WFContactEmails", emailAddress},
-			} {
-				var values = decompContactValue(action, contact.key, contact.contentKit)
-				if len(values) > 1 {
-					decompError(fmt.Sprintf("Expected the parameter '%s' to hold one value, got %d", contact.key, len(values)), action)
-				}
-				if len(values) == 1 {
-					recovered[name] = values[0]
-				}
+			if phone, found := decompSingleContactValue(action, "WFContactPhoneNumbers", phoneNumber); found {
+				recovered["phoneNumber"] = phone
+			}
+			if email, found := decompSingleContactValue(action, "WFContactEmails", emailAddress); found {
+				recovered["emailAddress"] = email
 			}
 
 			return decompHookArguments(action, recovered)
@@ -1369,6 +1360,19 @@ func decompContactValue(action *ShortcutAction, key string, contentKit contentKi
 	}
 
 	return
+}
+
+// decompSingleContactValue is decompContactValue for a parameter that holds at most one value.
+func decompSingleContactValue(action *ShortcutAction, key string, contentKit contentKit) (value string, found bool) {
+	var values = decompContactValue(action, key, contentKit)
+	if len(values) > 1 {
+		decompError(fmt.Sprintf("Expected the parameter '%s' to hold one value, got %d", key, len(values)), action)
+	}
+	if len(values) == 0 {
+		return
+	}
+
+	return values[0], true
 }
 
 // checkLiteralArgument stops on a variable argument at index that is not set to a literal of type T, as an
