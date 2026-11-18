@@ -25,7 +25,7 @@ enum deviceDetail {
 action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail')
 
 // [Doc]: Get Current App: Get the current app.
-action v26 default getCurrentApp()
+action default v26 getCurrentApp()
 
 // [Doc]: Get Current Visible App: Get the current visible apps.
 action v26 'getcurrentapp' getVisibleApps() {
