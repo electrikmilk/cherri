@@ -6,4 +6,7 @@ const vpns = findVPNs()
 const sortedVPNs = findVPNs("Server Address", "A to Z")
 const topVPNs = findVPNs("Name", "A to Z", 6)
 
+const ethernetAddress = getEthernetDetail("IPv4 Address")
+const ethernetSpeed = getEthernetDetail("Link Speed")
+
 show("✅ All tests passed")

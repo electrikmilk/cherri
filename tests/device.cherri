@@ -34,4 +34,9 @@ showControlCenter()
 
 const selectedText = getSelectedText()
 
+setVolume(0.5)
+setRingtoneVolume(0.6)
+setAlarmVolume(0.3)
+setAlertVolume(0.8)
+
 show("✅ All tests passed")

@@ -133,6 +133,21 @@ action toggleSet !mac 'orientationlock.set' OrientationLock 'OnValue'
 // [Doc]: Set Volume
 action setVolume(float volume: 'WFVolume')
 
+// [Doc]: Set Ringtone Volume
+action 'setvolume' setRingtoneVolume(float volume: 'WFVolume') {
+	"WFVolumeSetting": "Ringtone"
+}
+
+// [Doc]: Set Alarm Volume: Set the volume of alarms and timers.
+action !mac v27 'setvolume' setAlarmVolume(float volume: 'WFVolume') {
+	"WFVolumeSetting": "Alarms & Timers"
+}
+
+// [Doc]: Set Alert Volume: Set the volume of alerts and system sounds.
+action !mac v27 'setvolume' setAlertVolume(float volume: 'WFVolume') {
+	"WFVolumeSetting": "Alerts & System Sounds"
+}
+
 // [Doc]: [Personal Hotspot] Personal Hotspot
 action toggleSet !mac 'personalhotspot.set' Hotspot
 
