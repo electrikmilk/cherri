@@ -478,9 +478,7 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 		switch valueTwo := wfValue["Value"].(type) {
 		case map[string]interface{}:
 			if itemsValue, isMap := valueTwo["Value"].(map[string]interface{}); isMap {
-				var dictionaryItems []WFDictionaryFieldValueItem
-				decompMapToStruct(itemsValue["WFDictionaryFieldValueItems"], &dictionaryItems, "WFDictionaryFieldValueItems", currentDecompAction())
-				mapDictionaryValueIdentifiers(dictionaryItems)
+				mapDictionaryValueIdentifiers(decompFieldValueItems(itemsValue["WFDictionaryFieldValueItems"], currentDecompAction()))
 			}
 		case []interface{}:
 			var dictionaryItems = mapDictionaryItems(valueTwo)
@@ -1718,14 +1716,12 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	case itemTypeArray:
 		itemValue = decompArray(expectType[[]interface{}](itemValueMap["Value"], "an array dictionary item value", "an array", currentDecompAction()))
 	case itemTypeDict:
-		var dictionaryItems []WFDictionaryFieldValueItem
 		var value, hasValue = itemValueMap["Value"].(map[string]interface{})
 		var nestedValue, hasNestedValue = value["Value"].(map[string]interface{})
 		if !hasValue || !hasNestedValue {
 			decompError("Expected a dictionary item value to be a dictionary holding a Value dictionary", currentDecompAction())
 		}
-		decompMapToStruct(nestedValue["WFDictionaryFieldValueItems"], &dictionaryItems, "WFDictionaryFieldValueItems", currentDecompAction())
-		itemValue = decompDictionaryItems(dictionaryItems)
+		itemValue = decompDictionaryItems(decompFieldValueItems(nestedValue["WFDictionaryFieldValueItems"], currentDecompAction()))
 	default:
 		itemValue = decompValue(item.WFValue)
 	}
@@ -1906,10 +1902,7 @@ func decompValueObject(value map[string]interface{}) string {
 	}
 
 	if value["WFDictionaryFieldValueItems"] != nil {
-		var items []WFDictionaryFieldValueItem
-		decompMapToStruct(value["WFDictionaryFieldValueItems"], &items, "WFDictionaryFieldValueItems", currentDecompAction())
-
-		return decompDictionaryValue(items)
+		return decompDictionaryValue(decompFieldValueItems(value["WFDictionaryFieldValueItems"], currentDecompAction()))
 	}
 
 	var valueType, hasType = value["Type"]
@@ -2824,15 +2817,18 @@ func currentDecompAction() *ShortcutAction {
 // have the shape of structure, naming what holds it, as mapToStruct panics on one.
 func decompMapToStruct(value any, structure any, key string, action *ShortcutAction) {
 	var expected = strings.ReplaceAll(strings.TrimPrefix(fmt.Sprintf("%T", structure), "*"), "main.", "")
-	var plistBytes, marshalErr = plist.Marshal(value, plist.XMLFormat)
-	if marshalErr != nil {
-		decompError(fmt.Sprintf("Expected '%s' to be a %s, got %T: %s", key, expected, value, marshalErr), action)
+	var marshalErr, unmarshalErr = plistToStruct(value, structure)
+	if err := cmp.Or(marshalErr, unmarshalErr); err != nil {
+		decompError(fmt.Sprintf("Expected '%s' to be a %s, got %T: %s", key, expected, value, err), action)
 	}
+}
 
-	var _, unmarshalErr = plist.Unmarshal(plistBytes, structure)
-	if unmarshalErr != nil {
-		decompError(fmt.Sprintf("Expected '%s' to be a %s, got %T: %s", key, expected, value, unmarshalErr), action)
-	}
+// decompFieldValueItems reads the WFDictionaryFieldValueItems of a dictionary value.
+func decompFieldValueItems(value any, action *ShortcutAction) []WFDictionaryFieldValueItem {
+	var items []WFDictionaryFieldValueItem
+	decompMapToStruct(value, &items, "WFDictionaryFieldValueItems", action)
+
+	return items
 }
 
 // requiredParam returns the value of key, which the action must have.
