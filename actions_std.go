@@ -1297,9 +1297,7 @@ func getActionNameByIdentifier(identifier *string) (name string, err error) {
 
 func findActionByIdentifier(identifier *string) (name string, found bool) {
 	for actionName, action := range actions {
-		currentAction.definition = *action
-		var actionIdentifier = getFullActionIdentifier()
-		if *identifier == actionIdentifier {
+		if *identifier == fullActionIdentifier(actionName, action) {
 			return actionName, true
 		}
 	}
