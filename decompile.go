@@ -581,6 +581,10 @@ func newCodeLine(s string) {
 var decompiledImports []string
 var decompiledDefinitions []string
 
+func addDefinition(format string, a ...any) {
+	decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf(format, a...))
+}
+
 // writeHeader writes the imports and then the definitions above the code. The blank line written before a
 // block is trimmed from the start of the code even without a header, as the compiler rejects a file that
 // starts with a blank line.
@@ -602,7 +606,7 @@ func writeHeader() {
 // defineName defines the name of the imported Shortcut if the basename contains a space.
 func defineName() {
 	if strings.Contains(basename, " ") {
-		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define name %s", basename))
+		addDefinition("#define name %s", basename)
 	}
 }
 
@@ -611,7 +615,7 @@ func decompileIcon() {
 
 	if icon.WFWorkflowIconStartColor != iconColor {
 		if name, found := firstNameWithValue(icon.WFWorkflowIconStartColor, colors, altColors); found {
-			decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define color %s", name))
+			addDefinition("#define color %s", name)
 		} else {
 			decompWarning(fmt.Sprintf("The icon color %d has no name in Cherri and is left out.", icon.WFWorkflowIconStartColor))
 		}
@@ -619,7 +623,7 @@ func decompileIcon() {
 
 	if icon.WFWorkflowIconGlyphNumber != iconGlyph {
 		if name, found := firstNameWithValue(int(icon.WFWorkflowIconGlyphNumber), glyphs); found {
-			decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define glyph %s", name))
+			addDefinition("#define glyph %s", name)
 		} else {
 			decompWarning(fmt.Sprintf("The icon glyph %d has no name in Cherri and is left out.", icon.WFWorkflowIconGlyphNumber))
 		}
@@ -681,7 +685,7 @@ func defineList(definition string, key string, values []string, names map[string
 		return
 	}
 
-	decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define %s %s", definition, strings.Join(listed, ", ")))
+	addDefinition("#define %s %s", definition, strings.Join(listed, ", "))
 }
 
 // warnUnnamedValues returns the names of values, and warns about the values Cherri has no name for, which
@@ -731,7 +735,7 @@ func defineNoInput() {
 		if !hasMessage {
 			definitionError(fmt.Sprintf("Expected the Parameters of %s to have an Error that is text, got %T", key, parameters["Error"]), key)
 		}
-		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define noinput %s %s", StopWith, doubleQuoted(message)))
+		addDefinition("#define noinput %s %s", StopWith, doubleQuoted(message))
 	case "WFWorkflowNoInputBehaviorAskForInput":
 		var class, hasClass = parameters["ItemClass"].(string)
 		if !hasClass {
@@ -741,9 +745,9 @@ func defineNoInput() {
 		if len(listed) == 0 {
 			return
 		}
-		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define noinput %s %s", AskFor, listed[0]))
+		addDefinition("#define noinput %s %s", AskFor, listed[0])
 	case "WFWorkflowNoInputBehaviorGetClipboard":
-		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define noinput %s", GetClipboard))
+		addDefinition("#define noinput %s", GetClipboard)
 	default:
 		definitionError(fmt.Sprintf("Expected the Name of %s to be one of WFWorkflowNoInputBehaviorShowError, WFWorkflowNoInputBehaviorAskForInput or WFWorkflowNoInputBehaviorGetClipboard, got '%s'", key, name), key)
 	}
@@ -770,7 +774,7 @@ func defineVersion() {
 		return
 	}
 
-	decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define version %s", versionName))
+	addDefinition("#define version %s", versionName)
 }
 
 // questionKey is the argument an import question holds the value of.
@@ -813,7 +817,7 @@ func decompileQuestions() {
 		var identifier = makeQuestionIdentifier(question.Text, &number, claimedIdentifiers)
 		claimedIdentifiers[identifier] = true
 		questionIdentifiers[questionKey{question.ActionIndex, question.ParameterKey}] = identifier
-		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#question %s %s %s", identifier, doubleQuoted(question.Text), defaultValue))
+		addDefinition("#question %s %s %s", identifier, doubleQuoted(question.Text), defaultValue)
 	}
 }
 
@@ -2194,7 +2198,7 @@ func makeActionCallCode(action *ShortcutAction) string {
 
 	if (matchedAction.macOnly || matchedAction.nonMacOnly) && !setMacDefinition {
 		macDefinition = matchedAction.macOnly && !matchedAction.nonMacOnly
-		decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf("#define mac %v", macDefinition))
+		addDefinition("#define mac %v", macDefinition)
 		setMacDefinition = true
 	}
 
