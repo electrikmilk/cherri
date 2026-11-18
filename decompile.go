@@ -122,18 +122,21 @@ func mapIdentifiers() {
 var controlFlowOutputs map[string]string
 var controlFlowOutputUUIDs []string
 
+const repeatIdentifier = "is.workflow.actions.repeat.count"
+const repeatEachIdentifier = "is.workflow.actions.repeat.each"
+
 var controlFlowIdentifiers = []string{
 	"is.workflow.actions.conditional",
 	"is.workflow.actions.choosefrommenu",
-	"is.workflow.actions.repeat.count",
-	"is.workflow.actions.repeat.each",
+	repeatIdentifier,
+	repeatEachIdentifier,
 }
 
 // mapControlFlowOutputs names the output of each control flow block from its end action, which is the only one
 // that carries the UUID, so the start action that shares its GroupingIdentifier can be written as a constant.
 func mapControlFlowOutputs() {
 	for _, action := range shortcut.WFWorkflowActions {
-		if !slices.Contains(controlFlowIdentifiers, action.WFWorkflowActionIdentifier) {
+		if !isControlFlowAction(&action) {
 			continue
 		}
 		if controlFlowMode(&action) != endStatement || action.WFWorkflowActionParameters[UUID] == nil {
@@ -150,9 +153,6 @@ func mapControlFlowOutputs() {
 		controlFlowOutputUUIDs = append(controlFlowOutputUUIDs, outputUUID)
 	}
 }
-
-const repeatIdentifier = "is.workflow.actions.repeat.count"
-const repeatEachIdentifier = "is.workflow.actions.repeat.each"
 
 type openLoop struct {
 	groupingUUID string
@@ -178,7 +178,7 @@ var loopVariableRegex = regexp.MustCompile("^Repeat (Index|Item)( [0-9]+)?$")
 func mapLoopVariables() {
 	for index, action := range shortcut.WFWorkflowActions {
 		currentAction.identifier = action.WFWorkflowActionIdentifier
-		var isLoop = action.WFWorkflowActionIdentifier == repeatIdentifier || action.WFWorkflowActionIdentifier == repeatEachIdentifier
+		var isLoop = isLoopAction(&action)
 		if isLoop && controlFlowMode(&action) == endStatement {
 			popLoop(&action)
 			continue
@@ -278,8 +278,7 @@ func isLoopVariableAssignment() bool {
 	}
 
 	var previous = peekActions(-1)
-	var isLoop = previous.WFWorkflowActionIdentifier == repeatIdentifier || previous.WFWorkflowActionIdentifier == repeatEachIdentifier
-	if !isLoop || controlFlowMode(&previous) != startStatement {
+	if !isLoopAction(&previous) || controlFlowMode(&previous) != startStatement {
 		return false
 	}
 
@@ -967,9 +966,9 @@ func decompileActions() {
 			decompVariable(&action)
 		case "is.workflow.actions.conditional":
 			decompConditional(&action)
-		case "is.workflow.actions.repeat.count":
+		case repeatIdentifier:
 			decompRepeat(&action)
-		case "is.workflow.actions.repeat.each":
+		case repeatEachIdentifier:
 			decompFor(&action)
 		case "is.workflow.actions.choosefrommenu":
 			decompMenu(&action)
@@ -1316,23 +1315,17 @@ func decompDictionaryGetValue(action *ShortcutAction) {
 }
 
 func checkControlFlowOutput(action *ShortcutAction) bool {
-	switch action.WFWorkflowActionIdentifier {
-	case "is.workflow.actions.conditional":
-		fallthrough
-	case "is.workflow.actions.choosefrommenu":
-		fallthrough
-	case "is.workflow.actions.repeat.count":
-		fallthrough
-	case "is.workflow.actions.repeat.each":
-		if controlFlowMode(action) == startStatement {
-			var outputName, captured = controlFlowOutputs[paramString(action, "GroupingIdentifier")]
-			if captured {
-				newCodeLine(fmt.Sprintf("const %s = ", outputName))
-				return true
-			}
-		}
+	if !isControlFlowAction(action) || controlFlowMode(action) != startStatement {
+		return false
 	}
-	return false
+
+	var outputName, captured = controlFlowOutputs[paramString(action, "GroupingIdentifier")]
+	if !captured {
+		return false
+	}
+	newCodeLine(fmt.Sprintf("const %s = ", outputName))
+
+	return true
 }
 
 func beginStatement(t tokenType, action *ShortcutAction) {
@@ -2345,6 +2338,10 @@ func isCompilerNothing() bool {
 
 func isControlFlowAction(action *ShortcutAction) bool {
 	return slices.Contains(controlFlowIdentifiers, action.WFWorkflowActionIdentifier)
+}
+
+func isLoopAction(action *ShortcutAction) bool {
+	return action.WFWorkflowActionIdentifier == repeatIdentifier || action.WFWorkflowActionIdentifier == repeatEachIdentifier
 }
 
 func actionIdentifierEnd(identifier string) string {
