@@ -195,10 +195,10 @@ func roundTripRun(binary string, arguments ...string) (string, bool) {
 
 // roundTripCheckDeterministic decompiles the shortcut again, in another process as the order of a map changes
 // with each one, and fails when the code is not the same.
-func roundTripCheckDeterministic(t *testing.T, binary string, shortcutPath string, dir string, firstPath string) {
+func roundTripCheckDeterministic(t *testing.T, binary string, shortcutPath string, firstPath string) {
 	t.Helper()
 
-	var secondDir = filepath.Join(dir, "dec-again")
+	var secondDir = filepath.Join(filepath.Dir(shortcutPath), "dec-again")
 	if mkdirErr := os.MkdirAll(secondDir, 0755); mkdirErr != nil {
 		t.Fatal(mkdirErr)
 	}
@@ -229,23 +229,29 @@ func roundTripTail(output string) string {
 	return strings.Join(outputLines, "\n")
 }
 
-func roundTripIdentifiers(t *testing.T, path string) []string {
+// readPlist parses the plist at path into out.
+func readPlist(t *testing.T, path string, out any) {
 	t.Helper()
 
 	var data, readErr = os.ReadFile(path)
 	if readErr != nil {
 		t.Fatalf("read %s: %s", path, readErr)
 	}
+	var _, plistErr = plist.Unmarshal(data, out)
+	if plistErr != nil {
+		t.Fatalf("parse %s: %s", path, plistErr)
+	}
+}
+
+func roundTripIdentifiers(t *testing.T, path string) []string {
+	t.Helper()
 
 	var parsed struct {
 		WFWorkflowActions []struct {
 			WFWorkflowActionIdentifier string
 		}
 	}
-	var _, plistErr = plist.Unmarshal(data, &parsed)
-	if plistErr != nil {
-		t.Fatalf("parse %s: %s", path, plistErr)
-	}
+	readPlist(t, path, &parsed)
 
 	var identifiers []string
 	for _, action := range parsed.WFWorkflowActions {
@@ -272,15 +278,8 @@ var roundTripDefinitionKeys = []string{
 func roundTripDefinitions(t *testing.T, path string) map[string]string {
 	t.Helper()
 
-	var data, readErr = os.ReadFile(path)
-	if readErr != nil {
-		t.Fatalf("read %s: %s", path, readErr)
-	}
 	var shortcutPlist map[string]interface{}
-	var _, plistErr = plist.Unmarshal(data, &shortcutPlist)
-	if plistErr != nil {
-		t.Fatalf("parse %s: %s", path, plistErr)
-	}
+	readPlist(t, path, &shortcutPlist)
 
 	var definitions = make(map[string]string)
 	for _, key := range roundTripDefinitionKeys {
@@ -412,7 +411,7 @@ func TestRoundTrip(t *testing.T) {
 			}
 
 			if failure == "" {
-				roundTripCheckDeterministic(t, binary, copied, dir, decompiledPath)
+				roundTripCheckDeterministic(t, binary, copied, decompiledPath)
 			}
 
 			if failure == "" {
