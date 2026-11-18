@@ -733,34 +733,45 @@ func decompConditional(action *ShortcutAction) {
 	case startStatement:
 		beginStatement(If, action)
 
-		if action.WFWorkflowActionParameters["WFConditions"] != nil {
-			var conditions = action.WFWorkflowActionParameters["WFConditions"].(map[string]interface{})
-			var conditionValue = conditions["Value"].(map[string]interface{})
-			var intFilterPrefix, convErr = strconv.Atoi(fmt.Sprintf("%d", conditionValue["WFActionParameterFilterPrefix"]))
-			handle(convErr)
-			var paramFilterPrefix = convertFilterPrefix(intFilterPrefix)
-			var filterTemplates = conditionValue["WFActionParameterFilterTemplates"].([]interface{})
-			var conditionsLen = len(filterTemplates)
-			for i, condition := range filterTemplates {
-				decompCondition(condition.(map[string]interface{}), action)
-
-				if i != conditionsLen-1 {
-					code.WriteString(fmt.Sprintf(" %s ", paramFilterPrefix))
-				}
-			}
-		} else {
-			decompCondition(action.WFWorkflowActionParameters, action)
-		}
+		decompConditions(action)
 
 		code.WriteString(" {\n")
 		tabLevel++
 	case statementPart:
 		tabLevel--
-		newCodeLine("} else {\n")
+		var params = action.WFWorkflowActionParameters
+		if params["WFConditions"] != nil || params["WFCondition"] != nil {
+			newCodeLine("} else if ")
+			decompConditions(action)
+			code.WriteString(" {\n")
+		} else {
+			newCodeLine("} else {\n")
+		}
 		tabLevel++
 	case endStatement:
 		tabLevel--
 		newCodeLine("}\n")
+	}
+}
+
+func decompConditions(action *ShortcutAction) {
+	if action.WFWorkflowActionParameters["WFConditions"] != nil {
+		var conditions = action.WFWorkflowActionParameters["WFConditions"].(map[string]interface{})
+		var conditionValue = conditions["Value"].(map[string]interface{})
+		var intFilterPrefix, convErr = strconv.Atoi(fmt.Sprintf("%d", conditionValue["WFActionParameterFilterPrefix"]))
+		handle(convErr)
+		var paramFilterPrefix = convertFilterPrefix(intFilterPrefix)
+		var filterTemplates = conditionValue["WFActionParameterFilterTemplates"].([]interface{})
+		var conditionsLen = len(filterTemplates)
+		for i, condition := range filterTemplates {
+			decompCondition(condition.(map[string]interface{}), action)
+
+			if i != conditionsLen-1 {
+				code.WriteString(fmt.Sprintf(" %s ", paramFilterPrefix))
+			}
+		}
+	} else {
+		decompCondition(action.WFWorkflowActionParameters, action)
 	}
 }
 

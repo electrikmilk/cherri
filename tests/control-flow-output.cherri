@@ -43,4 +43,18 @@ const mapped = for item in @items {
 }
 show("{mapped}")
 
+// else if output
+@n = 2
+const grade = if @n == 1 {
+    text("a")
+} else if @n == 2 {
+    text("b")
+} else {
+    text("c")
+}
+@gradeStr = "{grade}"
+if @gradeStr != "b" {
+    mustOutput("❌ FAIL: else if output - got {@gradeStr}, expected 'b'", "❌ FAIL: else if output - got {@gradeStr}, expected 'b'")
+}
+
 show("✅ All tests passed")
