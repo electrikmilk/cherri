@@ -229,17 +229,12 @@ var actions = map[string]*actionDefinition{
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			var colorNumber = expectType[uint64](requiredParam(action, "WFLabelColorNumber"), "WFLabelColorNumber", "an integer", action)
-			var recovered = make(map[string]string)
-			for color, number := range fileLabelsMap {
-				if colorNumber == uint64(number) {
-					recovered["color"] = decompValue(color)
-				}
-			}
-			if recovered["color"] == "" {
+			var color, found = firstKeyWithValue(int(colorNumber), fileLabelsMap)
+			if !found {
 				decompError(fmt.Sprintf("Expected WFLabelColorNumber to be a file label color number, got %v", colorNumber), action)
 			}
 
-			return decompHookArguments(action, recovered)
+			return decompHookArguments(action, map[string]string{"color": decompValue(color)})
 		},
 	},
 	"filterFiles": {

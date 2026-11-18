@@ -5,6 +5,7 @@
 package main
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
 	"maps"
@@ -620,7 +621,7 @@ func decompileIcon() {
 	var icon = shortcut.WFWorkflowIcon
 
 	if icon.WFWorkflowIconStartColor != iconColor {
-		if name, found := firstNameWithValue(icon.WFWorkflowIconStartColor, colors, altColors); found {
+		if name, found := firstKeyWithValue(icon.WFWorkflowIconStartColor, colors, altColors); found {
 			addDefinition("#define color %s", name)
 		} else {
 			decompWarning(fmt.Sprintf("The icon color %d has no name in Cherri and is left out.", icon.WFWorkflowIconStartColor))
@@ -628,7 +629,7 @@ func decompileIcon() {
 	}
 
 	if icon.WFWorkflowIconGlyphNumber != iconGlyph {
-		if name, found := firstNameWithValue(int(icon.WFWorkflowIconGlyphNumber), glyphs); found {
+		if name, found := firstKeyWithValue(int(icon.WFWorkflowIconGlyphNumber), glyphs); found {
 			addDefinition("#define glyph %s", name)
 		} else {
 			decompWarning(fmt.Sprintf("The icon glyph %d has no name in Cherri and is left out.", icon.WFWorkflowIconGlyphNumber))
@@ -697,13 +698,8 @@ func defineList(definition string, key string, values []string, names map[string
 // warnUnnamedValues returns the names of values, and warns about the values Cherri has no name for, which
 // cannot be written.
 func warnUnnamedValues(key string, values []string, names map[string]string) (listed []string) {
-	var valueNames = make(map[string]string, len(names))
-	for name, value := range names {
-		valueNames[value] = name
-	}
-
 	for _, value := range values {
-		var name, found = valueNames[value]
+		var name, found = firstKeyWithValue(value, names)
 		if !found {
 			decompWarning(fmt.Sprintf("'%s' of %s has no name in Cherri and is left out.", value, key))
 			continue
@@ -916,13 +912,13 @@ func checkQuestionsWritten() {
 	}
 }
 
-// firstNameWithValue returns the alphabetically first name that has the value, so that when names share a value
+// firstKeyWithValue returns the alphabetically first key that has the value, so that when keys share a value
 // the one that is written never depends on the order of a map.
-func firstNameWithValue(value int, namedValues ...map[string]int) (firstName string, found bool) {
-	for _, names := range namedValues {
-		for name, namedValue := range names {
-			if namedValue == value && (!found || name < firstName) {
-				firstName = name
+func firstKeyWithValue[K cmp.Ordered, V comparable](value V, sources ...map[K]V) (firstKey K, found bool) {
+	for _, source := range sources {
+		for key, mapValue := range source {
+			if mapValue == value && (!found || key < firstKey) {
+				firstKey = key
 				found = true
 			}
 		}
@@ -1507,10 +1503,8 @@ func matchConditionOperator(conditionCode int, condition map[string]interface{},
 		}
 		return LessThan
 	}
-	for operator, operatorCode := range conditions {
-		if operatorCode == conditionCode {
-			return operator
-		}
+	if operator, found := firstKeyWithValue(conditionCode, conditions); found {
+		return operator
 	}
 
 	decompError(fmt.Sprintf("Invalid conditional %d", conditionCode), action)
