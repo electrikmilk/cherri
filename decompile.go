@@ -655,8 +655,8 @@ var defaultClientVersion = clientVersion
 var defaultWorkflowTypes = []string{"Watch", "WFWorkflowTypeShowInSearch"}
 
 // definitionError stops on a part of the Shortcut that holds a definition and is not what the compiler writes it as.
-func definitionError(message string, key string) {
-	decompError(message, &ShortcutAction{WFWorkflowActionIdentifier: key})
+func definitionError(message string) {
+	decompError(message, &ShortcutAction{WFWorkflowActionIdentifier: "WFWorkflowNoInputBehavior"})
 }
 
 // decompileDefinitions writes the definitions that the compiler writes the keys of the Shortcut from, left out
@@ -730,7 +730,7 @@ func defineNoInput() {
 	var key = "WFWorkflowNoInputBehavior"
 	var name, isText = shortcut.WFWorkflowNoInputBehavior["Name"].(string)
 	if !isText {
-		definitionError(fmt.Sprintf("Expected %s to have a Name that is text, got %T", key, shortcut.WFWorkflowNoInputBehavior["Name"]), key)
+		definitionError(fmt.Sprintf("Expected %s to have a Name that is text, got %T", key, shortcut.WFWorkflowNoInputBehavior["Name"]))
 	}
 
 	var parameters map[string]interface{}
@@ -738,7 +738,7 @@ func defineNoInput() {
 		var isMap bool
 		parameters, isMap = rawParameters.(map[string]interface{})
 		if !isMap {
-			definitionError(fmt.Sprintf("Expected the Parameters of %s to be a dictionary, got %T", key, rawParameters), key)
+			definitionError(fmt.Sprintf("Expected the Parameters of %s to be a dictionary, got %T", key, rawParameters))
 		}
 	}
 
@@ -746,13 +746,13 @@ func defineNoInput() {
 	case "WFWorkflowNoInputBehaviorShowError":
 		var message, hasMessage = parameters["Error"].(string)
 		if !hasMessage {
-			definitionError(fmt.Sprintf("Expected the Parameters of %s to have an Error that is text, got %T", key, parameters["Error"]), key)
+			definitionError(fmt.Sprintf("Expected the Parameters of %s to have an Error that is text, got %T", key, parameters["Error"]))
 		}
 		addDefinition("#define noinput %s %s", StopWith, doubleQuoted(message))
 	case "WFWorkflowNoInputBehaviorAskForInput":
 		var class, hasClass = parameters["ItemClass"].(string)
 		if !hasClass {
-			definitionError(fmt.Sprintf("Expected the Parameters of %s to have an ItemClass that is text, got %T", key, parameters["ItemClass"]), key)
+			definitionError(fmt.Sprintf("Expected the Parameters of %s to have an ItemClass that is text, got %T", key, parameters["ItemClass"]))
 		}
 		var listed = warnUnnamedValues(key, []string{class}, contentItems)
 		if len(listed) == 0 {
@@ -762,7 +762,7 @@ func defineNoInput() {
 	case "WFWorkflowNoInputBehaviorGetClipboard":
 		addDefinition("#define noinput %s", GetClipboard)
 	default:
-		definitionError(fmt.Sprintf("Expected the Name of %s to be one of WFWorkflowNoInputBehaviorShowError, WFWorkflowNoInputBehaviorAskForInput or WFWorkflowNoInputBehaviorGetClipboard, got '%s'", key, name), key)
+		definitionError(fmt.Sprintf("Expected the Name of %s to be one of WFWorkflowNoInputBehaviorShowError, WFWorkflowNoInputBehaviorAskForInput or WFWorkflowNoInputBehaviorGetClipboard, got '%s'", key, name))
 	}
 }
 
@@ -2209,10 +2209,7 @@ func makeActionCallCode(action *ShortcutAction) string {
 	if matchedAction.makeParams != nil || matchedAction.decomp != nil {
 		decompActionCustom(&actionCallCode, matchedIdentifier, &matchedAction, action)
 	} else {
-		var matchedParamsSize = len(matchedAction.parameters)
-		if matchedParamsSize > 0 {
-			decompActionArguments(&actionCallCode, matchedIdentifier, &matchedAction, action)
-		}
+		actionCallCode.WriteString(strings.Join(decompParameters(matchedIdentifier, matchedAction.parameters, action, nil), ", "))
 	}
 
 	actionCallCode.WriteString(")")
@@ -2334,10 +2331,6 @@ func isLoopAction(action *ShortcutAction) bool {
 
 func actionIdentifierEnd(identifier string) string {
 	return strings.Replace(identifier, "is.workflow.actions.", "", 1)
-}
-
-func decompActionArguments(actionCallCode *strings.Builder, name string, matchedAction *actionDefinition, action *ShortcutAction) {
-	actionCallCode.WriteString(strings.Join(decompParameters(name, matchedAction.parameters, action, nil), ", "))
 }
 
 // decompHookName and decompHookDefinition are the action whose decomp hook is running. Hooks cannot
