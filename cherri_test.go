@@ -352,6 +352,27 @@ func roundTripClientVersion(t *testing.T, data []byte) []byte {
 	return changed
 }
 
+// roundTripRecompile decompiles the shortcut at shortcutPath into decompiledDir and compiles the code again,
+// and returns what failed, or an empty string.
+func roundTripRecompile(t *testing.T, binary string, shortcutPath string, decompiledDir string, decompiledPath string) string {
+	t.Helper()
+
+	// Comments are included so the comment actions of the original are written as comment actions.
+	var output, ok = roundTripRun(binary, "--import="+shortcutPath, "--output="+decompiledDir+"/", "--no-ansi", "--comments")
+	if !ok {
+		return "decompile failed:\n" + roundTripTail(output)
+	}
+
+	roundTripCheckDeterministic(t, binary, shortcutPath, decompiledPath)
+
+	output, ok = roundTripRun(binary, decompiledPath, "--skip-sign", "--no-ansi")
+	if !ok {
+		return "recompile failed:\n" + roundTripTail(output)
+	}
+
+	return ""
+}
+
 // TestRoundTrip decompiles each compiler-generated plist, recompiles the result and compares the
 // action identifiers with the original. The _unsigned.shortcut files are produced by TestCherriNoSign.
 //
@@ -402,25 +423,8 @@ func TestRoundTrip(t *testing.T) {
 			var knownFailure, failureKnown = roundTripKnownFailures[name]
 			var knownMismatch, mismatchKnown = roundTripKnownMismatches[name]
 
-			var failure string
 			var decompiledPath = filepath.Join(decompiledDir, strings.ReplaceAll(name, " ", "_")+".cherri")
-			// Comments are included so the comment actions of the original are written as comment actions.
-			var output, ok = roundTripRun(binary, "--import="+copied, "--output="+decompiledDir+"/", "--no-ansi", "--comments")
-			if !ok {
-				failure = "decompile failed:\n" + roundTripTail(output)
-			}
-
-			if failure == "" {
-				roundTripCheckDeterministic(t, binary, copied, decompiledPath)
-			}
-
-			if failure == "" {
-				output, ok = roundTripRun(binary, decompiledPath, "--skip-sign", "--no-ansi")
-				if !ok {
-					failure = "recompile failed:\n" + roundTripTail(output)
-				}
-			}
-
+			var failure = roundTripRecompile(t, binary, copied, decompiledDir, decompiledPath)
 			if failure != "" {
 				if failureKnown {
 					t.Logf("known failure (%s): %s", knownFailure, failure)
