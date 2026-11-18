@@ -707,6 +707,7 @@ func collectReference(valueType *tokenType, value *any, variable bool) {
 	if char == '.' {
 		advance()
 		coerce = collectIdentifier()
+		checkCoerce(coerce)
 	}
 
 	isInputVariable(reference)
