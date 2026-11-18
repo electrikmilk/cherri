@@ -245,7 +245,13 @@ func makeFunctionRef(identifier *string) any {
 	var functionCall = makeFunctionCall(identifier, &arguments)
 	insertReference(variableIdentifier, Dict, functionCall, true)
 
-	advanceUntil('\n')
+	// Advance past the end of the call. A call with no parameters collects no arguments, so both
+	// parentheses are still ahead.
+	if paramsSize == 0 {
+		advanceTimes(2)
+	} else {
+		advance()
+	}
 
 	var runSelfAction = makeActionValue("runSelf", []actionArgument{
 		{
