@@ -542,11 +542,9 @@ var actions = map[string]*actionDefinition{
 				if args[2].valueType == Variable {
 					return
 				}
-				switch args[2].value {
-				case "half":
-					args[2].value = "½ + ½"
-				case "thirdByTwo":
-					args[2].value = "⅓ + ⅔"
+				var ratioName, _ = args[2].value.(string)
+				if ratio, found := splitAppRatios[ratioName]; found {
+					args[2].value = ratio
 				}
 			}
 		},
@@ -575,14 +573,11 @@ var actions = map[string]*actionDefinition{
 
 			switch ratio := splitRatio.(type) {
 			case string:
-				switch ratio {
-				case "½ + ½":
-					arguments = append(arguments, "\"half\"")
-				case "⅓ + ⅔":
-					arguments = append(arguments, "\"thirdByTwo\"")
-				default:
+				var ratioName, found = firstKeyWithValue(ratio, splitAppRatios)
+				if !found {
 					decompError(fmt.Sprintf("Expected WFAppRatio to be '½ + ½' or '⅓ + ⅔', got '%s'", ratio), action)
 				}
+				arguments = append(arguments, doubleQuoted(ratioName))
 			case map[string]interface{}:
 				arguments = append(arguments, decompValue(ratio))
 			default:
@@ -699,42 +694,34 @@ var actions = map[string]*actionDefinition{
 				if args[1].valueType != Variable {
 					checkLiteralArgument[string](args, 0, "Sort property must be a literal value when the sort order is, as it determines how the order is written.")
 				}
-				var alphabetic = []string{"Title", "App Name", "Name", "Random"}
-				var numeric = []string{"Width", "Height", "X Position", "Y Position", "Window Index"}
 				// A nil sortBy matches no sort property, so the order is kept as is.
 				var sortBy, _ = getArgValue(args[0]).(string)
 				var orderBy, _ = getArgValue(args[1]).(string)
-				if sortBy != "Random" {
-					if slices.Contains(alphabetic, sortBy) {
-						switch orderBy {
-						case "asc":
-							args[1].value = "A to Z"
-						case "desc":
-							args[1].value = "Z to A"
-						}
-					} else if slices.Contains(numeric, sortBy) {
-						switch orderBy {
-						case "asc":
-							args[1].value = "Biggest First"
-						case "desc":
-							args[1].value = "Smallest First"
-						}
+				for _, sortOrder := range windowSortOrders {
+					if !slices.Contains(sortOrder.properties, sortBy) {
+						continue
 					}
+					switch orderBy {
+					case "asc":
+						args[1].value = sortOrder.ascending
+					case "desc":
+						args[1].value = sortOrder.descending
+					}
+					break
 				}
 			}
 		},
 		decomp: func(action *ShortcutAction) (arguments []string) {
 			var recovered = make(map[string]string)
-			var sortOrders = map[string]string{
-				"A to Z":         "asc",
-				"Biggest First":  "asc",
-				"Z to A":         "desc",
-				"Smallest First": "desc",
-			}
 			// Any other sort order is read as is, a variable or the asc or desc kept for a random sort.
-			var sortOrder, _ = readParam(action, "WFContentItemSortOrder").(string)
-			if order, found := sortOrders[sortOrder]; found {
-				recovered["orderBy"] = decompValue(order)
+			var storedOrder, _ = readParam(action, "WFContentItemSortOrder").(string)
+			for _, sortOrder := range windowSortOrders {
+				switch storedOrder {
+				case sortOrder.ascending:
+					recovered["orderBy"] = decompValue("asc")
+				case sortOrder.descending:
+					recovered["orderBy"] = decompValue("desc")
+				}
 			}
 
 			return decompHookArguments(action, recovered)
@@ -1048,6 +1035,28 @@ var externalImageStyles = map[string]externalImageStyle{
 	"chatgpt_vector":       {"z_external_provider_3", "Vector (ChatGPT)"},
 	"chatgpt_anime":        {"z_external_provider_4", "Anime (ChatGPT)"},
 	"chatgpt_print":        {"z_external_provider_5", "Print (ChatGPT)"},
+}
+
+// splitAppRatios maps the ratios of splitApps to the text Shortcuts stores for them, and is read both ways so a
+// decompiled ratio gets its Cherri name back.
+var splitAppRatios = map[string]string{
+	"half":       "½ + ½",
+	"thirdByTwo": "⅓ + ⅔",
+}
+
+// windowSortOrder is the sort orders Shortcuts stores for an ascending and a descending sort by one of the
+// properties, as the order is named for the kind of property.
+type windowSortOrder struct {
+	properties []string
+	ascending  string
+	descending string
+}
+
+// windowSortOrders is read both ways so a decompiled sort order gets its Cherri name back. A random sort has no
+// order.
+var windowSortOrders = []windowSortOrder{
+	{[]string{"Title", "App Name", "Name"}, "A to Z", "Z to A"},
+	{[]string{"Width", "Height", "X Position", "Y Position", "Window Index"}, "Biggest First", "Smallest First"},
 }
 
 type focusMode struct {
