@@ -1092,6 +1092,12 @@ func decompTextValue(action *ShortcutAction) {
 var numberLiteralRegex = regexp.MustCompile(`^-?[0-9]+(\.[0-9]+)?$`)
 var inlineReferenceRegex = regexp.MustCompile(`{(.*?)}`)
 
+// decompBare writes value as decompValue does without the double quotes at its ends, to be written inside an
+// expression or a number.
+func decompBare(value any) string {
+	return strings.Trim(decompValue(value), "\"")
+}
+
 func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 	var value = requiredParam(action, "WFNumberActionNumber")
 	if mapValue, isMap := value.(map[string]interface{}); isMap {
@@ -1099,7 +1105,7 @@ func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
 			decompError(fmt.Sprintf("Expected the parameter 'WFNumberActionNumber' to have a Value dictionary, got %T", mapValue["Value"]), action)
 		}
 
-		var literal = strings.Trim(decompValue(value), "\"")
+		var literal = decompBare(value)
 		if !numberLiteralRegex.MatchString(literal) {
 			nonLiteral = true
 			return
@@ -1167,8 +1173,8 @@ func decompBasicExpression(action *ShortcutAction) {
 			decompError(fmt.Sprintf("Expected the parameter 'WFMathOperation' to be '+', '-', '×', '÷' or '…', got '%v'", action.WFWorkflowActionParameters["WFMathOperation"]), action)
 		}
 	}
-	var inputText = strings.Trim(decompValue(input), "\"")
-	var operandText = strings.Trim(decompValue(operand), "\"")
+	var inputText = decompBare(input)
+	var operandText = decompBare(operand)
 	var expression = inputText + " " + strings.Trim(operation, "\"") + " " + operandText
 	currentVariableValue = inlineReferenceRegex.ReplaceAllString(expression, "$1")
 
@@ -1218,7 +1224,7 @@ func decompExpression(action *ShortcutAction) {
 	case string:
 		expression = input
 	case map[string]interface{}:
-		expression = strings.Trim(decompValue(input["Value"]), "\"")
+		expression = decompBare(input["Value"])
 	default:
 		decompError(fmt.Sprintf("Expected the parameter 'Input' to be a string or a dictionary, got %T", input), action)
 	}
