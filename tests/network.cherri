@@ -1,0 +1,9 @@
+// compile-only: VPN configurations are device dependent
+
+const vpn = getCurrentVPN()
+
+const vpns = findVPNs()
+const sortedVPNs = findVPNs("Server Address", "A to Z")
+const topVPNs = findVPNs("Name", "A to Z", 6)
+
+show("✅ All tests passed")

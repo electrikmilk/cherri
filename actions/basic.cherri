@@ -183,6 +183,19 @@ action 'getitemfromlist' getListItem(variable list: 'WFInput', number index: 'WF
 	"WFItemSpecifier": "Item At Index"
 }
 
+// [Doc]: [Lists] Add List Item: Add `item` to the end of `list`.
+action v27 'additemtolist' addListItem(variable list: 'WFListVariable', text item: 'WFListItem')
+
+// [Doc]: [Lists] Prepend List Item: Add `item` to the beginning of `list`.
+action v27 'additemtolist' prependListItem(variable list: 'WFListVariable', text item: 'WFListItem') {
+	"WFInsertPosition": "Beginning"
+}
+
+// [Doc]: [Lists] Insert List Item: Add `item` to `list` at `index`. Keep in mind Shortcuts starts counting indexes at 1.
+action v27 'additemtolist' insertListItem(variable list: 'WFListVariable', text item: 'WFListItem', number index: 'WFItemIndex') {
+	"WFInsertPosition": "Index"
+}
+
 // [Doc]: [Lists] Get List Items: Get items from a `list` between two indexes. Keep in mind Shortcuts starts counting indexes at 1.
 action 'getitemfromlist' getListItems(variable list: 'WFInput', number start: 'WFItemRangeStart', number end: 'WFItemRangeEnd'): array {
 	"WFItemSpecifier": "Items in Range"

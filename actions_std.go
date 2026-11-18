@@ -188,18 +188,13 @@ var actions = map[string]*actionDefinition{
 		},
 	},
 	"filterFiles": {
-		appendParamsFunc: func(args []actionArgument) (params map[string]any) {
-			if len(args) == 0 {
-				return map[string]any{}
-			}
-
-			if len(args) != 1 {
-				return map[string]any{
-					"WFContentItemLimitEnabled": true,
-				}
-			}
-
-			return
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			return limitEnabledParams(args, 1)
+		},
+	},
+	"findVPNs": {
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			return limitEnabledParams(args, 2)
 		},
 	},
 	"getPDFText": {
@@ -879,6 +874,18 @@ var actions = map[string]*actionDefinition{
 			}
 		},
 	},
+}
+
+// limitEnabledParams turns the limit on only when the call reaches the limit argument, because Shortcuts ignores
+// WFContentItemLimitNumber unless WFContentItemLimitEnabled is set.
+func limitEnabledParams(args []actionArgument, limitIndex int) map[string]any {
+	if len(args) <= limitIndex {
+		return map[string]any{}
+	}
+
+	return map[string]any{
+		"WFContentItemLimitEnabled": true,
+	}
 }
 
 type focusMode struct {
