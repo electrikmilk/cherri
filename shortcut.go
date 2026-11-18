@@ -310,6 +310,231 @@ func reversedContentItems() map[string]string {
 	return revContentItems
 }
 
+var globalProperties = map[string]valueList{
+	"Device": {
+		name:   "device property",
+		plural: "device properties",
+		list: &[]string{
+			"OS",
+			"Name",
+			"Is Locked",
+			"Device Type",
+			"Device Is Watch",
+			"Device Model",
+			"Device Hostname",
+			"System Version",
+			"System Build Number",
+			"Screen Width",
+			"Screen Height",
+			"Current Volume",
+			"Current Brightness",
+			"Current Appearance",
+		},
+	},
+	"CurrentApp": {
+		name:   "app property",
+		plural: "app properties",
+		list: &[]string{
+			"Is Running",
+			"Is Hidden",
+			"Is Frontmost",
+			"Icon",
+			"Bundle Identifier",
+			"Process Identifier",
+			"Bundle Path",
+			"Launch Date",
+			"Windows",
+			"Displays",
+		},
+	},
+	"CurrentDate": {
+		name:   "date property",
+		plural: "date properties",
+		list: &[]string{
+			"Date",
+			"Time",
+			"Name",
+		},
+	},
+}
+
+var fileProperties = []string{
+	"File Size",
+	"File Extension",
+	"File Path",
+	"Date Created",
+	"Date Modified",
+	"Name",
+}
+
+var nameProperties = []string{"Name"}
+
+var labelProperties = []string{"Label", "Name"}
+
+var folderProperties = append([]string{
+	"Contents",
+	"Number of Items",
+}, fileProperties...)
+
+var mediaProperties = append([]string{
+	"Duration",
+	"Frame Rate",
+	"Album",
+}, fileProperties...)
+
+var imageProperties = append([]string{
+	"Width",
+	"Height",
+	"Date Taken",
+	"Time Taken",
+	"Media Type",
+	"Photo Type",
+	"Is a Screenshot",
+	"Is a Screen Recording",
+	"Location",
+	"Orientation",
+	"Camera Make",
+	"Camera Model",
+	"Metadata Dictionary",
+	"Is Favorite",
+}, mediaProperties...)
+
+var contactProperties = append([]string{
+	"First Name",
+	"Middle Name",
+	"Last Name",
+	"Birthday",
+	"Prefix",
+	"Suffix",
+	"Nickname",
+	"Phonetic First Name",
+	"Phonetic Last Name",
+	"Phonetic Middle Name",
+	"Relationship to Me",
+	"Contact Photo",
+	"Has Photo",
+	"URLs",
+	"Company",
+	"Job Title",
+	"Department",
+	"Creation Date",
+	"Last Modified Date",
+	"Group",
+}, fileProperties...)
+
+// text, number, bool and date are left out on purpose. Dictionary values and list items are coerced to them, and the
+// type of such a reference is not known when parsing, so a key on it is a dictionary key we cannot validate.
+var contentTypeProperties = map[string]valueList{
+	"installedapp": {list: globalProperties["CurrentApp"].list},
+	"app": {
+		list: &[]string{
+			"Artist",
+			"Price",
+			"Currency Code",
+			"Formatted Price",
+			"Release Date",
+			"Category",
+			"Description",
+			"Rating",
+			"# of Ratings",
+			"Rating (This Version)",
+			"# of Ratings (This Version)",
+			"Version",
+			"Last Updated",
+			"Release Notes",
+			"Content Rating",
+			"Minimum OS Version",
+			"Is Universal",
+			"Supports Game Center",
+			"Supported Devices",
+			"Screenshot URLs",
+			"iPad Screenshot URLs",
+			"Download Size",
+			"Bundle Identifier",
+			"Store ID",
+			"Store URL",
+			"Artwork",
+			"Artwork URL",
+			"Name",
+		},
+	},
+	"article": {
+		list: &[]string{
+			"Author",
+			"Body",
+			"Excerpt",
+			"Main Image URL",
+			"Name",
+			"Number of Words",
+			"Published Date",
+			"Title",
+			"URL",
+		},
+	},
+	"contact":       {list: &contactProperties},
+	"display":       {list: &[]string{"Is Main Display", "Is Built-in Display", "Scale", "Apps", "Windows"}},
+	"email":         {list: &labelProperties},
+	"eventattendee": {list: &[]string{"Status", "Role", "Type", "Is Me", "Email Address"}},
+	"folder":        {list: &folderProperties},
+	"file":          {list: &fileProperties},
+	"image":         {list: &imageProperties},
+	"itunes": {
+		list: &[]string{
+			"Artist",
+			"Artwork",
+			"Artwork URL",
+			"Currency Code",
+			"Description",
+			"Duration",
+			"Formatted Price",
+			"Genre",
+			"Is Explicit",
+			"Name",
+			"Price",
+			"Release Date",
+			"Store ID",
+			"Store URL",
+			"Streamable",
+		},
+	},
+	"location": {
+		list: &[]string{
+			"Full Street Address",
+			"Latitude",
+			"Longitude",
+			"Altitude",
+			"Street",
+			"City",
+			"State",
+			"Zip Code",
+			"Region",
+			"Phone Number",
+		},
+	},
+	"maplink":     {list: &nameProperties},
+	"media":       {list: &mediaProperties},
+	"photomedia":  {list: &mediaProperties},
+	"place":       {list: &nameProperties},
+	"pdf":         {list: &fileProperties},
+	"phonenumber": {list: &labelProperties},
+	"richtext":    {list: &fileProperties},
+	"webpage":     {list: &[]string{"Name", "Page Contents", "Page Selection", "Page URL"}},
+	"url":         {list: &nameProperties},
+	"vcard":       {list: &fileProperties},
+	"window": {list: &[]string{
+		"App Name",
+		"Is Hidden",
+		"Image",
+		"Width",
+		"Height",
+		"X Position",
+		"Y Position",
+		"Window Index",
+		"Display",
+		"App",
+	}},
+}
+
 var inputs []string
 var outputs []string
 
