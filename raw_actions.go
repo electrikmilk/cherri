@@ -14,6 +14,7 @@ func defineRawAction() {
 				name:      "parameters",
 				optional:  true,
 				validType: Dict,
+				literal:   true,
 			},
 		},
 		makeParams: func(args []actionArgument) map[string]any {
@@ -21,7 +22,12 @@ func defineRawAction() {
 				return map[string]any{}
 			}
 
-			var params = getArgValue(args[1]).(map[string]interface{})
+			var value = getArgValue(args[1])
+			if value == nil {
+				return map[string]any{}
+			}
+
+			var params = value.(map[string]interface{})
 			handleRawParams(params)
 
 			return params

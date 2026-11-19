@@ -4,3 +4,7 @@ rawAction("is.workflow.actions.alert", {
     "WFAlertActionMessage": "Hello, world!",
     "WFAlertActionTitle": "Alert"
 })
+
+rawAction("is.workflow.actions.alert", {})
+
+rawAction("is.workflow.actions.alert", nil)
