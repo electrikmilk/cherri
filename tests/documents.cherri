@@ -23,4 +23,10 @@ appendToFile("notes.txt", @contents)
 appendNote("Groceries", "Milk")
 openNote(@noteToOpen)
 
+filterNotes()
+filterNotes("Last Modified Date")
+filterNotes("Last Modified Date", "Latest First")
+filterNotes("Name", "A to Z", 10)
+filterNotes(nil, nil, 3)
+
 show("✅ All tests passed")

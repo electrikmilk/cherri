@@ -202,6 +202,13 @@ var actions = map[string]*actionDefinition{
 			return
 		},
 	},
+	"filterNotes": {
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFContentItemLimitEnabled": len(args) > 2 && args[2].value != nil,
+			}
+		},
+	},
 	"getPDFText": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
 			if len(args) == 0 {

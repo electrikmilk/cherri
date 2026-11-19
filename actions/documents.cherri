@@ -125,6 +125,26 @@ action #Notes.OpenNoteLinkAction 'shownote' openNote(variable note: 'WFInput')
 // [Doc]: [Notes] Append Note: Append text to a note.
 action #Notes.AppendToNoteLinkAction 'appendnote' appendNote(text note: 'WFNote', text input: 'WFInput')
 
+enum notesSortBy {
+    'Creation Date',
+    'Folder',
+    'Last Modified Date',
+    'Name',
+    'Random',
+}
+
+enum notesOrderings {
+    'Latest First',
+    'Oldest First',
+    'A to Z',
+    'Z to A',
+    'Ascending',
+    'Descending',
+}
+
+// [Doc]: [Notes] Filter Notes: Get notes from the Notes library, sorted by `sortBy` in `orderBy` order, up to `limit` notes.
+action internal 'filter.notes' filterNotes(notesSortBy ?sortBy: 'WFContentItemSortProperty', notesOrderings ?orderBy: 'WFContentItemSortOrder', number ?limit: 'WFContentItemLimitNumber'): array
+
 // [Doc]: [Notes] Show Quick Note: Show quick note.
 action 'com.apple.mobilenotes.ShowQuickNoteIntent' showQuickNote()
 
