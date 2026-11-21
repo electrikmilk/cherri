@@ -48,7 +48,6 @@ func actionsSearch() {
 		os.Exit(1)
 	case "dictionary":
 		fmt.Print("\nDictionary actions are abstracted into JSON object statements. For example:\n\n@variable = {\"test\":5\", \"key\":\"value\"}\n\n")
-		os.Exit(1)
 	}
 
 	var actionSearchResults strings.Builder
