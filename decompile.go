@@ -1138,6 +1138,12 @@ func decompAction(action *ShortcutAction) {
 
 func makeActionCallCode(action *ShortcutAction) string {
 	var actionCallCode strings.Builder
+
+	if args.Using("faithful") {
+		actionCallCode.WriteString(makeRawAction(action))
+		return actionCallCode.String()
+	}
+
 	var matchedIdentifier, matchedAction = matchAction(action)
 	if matchedIdentifier == "" {
 		checkMissingStandardInclude(&action.WFWorkflowActionIdentifier, false)

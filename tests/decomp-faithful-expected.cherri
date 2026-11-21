@@ -1,0 +1,62 @@
+#define color red
+#define glyph apple
+
+const hello = rawAction("is.workflow.actions.ask")
+@confirm = rawAction("is.workflow.actions.ask")
+const location = rawAction("is.workflow.actions.location")
+@urls = rawAction("is.workflow.actions.url")
+@int = 42
+@dict = {
+	"key": "",
+	"key2": "value",
+	"key3": false,
+	"key4": "{@int}",
+	"key5": {
+		"key": "test",
+		"key1": 5
+	},
+	"key7": [
+		5,
+		6
+	]
+}
+@str = "me"
+@var = "5 {@str}"
+
+if @int == 0 {
+	rawAction("is.workflow.actions.alert", {
+		"WFAlertActionCancelButtonShown": false,
+		"WFAlertActionMessage": "Title",
+		"WFAlertActionTitle": "Message"
+	})
+} else {
+	rawAction("is.workflow.actions.nothing")
+	if @int == 1 {
+	}
+}
+@list = rawAction("is.workflow.actions.list")
+
+if @str == "me" {
+}
+
+if @var == @str && @int == 2 {
+}
+
+menu "Prompt" {
+item "Item 1":
+}
+rawAction("is.workflow.actions.alert", {
+	"WFAlertActionCancelButtonShown": false,
+	"WFAlertActionMessage": "Title",
+	"WFAlertActionTitle": "Message"
+})
+rawAction("is.workflow.actions.showresult", {
+	"Text": "{@var}"
+})
+
+repeat _ for 3 {
+}
+
+for _ in @list {
+}
+@val = @dict['key2']
