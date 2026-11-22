@@ -1161,6 +1161,14 @@ func generateImportQuestions() (importQuestions []WFQuestion) {
 			DefaultValue: makeQuestionDefaultValue(q.defaultValue),
 		})
 	}
+
+	// Map iteration order is random, so sort to keep the compiled Shortcut reproducible.
+	sort.Slice(importQuestions, func(i, j int) bool {
+		if importQuestions[i].ActionIndex != importQuestions[j].ActionIndex {
+			return importQuestions[i].ActionIndex < importQuestions[j].ActionIndex
+		}
+		return importQuestions[i].ParameterKey < importQuestions[j].ParameterKey
+	})
 	return
 }
 
