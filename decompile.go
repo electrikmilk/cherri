@@ -34,6 +34,7 @@ func decompile(b []byte) {
 
 	variables = make(map[string]varValue)
 	uuids = make(map[string]string)
+	questions = make(map[string]*question)
 	controlFlowGroups = make(map[int]controlFlowGroup)
 
 	basename = strings.ReplaceAll(basename, " ", "_")
@@ -381,19 +382,9 @@ func defineColors(icon ShortcutIcon, colors map[string]int) {
 	}
 }
 
-type importQuestionKey struct {
-	actionIndex  int
-	parameterKey string
-}
-
-var importQuestionBindings map[importQuestionKey]string
-
 // mapImportQuestions defines each import question and records which action parameter it is bound to,
 // since Shortcuts blanks that parameter and keeps the question's prompt and default value separately.
 func mapImportQuestions() {
-	importQuestionBindings = make(map[importQuestionKey]string)
-
-	var claimedIdentifiers = make(map[string]bool)
 	var definitions strings.Builder
 	for i, importQuestion := range shortcut.WFWorkflowImportQuestions {
 		if importQuestion.Category != "Parameter" {
@@ -405,23 +396,18 @@ func mapImportQuestions() {
 		switch value := importQuestion.DefaultValue.(type) {
 		case nil:
 			defaultValue = `""`
-		case string:
-			defaultValue = fmt.Sprintf("\"%s\"", escapeString(value))
-		case map[string]any:
-			var dictionaryItems WFItems
-			mapToStruct(value, &dictionaryItems)
-			defaultValue = decompDictionaryValue(dictionaryItems.Value.WFDictionaryFieldValueItems)
+		case string, map[string]any:
+			defaultValue = decompValue(value)
 		default:
 			decompWarning(fmt.Sprintf("Import question '%s' has a default value of type %T, but #question only supports text and dictionaries. Skipping it.", importQuestion.Text, value))
 			continue
 		}
 
-		var identifier = makeQuestionIdentifier(importQuestion.Text, i, claimedIdentifiers)
-		claimedIdentifiers[identifier] = true
-		importQuestionBindings[importQuestionKey{
-			actionIndex:  importQuestion.ActionIndex,
-			parameterKey: importQuestion.ParameterKey,
-		}] = identifier
+		var identifier = makeQuestionIdentifier(importQuestion.Text, i)
+		questions[identifier] = &question{
+			parameter:   importQuestion.ParameterKey,
+			actionIndex: importQuestion.ActionIndex,
+		}
 
 		fmt.Fprintf(&definitions, "#question %s \"%s\" %s\n", identifier, escapeString(importQuestion.Text), defaultValue)
 	}
@@ -433,31 +419,33 @@ func mapImportQuestions() {
 	newCodeLine(definitions.String())
 }
 
-func makeQuestionIdentifier(text string, questionIndex int, claimedIdentifiers map[string]bool) string {
+func makeQuestionIdentifier(text string, questionIndex int) string {
 	var baseIdentifier = text
 	sanitizeIdentifier(&baseIdentifier)
 	if baseIdentifier == "" || (baseIdentifier[0] >= '0' && baseIdentifier[0] <= '9') {
 		baseIdentifier = fmt.Sprintf("question%d", questionIndex+1)
 	}
 
-	var identifier = baseIdentifier
-	for suffix := 2; isQuestionIdentifierTaken(identifier, claimedIdentifiers); suffix++ {
-		identifier = baseIdentifier + strconv.Itoa(suffix)
+	var identifier = checkDuplicateOutputName(baseIdentifier)
+	for validReference(identifier) {
+		identifier = checkDuplicateOutputName(duplicateOutputName())
 	}
 
 	return identifier
 }
 
-func isQuestionIdentifierTaken(identifier string, claimedIdentifiers map[string]bool) bool {
-	return claimedIdentifiers[identifier] || validReference(identifier) || slices.Contains(slices.Collect(maps.Values(uuids)), identifier)
-}
-
-// takeQuestionBinding removes the binding it returns so the bindings left after decompiling are the unbound ones.
+// takeQuestionBinding marks the question it returns as used so the questions left unused after decompiling are the unbound ones.
 func takeQuestionBinding(parameterKey string) (identifier string, found bool) {
-	var key = importQuestionKey{actionIndex: actionIndex, parameterKey: parameterKey}
-	identifier, found = importQuestionBindings[key]
-	delete(importQuestionBindings, key)
-	return
+	for questionIdentifier, question := range questions {
+		if question.used || question.actionIndex != actionIndex || question.parameter != parameterKey {
+			continue
+		}
+
+		question.used = true
+		return questionIdentifier, true
+	}
+
+	return "", false
 }
 
 // decompQuestionCall writes the action call a question binds to, since a literal would drop the question.
@@ -473,8 +461,12 @@ func decompQuestionCall(action *ShortcutAction, call string, parameterKey string
 }
 
 func warnUnboundQuestions() {
-	for key, identifier := range importQuestionBindings {
-		decompWarning(fmt.Sprintf("Import question '%s' on action %d parameter '%s' could not be bound to an action argument.", identifier, key.actionIndex, key.parameterKey))
+	for identifier, question := range questions {
+		if question.used {
+			continue
+		}
+
+		decompWarning(fmt.Sprintf("Import question '%s' on action %d parameter '%s' could not be bound to an action argument.", identifier, question.actionIndex, question.parameter))
 	}
 }
 

@@ -230,8 +230,9 @@ func checkDuplicateOutputName(name string) string {
 		currentOutputName = name
 		duplicateDelta = 0
 	}
-	// Constants are named when parsed, so a generated name must not take one.
-	if _, found := uuids[name]; found || variables[name].constant {
+	// Constants and import questions are named when parsed, so a generated name must not take one.
+	var _, isQuestion = questions[name]
+	if _, found := uuids[name]; found || isQuestion || variables[name].constant {
 		return checkDuplicateOutputName(duplicateOutputName())
 	} else if args.Using("import") {
 		for _, outputName := range uuids {
