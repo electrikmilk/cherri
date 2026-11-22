@@ -1320,6 +1320,7 @@ func collectQuestion() {
 		if defaultType != Dict {
 			parserError("Expected question default string or dictionary value.")
 		}
+		checkQuestionDefaultIsStatic(identifier, defaultValue)
 		if dictionary, _ := defaultValue.(map[string]any); dictionary == nil {
 			defaultValue = make(map[string]any)
 		}
@@ -1328,6 +1329,27 @@ func collectQuestion() {
 	questions[identifier] = &question{
 		text:         text,
 		defaultValue: defaultValue,
+	}
+}
+
+// checkQuestionDefaultIsStatic rejects variables, action results and inline references because the
+// default is stored in the Shortcut before it runs, so there is nothing to resolve them against.
+func checkQuestionDefaultIsStatic(identifier string, value any) {
+	switch typed := value.(type) {
+	case map[string]any:
+		for _, item := range typed {
+			checkQuestionDefaultIsStatic(identifier, item)
+		}
+	case []any:
+		for _, item := range typed {
+			checkQuestionDefaultIsStatic(identifier, item)
+		}
+	case varValue:
+		parserError(fmt.Sprintf("Import question '%s' default value cannot contain variables or action results.", identifier))
+	case string:
+		if checkInlineVarRegex.MatchString(typed) {
+			parserError(fmt.Sprintf("Import question '%s' default value cannot contain inline references.", identifier))
+		}
 	}
 }
 
