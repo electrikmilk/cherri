@@ -422,8 +422,11 @@ func mapImportQuestions() {
 func makeQuestionIdentifier(text string) string {
 	var baseIdentifier = text
 	sanitizeIdentifier(&baseIdentifier)
-	if baseIdentifier == "" || (baseIdentifier[0] >= '0' && baseIdentifier[0] <= '9') {
+	switch {
+	case baseIdentifier == "" || (baseIdentifier[0] >= '0' && baseIdentifier[0] <= '9'):
 		baseIdentifier = "Question"
+	case startsWithKeyword(baseIdentifier):
+		baseIdentifier = "Question" + capitalize(baseIdentifier)
 	}
 
 	var identifier = checkDuplicateOutputName(baseIdentifier)
@@ -432,6 +435,14 @@ func makeQuestionIdentifier(text string) string {
 	}
 
 	return identifier
+}
+
+// startsWithKeyword reports whether the parser would read the start of identifier as a keyword value,
+// which a suffix cannot fix.
+func startsWithKeyword(identifier string) bool {
+	return slices.ContainsFunc([]tokenType{True, False, Nil, Color, Quantity}, func(keyword tokenType) bool {
+		return strings.HasPrefix(identifier, string(keyword))
+	})
 }
 
 // takeQuestionBinding marks the question it returns as used so the questions left unused after decompiling are the unbound ones.
