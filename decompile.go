@@ -456,7 +456,7 @@ func decompQuestionCall(action *ShortcutAction, call string, parameterKey string
 	}
 
 	currentVariableValue = fmt.Sprintf("%s(%s)", call, identifier)
-	checkConstantLiteral(action)
+	writeActionOutput(action)
 	return true
 }
 
@@ -1237,7 +1237,12 @@ func decompAction(action *ShortcutAction) {
 	}
 
 	currentVariableValue = makeActionCallCode(action)
+	writeActionOutput(action)
+}
 
+// writeActionOutput writes currentVariableValue as a constant, as a bare action call or leaves it
+// for the variable statement that follows, depending on how the action's output is used.
+func writeActionOutput(action *ShortcutAction) {
 	var isConstant, isVariableValue = checkOutputType(action)
 	if isConstant && isVariableValue {
 		makeConstantLiteral(action)
