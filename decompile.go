@@ -386,7 +386,7 @@ func defineColors(icon ShortcutIcon, colors map[string]int) {
 // since Shortcuts blanks that parameter and keeps the question's prompt and default value separately.
 func mapImportQuestions() {
 	var definitions strings.Builder
-	for i, importQuestion := range shortcut.WFWorkflowImportQuestions {
+	for _, importQuestion := range shortcut.WFWorkflowImportQuestions {
 		if importQuestion.Category != "Parameter" {
 			decompWarning(fmt.Sprintf("Import question '%s' has unsupported category '%s', skipping it.", importQuestion.Text, importQuestion.Category))
 			continue
@@ -403,7 +403,7 @@ func mapImportQuestions() {
 			continue
 		}
 
-		var identifier = makeQuestionIdentifier(importQuestion.Text, i)
+		var identifier = makeQuestionIdentifier(importQuestion.Text)
 		questions[identifier] = &question{
 			parameter:   importQuestion.ParameterKey,
 			actionIndex: importQuestion.ActionIndex,
@@ -419,11 +419,11 @@ func mapImportQuestions() {
 	newCodeLine(definitions.String())
 }
 
-func makeQuestionIdentifier(text string, questionIndex int) string {
+func makeQuestionIdentifier(text string) string {
 	var baseIdentifier = text
 	sanitizeIdentifier(&baseIdentifier)
 	if baseIdentifier == "" || (baseIdentifier[0] >= '0' && baseIdentifier[0] <= '9') {
-		baseIdentifier = fmt.Sprintf("question%d", questionIndex+1)
+		baseIdentifier = "Question"
 	}
 
 	var identifier = checkDuplicateOutputName(baseIdentifier)
