@@ -130,7 +130,7 @@ if emptyNestedName.text != "value" {
 const made = dictionary({"name": "Bob"})
 const madeName = getValue(made, "name")
 if madeName.text != "Bob" {
-    mustOutput("❌ FAIL: dictionary action — got {madeName}, expected 'Bob'", "❌ FAIL: dictionary action — got {madeName}, expected 'Bob'")
+    mustOutput("❌ FAIL: dictionary action - got {madeName}, expected 'Bob'", "❌ FAIL: dictionary action - got {madeName}, expected 'Bob'")
 }
 
 show("✅ All tests passed")
