@@ -1310,19 +1310,19 @@ func collectQuestion() {
 	advance()
 
 	var defaultValue any
-	switch char {
-	case '"':
+	if char == '"' {
+		// collectValue would treat braces in the default as inline variables.
 		advance()
 		defaultValue = collectString()
-	case '{':
-		advance()
-		var dictionary = collectDictionary()
-		if dictionary == nil {
-			dictionary = make(map[string]any)
+	} else {
+		var defaultType tokenType
+		collectValue(&defaultType, &defaultValue, '\n')
+		if defaultType != Dict {
+			parserError("Expected question default string or dictionary value.")
 		}
-		defaultValue = dictionary
-	default:
-		parserError("Expected question default string or dictionary value.")
+		if dictionary, _ := defaultValue.(map[string]any); dictionary == nil {
+			defaultValue = make(map[string]any)
+		}
 	}
 
 	questions[identifier] = &question{
