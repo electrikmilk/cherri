@@ -480,8 +480,15 @@ var varPositions map[string]Value
 var inlineVariables []inlineVariable
 var varIndex []varValue
 
+var literalBraceReplacer = strings.NewReplacer(string(escapedLeftBrace), "{", string(escapedRightBrace), "}")
+
+// hasBraces is whether text has a brace, escaped or not, which its text has to be generated from.
+func hasBraces(text string) bool {
+	return strings.ContainsAny(text, "{}"+string(escapedLeftBrace)+string(escapedRightBrace))
+}
+
 func attachmentValues(str string) any {
-	if !strings.ContainsAny(str, "{}") {
+	if !hasBraces(str) {
 		return str
 	}
 
@@ -542,8 +549,9 @@ var collectInlineVarRegex = regexp.MustCompile(`\{@?(.*?)(?:\['(.*?)'])?(?:\.(.*
 var replaceVarRegex = regexp.MustCompile(`(\{@?.*?})`)
 
 // collectInlineVariables collects inline variables from `str` and adds them to a slice of attachmentVariable.
-// It then replaces all instances of inline variables in `str` with ObjectReplaceChar.
+// It then replaces all instances of inline variables in `str` with ObjectReplaceChar and writes the escaped braces.
 func collectInlineVariables(str *string) (noVarString string) {
+	noVarString = *str
 	var matches = collectInlineVarRegex.FindAllStringSubmatch(*str, -1)
 	if matches != nil {
 		for _, match := range matches {
@@ -560,6 +568,7 @@ func collectInlineVariables(str *string) (noVarString string) {
 		noVarString = replaceVarRegex.ReplaceAllString(*str, ObjectReplaceCharStr)
 	}
 
+	noVarString = literalBraceReplacer.Replace(noVarString)
 	mapInlineVariables(&noVarString)
 	return
 }
@@ -657,7 +666,7 @@ func makeDictionaryItem(key string, value any, fileItems bool) WFDictionaryField
 	switch v := value.(type) {
 	case string:
 		itemType = itemTypeText
-		if strings.ContainsAny(v, "{}") {
+		if hasBraces(v) {
 			wfValue = attachmentValues(v)
 		} else {
 			wfValue = WFTextTokenString{
@@ -744,7 +753,7 @@ func buildDictionaryItem(key string, itemType dictDataType, wfValue any) WFDicti
 }
 
 func buildDictionaryKey(key string) any {
-	if strings.ContainsAny(key, "{}") {
+	if hasBraces(key) {
 		return attachmentValues(key)
 	}
 	return WFTextTokenString{

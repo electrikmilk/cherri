@@ -108,4 +108,14 @@ if @bracesAndMore != 'brace { and } here!' {
     alert("❌ FAIL: text with literal braces - got {@bracesAndMore}")
 }
 
+// a backslash before a brace makes it literal in double quoted text, and a reference can sit between them
+@escapedBraces = "\{not a reference\}"
+if @escapedBraces != '{not a reference}' {
+    alert("❌ FAIL: text with escaped braces - got {@escapedBraces}")
+}
+@escapedAroundReference = "\{{@braces}\}"
+if @escapedAroundReference != '{brace { and } here}' {
+    alert("❌ FAIL: escaped braces around an inline reference - got {@escapedAroundReference}")
+}
+
 show("✅ All tests passed")

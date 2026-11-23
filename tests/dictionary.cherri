@@ -134,6 +134,18 @@ if markup != "<b>Tom & Jerry</b>" {
     mustOutput("❌ FAIL: dict text with <, > and & - got {markup}, expected '<b>Tom & Jerry</b>'", "❌ FAIL: dict text with <, > and & - got {markup}, expected '<b>Tom & Jerry</b>'")
 }
 
+// a backslash before a brace makes it literal text, beside an inline reference too
+@who = "Ann"
+@braced = {"code": "if x \{ run() \}", "mixed": "{@who}: \{ok\}"}
+const bracedCode = "{@braced['code']}"
+if bracedCode != 'if x { run() }' {
+    mustOutput("❌ FAIL: dict text with escaped braces - got {bracedCode}, expected 'if x \{ run() \}'", "❌ FAIL: dict text with escaped braces - got {bracedCode}, expected 'if x \{ run() \}'")
+}
+const bracedMixed = "{@braced['mixed']}"
+if bracedMixed != 'Ann: {ok}' {
+    mustOutput("❌ FAIL: dict text with a reference and escaped braces - got {bracedMixed}, expected 'Ann: \{ok\}'", "❌ FAIL: dict text with a reference and escaped braces - got {bracedMixed}, expected 'Ann: \{ok\}'")
+}
+
 // dictionary action
 const made = dictionary({"name": "Bob"})
 const madeName = getValue(made, "name")

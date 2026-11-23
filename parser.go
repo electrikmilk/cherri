@@ -1746,6 +1746,10 @@ func collectString() string {
 				collection.WriteRune('\r')
 			case '\\':
 				collection.WriteRune('\\')
+			case '{':
+				collection.WriteRune(escapedLeftBrace)
+			case '}':
+				collection.WriteRune(escapedRightBrace)
 			default:
 				collection.WriteRune(next(1))
 			}

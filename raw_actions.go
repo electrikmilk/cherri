@@ -1,7 +1,5 @@
 package main
 
-import "strings"
-
 func defineRawAction() {
 	actions["rawAction"] = &actionDefinition{
 		parameters: []parameterDefinition{
@@ -48,7 +46,7 @@ func normalizeRawActionParamValue(value any) any {
 
 	switch v := value.(type) {
 	case string:
-		if !strings.ContainsAny(v, "{}") {
+		if !hasBraces(v) {
 			return value
 		}
 		return attachmentValues(v)
