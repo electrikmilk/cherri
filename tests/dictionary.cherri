@@ -119,4 +119,11 @@ if bareLast.text != "constant" {
     mustOutput("❌ FAIL: bare constant as last dictionary item - got {bareLast}, expected 'constant'", "❌ FAIL: bare constant as last dictionary item - got {bareLast}, expected 'constant'")
 }
 
+// an empty nested dictionary compiles without WFDictionaryFieldValueItems, which decompiling must tolerate
+@emptyNested = {"name": "value", "empty": {}}
+const emptyNestedName = getValue(@emptyNested, "name")
+if emptyNestedName.text != "value" {
+    mustOutput("❌ FAIL: empty nested dictionary - got {emptyNestedName}, expected 'value'", "❌ FAIL: empty nested dictionary - got {emptyNestedName}, expected 'value'")
+}
+
 show("✅ All tests passed")
