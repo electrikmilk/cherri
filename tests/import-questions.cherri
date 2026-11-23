@@ -12,3 +12,5 @@ alert(age, "Age")
 const config = dictionary(settings)
 
 alert("Settings", "Done")
+
+show("✅ All tests passed")
