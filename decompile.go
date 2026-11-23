@@ -1873,12 +1873,20 @@ func writeLiteralScalar(literal *strings.Builder, value any) {
 	encoder.SetEscapeHTML(false)
 	handle(encoder.Encode(value))
 
-	literal.WriteString(strings.TrimSuffix(encoded.String(), "\n"))
+	literal.WriteString(markedBraceEscaper.Replace(strings.TrimSuffix(encoded.String(), "\n")))
 }
 
 // stringEscaper is one replacer, rather than a chain of replacements, so the backslashes it adds are
 // never escaped again.
-var stringEscaper = strings.NewReplacer(`\`, `\\`, `"`, `\"`, "\n", `\n`, "\t", `\t`, "\r", `\r`)
+var stringEscaper = strings.NewReplacer(`\`, `\\`, `"`, `\"`, "\n", `\n`, "\t", `\t`, "\r", `\r`,
+	string(escapedLeftBrace), `\{`, string(escapedRightBrace), `\}`)
+
+// literalBraceMarker holds the braces of text as the characters the compiler holds an escaped brace as, which
+// the writers of a string write escaped, so a brace of the text is never read as an inline reference.
+var literalBraceMarker = strings.NewReplacer("{", string(escapedLeftBrace), "}", string(escapedRightBrace))
+
+// markedBraceEscaper writes held braces escaped in text that is already encoded.
+var markedBraceEscaper = strings.NewReplacer(string(escapedLeftBrace), `\{`, string(escapedRightBrace), `\}`)
 
 // escapeString escapes raw text for the inside of a double quoted Cherri string, the inverse of collectString.
 func escapeString(value string) string {
@@ -1894,14 +1902,15 @@ func doubleQuoted(text string) string {
 // text as it is in the Shortcut and never trims or escapes it first. Text that has its inline
 // references already written as {reference} is passed with hasReferences.
 //
-// Cherri has no escape for a brace in a double quoted string, and the compiler reads the braces in
-// one as inline references, so text with a literal brace is written as a raw string.
+// The compiler reads the braces in a double quoted string as inline references, so the braces of text with
+// no reference are written escaped. A raw string would not need that, but it is of the rawtext type, which
+// a condition does not accept.
 func quoteString(text string, hasReferences bool) string {
-	if hasReferences || !strings.ContainsAny(text, "{}") {
+	if hasReferences {
 		return doubleQuoted(text)
 	}
 
-	return quoteRawString(text)
+	return doubleQuoted(literalBraceMarker.Replace(text))
 }
 
 // quoteRawString writes text as a raw string, which only has an escape for the single quote, so a
@@ -1915,14 +1924,15 @@ func quoteRawString(text string) string {
 }
 
 // decompTextLiteral writes text as it is written in the current context. Inside an array or a dictionary it
-// stays as it is because it is escaped when the literal is written as JSON.
+// stays as it is because it is escaped when the literal is written as JSON. Text with references already has
+// the braces that are its own marked.
 func decompTextLiteral(text string, hasReferences bool) string {
 	if decompilingDictionary {
-		if !hasReferences && strings.ContainsAny(text, "{}") {
-			decompError(fmt.Sprintf("Expected text in an array or a dictionary to have no literal brace, as Cherri reads it as an inline reference, got '%s'", text), currentDecompAction())
+		if hasReferences {
+			return text
 		}
 
-		return text
+		return literalBraceMarker.Replace(text)
 	}
 
 	return quoteString(text, hasReferences)
@@ -2134,15 +2144,10 @@ func decompAttachmentString(text string, attachments map[string]interface{}) str
 	return decompTextLiteral(result.String(), true)
 }
 
-// decompLiteralText decodes text between two attachments, which Cherri can only write when it has no brace
-// because the compiler would read the braces with the references as one reference.
+// decompLiteralText decodes text between two attachments. Its braces are marked so they are written escaped,
+// as the compiler would otherwise read them with the references as one reference.
 func decompLiteralText(units []uint16) string {
-	var text = string(utf16.Decode(units))
-	if strings.ContainsAny(text, "{}") {
-		decompError(fmt.Sprintf("Expected text with inline references to have no literal brace, got '%s'", text), currentDecompAction())
-	}
-
-	return text
+	return literalBraceMarker.Replace(string(utf16.Decode(units)))
 }
 
 // decompAggrandizements writes the aggrandizements in plist order. The compiler reads at most one
