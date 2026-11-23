@@ -1290,6 +1290,17 @@ type question struct {
 	used         bool
 }
 
+func (q *question) isDictionary() bool {
+	var _, isDictionary = q.defaultValue.(map[string]any)
+	return isDictionary
+}
+
+// fitsParameter reports whether the question can be bound to a parameter of this type, since a
+// dictionary default is stored in the action and a text default in the question.
+func (q *question) fitsParameter(parameterType tokenType) bool {
+	return q.isDictionary() == (parameterType == Dict)
+}
+
 func collectQuestion() {
 	advance()
 	var identifier = collectIdentifier()

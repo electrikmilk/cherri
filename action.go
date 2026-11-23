@@ -554,12 +554,11 @@ func checkQuestionDefaultType(param *parameterDefinition, argument *actionArgume
 		return
 	}
 
-	var _, isDictionary = question.defaultValue.(map[string]any)
-	if isDictionary == (param.validType == Dict) {
+	if question.fitsParameter(param.validType) {
 		return
 	}
 
-	if isDictionary {
+	if question.isDictionary() {
 		parserError(fmt.Sprintf("Import question '%s' has a dictionary default value, but argument '%s' is not a dictionary.", argument.value, param.name))
 	}
 	parserError(fmt.Sprintf("Import question '%s' has a text default value, but argument '%s' is a dictionary.", argument.value, param.name))

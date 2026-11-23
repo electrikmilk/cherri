@@ -405,8 +405,9 @@ func mapImportQuestions() {
 
 		var identifier = makeQuestionIdentifier(importQuestion.Text)
 		questions[identifier] = &question{
-			parameter:   importQuestion.ParameterKey,
-			actionIndex: importQuestion.ActionIndex,
+			parameter:    importQuestion.ParameterKey,
+			actionIndex:  importQuestion.ActionIndex,
+			defaultValue: importQuestion.DefaultValue,
 		}
 
 		fmt.Fprintf(&definitions, "#question %s \"%s\" %s\n", identifier, escapeString(importQuestion.Text), defaultValue)
@@ -446,9 +447,12 @@ func startsWithKeyword(identifier string) bool {
 }
 
 // takeQuestionBinding marks the question it returns as used so the questions left unused after decompiling are the unbound ones.
-func takeQuestionBinding(parameterKey string) (identifier string, found bool) {
+func takeQuestionBinding(parameterKey string, parameterType tokenType) (identifier string, found bool) {
 	for questionIdentifier, question := range questions {
 		if question.used || question.actionIndex != actionIndex || question.parameter != parameterKey {
+			continue
+		}
+		if !question.fitsParameter(parameterType) {
 			continue
 		}
 
@@ -460,8 +464,8 @@ func takeQuestionBinding(parameterKey string) (identifier string, found bool) {
 }
 
 // decompQuestionCall writes the action call a question binds to, since a literal would drop the question.
-func decompQuestionCall(action *ShortcutAction, call string, parameterKey string) bool {
-	var identifier, found = takeQuestionBinding(parameterKey)
+func decompQuestionCall(action *ShortcutAction, call string, parameterKey string, parameterType tokenType) bool {
+	var identifier, found = takeQuestionBinding(parameterKey, parameterType)
 	if !found {
 		return false
 	}
@@ -584,7 +588,7 @@ var decompilingText = false
 
 func decompTextValue(action *ShortcutAction) {
 	// The shared gettext identifier is ambiguous to match, so write the text() call directly.
-	if decompQuestionCall(action, "text", "WFTextActionText") {
+	if decompQuestionCall(action, "text", "WFTextActionText", String) {
 		return
 	}
 
@@ -933,7 +937,7 @@ type WFItems struct {
 var decompilingDictionary = false
 
 func decompDictionary(action *ShortcutAction) {
-	if decompQuestionCall(action, "dictionary", "WFItems") {
+	if decompQuestionCall(action, "dictionary", "WFItems", Dict) {
 		return
 	}
 
@@ -1356,7 +1360,7 @@ func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actio
 		}
 
 		var argValue string
-		if identifier, found := takeQuestionBinding(param.key); found {
+		if identifier, found := takeQuestionBinding(param.key, param.validType); found {
 			argValue = identifier
 		} else if value, found := action.WFWorkflowActionParameters[param.key]; found {
 			argValue = decompValue(value)
