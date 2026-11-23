@@ -111,7 +111,7 @@ type WFDictionaryFieldValue struct {
 }
 
 type WFDictionaryFieldValueWrapper struct {
-	WFDictionaryFieldValueItems []WFDictionaryFieldValueItem `plist:",omitempty"`
+	WFDictionaryFieldValueItems []WFDictionaryFieldValueItem
 }
 
 type WFArrayValue struct {
