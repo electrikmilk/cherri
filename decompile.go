@@ -476,7 +476,8 @@ func decompQuestionCall(action *ShortcutAction, call string, parameterKey string
 }
 
 func warnUnboundQuestions() {
-	for identifier, question := range questions {
+	for _, identifier := range slices.Sorted(maps.Keys(questions)) {
+		var question = questions[identifier]
 		if question.used {
 			continue
 		}
