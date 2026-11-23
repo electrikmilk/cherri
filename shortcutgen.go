@@ -1173,11 +1173,11 @@ func generateImportQuestions() (importQuestions []WFQuestion) {
 }
 
 func makeQuestionDefaultValue(defaultValue any) any {
-	if _, isDictionary := defaultValue.(map[string]any); !isDictionary {
-		return defaultValue
+	if _, isDictionary := defaultValue.(map[string]any); isDictionary {
+		return makeDictionaryValue(&defaultValue, true)
 	}
 
-	return makeDictionaryValue(&defaultValue, true)
+	return defaultValue
 }
 
 func generateInputContentItems() (inputContentItems []string) {
