@@ -170,7 +170,8 @@ func makeVariableInput(t *token, params map[string]any) {
 
 	makeVariableValueAction(t, &outputName, &varUUID)
 	if t.valueType != Arr && t.value != nil {
-		if t.typeof == Variable && t.valueType == Variable {
+		// Appending to an array emits no action for a reference, so the appended input is the reference itself.
+		if t.valueType == Variable && (t.typeof == Variable || variables[t.ident].valueType == Arr) {
 			params["WFInput"] = variableValue(t.value.(varValue))
 		} else {
 			params["WFInput"] = inputValue(outputName, varUUID)
@@ -379,8 +380,7 @@ func referenceAggrandizements(reference varValue) []Aggrandizement {
 	var aggrandizements []Aggrandizement
 	if reference.getAs != "" {
 		var identifier, _ = reference.value.(string)
-		var definition, _ = resolveDefinition(identifier)
-		if effectiveType(definition) == Dict {
+		if isDictionaryReference(identifier) {
 			aggrandizements = append(aggrandizements, Aggrandizement{
 				Type:          "WFDictionaryValueVariableAggrandizement",
 				DictionaryKey: reference.getAs,
@@ -393,7 +393,6 @@ func referenceAggrandizements(reference varValue) []Aggrandizement {
 		}
 	}
 	if reference.coerce != "" {
-		checkCoerce(reference.coerce)
 		aggrandizements = append(aggrandizements, Aggrandizement{
 			Type:              "WFCoercionVariableAggrandizement",
 			CoercionItemClass: contentItems[reference.coerce],
@@ -854,21 +853,26 @@ func makeConditionalAction(t *token) {
 	switch t.valueType {
 	case If:
 		conditionalParams["WFControlFlowMode"] = startStatement
-
-		var cond = t.value.(WFConditions)
-		if len(cond.conditions) == 1 {
-			singleConditionParam(makeConditionParam(cond.conditions[0]), conditionalParams)
-		} else {
-			conditionalParams["WFConditions"] = makeConditions(&cond)
-		}
+		conditionParams(t.value.(WFConditions), conditionalParams)
 	case Else:
 		conditionalParams["WFControlFlowMode"] = statementPart
+		if cond, isElseIf := t.value.(WFConditions); isElseIf {
+			conditionParams(cond, conditionalParams)
+		}
 	case EndClosure:
 		conditionalParams["UUID"] = createUUIDReference(t.value.(string))
 		conditionalParams["WFControlFlowMode"] = endStatement
 	}
 
 	addStdAction("conditional", conditionalParams)
+}
+
+func conditionParams(cond WFConditions, params map[string]any) {
+	if len(cond.conditions) == 1 {
+		singleConditionParam(makeConditionParam(cond.conditions[0]), params)
+	} else {
+		params["WFConditions"] = makeConditions(&cond)
+	}
 }
 
 var filterTemplates []WFConditionParam
@@ -1166,22 +1170,29 @@ func generateImportQuestions() (importQuestions []WFQuestion) {
 			DefaultValue: makeQuestionDefaultValue(q.defaultValue),
 		})
 	}
+
+	// Map iteration order is random, so sort to keep the compiled Shortcut reproducible.
+	sort.Slice(importQuestions, func(i, j int) bool {
+		if importQuestions[i].ActionIndex != importQuestions[j].ActionIndex {
+			return importQuestions[i].ActionIndex < importQuestions[j].ActionIndex
+		}
+		return importQuestions[i].ParameterKey < importQuestions[j].ParameterKey
+	})
 	return
 }
 
 func makeQuestionDefaultValue(defaultValue any) any {
-	if _, isDictionary := defaultValue.(map[string]any); !isDictionary {
-		return defaultValue
+	if _, isDictionary := defaultValue.(map[string]any); isDictionary {
+		return makeDictionaryValue(&defaultValue, true)
 	}
 
-	// A question default is plain values, so there are no variable references to read as files.
-	return makeDictionaryValue(&defaultValue, false)
+	return defaultValue
 }
 
 func generateInputContentItems() (inputContentItems []string) {
 	if len(inputs) == 0 {
-		for _, input := range contentItems {
-			inputContentItems = append(inputContentItems, input)
+		for _, input := range defaultContentItems {
+			inputContentItems = append(inputContentItems, contentItems[input])
 		}
 	} else {
 		for _, input := range inputs {

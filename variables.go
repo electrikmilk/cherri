@@ -39,6 +39,11 @@ var globals = map[string]varValue{
 		valueType:    Date,
 		value:        "CurrentDate",
 	},
+	"CurrentApp": {
+		variableType: "CurrentApp",
+		valueType:    String,
+		value:        "CurrentApp",
+	},
 	"Clipboard": {
 		variableType: "Clipboard",
 		valueType:    String,
@@ -180,6 +185,14 @@ func effectiveType(definition varValue) tokenType {
 	return definition.valueType
 }
 
+// isDictionaryReference is whether a key on the reference is a dictionary key, otherwise it is a property
+// of a content item. Shortcut generation and key validation must agree on this, so both use it.
+func isDictionaryReference(identifier string) bool {
+	var definition, _ = resolveDefinition(identifier)
+
+	return effectiveType(definition) == Dict
+}
+
 // referenceType is the type of a reference as written at its use site, where a coercion
 // takes precedence over the type of the definition behind it.
 func referenceType(reference varValue) tokenType {
@@ -217,8 +230,9 @@ func checkDuplicateOutputName(name string) string {
 		currentOutputName = name
 		duplicateDelta = 0
 	}
-	// Constants are named when parsed, so a generated name must not take one.
-	if _, found := uuids[name]; found || variables[name].constant {
+	// Constants and import questions are named when parsed, so a generated name must not take one.
+	var _, isQuestion = questions[name]
+	if _, found := uuids[name]; found || isQuestion || variables[name].constant {
 		return checkDuplicateOutputName(duplicateOutputName())
 	} else if args.Using("import") {
 		for _, outputName := range uuids {

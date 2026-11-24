@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"regexp"
 	"slices"
@@ -28,6 +29,7 @@ type controlFlowGroup struct {
 	identifier string
 	groupType  tokenType
 	uuid       string
+	hasElse    bool // Shortcuts has nothing after the plain Otherwise of an if.
 }
 
 var controlFlowGroups map[int]controlFlowGroup
@@ -116,6 +118,7 @@ func initParse() {
 	if args.Using("debug") {
 		fmt.Printf("Parsing %s...\n", filename)
 	}
+	nameContentTypeLists()
 	variables = make(map[string]varValue)
 	questions = make(map[string]*question)
 	controlFlowGroups = make(map[int]controlFlowGroup)
@@ -622,12 +625,50 @@ func checkInlineVars(value *string) {
 			if !validVariableReference(&variableName) {
 				parserError(fmt.Sprintf("Undefined inline variable reference '%s'", variableName))
 			}
+			checkKey(variableName, match[2], match[3])
 			continue
 		}
 
 		if !validActionReference(&identifier) && !validGlobalReference(&identifier) {
 			parserError(fmt.Sprintf("Undefined inline reference '%s'. Variable references must be prefixed with @.", identifier))
 		}
+		checkKey(identifier, match[2], match[3])
+	}
+}
+
+func nameContentTypeLists() {
+	for name, list := range contentTypeProperties {
+		list.name = fmt.Sprintf("%s property", name)
+		list.plural = fmt.Sprintf("%s properties", name)
+		contentTypeProperties[name] = list
+	}
+}
+
+// checkKey validates the key of a reference. A dictionary is never validated as a content item, unlike
+// every other kind of reference. Only the keys of a constant dictionary are checked. A variable keeps its first definition, but can
+// be added to afterwards (e.g. with setValue), so its literal does not say which keys it holds.
+func checkKey(reference string, getAs string, coerce string) {
+	if getAs == "" {
+		return
+	}
+	if validGlobalReference(&reference) {
+		if propList, found := globalProperties[reference]; found {
+			propList.validate(&getAs)
+		}
+		return
+	}
+
+	if isDictionaryReference(reference) {
+		var dictionary = variables[reference]
+		var keys, isLiteral = dictionary.value.(map[string]any)
+		if _, found := keys[getAs]; dictionary.constant && isLiteral && !found {
+			parserError(fmt.Sprintf("Dictionary '%s' has no key '%s'", reference, getAs))
+		}
+		return
+	}
+
+	if propList, found := contentTypeProperties[coerce]; found {
+		propList.validate(&getAs)
 	}
 }
 
@@ -711,6 +752,7 @@ func collectReference(valueType *tokenType, value *any, variable bool) {
 	}
 
 	isInputVariable(reference)
+	checkKey(reference, getAs, coerce)
 
 	*valueType = Variable
 	*value = varValue{
@@ -1248,6 +1290,17 @@ type question struct {
 	used         bool
 }
 
+func (q *question) isDictionary() bool {
+	var _, isDictionary = q.defaultValue.(map[string]any)
+	return isDictionary
+}
+
+// fitsParameter reports whether the question can be bound to a parameter of this type, since a
+// dictionary default is stored in the action and a text default in the question.
+func (q *question) fitsParameter(parameterType tokenType) bool {
+	return q.isDictionary() == (parameterType == Dict)
+}
+
 func collectQuestion() {
 	advance()
 	var identifier = collectIdentifier()
@@ -1268,20 +1321,46 @@ func collectQuestion() {
 	advance()
 
 	var defaultValue any
-	switch char {
-	case '"':
+	if char == '"' {
+		// collectValue would treat braces in the default as inline variables.
 		advance()
 		defaultValue = collectString()
-	case '{':
-		advance()
-		defaultValue = collectDictionary()
-	default:
-		parserError("Expected question default string or dictionary value.")
+	} else {
+		var defaultType tokenType
+		collectValue(&defaultType, &defaultValue, '\n')
+		if defaultType != Dict {
+			parserError("Expected question default string or dictionary value.")
+		}
+		checkQuestionDefaultIsStatic(identifier, defaultValue)
+		if dictionary, _ := defaultValue.(map[string]any); dictionary == nil {
+			defaultValue = make(map[string]any)
+		}
 	}
 
 	questions[identifier] = &question{
 		text:         text,
 		defaultValue: defaultValue,
+	}
+}
+
+// checkQuestionDefaultIsStatic rejects variables, action results and inline references because the
+// default is stored in the Shortcut before it runs, so there is nothing to resolve them against.
+func checkQuestionDefaultIsStatic(identifier string, value any) {
+	switch typed := value.(type) {
+	case map[string]any:
+		for _, item := range typed {
+			checkQuestionDefaultIsStatic(identifier, item)
+		}
+	case []any:
+		for _, item := range typed {
+			checkQuestionDefaultIsStatic(identifier, item)
+		}
+	case varValue:
+		parserError(fmt.Sprintf("Import question '%s' default value cannot contain variables or action results.", identifier))
+	case string:
+		if checkInlineVarRegex.MatchString(typed) {
+			parserError(fmt.Sprintf("Import question '%s' default value cannot contain inline references.", identifier))
+		}
 	}
 }
 
@@ -1418,7 +1497,16 @@ func collectConditionals(identifier string) {
 
 	var group = groupStatement(Conditional, &identifier)
 
-	var conditions WFConditions
+	tokens = append(tokens, token{
+		typeof:    Conditional,
+		ident:     group.uuid,
+		valueType: If,
+		value:     collectConditionList(),
+	})
+}
+
+// collectConditionList collects the conditions up to the opening brace and moves past it.
+func collectConditionList() (conditions WFConditions) {
 	conditions.WFActionParameterFilterPrefix = -1
 	for char != 1 && char != '{' {
 		var conditional = collectConditional()
@@ -1429,12 +1517,7 @@ func collectConditionals(identifier string) {
 
 	advance()
 
-	tokens = append(tokens, token{
-		typeof:    Conditional,
-		ident:     group.uuid,
-		valueType: If,
-		value:     conditions,
-	})
+	return
 }
 
 func collectFilterPrefix(wfConditions *WFConditions) {
@@ -1627,16 +1710,35 @@ func collectEndStatement() {
 
 	if tokenAhead(Else) {
 		skipWhitespace()
-		if _, ok := controlFlowGroups[groupingIdx]; !ok {
+		var group, found = controlFlowGroups[groupingIdx]
+		if !found || group.groupType != Conditional {
 			parserError("Else has no starting if statement.")
 		}
-		// Shortcuts has no "else if", it would be parsed as a nested if that never gets closed.
-		if !tokenAhead(LeftBrace) {
-			parserError("Else must be followed by '{', nest an if statement inside the else block instead of using 'else if'.")
+		if group.hasElse {
+			parserError("Else or else if cannot follow an else.")
 		}
+		if tokenAhead(If) {
+			if iosVersion < 27.0 {
+				parserError(fmt.Sprintf("'else if' is not available in set minimum version '%.1f'", math.Ceil(iosVersion)))
+			}
+			advance()
+			// Otherwise If belongs to the group of the if that opened the chain, which has one End If.
+			tokens = append(tokens, token{
+				typeof:    Conditional,
+				ident:     group.uuid,
+				valueType: Else,
+				value:     collectConditionList(),
+			})
+			return
+		}
+		if !tokenAhead(LeftBrace) {
+			parserError("Else must be followed by '{' or 'if'.")
+		}
+		group.hasElse = true
+		controlFlowGroups[groupingIdx] = group
 		tokens = append(tokens, token{
 			typeof:    Conditional,
-			ident:     controlFlowGroups[groupingIdx].uuid,
+			ident:     group.uuid,
 			valueType: Else,
 			value:     nil,
 		})
@@ -1961,7 +2063,6 @@ func collectActionCall() {
 
 func collectAction(identifier *string) (value action) {
 	if !callableAction(*identifier) {
-		// Probing the standard includes rewinds the cursor and rewrites the source.
 		var beforeProbe = saveErrorPosition()
 		var requiredInclude = checkMissingStandardInclude(identifier, true)
 		beforeProbe.restore()

@@ -12,6 +12,7 @@ Tools that keep Cherri's action and automation trigger definitions matched to wh
 | Which actions exist in Shortcuts but not Cherri, or the reverse | `scripts/actions-sync.sh` |
 | Which parameters and enum values differ for actions both define | `scripts/actions-sync-params.sh` |
 | What plist does Shortcuts produce for this action | `scripts/shortcut-plist.sh` |
+| Which properties a content item type has, for validating key reads on coerced references | `scripts/content-item-properties.sh` |
 | Which automation trigger families exist in Shortcuts but not Cherri, or the reverse | `scripts/triggers-sync.sh` |
 | Which variants, parameters and enum values a trigger family has | `scripts/trigger-params.sh` |
 | What automation data Shortcuts stored for an installed shortcut | `scripts/trigger-plist.sh` |
@@ -129,6 +130,17 @@ Both plists are an array of action dicts, so a plain `diff reference.plist cherr
 The shortcut name must be unique in the library. The script stops with an error if it is not, or if it is missing.
 
 The check covers structure, not behavior. A matching plist does not prove the action runs correctly, so the signed `go test -run '^TestCherri$'` and the Shortcuts app still apply.
+
+## Content item properties
+
+```bash
+bash .claude/skills/shortcuts-sync/scripts/content-item-properties.sh
+bash .claude/skills/shortcuts-sync/scripts/content-item-properties.sh WFArticleContentItem
+```
+
+Prints the properties the Mac ToolKit database lists for each content item class in `contentItems` in `shortcut.go`, or for the classes given. These are the keys a property read can take on a coerced reference, such as `@x['Author'].article`. Pass `--db` for the simulator database.
+
+The database only describes content items with App Intents metadata, and the script prints `(no properties in database)` for the rest (see its header). Take those properties from a reference plist or the Shortcuts app and keep them by hand in `contentTypeProperties` in `shortcut.go`.
 
 ## Automation triggers
 

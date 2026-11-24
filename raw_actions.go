@@ -12,14 +12,35 @@ func defineRawAction() {
 				name:      "parameters",
 				optional:  true,
 				validType: Dict,
+				literal:   true,
 			},
+		},
+		check: func(args []actionArgument, _ *actionDefinition) {
+			if len(args) == 1 {
+				return
+			}
+
+			var params, hasParams = args[1].value.(map[string]any)
+			if !hasParams {
+				return
+			}
+
+			// Shortcuts crashes while loading a Shortcut with an empty descriptor, which looks like our output is wrong.
+			if params["AppIntentDescriptor"] == "" {
+				parserError("An empty 'AppIntentDescriptor' is an invalid Shortcut format and signing will fail. Remove it or give it a valid intent value.")
+			}
 		},
 		makeParams: func(args []actionArgument) map[string]any {
 			if len(args) == 1 {
 				return map[string]any{}
 			}
 
-			var params = getArgValue(args[1]).(map[string]interface{})
+			var value = args[1].value
+			if value == nil {
+				return map[string]any{}
+			}
+
+			var params = value.(map[string]interface{})
 			handleRawParams(params)
 
 			return params

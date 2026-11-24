@@ -103,7 +103,7 @@ func (pkg *cherriPackage) loadDependencies(reinstall bool) {
 	}
 }
 
-// Reports that the package failed to install.
+// failed reports that the package failed to install.
 func (pkg *cherriPackage) failed(err error) {
 	fmt.Println(ansi(fmt.Sprintf("[x] %s - unable to install: %s\n", pkg.signature(), err), yellow))
 }

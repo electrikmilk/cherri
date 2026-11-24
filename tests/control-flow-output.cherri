@@ -54,7 +54,7 @@ if @flag != "set" {
 }
 
 // compile-only: device-dependent and interactive values
-@deviceModel = "{Device['Model']}"
+@deviceModel = "{Device['Device Model']}"
 const connectionName = if @deviceModel == "iPhone" {
     getCellularDetail("Carrier Name")
 } else {
@@ -74,5 +74,19 @@ const mapped = for item in @items {
     number(item)
 }
 show("{mapped}")
+
+// else if output
+@n = 2
+const grade = if @n == 1 {
+    text("a")
+} else if @n == 2 {
+    text("b")
+} else {
+    text("c")
+}
+@gradeStr = "{grade}"
+if @gradeStr != "b" {
+    mustOutput("❌ FAIL: else if output - got {@gradeStr}, expected 'b'", "❌ FAIL: else if output - got {@gradeStr}, expected 'b'")
+}
 
 show("✅ All tests passed")

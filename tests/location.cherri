@@ -1,8 +1,16 @@
-// compile-only: weather locations are saved on the device
+// compile-only: weather locations are saved on the device and home and work resolve per user
 
 @location = "Cupertino"
 
 addWeatherLocation(@location)
 removeWeatherLocation(@location)
+
+const homePlace = homeLocation()
+const workPlace = workLocation()
+
+getTravelTime("Driving", workPlace)
+getTravelTime("Walking", workPlace, currentLocation())
+getTravelTime("Transit", workPlace, homePlace, true, true)
+getTravelTime("Biking", workPlace)
 
 show("✅ All tests passed")

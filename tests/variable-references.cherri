@@ -16,4 +16,13 @@ const dict = getDictionary(@raw)
 const first = getFirstItem(dict['a'])
 if first.text != "1" { mustOutput("❌ FAIL: dict key as argument - got {first}, expected '1'", "❌ FAIL: dict key as argument - got {first}, expected '1'") }
 
+// a key with a coercion on a dictionary is a dictionary key, not a content item property, also through a copy
+@copyOfDict = @raw
+@keyedText = @raw['a'].text
+@keyedCopyText = @copyOfDict['a'].text
+
+// a key with a coercion on anything else is a property of that content item type
+const page = text("https://example.com")
+@pageURL = page['Page URL'].webpage
+
 show("✅ All tests passed")

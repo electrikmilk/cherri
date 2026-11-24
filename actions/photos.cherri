@@ -2,6 +2,53 @@
 Photos Actions
 */
 
+app Photos 'com.apple.mobileslideshow' {
+    'FavoriteAssetsIntent',
+    'HideAssetsIntent',
+    'EnhanceIntent',
+    'DeleteAlbumsIntent',
+    'OpenAssetIntent',
+    'AlbumEntity'
+}
+
+enum albumOrderings {
+    'Oldest First',
+    'Latest First',
+}
+
+// [Doc]: Favorite Photos: Add photos to Favorites.
+action v27 #Photos.FavoriteAssetsIntent favoritePhotos(variable photos: 'assets')
+
+// [Doc]: Unfavorite Photos: Remove photos from Favorites.
+action v27 #Photos.FavoriteAssetsIntent unfavoritePhotos(variable photos: 'assets') {
+    "action": "unfavorite"
+}
+
+// [Doc]: Hide Photos: Hide photos.
+action v27 #Photos.HideAssetsIntent hidePhotos(variable photos: 'assets')
+
+// [Doc]: Unhide Photos: Unhide photos.
+action v27 #Photos.HideAssetsIntent unhidePhotos(variable photos: 'assets') {
+    "action": "unhide"
+}
+
+// [Doc]: Enhance Photos: Auto enhance photos.
+action v27 #Photos.EnhanceIntent enhancePhotos(variable photos: 'assets')
+
+// [Doc]: Unenhance Photos: Remove the auto enhancement from photos.
+action v27 #Photos.EnhanceIntent unenhancePhotos(variable photos: 'assets') {
+    "enabled": 0
+}
+
+// [Doc]: Open Photo: Open a photo in the Photos app.
+action v27 #Photos.OpenAssetIntent openPhoto(variable photo: 'target')
+
+// [Doc]: Delete Albums: Delete albums.
+action v27 #Photos.DeleteAlbumsIntent deleteAlbums(variable albums: 'entities')
+
+// [Doc]: Find Albums: Find albums, optionally ordered by creation date and limited.
+action internal v27 #Photos.AlbumEntity findAlbums(albumOrderings ?orderBy: 'WFContentItemSortOrder', number ?limit: 'WFContentItemLimitNumber')
+
 // [Doc]: Create Album
 action 'photos.createalbum' createAlbum(text name: 'AlbumName', variable ?images: 'WFInput')
 

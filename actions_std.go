@@ -230,18 +230,44 @@ var actions = map[string]*actionDefinition{
 	},
 	"filterFiles": {
 		derivedKeys: []string{"WFContentItemLimitEnabled"},
-		appendParamsFunc: func(args []actionArgument) (params map[string]any) {
-			if len(args) == 0 {
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			return limitEnabledParams(args, 1)
+		},
+	},
+	"findVPNs": {
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			return limitEnabledParams(args, 2)
+		},
+	},
+	"filterNotes": {
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFContentItemLimitEnabled": len(args) > 2 && args[2].value != nil,
+			}
+		},
+	},
+	"findAlbums": {
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			var params = limitEnabledParams(args, 1)
+			if len(args) > 0 && args[0].valueType != Nil {
+				params["WFContentItemSortProperty"] = "creationDate"
+			}
+
+			return params
+		},
+	},
+	"getTravelTime": {
+		appendParamsFunc: func(args []actionArgument) map[string]any {
+			if len(args) > 2 && args[2].valueType != Nil {
 				return map[string]any{}
 			}
 
-			if len(args) != 1 {
-				return map[string]any{
-					"WFContentItemLimitEnabled": true,
-				}
+			// Shortcuts stores the current location as the start explicitly instead of leaving it out.
+			return map[string]any{
+				"WFGetDirectionsCustomLocation": map[string]any{
+					"isCurrentLocation": true,
+				},
 			}
-
-			return
 		},
 	},
 	"getPDFText": {
@@ -1027,6 +1053,18 @@ type windowSortOrder struct {
 var windowSortOrders = []windowSortOrder{
 	{[]string{"Title", "App Name", "Name"}, "A to Z", "Z to A"},
 	{[]string{"Width", "Height", "X Position", "Y Position", "Window Index"}, "Biggest First", "Smallest First"},
+}
+
+// limitEnabledParams turns the limit on only when the call reaches the limit argument, because Shortcuts ignores
+// WFContentItemLimitNumber unless WFContentItemLimitEnabled is set.
+func limitEnabledParams(args []actionArgument, limitIndex int) map[string]any {
+	if len(args) <= limitIndex {
+		return map[string]any{}
+	}
+
+	return map[string]any{
+		"WFContentItemLimitEnabled": true,
+	}
 }
 
 type focusMode struct {

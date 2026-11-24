@@ -1,0 +1,48 @@
+// compile-only: automations are installed by Shortcuts, not run by the compiler
+
+// connection status triggers
+#trigger wifi joined
+#trigger wifi disconnected
+#trigger wifi both
+#trigger bluetooth connect
+#trigger bluetooth disconnect
+#trigger bluetooth both
+#trigger display connect
+#trigger display disconnect
+#trigger display both
+#trigger charger connect
+#trigger charger disconnect
+#trigger charger both
+#trigger keyboard connect
+#trigger keyboard disconnect
+#trigger keyboard both
+#trigger carplay connect
+#trigger carplay disconnect
+#trigger carplay both
+
+// on, off or both triggers
+#trigger stageManager on
+#trigger stageManager off
+#trigger stageManager both
+#trigger airplaneMode on
+#trigger airplaneMode off
+#trigger airplaneMode both
+#trigger lowPowerMode on
+#trigger lowPowerMode off
+#trigger lowPowerMode both
+
+// screenshot locations, one or several
+#trigger screenshot photos
+#trigger screenshot files
+#trigger screenshot clipboard
+#trigger screenshot photos, files
+#trigger screenshot photos, files, clipboard
+
+// battery level, exact then rising above and falling below
+#trigger battery 30
+#trigger battery >50
+#trigger battery <20
+
+alert("Automation ran")
+
+show("✅ All tests passed")

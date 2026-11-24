@@ -408,7 +408,7 @@ func typeCheck(param *parameterDefinition, argument *actionArgument) {
 		return
 	case argValueType == Variable:
 		var reference = argVal.(varValue)
-		// The value of a key or property read is only known at runtime.
+		// The value of a key or property read is specific to each type of value.
 		if reference.getAs != "" && reference.coerce == "" {
 			return
 		}
@@ -562,12 +562,11 @@ func checkQuestionDefaultType(param *parameterDefinition, argument *actionArgume
 		return
 	}
 
-	var _, isDictionary = question.defaultValue.(map[string]any)
-	if isDictionary == (param.validType == Dict) {
+	if question.fitsParameter(param.validType) {
 		return
 	}
 
-	if isDictionary {
+	if question.isDictionary() {
 		parserError(fmt.Sprintf("Import question '%s' has a dictionary default value, but argument '%s' is not a dictionary.", argument.value, param.name))
 	}
 	parserError(fmt.Sprintf("Import question '%s' has a text default value, but argument '%s' is a dictionary.", argument.value, param.name))

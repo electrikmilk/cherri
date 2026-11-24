@@ -49,8 +49,8 @@ func resetDecompiler() {
 	currentVariableOperator = ""
 	decompiledImports = nil
 	decompiledDefinitions = nil
-	questionIdentifiers = make(map[questionKey]string)
-	writtenQuestions = make(map[questionKey]bool)
+	questions = make(map[string]*question)
+	controlFlowGroups = make(map[int]controlFlowGroup)
 	openMenuItems = make(map[string]bool)
 	appendedVariables = make(map[string]bool)
 	assignedVariables = make(map[string]bool)
@@ -92,10 +92,10 @@ func decompile(b []byte) {
 	defineName()
 	decompileIcon()
 	decompileDefinitions()
-	decompileQuestions()
+	mapImportQuestions()
 
 	decompileActions()
-	checkQuestionsWritten()
+	warnUnboundQuestions()
 	writeHeader()
 
 	if args.Using("debug") {
@@ -500,7 +500,7 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 
 		switch valueTwo := wfValue["Value"].(type) {
 		case map[string]interface{}:
-			if itemsValue, isMap := valueTwo["Value"].(map[string]interface{}); isMap {
+			if itemsValue, isMap := valueTwo["Value"].(map[string]interface{}); isMap && itemsValue["WFDictionaryFieldValueItems"] != nil {
 				mapDictionaryValueIdentifiers(decompFieldValueItems(itemsValue["WFDictionaryFieldValueItems"], currentDecompAction()))
 			}
 		case []interface{}:
@@ -800,62 +800,56 @@ func defineVersion() {
 	addDefinition("#define version %s", versionName)
 }
 
-// questionKey is the argument an import question holds the value of.
-type questionKey struct {
-	actionIndex  int
-	parameterKey string
-}
-
-// questionIdentifiers names the import question of an argument, and writtenQuestions are those whose argument
-// has been written.
-var questionIdentifiers map[questionKey]string
-var writtenQuestions map[questionKey]bool
-
-// decompileQuestions writes a question declaration for each import question and names it for the argument that
-// takes it. The compiler writes an empty value for the argument, so only the question holds one.
-func decompileQuestions() {
-	var questions = slices.Clone(shortcut.WFWorkflowImportQuestions)
-	slices.SortStableFunc(questions, func(a WFQuestion, b WFQuestion) int {
+// mapImportQuestions defines each import question and records which action parameter it is bound to,
+// since Shortcuts blanks that parameter and keeps the question's prompt and default value separately.
+func mapImportQuestions() {
+	var importQuestions = slices.Clone(shortcut.WFWorkflowImportQuestions)
+	slices.SortStableFunc(importQuestions, func(a WFQuestion, b WFQuestion) int {
 		if a.ActionIndex != b.ActionIndex {
 			return cmp.Compare(a.ActionIndex, b.ActionIndex)
 		}
 		return cmp.Compare(a.ParameterKey, b.ParameterKey)
 	})
 
-	var number = 1
-	var claimedIdentifiers = make(map[string]bool)
-	for _, question := range questions {
-		var defaultValue string
-		var isWritable bool
-		if question.Category == "Parameter" && question.ParameterKey != "" {
-			defaultValue, isWritable = decompQuestionDefault(question)
-		}
-		if !isWritable {
-			decompWarning(fmt.Sprintf("The import question '%s' is not a question about an argument with a text or dictionary default value, which Cherri cannot write, and is left out.", question.Text))
+	for _, importQuestion := range importQuestions {
+		if importQuestion.Category != "Parameter" || importQuestion.ParameterKey == "" {
+			decompWarning(fmt.Sprintf("The import question '%s' is not a question about an argument, which Cherri cannot write, and is left out.", importQuestion.Text))
 			continue
 		}
 
-		var identifier = makeQuestionIdentifier(question.Text, &number, claimedIdentifiers)
-		claimedIdentifiers[identifier] = true
-		questionIdentifiers[questionKey{question.ActionIndex, question.ParameterKey}] = identifier
-		addDefinition("#question %s %s %s", identifier, doubleQuoted(question.Text), defaultValue)
+		var defaultValue, isWritable = decompQuestionDefault(importQuestion)
+		if !isWritable {
+			decompWarning(fmt.Sprintf("The import question '%s' does not have a text or dictionary default value, which Cherri cannot write, and is left out.", importQuestion.Text))
+			continue
+		}
+
+		var identifier = makeQuestionIdentifier(importQuestion.Text)
+		questions[identifier] = &question{
+			parameter:    importQuestion.ParameterKey,
+			actionIndex:  importQuestion.ActionIndex,
+			defaultValue: importQuestion.DefaultValue,
+		}
+
+		addDefinition("#question %s %s %s", identifier, decompTextLiteral(importQuestion.Text, false), defaultValue)
 	}
 }
 
 // decompQuestionDefault writes the default value of a question as the text or dictionary literal that Cherri
 // reads it from, and is false for a default Cherri cannot write.
-func decompQuestionDefault(question WFQuestion) (defaultValue string, isWritable bool) {
-	switch value := question.DefaultValue.(type) {
+func decompQuestionDefault(importQuestion WFQuestion) (defaultValue string, isWritable bool) {
+	switch value := importQuestion.DefaultValue.(type) {
+	case nil:
+		return `""`, true
 	case string:
-		return doubleQuoted(value), true
+		return decompTextLiteral(value, false), true
 	case map[string]interface{}:
 		var action = &ShortcutAction{WFWorkflowActionIdentifier: "an import question"}
-		if question.ActionIndex >= 0 && question.ActionIndex < len(shortcut.WFWorkflowActions) {
-			action = &shortcut.WFWorkflowActions[question.ActionIndex]
+		if importQuestion.ActionIndex >= 0 && importQuestion.ActionIndex < len(shortcut.WFWorkflowActions) {
+			action = &shortcut.WFWorkflowActions[importQuestion.ActionIndex]
 		}
 
 		var items WFItems
-		decompMapToStruct(value, &items, "DefaultValue of the import question '"+question.Text+"'", action)
+		decompMapToStruct(value, &items, "DefaultValue of the import question '"+importQuestion.Text+"'", action)
 		return decompDictionaryValue(items.Value.WFDictionaryFieldValueItems), true
 	}
 
@@ -863,37 +857,29 @@ func decompQuestionDefault(question WFQuestion) (defaultValue string, isWritable
 }
 
 // makeQuestionIdentifier names a question for its text, so the question reads as what it asks. A text with
-// no name in it is named by the next number instead, and a name that is taken has a number added.
-func makeQuestionIdentifier(text string, number *int, claimedIdentifiers map[string]bool) string {
+// no name in it is named Question, and a name that is taken has a number added.
+func makeQuestionIdentifier(text string) string {
 	var baseIdentifier = sanitizeIdentifier(text)
-	if baseIdentifier == "" || (baseIdentifier[0] >= '0' && baseIdentifier[0] <= '9') {
-		return freshIdentifier("question", number, claimedIdentifiers)
+	switch {
+	case baseIdentifier == "" || (baseIdentifier[0] >= '0' && baseIdentifier[0] <= '9'):
+		baseIdentifier = "Question"
+	case startsWithKeyword(baseIdentifier):
+		baseIdentifier = "Question" + capitalize(baseIdentifier)
 	}
 
 	var identifier = baseIdentifier
-	for suffix := 2; isIdentifierTaken(identifier, claimedIdentifiers); suffix++ {
+	for suffix := 2; isIdentifierTaken(identifier); suffix++ {
 		identifier = baseIdentifier + strconv.Itoa(suffix)
 	}
 
 	return identifier
 }
 
-// freshIdentifier returns the prefix followed by the next number that is not taken.
-func freshIdentifier(prefix string, number *int, claimedIdentifiers map[string]bool) string {
-	for {
-		var identifier = fmt.Sprintf("%s%d", prefix, *number)
-		*number++
-
-		if !isIdentifierTaken(identifier, claimedIdentifiers) {
-			return identifier
-		}
-	}
-}
-
 // isIdentifierTaken is whether the compiler would reject a question named identifier, as it can not be named
 // like a variable, a constant, a global, a value or another question.
-func isIdentifierTaken(identifier string, claimedIdentifiers map[string]bool) bool {
-	if claimedIdentifiers[identifier] || validReference(identifier) || slices.Contains([]string{"true", "false", "nil"}, identifier) {
+func isIdentifierTaken(identifier string) bool {
+	var _, isQuestion = questions[identifier]
+	if isQuestion || validReference(identifier) || slices.Contains([]string{"true", "false", "nil"}, identifier) {
 		return true
 	}
 
@@ -901,29 +887,59 @@ func isIdentifierTaken(identifier string, claimedIdentifiers map[string]bool) bo
 		slices.Contains(slices.Collect(maps.Values(loopIdentifiers)), identifier)
 }
 
-// questionArgument returns the question that holds the value of the parameter of the current action.
-func questionArgument(parameterKey string) (identifier string, isQuestion bool) {
-	var key = questionKey{actionIndex, parameterKey}
-	identifier, isQuestion = questionIdentifiers[key]
-	if isQuestion {
-		writtenQuestions[key] = true
-	}
-
-	return
+// startsWithKeyword reports whether the parser would read the start of identifier as a keyword value,
+// which a suffix cannot fix.
+func startsWithKeyword(identifier string) bool {
+	return slices.ContainsFunc([]tokenType{True, False, Nil, Color, Quantity}, func(keyword tokenType) bool {
+		return strings.HasPrefix(identifier, string(keyword))
+	})
 }
 
-// checkQuestionsWritten warns about the import questions that no argument was written for, which are left out.
-func checkQuestionsWritten() {
-	var keys = slices.SortedFunc(maps.Keys(questionIdentifiers), func(a, b questionKey) int {
-		if a.actionIndex != b.actionIndex {
-			return a.actionIndex - b.actionIndex
+// takeQuestionBinding marks the question it returns as used so the questions left unused after decompiling are the unbound ones.
+func takeQuestionBinding(parameterKey string, parameterType tokenType) (identifier string, found bool) {
+	for questionIdentifier, question := range questions {
+		if question.used || question.actionIndex != actionIndex || question.parameter != parameterKey {
+			continue
 		}
-		return strings.Compare(a.parameterKey, b.parameterKey)
+		if !question.fitsParameter(parameterType) {
+			continue
+		}
+
+		question.used = true
+		return questionIdentifier, true
+	}
+
+	return "", false
+}
+
+// isQuestionBound is whether an import question holds the value of the parameter of the current action, which
+// takeQuestionBinding has already taken when the action is written.
+func isQuestionBound(parameterKey string) bool {
+	return slices.ContainsFunc(slices.Collect(maps.Values(questions)), func(question *question) bool {
+		return question.actionIndex == actionIndex && question.parameter == parameterKey
 	})
-	for _, key := range keys {
-		if !writtenQuestions[key] {
-			decompWarning(fmt.Sprintf("The import question '%s' is for the parameter '%s' of action %d, which is not written as an argument.", questionIdentifiers[key], key.parameterKey, key.actionIndex))
+}
+
+// decompQuestionCall writes the action call a question binds to, since a literal would drop the question.
+func decompQuestionCall(action *ShortcutAction, call string, parameterKey string, parameterType tokenType) bool {
+	var identifier, found = takeQuestionBinding(parameterKey, parameterType)
+	if !found {
+		return false
+	}
+
+	currentVariableValue = fmt.Sprintf("%s(%s)", call, identifier)
+	checkConstantLiteral(action)
+	return true
+}
+
+func warnUnboundQuestions() {
+	for _, identifier := range slices.Sorted(maps.Keys(questions)) {
+		var question = questions[identifier]
+		if question.used {
+			continue
 		}
+
+		decompWarning(fmt.Sprintf("Import question '%s' on action %d parameter '%s' could not be bound to an action argument.", identifier, question.actionIndex, question.parameter))
 	}
 }
 
@@ -988,7 +1004,7 @@ func decompileActions() {
 			if dictionaryKey != nil && action.WFWorkflowActionParameters[UUID] != nil &&
 				!slices.Contains(constUUIDs, paramString(&action, UUID)) {
 				decompDictionaryGetValue(&action)
-				continue
+				break
 			}
 			fallthrough
 		default:
@@ -1041,7 +1057,7 @@ func writeUnreferencedCall(action *ShortcutAction) {
 	var call string
 	if action.WFWorkflowActionIdentifier == "is.workflow.actions.gettext" {
 		call = fmt.Sprintf("text(%s)", currentVariableValue)
-		if _, isQuestion := questionIdentifiers[questionKey{actionIndex, "WFTextActionText"}]; isQuestion {
+		if isQuestionBound("WFTextActionText") {
 			call = currentVariableValue
 		}
 	} else {
@@ -1095,9 +1111,7 @@ var decompilingTextParameter bool
 func decompTextValue(action *ShortcutAction) {
 	// A literal would drop the question, and the Text action is matched by more than one action definition, so
 	// it is written as the text() call.
-	if identifier, isQuestion := questionArgument("WFTextActionText"); isQuestion {
-		currentVariableValue = fmt.Sprintf("text(%s)", identifier)
-		checkConstantLiteral(action)
+	if decompQuestionCall(action, "text", "WFTextActionText", String) {
 		return
 	}
 
@@ -1481,38 +1495,50 @@ func decompConditional(action *ShortcutAction) {
 	case startStatement:
 		beginStatement(If, action)
 
-		if action.WFWorkflowActionParameters["WFConditions"] != nil {
-			var conditions = paramMap(action, "WFConditions")
-			var conditionValue, hasValue = conditions["Value"].(map[string]interface{})
-			if !hasValue {
-				decompError("Expected WFConditions to have a Value dictionary", action)
-			}
-			var templates = conditionTemplates(conditionValue, action)
-			var conditionsLen = len(templates)
-			var paramFilterPrefix string
-			if conditionsLen > 1 {
-				paramFilterPrefix = decompFilterPrefix(conditionValue, action)
-			}
-			for i, condition := range templates {
-				decompCondition(condition, action)
-
-				if i != conditionsLen-1 {
-					code.WriteString(fmt.Sprintf(" %s ", paramFilterPrefix))
-				}
-			}
-		} else {
-			decompCondition(action.WFWorkflowActionParameters, action)
-		}
+		decompConditions(action)
 
 		code.WriteString(" {\n")
 		tabLevel++
 	case statementPart:
 		tabLevel--
-		newCodeLine("} else {\n")
+		var params = action.WFWorkflowActionParameters
+		if params["WFConditions"] != nil || params["WFCondition"] != nil {
+			newCodeLine("} else if ")
+			decompConditions(action)
+			code.WriteString(" {\n")
+		} else {
+			newCodeLine("} else {\n")
+		}
 		tabLevel++
 	case endStatement:
 		tabLevel--
 		newCodeLine("}\n")
+	}
+}
+
+func decompConditions(action *ShortcutAction) {
+	if action.WFWorkflowActionParameters["WFConditions"] == nil {
+		decompCondition(action.WFWorkflowActionParameters, action)
+		return
+	}
+
+	var conditions = paramMap(action, "WFConditions")
+	var conditionValue, hasValue = conditions["Value"].(map[string]interface{})
+	if !hasValue {
+		decompError("Expected WFConditions to have a Value dictionary", action)
+	}
+	var templates = conditionTemplates(conditionValue, action)
+	var conditionsLen = len(templates)
+	var paramFilterPrefix string
+	if conditionsLen > 1 {
+		paramFilterPrefix = decompFilterPrefix(conditionValue, action)
+	}
+	for i, condition := range templates {
+		decompCondition(condition, action)
+
+		if i != conditionsLen-1 {
+			code.WriteString(fmt.Sprintf(" %s ", paramFilterPrefix))
+		}
 	}
 }
 
@@ -1644,9 +1670,7 @@ const emptyDictionary = "{}"
 
 func decompDictionary(action *ShortcutAction) {
 	// A literal would drop the question, so write the dictionary() call it is an argument of.
-	if _, isQuestion := questionIdentifiers[questionKey{actionIndex, "WFItems"}]; isQuestion {
-		currentVariableValue = makeActionCallCode(action)
-		checkConstantLiteral(action)
+	if decompQuestionCall(action, "dictionary", "WFItems", Dict) {
 		return
 	}
 
@@ -1764,7 +1788,12 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 		if !hasValue || !hasNestedValue {
 			decompError("Expected a dictionary item value to be a dictionary holding a Value dictionary", currentDecompAction())
 		}
-		itemValue = decompDictionaryItems(decompFieldValueItems(nestedValue["WFDictionaryFieldValueItems"], currentDecompAction()))
+		// An empty nested dictionary has no items.
+		var nestedItems []WFDictionaryFieldValueItem
+		if nestedValue["WFDictionaryFieldValueItems"] != nil {
+			nestedItems = decompFieldValueItems(nestedValue["WFDictionaryFieldValueItems"], currentDecompAction())
+		}
+		itemValue = decompDictionaryItems(nestedItems)
 	default:
 		itemValue = decompValue(item.WFValue)
 	}
@@ -2195,7 +2224,12 @@ func decompAction(action *ShortcutAction) {
 	}
 
 	currentVariableValue = makeActionCallCode(action)
+	writeActionOutput(action)
+}
 
+// writeActionOutput writes currentVariableValue as a constant, as a bare action call or leaves it
+// for the variable statement that follows, depending on how the action's output is used.
+func writeActionOutput(action *ShortcutAction) {
 	var isConstant, isVariableValue = checkOutputType(action)
 	if isConstant && isVariableValue {
 		makeConstantLiteral(action)
@@ -2372,7 +2406,7 @@ func decompParameters(name string, parameters []parameterDefinition, action *Sho
 	var written int
 	for _, param := range parameters {
 		var skippable = param.optional || param.defaultValue != nil
-		if identifier, isQuestion := questionArgument(param.key); isQuestion {
+		if identifier, isQuestion := takeQuestionBinding(param.key, param.validType); isQuestion {
 			arguments = append(arguments, identifier)
 			written = len(arguments)
 			continue

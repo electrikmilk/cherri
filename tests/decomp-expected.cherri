@@ -45,6 +45,14 @@ if @str == "me" {
 if @var == @str && @int == 2 {
 }
 
+if ShortcutInput {
+} else if @str || ShortcutInput {
+}
+
+if ShortcutInput {
+} else if @var {
+}
+
 menu "Prompt" {
 	item "Item 1":
 }

@@ -1,0 +1,17 @@
+// compile-only: these change the photo library on the device
+
+const photos = getLatestPhotos(3)
+
+favoritePhotos(photos)
+unfavoritePhotos(photos)
+hidePhotos(photos)
+unhidePhotos(photos)
+enhancePhotos(photos)
+unenhancePhotos(photos)
+openPhoto(photos)
+
+const albums = findAlbums("Latest First", 6)
+const oldestAlbums = findAlbums("Oldest First")
+deleteAlbums(albums)
+
+show("✅ All tests passed")
