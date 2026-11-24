@@ -71,7 +71,7 @@ func TestCherri(_ *testing.T) {
 	}
 	loadStandardActions()
 	for _, file := range files {
-		if !strings.Contains(file.Name(), ".cherri") || file.Name() == "decomp-expected.cherri" || file.Name() == "decomp-me.cherri" {
+		if !strings.Contains(file.Name(), ".cherri") || file.Name() == "decomp-expected.cherri" || file.Name() == "decomp-app-expected.cherri" || file.Name() == "decomp-app.cherri" {
 			continue
 		}
 		currentTest = fmt.Sprintf("tests/%s", file.Name())
@@ -151,15 +151,60 @@ func TestPackages(t *testing.T) {
 	delete(args.Args, "remove")
 }
 
+// TestDecomp is the test driven loop of the decompiler: tests/decomp-expected.cherri is written as the code the
+// decompiler should write, compiled, and decompiled again, and the result must be the same code. Whatever the
+// compiler can write that the decompiler does not write back the same is a failure of one of them.
 func TestDecomp(t *testing.T) {
+	var tempDir = t.TempDir()
+	var binary = filepath.Join(tempDir, "cherri")
+	var buildOutput, buildErr = exec.Command("go", "build", "-o", binary, ".").CombinedOutput()
+	if buildErr != nil {
+		t.Fatalf("build compiler: %s\n%s", buildErr, buildOutput)
+	}
+
+	// The compiler writes the shortcut next to the code, so the code is compiled from a copy.
+	var expected, readErr = os.ReadFile("tests/decomp-expected.cherri")
+	if readErr != nil {
+		t.Fatal(readErr)
+	}
+	var sourcePath = filepath.Join(tempDir, "decomp-expected.cherri")
+	if writeErr := os.WriteFile(sourcePath, expected, 0600); writeErr != nil {
+		t.Fatal(writeErr)
+	}
+	var compileOutput, compiled = roundTripRun(binary, sourcePath, "--skip-sign", "--no-ansi")
+	if !compiled {
+		t.Fatalf("compile tests/decomp-expected.cherri:\n%s", roundTripTail(compileOutput))
+	}
+	var compiledPath = filepath.Join(tempDir, "decomp-expected"+unsignedEnd)
+
+	var decompiledDir = filepath.Join(tempDir, "dec")
+	if mkdirErr := os.MkdirAll(decompiledDir, 0755); mkdirErr != nil {
+		t.Fatal(mkdirErr)
+	}
+	var decompileOutput, decompiled = roundTripRun(binary, "--import="+compiledPath, "--output="+decompiledDir+"/", "--no-ansi")
+	if !decompiled {
+		t.Fatalf("decompile the compiled tests/decomp-expected.cherri:\n%s", roundTripTail(decompileOutput))
+	}
+
+	var actualPath = filepath.Join(decompiledDir, "decomp-expected"+strings.TrimSuffix(unsignedEnd, ".shortcut")+".cherri")
+	var diffOutput, sameCode = roundTripRun("diff", "-u", "tests/decomp-expected.cherri", actualPath)
+	if !sameCode {
+		t.Fatalf("the decompiled code is not the expected code, - is expected and + is decompiled:\n%s", diffOutput)
+	}
+}
+
+// TestDecompApp decompiles tests/decomp-app.plist, which holds what the Shortcuts app writes and the compiler
+// does not, such as an output without a name, and expects byte-for-byte equality with
+// tests/decomp-app-expected.cherri. When decompiler output changes intentionally, regenerate the expected file.
+func TestDecompApp(t *testing.T) {
 	defer resetParser()
 
 	fmt.Println("Decompiling...")
-	args.Args["import"] = "tests/decomp-me.plist"
+	args.Args["import"] = "tests/decomp-app.plist"
 	decompile(importShortcut(args.Value("import")))
 
 	fmt.Println("Comparing to expected...")
-	var bytes, readErr = os.ReadFile("tests/decomp-expected.cherri")
+	var bytes, readErr = os.ReadFile("tests/decomp-app-expected.cherri")
 	handle(readErr)
 
 	if code.String() != string(bytes) {
