@@ -1,0 +1,26 @@
+// compile-only: every action called with its required arguments and then with all of them, to decompile each one
+#define mac true
+
+@v = "x"
+
+displaySleep()
+getApps()
+getWindows()
+getWindows("Random", "desc", 2)
+makeDiskImage("a", @v)
+makeDiskImage("b", @v, true)
+makeSizedDiskImage("a", @v)
+moveWindow(@v, "Top Left")
+moveWindow(@v, "Coordinates", true)
+resizeWindow(@v, "Fit Screen")
+resizeWindow(@v, "Dimensions")
+runJSAutomation("a")
+runJSAutomation("b", @v)
+runShellScript("a")
+runShellScript("b", @v, "b", "b")
+sleep()
+startScreensaver()
+takeInteractiveScreenshot()
+takeInteractiveScreenshot("Custom")
+
+show("✅ All tests passed")

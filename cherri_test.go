@@ -359,7 +359,6 @@ func roundTripIconColor(t *testing.T, data []byte) []byte {
 // test file name without _unsigned.shortcut. An entry that starts passing must be removed.
 var roundTripKnownFailures = map[string]string{
 	"ask-prompts": "the prompt of an Ask in a function call argument is inside the dictionary of the call, and Cherri has no syntax for a prompt inside text, an array or a dictionary",
-	"calendar":    "addWorldClock() and the other world clock actions build their city parameters in Go and have no decomp hook to read the city back",
 }
 
 // roundTripKnownMismatches lists shortcuts that recompile but with a different action sequence,
