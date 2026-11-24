@@ -120,15 +120,15 @@ func worldClockCitiesValue(argument actionArgument) any {
 	return cities
 }
 
-// decompWorldClockCity recovers the city argument that is written as the parameter key of the action, which is a
-// variable or the name of the city of the identifier Shortcuts stores.
-func decompWorldClockCity(action *ShortcutAction, key string, name string) map[string]string {
-	var value, found = optionalParam(action, key)
+// decompWorldClockCity recovers the city argument, which is a variable or the name of the city of the identifier
+// Shortcuts stores.
+func decompWorldClockCity(action *ShortcutAction) map[string]string {
+	var value, found = optionalParam(action, "city")
 	if !found {
 		return nil
 	}
 
-	return map[string]string{name: decompCityValue(value, action)}
+	return map[string]string{"city": decompCityValue(value, action)}
 }
 
 // decompWorldClockCities recovers the cities argument, which Shortcuts writes as a single city when there is only one.

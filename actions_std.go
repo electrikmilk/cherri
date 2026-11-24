@@ -107,9 +107,7 @@ var actions = map[string]*actionDefinition{
 				"city": worldClockCityValue(args[0]),
 			}
 		},
-		decompRecover: func(action *ShortcutAction) map[string]string {
-			return decompWorldClockCity(action, "city", "city")
-		},
+		decompRecover: decompWorldClockCity,
 	},
 	"removeWorldClock": {
 		check: checkWorldClockCities,
@@ -122,9 +120,7 @@ var actions = map[string]*actionDefinition{
 				"entities": worldClockCitiesValue(args[0]),
 			}
 		},
-		decompRecover: func(action *ShortcutAction) map[string]string {
-			return decompWorldClockCities(action)
-		},
+		decompRecover: decompWorldClockCities,
 	},
 	"getCityTime": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
@@ -136,9 +132,7 @@ var actions = map[string]*actionDefinition{
 				"city": worldClockCityValue(args[0]),
 			}
 		},
-		decompRecover: func(action *ShortcutAction) map[string]string {
-			return decompWorldClockCity(action, "city", "city")
-		},
+		decompRecover: decompWorldClockCity,
 	},
 	"emailAddress": {
 		check: func(args []actionArgument, _ *actionDefinition) {
