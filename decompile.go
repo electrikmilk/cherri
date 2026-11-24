@@ -2323,12 +2323,13 @@ func checkOutputType(action *ShortcutAction) (isConstant bool, isVariableValue b
 		return
 	}
 	var uuid = paramString(action, UUID)
-	if _, found := uuids[uuid]; !found {
+	isVariableValue = slices.Contains(varUUIDs, uuid)
+	// The Shortcuts app names no output that only a Set Variable reads, so there is no identifier for it.
+	if _, found := uuids[uuid]; !found && !isVariableValue {
 		return
 	}
 
-	isConstant = slices.Contains(constUUIDs, uuid) || !slices.Contains(varUUIDs, uuid)
-	isVariableValue = slices.Contains(varUUIDs, uuid)
+	isConstant = slices.Contains(constUUIDs, uuid) || !isVariableValue
 
 	return
 }

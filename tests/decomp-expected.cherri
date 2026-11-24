@@ -69,3 +69,4 @@ for _ in @list {
 }
 @val = @dict['key2']
 const settings = dictionary(EnterTheSettings)
+@fromApp = prompt("Named by the Shortcuts app")
