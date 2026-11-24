@@ -22,7 +22,7 @@ enum deviceDetail {
 }
 
 // [Doc]: Get Device Detail: Get a detail about current device.
-action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail')
+action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail'): variable
 
 // [Doc]: Get Current App: Get the current app.
 action default v26 getCurrentApp()

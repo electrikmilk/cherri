@@ -406,6 +406,9 @@ func insertCodeComment(comment string) {
 }
 
 func checkParamIdentifiers(params map[string]interface{}, action *ShortcutAction) {
+	// The conditions of a conditional are in its parameters, so an output that only a condition reads is named.
+	checkConditionIdentifiers(params, action)
+
 	for _, value := range params {
 		var paramValues, isMap = value.(map[string]interface{})
 		if !isMap {
@@ -1595,6 +1598,7 @@ func decompCondition(condition map[string]interface{}, action *ShortcutAction) {
 	}
 
 	code.WriteString(decompValue(condition["WFInput"]))
+	code.WriteString(conditionInputCoercion(condition["WFInput"], conditionalOperator))
 
 	switch conditionalOperator {
 	case Any, Empty:
@@ -1611,6 +1615,106 @@ func decompCondition(condition map[string]interface{}, action *ShortcutAction) {
 		code.WriteRune(' ')
 		code.WriteString(decompConditionOperand(condition, []string{"WFAnotherDate", "WFAnotherNumber"}, action))
 	}
+}
+
+// conditionInputCoercion is the coercion the compiler needs to compare an action output of a type that the
+// operator does not accept, such as the variable type of an action that can output any kind of value. The
+// Shortcuts app does not store the type, so it is read from the action that wrote the output.
+func conditionInputCoercion(input any, operator tokenType) string {
+	var allowed = allowedConditionalTypes[operator]
+	if len(allowed) == 0 {
+		return ""
+	}
+
+	var reference, isReference = conditionInputReference(input)
+	if !isReference || len(reference.Aggrandizements) != 0 {
+		return ""
+	}
+
+	var outputType, known = referenceOutputType(reference, 0)
+	if !known || slices.Contains(allowed, outputType) {
+		return ""
+	}
+
+	for _, coercible := range []tokenType{String, Integer, Date} {
+		if slices.Contains(allowed, coercible) {
+			return "." + string(coercible)
+		}
+	}
+
+	return ""
+}
+
+// conditionInputReference reads the reference a condition input wraps in its Variable dictionary.
+func conditionInputReference(input any) (reference Value, isReference bool) {
+	var inputMap, isMap = input.(map[string]interface{})
+	if !isMap {
+		return
+	}
+	var variable, hasVariable = inputMap["Variable"].(map[string]interface{})
+	if !hasVariable {
+		return
+	}
+	var value, hasValue = variable["Value"].(map[string]interface{})
+	if !hasValue {
+		return
+	}
+
+	decompMapToStruct(value, &reference, "reference", currentDecompAction())
+
+	return reference, true
+}
+
+// referenceOutputType is the type the compiler gives the output a reference reads, which is the output type of
+// the action that wrote it, or of the action a variable was set from.
+func referenceOutputType(reference Value, depth int) (outputType tokenType, known bool) {
+	if depth > len(shortcut.WFWorkflowActions) {
+		return
+	}
+
+	switch reference.Type {
+	case "ActionOutput":
+		var producer = actionWithUUID(reference.OutputUUID)
+		if producer == nil {
+			return
+		}
+		// Matching actions that share an identifier reads their parameters, which is not what is written.
+		if len(identifierMap[producer.WFWorkflowActionIdentifier]) == 0 {
+			return
+		}
+		var readBefore = maps.Clone(readParameters)
+		var _, definition = matchAction(producer)
+		readParameters = readBefore
+
+		return definition.outputType, true
+	case "Variable":
+		for index := range shortcut.WFWorkflowActions {
+			var setter = &shortcut.WFWorkflowActions[index]
+			if setter.WFWorkflowActionIdentifier != SetVariableIdentifier || setter.WFWorkflowActionParameters["WFVariableName"] != reference.VariableName {
+				continue
+			}
+
+			var input, isReference = conditionInputReference(map[string]interface{}{"Variable": setter.WFWorkflowActionParameters["WFInput"]})
+			if !isReference {
+				return
+			}
+
+			return referenceOutputType(input, depth+1)
+		}
+	}
+
+	return
+}
+
+// actionWithUUID finds the action that has uuid as its output.
+func actionWithUUID(uuid string) *ShortcutAction {
+	for index := range shortcut.WFWorkflowActions {
+		if shortcut.WFWorkflowActions[index].WFWorkflowActionParameters[UUID] == uuid {
+			return &shortcut.WFWorkflowActions[index]
+		}
+	}
+
+	return nil
 }
 
 // decompConditionOperand writes the first of keys present in condition, as routeConditionalValue

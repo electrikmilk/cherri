@@ -1,4 +1,5 @@
 #include 'actions/location'
+#include 'actions/device'
 #define color red
 #define glyph apple
 #define inputs text, dictionary, url, app, contact, folder, date, file, maplink, media, pdf, phonenumber, richtext, number, itunes, webpage, article, email, image, location
@@ -70,3 +71,7 @@ for _ in @list {
 @val = @dict['key2']
 const settings = dictionary(EnterTheSettings)
 @fromApp = prompt("Named by the Shortcuts app")
+const DeviceDetails = getDeviceDetail("Current Brightness")
+
+if DeviceDetails.text == "0.5" {
+}
