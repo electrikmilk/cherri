@@ -269,6 +269,14 @@ var actions = map[string]*actionDefinition{
 				},
 			}
 		},
+		decompRecover: func(action *ShortcutAction) map[string]string {
+			var start, _ = readParam(action, "WFGetDirectionsCustomLocation").(map[string]interface{})
+			if start["isCurrentLocation"] == true {
+				return map[string]string{"start": "nil"}
+			}
+
+			return nil
+		},
 	},
 	"getPDFText": {
 		check: func(args []actionArgument, _ *actionDefinition) {
