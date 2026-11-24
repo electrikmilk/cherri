@@ -584,6 +584,11 @@ var identifierMap map[string][]actionValue
 func mapSplitActions() {
 	identifierMap = make(map[string][]actionValue)
 	for name, action := range actions {
+		// Logic of the compiler that no include has declared yet is not an action the Shortcut can be written with.
+		if logicOnly(action) {
+			continue
+		}
+
 		var identifier = fullActionIdentifier(name, action)
 		identifierMap[identifier] = append(identifierMap[identifier], actionValue{
 			identifier: name,

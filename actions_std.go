@@ -1330,6 +1330,9 @@ func getActionNameByIdentifier(identifier *string) (name string, err error) {
 
 func findActionByIdentifier(identifier *string) (name string, found bool) {
 	for actionName, action := range actions {
+		if logicOnly(action) {
+			continue
+		}
 		if *identifier == fullActionIdentifier(actionName, action) {
 			return actionName, true
 		}
