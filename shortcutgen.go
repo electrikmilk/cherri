@@ -6,7 +6,9 @@ package main
 
 import (
 	"fmt"
+	"maps"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
@@ -650,8 +652,11 @@ func makeDictionary(value interface{}, fileItems bool) (dictItems []WFDictionary
 	if value == nil {
 		return []WFDictionaryFieldValueItem{}
 	}
-	for key, item := range value.(map[string]interface{}) {
-		dictItems = append(dictItems, makeDictionaryItem(key, item, fileItems))
+	var dictionary = value.(map[string]interface{})
+	// A map is iterated in a random order, so the items are written in the order of their keys to compile the
+	// same dictionary every time.
+	for _, key := range slices.Sorted(maps.Keys(dictionary)) {
+		dictItems = append(dictItems, makeDictionaryItem(key, dictionary[key], fileItems))
 	}
 	return
 }
