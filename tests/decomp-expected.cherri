@@ -75,3 +75,5 @@ const DeviceDetails = getDeviceDetail("Current Brightness")
 
 if DeviceDetails.text == "0.5" {
 }
+@fromKey = @dict['key2']
+@fromProperty = @dict['Last Name'].contact

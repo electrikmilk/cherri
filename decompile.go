@@ -2287,6 +2287,7 @@ func decompLiteralText(units []uint16) string {
 // key or property followed by at most one coercion, so any other order cannot be written as Cherri.
 func decompAggrandizements(reference *string, aggrandizements []Aggrandizement) {
 	var revContentItems = reversedContentItems()
+	aggrandizements = readCoercionFirst(aggrandizements)
 	var keyed, coerced bool
 	for _, aggrandizement := range aggrandizements {
 		switch aggrandizement.Type {
@@ -2317,6 +2318,31 @@ func decompAggrandizements(reference *string, aggrandizements []Aggrandizement) 
 			decompError(fmt.Sprintf("Expected a coercion, dictionary key or property aggrandizement, got '%s'", aggrandizement.Type), currentDecompAction())
 		}
 	}
+}
+
+// readCoercionFirst orders the aggrandizements the Shortcuts app writes, which coerces a value before it reads
+// a key or property from it, as Cherri writes them. The coercion to a dictionary before a dictionary key is
+// implied by the key read, so it is dropped. The coercion to a content item before a property is not implied,
+// and Cherri has no syntax to coerce before a property read, so it is written after the read and warned about.
+func readCoercionFirst(aggrandizements []Aggrandizement) []Aggrandizement {
+	if len(aggrandizements) != 2 || aggrandizements[0].Type != "WFCoercionVariableAggrandizement" {
+		return aggrandizements
+	}
+
+	var coercion, read = aggrandizements[0], aggrandizements[1]
+	switch read.Type {
+	case "WFDictionaryValueVariableAggrandizement":
+		if coercion.CoercionItemClass == contentItems["dictionary"] {
+			return []Aggrandizement{read}
+		}
+	case "WFPropertyVariableAggrandizement":
+	default:
+		return aggrandizements
+	}
+
+	decompWarning(fmt.Sprintf("The property '%s' is read after it is coerced to %s, but Cherri can only coerce after a read, which may change what is read.", read.PropertyName+read.DictionaryKey, coercion.CoercionItemClass))
+
+	return []Aggrandizement{read, coercion}
 }
 
 var macDefinition bool
