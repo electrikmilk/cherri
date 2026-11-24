@@ -107,6 +107,9 @@ var actions = map[string]*actionDefinition{
 				"city": worldClockCityValue(args[0]),
 			}
 		},
+		decompRecover: func(action *ShortcutAction) map[string]string {
+			return decompWorldClockCity(action, "city", "city")
+		},
 	},
 	"removeWorldClock": {
 		check: checkWorldClockCities,
@@ -119,6 +122,9 @@ var actions = map[string]*actionDefinition{
 				"entities": worldClockCitiesValue(args[0]),
 			}
 		},
+		decompRecover: func(action *ShortcutAction) map[string]string {
+			return decompWorldClockCities(action)
+		},
 	},
 	"getCityTime": {
 		appendParamsFunc: func(args []actionArgument) map[string]any {
@@ -129,6 +135,9 @@ var actions = map[string]*actionDefinition{
 			return map[string]any{
 				"city": worldClockCityValue(args[0]),
 			}
+		},
+		decompRecover: func(action *ShortcutAction) map[string]string {
+			return decompWorldClockCity(action, "city", "city")
 		},
 	},
 	"emailAddress": {
@@ -1230,6 +1239,7 @@ var standardActionIncludes = map[string]string{}
 // checkMissingStandardInclude returns the include statement that defines the action when parsing, and loads the
 // definitions of the action otherwise. Standard actions win over actions imported from the ToolKit database.
 func checkMissingStandardInclude(identifier *string, parsing bool) (requiredInclude string) {
+	var foundInStandard bool
 	for _, actionInclude := range actionIncludes {
 		if slices.Contains(included, fmt.Sprintf("actions/%s", actionInclude)) {
 			continue
@@ -1259,10 +1269,12 @@ func checkMissingStandardInclude(identifier *string, parsing bool) (requiredIncl
 		if parsing {
 			return fmt.Sprintf("#include 'actions/%s'", actionInclude)
 		}
-		return ""
+		// Actions of other categories can share the identifier, and the one that wrote the parameters is picked
+		// from all of them, so the remaining categories are loaded too.
+		foundInStandard = true
 	}
 
-	if !parsing {
+	if !parsing && !foundInStandard {
 		importToolkitActions(identifier)
 		mapSplitActions()
 	}
