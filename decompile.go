@@ -2849,12 +2849,22 @@ func splitActionConflicts(splitAction actionValue, parameters map[string]any) (m
 // samePlistValue compares a value written by Cherri with one read from a plist, which holds the same
 // data in other Go types, such as uint64 for an int, so both are compared as JSON.
 func samePlistValue(written any, read any) bool {
-	var writtenJSON, writtenErr = json.Marshal(written)
-	handle(writtenErr)
-	var readJSON, readErr = json.Marshal(read)
-	handle(readErr)
+	return canonicalJSON(written) == canonicalJSON(read)
+}
 
-	return string(writtenJSON) == string(readJSON)
+// canonicalJSON writes value as JSON of what the plist holds, with the keys of every dictionary sorted. A value
+// written by Cherri is a struct, whose fields are named and omitted as the plist names and omits them.
+func canonicalJSON(value any) string {
+	var encoded, marshalErr = plist.Marshal(value, plist.XMLFormat)
+	handle(marshalErr)
+
+	var generic any
+	var _, unmarshalErr = plist.Unmarshal(encoded, &generic)
+	handle(unmarshalErr)
+	var canonical, canonicalErr = json.Marshal(generic)
+	handle(canonicalErr)
+
+	return string(canonical)
 }
 
 func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
