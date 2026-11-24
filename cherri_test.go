@@ -156,11 +156,7 @@ func TestPackages(t *testing.T) {
 // compiler can write that the decompiler does not write back the same is a failure of one of them.
 func TestDecomp(t *testing.T) {
 	var tempDir = t.TempDir()
-	var binary = filepath.Join(tempDir, "cherri")
-	var buildOutput, buildErr = exec.Command("go", "build", "-o", binary, ".").CombinedOutput()
-	if buildErr != nil {
-		t.Fatalf("build compiler: %s\n%s", buildErr, buildOutput)
-	}
+	var binary = buildCompiler(t, tempDir)
 
 	// The compiler writes the shortcut next to the code, so the code is compiled from a copy.
 	var expected, readErr = os.ReadFile("tests/decomp-expected.cherri")
@@ -181,8 +177,7 @@ func TestDecomp(t *testing.T) {
 	if mkdirErr := os.MkdirAll(decompiledDir, 0755); mkdirErr != nil {
 		t.Fatal(mkdirErr)
 	}
-	// Comments are included so a comment action is written as one, which is the only way it compiles back.
-	var decompileOutput, decompiled = roundTripRun(binary, "--import="+compiledPath, "--output="+decompiledDir+"/", "--no-ansi", "--comments")
+	var decompileOutput, decompiled = roundTripDecompile(binary, compiledPath, decompiledDir)
 	if !decompiled {
 		t.Fatalf("decompile the compiled tests/decomp-expected.cherri:\n%s", roundTripTail(decompileOutput))
 	}
@@ -230,20 +225,10 @@ var decompFixedPointSkipped = map[string]string{
 //
 //	go test -run '^TestCherriNoSign$' && go test -run '^TestDecompFixedPoint$'
 func TestDecompFixedPoint(t *testing.T) {
-	var originals, globErr = filepath.Glob("tests/*_unsigned.shortcut")
-	if globErr != nil {
-		t.Fatal(globErr)
-	}
-	if len(originals) == 0 {
-		t.Skip("no tests/*_unsigned.shortcut files - run TestCherriNoSign first")
-	}
+	var originals = compiledTestShortcuts(t)
 
 	var tempDir = t.TempDir()
-	var binary = filepath.Join(tempDir, "cherri")
-	var buildOutput, buildErr = exec.Command("go", "build", "-o", binary, ".").CombinedOutput()
-	if buildErr != nil {
-		t.Fatalf("build compiler: %s\n%s", buildErr, buildOutput)
-	}
+	var binary = buildCompiler(t, tempDir)
 
 	for _, original := range originals {
 		var name = strings.TrimSuffix(filepath.Base(original), unsignedEnd)
@@ -273,7 +258,7 @@ func TestDecompFixedPoint(t *testing.T) {
 			}
 
 			var decompiledName = strings.ReplaceAll(name, " ", "_") + ".cherri"
-			var output, ok = roundTripRun(binary, "--import="+copied, "--output="+firstDir+"/", "--no-ansi", "--comments")
+			var output, ok = roundTripDecompile(binary, copied, firstDir)
 			if !ok {
 				t.Fatalf("decompile failed:\n%s", roundTripTail(output))
 			}
@@ -297,7 +282,7 @@ func TestDecompFixedPoint(t *testing.T) {
 			if writeErr := os.WriteFile(recompiled, recompiledData, 0600); writeErr != nil {
 				t.Fatal(writeErr)
 			}
-			output, ok = roundTripRun(binary, "--import="+recompiled, "--output="+secondDir+"/", "--no-ansi", "--comments")
+			output, ok = roundTripDecompile(binary, recompiled, secondDir)
 			if !ok {
 				t.Fatalf("decompile the compiled code failed:\n%s", roundTripTail(output))
 			}
@@ -367,6 +352,41 @@ var roundTripKnownMismatches = map[string]string{
 	"numbers": "an expression with an action call compiles to Calculate Expression, but the decompiled expression reads the call's output as a constant, and an expression of two operands compiles to Math",
 }
 
+// buildCompiler builds the compiler into dir and returns the path of the binary.
+func buildCompiler(t *testing.T, dir string) string {
+	t.Helper()
+
+	var binary = filepath.Join(dir, "cherri")
+	var buildOutput, buildErr = exec.Command("go", "build", "-o", binary, ".").CombinedOutput()
+	if buildErr != nil {
+		t.Fatalf("build compiler: %s\n%s", buildErr, buildOutput)
+	}
+
+	return binary
+}
+
+// compiledTestShortcuts returns the shortcuts TestCherriNoSign compiled from the tests, and skips the test when
+// there are none.
+func compiledTestShortcuts(t *testing.T) []string {
+	t.Helper()
+
+	var shortcuts, globErr = filepath.Glob("tests/*_unsigned.shortcut")
+	if globErr != nil {
+		t.Fatal(globErr)
+	}
+	if len(shortcuts) == 0 {
+		t.Skip("no tests/*_unsigned.shortcut files - run TestCherriNoSign first")
+	}
+
+	return shortcuts
+}
+
+// roundTripDecompile decompiles the shortcut at shortcutPath into outputDir with the built compiler. Comments are
+// included so a comment action is written as one, which is the only way it compiles back.
+func roundTripDecompile(binary string, shortcutPath string, outputDir string) (string, bool) {
+	return roundTripRun(binary, "--import="+shortcutPath, "--output="+outputDir+"/", "--no-ansi", "--comments")
+}
+
 // roundTripRun runs the built compiler and returns whether it exited zero. The compiler runs as a
 // separate process because it keeps global state and calls os.Exit on error.
 func roundTripRun(binary string, arguments ...string) (string, bool) {
@@ -383,7 +403,7 @@ func roundTripCheckDeterministic(t *testing.T, binary string, shortcutPath strin
 	if mkdirErr := os.MkdirAll(secondDir, 0755); mkdirErr != nil {
 		t.Fatal(mkdirErr)
 	}
-	var output, ok = roundTripRun(binary, "--import="+shortcutPath, "--output="+secondDir+"/", "--no-ansi", "--comments")
+	var output, ok = roundTripDecompile(binary, shortcutPath, secondDir)
 	if !ok {
 		t.Fatalf("second decompile failed:\n%s", roundTripTail(output))
 	}
@@ -538,8 +558,7 @@ func roundTripClientVersion(t *testing.T, data []byte) []byte {
 func roundTripRecompile(t *testing.T, binary string, shortcutPath string, decompiledDir string, decompiledPath string) string {
 	t.Helper()
 
-	// Comments are included so the comment actions of the original are written as comment actions.
-	var output, ok = roundTripRun(binary, "--import="+shortcutPath, "--output="+decompiledDir+"/", "--no-ansi", "--comments")
+	var output, ok = roundTripDecompile(binary, shortcutPath, decompiledDir)
 	if !ok {
 		return "decompile failed:\n" + roundTripTail(output)
 	}
@@ -561,20 +580,10 @@ func roundTripRecompile(t *testing.T, binary string, shortcutPath string, decomp
 //
 //	go test -run '^TestCherriNoSign$' && go test -run '^TestRoundTrip$'
 func TestRoundTrip(t *testing.T) {
-	var originals, globErr = filepath.Glob("tests/*_unsigned.shortcut")
-	if globErr != nil {
-		t.Fatal(globErr)
-	}
-	if len(originals) == 0 {
-		t.Skip("no tests/*_unsigned.shortcut files - run TestCherriNoSign first")
-	}
+	var originals = compiledTestShortcuts(t)
 
 	var tempDir = t.TempDir()
-	var binary = filepath.Join(tempDir, "cherri")
-	var buildOutput, buildErr = exec.Command("go", "build", "-o", binary, ".").CombinedOutput()
-	if buildErr != nil {
-		t.Fatalf("build compiler: %s\n%s", buildErr, buildOutput)
-	}
+	var binary = buildCompiler(t, tempDir)
 
 	for _, original := range originals {
 		var name = strings.TrimSuffix(filepath.Base(original), unsignedEnd)
