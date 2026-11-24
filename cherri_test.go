@@ -181,7 +181,8 @@ func TestDecomp(t *testing.T) {
 	if mkdirErr := os.MkdirAll(decompiledDir, 0755); mkdirErr != nil {
 		t.Fatal(mkdirErr)
 	}
-	var decompileOutput, decompiled = roundTripRun(binary, "--import="+compiledPath, "--output="+decompiledDir+"/", "--no-ansi")
+	// Comments are included so a comment action is written as one, which is the only way it compiles back.
+	var decompileOutput, decompiled = roundTripRun(binary, "--import="+compiledPath, "--output="+decompiledDir+"/", "--no-ansi", "--comments")
 	if !decompiled {
 		t.Fatalf("decompile the compiled tests/decomp-expected.cherri:\n%s", roundTripTail(decompileOutput))
 	}
@@ -213,6 +214,145 @@ func TestDecompApp(t *testing.T) {
 		return
 	}
 	fmt.Print(ansi("✅  PASSED", green, bold) + "\n\n")
+}
+
+// decompFixedPointSkipped lists the test files that are not expected to decompile to code that decompiles to the
+// same code, keyed like roundTripKnownFailures. A file that starts to be one must be removed.
+var decompFixedPointSkipped = map[string]string{
+	"zz-action-identifiers":      "it declares actions that have the identifier of other actions, which the decompiler cannot know to write them as",
+	"raw-action-variable-values": "a variable in a raw action is stored as an attachment, which the action it decompiles to stores as text with the variable in it",
+}
+
+// TestDecompFixedPoint decompiles each compiled file of the tests, compiles the code and decompiles that, and expects
+// the same code both times, so the decompiler writes everything it reads back as the code it reads it from.
+//
+// Run independently:
+//
+//	go test -run '^TestCherriNoSign$' && go test -run '^TestDecompFixedPoint$'
+func TestDecompFixedPoint(t *testing.T) {
+	var originals, globErr = filepath.Glob("tests/*_unsigned.shortcut")
+	if globErr != nil {
+		t.Fatal(globErr)
+	}
+	if len(originals) == 0 {
+		t.Skip("no tests/*_unsigned.shortcut files - run TestCherriNoSign first")
+	}
+
+	var tempDir = t.TempDir()
+	var binary = filepath.Join(tempDir, "cherri")
+	var buildOutput, buildErr = exec.Command("go", "build", "-o", binary, ".").CombinedOutput()
+	if buildErr != nil {
+		t.Fatalf("build compiler: %s\n%s", buildErr, buildOutput)
+	}
+
+	for _, original := range originals {
+		var name = strings.TrimSuffix(filepath.Base(original), unsignedEnd)
+		var _, skipped = roundTripKnownFailures[name]
+		if skipped {
+			continue
+		}
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			var skipReason, isSkipped = decompFixedPointSkipped[name]
+			var firstDir = filepath.Join(tempDir, name, "first")
+			var secondDir = filepath.Join(tempDir, name, "second")
+			for _, dir := range []string{firstDir, secondDir} {
+				if mkdirErr := os.MkdirAll(dir, 0755); mkdirErr != nil {
+					t.Fatal(mkdirErr)
+				}
+			}
+
+			var data, readErr = os.ReadFile(original)
+			if readErr != nil {
+				t.Fatal(readErr)
+			}
+			var copied = filepath.Join(firstDir, name+".shortcut")
+			if writeErr := os.WriteFile(copied, roundTripIconColor(t, roundTripClientVersion(t, data)), 0600); writeErr != nil {
+				t.Fatal(writeErr)
+			}
+
+			var decompiledName = strings.ReplaceAll(name, " ", "_") + ".cherri"
+			var output, ok = roundTripRun(binary, "--import="+copied, "--output="+firstDir+"/", "--no-ansi", "--comments")
+			if !ok {
+				t.Fatalf("decompile failed:\n%s", roundTripTail(output))
+			}
+			var firstCode = filepath.Join(firstDir, decompiledName)
+
+			output, ok = roundTripRun(binary, firstCode, "--skip-sign", "--no-ansi")
+			if !ok {
+				t.Fatalf("compile the decompiled code failed:\n%s", roundTripTail(output))
+			}
+
+			// The recompiled shortcut is named by the decompiled #define name, so it is found by suffix.
+			var recompiled = filepath.Join(secondDir, name+".shortcut")
+			var compiled, globCompiledErr = filepath.Glob(filepath.Join(firstDir, "*"+unsignedEnd))
+			if globCompiledErr != nil || len(compiled) != 1 {
+				t.Fatalf("expected one recompiled shortcut in %s, found %v", firstDir, compiled)
+			}
+			var recompiledData, recompiledErr = os.ReadFile(compiled[0])
+			if recompiledErr != nil {
+				t.Fatal(recompiledErr)
+			}
+			if writeErr := os.WriteFile(recompiled, recompiledData, 0600); writeErr != nil {
+				t.Fatal(writeErr)
+			}
+			output, ok = roundTripRun(binary, "--import="+recompiled, "--output="+secondDir+"/", "--no-ansi", "--comments")
+			if !ok {
+				t.Fatalf("decompile the compiled code failed:\n%s", roundTripTail(output))
+			}
+
+			var diffOutput, sameCode = roundTripRun("diff", "-u", firstCode, filepath.Join(secondDir, decompiledName))
+			if isSkipped {
+				if sameCode {
+					t.Fatalf("%s now decompiles to the same code: remove from decompFixedPointSkipped", name)
+				}
+				t.Logf("skipped (%s)", skipReason)
+				return
+			}
+			if !sameCode {
+				t.Fatalf("decompiling the compiled decompiled code changed it, - is the first decompile:\n%s", diffOutput)
+			}
+		})
+	}
+}
+
+// roundTripIconColor writes the icon color of a shortcut that is compiled for an older version, which is stored
+// as another number, as the one of the version it is decompiled to be compiled for.
+func roundTripIconColor(t *testing.T, data []byte) []byte {
+	t.Helper()
+
+	var shortcutPlist map[string]interface{}
+	var _, unmarshalErr = plist.Unmarshal(data, &shortcutPlist)
+	if unmarshalErr != nil {
+		t.Fatal(unmarshalErr)
+	}
+	var icon, isIcon = shortcutPlist["WFWorkflowIcon"].(map[string]interface{})
+	if !isIcon {
+		return data
+	}
+
+	var current uint32
+	switch color := icon["WFWorkflowIconStartColor"].(type) {
+	case int64:
+		current = uint32(color)
+	case uint64:
+		current = uint32(color)
+	default:
+		return data
+	}
+	for name, alternate := range altColors {
+		if uint32(int32(alternate)) == current {
+			icon["WFWorkflowIconStartColor"] = uint64(uint32(colors[name]))
+		}
+	}
+
+	var changed, marshalErr = plist.Marshal(shortcutPlist, plist.XMLFormat)
+	if marshalErr != nil {
+		t.Fatal(marshalErr)
+	}
+
+	return changed
 }
 
 // roundTripKnownFailures lists shortcuts whose decompile or recompile exits non-zero, keyed by

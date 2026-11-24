@@ -25,6 +25,7 @@ go test -run TestCherriNoSign     # compile all tests/*.cherri files, skip signi
 go test -run '^TestCherri$'       # same but with signing (macOS only)
 go test -run TestDecomp           # compile tests/decomp-expected.cherri, decompile it, and expect the same code
 go test -run TestDecompApp        # decompile tests/decomp-app.plist, compare to tests/decomp-app-expected.cherri
+go test -run TestDecompFixedPoint # decompile each compiled tests/*.cherri, compile that code, and expect the same code when decompiled (run TestCherriNoSign first)
 go test -run TestActionIdentifiers # verify specific action identifier output
 
 # Search actions and glyphs (requires build)
