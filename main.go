@@ -238,7 +238,12 @@ func handleFile() {
 
 	var fileBytes, readErr = os.ReadFile(filePath)
 	handle(readErr)
-	contents = string(fileBytes)
+	contents = normalizeLineEndings(string(fileBytes))
+}
+
+// normalizeLineEndings converts CRLF to LF because the parser only recognizes LF as a line break.
+func normalizeLineEndings(text string) string {
+	return strings.ReplaceAll(text, "\r\n", "\n")
 }
 
 // checkFile checks if the file exists and is a .cherri file.
