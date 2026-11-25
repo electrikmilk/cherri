@@ -29,6 +29,9 @@ jobs:
     - name: Decompilation Test
       run: go test -run TestDecomp -v ./...
 
+    - name: Line Ending Test
+      run: go test -run TestCRLFSourceAndIncludeCompile -v ./...
+
     - name: Package Manager Test
       run: go test -run TestPackages -v ./...
 
@@ -50,6 +53,34 @@ jobs:
 
     - name: Decompilation Test
       run: go test -run TestDecomp -v ./...
+
+    - name: Line Ending Test
+      run: go test -run TestCRLFSourceAndIncludeCompile -v ./...
+
+    - name: Package Manager Test
+      run: go test -run TestPackages -v ./...
+
+  build-test-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Go
+      uses: actions/setup-go@v7
+      with:
+        go-version: 1.27
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -run TestCherriNoSign -v ./...
+
+    - name: Decompilation Test
+      run: go test -run TestDecomp -v ./...
+
+    - name: Line Ending Test
+      run: go test -run TestCRLFSourceAndIncludeCompile -v ./...
 
     - name: Package Manager Test
       run: go test -run TestPackages -v ./...
