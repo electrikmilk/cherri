@@ -66,4 +66,56 @@ const rejoined = joinText(@lines)
 // an empty separator splits into every character
 @characters = splitText("abc", "")
 
+// separators with a quote, a backslash or a new line are written escaped
+@quoteParts = splitText("a\"b", "\"")
+const backslashJoined = joinText(@quoteParts, "\\")
+if backslashJoined != "a\\b" {
+    alert("❌ FAIL: joinText with a backslash - got {backslashJoined}")
+}
+const lineJoined = joinText(@quoteParts, "-\n-")
+if lineJoined != "a-\n-b" {
+    alert("❌ FAIL: joinText with a new line - got {lineJoined}")
+}
+
+// a custom separator named like a separator is the text it holds
+const spacesJoined = joinText(@quoteParts, "Spaces")
+if spacesJoined != "aSpacesb" {
+    alert("❌ FAIL: joinText with the text Spaces - got {spacesJoined}")
+}
+
+// text that starts and ends with a quote, written escaped and as a raw string
+@quoted = "\"quoted\""
+if @quoted != '"quoted"' {
+    alert("❌ FAIL: text that starts and ends with a quote - got {@quoted}")
+}
+
+// a backslash is written escaped in text and as is in a raw string
+@backslash = "back\\slash"
+if @backslash != 'back\slash' {
+    alert("❌ FAIL: text with a backslash - got {@backslash}")
+}
+
+// a backslash before an inline reference does not escape it
+@beforeReference = "\\{@quoted}"
+if @beforeReference != '\"quoted"' {
+    alert("❌ FAIL: backslash before an inline reference - got {@beforeReference}")
+}
+
+// braces are only literal in a raw string, as double quoted text reads them as inline references
+@braces = 'brace { and } here'
+@bracesAndMore = "{@braces}!"
+if @bracesAndMore != 'brace { and } here!' {
+    alert("❌ FAIL: text with literal braces - got {@bracesAndMore}")
+}
+
+// a backslash before a brace makes it literal in double quoted text, and a reference can sit between them
+@escapedBraces = "\{not a reference\}"
+if @escapedBraces != '{not a reference}' {
+    alert("❌ FAIL: text with escaped braces - got {@escapedBraces}")
+}
+@escapedAroundReference = "\{{@braces}\}"
+if @escapedAroundReference != '{brace { and } here}' {
+    alert("❌ FAIL: escaped braces around an inline reference - got {@escapedAroundReference}")
+}
+
 show("✅ All tests passed")

@@ -18,7 +18,7 @@
 !/tests/*.cherri
 !/tests/include-errors/**/*.cherri
 !/tests/include-errors/*.cherri
-/tests/decomp-me.cherri
+/tests/decomp-app.cherri
 *_decompiled.plist
 *_processed.cherri
 !stdfunc.cherri

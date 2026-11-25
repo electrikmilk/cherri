@@ -26,6 +26,9 @@ jobs:
     - name: Test
       run: go test -run TestCherriNoSign -v ./...
 
+    - name: Round Trip Test
+      run: go test -run '^TestRoundTrip$' -v ./...
+
     - name: Decompilation Test
       run: go test -run TestDecomp -v ./...
 
@@ -47,6 +50,9 @@ jobs:
 
     - name: Test
       run: go test -run TestCherriNoSign -v ./...
+
+    - name: Round Trip Test
+      run: go test -run '^TestRoundTrip$' -v ./...
 
     - name: Decompilation Test
       run: go test -run TestDecomp -v ./...

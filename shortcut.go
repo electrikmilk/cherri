@@ -45,7 +45,7 @@ type Value struct {
 	Value                       any                          `plist:",omitempty"`
 	Variable                    any                          `plist:",omitempty"`
 	WFDictionaryFieldValueItems []WFDictionaryFieldValueItem `plist:",omitempty"`
-	AttachmentsByRange          map[string]Value             `plist:",omitempty"`
+	AttachmentsByRange          map[string]Value             `plist:"attachmentsByRange,omitempty"`
 	String                      string                       `plist:",omitempty"`
 	Aggrandizements             []Aggrandizement             `plist:",omitempty"`
 	Prompt                      string                       `plist:",omitempty"`
@@ -196,6 +196,11 @@ var hasShortcutInputVariables = false
 // ObjectReplaceChar is a Shortcuts convention to mark the placement of inline variables in a string.
 const ObjectReplaceChar = '\uFFFC'
 const ObjectReplaceCharStr = "\uFFFC"
+
+// A brace escaped with a backslash is held as one of these private use characters from when the string is
+// collected until its text is generated, so it is never read as the start or end of an inline reference.
+const escapedLeftBrace = '\uE000'
+const escapedRightBrace = '\uE001'
 
 var workflowName string
 

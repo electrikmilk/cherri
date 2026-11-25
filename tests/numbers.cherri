@@ -176,4 +176,21 @@ if @rand > 10 {
     mustOutput("❌ FAIL: randomNumber max — got {@rand}, expected <= 10", "❌ FAIL: randomNumber max — got {@rand}, expected <= 10")
 }
 
+// a variable with a digit in its name converts to a number like any other
+@count1 = "5"
+const fromCount = number(@count1)
+if fromCount != 5 {
+    alert("❌ FAIL: number of a variable with a digit in its name - got {fromCount}, expected 5")
+}
+
+// a negative and a float number are written as the number they are
+const negative = -3
+if negative != -3 {
+    alert("❌ FAIL: negative number - got {negative}, expected -3")
+}
+const fraction = 2.5
+if fraction.text != "2.5" {
+    alert("❌ FAIL: float number - got {fraction}, expected 2.5")
+}
+
 show("✅ All tests passed")

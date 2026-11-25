@@ -94,4 +94,6 @@ action internal v26 #ShortcutsActions.SetMultitaskingModeAction setStageManagerM
 action internal 'dnd.set' setFocusMode(focusModes ?focusMode = "Do Not Disturb", focusUntil ?until: 'AssertionType' = "Turned Off", text ?time: 'Time', variable ?event: 'Event')
 
 // [Doc]: [Notifications] Toggle Focus Mode: Toggle a focus mode.
-action internal 'dnd.set' toggleFocusMode(focusModes ?focusMode = "Do Not Disturb")
+action internal 'dnd.set' toggleFocusMode(focusModes ?focusMode = "Do Not Disturb") {
+    "Operation": "Toggle"
+}

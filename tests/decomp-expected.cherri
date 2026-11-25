@@ -1,7 +1,10 @@
 #include 'actions/location'
+#include 'actions/web'
+#include 'actions/device'
 #define color red
 #define glyph apple
-
+#define inputs media, app, article, contact, maplink, date, dictionary, email, folder, file, image, location, number, pdf, phonenumber, richtext, webpage, text, url, itunes
+#define version 27
 #question WhatShouldTheFirstPromptAsk "What should the first prompt ask?" "Hello?"
 #question WhoIsIt "Who is it?" "me"
 #question EnterTheSettings "Enter the settings" {
@@ -10,7 +13,7 @@
 
 const hello = prompt(WhatShouldTheFirstPromptAsk)
 @confirm = prompt("What do you want?", "Number")
-const location = location(Ask)
+const location = location("{Ask}")
 @urls = url("https://google.com", "https://apple.com", "https://cherrilang.org")
 @int = 42
 @dict = {
@@ -24,8 +27,7 @@ const location = location(Ask)
 	},
 	"key7": [
 		5,
-		6
-	]
+		6]
 }
 @str = text(WhoIsIt)
 @var = "5 {@str}"
@@ -54,13 +56,13 @@ if ShortcutInput {
 }
 
 menu "Prompt" {
-item "Item 1":
+	item "Item 1":
 }
 alert("Title", "Message")
 alert("No title")
 confirm("No title")
 confirm("No button setting")
-show(@var)
+show("{@var}")
 
 repeat _ for 3 {
 }
@@ -69,3 +71,10 @@ for _ in @list {
 }
 @val = @dict['key2']
 const settings = dictionary(EnterTheSettings)
+@fromApp = prompt("Named by the Shortcuts app")
+const DeviceDetails = getDeviceDetail("Current Brightness")
+
+if DeviceDetails.text == "0.5" {
+}
+@fromKey = @dict['key2']
+@fromProperty = @dict['Last Name'].contact

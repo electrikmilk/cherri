@@ -14,5 +14,6 @@ updateContact(@contact, "Company", "Analytical Engines")
 @emails = emailAddress("ada@example.com", "lovelace@example.com")
 @number = phoneNumber("555-0100")
 @numbers = phoneNumber("555-0100", "555-0101")
+@quotedEmail = emailAddress("a\"b\\c@example.com")
 
 show("✅ All tests passed")

@@ -59,6 +59,12 @@ if @r != "right" { mustOutput("❌ FAIL: endsWith", "❌ FAIL: endsWith") }
 if @n <> 1 10 { @r = "right" }
 if @r != "right" { mustOutput("❌ FAIL: between", "❌ FAIL: between") }
 
+// float operand
+@half = 0.5
+@r = "wrong"
+if @half < 1.5 { @r = "right" }
+if @r != "right" { mustOutput("❌ FAIL: < (float)", "❌ FAIL: < (float)") }
+
 // else branch executes when condition is false
 @one = 1
 @r = "wrong"

@@ -5,6 +5,7 @@
 createAlarm("Wake", "07:30")
 createAlarm("Gym", "06:00", false, ["monday", "friday"])
 createAlarm("Silent", "08:00", true, ["monday"], false)
+createAlarm("No repeat", "07:00", true, nil, false)
 deleteAlarm(@alarm)
 turnOnAlarm(@alarm)
 turnOnAlarm(@alarm, false)

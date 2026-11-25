@@ -43,4 +43,11 @@ if @r6 != "ASCII ✅ 123 mixed end" {
     mustOutput("❌ FAIL: mixed context — got {@r6}", "❌ FAIL: mixed context — got {@r6}")
 }
 
+// emoji immediately before and after a variable (non-BMP, 2 UTF-16 code units each)
+@v7 = "wrapped"
+@r7 = "📝{@v7}🎉"
+if @r7 != "📝wrapped🎉" {
+    mustOutput("❌ FAIL: emoji around variable - got {@r7}", "❌ FAIL: emoji around variable - got {@r7}")
+}
+
 show("✅ All tests passed")

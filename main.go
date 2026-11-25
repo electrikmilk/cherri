@@ -339,14 +339,26 @@ func panicDebug(err error) {
 
 // Converts a map[string]interface{} to a matching struct data type.
 func mapToStruct(data any, structure any) {
-	var plistBytes, marshalErr = plist.Marshal(data, plist.XMLFormat)
+	var marshalErr, unmarshalErr = plistToStruct(data, structure)
 	handle(marshalErr)
-
-	var _, unmarshalErr = plist.Unmarshal(plistBytes, structure)
 	if unmarshalErr != nil {
 		fmt.Println("Tried to map to struct, but it was not a struct!", data)
 		handle(unmarshalErr)
 	}
+}
+
+// plistToStruct writes the plist form of value into structure. The errors are returned apart, as a value that
+// has no plist form is reported differently than one that does not fit structure.
+func plistToStruct(value any, structure any) (marshalErr error, unmarshalErr error) {
+	var plistBytes []byte
+	plistBytes, marshalErr = plist.Marshal(value, plist.XMLFormat)
+	if marshalErr != nil {
+		return
+	}
+
+	_, unmarshalErr = plist.Unmarshal(plistBytes, structure)
+
+	return
 }
 
 // waitFor takes functions and uses a WaitGroup to wait for them all to finish.

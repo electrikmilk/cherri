@@ -5,15 +5,16 @@
 package main
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
 	"maps"
 	"os"
 	"regexp"
 	"slices"
-	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf16"
 
 	"github.com/electrikmilk/args-parser"
 	"howett.net/plist"
@@ -26,21 +27,54 @@ const (
 )
 
 var code strings.Builder
-var specialCharsRegex *regexp.Regexp
+
+// resetDecompiler clears the state that decompiling keeps in globals, so nothing is kept from a Shortcut
+// decompiled before.
+func resetDecompiler() {
+	code.Reset()
+	varUUIDs = nil
+	constUUIDs = nil
+	menus = make(map[string][]varValue)
+	tabLevel = 0
+	variables = make(map[string]varValue)
+	uuids = make(map[string]string)
+	standardActionIncludes = make(map[string]string)
+	controlFlowOutputs = make(map[string]string)
+	controlFlowOutputUUIDs = []string{}
+	openLoops = nil
+	loopIdentifiers = make(map[string]string)
+	loopVariables = make(map[string]bool)
+	currentVariableValue = ""
+	currentVariableUUID = ""
+	currentVariableOperator = ""
+	decompiledImports = nil
+	decompiledDefinitions = nil
+	questions = make(map[string]*question)
+	controlFlowGroups = make(map[int]controlFlowGroup)
+	openMenuItems = make(map[string]bool)
+	appendedVariables = make(map[string]bool)
+	assignedVariables = make(map[string]bool)
+	identifierMap = nil
+	readParameters = make(map[string]bool)
+	decompilingText = false
+	decompilingDictionary = false
+	macDefinition = false
+	setMacDefinition = false
+}
 
 func decompile(b []byte) {
+	// A fresh Shortcut, so a key missing from this plist is not kept from one decompiled before.
+	shortcut = Shortcut{}
 	var _, marshalIndexedErr = plist.Unmarshal(b, &shortcut)
 	handle(marshalIndexedErr)
 
-	variables = make(map[string]varValue)
-	uuids = make(map[string]string)
-	questions = make(map[string]*question)
-	controlFlowGroups = make(map[int]controlFlowGroup)
+	resetDecompiler()
 
-	basename = strings.ReplaceAll(basename, " ", "_")
-	outputPath = getOutputPath(basename + ".cherri")
+	// The Shortcut keeps its name for the name definition and runSelf, only the file name has no spaces.
+	var outputBasename = strings.ReplaceAll(basename, " ", "_")
+	outputPath = getOutputPath(outputBasename + ".cherri")
 	if args.Using("no-ansi") {
-		filePath = basename + ".cherri"
+		filePath = outputBasename + ".cherri"
 	} else {
 		filePath = outputPath
 	}
@@ -53,13 +87,16 @@ func decompile(b []byte) {
 	mapSplitActions()
 	mapIdentifiers()
 	mapControlFlowOutputs()
+	mapLoopVariables()
 
 	defineName()
 	decompileIcon()
+	decompileDefinitions()
 	mapImportQuestions()
 
 	decompileActions()
 	warnUnboundQuestions()
+	writeHeader()
 
 	if args.Using("debug") {
 		printDecompDebug()
@@ -75,70 +112,287 @@ func mapIdentifiers() {
 		currentAction.identifier = action.WFWorkflowActionIdentifier
 		var params = action.WFWorkflowActionParameters
 		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
+			if params["WFInput"] == nil {
+				continue
+			}
+			var wfInput = decompInput(&action)
+			if len(wfInput.Value.Aggrandizements) != 0 {
+				mapValueReference(wfInput.Value)
+			}
 			continue
 		}
 
-		if params["UUID"] != nil && params["CustomOutputName"] != nil {
-			mapUUID(params["UUID"].(string), params["CustomOutputName"].(string))
+		if params[UUID] != nil && params["CustomOutputName"] != nil {
+			mapUUID(paramString(&action, UUID), paramString(&action, "CustomOutputName"))
 		}
 
-		checkParamIdentifiers(params)
+		checkParamIdentifiers(params, &action)
 	}
 }
 
+// controlFlowOutputs maps the GroupingIdentifier of a control flow block to the name its output is referenced by.
+var controlFlowOutputs map[string]string
+var controlFlowOutputUUIDs []string
+
+const repeatIdentifier = "is.workflow.actions.repeat.count"
+const repeatEachIdentifier = "is.workflow.actions.repeat.each"
+
+var controlFlowIdentifiers = []string{
+	"is.workflow.actions.conditional",
+	"is.workflow.actions.choosefrommenu",
+	repeatIdentifier,
+	repeatEachIdentifier,
+}
+
+// mapControlFlowOutputs names the output of each control flow block from its end action, which is the only one
+// that carries the UUID, so the start action that shares its GroupingIdentifier can be written as a constant.
 func mapControlFlowOutputs() {
 	for _, action := range shortcut.WFWorkflowActions {
-		switch action.WFWorkflowActionIdentifier {
-		case "is.workflow.actions.conditional":
-			fallthrough
-		case "is.workflow.actions.choosefrommenu":
-			fallthrough
-		case "is.workflow.actions.repeat.count":
-			fallthrough
-		case "is.workflow.actions.repeat.each":
-			var params = action.WFWorkflowActionParameters
-			if params["WFControlFlowMode"].(uint64) != endStatement {
-				continue
-			}
+		if !isControlFlowAction(&action) {
+			continue
+		}
+		if controlFlowMode(&action) != endStatement || action.WFWorkflowActionParameters[UUID] == nil {
+			continue
+		}
 
-			var groupName string
-			if params["UUID"] != nil {
-				var endingUUID = params["UUID"].(string)
-				if uuids[endingUUID] != "" {
-					groupName = uuids[endingUUID]
-				}
-			}
+		var outputUUID = paramString(&action, UUID)
+		var outputName, referenced = uuids[outputUUID]
+		if !referenced {
+			continue
+		}
 
-			controlFlowGroups[groupingIdx] = controlFlowGroup{
-				groupType:  Conditional,
-				identifier: groupName,
-			}
-			groupingIdx++
+		controlFlowOutputs[paramString(&action, "GroupingIdentifier")] = outputName
+		controlFlowOutputUUIDs = append(controlFlowOutputUUIDs, outputUUID)
+	}
+}
+
+type openLoop struct {
+	groupingUUID string
+	variableName string
+	identifier   string
+	// assigned is whether the loop starts with the Set Variable that the compiler writes for its variable.
+	assigned bool
+}
+
+var openLoops []openLoop
+
+// loopIdentifiers maps the GroupingIdentifier of each loop whose variable is referenced to the identifier the
+// loop declares, so a loop whose variable is never referenced can still be written with `_`.
+var loopIdentifiers map[string]string
+
+// loopVariables holds the identifiers that loops have declared, which are constants and so referenced without @.
+var loopVariables map[string]bool
+
+var loopVariableRegex = regexp.MustCompile("^Repeat (Index|Item)( [0-9]+)?$")
+
+// mapLoopVariables finds the loops whose variable is referenced before any code is written, because the loop
+// identifier is written before the references in its body.
+func mapLoopVariables() {
+	for index, action := range shortcut.WFWorkflowActions {
+		currentAction.identifier = action.WFWorkflowActionIdentifier
+		var isLoop = isLoopAction(&action)
+		if isLoop && controlFlowMode(&action) == endStatement {
+			popLoop(&action)
+			continue
+		}
+
+		markLoopReferences(action.WFWorkflowActionParameters)
+
+		if isLoop && controlFlowMode(&action) == startStatement {
+			pushLoop(&action, index)
 		}
 	}
-	groupingIdx = 0
+	openLoops = nil
+}
+
+func markLoopReferences(value any) {
+	switch typedValue := value.(type) {
+	case map[string]interface{}:
+		if variableName, isString := typedValue["VariableName"].(string); isString && typedValue["Type"] == "Variable" {
+			if loop, found := findOpenLoop(variableName); found {
+				loopIdentifiers[loop.groupingUUID] = loop.identifier
+			}
+		}
+		for _, item := range typedValue {
+			markLoopReferences(item)
+		}
+	case []interface{}:
+		for _, item := range typedValue {
+			markLoopReferences(item)
+		}
+	}
+}
+
+// pushLoop opens the loop at index. The compiler numbers the variable of a repeat by how many repeats are open,
+// and the variable of a repeat with each by how many of those are open, so each kind is counted on its own.
+func pushLoop(action *ShortcutAction, index int) openLoop {
+	var variableName = "Repeat Index"
+	var identifier = "repeatIndex"
+	if action.WFWorkflowActionIdentifier == repeatEachIdentifier {
+		variableName = "Repeat Item"
+		identifier = "repeatItem"
+	}
+
+	var depth = 1
+	for _, loop := range openLoops {
+		if strings.HasPrefix(loop.variableName, variableName) {
+			depth++
+		}
+	}
+	if depth > 1 {
+		variableName = fmt.Sprintf("%s %d", variableName, depth)
+		identifier = fmt.Sprintf("%s%d", identifier, depth)
+	}
+
+	// The compiler sets the variable the loop declares to the variable Shortcuts names, so the loop is
+	// declared with that variable, and writing the Set Variable too would have the compiler write it twice.
+	var assignedIdentifier, assigned = loopVariableAssignment(index, variableName)
+	if assigned {
+		identifier = assignedIdentifier
+	}
+
+	var loop = openLoop{
+		groupingUUID: paramString(action, "GroupingIdentifier"),
+		variableName: variableName,
+		identifier:   identifier,
+		assigned:     assigned,
+	}
+	openLoops = append(openLoops, loop)
+
+	return loop
+}
+
+// loopVariableAssignment finds the variable that the Set Variable right after the loop at index sets to
+// variableName, which is the variable the loop declares.
+func loopVariableAssignment(index int, variableName string) (identifier string, found bool) {
+	if index+1 >= len(shortcut.WFWorkflowActions) {
+		return
+	}
+
+	var next = shortcut.WFWorkflowActions[index+1]
+	if next.WFWorkflowActionIdentifier != SetVariableIdentifier || next.WFWorkflowActionParameters["WFInput"] == nil {
+		return
+	}
+
+	var reference = decompInput(&next).Value
+	if reference.Type != "Variable" || reference.VariableName != variableName || len(reference.Aggrandizements) != 0 {
+		return
+	}
+
+	return setVariableName(&next), true
+}
+
+// isLoopVariableAssignment is whether the Set Variable at the current action is the one that the loop
+// declaration just written stands for.
+func isLoopVariableAssignment() bool {
+	if actionIndex == 0 || len(openLoops) == 0 {
+		return false
+	}
+
+	var previous = peekActions(-1)
+	if !isLoopAction(&previous) || controlFlowMode(&previous) != startStatement {
+		return false
+	}
+
+	var innermost = openLoops[len(openLoops)-1]
+	return innermost.assigned && innermost.groupingUUID == paramString(&previous, "GroupingIdentifier")
+}
+
+func popLoop(action *ShortcutAction) {
+	var groupingUUID = paramString(action, "GroupingIdentifier")
+	if len(openLoops) == 0 || openLoops[len(openLoops)-1].groupingUUID != groupingUUID {
+		decompError(fmt.Sprintf("Expected loop '%s' to end the innermost open loop", groupingUUID), action)
+	}
+	openLoops = openLoops[:len(openLoops)-1]
+}
+
+func findOpenLoop(variableName string) (openLoop, bool) {
+	for i := len(openLoops) - 1; i >= 0; i-- {
+		if openLoops[i].variableName == variableName {
+			return openLoops[i], true
+		}
+	}
+
+	return openLoop{}, false
+}
+
+// loopVariableReference returns how a variable name that Shortcuts gives a loop is referenced in Cherri.
+// Outside a loop that defines it, only the first index and item can be referenced, as globals.
+func loopVariableReference(variableName string) (reference string, isLoopVariable bool) {
+	if !loopVariableRegex.MatchString(variableName) {
+		return "", false
+	}
+	if loop, found := findOpenLoop(variableName); found {
+		return loop.identifier, true
+	}
+	for name, global := range globals {
+		if global.value == variableName {
+			return name, true
+		}
+	}
+
+	decompError(fmt.Sprintf("Expected the variable '%s' to be referenced inside a loop that defines it", variableName), currentDecompAction())
+	return "", false
+}
+
+// loopDeclaration opens a loop and returns the identifier it declares.
+func loopDeclaration(action *ShortcutAction) string {
+	var loop = pushLoop(action, actionIndex)
+	if _, referenced := loopIdentifiers[loop.groupingUUID]; !referenced && !loop.assigned {
+		return "_"
+	}
+
+	loopVariables[loop.identifier] = true
+	return loop.identifier
+}
+
+// decompInput reads the WFInput of a Set Variable or Append to Variable action.
+func decompInput(action *ShortcutAction) WFInput {
+	var wfInput WFInput
+	decompMapToStruct(action.WFWorkflowActionParameters["WFInput"], &wfInput, "WFInput", action)
+
+	return wfInput
+}
+
+// setVariableName is the identifier that a Set Variable or Append to Variable action writes to.
+func setVariableName(action *ShortcutAction) string {
+	return sanitizeIdentifier(paramString(action, "WFVariableName"))
 }
 
 // Map out variables in the Shortcut and their UUIDs for later checks.
 func mapVariables() {
-	for _, action := range shortcut.WFWorkflowActions {
+	for index, action := range shortcut.WFWorkflowActions {
 		currentAction.identifier = action.WFWorkflowActionIdentifier
-		var params = action.WFWorkflowActionParameters
-		if action.WFWorkflowActionIdentifier == SetVariableIdentifier || action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
-			var varName = params["WFVariableName"].(string)
-			sanitizeIdentifier(&varName)
-			if _, found := variables[varName]; !found {
-				variables[varName] = varValue{}
-			}
-
-			if action.WFWorkflowActionParameters["WFInput"] != nil {
-				var wfInput WFInput
-				mapToStruct(action.WFWorkflowActionParameters["WFInput"], &wfInput)
-				if _, found := uuids[wfInput.Value.OutputUUID]; !found {
-					varUUIDs = append(varUUIDs, wfInput.Value.OutputUUID)
-				}
-			}
+		if action.WFWorkflowActionIdentifier != SetVariableIdentifier && action.WFWorkflowActionIdentifier != AppendVariableIdentifier {
+			continue
 		}
+
+		var varName = setVariableName(&action)
+		if _, found := variables[varName]; !found {
+			variables[varName] = varValue{}
+		}
+		if action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
+			appendedVariables[varName] = true
+		}
+
+		if action.WFWorkflowActionParameters["WFInput"] == nil {
+			continue
+		}
+		var wfInput = decompInput(&action)
+		// An output read through aggrandizements stays a constant, since folding its action
+		// into the Set Variable would drop them.
+		var _, found = uuids[wfInput.Value.OutputUUID]
+		if found || len(wfInput.Value.Aggrandizements) != 0 {
+			continue
+		}
+
+		// An action is only folded into the Set Variable written right after it, as folding one that
+		// has other actions between would move it after them.
+		if index > 0 && shortcut.WFWorkflowActions[index-1].WFWorkflowActionParameters[UUID] == wfInput.Value.OutputUUID {
+			varUUIDs = append(varUUIDs, wfInput.Value.OutputUUID)
+			continue
+		}
+		mapValueReference(wfInput.Value)
 	}
 }
 
@@ -151,7 +405,10 @@ func insertCodeComment(comment string) {
 	newCodeLine(fmt.Sprintf("// %s\n", comment))
 }
 
-func checkParamIdentifiers(params map[string]interface{}) {
+func checkParamIdentifiers(params map[string]interface{}, action *ShortcutAction) {
+	// The conditions of a conditional are in its parameters, so an output that only a condition reads is named.
+	checkConditionIdentifiers(params, action)
+
 	for _, value := range params {
 		var paramValues, isMap = value.(map[string]interface{})
 		if !isMap {
@@ -159,22 +416,47 @@ func checkParamIdentifiers(params map[string]interface{}) {
 		}
 		checkParamValueAttachments(paramValues)
 
-		if _, found := paramValues["Variable"]; found {
-			var paramVariable = paramValues["Variable"].(map[string]interface{})
+		// A dictionary value can hold any key, so a "Variable" that is not a dictionary is not an attachment.
+		if paramVariable, isMap := paramValues["Variable"].(map[string]interface{}); isMap {
 			checkParamValueAttachments(paramVariable)
 		}
 
-		if _, found := paramValues["WFConditions"]; found {
-			var wfConditions = paramValues["WFConditions"].(map[string]interface{})
-			var value = wfConditions["Value"].(map[string]interface{})
-			if value["WFActionParameterFilterTemplates"] != nil {
-				for _, filtertemplate := range value["WFActionParameterFilterTemplates"].([]interface{}) {
-					var paramFilterTemplate = filtertemplate.(map[string]interface{})
-					checkParamIdentifiers(paramFilterTemplate["WFInput"].(map[string]interface{}))
-				}
-			}
-		}
+		checkConditionIdentifiers(paramValues, action)
 	}
+}
+
+// checkConditionIdentifiers maps the identifiers inside the conditions of a WFConditions value, if it has any.
+func checkConditionIdentifiers(paramValues map[string]interface{}, action *ShortcutAction) {
+	if _, found := paramValues["WFConditions"]; !found {
+		return
+	}
+
+	var wfConditions = expectType[map[string]interface{}](paramValues["WFConditions"], "WFConditions", "a dictionary", action)
+	var conditionsValue, hasValue = wfConditions["Value"].(map[string]interface{})
+	if !hasValue {
+		decompError("Expected WFConditions to have a Value dictionary", action)
+	}
+	if conditionsValue["WFActionParameterFilterTemplates"] == nil {
+		return
+	}
+
+	for _, filterTemplate := range conditionTemplates(conditionsValue, action) {
+		if filterTemplate["WFInput"] == nil {
+			continue
+		}
+		checkParamIdentifiers(expectType[map[string]interface{}](filterTemplate["WFInput"], "WFInput of a condition", "a dictionary", action), action)
+	}
+}
+
+// conditionTemplates returns the conditions in the Value of a WFConditions parameter.
+func conditionTemplates(conditionsValue map[string]interface{}, action *ShortcutAction) (templates []map[string]interface{}) {
+	var templateValues = expectType[[]interface{}](conditionsValue["WFActionParameterFilterTemplates"], "WFActionParameterFilterTemplates", "an array", action)
+
+	for _, templateValue := range templateValues {
+		templates = append(templates, expectType[map[string]interface{}](templateValue, "a condition", "a dictionary", action))
+	}
+
+	return
 }
 
 // checkParamValueAttachments checks for attachments on values to map them.
@@ -185,7 +467,7 @@ func checkParamValueAttachments(param map[string]interface{}) {
 	}
 
 	var inputValue Value
-	mapToStruct(paramValue, &inputValue)
+	decompMapToStruct(paramValue, &inputValue, "Value", currentDecompAction())
 	mapValueReference(inputValue)
 	checkConstantUUID(inputValue)
 
@@ -209,7 +491,11 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 
 		// A file item wraps its attachment one level deeper than other items, which would otherwise be read as a nested dictionary.
 		if dictDataType(item.WFItemType) == itemTypeFile {
-			checkParamValueAttachments(wfValue["Value"].(map[string]interface{}))
+			var fileValue, isMap = wfValue["Value"].(map[string]interface{})
+			if !isMap {
+				decompError(fmt.Sprintf("Expected a file dictionary item to hold a dictionary, got %T", wfValue["Value"]), currentDecompAction())
+			}
+			checkParamValueAttachments(fileValue)
 			continue
 		}
 
@@ -218,9 +504,7 @@ func mapDictionaryValueIdentifiers(items []WFDictionaryFieldValueItem) {
 		switch valueTwo := wfValue["Value"].(type) {
 		case map[string]interface{}:
 			if itemsValue, isMap := valueTwo["Value"].(map[string]interface{}); isMap && itemsValue["WFDictionaryFieldValueItems"] != nil {
-				var dictionaryItems []WFDictionaryFieldValueItem
-				mapToStruct(itemsValue["WFDictionaryFieldValueItems"], &dictionaryItems)
-				mapDictionaryValueIdentifiers(dictionaryItems)
+				mapDictionaryValueIdentifiers(decompFieldValueItems(itemsValue["WFDictionaryFieldValueItems"], currentDecompAction()))
 			}
 		case []interface{}:
 			var dictionaryItems = mapDictionaryItems(valueTwo)
@@ -236,7 +520,7 @@ func mapDictionaryItems(items []interface{}) (dictionaryItems []WFDictionaryFiel
 		}
 
 		var dictionaryItem WFDictionaryFieldValueItem
-		mapToStruct(value, &dictionaryItem)
+		decompMapToStruct(value, &dictionaryItem, "WFDictionaryFieldValueItems", currentDecompAction())
 		dictionaryItems = append(dictionaryItems, dictionaryItem)
 	}
 	return
@@ -264,29 +548,26 @@ func mapValueReference(value Value) {
 }
 
 func mapUUID(uuid string, varName string) {
-	var outputName string
 	if _, found := uuids[uuid]; !found {
-		outputName = varName
-		sanitizeIdentifier(&outputName)
-		uuids[uuid] = checkDuplicateOutputName(outputName)
+		uuids[uuid] = checkDuplicateOutputName(sanitizeIdentifier(varName))
 	}
 }
 
+var specialCharsRegex = regexp.MustCompile("[^a-zA-Z0-9_]+")
+
 // sanitizeIdentifier strips special characters and replaces dashes with underscores.
-func sanitizeIdentifier(identifier *string) {
-	if specialCharsRegex == nil {
-		specialCharsRegex = regexp.MustCompile("[^a-zA-Z0-9_]+")
-	}
-	if strings.Contains(*identifier, " ") {
-		var words = strings.Split(strings.TrimSpace(*identifier), " ")
+func sanitizeIdentifier(identifier string) string {
+	if strings.Contains(identifier, " ") {
+		var words = strings.Split(strings.TrimSpace(identifier), " ")
 		for i, word := range words {
 			words[i] = capitalize(word)
 		}
-		*identifier = strings.Join(words, "")
+		identifier = strings.Join(words, "")
 	}
 
-	*identifier = specialCharsRegex.ReplaceAllString(*identifier, "")
-	*identifier = strings.ReplaceAll(*identifier, "-", "_")
+	identifier = specialCharsRegex.ReplaceAllString(identifier, "")
+
+	return strings.ReplaceAll(identifier, "-", "_")
 }
 
 type actionValue struct {
@@ -294,40 +575,30 @@ type actionValue struct {
 	definition *actionDefinition
 }
 
+// identifierMap maps the full identifier that an action writes to the actions that write it, sorted by
+// name, so which one of several that share an identifier is picked never depends on the order of a map.
 var identifierMap map[string][]actionValue
 
-// mapSplitActions creates a map of actions that have been split into a few actions to reduce the number of arguments.
+// mapSplitActions indexes the actions by identifier. It is rebuilt from every action defined so far, as actions
+// are defined while the Shortcut is decompiled.
 func mapSplitActions() {
-	if identifierMap == nil {
-		identifierMap = make(map[string][]actionValue)
-	}
-	for identifier, action := range actions {
-		var ident = action.identifier
-		if action.identifier == "" {
-			ident = identifier
+	identifierMap = make(map[string][]actionValue)
+	for name, action := range actions {
+		// Logic of the compiler that no include has declared yet is not an action the Shortcut can be written with.
+		if logicOnly(action) {
+			continue
 		}
 
-		ident = strings.ToLower(ident)
-
-		var splitActionValue = actionValue{
-			identifier: identifier,
+		var identifier = fullActionIdentifier(name, action)
+		identifierMap[identifier] = append(identifierMap[identifier], actionValue{
+			identifier: name,
 			definition: action,
-		}
-		if identifierMap[ident] != nil && slices.Contains(identifierMap[ident], splitActionValue) {
-			continue
-		}
-
-		identifierMap[ident] = append(identifierMap[ident], splitActionValue)
-	}
-	for identifier, actions := range identifierMap {
-		if len(actions) < 2 {
-			delete(identifierMap, identifier)
-			continue
-		}
-		sort.Slice(actions, func(i, j int) bool {
-			return actions[i].identifier < actions[j].identifier
 		})
-		identifierMap[identifier] = actions
+	}
+	for _, candidates := range identifierMap {
+		slices.SortFunc(candidates, func(a actionValue, b actionValue) int {
+			return cmp.Compare(a.identifier, b.identifier)
+		})
 	}
 }
 
@@ -341,65 +612,222 @@ func newCodeLine(s string) {
 	code.WriteString(s)
 }
 
-// defineName writes the name of the imported Shortcut to code as a name definition if the basename contains a space.
+// decompiledImports are the includes and imports the code needs, and decompiledDefinitions the definitions it
+// is written with. Both are written above the code, the imports first, once the code is known.
+var decompiledImports []string
+var decompiledDefinitions []string
+
+func addDefinition(format string, a ...any) {
+	decompiledDefinitions = append(decompiledDefinitions, fmt.Sprintf(format, a...))
+}
+
+// writeHeader writes the imports and then the definitions above the code. The blank line written before a
+// block is trimmed from the start of the code even without a header, as the compiler rejects a file that
+// starts with a blank line.
+func writeHeader() {
+	var body = strings.TrimLeft(code.String(), "\n")
+	code.Reset()
+
+	var header = append(slices.Clone(decompiledImports), decompiledDefinitions...)
+	if len(header) == 0 {
+		code.WriteString(body)
+		return
+	}
+
+	code.WriteString(strings.Join(header, "\n"))
+	code.WriteString("\n\n")
+	code.WriteString(body)
+}
+
+// defineName defines the name of the imported Shortcut if the basename contains a space.
 func defineName() {
 	if strings.Contains(basename, " ") {
-		newCodeLine(fmt.Sprintf("#define name %s\n", basename))
+		addDefinition("#define name %s", basename)
 	}
 }
 
 func decompileIcon() {
 	var icon = shortcut.WFWorkflowIcon
-	var hasIcon = icon.WFWorkflowIconStartColor != iconColor || icon.WFWorkflowIconGlyphNumber != iconGlyph
 
 	if icon.WFWorkflowIconStartColor != iconColor {
-		defineColors(icon, colors)
-		defineColors(icon, altColors)
+		if name, found := firstKeyWithValue(icon.WFWorkflowIconStartColor, colors, altColors); found {
+			addDefinition("#define color %s", name)
+		} else {
+			decompWarning(fmt.Sprintf("The icon color %d has no name in Cherri and is left out.", icon.WFWorkflowIconStartColor))
+		}
 	}
 
 	if icon.WFWorkflowIconGlyphNumber != iconGlyph {
-		for name, i := range glyphs {
-			if icon.WFWorkflowIconGlyphNumber != int64(i) {
-				continue
-			}
-
-			newCodeLine(fmt.Sprintf("#define glyph %s\n", name))
+		if name, found := firstKeyWithValue(int(icon.WFWorkflowIconGlyphNumber), glyphs); found {
+			addDefinition("#define glyph %s", name)
+		} else {
+			decompWarning(fmt.Sprintf("The icon glyph %d has no name in Cherri and is left out.", icon.WFWorkflowIconGlyphNumber))
 		}
-	}
-
-	if hasIcon {
-		newCodeLine("\n")
 	}
 }
 
-func defineColors(icon ShortcutIcon, colors map[string]int) {
-	for name, i := range colors {
-		if icon.WFWorkflowIconStartColor != i {
+// defaultClientVersion is the client version that is written when none is defined.
+var defaultClientVersion = clientVersion
+
+// defaultWorkflowTypes is what Shortcuts is set to be used in when no workflow types are defined.
+var defaultWorkflowTypes = []string{"Watch", "WFWorkflowTypeShowInSearch"}
+
+// definitionError stops on a part of the Shortcut that holds a definition and is not what the compiler writes it as.
+func definitionError(message string) {
+	decompError(message, &ShortcutAction{WFWorkflowActionIdentifier: "WFWorkflowNoInputBehavior"})
+}
+
+// decompileDefinitions writes the definitions that the compiler writes the keys of the Shortcut from, left out
+// when they are what is written without the definition.
+func decompileDefinitions() {
+	defineInputs()
+	defineList("outputs", "WFWorkflowOutputContentItemClasses", shortcut.WFWorkflowOutputContentItemClasses, contentItems)
+
+	var workflowTypeNames = slices.Sorted(slices.Values(shortcut.WFWorkflowTypes))
+	if len(workflowTypeNames) > 0 && !slices.Equal(workflowTypeNames, slices.Sorted(slices.Values(defaultWorkflowTypes))) {
+		defineList("from", "WFWorkflowTypes", shortcut.WFWorkflowTypes, workflowTypes)
+	}
+	defineList("quickactions", "WFQuickActionSurfaces", shortcut.WFQuickActionSurfaces, quickActions)
+
+	defineNoInput()
+	defineVersion()
+}
+
+// defineInputs writes the content items that the Shortcut accepts, which are all of them when not defined.
+func defineInputs() {
+	if len(shortcut.WFWorkflowInputContentItemClasses) == 0 {
+		decompWarning("WFWorkflowInputContentItemClasses is empty, which Cherri cannot write, and is left out for the default.")
+		return
+	}
+
+	var accepted []string
+	for _, class := range shortcut.WFWorkflowInputContentItemClasses {
+		if _, found := reversedContentItems()[class]; found {
+			accepted = append(accepted, class)
+		}
+	}
+	if len(accepted) == len(contentItems) {
+		warnUnnamedValues("WFWorkflowInputContentItemClasses", shortcut.WFWorkflowInputContentItemClasses, contentItems)
+		return
+	}
+
+	defineList("inputs", "WFWorkflowInputContentItemClasses", shortcut.WFWorkflowInputContentItemClasses, contentItems)
+}
+
+// defineList writes the definition of a list of values by the names the compiler reads them from.
+func defineList(definition string, key string, values []string, names map[string]string) {
+	var listed = warnUnnamedValues(key, values, names)
+	if len(listed) == 0 {
+		return
+	}
+
+	addDefinition("#define %s %s", definition, strings.Join(listed, ", "))
+}
+
+// warnUnnamedValues returns the names of values, and warns about the values Cherri has no name for, which
+// cannot be written.
+func warnUnnamedValues(key string, values []string, names map[string]string) (listed []string) {
+	for _, value := range values {
+		var name, found = firstKeyWithValue(value, names)
+		if !found {
+			decompWarning(fmt.Sprintf("'%s' of %s has no name in Cherri and is left out.", value, key))
 			continue
 		}
-
-		newCodeLine(fmt.Sprintf("#define color %s\n", name))
+		listed = append(listed, name)
 	}
+
+	return
+}
+
+// defineNoInput writes what the Shortcut does without input, which is the inverse of collectNoInputDefinition.
+func defineNoInput() {
+	if len(shortcut.WFWorkflowNoInputBehavior) == 0 {
+		return
+	}
+
+	var key = "WFWorkflowNoInputBehavior"
+	var name, isText = shortcut.WFWorkflowNoInputBehavior["Name"].(string)
+	if !isText {
+		definitionError(fmt.Sprintf("Expected %s to have a Name that is text, got %T", key, shortcut.WFWorkflowNoInputBehavior["Name"]))
+	}
+
+	var parameters map[string]interface{}
+	if rawParameters, hasParameters := shortcut.WFWorkflowNoInputBehavior["Parameters"]; hasParameters {
+		var isMap bool
+		parameters, isMap = rawParameters.(map[string]interface{})
+		if !isMap {
+			definitionError(fmt.Sprintf("Expected the Parameters of %s to be a dictionary, got %T", key, rawParameters))
+		}
+	}
+
+	switch name {
+	case "WFWorkflowNoInputBehaviorShowError":
+		var message, hasMessage = parameters["Error"].(string)
+		if !hasMessage {
+			definitionError(fmt.Sprintf("Expected the Parameters of %s to have an Error that is text, got %T", key, parameters["Error"]))
+		}
+		addDefinition("#define noinput %s %s", StopWith, doubleQuoted(message))
+	case "WFWorkflowNoInputBehaviorAskForInput":
+		var class, hasClass = parameters["ItemClass"].(string)
+		if !hasClass {
+			definitionError(fmt.Sprintf("Expected the Parameters of %s to have an ItemClass that is text, got %T", key, parameters["ItemClass"]))
+		}
+		var listed = warnUnnamedValues(key, []string{class}, contentItems)
+		if len(listed) == 0 {
+			return
+		}
+		addDefinition("#define noinput %s %s", AskFor, listed[0])
+	case "WFWorkflowNoInputBehaviorGetClipboard":
+		addDefinition("#define noinput %s", GetClipboard)
+	default:
+		definitionError(fmt.Sprintf("Expected the Name of %s to be one of WFWorkflowNoInputBehaviorShowError, WFWorkflowNoInputBehaviorAskForInput or WFWorkflowNoInputBehaviorGetClipboard, got '%s'", key, name))
+	}
+}
+
+// defineVersion writes the version that the client version of the Shortcut is written for. Several versions
+// have the same client version, of which the shortest name is written.
+func defineVersion() {
+	if shortcut.WFWorkflowClientVersion == "" || shortcut.WFWorkflowClientVersion == defaultClientVersion {
+		return
+	}
+
+	var versionName string
+	for name, versionClient := range versions {
+		if versionClient != shortcut.WFWorkflowClientVersion {
+			continue
+		}
+		if versionName == "" || len(name) < len(versionName) || (len(name) == len(versionName) && name < versionName) {
+			versionName = name
+		}
+	}
+	if versionName == "" {
+		decompWarning(fmt.Sprintf("The client version '%s' has no version in Cherri and is left out.", shortcut.WFWorkflowClientVersion))
+		return
+	}
+
+	addDefinition("#define version %s", versionName)
 }
 
 // mapImportQuestions defines each import question and records which action parameter it is bound to,
 // since Shortcuts blanks that parameter and keeps the question's prompt and default value separately.
 func mapImportQuestions() {
-	var definitions strings.Builder
-	for _, importQuestion := range shortcut.WFWorkflowImportQuestions {
-		if importQuestion.Category != "Parameter" {
-			decompWarning(fmt.Sprintf("Import question '%s' has unsupported category '%s', skipping it.", importQuestion.Text, importQuestion.Category))
+	var importQuestions = slices.Clone(shortcut.WFWorkflowImportQuestions)
+	slices.SortStableFunc(importQuestions, func(a WFQuestion, b WFQuestion) int {
+		if a.ActionIndex != b.ActionIndex {
+			return cmp.Compare(a.ActionIndex, b.ActionIndex)
+		}
+		return cmp.Compare(a.ParameterKey, b.ParameterKey)
+	})
+
+	for _, importQuestion := range importQuestions {
+		if importQuestion.Category != "Parameter" || importQuestion.ParameterKey == "" {
+			decompWarning(fmt.Sprintf("The import question '%s' is not a question about an argument, which Cherri cannot write, and is left out.", importQuestion.Text))
 			continue
 		}
 
-		var defaultValue string
-		switch value := importQuestion.DefaultValue.(type) {
-		case nil:
-			defaultValue = `""`
-		case string, map[string]any:
-			defaultValue = decompValue(value)
-		default:
-			decompWarning(fmt.Sprintf("Import question '%s' has a default value of type %T, but #question only supports text and dictionaries. Skipping it.", importQuestion.Text, value))
+		var defaultValue, isWritable = decompQuestionDefault(importQuestion)
+		if !isWritable {
+			decompWarning(fmt.Sprintf("The import question '%s' does not have a text or dictionary default value, which Cherri cannot write, and is left out.", importQuestion.Text))
 			continue
 		}
 
@@ -410,19 +838,36 @@ func mapImportQuestions() {
 			defaultValue: importQuestion.DefaultValue,
 		}
 
-		fmt.Fprintf(&definitions, "#question %s \"%s\" %s\n", identifier, escapeString(importQuestion.Text), defaultValue)
+		addDefinition("#question %s %s %s", identifier, decompTextLiteral(importQuestion.Text, false), defaultValue)
 	}
-
-	if definitions.Len() == 0 {
-		return
-	}
-	definitions.WriteString("\n")
-	newCodeLine(definitions.String())
 }
 
+// decompQuestionDefault writes the default value of a question as the text or dictionary literal that Cherri
+// reads it from, and is false for a default Cherri cannot write.
+func decompQuestionDefault(importQuestion WFQuestion) (defaultValue string, isWritable bool) {
+	switch value := importQuestion.DefaultValue.(type) {
+	case nil:
+		return `""`, true
+	case string:
+		return decompTextLiteral(value, false), true
+	case map[string]interface{}:
+		var action = &ShortcutAction{WFWorkflowActionIdentifier: "an import question"}
+		if importQuestion.ActionIndex >= 0 && importQuestion.ActionIndex < len(shortcut.WFWorkflowActions) {
+			action = &shortcut.WFWorkflowActions[importQuestion.ActionIndex]
+		}
+
+		var items WFItems
+		decompMapToStruct(value, &items, "DefaultValue of the import question '"+importQuestion.Text+"'", action)
+		return decompDictionaryValue(items.Value.WFDictionaryFieldValueItems), true
+	}
+
+	return "", false
+}
+
+// makeQuestionIdentifier names a question for its text, so the question reads as what it asks. A text with
+// no name in it is named Question, and a name that is taken has a number added.
 func makeQuestionIdentifier(text string) string {
-	var baseIdentifier = text
-	sanitizeIdentifier(&baseIdentifier)
+	var baseIdentifier = sanitizeIdentifier(text)
 	switch {
 	case baseIdentifier == "" || (baseIdentifier[0] >= '0' && baseIdentifier[0] <= '9'):
 		baseIdentifier = "Question"
@@ -430,12 +875,24 @@ func makeQuestionIdentifier(text string) string {
 		baseIdentifier = "Question" + capitalize(baseIdentifier)
 	}
 
-	var identifier = checkDuplicateOutputName(baseIdentifier)
-	for validReference(identifier) {
-		identifier = checkDuplicateOutputName(duplicateOutputName())
+	var identifier = baseIdentifier
+	for suffix := 2; isIdentifierTaken(identifier); suffix++ {
+		identifier = baseIdentifier + strconv.Itoa(suffix)
 	}
 
 	return identifier
+}
+
+// isIdentifierTaken is whether the compiler would reject a question named identifier, as it can not be named
+// like a variable, a constant, a global, a value or another question.
+func isIdentifierTaken(identifier string) bool {
+	var _, isQuestion = questions[identifier]
+	if isQuestion || validReference(identifier) || slices.Contains([]string{"true", "false", "nil"}, identifier) {
+		return true
+	}
+
+	return slices.Contains(slices.Collect(maps.Values(uuids)), identifier) ||
+		slices.Contains(slices.Collect(maps.Values(loopIdentifiers)), identifier)
 }
 
 // startsWithKeyword reports whether the parser would read the start of identifier as a keyword value,
@@ -463,6 +920,14 @@ func takeQuestionBinding(parameterKey string, parameterType tokenType) (identifi
 	return "", false
 }
 
+// isQuestionBound is whether an import question holds the value of the parameter of the current action, which
+// takeQuestionBinding has already taken when the action is written.
+func isQuestionBound(parameterKey string) bool {
+	return slices.ContainsFunc(slices.Collect(maps.Values(questions)), func(question *question) bool {
+		return question.actionIndex == actionIndex && question.parameter == parameterKey
+	})
+}
+
 // decompQuestionCall writes the action call a question binds to, since a literal would drop the question.
 func decompQuestionCall(action *ShortcutAction, call string, parameterKey string, parameterType tokenType) bool {
 	var identifier, found = takeQuestionBinding(parameterKey, parameterType)
@@ -471,7 +936,7 @@ func decompQuestionCall(action *ShortcutAction, call string, parameterKey string
 	}
 
 	currentVariableValue = fmt.Sprintf("%s(%s)", call, identifier)
-	writeActionOutput(action)
+	checkConstantLiteral(action)
 	return true
 }
 
@@ -486,10 +951,33 @@ func warnUnboundQuestions() {
 	}
 }
 
+// firstKeyWithValue returns the alphabetically first key that has the value, so that when keys share a value
+// the one that is written never depends on the order of a map.
+func firstKeyWithValue[K cmp.Ordered, V comparable](value V, sources ...map[K]V) (firstKey K, found bool) {
+	for _, source := range sources {
+		for key, mapValue := range source {
+			if mapValue == value && (!found || key < firstKey) {
+				firstKey = key
+				found = true
+			}
+		}
+	}
+
+	return
+}
+
 var currentVariableValue string
 
+// currentVariableUUID is the UUID of the action that produced currentVariableValue, which only the Set Variable
+// referencing that UUID may consume.
+var currentVariableUUID string
+
 func decompileActions() {
-	for _, action := range shortcut.WFWorkflowActions {
+	for index, action := range shortcut.WFWorkflowActions {
+		// Set from the loop so an action that is written without reaching the end of it does not shift
+		// the actions that are peeked at.
+		actionIndex = index
+		currentAction.identifier = action.WFWorkflowActionIdentifier
 		switch action.WFWorkflowActionIdentifier {
 		case "is.workflow.actions.comment":
 			decompComment(&action)
@@ -507,19 +995,22 @@ func decompileActions() {
 		case "is.workflow.actions.calculateexpression":
 			decompExpression(&action)
 		case SetVariableIdentifier, AppendVariableIdentifier:
+			if isLoopVariableAssignment() {
+				continue
+			}
 			decompVariable(&action)
 		case "is.workflow.actions.conditional":
 			decompConditional(&action)
-		case "is.workflow.actions.repeat.count":
+		case repeatIdentifier:
 			decompRepeat(&action)
-		case "is.workflow.actions.repeat.each":
+		case repeatEachIdentifier:
 			decompFor(&action)
 		case "is.workflow.actions.choosefrommenu":
 			decompMenu(&action)
 		case "is.workflow.actions.getvalueforkey":
 			var dictionaryKey = action.WFWorkflowActionParameters["WFDictionaryKey"]
 			if dictionaryKey != nil && action.WFWorkflowActionParameters[UUID] != nil &&
-				!slices.Contains(constUUIDs, action.WFWorkflowActionParameters[UUID].(string)) {
+				!slices.Contains(constUUIDs, paramString(&action, UUID)) {
 				decompDictionaryGetValue(&action)
 				break
 			}
@@ -527,125 +1018,194 @@ func decompileActions() {
 		default:
 			decompAction(&action)
 		}
-		actionIndex++
 	}
 }
 
 var varUUIDs []string
 var constUUIDs []string
 
-// checkConstantLiteral determines if action should be written out on a new line as a constant and clear the current variable value.
+// checkConstantLiteral writes the current variable value of action as a constant, holds it for the Set Variable
+// that references it, or writes action as a call on its own line when nothing references its output.
 func checkConstantLiteral(action *ShortcutAction) {
-	if _, found := action.WFWorkflowActionParameters[UUID]; !found {
+	if action.WFWorkflowActionParameters[UUID] == nil {
+		writeUnreferencedCall(action)
 		return
 	}
-	var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
+	var actionUUID = paramString(action, UUID)
 	if slices.Contains(varUUIDs, actionUUID) && !slices.Contains(constUUIDs, actionUUID) {
+		currentVariableUUID = actionUUID
 		return
 	}
-	if outputName, found := uuids[actionUUID]; found {
-		newCodeLine(fmt.Sprintf("const %s = ", outputName))
-		code.WriteString(currentVariableValue)
-		code.WriteRune('\n')
-		currentVariableValue = ""
+	var outputName, referenced = uuids[actionUUID]
+	if !referenced {
+		writeUnreferencedCall(action)
+		return
 	}
+
+	writeConstant(outputName)
+}
+
+// writeConstant writes the current value as the constant name.
+func writeConstant(name string) {
+	newCodeLine(fmt.Sprintf("const %s = ", name))
+	code.WriteString(currentVariableValue)
+	code.WriteRune('\n')
+	currentVariableValue = ""
+}
+
+// writeStatementLine writes line as a statement on its own line, which consumes the current value.
+func writeStatementLine(line string) {
+	newCodeLine(line + "\n")
+	currentVariableValue = ""
+}
+
+// writeUnreferencedCall writes action as a call because a literal on its own line is not valid Cherri.
+// A text action is matched by more than one action definition, so it is written with the text alias.
+func writeUnreferencedCall(action *ShortcutAction) {
+	var call string
+	if action.WFWorkflowActionIdentifier == "is.workflow.actions.gettext" {
+		call = fmt.Sprintf("text(%s)", currentVariableValue)
+		if isQuestionBound("WFTextActionText") {
+			call = currentVariableValue
+		}
+	} else {
+		call = makeActionCallCode(action)
+	}
+
+	writeStatementLine(call)
 }
 
 func makeConstantLiteral(action *ShortcutAction) {
 	if _, found := action.WFWorkflowActionParameters[UUID]; !found {
 		return
 	}
-	var actionUUID = action.WFWorkflowActionParameters[UUID].(string)
+	var actionUUID = paramString(action, UUID)
 	if outputName, found := uuids[actionUUID]; found {
-		newCodeLine(fmt.Sprintf("const %s = ", outputName))
-		code.WriteString(currentVariableValue)
-		code.WriteRune('\n')
-		currentVariableValue = ""
+		writeConstant(outputName)
 	}
 }
 
+// decompComment writes a comment action as a comment action when comments are included, which is the only
+// way for it to compile back into the Shortcut, and as a code comment otherwise.
 func decompComment(action *ShortcutAction) {
-	var commentText = action.WFWorkflowActionParameters["WFCommentActionText"].(string)
+	var commentText = paramString(action, "WFCommentActionText")
 	if args.Using("comments") {
-		if strings.Contains(commentText, "\n") {
-			newCodeLine(fmt.Sprintf("comment('\n%s\n')\n\n", commentText))
-		} else {
-			newCodeLine(fmt.Sprintf("comment('%s')\n", commentText))
-		}
+		newCodeLine(fmt.Sprintf("comment(%s)\n", quoteRawString(commentText)))
+		return
 	}
 
-	if strings.Contains(commentText, "\n") {
+	// A comment that holds the end of a multi-line comment cannot be written as one.
+	if strings.Contains(commentText, "\n") && !strings.Contains(commentText, "*/") {
 		newCodeLine("/*\n")
 		for _, line := range strings.Split(commentText, "\n") {
 			newCodeLine(fmt.Sprintln(line))
 		}
 		newCodeLine("*/\n")
-	} else {
-		newCodeLine(fmt.Sprintf("// %s\n\n", commentText))
+		return
 	}
+
+	for _, line := range strings.Split(commentText, "\n") {
+		newCodeLine(fmt.Sprintf("// %s\n", line))
+	}
+	code.WriteRune('\n')
 }
 
-var decompilingText = false
+var decompilingText bool
+
+// decompilingTextParameter is set while writing the argument of a text parameter, which keeps text that is only a
+// reference as text but, unlike a Text action, can be written as an Ask with a prompt.
+var decompilingTextParameter bool
 
 func decompTextValue(action *ShortcutAction) {
-	// The shared gettext identifier is ambiguous to match, so write the text() call directly.
+	// A literal would drop the question, and the Text action is matched by more than one action definition, so
+	// it is written as the text() call.
 	if decompQuestionCall(action, "text", "WFTextActionText", String) {
 		return
 	}
 
 	decompilingText = true
-	currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
-	if currentVariableValue == "" {
-		currentVariableValue = "\"\""
+	// Shortcuts leaves out the text of a Text action that is empty.
+	if action.WFWorkflowActionParameters["WFTextActionText"] == nil {
+		currentVariableValue = quoteString("", false)
 	} else {
-		currentVariableValue = fmt.Sprintf("\"%s\"", escapeString(strings.Trim(currentVariableValue, "\"")))
+		currentVariableValue = decompValue(action.WFWorkflowActionParameters["WFTextActionText"])
 	}
 	checkConstantLiteral(action)
 	decompilingText = false
 }
 
-func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
-	var value = action.WFWorkflowActionParameters["WFNumberActionNumber"]
-	if mapValue, isMap := value.(map[string]interface{}); isMap {
-		var Value = mapValue["Value"].(map[string]interface{})
-		value = decompValue(value)
+var numberLiteralRegex = regexp.MustCompile(`^-?[0-9]+(\.[0-9]+)?$`)
+var inlineReferenceRegex = regexp.MustCompile(`{(.*?)}`)
 
-		match, _ := regexp.MatchString("[0-9.]", value.(string))
-		if !match {
+// decompBare writes value as decompValue does without the double quotes at its ends, to be written inside an
+// expression or a number.
+func decompBare(value any) string {
+	return strings.Trim(decompValue(value), "\"")
+}
+
+func decompNumberValue(action *ShortcutAction) (nonLiteral bool) {
+	var value = requiredParam(action, "WFNumberActionNumber")
+	if mapValue, isMap := value.(map[string]interface{}); isMap {
+		if _, hasValue := mapValue["Value"].(map[string]interface{}); !hasValue {
+			decompError(fmt.Sprintf("Expected the parameter 'WFNumberActionNumber' to have a Value dictionary, got %T", mapValue["Value"]), action)
+		}
+
+		var literal = decompBare(value)
+		if !numberLiteralRegex.MatchString(literal) {
 			nonLiteral = true
 			return
 		}
 
-		if Value["Type"] == "ActionOutput" {
-			currentVariableValue = value.(string)
-		}
+		currentVariableValue = literal
+		checkConstantLiteral(action)
 		return
 	}
 
 	var number any
-	var convErr error
-	if stringValue, isString := value.(string); isString {
-		if strings.Contains(stringValue, ".") {
-			number, convErr = strconv.ParseFloat(stringValue, 64)
-		} else if strings.Contains(stringValue, ",") {
-			number, convErr = strconv.ParseFloat(strings.Replace(stringValue, ",", ".", 1), 64)
-		} else if stringValue != "" {
-			number, convErr = strconv.Atoi(stringValue)
-		}
-		handle(convErr)
+	if text, isText := value.(string); isText {
+		number = numberFromText(text, action)
 	} else {
-		switch v := value.(type) {
-		case uint64:
-			number = int(v)
-		case float64:
-			number = v
-		}
+		number = numberFromPlist(value, action)
 	}
 
 	currentVariableValue = decompValue(number)
 	checkConstantLiteral(action)
 
 	return
+}
+
+// numberFromText reads the number that the text of a number action holds, which is nil when it is empty.
+func numberFromText(text string, action *ShortcutAction) (number any) {
+	var convErr error
+	if strings.Contains(text, ".") {
+		number, convErr = strconv.ParseFloat(text, 64)
+	} else if strings.Contains(text, ",") {
+		number, convErr = strconv.ParseFloat(strings.Replace(text, ",", ".", 1), 64)
+	} else if text != "" {
+		number, convErr = strconv.Atoi(text)
+	}
+	if convErr != nil {
+		decompError(fmt.Sprintf("Expected the parameter 'WFNumberActionNumber' to be a number, got '%s'", text), action)
+	}
+
+	return
+}
+
+// numberFromPlist reads the number that a number action holds as a number in the plist.
+func numberFromPlist(value any, action *ShortcutAction) any {
+	switch number := value.(type) {
+	case uint64:
+		return int(number)
+	case int64:
+		// A negative integer is read as an int64 rather than a uint64.
+		return number
+	case float64:
+		return number
+	}
+
+	decompError(fmt.Sprintf("Expected the parameter 'WFNumberActionNumber' to be a number, text or a dictionary, got %T", value), action)
+
+	return nil
 }
 
 func decompBasicExpression(action *ShortcutAction) {
@@ -658,54 +1218,142 @@ func decompBasicExpression(action *ShortcutAction) {
 			operation = "*"
 		case "÷":
 			operation = "/"
+		case "+", "-":
+			operation = paramString(action, "WFMathOperation")
+		case "…":
+			// A scientific operation is stored in a second key that an infix expression has no way to
+			// write, so it is written as the calculate() call that makes it.
+			if action.WFWorkflowActionParameters["WFScientificMathOperation"] == nil {
+				decompError("Expected the parameter 'WFScientificMathOperation' to name the scientific operation of the math action", action)
+			}
+			decompAction(action)
+			return
 		default:
-			operation = action.WFWorkflowActionParameters["WFMathOperation"].(string)
+			decompError(fmt.Sprintf("Expected the parameter 'WFMathOperation' to be '+', '-', '×', '÷' or '…', got '%v'", action.WFWorkflowActionParameters["WFMathOperation"]), action)
 		}
 	}
-	var expression = strings.Trim(decompValue(input), "\"") + " " + strings.Trim(operation, "\"") + " " + strings.Trim(decompValue(operand), "\"")
-	var varRegex = regexp.MustCompile(`{(.*?)}`)
-	currentVariableValue = varRegex.ReplaceAllString(expression, "$1")
+	var inputText = decompBare(input)
+	var operandText = decompBare(operand)
+	var expression = inputText + " " + strings.Trim(operation, "\"") + " " + operandText
+	currentVariableValue = inlineReferenceRegex.ReplaceAllString(expression, "$1")
 
 	checkConstantLiteral(action)
+
+	var compound, isCompound = compoundAssignment(action, inputText, operation, operandText)
+	if isCompound {
+		currentVariableValue = operandText
+		currentVariableOperator = compound
+	}
+}
+
+// currentVariableOperator is the operator that the Set Variable consuming currentVariableValue is written
+// with when the value is the operand of a compound assignment.
+var currentVariableOperator string
+
+var integerLiteralRegex = regexp.MustCompile(`^-?[0-9]+$`)
+
+// compoundAssignment reverses variableValueModifier: a math action that has a variable as its first operand,
+// an integer as its second and whose output is only taken by the Set Variable right after it that sets that
+// variable is what x += 3 compiles to. The compiler only writes that for an integer operand, and only appends
+// to a variable that is an array instead, so neither is written as one.
+func compoundAssignment(action *ShortcutAction, inputText string, operation string, operandText string) (operator string, isCompound bool) {
+	if action.WFWorkflowActionParameters[UUID] == nil || actionIndex+1 >= len(shortcut.WFWorkflowActions) {
+		return
+	}
+	var actionUUID = paramString(action, UUID)
+	if currentVariableUUID != actionUUID || !integerLiteralRegex.MatchString(operandText) {
+		return
+	}
+
+	var next = peekActions(1)
+	if next.WFWorkflowActionIdentifier != SetVariableIdentifier {
+		return
+	}
+	var variableName = setVariableName(&next)
+	if inputText != "@"+variableName || appendedVariables[variableName] {
+		return
+	}
+
+	return operation + "=", true
 }
 
 func decompExpression(action *ShortcutAction) {
-	var raw = action.WFWorkflowActionParameters["Input"]
 	var expression string
-	if s, ok := raw.(string); ok {
-		expression = s
-	} else {
-		expression = strings.Trim(decompValue(raw.(map[string]interface{})["Value"]), "\"")
+	switch input := requiredParam(action, "Input").(type) {
+	case string:
+		expression = input
+	case map[string]interface{}:
+		expression = decompBare(input["Value"])
+	default:
+		decompError(fmt.Sprintf("Expected the parameter 'Input' to be a string or a dictionary, got %T", input), action)
 	}
-	var varRegex = regexp.MustCompile(`{(.*?)}`)
-	currentVariableValue = varRegex.ReplaceAllString(expression, "$1")
+	currentVariableValue = inlineReferenceRegex.ReplaceAllString(expression, "$1")
 
 	checkConstantLiteral(action)
 }
 
+// appendedVariables are the variables that an Append to Variable adds to, and assignedVariables those that
+// a Set Variable or Append to Variable has written so far.
+var appendedVariables map[string]bool
+var assignedVariables map[string]bool
+
 func decompVariable(action *ShortcutAction) {
-	var variableName = action.WFWorkflowActionParameters["WFVariableName"].(string)
-	sanitizeIdentifier(&variableName)
+	var variableName = setVariableName(action)
 	newCodeLine(fmt.Sprintf("@%s", variableName))
 
-	if currentVariableValue != "" {
-		code.WriteRune(' ')
-		if action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
-			code.WriteString("+= ")
-		} else {
-			code.WriteString("= ")
-		}
+	var firstAssignment = !assignedVariables[variableName]
+	assignedVariables[variableName] = true
 
-		code.WriteString(currentVariableValue)
-	} else {
-		var decompInput = decompValue(action.WFWorkflowActionParameters["WFInput"])
-		if decompInput != "" {
-			code.WriteString(fmt.Sprintf(" = %s", decompInput))
-		}
+	// The compiler only appends to a variable that was an array where it was first written, and otherwise
+	// sets it, so the first write of a variable that is appended to declares the type.
+	if firstAssignment && appendedVariables[variableName] && action.WFWorkflowActionIdentifier == SetVariableIdentifier &&
+		action.WFWorkflowActionParameters["WFInput"] == nil {
+		code.WriteString(": array\n")
+		return
 	}
 
-	currentVariableValue = ""
+	var inputUUID string
+	if action.WFWorkflowActionParameters["WFInput"] != nil {
+		inputUUID = decompInput(action).Value.OutputUUID
+	}
+
+	if currentVariableValue == "" || inputUUID == "" || inputUUID != currentVariableUUID {
+		var inputText = decompValue(action.WFWorkflowActionParameters["WFInput"])
+		if inputText != "" {
+			code.WriteString(fmt.Sprintf(" %s %s", assignmentOperator(action), inputText))
+		}
+		code.WriteRune('\n')
+		return
+	}
+
+	// Assigning an empty dictionary compiles to a Nothing before the Set Variable, so only a type
+	// declaration compiles to a Set Variable that takes the dictionary.
+	if currentVariableValue == emptyDictionary && action.WFWorkflowActionIdentifier == SetVariableIdentifier {
+		code.WriteString(": dictionary\n")
+		currentVariableValue = ""
+		currentVariableUUID = ""
+		return
+	}
+
+	var operator = assignmentOperator(action)
+	if currentVariableOperator != "" {
+		operator = currentVariableOperator
+		currentVariableOperator = ""
+	}
+	code.WriteString(fmt.Sprintf(" %s ", operator))
+	code.WriteString(currentVariableValue)
 	code.WriteRune('\n')
+
+	currentVariableValue = ""
+	currentVariableUUID = ""
+}
+
+func assignmentOperator(action *ShortcutAction) string {
+	if action.WFWorkflowActionIdentifier == AppendVariableIdentifier {
+		return "+="
+	}
+
+	return "="
 }
 
 func decompDictionaryGetValue(action *ShortcutAction) {
@@ -715,9 +1363,7 @@ func decompDictionaryGetValue(action *ShortcutAction) {
 	if action.WFWorkflowActionParameters["WFDictionaryKey"] != nil {
 		dictionaryValueRef.WriteRune('[')
 		if keyValue, isString := action.WFWorkflowActionParameters["WFDictionaryKey"].(string); isString {
-			dictionaryValueRef.WriteRune('\'')
-			dictionaryValueRef.WriteString(keyValue)
-			dictionaryValueRef.WriteRune('\'')
+			dictionaryValueRef.WriteString(quoteRawString(keyValue))
 		} else {
 			dictionaryValueRef.WriteString(decompValue(action.WFWorkflowActionParameters["WFDictionaryKey"]))
 		}
@@ -728,24 +1374,17 @@ func decompDictionaryGetValue(action *ShortcutAction) {
 }
 
 func checkControlFlowOutput(action *ShortcutAction) bool {
-	switch action.WFWorkflowActionIdentifier {
-	case "is.workflow.actions.conditional":
-		fallthrough
-	case "is.workflow.actions.choosefrommenu":
-		fallthrough
-	case "is.workflow.actions.repeat.count":
-		fallthrough
-	case "is.workflow.actions.repeat.each":
-		if action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64) == startStatement {
-			var group = controlFlowGroups[groupingIdx]
-			if group.identifier != "" {
-				newCodeLine(fmt.Sprintf("const %s = ", group.identifier))
-				groupingIdx++
-				return true
-			}
-		}
+	if !isControlFlowAction(action) || controlFlowMode(action) != startStatement {
+		return false
 	}
-	return false
+
+	var outputName, captured = controlFlowOutputs[paramString(action, "GroupingIdentifier")]
+	if !captured {
+		return false
+	}
+	newCodeLine(fmt.Sprintf("const %s = ", outputName))
+
+	return true
 }
 
 func beginStatement(t tokenType, action *ShortcutAction) {
@@ -765,22 +1404,24 @@ func decompMenu(action *ShortcutAction) {
 	if len(menus) == 0 {
 		menus = make(map[string][]varValue)
 	}
-	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
-	var groupingUUID = action.WFWorkflowActionParameters["GroupingIdentifier"].(string)
-	switch controlFlowMode {
+	var groupingUUID = paramString(action, "GroupingIdentifier")
+	switch controlFlowMode(action) {
 	case startStatement:
 		beginStatement(Menu, action)
 
 		menus[groupingUUID] = []varValue{}
-		var items = action.WFWorkflowActionParameters["WFMenuItems"]
-		for _, item := range items.([]interface{}) {
+		for _, item := range paramSlice(action, "WFMenuItems") {
 			menus[groupingUUID] = append(menus[groupingUUID], varValue{value: item})
 		}
 		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFMenuPrompt"]))
 		code.WriteString(" {\n")
 		tabLevel++
 	case statementPart:
-		tabLevel--
+		// The body of the item before this one is one level in from the item.
+		if openMenuItems[groupingUUID] {
+			tabLevel--
+		}
+		openMenuItems[groupingUUID] = true
 		newCodeLine("item ")
 
 		// Cases with an attributed title do not read their option but still consume it.
@@ -793,55 +1434,72 @@ func decompMenu(action *ShortcutAction) {
 		if attributedTitle, found := action.WFWorkflowActionParameters["WFMenuItemAttributedTitle"]; found {
 			code.WriteString(decompValue(attributedTitle))
 		} else if menuItem.value != nil {
-			code.WriteString(decompValue(menuItem.value))
+			code.WriteString(decompValue(menuItemValue(menuItem.value, action)))
 		}
 		code.WriteString(":\n")
 		tabLevel++
 	case endStatement:
+		if openMenuItems[groupingUUID] {
+			tabLevel--
+		}
+		delete(openMenuItems, groupingUUID)
 		tabLevel--
 		newCodeLine("}\n")
 	}
 }
 
+// openMenuItems are the menus that have an item whose body is open.
+var openMenuItems map[string]bool
+
+// menuItemValue is the title of a menu item, which the compiler writes as a WFMenuItem dictionary
+// holding it in WFValue, and Shortcuts as a string.
+func menuItemValue(item any, action *ShortcutAction) any {
+	var menuItem, isMap = item.(map[string]interface{})
+	if !isMap {
+		return item
+	}
+	var value, found = menuItem["WFValue"]
+	if !found {
+		decompError("Expected a menu item dictionary to hold its title in WFValue", action)
+	}
+
+	return value
+}
+
 func decompRepeat(action *ShortcutAction) {
-	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
-	switch controlFlowMode {
+	switch controlFlowMode(action) {
 	case startStatement:
 		beginStatement(Repeat, action)
 
-		code.WriteString("_ for ")
-
-		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFRepeatCount"]))
-
-		code.WriteString(" {\n")
+		// The count is evaluated outside the loop, so it is decompiled before the loop opens.
+		var count = decompValue(action.WFWorkflowActionParameters["WFRepeatCount"])
+		code.WriteString(fmt.Sprintf("%s for %s {\n", loopDeclaration(action), count))
 		tabLevel++
 	case endStatement:
+		popLoop(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
 }
 
 func decompFor(action *ShortcutAction) {
-	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
-	switch controlFlowMode {
+	switch controlFlowMode(action) {
 	case startStatement:
 		beginStatement(RepeatWithEach, action)
 
-		code.WriteString("_ in ")
-
-		code.WriteString(decompValue(action.WFWorkflowActionParameters["WFInput"]))
-
-		code.WriteString(" {\n")
+		// The input is evaluated outside the loop, so it is decompiled before the loop opens.
+		var input = decompValue(action.WFWorkflowActionParameters["WFInput"])
+		code.WriteString(fmt.Sprintf("%s in %s {\n", loopDeclaration(action), input))
 		tabLevel++
 	case endStatement:
+		popLoop(action)
 		tabLevel--
 		newCodeLine("}\n")
 	}
 }
 
 func decompConditional(action *ShortcutAction) {
-	var controlFlowMode = action.WFWorkflowActionParameters["WFControlFlowMode"].(uint64)
-	switch controlFlowMode {
+	switch controlFlowMode(action) {
 	case startStatement:
 		beginStatement(If, action)
 
@@ -867,112 +1525,292 @@ func decompConditional(action *ShortcutAction) {
 }
 
 func decompConditions(action *ShortcutAction) {
-	if action.WFWorkflowActionParameters["WFConditions"] != nil {
-		var conditions = action.WFWorkflowActionParameters["WFConditions"].(map[string]interface{})
-		var conditionValue = conditions["Value"].(map[string]interface{})
-		var intFilterPrefix, convErr = strconv.Atoi(fmt.Sprintf("%d", conditionValue["WFActionParameterFilterPrefix"]))
-		handle(convErr)
-		var paramFilterPrefix = convertFilterPrefix(intFilterPrefix)
-		var filterTemplates = conditionValue["WFActionParameterFilterTemplates"].([]interface{})
-		var conditionsLen = len(filterTemplates)
-		for i, condition := range filterTemplates {
-			decompCondition(condition.(map[string]interface{}), action)
-
-			if i != conditionsLen-1 {
-				code.WriteString(fmt.Sprintf(" %s ", paramFilterPrefix))
-			}
-		}
-	} else {
+	if action.WFWorkflowActionParameters["WFConditions"] == nil {
 		decompCondition(action.WFWorkflowActionParameters, action)
+		return
+	}
+
+	var conditions = paramMap(action, "WFConditions")
+	var conditionValue, hasValue = conditions["Value"].(map[string]interface{})
+	if !hasValue {
+		decompError("Expected WFConditions to have a Value dictionary", action)
+	}
+	var templates = conditionTemplates(conditionValue, action)
+	var conditionsLen = len(templates)
+	var paramFilterPrefix string
+	if conditionsLen > 1 {
+		paramFilterPrefix = decompFilterPrefix(conditionValue, action)
+	}
+	for i, condition := range templates {
+		decompCondition(condition, action)
+
+		if i != conditionsLen-1 {
+			code.WriteString(fmt.Sprintf(" %s ", paramFilterPrefix))
+		}
 	}
 }
 
-func matchConditionOperator(number int) tokenType {
-	for operator, cond := range conditions {
-		if cond == number {
-			return operator
-		}
+// decompFilterPrefix writes the operator that joins the conditions, which is only read when there is more than
+// one, so an absent prefix only stops on conditions it would join.
+func decompFilterPrefix(conditionValue map[string]interface{}, action *ShortcutAction) string {
+	var key = "WFActionParameterFilterPrefix"
+	var filterPrefix, isInt = conditionValue[key].(uint64)
+	if !isInt {
+		decompError(fmt.Sprintf("Expected WFConditions to have a %s of %d (any) or %d (all) to join its conditions, got %T", key, conditionFilterPrefixes[Or], conditionFilterPrefixes[And], conditionValue[key]), action)
 	}
+	if filterPrefix != uint64(conditionFilterPrefixes[Or]) && filterPrefix != uint64(conditionFilterPrefixes[And]) {
+		decompError(fmt.Sprintf("Expected the %s of WFConditions to be %d (any) or %d (all), got %d", key, conditionFilterPrefixes[Or], conditionFilterPrefixes[And], filterPrefix), action)
+	}
+
+	return convertFilterPrefix(int(filterPrefix))
+}
+
+// matchConditionOperator reverses makeConditionParam, which swaps the greater and less than codes
+// for 1000 and 1001 when the condition compares a date to a duration.
+func matchConditionOperator(conditionCode int, condition map[string]interface{}, action *ShortcutAction) tokenType {
+	switch conditionCode {
+	case 1000, 1001:
+		if condition["WFDuration"] == nil {
+			decompError(fmt.Sprintf("Expected a WFDuration operand for conditional %d", conditionCode), action)
+		}
+		if conditionCode == 1000 {
+			return GreaterThan
+		}
+		return LessThan
+	}
+	if operator, found := firstKeyWithValue(conditionCode, conditions); found {
+		return operator
+	}
+
+	decompError(fmt.Sprintf("Invalid conditional %d", conditionCode), action)
 	return ""
 }
 
 func decompCondition(condition map[string]interface{}, action *ShortcutAction) {
-	var conditionInt = condition["WFCondition"].(uint64)
-	var conditionalOperator = matchConditionOperator(int(conditionInt))
-	if conditionalOperator == "" {
-		decompError(fmt.Sprintf("Invalid conditional %v", conditionInt), action)
+	// The plist omits WFCondition when it is 0 (LessThan).
+	var conditionCode uint64
+	if condition["WFCondition"] != nil {
+		var wfCondition, isInt = condition["WFCondition"].(uint64)
+		if !isInt {
+			decompError(fmt.Sprintf("Expected WFCondition to be an integer, got %T", condition["WFCondition"]), action)
+		}
+		conditionCode = wfCondition
 	}
+
+	var conditionalOperator = matchConditionOperator(int(conditionCode), condition, action)
 	if conditionalOperator == Empty {
 		code.WriteRune('!')
 	}
 
 	code.WriteString(decompValue(condition["WFInput"]))
+	code.WriteString(conditionInputCoercion(condition["WFInput"], conditionalOperator))
 
-	if conditionalOperator == Any || conditionalOperator == Empty {
+	switch conditionalOperator {
+	case Any, Empty:
+		return
+	case IsToday:
+		code.WriteString(fmt.Sprintf(" %s", IsToday))
 		return
 	}
 
 	code.WriteString(fmt.Sprintf(" %s ", conditionalOperator))
+	code.WriteString(decompConditionOperand(condition, []string{"WFDuration", "WFDate", "WFNumberValue", "WFConditionalActionString"}, action))
 
-	if condition["WFNumberValue"] != nil && condition["WFNumberValue"] != "" {
-		if stringValue, isString := condition["WFNumberValue"].(string); isString {
-			var numberValue, convErr = strconv.Atoi(stringValue)
-			handle(convErr)
-			code.WriteString(decompValue(numberValue))
-		} else {
-			code.WriteString(decompValue(condition["WFNumberValue"]))
-		}
-	} else if _, foundStr := condition["WFConditionalActionString"]; foundStr {
-		code.WriteString(decompValue(condition["WFConditionalActionString"]))
+	if conditionalOperator == Between {
+		code.WriteRune(' ')
+		code.WriteString(decompConditionOperand(condition, []string{"WFAnotherDate", "WFAnotherNumber"}, action))
 	}
 }
 
-type DictionaryActionParameters struct {
-	WFItems WFItems
+// conditionInputCoercion is the coercion the compiler needs to compare an action output of a type that the
+// operator does not accept, such as the variable type of an action that can output any kind of value. The
+// Shortcuts app does not store the type, so it is read from the action that wrote the output.
+func conditionInputCoercion(input any, operator tokenType) string {
+	var allowed = allowedConditionalTypes[operator]
+	if len(allowed) == 0 {
+		return ""
+	}
+
+	var reference, isReference = conditionInputReference(input)
+	if !isReference || len(reference.Aggrandizements) != 0 {
+		return ""
+	}
+
+	var outputType, known = referenceOutputType(reference, 0)
+	if !known || slices.Contains(allowed, outputType) {
+		return ""
+	}
+
+	for _, coercible := range []tokenType{String, Integer, Date} {
+		if slices.Contains(allowed, coercible) {
+			return "." + string(coercible)
+		}
+	}
+
+	return ""
+}
+
+// conditionInputReference reads the reference a condition input wraps in its Variable dictionary.
+func conditionInputReference(input any) (reference Value, isReference bool) {
+	var inputMap, isMap = input.(map[string]interface{})
+	if !isMap {
+		return
+	}
+	var variable, hasVariable = inputMap["Variable"].(map[string]interface{})
+	if !hasVariable {
+		return
+	}
+	var value, hasValue = variable["Value"].(map[string]interface{})
+	if !hasValue {
+		return
+	}
+
+	decompMapToStruct(value, &reference, "reference", currentDecompAction())
+
+	return reference, true
+}
+
+// referenceOutputType is the type the compiler gives the output a reference reads, which is the output type of
+// the action that wrote it, or of the action a variable was set from.
+func referenceOutputType(reference Value, depth int) (outputType tokenType, known bool) {
+	if depth > len(shortcut.WFWorkflowActions) {
+		return
+	}
+
+	switch reference.Type {
+	case "ActionOutput":
+		var producer = actionWithUUID(reference.OutputUUID)
+		if producer == nil {
+			return
+		}
+		// Matching actions that share an identifier reads their parameters, which is not what is written.
+		if len(identifierMap[producer.WFWorkflowActionIdentifier]) == 0 {
+			return
+		}
+		var readBefore = maps.Clone(readParameters)
+		var _, definition = matchAction(producer)
+		readParameters = readBefore
+
+		return definition.outputType, true
+	case "Variable":
+		for index := range shortcut.WFWorkflowActions {
+			var setter = &shortcut.WFWorkflowActions[index]
+			if setter.WFWorkflowActionIdentifier != SetVariableIdentifier || setter.WFWorkflowActionParameters["WFVariableName"] != reference.VariableName {
+				continue
+			}
+
+			var input, isReference = conditionInputReference(map[string]interface{}{"Variable": setter.WFWorkflowActionParameters["WFInput"]})
+			if !isReference {
+				return
+			}
+
+			return referenceOutputType(input, depth+1)
+		}
+	}
+
+	return
+}
+
+// actionWithUUID finds the action that has uuid as its output.
+func actionWithUUID(uuid string) *ShortcutAction {
+	for index := range shortcut.WFWorkflowActions {
+		if shortcut.WFWorkflowActions[index].WFWorkflowActionParameters[UUID] == uuid {
+			return &shortcut.WFWorkflowActions[index]
+		}
+	}
+
+	return nil
+}
+
+// decompConditionOperand writes the first of keys present in condition, as routeConditionalValue
+// and conditionalParameter write each operand to exactly one of them.
+func decompConditionOperand(condition map[string]interface{}, keys []string, action *ShortcutAction) string {
+	for _, key := range keys {
+		var operand = condition[key]
+		if operand == nil {
+			continue
+		}
+
+		switch key {
+		case "WFDuration":
+			return decompQuantity(operand, "WFDuration", action)
+		case "WFNumberValue", "WFAnotherNumber":
+			return decompConditionNumber(operand)
+		default:
+			return decompValue(operand)
+		}
+	}
+
+	decompError(fmt.Sprintf("Expected a condition operand in one of %s", strings.Join(keys, ", ")), action)
+	return ""
+}
+
+// decompConditionNumber writes a number stored as text, as a duration's Magnitude always is, without
+// converting it so floats are not truncated.
+func decompConditionNumber(operand any) string {
+	var numberText, isText = operand.(string)
+	if !isText {
+		return decompValue(operand)
+	}
+	if _, parseErr := strconv.ParseFloat(numberText, 64); parseErr != nil {
+		return decompValue(numberText)
+	}
+
+	return numberText
+}
+
+func decompQuantity(operand any, key string, action *ShortcutAction) string {
+	var duration = expectType[map[string]interface{}](operand, key, "a WFQuantityFieldValue", action)
+	var quantity, hasValue = duration["Value"].(map[string]interface{})
+	if !hasValue || quantity["Magnitude"] == nil || quantity["Unit"] == nil {
+		decompError(fmt.Sprintf("Expected %s to have a Value with a Magnitude and a Unit", key), action)
+	}
+
+	return fmt.Sprintf("qty(%s, %s)", decompConditionNumber(quantity["Magnitude"]), decompValue(quantity["Unit"]))
 }
 
 type WFItems struct {
 	Value Value
 }
 
-var decompilingDictionary = false
+var decompilingDictionary bool
+
+const emptyDictionary = "{}"
 
 func decompDictionary(action *ShortcutAction) {
+	// A literal would drop the question, so write the dictionary() call it is an argument of.
 	if decompQuestionCall(action, "dictionary", "WFItems", Dict) {
 		return
 	}
 
-	var params DictionaryActionParameters
-	mapToStruct(action.WFWorkflowActionParameters, &params)
+	// An empty dictionary has no WFItems.
+	var items WFItems
+	if action.WFWorkflowActionParameters["WFItems"] != nil {
+		decompMapToStruct(action.WFWorkflowActionParameters["WFItems"], &items, "WFItems", action)
+	}
 
-	currentVariableValue = decompDictionaryValue(params.WFItems.Value.WFDictionaryFieldValueItems)
+	currentVariableValue = decompDictionaryValue(items.Value.WFDictionaryFieldValueItems)
 
 	checkConstantLiteral(action)
 }
 
 func decompDictionaryValue(items []WFDictionaryFieldValueItem) string {
+	return decompLiteral(decompDictionaryItems(items))
+}
+
+// enterLiteral keeps the text inside of an array or a dictionary as it is until the returned function is called,
+// as it is escaped when the literal is written as JSON, and restores what was set so literals can be nested.
+func enterLiteral() (leave func()) {
+	var wasLiteral = decompilingDictionary
 	decompilingDictionary = true
 
-	var dictionary = decompDictionaryItems(items)
-	var jsonBytes, jsonErr = json.MarshalIndent(dictionary, strings.Repeat("\t", tabLevel), "\t")
-	handle(jsonErr)
-
-	decompilingDictionary = false
-
-	return bareReferenceMarkerRegex.ReplaceAllString(string(jsonBytes), "$1")
+	return func() {
+		decompilingDictionary = wasLiteral
+	}
 }
 
-// bareReference is a variable reference that is written without quotes. JSON cannot express that, so it is
-// marshaled as a string with a NUL prefix that is unquoted afterwards, as no real dictionary text starts with one.
+// bareReference is a variable reference that is written in a literal without quotes.
 type bareReference string
-
-const bareReferenceMarker = "\x00"
-
-var bareReferenceMarkerRegex = regexp.MustCompile(`"\\u0000([^"]*)"`)
-
-func (reference bareReference) MarshalJSON() ([]byte, error) {
-	return json.Marshal(bareReferenceMarker + string(reference))
-}
 
 func isReferenceValue(value any) bool {
 	if mapValue, isMap := value.(map[string]interface{}); isMap {
@@ -984,20 +1822,46 @@ func isReferenceValue(value any) bool {
 	return false
 }
 
-func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary map[string]interface{}) {
-	dictionary = make(map[string]interface{})
+// literalItem is a key and value of a dictionary literal.
+type literalItem struct {
+	key   string
+	value any
+}
+
+// literalDictionary is a dictionary literal that keeps the order of its items, as the order the items
+// are in is the order they show in the Shortcut, which a Go map would not keep.
+type literalDictionary []literalItem
+
+func decompDictionaryItems(items []WFDictionaryFieldValueItem) (dictionary literalDictionary) {
+	defer enterLiteral()()
 	for _, item := range items {
-		var itemKey = strings.Trim(decompValue(item.WFKey), "\"")
-		dictionary[itemKey] = decompDictionaryItem(item)
+		var itemKey = decompValue(item.WFKey)
+		dictionary = append(dictionary, literalItem{key: itemKey, value: decompDictionaryItem(item)})
 	}
 	return
 }
 
-var numericRegex = regexp.MustCompile("^[0-9]+$")
+// jsonNumberRegex is a number as JSON writes it, which has no leading zero.
+var jsonNumberRegex = regexp.MustCompile(`^-?(0|[1-9][0-9]*)(\.[0-9]+)?$`)
+
+// decompNumberItem writes the text of a number item as a number if it is one, keeping a decimal or a negative
+// as it is. A number with a leading zero is written as the number it is, as JSON has no number like it.
+func decompNumberItem(text string) (number json.Number, isNumber bool) {
+	if !numberLiteralRegex.MatchString(text) {
+		return "", false
+	}
+	if jsonNumberRegex.MatchString(text) {
+		return json.Number(text), true
+	}
+
+	var value, parseErr = strconv.ParseFloat(text, 64)
+	handle(parseErr)
+
+	return json.Number(strconv.FormatFloat(value, 'f', -1, 64)), true
+}
 
 func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
-	var itemStringValue = decompValue(item.WFValue)
-	var itemValueMap = item.WFValue.(map[string]interface{})
+	var itemValueMap = expectType[map[string]interface{}](item.WFValue, "a dictionary item value", "a dictionary", currentDecompAction())
 	var itemValue any
 
 	if dictDataType(item.WFItemType) == itemTypeFile {
@@ -1005,51 +1869,58 @@ func decompDictionaryItem(item WFDictionaryFieldValueItem) any {
 	}
 
 	if isReferenceValue(itemValueMap["Value"]) {
-		return fmt.Sprintf("{%s}", itemStringValue)
+		return fmt.Sprintf("{%s}", decompValue(item.WFValue))
 	}
 
 	switch dictDataType(item.WFItemType) {
 	case itemTypeNumber:
-		itemValue = decompValue(item.WFValue)
-		if !numericRegex.MatchString(itemValue.(string)) {
+		var numberText = decompValue(item.WFValue)
+		var number, isNumber = decompNumberItem(numberText)
+		if !isNumber {
+			itemValue = numberText
 			break
 		}
-
-		var convErr error
-		itemValue, convErr = strconv.ParseInt(itemValue.(string), 10, 64)
-		handle(convErr)
+		itemValue = number
 	case itemTypeBool:
-		var wfValue = item.WFValue.(map[string]interface{})
-		itemValue = wfValue["Value"].(bool)
-	case itemTypeText:
-		itemValue = strings.Trim(itemStringValue, "\"")
-	case itemTypeArray:
-		itemValue = decompArray(itemValueMap["Value"].([]interface{}))
-	case itemTypeDict:
-		var dictionaryItems []WFDictionaryFieldValueItem
-		var value = itemValueMap["Value"].(map[string]interface{})
-		var fieldValueItems = value["Value"].(map[string]interface{})["WFDictionaryFieldValueItems"]
-		if fieldValueItems != nil {
-			mapToStruct(fieldValueItems, &dictionaryItems)
+		var boolValue, isBool = itemValueMap["Value"].(bool)
+		if !isBool {
+			decompError(fmt.Sprintf("Expected a boolean dictionary item value, got %T", itemValueMap["Value"]), currentDecompAction())
 		}
-		itemValue = decompDictionaryItems(dictionaryItems)
+		itemValue = boolValue
+	case itemTypeText:
+		itemValue = decompValue(item.WFValue)
+	case itemTypeArray:
+		itemValue = decompArray(expectType[[]interface{}](itemValueMap["Value"], "an array dictionary item value", "an array", currentDecompAction()))
+	case itemTypeDict:
+		var value, hasValue = itemValueMap["Value"].(map[string]interface{})
+		var nestedValue, hasNestedValue = value["Value"].(map[string]interface{})
+		if !hasValue || !hasNestedValue {
+			decompError("Expected a dictionary item value to be a dictionary holding a Value dictionary", currentDecompAction())
+		}
+		// An empty nested dictionary has no items.
+		var nestedItems []WFDictionaryFieldValueItem
+		if nestedValue["WFDictionaryFieldValueItems"] != nil {
+			nestedItems = decompFieldValueItems(nestedValue["WFDictionaryFieldValueItems"], currentDecompAction())
+		}
+		itemValue = decompDictionaryItems(nestedItems)
 	default:
-		itemValue = itemStringValue
+		itemValue = decompValue(item.WFValue)
 	}
 
 	return itemValue
 }
 
 func decompArray(items []interface{}) (array []interface{}) {
+	defer enterLiteral()()
 	for _, item := range items {
 		if itemMap, isMap := item.(map[string]interface{}); isMap {
 			var fieldValueItem WFDictionaryFieldValueItem
-			mapToStruct(itemMap, &fieldValueItem)
+			decompMapToStruct(itemMap, &fieldValueItem, "array item", currentDecompAction())
 			array = append(array, decompDictionaryItem(fieldValueItem))
 			continue
 		}
 
-		array = append(array, strings.Trim(decompValue(item), "\""))
+		array = append(array, decompValue(item))
 	}
 	return
 }
@@ -1059,189 +1930,424 @@ func decompValue(value any) string {
 		return "nil"
 	}
 
-	switch typed := value.(type) {
+	switch typedValue := value.(type) {
 	case map[string]interface{}:
-		return decompValueObject(typed)
+		return decompValueObject(typedValue)
 	case string:
-		return fmt.Sprintf("\"%s\"", escapeString(typed))
+		return decompTextLiteral(typedValue, false)
+	case []interface{}:
+		return decompLiteral(decompArray(typedValue))
+	case bool, int, int64, uint64, float64:
+		return fmt.Sprintf("%v", typedValue)
 	default:
-		return fmt.Sprintf("%v", value)
+		decompError(fmt.Sprintf("Expected a value to be text, a number, a boolean, an array or a dictionary, got %T", value), currentDecompAction())
+		return ""
 	}
 }
 
-func escapeString(value string) string {
-	var escapes = map[string]string{
-		"\n": "\\n",
-		"\t": "\\t",
-		"\r": "\\r",
-		"\"": `\"`,
+// decompLiteral writes an array or a dictionary as a Cherri literal, which is JSON, so a Go value is never
+// written with its Go formatting.
+func decompLiteral(value any) string {
+	var literal strings.Builder
+	writeLiteral(&literal, value, tabLevel)
+
+	return literal.String()
+}
+
+// writeLiteral writes value as indented JSON that keeps the order of a dictionary. Each line after the first
+// starts at level tabs, as the literal is written where code is indented that much.
+func writeLiteral(literal *strings.Builder, value any, level int) {
+	var inner = strings.Repeat("\t", level+1)
+	var outer = strings.Repeat("\t", level)
+
+	switch typedValue := value.(type) {
+	case literalDictionary:
+		if len(typedValue) == 0 {
+			literal.WriteString(emptyDictionary)
+			return
+		}
+
+		literal.WriteString("{\n")
+		for i, item := range typedValue {
+			literal.WriteString(inner)
+			writeLiteralScalar(literal, item.key)
+			literal.WriteString(": ")
+			writeLiteral(literal, item.value, level+1)
+			if i < len(typedValue)-1 {
+				literal.WriteRune(',')
+			}
+			literal.WriteRune('\n')
+		}
+		literal.WriteString(outer + "}")
+	case []interface{}:
+		if len(typedValue) == 0 {
+			literal.WriteString("[]")
+			return
+		}
+
+		// The compiler does not skip whitespace before the closing bracket of an array, so it
+		// follows the last item on the same line.
+		literal.WriteString("[\n")
+		for i, item := range typedValue {
+			literal.WriteString(inner)
+			writeLiteral(literal, item, level+1)
+			if i < len(typedValue)-1 {
+				literal.WriteString(",\n")
+			}
+		}
+		literal.WriteRune(']')
+	case bareReference:
+		literal.WriteString(string(typedValue))
+	default:
+		writeLiteralScalar(literal, value)
 	}
-	for chr, e := range escapes {
-		value = strings.ReplaceAll(value, chr, e)
+}
+
+// writeLiteralScalar writes text, a number or a boolean as JSON. Text keeps <, > and & as they are, which
+// the encoder would escape as it assumes the JSON is put in HTML.
+func writeLiteralScalar(literal *strings.Builder, value any) {
+	var encoded strings.Builder
+	var encoder = json.NewEncoder(&encoded)
+	encoder.SetEscapeHTML(false)
+	handle(encoder.Encode(value))
+
+	literal.WriteString(markedBraceEscaper.Replace(strings.TrimSuffix(encoded.String(), "\n")))
+}
+
+// stringEscaper is one replacer, rather than a chain of replacements, so the backslashes it adds are
+// never escaped again.
+var stringEscaper = strings.NewReplacer(`\`, `\\`, `"`, `\"`, "\n", `\n`, "\t", `\t`, "\r", `\r`,
+	string(escapedLeftBrace), `\{`, string(escapedRightBrace), `\}`)
+
+// literalBraceMarker holds the braces of text as the characters the compiler holds an escaped brace as, which
+// the writers of a string write escaped, so a brace of the text is never read as an inline reference.
+var literalBraceMarker = strings.NewReplacer("{", string(escapedLeftBrace), "}", string(escapedRightBrace))
+
+// markedBraceEscaper writes held braces escaped in text that is already encoded.
+var markedBraceEscaper = strings.NewReplacer(string(escapedLeftBrace), `\{`, string(escapedRightBrace), `\}`)
+
+// escapeString escapes raw text for the inside of a double quoted Cherri string, the inverse of collectString.
+func escapeString(value string) string {
+	return stringEscaper.Replace(value)
+}
+
+// doubleQuoted writes text as a double quoted Cherri string, with no regard for a brace in it, unlike quoteString.
+func doubleQuoted(text string) string {
+	return fmt.Sprintf("\"%s\"", escapeString(text))
+}
+
+// quoteString is the only place text becomes a Cherri string literal, so every caller passes the
+// text as it is in the Shortcut and never trims or escapes it first. Text that has its inline
+// references already written as {reference} is passed with hasReferences.
+//
+// The compiler reads the braces in a double quoted string as inline references, so the braces of text with
+// no reference are written escaped. A raw string would not need that, but it is of the rawtext type, which
+// a condition does not accept.
+func quoteString(text string, hasReferences bool) string {
+	if hasReferences {
+		return doubleQuoted(text)
 	}
 
-	return value
+	return doubleQuoted(literalBraceMarker.Replace(text))
+}
+
+// quoteRawString writes text as a raw string, which only has an escape for the single quote, so a
+// backslash at the end of the text would escape the closing quote.
+func quoteRawString(text string) string {
+	if strings.HasSuffix(text, `\`) {
+		decompError(fmt.Sprintf("Expected text that is written as a raw string not to end with a backslash, got '%s'", text), currentDecompAction())
+	}
+
+	return fmt.Sprintf("'%s'", strings.ReplaceAll(text, "'", `\'`))
+}
+
+// decompTextLiteral writes text as it is written in the current context. Inside an array or a dictionary it
+// stays as it is because it is escaped when the literal is written as JSON. Text with references already has
+// the braces that are its own marked.
+func decompTextLiteral(text string, hasReferences bool) string {
+	if decompilingDictionary {
+		if hasReferences {
+			return text
+		}
+
+		return literalBraceMarker.Replace(text)
+	}
+
+	return quoteString(text, hasReferences)
 }
 
 func decompValueObject(value map[string]interface{}) string {
+	// The compiler writes an empty dictionary for an argument given as nil.
+	if len(value) == 0 {
+		return "nil"
+	}
+
 	if v, found := value["Value"]; found {
 		if nested, isMap := v.(map[string]interface{}); isMap {
+			// The compiler writes empty text as a text token string with an empty Value.
+			if len(nested) == 0 && value["WFSerializationType"] == "WFTextTokenString" {
+				return decompTextLiteral("", false)
+			}
 			value = nested
 		}
 	}
 
 	if value["WFDictionaryFieldValueItems"] != nil {
-		var items []WFDictionaryFieldValueItem
-		mapToStruct(value["WFDictionaryFieldValueItems"], &items)
-
-		return decompDictionaryValue(items)
+		return decompDictionaryValue(decompFieldValueItems(value["WFDictionaryFieldValueItems"], currentDecompAction()))
 	}
 
-	switch value["Type"] {
-	case "Variable":
-		if _, found := value["VariableName"]; found {
-			var variableName = value["VariableName"].(string)
-			sanitizeIdentifier(&variableName)
+	var valueType, hasType = value["Type"]
+	if !hasType {
+		return decompObjectValue(value)
+	}
 
-			return fmt.Sprintf("@%s", variableName)
+	// A condition input wraps its reference in a Variable dictionary instead of naming it.
+	if _, named := value["VariableName"]; valueType == "Variable" && !named {
+		var variableValue, hasVariable = value["Variable"].(map[string]interface{})
+		if !hasVariable {
+			decompError(fmt.Sprintf("Expected a Variable value to have a VariableName or a Variable dictionary, got %T", value["Variable"]), currentDecompAction())
 		}
-
-		var variableValue = value["Variable"].(map[string]interface{})
 		return decompValue(variableValue["Value"])
-	case "ActionOutput":
-		if _, found := value["OutputUUID"]; found {
-			var outputName = uuids[value["OutputUUID"].(string)]
-			sanitizeIdentifier(&outputName)
+	}
 
-			if value["Aggrandizements"] == nil {
-				return outputName
+	for _, key := range []string{"Type", "VariableName", "OutputUUID", "OutputName", "Prompt"} {
+		if field, found := value[key]; found {
+			if _, isString := field.(string); !isString {
+				decompError(fmt.Sprintf("Expected %s of a reference to be a string, got %T", key, field), currentDecompAction())
 			}
 		}
-		break
-	case "Ask":
-		if value["Prompt"] == nil {
-			return Ask
-		}
-
-		return fmt.Sprintf("Ask: \"%s\"", value["Prompt"])
-	case globals[ShortcutInput].variableType:
-		return ShortcutInput
+	}
+	if aggrandizements, found := value["Aggrandizements"]; found {
+		expectType[[]interface{}](aggrandizements, "Aggrandizements of a reference", "an array", currentDecompAction())
 	}
 
-	return decompObjectValue(value)
+	var reference Value
+	decompMapToStruct(value, &reference, "reference", currentDecompAction())
+
+	return decompReference(reference)
+}
+
+// decompReference is the only place a plist reference becomes Cherri, so references written as
+// whole values and references inside text resolve globals and aggrandizements the same way.
+func decompReference(reference Value) string {
+	var name string
+	switch reference.Type {
+	case "Variable":
+		if reference.VariableName == "" {
+			decompError("Expected a Variable reference to have a VariableName", currentDecompAction())
+		}
+		if loopReference, isLoopVariable := loopVariableReference(reference.VariableName); isLoopVariable {
+			name = loopReference
+			break
+		}
+		name = sanitizeIdentifier(reference.VariableName)
+		if !loopVariables[name] {
+			name = fmt.Sprintf("@%s", name)
+		}
+	case "ActionOutput":
+		var outputName, found = uuids[reference.OutputUUID]
+		if !found {
+			decompError(fmt.Sprintf("Expected the output UUID '%s' to belong to an earlier action", reference.OutputUUID), currentDecompAction())
+		}
+		name = sanitizeIdentifier(outputName)
+	default:
+		name = decompGlobal(reference.Type)
+		if reference.Type == Ask && reference.Prompt != "" {
+			name = fmt.Sprintf("%s: %s", name, quoteRawString(reference.Prompt))
+		}
+	}
+
+	decompAggrandizements(&name, reference.Aggrandizements)
+
+	return name
+}
+
+// decompGlobal skips the globals of type Variable, the repeat variables, because Shortcuts names them.
+func decompGlobal(referenceType string) string {
+	for name, global := range globals {
+		if global.variableType != "Variable" && global.variableType == referenceType {
+			return name
+		}
+	}
+
+	var globalTypes []string
+	for _, global := range globals {
+		if global.variableType != "Variable" {
+			globalTypes = append(globalTypes, global.variableType)
+		}
+	}
+	slices.Sort(globalTypes)
+	decompError(fmt.Sprintf("Expected a reference of type Variable, ActionOutput or a global (%s), got '%s'", strings.Join(globalTypes, ", "), referenceType), currentDecompAction())
+
+	return ""
 }
 
 func decompObjectValue(valueObj any) string {
 	var value, isMap = valueObj.(map[string]interface{})
 	if !isMap {
-		return fmt.Sprintf("%v", valueObj)
+		return decompValue(valueObj)
 	}
 
-	var attachmentString string
+	// Shortcuts writes empty text as a text token string without a Value.
+	if value["Value"] == nil && value["WFSerializationType"] == "WFTextTokenString" {
+		return decompTextLiteral("", false)
+	}
 	if value["Value"] != nil {
-		var nested, isNestedMap = value["Value"].(map[string]interface{})
+		var nestedValue, isNestedMap = value["Value"].(map[string]interface{})
 		if !isNestedMap {
-			return fmt.Sprintf("%v", valueObj)
+			return decompValue(value["Value"])
 		}
-		value = nested
+		value = nestedValue
 	}
 
+	var _, hasString = value["string"]
+	var _, hasAttachments = value["attachmentsByRange"]
+	if !hasString && !hasAttachments {
+		var keys = slices.Sorted(maps.Keys(value))
+		decompError(fmt.Sprintf("Expected a dictionary value to be text, a variable reference or a dictionary, got one with the keys: %s", strings.Join(keys, ", ")), currentDecompAction())
+	}
+
+	var text string
 	if _, found := value["string"]; found {
-		attachmentString = value["string"].(string)
+		text = expectType[string](value["string"], "string of a text value", "a string", currentDecompAction())
 	}
 
-	if value["Aggrandizements"] != nil {
-		attachmentString = ObjectReplaceCharStr
-		decompAttachmentString(&attachmentString, map[string]any{
-			"{0, 1}": value,
-		})
-		attachmentString = strings.Trim(attachmentString, "\"{}")
+	var attachments, found = value["attachmentsByRange"]
+	if !found {
+		return decompTextLiteral(text, false)
 	}
 
-	if attachments, found := value["attachmentsByRange"]; found {
-		decompAttachmentString(&attachmentString, attachments.(map[string]interface{}))
-	}
-
-	return attachmentString
+	return decompAttachmentString(text, expectType[map[string]interface{}](attachments, "attachmentsByRange", "a dictionary", currentDecompAction()))
 }
 
-func decompAttachmentString(attachmentString *string, attachments map[string]interface{}) {
-	var originalString = *attachmentString
-	var attachmentChars = strings.Split(*attachmentString, "")
+// decompAttachmentString substitutes each attachment into the text and writes it as text. Attachment
+// ranges are UTF-16 code unit offsets, the inverse of mapInlineVariables, so the text is indexed as
+// UTF-16 rather than as code points, which would misplace attachments after an emoji.
+func decompAttachmentString(text string, attachments map[string]interface{}) string {
+	var units = utf16.Encode([]rune(text))
 
+	var positions []int
+	var attachmentsByPosition = make(map[int]any, len(attachments))
 	for attachmentRange, a := range attachments {
 		var attachmentStart, _, _ = strings.Cut(attachmentRange, ",")
 		var attachmentPosition = strings.TrimPrefix(attachmentStart, "{")
 		var position, convErr = strconv.Atoi(attachmentPosition)
-		handle(convErr)
+		if convErr != nil {
+			decompError(fmt.Sprintf("Expected a range of attachmentsByRange to start with a position, such as {0, 1}, got '%s'", attachmentRange), currentDecompAction())
+		}
+
+		positions = append(positions, position)
+		attachmentsByPosition[position] = a
+	}
+	slices.Sort(positions)
+
+	var result strings.Builder
+	var consumed int
+	var referencesControlFlowOutput bool
+	var isWholeValue = text == ObjectReplaceCharStr
+	var lastReference string
+	var hasPrompt bool
+	for _, position := range positions {
+		if position < consumed || position >= len(units) {
+			decompError(fmt.Sprintf("Attachment position %d is outside of the string", position), currentDecompAction())
+		}
 
 		var attachment Value
-		mapToStruct(a, &attachment)
-
-		var variableName = attachment.VariableName
-		if _, uuid := uuids[attachment.OutputUUID]; uuid {
-			variableName = uuids[attachment.OutputUUID]
+		decompMapToStruct(attachmentsByPosition[position], &attachment, "attachmentsByRange", currentDecompAction())
+		// Cherri can only write the prompt of an Ask on a whole value, not inside of text or an array or a dictionary.
+		var keepsPrompt = isWholeValue && !decompilingDictionary && !decompilingText
+		if attachment.Prompt != "" && !keepsPrompt {
+			decompError(fmt.Sprintf("Expected the Ask in text to have no prompt, as Cherri can only write one on an Ask that is a whole value, got '%s'", attachment.Prompt), currentDecompAction())
 		}
-		sanitizeIdentifier(&variableName)
-		if variableName == "" && attachment.Type == globals[ShortcutInput].variableType {
-			variableName = ShortcutInput
-		}
-		if attachment.Type != "Variable" {
-			for name, global := range globals {
-				if global.variableType == attachment.Type {
-					variableName = name
-				}
-			}
-		} else {
-			variableName = fmt.Sprintf("@%s", variableName)
+		if slices.Contains(controlFlowOutputUUIDs, attachment.OutputUUID) {
+			referencesControlFlowOutput = true
 		}
 
-		if len(attachment.Aggrandizements) != 0 {
-			decompAggrandizements(&variableName, attachment.Aggrandizements)
-		}
+		lastReference = decompReference(attachment)
+		hasPrompt = attachment.Prompt != ""
+		result.WriteString(decompLiteralText(units[consumed:position]))
+		result.WriteString(fmt.Sprintf("{%s}", lastReference))
+		consumed = position + 1
+	}
+	result.WriteString(decompLiteralText(units[consumed:]))
 
-		attachmentChars[position] = fmt.Sprintf("{%s}", variableName)
+	// The output of a control flow block has no type, so the compiler only accepts it inside text.
+	// A text parameter keeps the text so the reference is converted to text, which a bare variable of
+	// another type is not.
+	var keepsText = decompilingText || decompilingTextParameter
+	if isWholeValue && !referencesControlFlowOutput && !decompilingDictionary && (!keepsText || hasPrompt) {
+		return lastReference
 	}
 
-	*attachmentString = escapeString(strings.Join(attachmentChars, ""))
-
-	if !decompilingDictionary && !decompilingText {
-		if originalString == ObjectReplaceCharStr {
-			*attachmentString = strings.Trim(*attachmentString, "{}")
-		} else if !strings.Contains("\"", *attachmentString) {
-			*attachmentString = fmt.Sprintf("\"%s\"", *attachmentString)
-		}
-	}
+	return decompTextLiteral(result.String(), true)
 }
 
-func decompAggrandizements(reference *string, aggrs []Aggrandizement) {
-	var index string
-	var coerce string
+// decompLiteralText decodes text between two attachments. Its braces are marked so they are written escaped,
+// as the compiler would otherwise read them with the references as one reference.
+func decompLiteralText(units []uint16) string {
+	return literalBraceMarker.Replace(string(utf16.Decode(units)))
+}
+
+// decompAggrandizements writes the aggrandizements in plist order. The compiler reads at most one
+// key or property followed by at most one coercion, so any other order cannot be written as Cherri.
+func decompAggrandizements(reference *string, aggrandizements []Aggrandizement) {
 	var revContentItems = reversedContentItems()
-	for _, aggr := range aggrs {
-		switch aggr.Type {
+	aggrandizements = readCoercionFirst(aggrandizements)
+	var keyed, coerced bool
+	for _, aggrandizement := range aggrandizements {
+		switch aggrandizement.Type {
+		case "WFDictionaryValueVariableAggrandizement", "WFPropertyVariableAggrandizement":
+			if keyed || coerced {
+				decompError("Expected at most one dictionary key or property read on a reference, before any coercion", currentDecompAction())
+			}
+			var key = aggrandizement.DictionaryKey
+			if aggrandizement.Type == "WFPropertyVariableAggrandizement" {
+				key = aggrandizement.PropertyName
+			}
+			if key == "" || strings.Contains(key, "'") {
+				decompError(fmt.Sprintf("Expected a dictionary key or property name that is not empty and has no single quote, got '%s'", key), currentDecompAction())
+			}
+			*reference = fmt.Sprintf("%s['%s']", *reference, key)
+			keyed = true
 		case "WFCoercionVariableAggrandizement":
-			coerce = revContentItems[aggr.CoercionItemClass]
-		case "WFDictionaryValueVariableAggrandizement":
-			index = aggr.DictionaryKey
-		case "WFPropertyVariableAggrandizement":
-			index = aggr.PropertyName
+			if coerced {
+				decompError("Expected at most one coercion on a reference", currentDecompAction())
+			}
+			var coerce, found = revContentItems[aggrandizement.CoercionItemClass]
+			if !found {
+				decompError(fmt.Sprintf("Expected a coercion to a known content item class, got '%s'", aggrandizement.CoercionItemClass), currentDecompAction())
+			}
+			*reference = fmt.Sprintf("%s.%s", *reference, coerce)
+			coerced = true
+		default:
+			decompError(fmt.Sprintf("Expected a coercion, dictionary key or property aggrandizement, got '%s'", aggrandizement.Type), currentDecompAction())
 		}
-	}
-
-	if index != "" {
-		*reference = fmt.Sprintf("%s['%s']", *reference, index)
-	}
-	if coerce != "" {
-		*reference = fmt.Sprintf("%s.%s", *reference, coerce)
 	}
 }
 
-// popLine adds line to the top of the generated Cherri code.
-func popLine(line string) {
-	var saveCode = code.String()
-	code.Reset()
-	code.WriteString(fmt.Sprintf("%s\n%s", line, saveCode))
+// readCoercionFirst orders the aggrandizements the Shortcuts app writes, which coerces a value before it reads
+// a key or property from it, as Cherri writes them. The coercion to a dictionary before a dictionary key is
+// implied by the key read, so it is dropped. The coercion to a content item before a property is not implied,
+// and Cherri has no syntax to coerce before a property read, so it is written after the read and warned about.
+func readCoercionFirst(aggrandizements []Aggrandizement) []Aggrandizement {
+	if len(aggrandizements) != 2 || aggrandizements[0].Type != "WFCoercionVariableAggrandizement" {
+		return aggrandizements
+	}
+
+	var coercion, read = aggrandizements[0], aggrandizements[1]
+	switch read.Type {
+	case "WFDictionaryValueVariableAggrandizement":
+		if coercion.CoercionItemClass == contentItems["dictionary"] {
+			return []Aggrandizement{read}
+		}
+	case "WFPropertyVariableAggrandizement":
+	default:
+		return aggrandizements
+	}
+
+	decompWarning(fmt.Sprintf("The property '%s' is read after it is coerced to %s, but Cherri can only coerce after a read, which may change what is read.", read.PropertyName+read.DictionaryKey, coercion.CoercionItemClass))
+
+	return []Aggrandizement{read, coercion}
 }
 
 var macDefinition bool
@@ -1264,17 +2370,22 @@ func writeActionOutput(action *ShortcutAction) {
 		makeConstantLiteral(action)
 	} else if isConstant {
 		checkConstantLiteral(action)
-	} else if !isVariableValue {
-		code.WriteString(tabbedLine(currentVariableValue))
-		code.WriteRune('\n')
-		currentVariableValue = ""
+	} else if isVariableValue {
+		currentVariableUUID = paramString(action, UUID)
+	} else {
+		writeStatementLine(currentVariableValue)
 	}
 }
 
 func makeActionCallCode(action *ShortcutAction) string {
+	readParameters = make(map[string]bool)
 	var actionCallCode strings.Builder
 	var matchedIdentifier, matchedAction = matchAction(action)
 	if matchedIdentifier == "" {
+		if !strings.Contains(action.WFWorkflowActionIdentifier, ".") {
+			decompError(fmt.Sprintf("Expected the action identifier '%s' to be a dot separated identifier such as 'is.workflow.actions.name'", action.WFWorkflowActionIdentifier), action)
+		}
+
 		checkMissingStandardInclude(&action.WFWorkflowActionIdentifier, false)
 
 		matchedIdentifier, matchedAction = matchAction(action)
@@ -1283,27 +2394,61 @@ func makeActionCallCode(action *ShortcutAction) string {
 			return actionCallCode.String()
 		}
 	}
+	includeStandardAction(matchedIdentifier)
 
 	if (matchedAction.macOnly || matchedAction.nonMacOnly) && !setMacDefinition {
 		macDefinition = matchedAction.macOnly && !matchedAction.nonMacOnly
-		popLine(fmt.Sprintf("#define mac %v", macDefinition))
+		addDefinition("#define mac %v", macDefinition)
 		setMacDefinition = true
 	}
 
 	actionCallCode.WriteString(fmt.Sprintf("%s(", matchedIdentifier))
 
-	if matchedAction.makeParams != nil || matchedAction.decomp != nil {
-		decompActionCustom(&actionCallCode, &matchedAction, action)
+	if matchedAction.makeParams != nil || matchedAction.decomp != nil || matchedAction.decompRecover != nil {
+		decompActionCustom(&actionCallCode, matchedIdentifier, &matchedAction, action)
 	} else {
-		var matchedParamsSize = len(matchedAction.parameters)
-		if matchedParamsSize > 0 {
-			decompActionArguments(&actionCallCode, &matchedAction, action)
-		}
+		actionCallCode.WriteString(strings.Join(decompParameters(matchedIdentifier, matchedAction.parameters, action, nil), ", "))
 	}
 
 	actionCallCode.WriteString(")")
+	warnDroppedParameters(matchedIdentifier, &matchedAction, action)
 
 	return actionCallCode.String()
+}
+
+// readParameters are the parameters of the action being written that were read to write it.
+var readParameters = make(map[string]bool)
+
+// bookkeepingParameters are written by the compiler for every action that needs them, never from an argument.
+var bookkeepingParameters = []string{UUID, "CustomOutputName", "GroupingIdentifier", "WFControlFlowMode"}
+
+// warnDroppedParameters warns about the parameters of an action that no argument was written from, as the
+// action is still matched by its identifier but those values are lost when it is compiled again.
+func warnDroppedParameters(name string, definition *actionDefinition, action *ShortcutAction) {
+	var dropped []string
+	for key := range action.WFWorkflowActionParameters {
+		if readParameters[key] || slices.Contains(bookkeepingParameters, key) || slices.Contains(definition.derivedKeys, key) {
+			continue
+		}
+		if key == "AppIntentDescriptor" && definition.appIntent != emptyAppIntent {
+			continue
+		}
+		if _, isStatic := definition.appendParams[key]; isStatic {
+			continue
+		}
+		var isParameter = slices.ContainsFunc(definition.parameters, func(param parameterDefinition) bool {
+			return param.key == key
+		})
+		if !isParameter {
+			dropped = append(dropped, key)
+		}
+	}
+	if len(dropped) == 0 {
+		return
+	}
+
+	slices.Sort(dropped)
+	decompWarning(fmt.Sprintf("The parameters %s of %s() have no argument to be written as and are left out.", strings.Join(dropped, ", "), name))
 }
 
 // checkOutputType determines if action output is a constant or a variable.
@@ -1312,13 +2457,14 @@ func checkOutputType(action *ShortcutAction) (isConstant bool, isVariableValue b
 	if action.WFWorkflowActionParameters[UUID] == nil {
 		return
 	}
-	var uuid = action.WFWorkflowActionParameters[UUID].(string)
-	if _, found := uuids[uuid]; !found {
+	var uuid = paramString(action, UUID)
+	isVariableValue = slices.Contains(varUUIDs, uuid)
+	// The Shortcuts app names no output that only a Set Variable reads, so there is no identifier for it.
+	if _, found := uuids[uuid]; !found && !isVariableValue {
 		return
 	}
 
-	isConstant = slices.Contains(constUUIDs, uuid) || !slices.Contains(varUUIDs, uuid)
-	isVariableValue = slices.Contains(varUUIDs, uuid)
+	isConstant = slices.Contains(constUUIDs, uuid) || !isVariableValue
 
 	return
 }
@@ -1335,67 +2481,177 @@ func skipDecompAction(action *ShortcutAction) bool {
 		return true
 	}
 
-	if identifier == "nothing" && actionIndex+1 < len(shortcut.WFWorkflowActions) {
-		var nextAction = peekActions(1)
-		var controlflowActionIdentifiers = []string{"conditional", "repeat.each", "repeat.count", "choosefrommenu"}
-		var nextActionIdentifier = actionIdentifierEnd(nextAction.WFWorkflowActionIdentifier)
-		if slices.Contains(controlflowActionIdentifiers, nextActionIdentifier) {
-			var controlFlowMode = nextAction.WFWorkflowActionParameters["WFControlFlowMode"]
-			if controlFlowMode == endStatement || controlFlowMode == statementPart {
-				return true
-			}
+	return identifier == "nothing" && isCompilerNothing()
+}
+
+// isCompilerNothing reports whether the current Nothing action is one the compiler inserts, which is
+// written again when the code is compiled, so it must not be written. Each is a Nothing that:
+//   - follows the end of a block, which the compiler always adds so no output is passed on
+//   - comes before the end of a block, or before an item of a menu, that does not capture its output
+//   - comes before a Set Variable with no input, which a variable set to nil is compiled to
+func isCompilerNothing() bool {
+	if actionIndex > 0 {
+		var previous = peekActions(-1)
+		if isControlFlowAction(&previous) && controlFlowMode(&previous) == endStatement {
+			return true
 		}
+	}
+	if actionIndex+1 >= len(shortcut.WFWorkflowActions) {
+		return false
+	}
+
+	var next = peekActions(1)
+	if next.WFWorkflowActionIdentifier == SetVariableIdentifier {
+		return next.WFWorkflowActionParameters["WFInput"] == nil
+	}
+	if !isControlFlowAction(&next) {
+		return false
+	}
+
+	var _, capturesOutput = controlFlowOutputs[paramString(&next, "GroupingIdentifier")]
+	switch controlFlowMode(&next) {
+	case endStatement:
+		return !capturesOutput
+	case statementPart:
+		// The compiler adds no Nothing before an else.
+		return next.WFWorkflowActionIdentifier == "is.workflow.actions.choosefrommenu" && !capturesOutput
 	}
 
 	return false
+}
+
+func isControlFlowAction(action *ShortcutAction) bool {
+	return slices.Contains(controlFlowIdentifiers, action.WFWorkflowActionIdentifier)
+}
+
+func isLoopAction(action *ShortcutAction) bool {
+	return action.WFWorkflowActionIdentifier == repeatIdentifier || action.WFWorkflowActionIdentifier == repeatEachIdentifier
 }
 
 func actionIdentifierEnd(identifier string) string {
 	return strings.Replace(identifier, "is.workflow.actions.", "", 1)
 }
 
-func decompActionArguments(actionCallCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
-	for i, param := range matchedAction.parameters {
-		if param.key == "" {
+// decompParameters writes one argument per parameter, as arguments are matched to parameters by
+// position. An absent parameter that can be skipped is written as nil so later arguments keep their
+// position, and the skipped ones left at the end are trimmed. A decomp hook passes the values it
+// recovered in recovered, which are used in place of the plist, and a parameter without a plist key
+// can only be recovered by a hook.
+func decompParameters(name string, parameters []parameterDefinition, action *ShortcutAction, recovered map[string]string) []string {
+	var arguments []string
+	var written int
+	for _, param := range parameters {
+		var skippable = param.optional || param.defaultValue != nil
+		if identifier, isQuestion := takeQuestionBinding(param.key, param.validType); isQuestion {
+			arguments = append(arguments, identifier)
+			written = len(arguments)
+			continue
+		}
+		if argValue, isRecovered := recovered[param.name]; isRecovered {
+			arguments = append(arguments, argValue)
+			if argValue != "nil" || !skippable {
+				written = len(arguments)
+			}
 			continue
 		}
 
-		var argValue string
-		if identifier, found := takeQuestionBinding(param.key, param.validType); found {
-			argValue = identifier
-		} else if value, found := action.WFWorkflowActionParameters[param.key]; found {
-			argValue = decompValue(value)
-		} else if !param.optional {
-			argValue = makeDefaultValue(param)
-		}
-
-		switch param.validType {
-		case Integer:
-			if startsWith(Ask, argValue) {
-				break
-			}
-			argValue = strings.Trim(argValue, "\"")
-		}
-
-		if argValue != "" {
-			if i == 0 {
-				actionCallCode.WriteString(argValue)
-			} else {
-				actionCallCode.WriteString(fmt.Sprintf(", %s", argValue))
+		var value, found = action.WFWorkflowActionParameters[param.key]
+		switch {
+		case param.key == "" && recovered == nil:
+			decompError(fmt.Sprintf("Expected %s() to have a decomp hook, as its parameter '%s' has no plist key to read it from", name, param.name), action)
+		case param.key == "" && !skippable:
+			decompError(fmt.Sprintf("Expected the decomp hook of %s() to recover its required parameter '%s'", name, param.name), action)
+		case (param.key == "" || !found) && skippable:
+			arguments = append(arguments, "nil")
+			continue
+		case !found && param.literal:
+			arguments = append(arguments, makeDefaultValue(param))
+		case !found:
+			// The compiler writes nothing for a required argument given as nil.
+			arguments = append(arguments, "nil")
+		default:
+			arguments = append(arguments, decompArgument(param, value, action))
+			if end(arguments) == "nil" && skippable {
+				continue
 			}
 		}
+		written = len(arguments)
+	}
+
+	return arguments[:written]
+}
+
+// decompArgument writes the plist value of a parameter, which for a color or a quantity is written
+// as the color() or qty() Cherri reads it from.
+func decompArgument(param parameterDefinition, value any, action *ShortcutAction) string {
+	if isReferenceValue(value) {
+		return decompValue(value)
+	}
+
+	switch param.validType {
+	case Quantity:
+		var quantity = decompQuantity(value, param.key, action)
+		checkDecompEnum(param, value.(map[string]interface{})["Value"].(map[string]interface{})["Unit"], action)
+		return quantity
+	case Color:
+		return decompColor(value, param.key, action)
+	}
+
+	checkDecompEnum(param, value, action)
+
+	decompilingTextParameter = param.validType == String
+	var argValue = decompValue(value)
+	decompilingTextParameter = false
+	if param.validType == Integer && !startsWith(Ask, argValue) {
+		argValue = strings.Trim(argValue, "\"")
+	}
+
+	return argValue
+}
+
+// checkDecompEnum stops on a text value that is not in the enum of param, as Cherri would reject it.
+func checkDecompEnum(param parameterDefinition, value any, action *ShortcutAction) {
+	var text, isText = value.(string)
+	if param.enum == "" || !isText {
+		return
+	}
+
+	var enum = getEnum(param.enum)
+	if !slices.Contains(enum, text) {
+		decompError(fmt.Sprintf("Expected the value of '%s' to be one of: %s, got '%s'", param.name, strings.Join(enum, ", "), text), action)
 	}
 }
 
-func makeDefaultValue(param parameterDefinition) string {
-	if param.defaultValue != nil {
-		if stringValue, isString := param.defaultValue.(string); isString {
-			return fmt.Sprintf("\"%s\"", stringValue)
-		}
-
-		return fmt.Sprintf("%v", param.defaultValue)
+// decompColor writes a WFColorValue as color(). Shortcuts leaves a component out when it is 0.
+func decompColor(value any, key string, action *ShortcutAction) string {
+	var colorValue, isMap = value.(map[string]interface{})
+	if !isMap || colorValue["WFColorRepresentationType"] != "WFColorRepresentationTypeCGColor" {
+		decompError(fmt.Sprintf("Expected %s to be a CGColor color value", key), action)
 	}
 
+	var components []string
+	for _, component := range []string{"redComponent", "greenComponent", "blueComponent", "alphaComponent"} {
+		var number float64
+		switch componentValue := colorValue[component].(type) {
+		case nil:
+		case float64:
+			number = componentValue
+		case uint64:
+			number = float64(componentValue)
+		default:
+			decompError(fmt.Sprintf("Expected %s of %s to be a number, got %T", component, key, componentValue), action)
+		}
+		// Color components are float literals, which need a decimal point to be read as a float.
+		components = append(components, strconv.FormatFloat(number, 'f', -1, 64))
+		if !strings.Contains(end(components), ".") {
+			components[len(components)-1] += ".0"
+		}
+	}
+
+	return fmt.Sprintf("color(%s)", strings.Join(components, ", "))
+}
+
+func makeDefaultValue(param parameterDefinition) string {
 	switch param.validType {
 	case Integer:
 		return "0"
@@ -1437,148 +2693,183 @@ func makeRawAction(action *ShortcutAction) string {
 	return fmt.Sprintf("rawAction(%s)", arguments)
 }
 
+// processRawParameters returns the parameters to write for a raw action. It builds a new map as
+// the action's own parameters are still read after the raw action is written.
 func processRawParameters(params map[string]any) map[string]any {
+	var rawParams = make(map[string]any, len(params))
 	for key, value := range params {
 		if key == UUID || key == "CustomOutputName" {
-			delete(params, key)
-		}
-
-		if valueMap, isMap := value.(map[string]interface{}); isMap {
-			decompilingDictionary = true
-			params[key] = decompValueObject(valueMap)
-			decompilingDictionary = false
-		}
-	}
-
-	return params
-}
-
-func matchAction(action *ShortcutAction) (name string, definition actionDefinition) {
-	for call, def := range actions {
-		var identifier = strings.ToLower(call)
-		if def.identifier != "" {
-			identifier = def.identifier
-		}
-		var appIdentifier = "is.workflow.actions"
-		if def.appIdentifier != "" {
-			appIdentifier = def.appIdentifier
-		}
-		var actionIdentifier = fmt.Sprintf("%s.%s", appIdentifier, identifier)
-		if actionIdentifier != action.WFWorkflowActionIdentifier && def.overrideIdentifier != action.WFWorkflowActionIdentifier {
 			continue
 		}
 
-		definition = *def
-		name = call
-
-		if splitActions, found := identifierMap[identifier]; found {
-			matchSplitAction(&splitActions, action.WFWorkflowActionParameters, &name, &definition)
-			if name != "run" && name != "runSelf" {
-				return
-			}
-			var workflow = action.WFWorkflowActionParameters["WFWorkflow"].(map[string]interface{})
-			if _, isSelf := workflow["isSelf"]; !isSelf {
-				return
-			}
-			if workflow["isSelf"].(bool) || action.WFWorkflowActionParameters["WFWorkflowName"] == basename {
-				name = "runSelf"
-				definition = *actions["runSelf"]
-			} else {
-				name = "run"
-			}
+		if mapValue, isMap := value.(map[string]interface{}); isMap {
+			var leave = enterLiteral()
+			rawParams[key] = decompValueObject(mapValue)
+			leave()
+			continue
 		}
 
+		rawParams[key] = value
+	}
+
+	return rawParams
+}
+
+func matchAction(action *ShortcutAction) (name string, definition actionDefinition) {
+	var candidates = identifierMap[action.WFWorkflowActionIdentifier]
+	if len(candidates) == 0 {
 		return
 	}
+
+	name = candidates[0].identifier
+	definition = *candidates[0].definition
+	if len(candidates) == 1 {
+		return
+	}
+
+	matchSplitAction(&candidates, action, &name, &definition)
+	if name != "run" && name != "runSelf" {
+		return
+	}
+	// A shortcut run by name has no WFWorkflow, and a run of itself without input only has isSelf.
+	if _, hasWorkflow := action.WFWorkflowActionParameters["WFWorkflow"]; !hasWorkflow {
+		return
+	}
+	var workflow = paramMap(action, "WFWorkflow")
+	if _, hasSelf := workflow["isSelf"]; !hasSelf {
+		return
+	}
+	if expectType[bool](workflow["isSelf"], "isSelf of WFWorkflow", "a boolean", action) || action.WFWorkflowActionParameters["WFWorkflowName"] == basename {
+		name = "runSelf"
+		definition = *actions["runSelf"]
+	} else {
+		name = "run"
+	}
+
 	return
 }
 
 type actionMatch struct {
-	params uint
-	values uint
-	action actionValue
+	params  uint
+	values  uint
+	missing uint
+	action  actionValue
 }
 
-func matchSplitAction(splitActions *[]actionValue, parameters map[string]any, identifier *string, definition *actionDefinition) {
+// matchSplitAction picks which of the actions sharing an identifier wrote the parameters. Of the actions
+// that could have written them, the one that matches the most parameters, then the most values, then
+// misses the fewest of its fixed parameters is picked, and on a tie the default action is preferred.
+func matchSplitAction(splitActions *[]actionValue, action *ShortcutAction, identifier *string, definition *actionDefinition) {
+	var parameters = action.WFWorkflowActionParameters
 	if args.Using("debug") {
 		fmt.Println("## MATCHING SPLIT ACTIONS ##")
 		fmt.Println("parameters", parameters)
 	}
 
-	var defaultAction, hasDefaultAction = getDefaultAction(splitActions)
-	if hasDefaultAction {
-		*identifier = defaultAction.identifier
-		*definition = *defaultAction.definition
-		if args.Using("debug") {
-			fmt.Println("has default action", defaultAction.identifier)
+	var matches []actionMatch
+	var names []string
+	for _, splitAction := range *splitActions {
+		names = append(names, splitAction.identifier)
+		var missing, conflicts = splitActionConflicts(splitAction, parameters)
+		if conflicts {
+			continue
 		}
+
+		var matchedParams, matchedValues = scoreActionMatch(splitAction, splitAction.definition.parameters, parameters)
+		matches = append(matches, actionMatch{
+			params:  matchedParams,
+			values:  matchedValues,
+			missing: missing,
+			action:  splitAction,
+		})
 	}
-
-	var matches = getSplitActionMatches(splitActions, parameters)
-
 	if len(matches) == 0 {
-		return
+		decompError(fmt.Sprintf("Expected the parameters to fit one of the actions %s", strings.Join(names, ", ")), action)
 	}
 
-	sort.SliceStable(matches, func(i, j int) bool {
-		return matches[i].params > matches[j].params || matches[i].values > matches[j].values
+	slices.SortStableFunc(matches, func(a actionMatch, b actionMatch) int {
+		if a.params != b.params {
+			return cmp.Compare(b.params, a.params)
+		}
+		if a.values != b.values {
+			return cmp.Compare(b.values, a.values)
+		}
+		if a.missing != b.missing {
+			return cmp.Compare(a.missing, b.missing)
+		}
+		if a.action.definition.defaultAction != b.action.definition.defaultAction {
+			if a.action.definition.defaultAction {
+				return -1
+			}
+			return 1
+		}
+		return cmp.Compare(a.action.identifier, b.action.identifier)
 	})
 
 	if args.Using("debug") {
-		for _, match := range matches[0:] {
+		for _, match := range matches {
 			fmt.Printf("%s()\n", match.action.identifier)
-			fmt.Println("params:", match.params, " values:", match.values)
+			fmt.Println("params:", match.params, " values:", match.values, " missing:", match.missing)
 			fmt.Println("---")
 		}
 		fmt.Print("\n")
 	}
 
-	if !competingMatches(matches) {
-		if args.Using("debug") {
-			fmt.Println("matches are not competing! using default")
-		}
-		return
-	}
-
-	var matchedAction = matches[0]
-	*identifier = matchedAction.action.identifier
-	*definition = *matchedAction.action.definition
+	*identifier = matches[0].action.identifier
+	*definition = *matches[0].action.definition
 }
 
-func getSplitActionMatches(splitActions *[]actionValue, parameters map[string]any) (matches []actionMatch) {
-	for _, splitAction := range *splitActions {
-		var matchedParams, matchedValues = scoreActionMatch(splitAction, splitAction.definition.parameters, parameters)
-		if matchedParams == 0 {
+// splitActionConflicts reports whether splitAction cannot have written the parameters: a parameter it
+// always writes holds another value, or one of its variable parameters holds a plain dictionary, which
+// a variable is never written as. It also counts the parameters it always writes that are missing, as
+// Shortcuts leaves a parameter out when it holds its default.
+func splitActionConflicts(splitAction actionValue, parameters map[string]any) (missing uint, conflicts bool) {
+	for key, value := range splitAction.definition.appendParams {
+		var parameter, found = parameters[key]
+		if !found {
+			missing++
 			continue
 		}
-
-		matches = append(matches, actionMatch{
-			params: matchedParams,
-			values: matchedValues,
-			action: splitAction,
-		})
+		if !samePlistValue(value, parameter) {
+			return missing, true
+		}
 	}
-	return
+
+	for _, param := range splitAction.definition.parameters {
+		if param.key == "" || param.validType != Variable {
+			continue
+		}
+		var dictionary, isDictionary = parameters[param.key].(map[string]interface{})
+		if !isDictionary {
+			continue
+		}
+		if _, serialized := dictionary["WFSerializationType"]; !serialized {
+			return missing, true
+		}
+	}
+
+	return missing, false
 }
 
-// competingMatches determines if the matches for this identifier have more values than 1 matching this action.
-func competingMatches(matches []actionMatch) bool {
-	var hasCompetingValues bool
-	for _, match := range matches {
-		if match.values > 1 {
-			hasCompetingValues = true
-			break
-		}
-	}
-	if hasCompetingValues {
-		return true
-	}
-	for _, match := range matches {
-		if match.params > 1 {
-			return true
-		}
-	}
-	return false
+// samePlistValue compares a value written by Cherri with one read from a plist, which holds the same
+// data in other Go types, such as uint64 for an int, so both are compared as JSON.
+func samePlistValue(written any, read any) bool {
+	return canonicalJSON(written) == canonicalJSON(read)
+}
+
+// canonicalJSON writes value as JSON of what the plist holds, with the keys of every dictionary sorted. A value
+// written by Cherri is a struct, whose fields are named and omitted as the plist names and omits them.
+func canonicalJSON(value any) string {
+	var encoded, marshalErr = plist.Marshal(value, plist.XMLFormat)
+	handle(marshalErr)
+
+	var generic any
+	var _, unmarshalErr = plist.Unmarshal(encoded, &generic)
+	handle(unmarshalErr)
+	var canonical, canonicalErr = json.Marshal(generic)
+	handle(canonicalErr)
+
+	return string(canonical)
 }
 
 func scoreActionMatch(splitAction actionValue, splitActionParams []parameterDefinition, parameters map[string]any) (matchedParams uint, matchedValues uint) {
@@ -1619,12 +2910,8 @@ func scoreActionParams(splitActionParams *[]parameterDefinition, parameters map[
 			if len(param.enum) > 0 && slices.Contains(getEnum(param.enum), fmt.Sprintf("%s", value)) {
 				matchedValues++
 			}
-			if param.defaultValue != nil {
-				var defaultValue = fmt.Sprintf("%v", param.defaultValue)
-				var rawValue = strings.Trim(decompValue(value), "\"")
-				if defaultValue == rawValue && defaultValue != "" && rawValue != "" {
-					matchedValues++
-				}
+			if param.defaultValue != nil && samePlistValue(param.defaultValue, value) {
+				matchedValues++
 			}
 		}
 	}
@@ -1639,13 +2926,7 @@ func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameter
 		if value, found := parameters[param.key]; found {
 			matchedParams++
 
-			var defaultValueMap, defaultValueIsMap = param.defaultValue.(map[string]interface{})
-			var valueMap, valueIsMap = value.(map[string]interface{})
-			if defaultValueIsMap && valueIsMap {
-				if maps.Equal(defaultValueMap, valueMap) {
-					matchedValues++
-				}
-			} else if param.defaultValue == value {
+			if samePlistValue(param.defaultValue, value) {
 				matchedValues++
 			}
 		}
@@ -1653,8 +2934,17 @@ func scoreActionAddParams(splitActionAddParams *[]parameterDefinition, parameter
 	return
 }
 
-func decompActionCustom(actionCode *strings.Builder, matchedAction *actionDefinition, action *ShortcutAction) {
-	var arguments = matchedAction.decomp(action)
+func decompActionCustom(actionCode *strings.Builder, name string, matchedAction *actionDefinition, action *ShortcutAction) {
+	if matchedAction.decomp == nil && matchedAction.decompRecover == nil {
+		decompError(fmt.Sprintf("Expected %s() to have a decomp hook, as it builds its parameters with makeParams", name), action)
+	}
+
+	var arguments []string
+	if matchedAction.decompRecover != nil {
+		arguments = decompParameters(name, matchedAction.parameters, action, matchedAction.decompRecover(action))
+	} else {
+		arguments = matchedAction.decomp(action)
+	}
 	if len(arguments) == 0 {
 		return
 	}
@@ -1672,19 +2962,6 @@ func glueToChar(glue string) string {
 	default:
 		return glue
 	}
-}
-
-// getDefaultAction gets the default action from a slice of split actions.
-func getDefaultAction(splitActions *[]actionValue) (action actionValue, found bool) {
-	for _, splitAction := range *splitActions {
-		if splitAction.definition.defaultAction {
-			action = splitAction
-			found = true
-			return
-		}
-	}
-
-	return
 }
 
 func printDecompDebug() {
@@ -1718,13 +2995,95 @@ func decompError(message string, action *ShortcutAction) {
 	fmt.Println(ansi(fmt.Sprintf("Error: %s\n\n", message), red, bold))
 
 	fmt.Println("Action identifier:", action.WFWorkflowActionIdentifier)
-	lines = strings.Split(code.String(), "\n")
-	var linesLen = len(lines)
-	var lastWrittenLine = lines[linesLen-1]
-	var prevWrittenLine = lines[linesLen-2]
+	var writtenLines = strings.Split(code.String(), "\n")
+	var linesLen = len(writtenLines)
 	fmt.Printf("\nStopped while writing line %d:\n", linesLen)
-	fmt.Printf("%s %s\n", ansi(fmt.Sprintf("%d |", linesLen-1), dim), ansi(prevWrittenLine, dim))
-	fmt.Printf("%s %s\n", ansi(fmt.Sprintf("%d |", linesLen), dim), ansi(lastWrittenLine, red))
+	if linesLen >= 2 {
+		fmt.Printf("%s %s\n", ansi(fmt.Sprintf("%d |", linesLen-1), dim), ansi(writtenLines[linesLen-2], dim))
+	}
+	fmt.Printf("%s %s\n", ansi(fmt.Sprintf("%d |", linesLen), dim), ansi(writtenLines[linesLen-1], red))
 
 	os.Exit(1)
+}
+
+// currentDecompAction describes the action being decompiled for errors raised where the action is not at hand.
+func currentDecompAction() *ShortcutAction {
+	return &ShortcutAction{WFWorkflowActionIdentifier: currentAction.identifier}
+}
+
+// decompMapToStruct is mapToStruct for a value read from the Shortcut, which stops on a value that does not
+// have the shape of structure, naming what holds it, as mapToStruct panics on one.
+func decompMapToStruct(value any, structure any, key string, action *ShortcutAction) {
+	var expected = strings.ReplaceAll(strings.TrimPrefix(fmt.Sprintf("%T", structure), "*"), "main.", "")
+	var marshalErr, unmarshalErr = plistToStruct(value, structure)
+	if err := cmp.Or(marshalErr, unmarshalErr); err != nil {
+		decompError(fmt.Sprintf("Expected '%s' to be a %s, got %T: %s", key, expected, value, err), action)
+	}
+}
+
+// decompFieldValueItems reads the WFDictionaryFieldValueItems of a dictionary value.
+func decompFieldValueItems(value any, action *ShortcutAction) []WFDictionaryFieldValueItem {
+	var items []WFDictionaryFieldValueItem
+	decompMapToStruct(value, &items, "WFDictionaryFieldValueItems", action)
+
+	return items
+}
+
+// requiredParam returns the value of key, which the action must have.
+func requiredParam(action *ShortcutAction, key string) any {
+	readParameters[key] = true
+	var value, found = action.WFWorkflowActionParameters[key]
+	if !found {
+		decompError(fmt.Sprintf("Expected the parameter '%s' to be present", key), action)
+	}
+
+	return value
+}
+
+// optionalParam returns the value of key and whether the action has it, and counts it as read so it is not
+// warned about as left out.
+func optionalParam(action *ShortcutAction, key string) (value any, found bool) {
+	readParameters[key] = true
+	value, found = action.WFWorkflowActionParameters[key]
+
+	return
+}
+
+// readParam is optionalParam for a value that is nil when the action does not have it.
+func readParam(action *ShortcutAction, key string) any {
+	var value, _ = optionalParam(action, key)
+
+	return value
+}
+
+// expectType stops unless value is a T, as a value read from the Shortcut can have any shape. what and typeName
+// are written into the error as "Expected <what> to be <typeName>, got <actual type>".
+func expectType[T any](value any, what string, typeName string, action *ShortcutAction) T {
+	var typed, matches = value.(T)
+	if !matches {
+		decompError(fmt.Sprintf("Expected %s to be %s, got %T", what, typeName, value), action)
+	}
+
+	return typed
+}
+
+// requiredParamAs returns the value of key, which the action must have as a T.
+func requiredParamAs[T any](action *ShortcutAction, key string, typeName string) T {
+	return expectType[T](requiredParam(action, key), "the parameter '"+key+"'", typeName, action)
+}
+
+func paramMap(action *ShortcutAction, key string) map[string]interface{} {
+	return requiredParamAs[map[string]interface{}](action, key, "a dictionary")
+}
+
+func paramString(action *ShortcutAction, key string) string {
+	return requiredParamAs[string](action, key, "a string")
+}
+
+func paramSlice(action *ShortcutAction, key string) []interface{} {
+	return requiredParamAs[[]interface{}](action, key, "an array")
+}
+
+func controlFlowMode(action *ShortcutAction) uint64 {
+	return requiredParamAs[uint64](action, "WFControlFlowMode", "an integer")
 }

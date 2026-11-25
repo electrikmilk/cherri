@@ -87,7 +87,9 @@ type actionDefinition struct {
 	makeParams         paramsFunc     // makeParams overrides automatic handling of arguments for custom logic based on the arguments collected.
 	appendParams       map[string]any // appendParams allows for adding additional parameters not based on the provided arguments without affecting automatic handling.
 	appendParamsFunc   paramsFunc     // appendParamsFunc allows for adding additional parameters based on the provided arguments without disabling automatic handling.
+	derivedKeys        []string       // derivedKeys are the parameters the compiler writes whatever the arguments are, or works out from them, so decompiling does not warn that they are left out.
 	decomp             func(action *ShortcutAction) (arguments []string)
+	decompRecover      func(action *ShortcutAction) map[string]string // decompRecover is decomp for an action whose arguments are written by parameter, as it only recovers the values by parameter name.
 	appIntent          appIntent
 	outputType         tokenType
 	defaultAction      bool // Default action for this identifier during decompilation.
@@ -186,19 +188,24 @@ func makeAction(arguments []actionArgument, reference *WFActionReference) {
 }
 
 // getFullActionIdentifier determines the full identifier of currentAction.definition.
-func getFullActionIdentifier() (ident string) {
-	if currentAction.definition.overrideIdentifier != "" {
-		return currentAction.definition.overrideIdentifier
+func getFullActionIdentifier() string {
+	return fullActionIdentifier(currentAction.identifier, &currentAction.definition)
+}
+
+// fullActionIdentifier determines the full identifier that the action called name writes.
+func fullActionIdentifier(name string, definition *actionDefinition) (ident string) {
+	if definition.overrideIdentifier != "" {
+		return definition.overrideIdentifier
 	}
 
 	ident = "is.workflow.actions"
-	if currentAction.definition.appIdentifier != "" {
-		ident = currentAction.definition.appIdentifier
+	if definition.appIdentifier != "" {
+		ident = definition.appIdentifier
 	}
-	if currentAction.definition.identifier != "" {
-		ident = fmt.Sprintf("%s.%s", ident, currentAction.definition.identifier)
+	if definition.identifier != "" {
+		ident = fmt.Sprintf("%s.%s", ident, definition.identifier)
 	} else {
-		ident = fmt.Sprintf("%s.%s", ident, strings.ToLower(currentAction.identifier))
+		ident = fmt.Sprintf("%s.%s", ident, strings.ToLower(name))
 	}
 	return
 }
@@ -548,6 +555,7 @@ func resolveQuestionArgs(arguments []actionArgument) {
 	}
 }
 
+// checkQuestionDefaultType ensures a dictionary question is only bound to a dictionary argument and vice versa.
 func checkQuestionDefaultType(param *parameterDefinition, argument *actionArgument) {
 	var question, found = questions[argument.value.(string)]
 	if !found {
@@ -1040,7 +1048,9 @@ func defineAction(name string, definition *actionDefinition, compilerDefinition 
 		definition.check = compilerDefinition.check
 		definition.makeParams = compilerDefinition.makeParams
 		definition.appendParamsFunc = compilerDefinition.appendParamsFunc
+		definition.derivedKeys = compilerDefinition.derivedKeys
 		definition.decomp = compilerDefinition.decomp
+		definition.decompRecover = compilerDefinition.decompRecover
 	}
 
 	definition.parsed = true

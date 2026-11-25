@@ -25,7 +25,9 @@ go run . file.cherri --debug      # also writes .plist and preprocessed file
 # Tests
 go test -run TestCherriNoSign     # compile all tests/*.cherri files, skip signing (use on non-macOS)
 go test -run '^TestCherri$'       # same but with signing (macOS only)
-go test -run TestDecomp           # decompile tests/decomp-me.plist, compare to tests/decomp-expected.cherri
+go test -run TestDecomp           # compile tests/decomp-expected.cherri, decompile it, and expect the same code
+go test -run TestDecompApp        # decompile tests/decomp-app.plist, compare to tests/decomp-app-expected.cherri
+go test -run TestDecompFixedPoint # decompile each compiled tests/*.cherri, compile that code, and expect the same code when decompiled (run TestCherriNoSign first)
 go test -run TestActionIdentifiers # verify specific action identifier output
 
 # Search actions and glyphs (requires build)
@@ -275,11 +277,11 @@ The header intercepts `ShortcutInput`, validates it as a Cherri function call, m
 
 ## Testing
 
-Each file in `tests/*.cherri` (except `decomp-expected.cherri` and `decomp-me.cherri`) is compiled by `TestCherri`/`TestCherriNoSign`. When adding or changing a language feature, add or update a test file in `tests/`. Group tests by domain (e.g. `web.cherri`, `shortcuts.cherri`) rather than one file per action. Test files do not need explicit `#include` statements — all standard library action categories are auto-injected during suite runs; includes are only needed when running a file individually with `go run .`.
+Each file in `tests/*.cherri` (except `decomp-expected.cherri`, `decomp-app-expected.cherri` and the generated `decomp-app.cherri`) is compiled by `TestCherri`/`TestCherriNoSign`. When adding or changing a language feature, add or update a test file in `tests/`. Group tests by domain (e.g. `web.cherri`, `shortcuts.cherri`) rather than one file per action. Test files do not need explicit `#include` statements — all standard library action categories are auto-injected during suite runs; includes are only needed when running a file individually with `go run .`.
 
 The test runner calls `compile()` which calls `main()`, so `os.Args[1]` is set to the test file path before each run. Global state is fully reset via `resetParser()` after each test.
 
-`TestDecomp` is a diff test: it decompiles `tests/decomp-me.plist` and expects byte-for-byte equality with `tests/decomp-expected.cherri`. When decompiler output changes intentionally, regenerate the expected file.
+`TestDecomp` is test driven: `tests/decomp-expected.cherri` is written as the code the decompiler should write, compiled, decompiled again, and must come back byte-for-byte the same. To cover a feature, write it in `tests/decomp-expected.cherri` the way the decompiler writes it. `TestDecompApp` covers what the Shortcuts app writes and the compiler does not (such as an output without a name) by decompiling `tests/decomp-app.plist` and expecting `tests/decomp-app-expected.cherri`. When decompiler output changes intentionally, regenerate the expected file.
 
 **Verification hierarchy:** On macOS, always run `go test -run '^TestCherri$'` as the final automated check — it is never sufficient to stop at `TestCherriNoSign`. `TestCherriNoSign` only confirms compilation does not panic; it does not validate plist structure. The signing step in `TestCherri` is the only automated confirmation that the generated plist is structurally accepted by the Shortcuts runtime. Use `TestCherriNoSign` only for rapid iteration or on non-macOS hosts. After `TestCherri` passes, the user performs the final verification: open the compiled `.shortcut` in QuickLook and import it into the Shortcuts app to confirm it runs correctly — this step cannot be automated.
 

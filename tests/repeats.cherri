@@ -102,4 +102,15 @@ if @outerIdxCapture != 3 {
     mustOutput("❌ FAIL: nested for/in outer RepeatIndex — got {@outerIdxCapture}, expected '3'", "❌ FAIL: nested for/in outer RepeatIndex — got {@outerIdxCapture}, expected '3'")
 }
 
+// nested repeat: outer RepeatIndex via string interpolation inside the inner body
+@outerIdxStr = ""
+repeat i4 for 2 {
+    repeat l for 3 {
+        @outerIdxStr = "{RepeatIndex}"
+    }
+}
+if @outerIdxStr != "2" {
+    mustOutput("❌ FAIL: nested repeat outer RepeatIndex interpolation - got {@outerIdxStr}, expected '2'", "❌ FAIL: nested repeat outer RepeatIndex interpolation - got {@outerIdxStr}, expected '2'")
+}
+
 show("✅ All tests passed")

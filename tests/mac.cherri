@@ -4,5 +4,6 @@
 getWindows("Title", "asc", 5)
 getWindows("Width", "desc", 3)
 getWindows("Random", "asc", 1)
+getWindows(nil, "asc", 2)
 
 show("✅ All tests passed")

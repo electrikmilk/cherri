@@ -22,7 +22,7 @@ enum deviceDetail {
 }
 
 // [Doc]: Get Device Detail: Get a detail about current device.
-action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail')
+action 'getdevicedetails' getDeviceDetail(deviceDetail detail: 'WFDeviceDetail'): variable
 
 // [Doc]: Get Current App: Get the current app.
 action default v26 getCurrentApp()
@@ -174,7 +174,9 @@ action internal 'splitscreen' splitApps(text firstAppID, text secondAppID, appSp
 
 // [Doc]: [Apps] Kill App: Kill an app.
 // [Warning]: This will not ask to save changes!
-action internal 'quit.app' killApp(text appID)
+action internal 'quit.app' killApp(text appID) {
+    "WFAskToSaveChanges": false
+}
 
 // [Doc]: [Apps] Hide Apps: Hide multiple apps. Allows exception.
 action internal 'hide.app' hideAllApps(text ...?except) {

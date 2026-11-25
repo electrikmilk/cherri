@@ -10,6 +10,7 @@ setFocusMode()
 setFocusMode("Work")
 setFocusMode("Personal", "Time", "17:00")
 setFocusMode("Sleep", "Event Ends")
+setFocusMode(nil, "Time", "18:00")
 toggleFocusMode()
 toggleFocusMode("Driving")
 

@@ -137,6 +137,16 @@ const (
 	shortcutArchivePath                  = "Shortcut.wflow"
 )
 
+const (
+	lzvnBlockMagic        = "bvxn"
+	lzfseEndOfStreamMagic = "bvx$"
+	lzvnBlockHeaderSize   = 12
+	lzvnEndOfStreamOp     = 0x06
+	// lzvnMaxExpansion is the most bytes a payload byte can decode to, as the longest match, 271 bytes,
+	// takes 2 bytes.
+	lzvnMaxExpansion = 136
+)
+
 // archiveFieldLengths are the sizes of the Apple Archive field types a Shortcut archive is made of.
 var archiveFieldLengths = map[byte]int{'1': 1, '2': 2, '4': 4, '8': 8, 'T': 12}
 
@@ -174,6 +184,25 @@ func decompressSignedShortcut(signed []byte) ([]byte, error) {
 	var archive bytes.Buffer
 	for compressed.Len() > 0 {
 		var remainingBefore = compressed.Len()
+		var stream = signed[len(signed)-remainingBefore:]
+		// Apple compresses small inputs as a single LZVN block. lzfse v0.2.4 (the latest) stores LZVN literal
+		// and match lengths in a byte, so a length above 255 wraps, the decoder loses its place in the block and fails
+		// with "Bad magic". Those streams are decoded here instead.
+		if bytes.HasPrefix(stream, []byte(lzvnBlockMagic)) {
+			var block, consumed, lzvnErr = decodeLZVNStream(stream)
+			switch {
+			case lzvnErr == nil:
+				if _, seekErr := compressed.Seek(int64(consumed), io.SeekCurrent); seekErr != nil {
+					return nil, fmt.Errorf("failed to decompress signed Shortcut: %w", seekErr)
+				}
+				archive.Write(block)
+				continue
+			// A stream with more blocks after the LZVN block is left to the library, as before.
+			case !errors.Is(lzvnErr, errLZVNNotLastBlock):
+				return nil, fmt.Errorf("failed to decompress signed Shortcut: %w", lzvnErr)
+			}
+		}
+
 		var block, decompressErr = io.ReadAll(lzfse.NewReader(compressed))
 		if decompressErr != nil {
 			return nil, fmt.Errorf("failed to decompress signed Shortcut: %w", decompressErr)
@@ -185,6 +214,122 @@ func decompressSignedShortcut(signed []byte) ([]byte, error) {
 	}
 
 	return archive.Bytes(), nil
+}
+
+// errLZVNNotLastBlock is returned for a stream where the LZVN block is followed by another block.
+var errLZVNNotLastBlock = errors.New("LZVN block is not the last block of the LZFSE stream")
+
+// decodeLZVNStream decodes an LZFSE stream made of one LZVN block and the end of stream marker, which is how Apple's
+// encoder writes small inputs, and returns the decoded data and the number of stream bytes it used.
+func decodeLZVNStream(stream []byte) ([]byte, int, error) {
+	if len(stream) < lzvnBlockHeaderSize {
+		return nil, 0, errors.New("LZVN block header is truncated")
+	}
+
+	var rawSize = binary.LittleEndian.Uint32(stream[4:])
+	var payloadEnd = uint64(lzvnBlockHeaderSize) + uint64(binary.LittleEndian.Uint32(stream[8:]))
+	var streamEnd = payloadEnd + uint64(len(lzfseEndOfStreamMagic))
+	if streamEnd > uint64(len(stream)) {
+		return nil, 0, fmt.Errorf("LZVN block of %d bytes is truncated, %d bytes left", streamEnd, len(stream))
+	}
+	if string(stream[payloadEnd:streamEnd]) != lzfseEndOfStreamMagic {
+		return nil, 0, errLZVNNotLastBlock
+	}
+
+	var decoded, decodeErr = decodeLZVN(stream[lzvnBlockHeaderSize:payloadEnd], int(rawSize))
+	if decodeErr != nil {
+		return nil, 0, decodeErr
+	}
+
+	return decoded, int(streamEnd), nil
+}
+
+// decodeLZVN decodes an LZVN payload, following the opcode layout of Apple's reference lzvn_decode_base.c.
+func decodeLZVN(payload []byte, rawSize int) ([]byte, error) {
+	// The raw size comes from the block header, so it is not trusted to size the buffer: a header
+	// that claims 4 GiB over a tiny payload must fail the size check below, not allocate it.
+	var decoded = make([]byte, 0, min(rawSize, len(payload)*lzvnMaxExpansion))
+	var distance int
+	for pos := 0; ; {
+		if pos >= len(payload) {
+			return nil, errors.New("LZVN payload ended without an end of stream opcode")
+		}
+
+		var op = payload[pos]
+		var literalLength, matchLength, opSize int
+		switch {
+		case op == lzvnEndOfStreamOp:
+			if len(decoded) != rawSize {
+				return nil, fmt.Errorf("LZVN block decoded to %d bytes, expected %d", len(decoded), rawSize)
+			}
+			return decoded, nil
+		case op == 0x0e || op == 0x16:
+			pos++
+			continue
+		case op&0xf0 == 0x70 || op&0xf0 == 0xd0 || (op < 0x40 && op&7 == 6):
+			return nil, fmt.Errorf("invalid LZVN opcode 0x%02x at offset %d", op, pos)
+		case op == 0xe0:
+			opSize = 2
+		case op&0xf0 == 0xe0:
+			opSize = 1
+			literalLength = int(op & 0xf)
+		case op == 0xf0:
+			opSize = 2
+		case op&0xf0 == 0xf0:
+			opSize = 1
+			matchLength = int(op & 0xf)
+		case op&0xe0 == 0xa0, op&7 == 7:
+			opSize = 3
+		case op&7 == 6:
+			opSize = 1
+		default:
+			opSize = 2
+		}
+		if pos+opSize > len(payload) {
+			return nil, fmt.Errorf("LZVN opcode 0x%02x at offset %d is truncated", op, pos)
+		}
+
+		var operands = payload[pos+1 : pos+opSize]
+		switch {
+		case op == 0xe0:
+			literalLength = int(operands[0]) + 16
+		case op == 0xf0:
+			matchLength = int(operands[0]) + 16
+		case op >= 0xe0:
+		case op&0xe0 == 0xa0:
+			var packed = binary.LittleEndian.Uint16(operands)
+			literalLength = int(op>>3) & 3
+			matchLength = (int(op&7)<<2 | int(packed&3)) + 3
+			distance = int(packed >> 2)
+		default:
+			literalLength = int(op >> 6)
+			matchLength = int(op>>3&7) + 3
+			if op&7 == 7 {
+				distance = int(binary.LittleEndian.Uint16(operands))
+			} else if op&7 != 6 {
+				distance = int(op&7)<<8 | int(operands[0])
+			}
+		}
+		pos += opSize
+
+		if pos+literalLength > len(payload) {
+			return nil, fmt.Errorf("LZVN literal of %d bytes at offset %d is truncated", literalLength, pos)
+		}
+		decoded = append(decoded, payload[pos:pos+literalLength]...)
+		pos += literalLength
+
+		if matchLength == 0 {
+			continue
+		}
+		if distance == 0 || distance > len(decoded) {
+			return nil, fmt.Errorf("LZVN match distance %d at offset %d is outside the %d decoded bytes", distance, pos, len(decoded))
+		}
+		// Byte by byte because a match may overlap the bytes it is copying.
+		var matchStart = len(decoded) - distance
+		for i := 0; i < matchLength; i++ {
+			decoded = append(decoded, decoded[matchStart+i])
+		}
+	}
 }
 
 func findArchiveFile(archive []byte, path string) ([]byte, error) {

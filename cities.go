@@ -119,3 +119,63 @@ func worldClockCitiesValue(argument actionArgument) any {
 
 	return cities
 }
+
+// decompWorldClockCity recovers the city argument, which is a variable or the name of the city of the identifier
+// Shortcuts stores.
+func decompWorldClockCity(action *ShortcutAction) map[string]string {
+	var value, found = optionalParam(action, "city")
+	if !found {
+		return nil
+	}
+
+	return map[string]string{"city": decompCityValue(value, action)}
+}
+
+// decompWorldClockCities recovers the cities argument, which Shortcuts writes as a single city when there is only one.
+func decompWorldClockCities(action *ShortcutAction) map[string]string {
+	var value, found = optionalParam(action, "entities")
+	if !found {
+		return nil
+	}
+
+	if cities, isArray := value.([]interface{}); isArray {
+		var names []interface{}
+		for _, city := range cities {
+			names = append(names, decompCityName(city, action))
+		}
+
+		return map[string]string{"cities": decompLiteral(names)}
+	}
+	if isReferenceValue(value) {
+		return map[string]string{"cities": decompValue(value)}
+	}
+
+	return map[string]string{"cities": decompLiteral([]interface{}{decompCityName(value, action)})}
+}
+
+// decompCityValue writes a city as the name of its value in the worldClockCity enum, or a variable as it is.
+func decompCityValue(value any, action *ShortcutAction) string {
+	if isReferenceValue(value) {
+		return decompValue(value)
+	}
+
+	return decompValue(decompCityName(value, action))
+}
+
+// decompCityName finds the enum value of the city with the identifier Shortcuts stores.
+func decompCityName(value any, action *ShortcutAction) string {
+	var city, isMap = value.(map[string]interface{})
+	var identifier, hasIdentifier = city["identifier"].(string)
+	if !isMap || !hasIdentifier {
+		decompError(fmt.Sprintf("Expected a world clock city to be a dictionary with an identifier, got %T", value), action)
+	}
+
+	for name, known := range worldClockCities {
+		if known.identifier == identifier {
+			return name
+		}
+	}
+	decompError(fmt.Sprintf("Expected the world clock city identifier '%s' to be one that Cherri knows", identifier), action)
+
+	return ""
+}

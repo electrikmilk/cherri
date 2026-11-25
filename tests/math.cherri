@@ -25,6 +25,58 @@ if rooted != 3 {
     mustOutput("❌ FAIL: calculate √x — got {rooted}, expected '3'", "❌ FAIL: calculate √x — got {rooted}, expected '3'")
 }
 
+const cubed = calculate('х^3', 2)
+if cubed != 8 {
+    mustOutput("❌ FAIL: calculate x^3 - got {cubed}, expected '8'", "❌ FAIL: calculate x^3 - got {cubed}, expected '8'")
+}
+
+const power = calculate('x^у', 2, 3)
+if power != 8 {
+    mustOutput("❌ FAIL: calculate x^y - got {power}, expected '8'", "❌ FAIL: calculate x^y - got {power}, expected '8'")
+}
+
+const exponential = calculate('e^x', 0)
+if exponential != 1 {
+    mustOutput("❌ FAIL: calculate e^x - got {exponential}, expected '1'", "❌ FAIL: calculate e^x - got {exponential}, expected '1'")
+}
+
+// no assertion - Shortcuts may return an inexact float here
+const tenPower = calculate('10^x', 2)
+
+const naturalLog = calculate('In(x)', 1)
+if naturalLog != 0 {
+    mustOutput("❌ FAIL: calculate In(x) - got {naturalLog}, expected '0'", "❌ FAIL: calculate In(x) - got {naturalLog}, expected '0'")
+}
+
+// no assertion - Shortcuts may return an inexact float here
+const logarithm = calculate('log(x)', 100)
+
+// no assertion - Shortcuts may return an inexact float here
+const cubeRoot = calculate('∛x', 8)
+
+// no assertion - Shortcuts may return an inexact float here
+const factorial = calculate('x!', 5)
+
+const sine = calculate('sin(x)', 0)
+if sine != 0 {
+    mustOutput("❌ FAIL: calculate sin(x) - got {sine}, expected '0'", "❌ FAIL: calculate sin(x) - got {sine}, expected '0'")
+}
+
+const cosine = calculate('cos(X)', 0)
+if cosine != 1 {
+    mustOutput("❌ FAIL: calculate cos(X) - got {cosine}, expected '1'", "❌ FAIL: calculate cos(X) - got {cosine}, expected '1'")
+}
+
+const tangent = calculate('tan(x)', 0)
+if tangent != 0 {
+    mustOutput("❌ FAIL: calculate tan(x) - got {tangent}, expected '0'", "❌ FAIL: calculate tan(x) - got {tangent}, expected '0'")
+}
+
+const absolute = calculate('abs(x)', -5)
+if absolute != 5 {
+    mustOutput("❌ FAIL: calculate abs(x) - got {absolute}, expected '5'", "❌ FAIL: calculate abs(x) - got {absolute}, expected '5'")
+}
+
 // statistic: compile-only (no declared return type in action definition)
 @nums = list("2", "4", "6", "8", "10")
 statistic("Sum", @nums)
