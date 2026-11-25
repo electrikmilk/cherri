@@ -99,6 +99,9 @@ func writeShortcut(path string, debug string) {
 }
 
 func openShortcut() {
+	if !darwin {
+		exit("The open argument is only supported on macOS.")
+	}
 	var _, importErr = exec.Command("open", outputPath).Output()
 	handle(importErr)
 }

@@ -8,6 +8,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -25,7 +26,7 @@ var relativePath string
 var inputPath string
 var outputPath string
 
-var internalDirectoryPath = os.ExpandEnv("$HOME/.cherri")
+var internalDirectoryPath = filepath.Join(homeDirectory(), ".cherri")
 
 const unsignedEnd = "_unsigned.shortcut"
 const darwin = runtime.GOOS == "darwin"
@@ -238,7 +239,19 @@ func handleFile() {
 
 	var fileBytes, readErr = os.ReadFile(filePath)
 	handle(readErr)
-	contents = string(fileBytes)
+	contents = normalizeLineEndings(string(fileBytes))
+}
+
+// normalizeLineEndings converts CRLF to LF because the parser only recognizes LF as a line break.
+func normalizeLineEndings(text string) string {
+	return strings.ReplaceAll(text, "\r\n", "\n")
+}
+
+// homeDirectory is used instead of $HOME because Windows does not set it.
+func homeDirectory() string {
+	var home, homeErr = os.UserHomeDir()
+	handle(homeErr)
+	return home
 }
 
 // checkFile checks if the file exists and is a .cherri file.

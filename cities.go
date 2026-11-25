@@ -29,7 +29,7 @@ var worldClockCities = map[string]worldClockCity{}
 func init() {
 	var cities []worldClockCity
 	var nameCounts = map[string]int{}
-	for _, line := range strings.Split(strings.TrimSpace(worldClockCitiesData), "\n") {
+	for _, line := range strings.Split(strings.TrimSpace(normalizeLineEndings(worldClockCitiesData)), "\n") {
 		var identifier, name, found = strings.Cut(line, "\t")
 		if !found {
 			panic(fmt.Sprintf("Invalid world clock city line '%s'", line))

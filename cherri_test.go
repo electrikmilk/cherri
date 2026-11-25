@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -386,5 +387,29 @@ func TestNoAnsiMainFileErrorOmitsTheFile(t *testing.T) {
 		if strings.HasPrefix(line, "File:") {
 			t.Fatalf("unexpected File line %q in output:\n%s", line, output)
 		}
+	}
+}
+
+func TestCRLFSourceAndIncludeCompile(t *testing.T) {
+	var directory = t.TempDir()
+	for _, name := range []string{"includes.cherri", "include.cherri", "definitions.cherri"} {
+		var source, readErr = os.ReadFile(filepath.Join("tests", name))
+		if readErr != nil {
+			t.Fatal(readErr)
+		}
+		var crlfSource = strings.ReplaceAll(normalizeLineEndings(string(source)), "\n", "\r\n")
+		if writeErr := os.WriteFile(filepath.Join(directory, name), []byte(crlfSource), 0600); writeErr != nil {
+			t.Fatal(writeErr)
+		}
+	}
+
+	var output = compileInSubprocess(t, filepath.Join(directory, "includes.cherri"))
+
+	var compiled, globErr = filepath.Glob(filepath.Join(directory, "*"+unsignedEnd))
+	if globErr != nil {
+		t.Fatal(globErr)
+	}
+	if len(compiled) != 1 {
+		t.Fatalf("expected one compiled Shortcut, got output:\n%s", output)
 	}
 }

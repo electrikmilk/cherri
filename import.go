@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -106,8 +107,7 @@ func readShortcutFile() []byte {
 		exit("import: File does not exist!")
 	}
 
-	var segments = strings.Split(importPath, "/")
-	filename = segments[len(segments)-1]
+	filename = filepath.Base(importPath)
 
 	var nameSegments = strings.Split(filename, ".")
 	basename = nameSegments[0]
