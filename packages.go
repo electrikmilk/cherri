@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
@@ -198,7 +199,7 @@ func initPackage() {
 	fmt.Println(ansi("Initialized Cherri package", green))
 }
 
-var trustedPackagesPlistPath = os.ExpandEnv("$HOME/.cherri/trusted.plist")
+var trustedPackagesPlistPath = filepath.Join(internalDirectoryPath, "trusted.plist")
 
 type trustedPackages struct {
 	Packages []string
