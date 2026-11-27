@@ -29,6 +29,7 @@ const location = location(Ask)
 }
 @str = text(WhoIsIt)
 @var = "5 {@str}"
+@emoji = "📅{@str}"
 
 if @int == 0 {
 	alert("Title", "Message")
