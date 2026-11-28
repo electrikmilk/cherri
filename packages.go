@@ -315,6 +315,9 @@ func newPackage(name string) cherriPackage {
 	var uri = matches[0][2]
 	var user = matches[0][3]
 	var pkg = matches[0][4]
+	if !isSafePackagePathPart(user) || !isSafePackagePathPart(pkg) {
+		exit(fmt.Sprintf("Invalid package signature: %s\nA package user and name cannot be . or ..", name))
+	}
 
 	if uri == user {
 		uri = ""
