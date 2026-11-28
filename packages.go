@@ -95,11 +95,9 @@ func (pkg *cherriPackage) removeFromManifest() {
 }
 
 func (pkg *cherriPackage) loadDependencies(reinstall bool) {
-	if len(pkg.Packages) == 0 {
-		return
-	}
-	if pkg, found := loadPackage(fmt.Sprintf("%s/info.plist", pkg.path())); found {
-		installPackages(pkg.Packages, reinstall)
+	// The receiver is often only a name and user (as with --install), so read the dependencies from the installed package itself.
+	if installed, found := loadPackage(fmt.Sprintf("%s/info.plist", pkg.path())); found {
+		installPackages(installed.Packages, reinstall)
 	}
 }
 
