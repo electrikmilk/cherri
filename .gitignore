@@ -20,6 +20,7 @@
 !/tests/include-errors/*.cherri
 !/tests/include-tree/**/*.cherri
 !/tests/include-isolation/**/*.cherri
+!/tests/package-*/**/*.cherri
 /tests/decomp-me.cherri
 *_decompiled.plist
 *_processed.cherri
@@ -33,6 +34,7 @@
 # Output
 *.shortcut
 *.plist
+!/tests/package-*/**/info.plist
 *.xml
 
 # Packages

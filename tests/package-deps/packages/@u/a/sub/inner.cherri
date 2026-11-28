@@ -1,0 +1,4 @@
+function aHello(): text {
+    const r = bHello()
+    output("{r}")
+}

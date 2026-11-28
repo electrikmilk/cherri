@@ -1,0 +1,2 @@
+const name = paintText("Red")
+show("{name}")

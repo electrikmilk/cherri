@@ -652,3 +652,37 @@ func requireCompiledCleanly(t *testing.T, output string, exitCode int) {
 		t.Errorf("unexpected error in output:\n%s", output)
 	}
 }
+
+func TestPackageDependenciesAreIncludedTransitively(t *testing.T) {
+	var output, exitCode, _ = compilePackageFixture(t, "package-deps", false)
+
+	requireCompiledCleanly(t, output, exitCode)
+}
+
+func TestPackageDependenciesComeBeforeDependents(t *testing.T) {
+	var output, exitCode, processed = compilePackageFixture(t, "package-order", true)
+
+	requireCompiledCleanly(t, output, exitCode)
+
+	var unrelated = strings.Index(processed, "// marker:@w/c")
+	var dependency = strings.Index(processed, "// marker:@u/a")
+	var dependent = strings.Index(processed, "// marker:@v/b")
+	if unrelated == -1 || dependency == -1 || dependent == -1 {
+		t.Fatalf("expected all three package markers in the processed source:\n%s", processed)
+	}
+	if !(unrelated < dependency && dependency < dependent) {
+		t.Errorf("expected @w/c, then @u/a, then @v/b, got offsets %d, %d, %d", unrelated, dependency, dependent)
+	}
+}
+
+func TestPackageDependencyCycleCompiles(t *testing.T) {
+	var output, exitCode, processed = compilePackageFixture(t, "package-cycle", true)
+
+	requireCompiledCleanly(t, output, exitCode)
+
+	for _, marker := range []string{"// marker:@u/a", "// marker:@v/b"} {
+		if count := strings.Count(processed, marker); count != 1 {
+			t.Errorf("expected %q once in the processed source, found %d", marker, count)
+		}
+	}
+}

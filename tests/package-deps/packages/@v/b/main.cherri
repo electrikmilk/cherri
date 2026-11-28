@@ -1,0 +1,4 @@
+// marker:@v/b
+function bHello(): text {
+    output("hi")
+}
