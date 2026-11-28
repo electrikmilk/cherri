@@ -5,10 +5,13 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -347,13 +350,110 @@ func TestCompileSubprocess(t *testing.T) {
 	main()
 }
 
+// runSubprocess runs a single test of this binary in its own process, for code that exits the process or reads stdin.
+func runSubprocess(t *testing.T, subprocessTest string, directory string, stdin string, environment ...string) (output string, exitCode int) {
+	t.Helper()
+
+	var executable, executableErr = os.Executable()
+	if executableErr != nil {
+		t.Fatal(executableErr)
+	}
+
+	var homeSupplied bool
+	for _, variable := range environment {
+		if strings.HasPrefix(variable, "HOME=") {
+			homeSupplied = true
+		}
+	}
+	if !homeSupplied {
+		environment = append(environment, "HOME="+t.TempDir())
+	}
+
+	// yesNo loops forever when stdin reaches EOF, so a prompt that is not answered must not hang the suite.
+	var ctx, cancel = context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	var cmd = exec.CommandContext(ctx, executable, "-test.run=^"+subprocessTest+"$")
+	cmd.Dir = directory
+	cmd.Stdin = strings.NewReader(stdin)
+	cmd.Env = append(os.Environ(), environment...)
+	cmd.WaitDelay = 5 * time.Second
+
+	var combined, runErr = cmd.CombinedOutput()
+	if ctx.Err() != nil {
+		t.Logf("subprocess %s timed out", subprocessTest)
+		return string(combined), -1
+	}
+	if runErr != nil {
+		var exitErr *exec.ExitError
+		if !errors.As(runErr, &exitErr) {
+			t.Fatal(runErr)
+		}
+	}
+	return string(combined), cmd.ProcessState.ExitCode()
+}
+
 func compileInSubprocess(t *testing.T, file string) string {
 	t.Helper()
 
-	var cmd = exec.Command(os.Args[0], "-test.run=^TestCompileSubprocess$")
-	cmd.Env = append(os.Environ(), "CHERRI_SUBPROCESS_FILE="+file)
-	var output, _ = cmd.CombinedOutput()
-	return string(output)
+	var output, _ = runSubprocess(t, "TestCompileSubprocess", "", "", "CHERRI_SUBPROCESS_FILE="+file)
+	return output
+}
+
+// TestInstallSubprocess is the body for TestInstallDeclinedTrustInstallsNothing, since exit ends the process.
+func TestInstallSubprocess(t *testing.T) {
+	var signature = os.Getenv("CHERRI_SUBPROCESS_INSTALL")
+	if signature == "" {
+		t.Skip("only runs as a subprocess of runSubprocess")
+	}
+
+	args.Args["no-ansi"] = ""
+	args.Args["install"] = signature
+	addPackage()
+}
+
+func TestInstallDeclinedTrustInstallsNothing(t *testing.T) {
+	var projectDir = t.TempDir()
+	var home = t.TempDir()
+
+	var manifest = []byte(`<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+	<key>Name</key>
+	<string>project</string>
+	<key>User</key>
+	<string>me</string>
+	<key>Packages</key>
+	<array/>
+</dict>
+</plist>
+`)
+	var manifestPath = filepath.Join(projectDir, "info.plist")
+	if writeErr := os.WriteFile(manifestPath, manifest, 0644); writeErr != nil {
+		t.Fatal(writeErr)
+	}
+
+	var output, exitCode = runSubprocess(t, "TestInstallSubprocess", projectDir, "n\n", "CHERRI_SUBPROCESS_INSTALL=@u/a", "HOME="+home)
+
+	if exitCode != 1 {
+		t.Errorf("expected exit code 1, got %d", exitCode)
+	}
+	if !strings.Contains(output, "Package @u/a was not trusted and was not installed.") {
+		t.Errorf("missing not trusted message in output:\n%s", output)
+	}
+	if _, statErr := os.Stat(filepath.Join(projectDir, "packages")); !os.IsNotExist(statErr) {
+		t.Errorf("expected no packages directory, stat error: %v", statErr)
+	}
+	var after, readErr = os.ReadFile(manifestPath)
+	if readErr != nil {
+		t.Fatal(readErr)
+	}
+	if string(after) != string(manifest) {
+		t.Errorf("info.plist changed:\n%s", after)
+	}
+	if _, statErr := os.Stat(filepath.Join(home, ".cherri", "trusted.plist")); !os.IsNotExist(statErr) {
+		t.Errorf("expected no trusted.plist, stat error: %v", statErr)
+	}
 }
 
 func TestNoAnsiIncludeErrorNamesTheIncludedFile(t *testing.T) {

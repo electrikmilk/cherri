@@ -324,25 +324,30 @@ func addPackage() {
 
 	fmt.Println(ansi(fmt.Sprintf("Install package %s\n", newPkg.signature()), green))
 
-	checkTrustedPackages(&newPkg)
+	if !checkTrustedPackages(&newPkg) {
+		exit(fmt.Sprintf("Package %s was not trusted and was not installed.", newPkg.signature()))
+	}
 
 	currentPkg.Packages = append(currentPkg.Packages, newPkg)
 	installPackages(currentPkg.Packages, false)
 	writePackage()
 }
 
-func checkTrustedPackages(newPkg *cherriPackage) {
-	if !newPkg.trusted() {
-		var packagePrompt = fmt.Sprintf("Do you trust this package?\n\nThis will download this remote git repository and automatically include it in this project:\n%s", newPkg.url())
-		fmt.Println(ansi(packagePrompt, yellow))
-		if !yesNo() {
-			return
-		}
-		fmt.Print("\n")
-
-		trusted.Packages = append(trusted.Packages, newPkg.signature())
-		writeTrustedPackages()
+func checkTrustedPackages(newPkg *cherriPackage) bool {
+	if newPkg.trusted() {
+		return true
 	}
+
+	var packagePrompt = fmt.Sprintf("Do you trust this package?\n\nThis will clone this remote git repository and automatically include it in this project:\n%s", newPkg.url())
+	fmt.Println(ansi(packagePrompt, yellow))
+	if !yesNo() {
+		return false
+	}
+	fmt.Print("\n")
+
+	trusted.Packages = append(trusted.Packages, newPkg.signature())
+	writeTrustedPackages()
+	return true
 }
 
 func addedPackage(pkg *cherriPackage) (added bool) {
