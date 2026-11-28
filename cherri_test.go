@@ -345,6 +345,9 @@ func TestCompileSubprocess(t *testing.T) {
 
 	args.Args["no-ansi"] = ""
 	args.Args["skip-sign"] = ""
+	if os.Getenv("CHERRI_SUBPROCESS_DEBUG") != "" {
+		args.Args["debug"] = ""
+	}
 	os.Args[1] = file
 	loadStandardActions()
 	main()
@@ -381,7 +384,7 @@ func runSubprocess(t *testing.T, subprocessTest string, directory string, stdin 
 
 	var combined, runErr = cmd.CombinedOutput()
 	if ctx.Err() != nil {
-		t.Logf("subprocess %s timed out", subprocessTest)
+		t.Errorf("subprocess %s timed out", subprocessTest)
 		return string(combined), -1
 	}
 	if runErr != nil {
@@ -486,5 +489,136 @@ func TestNoAnsiMainFileErrorOmitsTheFile(t *testing.T) {
 		if strings.HasPrefix(line, "File:") {
 			t.Fatalf("unexpected File line %q in output:\n%s", line, output)
 		}
+	}
+}
+
+// requireErrorWithFile fails unless output has a line starting with errorPrefix directly followed by the File line for file.
+func requireErrorWithFile(t *testing.T, output string, errorPrefix string, file string) {
+	t.Helper()
+
+	var outputLines = strings.Split(output, "\n")
+	for i, line := range outputLines {
+		if !strings.HasPrefix(line, errorPrefix) {
+			continue
+		}
+		if i+1 < len(outputLines) && outputLines[i+1] == "File: "+file {
+			return
+		}
+		t.Fatalf("expected the File line for %s directly after the error line, got output:\n%s", file, output)
+	}
+	t.Fatalf("missing error line %q in output:\n%s", errorPrefix, output)
+}
+
+func requireNoFileLine(t *testing.T, output string) {
+	t.Helper()
+
+	for _, line := range strings.Split(output, "\n") {
+		if strings.HasPrefix(line, "File:") {
+			t.Fatalf("unexpected File line %q in output:\n%s", line, output)
+		}
+	}
+}
+
+func TestIncludeCycleIsReportedAsAlreadyIncluded(t *testing.T) {
+	var output = compileInSubprocess(t, "tests/include-errors/cycle/main.cherri")
+
+	requireErrorWithFile(t, output,
+		"Error: Path 'tests/include-errors/cycle/a.cherri' has already been included. (1:",
+		"tests/include-errors/cycle/b.cherri")
+}
+
+func TestIncludeMainFileCycleIsReportedAsAlreadyIncluded(t *testing.T) {
+	var output = compileInSubprocess(t, "tests/include-errors/main-cycle/main.cherri")
+
+	requireErrorWithFile(t, output,
+		"Error: Path 'tests/include-errors/main-cycle/main.cherri' has already been included. (1:",
+		"tests/include-errors/main-cycle/nested/a.cherri")
+}
+
+func TestIncludeDuplicateNamesTheIncludingFile(t *testing.T) {
+	var output = compileInSubprocess(t, "tests/include-errors/duplicate/main.cherri")
+
+	if !strings.Contains(output, "Error: Path 'tests/include-errors/duplicate/x.cherri' has already been included. (2:") {
+		t.Fatalf("missing duplicate error in output:\n%s", output)
+	}
+	if strings.Contains(output, "Include chain") {
+		t.Fatalf("unexpected include chain in output:\n%s", output)
+	}
+	requireNoFileLine(t, output)
+}
+
+func TestIncludeErrorInDeepFileNamesThatFile(t *testing.T) {
+	var output = compileInSubprocess(t, "tests/include-errors/deep/main.cherri")
+
+	requireErrorWithFile(t, output,
+		"Error: Use raw string (') for include file paths (2:",
+		"tests/include-errors/deep/mid/two/three.cherri")
+}
+
+func TestIncludeErrorInMainAfterNestedScanIsInMain(t *testing.T) {
+	var output = compileInSubprocess(t, "tests/include-errors/after-nested/main.cherri")
+
+	if !strings.Contains(output, "Error: Use raw string (') for include file paths (2:") {
+		t.Fatalf("missing error line in output:\n%s", output)
+	}
+	requireNoFileLine(t, output)
+}
+
+func TestIncludeMissingFileNamesTheInclude(t *testing.T) {
+	var output = compileInSubprocess(t, "tests/include-errors/missing/main.cherri")
+
+	requireErrorWithFile(t, output,
+		"Error: File 'tests/include-errors/missing/nested/nothere.cherri' does not exist! (2:",
+		"tests/include-errors/missing/nested/a.cherri")
+}
+
+func TestIncludeProjectDirectoryNamedActionsIsNotStdlib(t *testing.T) {
+	var output, exitCode, _ = compilePackageFixture(t, "include-errors/actions-dir", false)
+
+	requireCompiledCleanly(t, output, exitCode)
+}
+
+// compilePackageFixture compiles the project in tests/<fixture> with that directory as the working directory, and removes
+// the files the compile leaves behind.
+func compilePackageFixture(t *testing.T, fixture string, debug bool) (output string, exitCode int, processedSource string) {
+	t.Helper()
+
+	var fixtureDirectory, absErr = filepath.Abs(filepath.Join("tests", fixture))
+	if absErr != nil {
+		t.Fatal(absErr)
+	}
+
+	var processedPath = filepath.Join(fixtureDirectory, "main_processed.cherri")
+	t.Cleanup(func() {
+		_ = os.Remove(processedPath)
+		_ = os.Remove(filepath.Join(fixtureDirectory, "main.plist"))
+		_ = os.Remove(filepath.Join(fixtureDirectory, "main_unsigned.shortcut"))
+	})
+
+	var environment = []string{"CHERRI_SUBPROCESS_FILE=main.cherri"}
+	if debug {
+		environment = append(environment, "CHERRI_SUBPROCESS_DEBUG=1")
+	}
+	output, exitCode = runSubprocess(t, "TestCompileSubprocess", fixtureDirectory, "", environment...)
+	if !debug {
+		return
+	}
+
+	var processed, readErr = os.ReadFile(processedPath)
+	if readErr != nil {
+		t.Fatalf("expected the processed source to be written: %s\n%s", readErr, output)
+	}
+	return output, exitCode, string(processed)
+}
+
+func requireCompiledCleanly(t *testing.T, output string, exitCode int) {
+	t.Helper()
+
+	if exitCode != 0 {
+		t.Errorf("expected exit code 0, got %d\n%s", exitCode, output)
+	}
+	// The debug output lists enum names such as QRCodeErrorCorrection, so match the compiler's own error prefix.
+	if strings.Contains(output, "Error: ") {
+		t.Errorf("unexpected error in output:\n%s", output)
 	}
 }

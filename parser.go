@@ -74,7 +74,7 @@ func prependGeneratedLines(generated ...string) {
 }
 
 // errorPosition holds the state parserError reads to locate the cursor in the source.
-// lineOrigins is cloned because parseInclude splices it in place.
+// lineOrigins is cloned so the saved origins stay intact however an include probe rebuilds the combined source.
 type errorPosition struct {
 	contents    string
 	lineIdx     int

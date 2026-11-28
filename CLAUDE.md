@@ -195,7 +195,7 @@ Use `cherri --action=actionName` to look up a specific action's signature.
     ↓ handleFile()       — read file, split into lines/chars
     ↓ initParse()        — initialize global state
     ↓ preParse()         — sequential pre-processing passes:
-         handleIncludes()      — inline #include files, resetParse()
+         handleIncludes()      — expandIncludeLevel() inlines #include files one nesting level at a time, each resolved against the including file, resetParse()
          handleFunctions()     — collect function defs, inject header, resetParse()
          handleActionDefinitions() — collect user-defined action blocks
     ↓ parse()            — main pass: walk chars, emit tokens[]
@@ -443,10 +443,10 @@ Non-obvious behaviors that affect pre-parse collectors and action DSL parsing.
 
 **`skipWhitespace()` skips newlines and can cross file boundaries.** During `parseActionDefinitions()`, previously erased lines appear as empty strings in `lines[]`, which join to form `\n\n...` in the combined source. `skipWhitespace()` advances through all of these, potentially landing in the next action category file. `replaceLines()` then erases lines up to the current `lineIdx`, which can silently destroy content the main `parse()` loop needs. Use `skipInlineWhitespace()` (spaces and tabs only) whenever optional parts must appear on the same source line as the parent construct.
 
-**Pre-parse loops (`parseActionDefinitions`, `parseFunctions`, `parseIncludes`, `parseCopyPastes`) have no default error handler.** Unrecognized characters are silently skipped. A bug that causes a silent no-op in these loops will surface as an "Illegal character" crash in the main `parse()` loop, which does have a default error case.
+**Pre-parse loops (`parseActionDefinitions`, `parseFunctions`, `expandIncludeLevel`, `parseCopyPastes`) have no default error handler.** Unrecognized characters are silently skipped. A bug that causes a silent no-op in these loops will surface as an "Illegal character" crash in the main `parse()` loop, which does have a default error case.
 
 **`replaceLines()` erases from `lineRef.start` to `lineIdx` at the moment of the call.** If any cursor advance in a collector moves `lineIdx` past the end of the construct being collected (e.g. via `skipWhitespace()` crossing into the next file), those extra lines are silently erased. This is the root class of cross-file erasure bugs — guard against it by using `skipInlineWhitespace()` instead of `skipWhitespace()` when searching for optional same-line parts.
 
-**`lineOrigins` must stay parallel to `lines`.** Error positions come from `lineOrigins[lineIdx]` (file and line the line was read from), not from the line numbers of the combined source. Anything that adds lines must also add their origins: use `prependGeneratedLines()` for compiler-generated text, and splice both slices together as `parseInclude()` does. A multi-line element placed in `lines` (as copy/paste does) is split by `resetParse()`, and each of its lines takes the element's origin. Having fewer origins than lines panics in `resetParse()`. Lines inside a generated functions header have no source origin, so errors there report the combined-source line.
+**`lineOrigins` must stay parallel to `lines`.** Error positions come from `lineOrigins[lineIdx]` (file and line the line was read from), not from the line numbers of the combined source. Anything that adds lines must also add their origins: use `prependGeneratedLines()` for compiler-generated text, and build both slices together as `expandIncludeLevel()` does. A multi-line element placed in `lines` (as copy/paste does) is split by `resetParse()`, and each of its lines takes the element's origin. Having fewer origins than lines panics in `resetParse()`. Lines inside a generated functions header have no source origin, so errors there report the combined-source line.
 
 **DSL toggle-set syntax:** `action toggleSet [modifiers] ['shortIdentifier'] name ['setKey'] [(params)] [{body}]` — all optional parts must be on the same line as the name.
