@@ -975,7 +975,9 @@ func collectMultilineComment(comment *strings.Builder) {
 		comment.WriteRune(char)
 		advance()
 	}
-	advanceTimes(3)
+
+	// Stop on the character after the closing `*/`. The pre-parse loops advance once more after a collector, so going any further skips the first character of what follows.
+	advanceTimes(2)
 }
 
 func collectVariable(constant bool) {

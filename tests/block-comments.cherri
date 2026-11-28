@@ -1,0 +1,29 @@
+/* A block comment directly before each of these must not swallow their first character. */
+function blockCommentFunction(text input): text {
+    output("{@input}")
+}
+
+/* before an enumeration */
+enum BlockCommentEnum { 'First', 'Second' }
+
+/* before a copy */
+copy blockCommentCopy {
+    @copied = "copied"
+}
+paste blockCommentCopy
+
+/* before a variable */@glued = "glued"
+
+const called = blockCommentFunction("called")
+@calledText = "{called}"
+if @calledText != "called" {
+    alert("❌ FAIL: function after block comment - got {@calledText}, expected 'called'")
+}
+if @copied != "copied" {
+    alert("❌ FAIL: copy after block comment - got {@copied}, expected 'copied'")
+}
+if @glued != "glued" {
+    alert("❌ FAIL: variable after block comment - got {@glued}, expected 'glued'")
+}
+
+show("✅ All tests passed")

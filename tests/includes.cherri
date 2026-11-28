@@ -1,4 +1,6 @@
 #include 'include.cherri'
+/* A block comment directly before an include must not swallow the #
+   that starts it. */
 #include 'include-tree/outer.cherri'
 
 if @textVar != "test" {
