@@ -125,11 +125,17 @@ func expandInclude() ([]string, []lineOrigin) {
 
 	var includer = lineOrigins[lineIdx]
 	var includerDirectory = includer.directory()
+	var packageDirectory, packageSignature, includerInPackage = packageDirectoryOf(includerDirectory)
 
-	var standardLibraryInclude = isStandardLibraryInclude(includePath)
+	// A package has no standard library of its own, so inside one an actions path is an ordinary path.
+	var standardLibraryInclude = !includerInPackage && isStandardLibraryInclude(includePath)
 	var resolvedPath = includePath
 	if !standardLibraryInclude {
 		resolvedPath = resolveIncludePath(includePath, includerDirectory)
+	}
+
+	if includerInPackage && !isInsideDirectory(resolvedPath, packageDirectory) {
+		parserError(fmt.Sprintf("Include '%s' resolves to '%s', outside package '%s'. Packages are isolated and cannot include files outside their own directory.", includePath, resolvedPath, packageSignature))
 	}
 
 	if alreadyIncluded(resolvedPath) {
@@ -156,6 +162,37 @@ func alreadyIncluded(resolvedPath string) bool {
 	}
 
 	return slices.Contains(included, resolvedPath)
+}
+
+// packageDirectoryOf finds the installed package that contains directory.
+func packageDirectoryOf(directory string) (packageDirectory string, packageSignature string, inPackage bool) {
+	var packagesDirectory = filepath.Join(relativePath, "packages")
+	var pathInPackages, relErr = filepath.Rel(packagesDirectory, filepath.Clean(directory))
+	if relErr != nil {
+		return
+	}
+
+	// A directory in a package starts with the user and the package name.
+	var pathParts = strings.Split(pathInPackages, string(filepath.Separator))
+	if len(pathParts) < 2 || !strings.HasPrefix(pathParts[0], "@") {
+		return
+	}
+
+	packageSignature = pathParts[0] + "/" + pathParts[1]
+	packageDirectory = filepath.Join(packagesDirectory, pathParts[0], pathParts[1])
+	inPackage = true
+
+	return
+}
+
+// isInsideDirectory compares by path elements so a sibling that shares a name prefix is outside.
+func isInsideDirectory(path string, directory string) bool {
+	var pathInDirectory, relErr = filepath.Rel(directory, path)
+	if relErr != nil {
+		return false
+	}
+
+	return pathInDirectory != ".." && !strings.HasPrefix(pathInDirectory, ".."+string(filepath.Separator))
 }
 
 func isStandardLibraryInclude(includePath string) bool {

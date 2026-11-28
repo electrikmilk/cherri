@@ -19,6 +19,7 @@
 !/tests/include-errors/**/*.cherri
 !/tests/include-errors/*.cherri
 !/tests/include-tree/**/*.cherri
+!/tests/include-isolation/**/*.cherri
 /tests/decomp-me.cherri
 *_decompiled.plist
 *_processed.cherri

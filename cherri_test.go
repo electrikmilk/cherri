@@ -578,6 +578,36 @@ func TestIncludeProjectDirectoryNamedActionsIsNotStdlib(t *testing.T) {
 	requireCompiledCleanly(t, output, exitCode)
 }
 
+func TestPackageIncludeOutsidePackageIsError(t *testing.T) {
+	var output = compileInSubprocess(t, "tests/include-isolation/escape/main.cherri")
+
+	requireErrorWithFile(t, output,
+		"Error: Include '../../escape.cherri' resolves to 'tests/include-isolation/escape/packages/escape.cherri', outside package '@u/a'. Packages are isolated and cannot include files outside their own directory. (1:",
+		"tests/include-isolation/escape/packages/@u/a/main.cherri")
+}
+
+func TestPackageIncludeIntoSiblingPackageNamePrefixIsError(t *testing.T) {
+	var output = compileInSubprocess(t, "tests/include-isolation/sibling/main.cherri")
+
+	requireErrorWithFile(t, output,
+		"Error: Include '../ab/x.cherri' resolves to 'tests/include-isolation/sibling/packages/@u/ab/x.cherri', outside package '@u/a'. Packages are isolated and cannot include files outside their own directory. (1:",
+		"tests/include-isolation/sibling/packages/@u/a/main.cherri")
+}
+
+func TestPackageIncludeInsidePackageCompiles(t *testing.T) {
+	var output, exitCode, _ = compilePackageFixture(t, "include-isolation/inside", false)
+
+	requireCompiledCleanly(t, output, exitCode)
+}
+
+func TestPackageIncludeOfStdlibCategoryIsNotStdlib(t *testing.T) {
+	var output = compileInSubprocess(t, "tests/include-isolation/stdlib/main.cherri")
+
+	requireErrorWithFile(t, output,
+		"Error: File 'tests/include-isolation/stdlib/packages/@u/a/actions/network' does not exist! (1:",
+		"tests/include-isolation/stdlib/packages/@u/a/main.cherri")
+}
+
 // compilePackageFixture compiles the project in tests/<fixture> with that directory as the working directory, and removes
 // the files the compile leaves behind.
 func compilePackageFixture(t *testing.T, fixture string, debug bool) (output string, exitCode int, processedSource string) {
