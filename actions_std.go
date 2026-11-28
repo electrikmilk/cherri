@@ -978,6 +978,7 @@ var includedStandardActions bool
 var includedBasicStandardActions bool
 
 func loadStandardActions() {
+	buildWorldClockCities()
 	includeStandardActions()
 	includeBasicStandardActions()
 	handleIncludes()

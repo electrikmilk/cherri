@@ -119,6 +119,7 @@ func initParse() {
 		fmt.Printf("Parsing %s...\n", filename)
 	}
 	nameContentTypeLists()
+	buildWorldClockCities()
 	variables = make(map[string]varValue)
 	questions = make(map[string]*question)
 	controlFlowGroups = make(map[int]controlFlowGroup)

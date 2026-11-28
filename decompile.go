@@ -45,6 +45,7 @@ func decompile(b []byte) {
 		filePath = outputPath
 	}
 
+	buildWorldClockCities()
 	loadBasicStandardActions()
 	resetParse()
 	firstChar()

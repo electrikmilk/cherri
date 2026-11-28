@@ -26,26 +26,28 @@ type worldClockCity struct {
 // worldClockCities maps a value of the worldClockCity enum to its city.
 var worldClockCities = map[string]worldClockCity{}
 
-func init() {
-	var cities []worldClockCity
-	var nameCounts = map[string]int{}
-	for _, line := range strings.Split(strings.TrimSpace(worldClockCitiesData), "\n") {
-		var identifier, name, found = strings.Cut(line, "\t")
-		if !found {
-			panic(fmt.Sprintf("Invalid world clock city line '%s'", line))
-		}
-		cities = append(cities, worldClockCity{identifier: identifier, name: name})
-		nameCounts[name]++
+// buildWorldClockCities registers the worldClockCity enum, which must exist before the actions that use it are defined.
+func buildWorldClockCities() {
+	if len(worldClockCities) > 0 {
+		return
 	}
 
 	var values []string
-	for _, city := range cities {
-		var value = city.name
-		// Cities that share a name are told apart by their identifier, but Shortcuts shows only the name.
-		if nameCounts[city.name] > 1 {
-			value = fmt.Sprintf("%s (%s)", city.name, city.identifier)
+	for _, line := range strings.Split(strings.TrimSpace(worldClockCitiesData), "\n") {
+		var identifier, rest, found = strings.Cut(line, "\t")
+		if !found {
+			panic(fmt.Sprintf("Invalid world clock city line '%s'", line))
 		}
-		worldClockCities[value] = city
+		var name, region, _ = strings.Cut(rest, "\t")
+
+		var value = name
+		if region != "" {
+			value = fmt.Sprintf("%s, %s", name, region)
+		}
+		if _, duplicate := worldClockCities[value]; duplicate {
+			panic(fmt.Sprintf("Duplicate world clock city '%s' (%s)", value, identifier))
+		}
+		worldClockCities[value] = worldClockCity{identifier: identifier, name: name}
 		values = append(values, value)
 	}
 	enumerations[worldClockCityEnum] = values
