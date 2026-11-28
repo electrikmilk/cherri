@@ -32,6 +32,9 @@ jobs:
     - name: Package Manager Test
       run: go test -run TestPackages -v ./...
 
+    - name: Include and Package Subprocess Tests
+      run: go test -run '^(TestNoAnsi.*|TestInclude.*|TestPackageInclude.*|TestPackageDependenc.*|TestInstallDeclined.*)$' -v ./...
+
   build-test-macos:
     runs-on: macos-latest
     steps:
@@ -53,6 +56,9 @@ jobs:
 
     - name: Package Manager Test
       run: go test -run TestPackages -v ./...
+
+    - name: Include and Package Subprocess Tests
+      run: go test -run '^(TestNoAnsi.*|TestInclude.*|TestPackageInclude.*|TestPackageDependenc.*|TestInstallDeclined.*)$' -v ./...
 
   build-test-nix:
     runs-on: ubuntu-latest
