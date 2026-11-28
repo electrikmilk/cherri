@@ -1,0 +1,2 @@
+// marker:@v/b
+action 'gettext' paintText(Color color: 'WFTextActionText'): text

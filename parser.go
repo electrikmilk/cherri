@@ -74,7 +74,7 @@ func prependGeneratedLines(generated ...string) {
 }
 
 // errorPosition holds the state parserError reads to locate the cursor in the source.
-// lineOrigins is cloned because parseInclude splices it in place.
+// lineOrigins is cloned so the saved origins stay intact however an include probe rebuilds the combined source.
 type errorPosition struct {
 	contents    string
 	lineIdx     int
@@ -975,7 +975,9 @@ func collectMultilineComment(comment *strings.Builder) {
 		comment.WriteRune(char)
 		advance()
 	}
-	advanceTimes(3)
+
+	// Stop on the character after the closing `*/`. The pre-parse loops advance once more after a collector, so going any further skips the first character of what follows.
+	advanceTimes(2)
 }
 
 func collectVariable(constant bool) {
@@ -2205,6 +2207,8 @@ func getChar(atIndex int) rune {
 }
 
 func firstChar() {
+	// advance reads the previous char to count lines, so a newline left over from an earlier scan would start this one on line 1.
+	char = 0
 	lineIdx = 0
 	lineCharIdx = -1
 	idx = -1

@@ -1,0 +1,2 @@
+#include 'x.cherri'
+#include 'sub/../x.cherri'

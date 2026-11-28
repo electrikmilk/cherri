@@ -1,0 +1,2 @@
+// marker:@v/b
+enum CycleB { 'Two' }

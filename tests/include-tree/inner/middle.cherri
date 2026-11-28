@@ -1,0 +1,5 @@
+#include 'leaf.cherri'
+#include 'empty.cherri'
+#include '../up.cherri'
+
+@treeMiddle = "middle"

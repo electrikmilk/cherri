@@ -1,0 +1,2 @@
+// marker:@u/a
+enum Color { 'Red', 'Green' }

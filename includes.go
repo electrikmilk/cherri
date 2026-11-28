@@ -7,7 +7,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"regexp"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -45,6 +45,15 @@ func (origin lineOrigin) source() string {
 	return origin.file
 }
 
+// directory is where the file the line came from lives, which for the main file and generated lines is the main file's directory.
+func (origin lineOrigin) directory() string {
+	if origin.file == "" {
+		return relativePath
+	}
+
+	return filepath.Dir(origin.file)
+}
+
 var included []string
 
 func handleIncludes() {
@@ -52,19 +61,22 @@ func handleIncludes() {
 		fmt.Println("Parsing includes...")
 	}
 
-	parseIncludes()
+	for expandIncludeLevel() {
+		// Files that were just included can include more files, which the next level expands.
+	}
 
 	if args.Using("debug") {
 		fmt.Println(ansi("Done.", green) + "\n")
 	}
 }
 
-var includedFile bool
-
-// parseIncludes() searches for include statements within the file and
-// injects the contents of the file at the specified path.
-func parseIncludes() {
-	includedFile = false
+// expandIncludeLevel replaces each line holding an include with the lines of the included file, and reports whether it found any.
+// The included files are not scanned yet, so the files they include are found by the next level.
+func expandIncludeLevel() bool {
+	var expandedLines = make([]string, 0, len(lines))
+	var expandedOrigins = make([]lineOrigin, 0, len(lineOrigins))
+	var nextUnexpandedLine int
+	var foundInclude bool
 	for char != -1 {
 		switch {
 		case char == '"':
@@ -74,18 +86,160 @@ func parseIncludes() {
 			collectComment()
 		case tokenAhead(Include):
 			advance()
-			parseInclude()
-			resetParse()
-			includedFile = true
+			var includeLineIdx = lineIdx
+			var includeLines, includeOrigins = expandInclude()
+
+			expandedLines = append(expandedLines, lines[nextUnexpandedLine:includeLineIdx]...)
+			expandedOrigins = append(expandedOrigins, lineOrigins[nextUnexpandedLine:includeLineIdx]...)
+			expandedLines = append(expandedLines, includeLines...)
+			expandedOrigins = append(expandedOrigins, includeOrigins...)
+			nextUnexpandedLine = includeLineIdx + 1
+			foundInclude = true
+
+			// The whole line is replaced by the included file, so the rest of it is never scanned.
+			advanceUntil('\n')
 		}
 		advance()
 	}
 
+	if foundInclude {
+		lines = append(expandedLines, lines[nextUnexpandedLine:]...)
+		lineOrigins = append(expandedOrigins, lineOrigins[nextUnexpandedLine:]...)
+	}
 	resetParse()
 
-	if includedFile {
-		parseIncludes()
+	return foundInclude
+}
+
+// expandInclude collects the include path at the cursor, checks it and returns the lines of the included file.
+func expandInclude() ([]string, []lineOrigin) {
+	if char == '"' {
+		parserError("Use raw string (') for include file paths")
 	}
+	if char != '\'' {
+		parserError("Expected file path")
+	}
+	advance()
+
+	var includePath = collectIncludePath()
+
+	var includer = lineOrigins[lineIdx]
+	var includerDirectory = includer.directory()
+	var packageDirectory, packageSignature, includerInPackage = packageDirectoryOf(includerDirectory)
+
+	// A package has no standard library of its own, so inside one an actions path is an ordinary path.
+	var standardLibraryInclude = !includerInPackage && isStandardLibraryInclude(includePath)
+	var resolvedPath = includePath
+	if !standardLibraryInclude {
+		resolvedPath = resolveIncludePath(includePath, includerDirectory)
+	}
+
+	if includerInPackage && !isInsideDirectory(resolvedPath, packageDirectory) {
+		parserError(fmt.Sprintf("Include '%s' resolves to '%s', outside package '%s'. Packages are isolated and cannot include files outside their own directory.", includePath, resolvedPath, packageSignature))
+	}
+
+	if alreadyIncluded(resolvedPath) {
+		parserError(fmt.Sprintf("Path '%s' has already been included.", resolvedPath))
+	}
+
+	var includeSource []byte
+	if standardLibraryInclude {
+		includeSource = readStandardLibrarySource(includePath)
+	} else {
+		includeSource = readIncludeSource(resolvedPath)
+	}
+	included = append(included, resolvedPath)
+
+	var includeLines = strings.Split(string(includeSource), "\n")
+
+	return includeLines, originsFor(resolvedPath, len(includeLines))
+}
+
+// alreadyIncluded is also true for the main file, so a file that includes it back is a repeated include like any cycle.
+func alreadyIncluded(resolvedPath string) bool {
+	if filePath != "" && resolvedPath == filepath.Clean(filePath) {
+		return true
+	}
+
+	return slices.Contains(included, resolvedPath)
+}
+
+// packageDirectoryOf finds the installed package that contains directory.
+func packageDirectoryOf(directory string) (packageDirectory string, packageSignature string, inPackage bool) {
+	var packagesDirectory = filepath.Join(relativePath, "packages")
+	var pathInPackages, relErr = filepath.Rel(packagesDirectory, filepath.Clean(directory))
+	if relErr != nil {
+		return
+	}
+
+	// A directory in a package starts with the user and the package name.
+	var pathParts = strings.Split(pathInPackages, string(filepath.Separator))
+	if len(pathParts) < 2 || !strings.HasPrefix(pathParts[0], "@") {
+		return
+	}
+
+	packageSignature = pathParts[0] + "/" + pathParts[1]
+	packageDirectory = filepath.Join(packagesDirectory, pathParts[0], pathParts[1])
+	inPackage = true
+
+	return
+}
+
+// isInsideDirectory compares by path elements so a sibling that shares a name prefix is outside.
+func isInsideDirectory(path string, directory string) bool {
+	var pathInDirectory, relErr = filepath.Rel(directory, path)
+	if relErr != nil {
+		return false
+	}
+
+	return pathInDirectory != ".." && !strings.HasPrefix(pathInDirectory, ".."+string(filepath.Separator))
+}
+
+func isStandardLibraryInclude(includePath string) bool {
+	return isStandardActionsInclude(includePath) || includePath == "stdfunc"
+}
+
+func isStandardActionsInclude(includePath string) bool {
+	// The slash is part of the prefix so a project folder like actionsKit/ is not mistaken for the standard library.
+	return startsWith("actions/", includePath)
+}
+
+// resolveIncludePath resolves includePath against the directory of the file that includes it.
+func resolveIncludePath(includePath string, includerDirectory string) string {
+	if filepath.IsAbs(includePath) {
+		return filepath.Clean(includePath)
+	}
+
+	return filepath.Clean(filepath.Join(includerDirectory, includePath))
+}
+
+func readStandardLibrarySource(includePath string) []byte {
+	if includePath == "stdfunc" {
+		var stdfuncSource, readErr = stdFuncs.ReadFile("stdfunc.cherri")
+		handle(readErr)
+
+		return stdfuncSource
+	}
+
+	var actionCategory = end(strings.Split(includePath, "/"))
+	var actionsSource, readErr = stdActions.ReadFile(fmt.Sprintf("actions/%s.cherri", actionCategory))
+	if readErr != nil {
+		parserError(fmt.Sprintf("Undefined actions include '%s'.", actionCategory))
+	}
+
+	return actionsSource
+}
+
+func readIncludeSource(resolvedPath string) []byte {
+	if _, statErr := os.Stat(resolvedPath); os.IsNotExist(statErr) {
+		parserError(fmt.Sprintf("File '%s' does not exist!", resolvedPath))
+	}
+	checkFile(resolvedPath)
+
+	var fileSource, readErr = os.ReadFile(resolvedPath)
+	handle(readErr)
+
+	return fileSource
 }
 
 func collectIncludePath() string {
@@ -100,63 +254,6 @@ func collectIncludePath() string {
 	}
 
 	return collection.String()
-}
-
-func parseInclude() {
-	if char == '"' {
-		parserError("Use raw string (') for include file paths")
-	}
-	if char != '\'' {
-		parserError("Expected file path")
-	}
-	advance()
-
-	var includePath = collectIncludePath()
-
-	handlePackageIncludePath(&includePath)
-
-	if slices.Contains(included, includePath) {
-		parserError(fmt.Sprintf("Path '%s' has already been included.", includePath))
-	}
-
-	var includeFileBytes []byte
-	var includeReadErr error
-	if startsWith("actions", includePath) && strings.Contains(includePath, "/") {
-		var actionCat = end(strings.Split(includePath, "/"))
-		includeFileBytes, includeReadErr = stdActions.ReadFile(fmt.Sprintf("actions/%s.cherri", actionCat))
-		if includeReadErr != nil {
-			parserError(fmt.Sprintf("Undefined actions include '%s'.", actionCat))
-		}
-	} else if includePath == "stdfunc" {
-		includeFileBytes, includeReadErr = stdFuncs.ReadFile("stdfunc.cherri")
-	} else {
-		if !strings.Contains(includePath, "..") {
-			includePath = relativePath + includePath
-		}
-		checkFile(includePath)
-		includeFileBytes, includeReadErr = os.ReadFile(includePath)
-	}
-	handle(includeReadErr)
-
-	var includeContents = string(includeFileBytes)
-	var includeLines = strings.Split(includeContents, "\n")
-	var includeLinesCount = len(includeLines)
-
-	lines = slices.Replace(lines, lineIdx, lineIdx+1, includeLines...)
-	lineOrigins = slices.Replace(lineOrigins, lineIdx, lineIdx+1, originsFor(includePath, includeLinesCount)...)
-	included = append(included, includePath)
-}
-
-var packageIncludeRegex = regexp.MustCompile("packages/@(.*?)/(.*?)/")
-
-// handlePackageIncludePath resolves internal package includes.
-func handlePackageIncludePath(includePath *string) {
-	var matches = packageIncludeRegex.FindStringSubmatch(lineOrigins[lineIdx].file)
-	if matches == nil {
-		return
-	}
-
-	*includePath = fmt.Sprintf("packages/@%s/%s/%s", matches[1], matches[2], *includePath)
 }
 
 // delinquentFile determines what file and line the current cursor came from.

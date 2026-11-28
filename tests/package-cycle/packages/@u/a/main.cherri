@@ -1,0 +1,2 @@
+// marker:@u/a
+enum CycleA { 'One' }

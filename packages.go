@@ -23,6 +23,7 @@ Package management through remote Git repositories
 var currentPkg *cherriPackage
 var visitedPackages []string
 var pkgSignatureRegex = regexp.MustCompile(`^(https://(.*?)/)?@?([A-Za-z0-9_.-]+)/(?:cherri-)?([A-Za-z0-9_.-]+)$`)
+var pkgPathPartRegex = regexp.MustCompile(`^[A-Za-z0-9_.-]+$`)
 
 type cherriPackage struct {
 	Name     string
@@ -95,11 +96,9 @@ func (pkg *cherriPackage) removeFromManifest() {
 }
 
 func (pkg *cherriPackage) loadDependencies(reinstall bool) {
-	if len(pkg.Packages) == 0 {
-		return
-	}
-	if pkg, found := loadPackage(fmt.Sprintf("%s/info.plist", pkg.path())); found {
-		installPackages(pkg.Packages, reinstall)
+	// The receiver is often only a name and user (as with --install), so read the dependencies from the installed package itself.
+	if installed, found := loadPackage(fmt.Sprintf("%s/info.plist", pkg.path())); found {
+		installPackages(installed.Packages, reinstall)
 	}
 }
 
@@ -252,7 +251,25 @@ func loadPackage(path string) (pkg *cherriPackage, found bool) {
 	var _, plistErr = plist.Unmarshal(pkgPlist, &info)
 	handle(plistErr)
 
+	// Every manifest is read here, so no reader can act on an entry that points outside the packages directory.
+	requireSafePackageEntries(info.Packages, path)
+
 	return &info, true
+}
+
+// requireSafePackageEntries stops when an entry of a manifest has a user or name that could make the package path leave
+// the packages directory, which would let a remote package choose where files are cloned, included and removed.
+func requireSafePackageEntries(entries []cherriPackage, manifestPath string) {
+	for _, entry := range entries {
+		if isSafePackagePathPart(entry.User) && isSafePackagePathPart(entry.Name) {
+			continue
+		}
+		exit(fmt.Sprintf("Package with user '%s' and name '%s' listed in %s is not allowed. A package user and name may only contain letters, numbers, _, . and - and cannot be . or ..", entry.User, entry.Name, manifestPath))
+	}
+}
+
+func isSafePackagePathPart(part string) bool {
+	return pkgPathPartRegex.MatchString(part) && part != "." && part != ".."
 }
 
 // writePackage writes the current package to the info.plist file in the current directory.
@@ -298,6 +315,9 @@ func newPackage(name string) cherriPackage {
 	var uri = matches[0][2]
 	var user = matches[0][3]
 	var pkg = matches[0][4]
+	if !isSafePackagePathPart(user) || !isSafePackagePathPart(pkg) {
+		exit(fmt.Sprintf("Invalid package signature: %s\nA package user and name cannot be . or ..", name))
+	}
 
 	if uri == user {
 		uri = ""
@@ -326,25 +346,30 @@ func addPackage() {
 
 	fmt.Println(ansi(fmt.Sprintf("Install package %s\n", newPkg.signature()), green))
 
-	checkTrustedPackages(&newPkg)
+	if !checkTrustedPackages(&newPkg) {
+		exit(fmt.Sprintf("Package %s was not trusted and was not installed.", newPkg.signature()))
+	}
 
 	currentPkg.Packages = append(currentPkg.Packages, newPkg)
 	installPackages(currentPkg.Packages, false)
 	writePackage()
 }
 
-func checkTrustedPackages(newPkg *cherriPackage) {
-	if !newPkg.trusted() {
-		var packagePrompt = fmt.Sprintf("Do you trust this package?\n\nThis will download this remote git repository and automatically include it in this project:\n%s", newPkg.url())
-		fmt.Println(ansi(packagePrompt, yellow))
-		if !yesNo() {
-			return
-		}
-		fmt.Print("\n")
-
-		trusted.Packages = append(trusted.Packages, newPkg.signature())
-		writeTrustedPackages()
+func checkTrustedPackages(newPkg *cherriPackage) bool {
+	if newPkg.trusted() {
+		return true
 	}
+
+	var packagePrompt = fmt.Sprintf("Do you trust this package?\n\nThis will clone this remote git repository and automatically include it in this project:\n%s", newPkg.url())
+	fmt.Println(ansi(packagePrompt, yellow))
+	if !yesNo() {
+		return false
+	}
+	fmt.Print("\n")
+
+	trusted.Packages = append(trusted.Packages, newPkg.signature())
+	writeTrustedPackages()
+	return true
 }
 
 func addedPackage(pkg *cherriPackage) (added bool) {
@@ -381,25 +406,56 @@ func installPackages(packages []cherriPackage, tidy bool) {
 	}
 }
 
-// includePackages adds lines to include all the packages for the current directory.
-// Sorts packages in deterministic order. Only includes files in info.plist.
+// includePackages adds lines to include all the packages for the current directory, and the packages they depend on.
+// Only includes files in info.plist, dependencies before the packages that depend on them.
 func includePackages() {
 	if len(currentPkg.Packages) == 0 {
 		return
 	}
 
-	var sortedPackages = make([]cherriPackage, len(currentPkg.Packages))
-	copy(sortedPackages, currentPkg.Packages)
-	slices.SortFunc(sortedPackages, func(a, b cherriPackage) int {
-		return strings.Compare(a.signature(), b.signature())
-	})
-
-	for _, pkg := range sortedPackages {
-		var packageInclude = fmt.Sprintf("#include './packages/%s/main.cherri'\n", pkg.signature())
-		prependGeneratedLines(packageInclude)
+	var packageIncludes []string
+	for _, pkg := range packagesDependenciesFirst(currentPkg.Packages) {
+		packageIncludes = append(packageIncludes, fmt.Sprintf("#include './packages/%s/main.cherri'\n", pkg.signature()))
 	}
+	prependGeneratedLines(packageIncludes...)
 
 	resetParse()
+}
+
+// packagesDependenciesFirst lists the given packages and all of their dependencies so that each package comes after
+// the packages it depends on. Packages with no relationship to each other are in descending signature order, which is
+// the order the project's packages have always been included in.
+func packagesDependenciesFirst(directPackages []cherriPackage) []cherriPackage {
+	var ordered []cherriPackage
+	var visited []string
+	visitPackagesDependenciesFirst(directPackages, &visited, &ordered)
+	return ordered
+}
+
+// visitPackagesDependenciesFirst appends each unvisited package to ordered after its own dependencies.
+// A package is marked visited on entry, so a dependency cycle ends instead of recursing forever.
+func visitPackagesDependenciesFirst(packages []cherriPackage, visited *[]string, ordered *[]cherriPackage) {
+	var descending = make([]cherriPackage, len(packages))
+	copy(descending, packages)
+	slices.SortFunc(descending, func(a, b cherriPackage) int {
+		return strings.Compare(b.signature(), a.signature())
+	})
+
+	for _, pkg := range descending {
+		if slices.Contains(*visited, pkg.signature()) {
+			continue
+		}
+		*visited = append(*visited, pkg.signature())
+
+		if !pkg.installed() {
+			installPackages([]cherriPackage{pkg}, false)
+		}
+		// The manifest entry may omit the package's own dependencies, so read them from the installed package.
+		if installedPkg, found := loadPackage(fmt.Sprintf("%s/info.plist", pkg.path())); found {
+			visitPackagesDependenciesFirst(installedPkg.Packages, visited, ordered)
+		}
+		*ordered = append(*ordered, pkg)
+	}
 }
 
 // removePackage uninstalls a package from the current directory.

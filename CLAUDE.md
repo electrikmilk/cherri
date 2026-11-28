@@ -195,7 +195,7 @@ Use `cherri --action=actionName` to look up a specific action's signature.
     ↓ handleFile()       — read file, split into lines/chars
     ↓ initParse()        — initialize global state
     ↓ preParse()         — sequential pre-processing passes:
-         handleIncludes()      — inline #include files, resetParse()
+         handleIncludes()      — expandIncludeLevel() inlines #include files one nesting level at a time, each resolved against the including file, resetParse()
          handleFunctions()     — collect function defs, inject header, resetParse()
          handleActionDefinitions() — collect user-defined action blocks
     ↓ parse()            — main pass: walk chars, emit tokens[]
@@ -276,6 +276,8 @@ The header intercepts `ShortcutInput`, validates it as a Cherri function call, m
 Each file in `tests/*.cherri` (except `decomp-expected.cherri` and `decomp-me.cherri`) is compiled by `TestCherri`/`TestCherriNoSign`. When adding or changing a language feature, add or update a test file in `tests/`. Group tests by domain (e.g. `web.cherri`, `shortcuts.cherri`) rather than one file per action. Test files do not need explicit `#include` statements — all standard library action categories are auto-injected during suite runs; includes are only needed when running a file individually with `go run .`.
 
 The test runner calls `compile()` which calls `main()`, so `os.Args[1]` is set to the test file path before each run. Global state is fully reset via `resetParser()` after each test.
+
+**Subprocess tests:** Go tests that use `runSubprocess` in `cherri_test.go` run the compiler in a separate process, because `parserError` and `exit` call `os.Exit`. Their fixtures live in subfolders of `tests/` (`include-errors/`, `include-isolation/`, `include-tree/`, `package-*`), which `TestCherri` does not read because it lists `tests/` non-recursively. Fixtures must not include standard library categories. A new subprocess test must match the pattern of the `Include and Package Subprocess Tests` step in `.github/workflows/build-test.yml` or it will not run in CI; name it with one of the existing prefixes (`TestInclude`, `TestPackageInclude`, `TestPackageDependenc`, `TestInstallDeclined`, `TestNoAnsi`) to be covered automatically.
 
 `TestDecomp` is a diff test: it decompiles `tests/decomp-me.plist` and expects byte-for-byte equality with `tests/decomp-expected.cherri`. When decompiler output changes intentionally, regenerate the expected file.
 
@@ -443,10 +445,10 @@ Non-obvious behaviors that affect pre-parse collectors and action DSL parsing.
 
 **`skipWhitespace()` skips newlines and can cross file boundaries.** During `parseActionDefinitions()`, previously erased lines appear as empty strings in `lines[]`, which join to form `\n\n...` in the combined source. `skipWhitespace()` advances through all of these, potentially landing in the next action category file. `replaceLines()` then erases lines up to the current `lineIdx`, which can silently destroy content the main `parse()` loop needs. Use `skipInlineWhitespace()` (spaces and tabs only) whenever optional parts must appear on the same source line as the parent construct.
 
-**Pre-parse loops (`parseActionDefinitions`, `parseFunctions`, `parseIncludes`, `parseCopyPastes`) have no default error handler.** Unrecognized characters are silently skipped. A bug that causes a silent no-op in these loops will surface as an "Illegal character" crash in the main `parse()` loop, which does have a default error case.
+**Pre-parse loops (`parseActionDefinitions`, `parseFunctions`, `expandIncludeLevel`, `parseCopyPastes`) have no default error handler.** Unrecognized characters are silently skipped. A bug that causes a silent no-op in these loops will surface as an "Illegal character" crash in the main `parse()` loop, which does have a default error case.
 
 **`replaceLines()` erases from `lineRef.start` to `lineIdx` at the moment of the call.** If any cursor advance in a collector moves `lineIdx` past the end of the construct being collected (e.g. via `skipWhitespace()` crossing into the next file), those extra lines are silently erased. This is the root class of cross-file erasure bugs — guard against it by using `skipInlineWhitespace()` instead of `skipWhitespace()` when searching for optional same-line parts.
 
-**`lineOrigins` must stay parallel to `lines`.** Error positions come from `lineOrigins[lineIdx]` (file and line the line was read from), not from the line numbers of the combined source. Anything that adds lines must also add their origins: use `prependGeneratedLines()` for compiler-generated text, and splice both slices together as `parseInclude()` does. A multi-line element placed in `lines` (as copy/paste does) is split by `resetParse()`, and each of its lines takes the element's origin. Having fewer origins than lines panics in `resetParse()`. Lines inside a generated functions header have no source origin, so errors there report the combined-source line.
+**`lineOrigins` must stay parallel to `lines`.** Error positions come from `lineOrigins[lineIdx]` (file and line the line was read from), not from the line numbers of the combined source. Anything that adds lines must also add their origins: use `prependGeneratedLines()` for compiler-generated text, and build both slices together as `expandIncludeLevel()` does. A multi-line element placed in `lines` (as copy/paste does) is split by `resetParse()`, and each of its lines takes the element's origin. Having fewer origins than lines panics in `resetParse()`. Lines inside a generated functions header have no source origin, so errors there report the combined-source line.
 
 **DSL toggle-set syntax:** `action toggleSet [modifiers] ['shortIdentifier'] name ['setKey'] [(params)] [{body}]` — all optional parts must be on the same line as the name.

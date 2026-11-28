@@ -1,0 +1,3 @@
+#include 'inner/middle.cherri'
+
+@treeOuter = "outer"

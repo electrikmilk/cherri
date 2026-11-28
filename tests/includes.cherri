@@ -1,5 +1,25 @@
-// compile-only: include file syntax
-
 #include 'include.cherri'
+/* A block comment directly before an include must not swallow the #
+   that starts it. */
+#include 'include-tree/outer.cherri'
 
-alert(@textVar,"Alert")
+if @textVar != "test" {
+    alert("❌ FAIL: include.cherri - got {@textVar}, expected 'test'")
+}
+if @treeOuter != "outer" {
+    alert("❌ FAIL: outer.cherri - got {@treeOuter}, expected 'outer'")
+}
+if @treeMiddle != "middle" {
+    alert("❌ FAIL: inner/middle.cherri - got {@treeMiddle}, expected 'middle'")
+}
+if @treeLeaf != "leaf" {
+    alert("❌ FAIL: inner/leaf.cherri - got {@treeLeaf}, expected 'leaf'")
+}
+if @treeLeafText != "#include 'nope.cherri'" {
+    alert("❌ FAIL: inner/leaf.cherri string - got {@treeLeafText}, expected the include text")
+}
+if @treeUp != "up" {
+    alert("❌ FAIL: up.cherri - got {@treeUp}, expected 'up'")
+}
+
+show("✅ All tests passed")
