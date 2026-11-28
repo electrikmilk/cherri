@@ -686,3 +686,27 @@ func TestPackageDependencyCycleCompiles(t *testing.T) {
 		}
 	}
 }
+
+func TestPackageDependencyWithPathTraversalIsRejected(t *testing.T) {
+	var output, exitCode, _ = compilePackageFixture(t, "package-traversal", false)
+
+	if exitCode != 1 {
+		t.Errorf("expected exit code 1, got %d\n%s", exitCode, output)
+	}
+	for _, expected := range []string{"x/../../..", "evil", "packages/@u/a/info.plist", "cannot be . or .."} {
+		if !strings.Contains(output, expected) {
+			t.Errorf("expected %q in output:\n%s", expected, output)
+		}
+	}
+
+	// The entry would have been cloned to the path it cleans to, which is next to the fixture.
+	var escapedPath = filepath.Join("tests", "evil")
+	if _, statErr := os.Stat(escapedPath); !os.IsNotExist(statErr) {
+		t.Errorf("expected nothing at %s, stat error: %v", escapedPath, statErr)
+		_ = os.RemoveAll(escapedPath)
+	}
+	var installedPackageFile = filepath.Join("tests", "package-traversal", "packages", "@u", "a", "main.cherri")
+	if _, statErr := os.Stat(installedPackageFile); statErr != nil {
+		t.Errorf("expected the fixture package to be left alone: %v", statErr)
+	}
+}

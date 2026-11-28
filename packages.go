@@ -23,6 +23,7 @@ Package management through remote Git repositories
 var currentPkg *cherriPackage
 var visitedPackages []string
 var pkgSignatureRegex = regexp.MustCompile(`^(https://(.*?)/)?@?([A-Za-z0-9_.-]+)/(?:cherri-)?([A-Za-z0-9_.-]+)$`)
+var pkgPathPartRegex = regexp.MustCompile(`^[A-Za-z0-9_.-]+$`)
 
 type cherriPackage struct {
 	Name     string
@@ -250,7 +251,25 @@ func loadPackage(path string) (pkg *cherriPackage, found bool) {
 	var _, plistErr = plist.Unmarshal(pkgPlist, &info)
 	handle(plistErr)
 
+	// Every manifest is read here, so no reader can act on an entry that points outside the packages directory.
+	requireSafePackageEntries(info.Packages, path)
+
 	return &info, true
+}
+
+// requireSafePackageEntries stops when an entry of a manifest has a user or name that could make the package path leave
+// the packages directory, which would let a remote package choose where files are cloned, included and removed.
+func requireSafePackageEntries(entries []cherriPackage, manifestPath string) {
+	for _, entry := range entries {
+		if isSafePackagePathPart(entry.User) && isSafePackagePathPart(entry.Name) {
+			continue
+		}
+		exit(fmt.Sprintf("Package with user '%s' and name '%s' listed in %s is not allowed. A package user and name may only contain letters, numbers, _, . and - and cannot be . or ..", entry.User, entry.Name, manifestPath))
+	}
+}
+
+func isSafePackagePathPart(part string) bool {
+	return pkgPathPartRegex.MatchString(part) && part != "." && part != ".."
 }
 
 // writePackage writes the current package to the info.plist file in the current directory.
