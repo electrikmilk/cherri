@@ -2205,6 +2205,8 @@ func getChar(atIndex int) rune {
 }
 
 func firstChar() {
+	// advance reads the previous char to count lines, so a newline left over from an earlier scan would start this one on line 1.
+	char = 0
 	lineIdx = 0
 	lineCharIdx = -1
 	idx = -1

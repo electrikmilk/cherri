@@ -1,0 +1,3 @@
+
+// compile-only: the test is the empty first line, a leading newline must not shift the include expansion
+show("✅ All tests passed")
