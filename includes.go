@@ -200,7 +200,8 @@ func isStandardLibraryInclude(includePath string) bool {
 }
 
 func isStandardActionsInclude(includePath string) bool {
-	return startsWith("actions", includePath) && strings.Contains(includePath, "/")
+	// The slash is part of the prefix so a project folder like actionsKit/ is not mistaken for the standard library.
+	return startsWith("actions/", includePath)
 }
 
 // resolveIncludePath resolves includePath against the directory of the file that includes it.
